@@ -1,0 +1,10 @@
+name = "recall-people-api"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+node_compat = true
+
+[env.dev]
+vars = { BETTER_AUTH_URL = "http://localhost:8787" }
+
+[env.production]
+vars = { BETTER_AUTH_URL = "https://api.recall-people.com" }

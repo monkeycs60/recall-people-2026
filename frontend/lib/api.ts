@@ -1,0 +1,98 @@
+import * as FileSystem from 'expo-file-system';
+import { getSession } from './auth';
+import { ExtractionResult } from '@/types';
+
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
+
+type ApiOptions = {
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  body?: unknown;
+  headers?: Record<string, string>;
+};
+
+const apiCall = async <T>(endpoint: string, options: ApiOptions = {}): Promise<T> => {
+  const session = await getSession();
+
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    method: options.method || 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(session?.token && { Authorization: `Bearer ${session.token}` }),
+      ...options.headers,
+    },
+    body: options.body ? JSON.stringify(options.body) : undefined,
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(error.error || `API Error: ${response.status}`);
+  }
+
+  return response.json();
+};
+
+export const transcribeAudio = async (
+  audioUri: string
+): Promise<{
+  transcript: string;
+  confidence: number;
+  duration: number;
+}> => {
+  const session = await getSession();
+
+  const formData = new FormData();
+
+  const audioInfo = await FileSystem.getInfoAsync(audioUri);
+  if (!audioInfo.exists) {
+    throw new Error('Audio file not found');
+  }
+
+  formData.append('audio', {
+    uri: audioUri,
+    type: 'audio/m4a',
+    name: 'recording.m4a',
+  } as unknown as Blob);
+
+  const response = await fetch(`${API_URL}/api/transcribe`, {
+    method: 'POST',
+    headers: {
+      ...(session?.token && { Authorization: `Bearer ${session.token}` }),
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error('Transcription failed');
+  }
+
+  return response.json();
+};
+
+export const extractInfo = async (data: {
+  transcription: string;
+  existingContacts: Array<{
+    id: string;
+    firstName: string;
+    lastName?: string;
+    tags: string[];
+  }>;
+  currentContact?: {
+    id: string;
+    firstName: string;
+    lastName?: string;
+    facts: Array<{
+      factType: string;
+      factKey: string;
+      factValue: string;
+    }>;
+  };
+}): Promise<{
+  extraction: ExtractionResult;
+}> => {
+  return apiCall('/api/extract', {
+    method: 'POST',
+    body: data,
+  });
+};
+
+export { apiCall };

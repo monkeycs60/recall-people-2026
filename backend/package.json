@@ -1,0 +1,31 @@
+{
+  "name": "recall-people-api",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.24.0",
+    "@better-auth/expo": "^1.4.5",
+    "@deepgram/sdk": "^3.5.0",
+    "@neondatabase/serverless": "^0.10.0",
+    "@prisma/adapter-neon": "^5.22.0",
+    "@prisma/client": "^5.22.0",
+    "better-auth": "^1.0.0",
+    "hono": "^4.4.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.0.0",
+    "@types/node": "^20.0.0",
+    "prisma": "^5.22.0",
+    "typescript": "^5.4.0",
+    "wrangler": "^3.60.0"
+  }
+}

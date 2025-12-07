@@ -1,0 +1,128 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// Tables Better Auth (requises)
+// ============================================
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false) @map("email_verified")
+  image         String?
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  sessions Session[]
+  accounts Account[]
+  contacts Contact[]
+  notes    Note[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime @map("expires_at")
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  userId    String   @map("user_id")
+  token     String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Account {
+  id           String    @id @default(cuid())
+  accountId    String    @map("account_id")
+  providerId   String    @map("provider_id")
+  userId       String    @map("user_id")
+  accessToken  String?   @map("access_token")
+  refreshToken String?   @map("refresh_token")
+  idToken      String?   @map("id_token")
+  expiresAt    DateTime? @map("expires_at")
+  password     String?
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("accounts")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime @map("expires_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("verifications")
+}
+
+// ============================================
+// Tables métier (pour future sync cloud, optionnel pour MVP)
+// ============================================
+
+model Contact {
+  id            String    @id @default(cuid())
+  userId        String    @map("user_id")
+  firstName     String    @map("first_name")
+  lastName      String?   @map("last_name")
+  nickname      String?
+  photoUrl      String?   @map("photo_url")
+  tags          String    @default("[]")
+  lastContactAt DateTime? @map("last_contact_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  facts Fact[]
+  notes Note[]
+
+  @@map("contacts")
+}
+
+model Fact {
+  id           String   @id @default(cuid())
+  contactId    String   @map("contact_id")
+  factType     String   @map("fact_type")
+  factKey      String   @map("fact_key")
+  factValue    String   @map("fact_value")
+  sourceNoteId String?  @map("source_note_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@map("facts")
+}
+
+model Note {
+  id              String   @id @default(cuid())
+  contactId       String   @map("contact_id")
+  userId          String   @map("user_id")
+  audioUrl        String?  @map("audio_url")
+  audioDurationMs Int?     @map("audio_duration_ms")
+  transcription   String?
+  summary         String?
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notes")
+}
