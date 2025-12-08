@@ -30,6 +30,19 @@ type ExtractionRequest = {
   };
 };
 
+// Helper function to clean JSON from markdown code blocks
+const cleanJsonResponse = (text: string): string => {
+  // Remove markdown code blocks if present
+  const codeBlockRegex = /```(?:json)?\s*([\s\S]*?)\s*```/;
+  const match = text.match(codeBlockRegex);
+
+  if (match) {
+    return match[1].trim();
+  }
+
+  return text.trim();
+};
+
 export const extractRoutes = new Hono<{ Bindings: Bindings }>();
 
 extractRoutes.use('/*', authMiddleware);
@@ -69,7 +82,8 @@ extractRoutes.post('/', async (c) => {
       throw new Error('Unexpected response type');
     }
 
-    const extraction = JSON.parse(content.text);
+    const cleanedText = cleanJsonResponse(content.text);
+    const extraction = JSON.parse(cleanedText);
 
     return c.json({
       success: true,
