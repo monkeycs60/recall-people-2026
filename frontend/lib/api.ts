@@ -1,5 +1,5 @@
-import * as FileSystem from 'expo-file-system';
-import { getSession } from './auth';
+import * as FileSystem from 'expo-file-system/legacy';
+import { getToken } from './auth';
 import { ExtractionResult } from '@/types';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
@@ -11,13 +11,13 @@ type ApiOptions = {
 };
 
 const apiCall = async <T>(endpoint: string, options: ApiOptions = {}): Promise<T> => {
-  const session = await getSession();
+  const token = await getToken();
 
   const response = await fetch(`${API_URL}${endpoint}`, {
     method: options.method || 'GET',
     headers: {
       'Content-Type': 'application/json',
-      ...(session?.token && { Authorization: `Bearer ${session.token}` }),
+      ...(token && { Authorization: `Bearer ${token}` }),
       ...options.headers,
     },
     body: options.body ? JSON.stringify(options.body) : undefined,
@@ -38,7 +38,7 @@ export const transcribeAudio = async (
   confidence: number;
   duration: number;
 }> => {
-  const session = await getSession();
+  const token = await getToken();
 
   const formData = new FormData();
 
@@ -56,7 +56,7 @@ export const transcribeAudio = async (
   const response = await fetch(`${API_URL}/api/transcribe`, {
     method: 'POST',
     headers: {
-      ...(session?.token && { Authorization: `Bearer ${session.token}` }),
+      ...(token && { Authorization: `Bearer ${token}` }),
     },
     body: formData,
   });
