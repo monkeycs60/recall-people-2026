@@ -7,8 +7,7 @@ import { extractRoutes } from './routes/extract';
 
 type Bindings = {
   DATABASE_URL: string;
-  BETTER_AUTH_SECRET: string;
-  BETTER_AUTH_URL: string;
+  JWT_SECRET: string;
   DEEPGRAM_API_KEY: string;
   ANTHROPIC_API_KEY: string;
 };
@@ -19,7 +18,7 @@ app.use('*', logger());
 app.use(
   '*',
   cors({
-    origin: ['recall-people://', 'http://localhost:8081'],
+    origin: ['recall-people://', 'http://localhost:8081', 'http://192.168.1.12:8081'],
     credentials: true,
   })
 );

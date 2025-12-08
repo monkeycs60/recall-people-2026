@@ -33,7 +33,7 @@ export default function RegisterScreen() {
 
   return (
     <View className="flex-1 bg-background px-6 justify-center">
-      <Text className="text-4xl font-bold text-textPrimary mb-8">Inscription</Text>
+      <Text className="text-4xl font-bold text-textPrimary mb-12">Inscription</Text>
 
       <View className="space-y-4">
         <View>

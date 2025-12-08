@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
-import { useSession, signIn as authSignIn, signUp as authSignUp, signOut as authSignOut } from '@/lib/auth';
+import { login as authLogin, register as authRegister, logout as authLogout } from '@/lib/auth';
 
 export const useAuth = () => {
-  const { data: session, isPending } = useSession();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -13,10 +12,7 @@ export const useAuth = () => {
     setError(null);
 
     try {
-      const result = await authSignIn.email({ email, password });
-      if (result.error) {
-        throw new Error(result.error.message);
-      }
+      await authLogin(email, password);
       router.replace('/(tabs)');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
@@ -31,10 +27,7 @@ export const useAuth = () => {
     setError(null);
 
     try {
-      const result = await authSignUp.email({ email, password, name });
-      if (result.error) {
-        throw new Error(result.error.message);
-      }
+      await authRegister(email, password, name);
       router.replace('/(tabs)');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed');
@@ -45,14 +38,12 @@ export const useAuth = () => {
   };
 
   const logout = async () => {
-    await authSignOut();
+    await authLogout();
     router.replace('/(auth)/login');
   };
 
   return {
-    user: session?.user,
-    isAuthenticated: !!session,
-    isLoading: isPending || isLoading,
+    isLoading,
     error,
     login,
     register,

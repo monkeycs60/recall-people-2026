@@ -59,8 +59,8 @@ export default function LoginScreen() {
         </Pressable>
 
         <Link href="/(auth)/register" asChild>
-          <Pressable className="mt-4">
-            <Text className="text-textSecondary text-center">
+          <Pressable>
+            <Text className="text-textSecondary text-center mt-6">
               Pas de compte ?{' '}
               <Text className="text-primary">Créer un compte</Text>
             </Text>

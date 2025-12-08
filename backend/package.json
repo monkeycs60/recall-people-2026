@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
+    "dev": "wrangler dev --ip 0.0.0.0",
     "deploy": "wrangler deploy",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
@@ -13,12 +13,10 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.24.0",
-    "@better-auth/expo": "^1.4.5",
     "@deepgram/sdk": "^3.5.0",
     "@neondatabase/serverless": "^0.10.0",
     "@prisma/adapter-neon": "^5.22.0",
     "@prisma/client": "^5.22.0",
-    "better-auth": "^1.0.0",
     "hono": "^4.4.0"
   },
   "devDependencies": {

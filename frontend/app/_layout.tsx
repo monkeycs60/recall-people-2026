@@ -29,34 +29,30 @@ export default function RootLayout() {
     }
   }, []);
 
-  console.log('[_layout] Render state:', { dbReady, dbError });
-
   if (dbError) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-        <Text style={{ color: 'red', marginBottom: 10 }}>Database Error:</Text>
-        <Text style={{ color: 'red' }}>{dbError}</Text>
+      <View className="flex-1 items-center justify-center px-5">
+        <Text className="text-error mb-2">Database Error:</Text>
+        <Text className="text-error">{dbError}</Text>
       </View>
     );
   }
 
   if (!dbReady) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>Initializing database...</Text>
+      <View className="flex-1 items-center justify-center">
+        <Text className="text-textPrimary">Initializing database...</Text>
       </View>
     );
   }
 
-  // TODO: Re-enable auth later - currently disabled to debug
-  // For now, app starts directly on tabs (no auth check)
   return (
-    <Stack>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+    <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-      <Stack.Screen name="review" options={{ title: 'Vérification' }} />
-      <Stack.Screen name="disambiguation" options={{ title: 'Sélectionner le contact' }} />
-      <Stack.Screen name="contact/[id]" options={{ title: 'Contact' }} />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="review" options={{ headerShown: true, title: 'Vérification' }} />
+      <Stack.Screen name="disambiguation" options={{ headerShown: true, title: 'Sélectionner le contact' }} />
+      <Stack.Screen name="contact/[id]" options={{ headerShown: true, title: 'Contact' }} />
     </Stack>
   );
 }
