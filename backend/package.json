@@ -12,12 +12,15 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@ai-sdk/google": "^2.0.46",
     "@anthropic-ai/sdk": "^0.24.0",
     "@deepgram/sdk": "^3.5.0",
     "@neondatabase/serverless": "^0.10.0",
     "@prisma/adapter-neon": "^5.22.0",
     "@prisma/client": "^5.22.0",
-    "hono": "^4.4.0"
+    "ai": "^5.0.113",
+    "hono": "^4.4.0",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.0.0",

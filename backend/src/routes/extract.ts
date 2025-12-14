@@ -1,5 +1,7 @@
 import { Hono } from 'hono';
-import Anthropic from '@anthropic-ai/sdk';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { generateObject } from 'ai';
+import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
 
 type Bindings = {
@@ -8,6 +10,7 @@ type Bindings = {
   BETTER_AUTH_URL: string;
   DEEPGRAM_API_KEY: string;
   ANTHROPIC_API_KEY: string;
+  GOOGLE_GEMINI_API_KEY: string;
 };
 
 type ExtractionRequest = {
@@ -30,18 +33,43 @@ type ExtractionRequest = {
   };
 };
 
-// Helper function to clean JSON from markdown code blocks
-const cleanJsonResponse = (text: string): string => {
-  // Remove markdown code blocks if present
-  const codeBlockRegex = /```(?:json)?\s*([\s\S]*?)\s*```/;
-  const match = text.match(codeBlockRegex);
-
-  if (match) {
-    return match[1].trim();
-  }
-
-  return text.trim();
-};
+const extractionSchema = z.object({
+  contactIdentified: z.object({
+    id: z.string().nullable().describe('ID du contact existant ou null si nouveau contact'),
+    firstName: z.string().describe('Prénom extrait de la transcription'),
+    lastName: z.string().nullable().describe('Nom de famille si mentionné'),
+    confidence: z.enum(['high', 'medium', 'low']),
+    needsDisambiguation: z.boolean(),
+    suggestedMatches: z.array(z.string()).describe('IDs des contacts possibles si ambiguïté'),
+  }),
+  facts: z.array(
+    z.object({
+      factType: z.enum([
+        'work',
+        'company',
+        'hobby',
+        'sport',
+        'relationship',
+        'partner',
+        'location',
+        'education',
+        'birthday',
+        'contact',
+        'other',
+      ]),
+      factKey: z.string().describe('Label lisible en français (ex: Poste, Tennis, Fils)'),
+      factValue: z.string().describe('La valeur extraite'),
+      action: z.enum(['add', 'update']),
+      previousValue: z.string().nullable(),
+    })
+  ),
+  noteBlocks: z.array(
+    z.object({
+      content: z.string().describe('Résumé court de cette information/anecdote'),
+      eventDate: z.string().nullable().describe('Date de l\'événement si mentionnée (format: YYYY-MM-DD ou description relative)'),
+    })
+  ).describe('Anecdotes, événements, et informations contextuelles qui ne sont pas des facts structurés'),
+});
 
 export const extractRoutes = new Hono<{ Bindings: Bindings }>();
 
@@ -56,8 +84,8 @@ extractRoutes.post('/', async (c) => {
       return c.json({ error: 'No transcription provided' }, 400);
     }
 
-    const anthropic = new Anthropic({
-      apiKey: c.env.ANTHROPIC_API_KEY,
+    const google = createGoogleGenerativeAI({
+      apiKey: c.env.GOOGLE_GEMINI_API_KEY,
     });
 
     const prompt = buildExtractionPrompt(
@@ -66,28 +94,26 @@ extractRoutes.post('/', async (c) => {
       currentContact
     );
 
-    const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1024,
-      messages: [
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-    });
+    const { object: extraction } = await generateObject({
+			model: google('gemini-2.5-flash-preview-09-2025'),
+			schema: extractionSchema,
+			prompt,
+		});
 
-    const content = response.content[0];
-    if (content.type !== 'text') {
-      throw new Error('Unexpected response type');
-    }
-
-    const cleanedText = cleanJsonResponse(content.text);
-    const extraction = JSON.parse(cleanedText);
+    const formattedExtraction = {
+      contactIdentified: extraction.contactIdentified,
+      facts: extraction.facts,
+      note: {
+        summary: extraction.noteBlocks.length > 0
+          ? extraction.noteBlocks.map((block) => block.content).join(' ')
+          : 'Note vocale enregistrée.',
+        keyPoints: extraction.noteBlocks.map((block) => block.content),
+      },
+    };
 
     return c.json({
       success: true,
-      extraction,
+      extraction: formattedExtraction,
     });
   } catch (error) {
     console.error('Extraction error:', error);
@@ -116,7 +142,7 @@ CONTACT ACTUELLEMENT SÉLECTIONNÉ:
 ${currentContact.facts.map((fact) => `  • ${fact.factKey}: ${fact.factValue}`).join('\n')}`
     : '';
 
-  return `Tu es un assistant qui extrait des informations sur des personnes à partir de notes vocales transcrites en français.
+  return `Tu es un assistant qui extrait des informations structurées à partir de notes vocales en français.
 
 CONTACTS EXISTANTS DE L'UTILISATEUR:
 ${contactsContext || '(aucun contact existant)'}
@@ -125,42 +151,41 @@ ${currentContactContext}
 TRANSCRIPTION DE LA NOTE VOCALE:
 "${transcription}"
 
-TÂCHE:
-1. Identifie la personne mentionnée dans la note (compare avec les contacts existants)
-2. Extrais les informations factuelles (job, entreprise, ville, relations familiales, anniversaire, centres d'intérêt, téléphone, email)
-3. Génère un résumé court de la note
+RÈGLES D'EXTRACTION:
+
+1. IDENTIFICATION DU CONTACT:
+   - Si le prénom correspond à PLUSIEURS contacts existants → needsDisambiguation: true + liste les IDs dans suggestedMatches
+   - Si le prénom ne correspond à AUCUN contact → id: null (nouveau contact)
+   - Si le prénom correspond à UN SEUL contact → utilise son ID
+
+2. FACTS (Informations structurées importantes à afficher en haut du profil):
+   Catégories et exemples:
+   - work: métier, poste, profession (ex: "Développeur", "Médecin", "Avocat")
+   - company: entreprise, société, employeur (ex: "Google", "Cabinet Dupont")
+   - hobby: loisirs, passions (ex: "Photographie", "Cuisine", "Jardinage")
+   - sport: sports pratiqués (ex: "Tennis", "Football", "Yoga")
+   - relationship: liens familiaux/sociaux (ex: factKey="Fils" factValue="Thomas", factKey="Ami de" factValue="Marc")
+   - partner: conjoint uniquement (ex: factKey="Femme" factValue="Marie", factKey="Compagnon" factValue="décédé")
+   - location: lieu de vie (ex: "Paris", "Lyon")
+   - education: formation, école (ex: "HEC", "Ingénieur INSA")
+   - birthday: date anniversaire (ex: "15 mars", "1985-03-15")
+   - contact: téléphone, email (ex: "06 12 34 56 78")
+   - other: autre info structurée importante
+
+3. NOTEBLOCKS (Anecdotes et événements contextuels):
+   Ce qui va dans noteBlocks (PAS dans facts):
+   - Événements ponctuels: "Sa femme est décédée hier", "Il organise les obsèques dans 3 jours"
+   - Anecdotes: "On s'est rencontrés au restaurant", "Il m'a parlé de son voyage"
+   - Contexte temporel: "Il part en vacances la semaine prochaine"
+   - Projets: "Il cherche un nouveau travail", "Il veut déménager"
+
+   Chaque noteBlock doit être un résumé COURT (1 phrase max).
+   Sépare les informations différentes en blocs distincts.
 
 RÈGLES IMPORTANTES:
-- Si le prénom mentionné correspond à PLUSIEURS contacts existants, mets needsDisambiguation: true et liste les IDs possibles dans suggestedMatches
-- Si le prénom ne correspond à AUCUN contact existant, mets id: null (c'est un nouveau contact)
-- Si le prénom correspond à UN SEUL contact, mets son ID et needsDisambiguation: false
-- Pour les facts, utilise action: "add" si c'est une nouvelle info, "update" si ça modifie une info existante
-- Sois CONSERVATEUR : n'extrais QUE ce qui est explicitement dit, pas d'inférences
-- Les relations (femme, mari, fils, fille, frère, sœur, collègue, boss) ont le factType "relationship"
-- Le factKey doit être en français et lisible (ex: "Poste", "Entreprise", "Fils", "Ville")
-
-RÉPONDS UNIQUEMENT EN JSON VALIDE (pas de markdown, pas de commentaires):
-{
-  "contactIdentified": {
-    "id": "string ou null si nouveau contact",
-    "firstName": "Prénom extrait de la transcription",
-    "lastName": "Nom de famille si mentionné, sinon null",
-    "confidence": "high|medium|low",
-    "needsDisambiguation": true|false,
-    "suggestedMatches": ["id1", "id2"]
-  },
-  "facts": [
-    {
-      "factType": "job|company|city|relationship|birthday|interest|phone|email|custom",
-      "factKey": "Label en français (ex: Poste, Entreprise, Fils)",
-      "factValue": "La valeur extraite",
-      "action": "add|update",
-      "previousValue": "Ancienne valeur si update et connue, sinon null"
-    }
-  ],
-  "note": {
-    "summary": "Résumé en 1-2 phrases maximum",
-    "keyPoints": ["Point clé 1", "Point clé 2"]
-  }
-}`;
+- Sois CONSERVATEUR: n'extrais QUE ce qui est explicitement dit
+- Les facts sont des informations PERMANENTES ou SEMI-PERMANENTES sur la personne
+- Les noteBlocks sont des événements, anecdotes, ou infos contextuelles/temporaires
+- Pour facts, action="add" si nouvelle info, "update" si modification d'une info existante
+- factKey doit être lisible et en français`;
 };

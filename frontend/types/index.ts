@@ -5,15 +5,17 @@
 export type Tag = 'client' | 'prospect' | 'ami' | 'famille' | 'collegue' | 'autre';
 
 export type FactType =
-  | 'job'
-  | 'company'
-  | 'city'
-  | 'relationship'
-  | 'birthday'
-  | 'interest'
-  | 'phone'
-  | 'email'
-  | 'custom';
+  | 'work'        // Poste, métier, profession
+  | 'company'     // Entreprise, société
+  | 'hobby'       // Loisirs, passions
+  | 'sport'       // Sports pratiqués
+  | 'relationship'// Relations (fils, fille, frère, ami, collègue)
+  | 'partner'     // Conjoint, compagnon, femme, mari
+  | 'location'    // Ville, pays, adresse
+  | 'education'   // École, diplôme, formation
+  | 'birthday'    // Date d'anniversaire
+  | 'contact'     // Téléphone, email
+  | 'other';      // Autres infos importantes structurées
 
 export type FactAction = 'add' | 'update';
 
