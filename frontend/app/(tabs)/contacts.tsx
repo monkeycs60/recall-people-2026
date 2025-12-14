@@ -58,7 +58,7 @@ export default function ContactsScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 10 }} className="px-6">
+      <View style={{ paddingTop: insets.top + 10, paddingHorizontal: 24 }}>
         <Text className="text-3xl font-bold text-textPrimary mb-6">Contacts</Text>
       </View>
 

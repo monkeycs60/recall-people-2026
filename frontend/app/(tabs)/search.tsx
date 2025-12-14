@@ -42,7 +42,7 @@ export default function SearchScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View style={{ paddingTop: insets.top + 10 }} className="px-6">
+      <View style={{ paddingTop: insets.top + 10, paddingHorizontal: 24 }}>
         <Text className="text-3xl font-bold text-textPrimary mb-6">Recherche</Text>
 
         <View className="bg-surface rounded-lg flex-row items-center px-4 mb-6">
