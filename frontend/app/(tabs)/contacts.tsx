@@ -57,14 +57,13 @@ export default function ContactsScreen() {
   );
 
   return (
-    <View
-      className="flex-1 bg-background px-6"
-      style={{ paddingTop: insets.top + 10 }}
-    >
-      <Text className="text-3xl font-bold text-textPrimary mb-6">Contacts</Text>
+    <View className="flex-1 bg-background">
+      <View style={{ paddingTop: insets.top + 10 }} className="px-6">
+        <Text className="text-3xl font-bold text-textPrimary mb-6">Contacts</Text>
+      </View>
 
       {contacts.length === 0 && !isLoading ? (
-        <View className="flex-1 items-center justify-center">
+        <View className="flex-1 items-center justify-center px-6">
           <Text className="text-textSecondary text-center">
             Aucun contact pour le moment.{'\n'}
             Créez votre première note vocale !
@@ -75,7 +74,7 @@ export default function ContactsScreen() {
           data={contacts}
           renderItem={renderContact}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingBottom: 20 }}
+          contentContainerStyle={{ paddingBottom: 20, paddingHorizontal: 24 }}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}

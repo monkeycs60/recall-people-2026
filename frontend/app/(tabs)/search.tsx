@@ -41,21 +41,20 @@ export default function SearchScreen() {
   );
 
   return (
-    <View
-      className="flex-1 bg-background px-6"
-      style={{ paddingTop: insets.top + 10 }}
-    >
-      <Text className="text-3xl font-bold text-textPrimary mb-6">Recherche</Text>
+    <View className="flex-1 bg-background">
+      <View style={{ paddingTop: insets.top + 10 }} className="px-6">
+        <Text className="text-3xl font-bold text-textPrimary mb-6">Recherche</Text>
 
-      <View className="bg-surface rounded-lg flex-row items-center px-4 mb-6">
-        <Search size={20} color="#9CA3AF" />
-        <TextInput
-          className="flex-1 py-3 px-3 text-textPrimary"
-          placeholder="Rechercher un contact..."
-          placeholderTextColor="#71717a"
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
+        <View className="bg-surface rounded-lg flex-row items-center px-4 mb-6">
+          <Search size={20} color="#9CA3AF" />
+          <TextInput
+            className="flex-1 py-3 px-3 text-textPrimary"
+            placeholder="Rechercher un contact..."
+            placeholderTextColor="#71717a"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
       </View>
 
       {searchQuery.length > 0 && (
@@ -63,7 +62,7 @@ export default function SearchScreen() {
           data={filteredContacts}
           renderItem={renderContact}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingBottom: 20 }}
+          contentContainerStyle={{ paddingBottom: 20, paddingHorizontal: 24 }}
           ListEmptyComponent={
             <Text className="text-textSecondary text-center mt-8">
               Aucun résultat trouvé
@@ -73,7 +72,7 @@ export default function SearchScreen() {
       )}
 
       {searchQuery.length === 0 && (
-        <View className="flex-1 items-center justify-center">
+        <View className="flex-1 items-center justify-center px-6">
           <Text className="text-textMuted text-center">
             Tapez pour rechercher dans vos contacts
           </Text>
