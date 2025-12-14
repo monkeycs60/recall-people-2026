@@ -1,25 +1,24 @@
 import { View, Text, ScrollView, Pressable } from 'react-native';
 import { useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useContacts } from '@/hooks/useContacts';
-import { useNotes } from '@/hooks/useNotes';
 import { ContactWithDetails } from '@/types';
 
 export default function ContactDetailScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const insets = useSafeAreaInsets();
   const contactId = params.id as string;
 
   const { getContactById, deleteContact } = useContacts();
   const [contact, setContact] = useState<ContactWithDetails | null>(null);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
-  useState(() => {
-    const loadContact = async () => {
-      const data = await getContactById(contactId);
-      setContact(data);
-    };
-    loadContact();
-  });
+  if (!hasLoaded) {
+    getContactById(contactId).then(setContact);
+    setHasLoaded(true);
+  }
 
   const handleDelete = async () => {
     if (contact) {
@@ -37,10 +36,13 @@ export default function ContactDetailScreen() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-background px-6 pt-6">
-      <View className="mb-6">
+    <ScrollView
+      className="flex-1 bg-background px-6"
+      contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
+    >
+      <View className="mb-6 mt-4">
         <Text className="text-3xl font-bold text-textPrimary mb-2">
-          {contact.firstName} {contact.lastName}
+          {contact.firstName} {contact.lastName || contact.nickname || ''}
         </Text>
 
         {contact.tags && contact.tags.length > 0 && (
@@ -95,7 +97,7 @@ export default function ContactDetailScreen() {
       )}
 
       <Pressable
-        className="bg-error/20 border border-error py-3 rounded-lg items-center mb-6"
+        className="bg-error/20 border border-error py-3 rounded-lg items-center"
         onPress={handleDelete}
       >
         <Text className="text-error font-semibold">Supprimer le contact</Text>

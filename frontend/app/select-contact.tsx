@@ -1,6 +1,7 @@
 import { View, Text, ScrollView, Pressable, TextInput, ActivityIndicator } from 'react-native';
 import { useState, useMemo } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useContactsStore } from '@/stores/contacts-store';
 import { useAppStore } from '@/stores/app-store';
 import { extractInfo } from '@/lib/api';
@@ -10,6 +11,7 @@ import { User, Plus, Search, Sparkles } from 'lucide-react-native';
 export default function SelectContactScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const insets = useSafeAreaInsets();
   const audioUri = params.audioUri as string;
   const transcription = params.transcription as string;
 
@@ -131,7 +133,10 @@ export default function SelectContactScreen() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-background px-6 pt-6">
+    <ScrollView
+      className="flex-1 bg-background px-6 pt-4"
+      contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
+    >
       <View className="flex-row items-center mb-2">
         <Sparkles size={24} color="#8B5CF6" />
         <Text className="text-2xl font-bold text-textPrimary ml-2">

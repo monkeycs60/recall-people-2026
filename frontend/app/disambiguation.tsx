@@ -1,11 +1,13 @@
 import { View, Text, ScrollView, Pressable } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Contact, ExtractionResult } from '@/types';
 import { Plus, User } from 'lucide-react-native';
 
 export default function DisambiguationScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const insets = useSafeAreaInsets();
 
   const extraction: ExtractionResult = JSON.parse(params.extraction as string);
   const possibleContacts: Contact[] = JSON.parse(params.possibleContacts as string);
@@ -40,7 +42,10 @@ export default function DisambiguationScreen() {
   const suggestedNickname = extraction.contactIdentified.suggestedNickname;
 
   return (
-    <ScrollView className="flex-1 bg-background px-6 pt-6">
+    <ScrollView
+      className="flex-1 bg-background px-6 pt-4"
+      contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
+    >
       <Text className="text-2xl font-bold text-textPrimary mb-2">
         Qui est "{firstName}" ?
       </Text>

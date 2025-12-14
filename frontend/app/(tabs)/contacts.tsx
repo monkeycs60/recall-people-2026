@@ -1,18 +1,18 @@
 import { View, Text, FlatList, Pressable, RefreshControl } from 'react-native';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
-import { useCallback } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useContactsStore } from '@/stores/contacts-store';
 import { Contact } from '@/types';
 import { User } from 'lucide-react-native';
 
 export default function ContactsScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { contacts, loadContacts, isLoading } = useContactsStore();
   const [refreshing, setRefreshing] = useState(false);
 
-  // Reload contacts when screen is focused
   useFocusEffect(
     useCallback(() => {
       loadContacts();
@@ -57,7 +57,10 @@ export default function ContactsScreen() {
   );
 
   return (
-    <View className="flex-1 bg-background px-6 pt-6">
+    <View
+      className="flex-1 bg-background px-6"
+      style={{ paddingTop: insets.top + 10 }}
+    >
       <Text className="text-3xl font-bold text-textPrimary mb-6">Contacts</Text>
 
       {contacts.length === 0 && !isLoading ? (
