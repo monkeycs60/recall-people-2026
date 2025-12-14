@@ -1,4 +1,4 @@
-import { nanoid } from 'nanoid';
+import * as Crypto from 'expo-crypto';
 import { getDatabase } from '@/lib/db';
 import { Contact, ContactWithDetails, Fact, Note } from '@/types';
 
@@ -108,7 +108,7 @@ export const contactService = {
     tags?: string[];
   }): Promise<Contact> => {
     const db = await getDatabase();
-    const id = nanoid();
+    const id = Crypto.randomUUID();
     const now = new Date().toISOString();
 
     await db.runAsync(

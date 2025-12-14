@@ -1,4 +1,4 @@
-import { nanoid } from 'nanoid';
+import * as Crypto from 'expo-crypto';
 import { getDatabase } from '@/lib/db';
 import { Fact, FactType } from '@/types';
 
@@ -36,7 +36,7 @@ export const factService = {
     sourceNoteId?: string;
   }): Promise<Fact> => {
     const db = await getDatabase();
-    const id = nanoid();
+    const id = Crypto.randomUUID();
     const now = new Date().toISOString();
 
     await db.runAsync(
