@@ -6,7 +6,7 @@ import { useContactsStore } from '@/stores/contacts-store';
 import { useAppStore } from '@/stores/app-store';
 import { extractInfo } from '@/lib/api';
 import { Contact } from '@/types';
-import { User, Plus, Search, Sparkles } from 'lucide-react-native';
+import { User, Plus, Search, Sparkles, Edit3 } from 'lucide-react-native';
 
 export default function SelectContactScreen() {
   const router = useRouter();
@@ -19,13 +19,15 @@ export default function SelectContactScreen() {
   const { setCurrentExtraction, setRecordingState } = useAppStore();
 
   const [isExtracting, setIsExtracting] = useState(false);
+  const [isEditingNewName, setIsEditingNewName] = useState(false);
+  const [newContactName, setNewContactName] = useState('');
 
   // Extract first name from transcription for suggestions (computed once)
   const detectedName = useMemo(() => {
     const patterns = [
-      /j'ai (?:vu|rencontré|croisé|parlé à|revu)\s+(\w+)/i,
-      /(?:avec|de)\s+(\w+)/i,
-      /(\w+)\s+m'a\s+dit/i,
+      /j'ai (?:vu|rencontré|croisé|parlé à|revu)\s+([\w-]+)/i,
+      /(?:avec|de)\s+([\w-]+)/i,
+      /([\w-]+)\s+m'a\s+dit/i,
     ];
 
     for (const pattern of patterns) {
@@ -40,6 +42,10 @@ export default function SelectContactScreen() {
   const [searchQuery, setSearchQuery] = useState(detectedName || '');
 
   const matchingContacts = detectedName ? findContactsByFirstName(detectedName) : [];
+
+  const nameForNewContact = isEditingNewName && newContactName.trim()
+    ? newContactName.trim()
+    : detectedName;
 
   const filteredContacts = searchQuery
     ? contacts.filter(
@@ -100,6 +106,11 @@ export default function SelectContactScreen() {
         transcription,
         existingContacts: contactsForExtraction,
       });
+
+      // Override the first name if user edited it
+      if (nameForNewContact && nameForNewContact !== extraction.contactIdentified.firstName) {
+        extraction.contactIdentified.firstName = nameForNewContact;
+      }
 
       setCurrentExtraction(extraction);
 
@@ -193,17 +204,52 @@ export default function SelectContactScreen() {
       )}
 
       {/* Create new contact */}
-      <Pressable
-        className="border-2 border-dashed border-primary/50 p-4 rounded-lg items-center bg-primary/5 mb-6"
-        onPress={handleCreateNew}
-      >
-        <View className="flex-row items-center">
-          <Plus size={20} color="#8B5CF6" />
-          <Text className="text-primary font-semibold ml-2">
-            Créer un nouveau contact {detectedName ? `"${detectedName}"` : ''}
-          </Text>
-        </View>
-      </Pressable>
+      <View className="mb-6">
+        <Text className="text-lg font-semibold text-textPrimary mb-3">
+          Nouveau contact
+        </Text>
+
+        {isEditingNewName ? (
+          <View className="bg-surface p-4 rounded-lg mb-3">
+            <Text className="text-textSecondary text-sm mb-2">Nom du contact</Text>
+            <TextInput
+              className="bg-background py-3 px-4 rounded-lg text-textPrimary"
+              placeholder="Prénom (ex: Jean-Luc)"
+              placeholderTextColor="#71717a"
+              value={newContactName}
+              onChangeText={setNewContactName}
+              autoFocus
+            />
+          </View>
+        ) : null}
+
+        <Pressable
+          className="border-2 border-dashed border-primary/50 p-4 rounded-lg items-center bg-primary/5"
+          onPress={handleCreateNew}
+        >
+          <View className="flex-row items-center">
+            <Plus size={20} color="#8B5CF6" />
+            <Text className="text-primary font-semibold ml-2">
+              Créer "{nameForNewContact || 'Nouveau contact'}"
+            </Text>
+          </View>
+        </Pressable>
+
+        {!isEditingNewName && (
+          <Pressable
+            className="mt-2 py-2 items-center flex-row justify-center"
+            onPress={() => {
+              setIsEditingNewName(true);
+              setNewContactName(detectedName || '');
+            }}
+          >
+            <Edit3 size={16} color="#9CA3AF" />
+            <Text className="text-textMuted ml-2 text-sm">
+              Modifier le nom
+            </Text>
+          </Pressable>
+        )}
+      </View>
 
       {/* All contacts */}
       {filteredContacts.length > 0 && (

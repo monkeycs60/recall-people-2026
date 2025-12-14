@@ -25,6 +25,7 @@ export const initDatabase = async () => {
       nickname TEXT,
       photo_uri TEXT,
       tags TEXT DEFAULT '[]',
+      highlights TEXT DEFAULT '[]',
       last_contact_at TEXT,
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now'))
@@ -37,6 +38,7 @@ export const initDatabase = async () => {
       fact_type TEXT NOT NULL,
       fact_key TEXT NOT NULL,
       fact_value TEXT NOT NULL,
+      previous_values TEXT DEFAULT '[]',
       source_note_id TEXT,
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now')),
@@ -77,4 +79,27 @@ export const initDatabase = async () => {
     CREATE INDEX IF NOT EXISTS idx_notes_contact ON notes(contact_id);
     CREATE INDEX IF NOT EXISTS idx_notes_created ON notes(created_at DESC);
   `);
+
+  // Run migrations for existing databases
+  await runMigrations(database);
+};
+
+const runMigrations = async (database: SQLite.SQLiteDatabase) => {
+  // Check if highlights column exists on contacts
+  const contactsInfo = await database.getAllAsync<{ name: string }>(
+    "PRAGMA table_info(contacts)"
+  );
+  const hasHighlights = contactsInfo.some((col) => col.name === 'highlights');
+  if (!hasHighlights) {
+    await database.execAsync("ALTER TABLE contacts ADD COLUMN highlights TEXT DEFAULT '[]'");
+  }
+
+  // Check if previous_values column exists on facts
+  const factsInfo = await database.getAllAsync<{ name: string }>(
+    "PRAGMA table_info(facts)"
+  );
+  const hasPreviousValues = factsInfo.some((col) => col.name === 'previous_values');
+  if (!hasPreviousValues) {
+    await database.execAsync("ALTER TABLE facts ADD COLUMN previous_values TEXT DEFAULT '[]'");
+  }
 };

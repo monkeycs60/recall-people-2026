@@ -57,13 +57,27 @@ export default function ReviewScreen() {
 
       for (const index of selectedFacts) {
         const fact = extraction.facts[index];
-        await factService.create({
-          contactId: finalContactId,
-          factType: fact.factType,
-          factKey: fact.factKey,
-          factValue: fact.factValue,
-          sourceNoteId: note.id,
-        });
+
+        // Check if a similar fact already exists (same type and key)
+        const existingFact = await factService.findByTypeAndKey(
+          finalContactId,
+          fact.factType,
+          fact.factKey
+        );
+
+        if (existingFact) {
+          // Update existing fact with history
+          await factService.updateWithHistory(existingFact.id, fact.factValue);
+        } else {
+          // Create new fact
+          await factService.create({
+            contactId: finalContactId,
+            factType: fact.factType,
+            factKey: fact.factKey,
+            factValue: fact.factValue,
+            sourceNoteId: note.id,
+          });
+        }
       }
 
       await updateContact(finalContactId, {

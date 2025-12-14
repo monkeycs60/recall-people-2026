@@ -167,8 +167,9 @@ TRANSCRIPTION DE LA NOTE VOCALE:
 RÈGLES D'EXTRACTION:
 
 1. IDENTIFICATION DU CONTACT:
-   - Extrais le prénom de la personne mentionnée
-   - Extrais le nom de famille SEULEMENT s'il est explicitement mentionné
+   - Extrais le prénom COMPLET de la personne mentionnée (ex: "Jean-Luc", "Marie-Claire", "Pierre-Antoine")
+   - Les prénoms composés avec trait d'union sont UN SEUL prénom (Jean-Luc = prénom, pas Jean = prénom + Luc = nom)
+   - Extrais le nom de famille SEULEMENT s'il est explicitement mentionné comme tel
 
 2. FACTS (Informations structurées PERMANENTES à afficher sur le profil):
    Catégories:

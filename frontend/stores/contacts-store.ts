@@ -25,6 +25,7 @@ type ContactsActions = {
       lastName: string;
       nickname: string;
       tags: Tag[];
+      highlights: string[];
       lastContactAt: string;
     }>
   ) => Promise<void>;

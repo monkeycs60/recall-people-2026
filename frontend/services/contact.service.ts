@@ -12,6 +12,7 @@ export const contactService = {
       nickname: string | null;
       photo_uri: string | null;
       tags: string;
+      highlights: string | null;
       last_contact_at: string | null;
       created_at: string;
       updated_at: string;
@@ -24,6 +25,7 @@ export const contactService = {
       nickname: row.nickname || undefined,
       photoUri: row.photo_uri || undefined,
       tags: JSON.parse(row.tags),
+      highlights: JSON.parse(row.highlights || '[]'),
       lastContactAt: row.last_contact_at || undefined,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
@@ -39,6 +41,7 @@ export const contactService = {
       nickname: string | null;
       photo_uri: string | null;
       tags: string;
+      highlights: string | null;
       last_contact_at: string | null;
       created_at: string;
       updated_at: string;
@@ -52,6 +55,7 @@ export const contactService = {
       fact_type: string;
       fact_key: string;
       fact_value: string;
+      previous_values: string | null;
       source_note_id: string | null;
       created_at: string;
       updated_at: string;
@@ -74,15 +78,17 @@ export const contactService = {
       nickname: contactRow.nickname || undefined,
       photoUri: contactRow.photo_uri || undefined,
       tags: JSON.parse(contactRow.tags),
+      highlights: JSON.parse(contactRow.highlights || '[]'),
       lastContactAt: contactRow.last_contact_at || undefined,
       createdAt: contactRow.created_at,
       updatedAt: contactRow.updated_at,
       facts: factsRows.map((row) => ({
         id: row.id,
         contactId: row.contact_id,
-        factType: row.fact_type as any,
+        factType: row.fact_type as Fact['factType'],
         factKey: row.fact_key,
         factValue: row.fact_value,
+        previousValues: JSON.parse(row.previous_values || '[]'),
         sourceNoteId: row.source_note_id || undefined,
         createdAt: row.created_at,
         updatedAt: row.updated_at,
@@ -112,14 +118,15 @@ export const contactService = {
     const now = new Date().toISOString();
 
     await db.runAsync(
-      `INSERT INTO contacts (id, first_name, last_name, nickname, tags, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO contacts (id, first_name, last_name, nickname, tags, highlights, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         data.firstName,
         data.lastName || null,
         data.nickname || null,
         JSON.stringify(data.tags || []),
+        JSON.stringify([]),
         now,
         now,
       ]
@@ -131,6 +138,7 @@ export const contactService = {
       lastName: data.lastName,
       nickname: data.nickname,
       tags: data.tags || [],
+      highlights: [],
       createdAt: now,
       updatedAt: now,
     };
@@ -143,12 +151,13 @@ export const contactService = {
       lastName: string;
       nickname: string;
       tags: string[];
+      highlights: string[];
       lastContactAt: string;
     }>
   ): Promise<void> => {
     const db = await getDatabase();
     const updates: string[] = [];
-    const values: any[] = [];
+    const values: (string | null)[] = [];
 
     if (data.firstName) {
       updates.push('first_name = ?');
@@ -165,6 +174,10 @@ export const contactService = {
     if (data.tags) {
       updates.push('tags = ?');
       values.push(JSON.stringify(data.tags));
+    }
+    if (data.highlights !== undefined) {
+      updates.push('highlights = ?');
+      values.push(JSON.stringify(data.highlights));
     }
     if (data.lastContactAt) {
       updates.push('last_contact_at = ?');

@@ -36,6 +36,7 @@ export type Contact = {
   nickname?: string;
   photoUri?: string;
   tags: Tag[];
+  highlights: string[];
   lastContactAt?: string;
   createdAt: string;
   updatedAt: string;
@@ -47,6 +48,7 @@ export type Fact = {
   factType: FactType;
   factKey: string;
   factValue: string;
+  previousValues: string[];
   sourceNoteId?: string;
   createdAt: string;
   updatedAt: string;
