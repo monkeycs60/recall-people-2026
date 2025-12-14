@@ -2,6 +2,8 @@
 
 This is an EXPO application, developping a mobile app in React Native.
 
+- NEVER TOUCH llm model name: I have determined the best model for the job, don't change it.
+
 ### Prohibited Practices
 
 -  **No useEffect**: Use fetch in server components via services, or handle side effects via event handlers

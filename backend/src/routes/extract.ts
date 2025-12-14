@@ -35,12 +35,9 @@ type ExtractionRequest = {
 
 const extractionSchema = z.object({
   contactIdentified: z.object({
-    id: z.string().nullable().describe('ID du contact existant ou null si nouveau contact'),
     firstName: z.string().describe('Prénom extrait de la transcription'),
     lastName: z.string().nullable().describe('Nom de famille si mentionné'),
     confidence: z.enum(['high', 'medium', 'low']),
-    needsDisambiguation: z.boolean(),
-    suggestedMatches: z.array(z.string()).describe('IDs des contacts possibles si ambiguïté'),
   }),
   facts: z.array(
     z.object({
@@ -88,11 +85,7 @@ extractRoutes.post('/', async (c) => {
       apiKey: c.env.GOOGLE_GEMINI_API_KEY,
     });
 
-    const prompt = buildExtractionPrompt(
-      transcription,
-      existingContacts,
-      currentContact
-    );
+    const prompt = buildExtractionPrompt(transcription, currentContact);
 
     const { object: extraction } = await generateObject({
 			model: google('gemini-2.5-flash-preview-09-2025'),
@@ -100,8 +93,39 @@ extractRoutes.post('/', async (c) => {
 			prompt,
 		});
 
+    // Server-side matching: find contacts with same first name
+    const extractedFirstName = extraction.contactIdentified.firstName.toLowerCase().trim();
+    const matchingContacts = existingContacts.filter(
+      (contact) => contact.firstName.toLowerCase().trim() === extractedFirstName
+    );
+
+    // Determine if we need disambiguation
+    const needsDisambiguation = matchingContacts.length > 0;
+    const suggestedMatches = matchingContacts.map((contact) => contact.id);
+
+    // Generate suggested nickname based on the most distinctive fact
+    let suggestedNickname: string | null = null;
+    if (extraction.facts.length > 0) {
+      const priorityOrder = ['work', 'company', 'sport', 'hobby', 'location', 'education'];
+      const sortedFacts = [...extraction.facts].sort((factA, factB) => {
+        const indexA = priorityOrder.indexOf(factA.factType);
+        const indexB = priorityOrder.indexOf(factB.factType);
+        return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+      });
+      const mainFact = sortedFacts[0];
+      suggestedNickname = mainFact.factValue.split(' ')[0]; // First word of the value
+    }
+
     const formattedExtraction = {
-      contactIdentified: extraction.contactIdentified,
+      contactIdentified: {
+        id: null as string | null,
+        firstName: extraction.contactIdentified.firstName,
+        lastName: extraction.contactIdentified.lastName,
+        confidence: extraction.contactIdentified.confidence,
+        needsDisambiguation,
+        suggestedMatches,
+        suggestedNickname,
+      },
       facts: extraction.facts,
       note: {
         summary: extraction.noteBlocks.length > 0
@@ -123,16 +147,8 @@ extractRoutes.post('/', async (c) => {
 
 const buildExtractionPrompt = (
   transcription: string,
-  existingContacts: ExtractionRequest['existingContacts'],
   currentContact?: ExtractionRequest['currentContact']
 ): string => {
-  const contactsContext = existingContacts
-    .map(
-      (contact) =>
-        `- "${contact.firstName}${contact.lastName ? ' ' + contact.lastName : ''}" (id: ${contact.id}, tags: ${contact.tags.join(', ') || 'aucun'})`
-    )
-    .join('\n');
-
   const currentContactContext = currentContact
     ? `
 CONTACT ACTUELLEMENT SÉLECTIONNÉ:
@@ -143,9 +159,6 @@ ${currentContact.facts.map((fact) => `  • ${fact.factKey}: ${fact.factValue}`)
     : '';
 
   return `Tu es un assistant qui extrait des informations structurées à partir de notes vocales en français.
-
-CONTACTS EXISTANTS DE L'UTILISATEUR:
-${contactsContext || '(aucun contact existant)'}
 ${currentContactContext}
 
 TRANSCRIPTION DE LA NOTE VOCALE:
@@ -154,38 +167,35 @@ TRANSCRIPTION DE LA NOTE VOCALE:
 RÈGLES D'EXTRACTION:
 
 1. IDENTIFICATION DU CONTACT:
-   - Si le prénom correspond à PLUSIEURS contacts existants → needsDisambiguation: true + liste les IDs dans suggestedMatches
-   - Si le prénom ne correspond à AUCUN contact → id: null (nouveau contact)
-   - Si le prénom correspond à UN SEUL contact → utilise son ID
+   - Extrais le prénom de la personne mentionnée
+   - Extrais le nom de famille SEULEMENT s'il est explicitement mentionné
 
-2. FACTS (Informations structurées importantes à afficher en haut du profil):
-   Catégories et exemples:
-   - work: métier, poste, profession (ex: "Développeur", "Médecin", "Avocat")
-   - company: entreprise, société, employeur (ex: "Google", "Cabinet Dupont")
-   - hobby: loisirs, passions (ex: "Photographie", "Cuisine", "Jardinage")
-   - sport: sports pratiqués (ex: "Tennis", "Football", "Yoga")
-   - relationship: liens familiaux/sociaux (ex: factKey="Fils" factValue="Thomas", factKey="Ami de" factValue="Marc")
-   - partner: conjoint uniquement (ex: factKey="Femme" factValue="Marie", factKey="Compagnon" factValue="décédé")
-   - location: lieu de vie (ex: "Paris", "Lyon")
-   - education: formation, école (ex: "HEC", "Ingénieur INSA")
-   - birthday: date anniversaire (ex: "15 mars", "1985-03-15")
-   - contact: téléphone, email (ex: "06 12 34 56 78")
-   - other: autre info structurée importante
+2. FACTS (Informations structurées PERMANENTES à afficher sur le profil):
+   Catégories:
+   - work: métier, poste, profession (factKey="Poste", factValue="Développeur")
+   - company: entreprise, société (factKey="Entreprise", factValue="Google")
+   - hobby: loisirs, passions (factKey="Loisir", factValue="Photographie")
+   - sport: sports pratiqués (factKey="Sport", factValue="Tennis")
+   - relationship: liens familiaux/sociaux (factKey="Fils", factValue="Thomas")
+   - partner: conjoint (factKey="Femme" ou "Mari" ou "Compagnon", factValue=prénom ou statut)
+   - location: lieu de vie (factKey="Ville", factValue="Paris")
+   - education: formation (factKey="École", factValue="HEC")
+   - birthday: anniversaire (factKey="Anniversaire", factValue="15 mars")
+   - contact: coordonnées (factKey="Téléphone" ou "Email", factValue=valeur)
+   - other: autre info structurée permanente
 
-3. NOTEBLOCKS (Anecdotes et événements contextuels):
+3. NOTEBLOCKS (Événements et anecdotes TEMPORAIRES):
    Ce qui va dans noteBlocks (PAS dans facts):
-   - Événements ponctuels: "Sa femme est décédée hier", "Il organise les obsèques dans 3 jours"
-   - Anecdotes: "On s'est rencontrés au restaurant", "Il m'a parlé de son voyage"
-   - Contexte temporel: "Il part en vacances la semaine prochaine"
-   - Projets: "Il cherche un nouveau travail", "Il veut déménager"
+   - Événements: "Sa femme est décédée hier"
+   - Anecdotes: "Rencontré au supermarché"
+   - Projets: "Cherche un nouveau travail"
+   - Contexte: "A eu une promotion récemment"
 
-   Chaque noteBlock doit être un résumé COURT (1 phrase max).
-   Sépare les informations différentes en blocs distincts.
+   Chaque bloc = 1 phrase courte. Sépare les infos différentes.
 
-RÈGLES IMPORTANTES:
-- Sois CONSERVATEUR: n'extrais QUE ce qui est explicitement dit
-- Les facts sont des informations PERMANENTES ou SEMI-PERMANENTES sur la personne
-- Les noteBlocks sont des événements, anecdotes, ou infos contextuelles/temporaires
-- Pour facts, action="add" si nouvelle info, "update" si modification d'une info existante
-- factKey doit être lisible et en français`;
+RÈGLES:
+- N'extrais QUE ce qui est EXPLICITEMENT dit
+- facts = infos PERMANENTES (métier, sport pratiqué, famille)
+- noteBlocks = événements TEMPORAIRES/anecdotes
+- action="add" pour nouvelle info, "update" si modification`;
 };

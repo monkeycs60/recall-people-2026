@@ -50,6 +50,7 @@ export default function RootLayout() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="select-contact" options={{ headerShown: true, title: 'Sélectionner le contact' }} />
       <Stack.Screen name="review" options={{ headerShown: true, title: 'Vérification' }} />
       <Stack.Screen name="disambiguation" options={{ headerShown: true, title: 'Sélectionner le contact' }} />
       <Stack.Screen name="contact/[id]" options={{ headerShown: true, title: 'Contact' }} />

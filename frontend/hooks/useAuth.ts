@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
-import { login as authLogin, register as authRegister, logout as authLogout } from '@/lib/auth';
+import { login as authLogin, register as authRegister } from '@/lib/auth';
+import { useAuthStore } from '@/stores/auth-store';
 
 export const useAuth = () => {
   const router = useRouter();
+  const { setUser, logout: storeLogout } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -12,7 +14,8 @@ export const useAuth = () => {
     setError(null);
 
     try {
-      await authLogin(email, password);
+      const result = await authLogin(email, password);
+      setUser(result.user);
       router.replace('/(tabs)');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
@@ -27,7 +30,8 @@ export const useAuth = () => {
     setError(null);
 
     try {
-      await authRegister(email, password, name);
+      const result = await authRegister(email, password, name);
+      setUser(result.user);
       router.replace('/(tabs)');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed');
@@ -38,7 +42,7 @@ export const useAuth = () => {
   };
 
   const logout = async () => {
-    await authLogout();
+    await storeLogout();
     router.replace('/(auth)/login');
   };
 

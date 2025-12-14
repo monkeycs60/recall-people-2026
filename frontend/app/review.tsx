@@ -36,6 +36,7 @@ export default function ReviewScreen() {
         const newContact = await createContact({
           firstName: extraction.contactIdentified.firstName,
           lastName: extraction.contactIdentified.lastName,
+          nickname: extraction.contactIdentified.suggestedNickname,
         });
         finalContactId = newContact.id;
       }

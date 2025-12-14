@@ -95,6 +95,7 @@ export type ExtractionResult = {
     confidence: Confidence;
     needsDisambiguation: boolean;
     suggestedMatches?: string[];
+    suggestedNickname?: string;
   };
   facts: ExtractedFact[];
   note: {

@@ -1,39 +1,58 @@
-import { View, Text, FlatList, Pressable } from 'react-native';
+import { View, Text, FlatList, Pressable, RefreshControl } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
-import { useContacts } from '@/hooks/useContacts';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
+import { useContactsStore } from '@/stores/contacts-store';
 import { Contact } from '@/types';
+import { User } from 'lucide-react-native';
 
 export default function ContactsScreen() {
   const router = useRouter();
-  const { contacts, loadContacts } = useContacts();
+  const { contacts, loadContacts, isLoading } = useContactsStore();
+  const [refreshing, setRefreshing] = useState(false);
 
-  useState(() => {
-    loadContacts();
-  });
+  // Reload contacts when screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      loadContacts();
+    }, [])
+  );
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadContacts();
+    setRefreshing(false);
+  };
 
   const renderContact = ({ item }: { item: Contact }) => (
     <Pressable
-      className="bg-surface p-4 rounded-lg mb-3"
+      className="bg-surface p-4 rounded-lg mb-3 flex-row items-center"
       onPress={() => router.push(`/contact/${item.id}`)}
     >
-      <Text className="text-textPrimary font-semibold text-lg">
-        {item.firstName} {item.lastName}
-      </Text>
-      {item.tags && item.tags.length > 0 && (
-        <View className="flex-row gap-2 mt-2">
-          {item.tags.map((tag) => (
-            <View key={tag} className="bg-primary/20 px-2 py-1 rounded">
-              <Text className="text-primary text-xs">{tag}</Text>
-            </View>
-          ))}
-        </View>
-      )}
-      {item.lastContactAt && (
-        <Text className="text-textMuted text-sm mt-2">
-          Dernier contact : {new Date(item.lastContactAt).toLocaleDateString()}
+      <View className="w-12 h-12 bg-primary/20 rounded-full items-center justify-center mr-4">
+        <User size={24} color="#8B5CF6" />
+      </View>
+
+      <View className="flex-1">
+        <Text className="text-textPrimary font-semibold text-lg">
+          {item.firstName} {item.lastName || item.nickname || ''}
         </Text>
-      )}
+        {item.tags && item.tags.length > 0 && (
+          <View className="flex-row gap-2 mt-1">
+            {item.tags.slice(0, 2).map((tag) => (
+              <View key={tag} className="bg-primary/20 px-2 py-0.5 rounded">
+                <Text className="text-primary text-xs">{tag}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+        {item.lastContactAt && (
+          <Text className="text-textMuted text-xs mt-1">
+            Dernier contact : {new Date(item.lastContactAt).toLocaleDateString()}
+          </Text>
+        )}
+      </View>
     </Pressable>
   );
 
@@ -41,7 +60,7 @@ export default function ContactsScreen() {
     <View className="flex-1 bg-background px-6 pt-6">
       <Text className="text-3xl font-bold text-textPrimary mb-6">Contacts</Text>
 
-      {contacts.length === 0 ? (
+      {contacts.length === 0 && !isLoading ? (
         <View className="flex-1 items-center justify-center">
           <Text className="text-textSecondary text-center">
             Aucun contact pour le moment.{'\n'}
@@ -54,6 +73,13 @@ export default function ContactsScreen() {
           renderItem={renderContact}
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ paddingBottom: 20 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor="#8B5CF6"
+            />
+          }
         />
       )}
     </View>
