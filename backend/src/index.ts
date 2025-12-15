@@ -4,6 +4,7 @@ import { logger } from 'hono/logger';
 import { authRoutes } from './routes/auth';
 import { transcribeRoutes } from './routes/transcribe';
 import { extractRoutes } from './routes/extract';
+import { similarityRoutes } from './routes/similarity';
 
 type Bindings = {
   DATABASE_URL: string;
@@ -30,5 +31,6 @@ app.get('/', (c) =>
 app.route('/auth', authRoutes);
 app.route('/api/transcribe', transcribeRoutes);
 app.route('/api/extract', extractRoutes);
+app.route('/api/similarity', similarityRoutes);
 
 export default app;

@@ -150,3 +150,39 @@ export type DisambiguationScreenParams = {
 export type ContactDetailParams = {
   id: string;
 };
+
+// ============================================
+// Network Graph (Réseau)
+// ============================================
+
+export type SimilarityScore = {
+  factValue1: string;
+  factValue2: string;
+  factType: FactType;
+  score: number;
+};
+
+export type GraphNode = {
+  id: string;
+  contactId: string;
+  label: string;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+};
+
+export type GraphEdge = {
+  id: string;
+  source: string;
+  target: string;
+  factType: FactType;
+  label: string;
+  similarity: number;
+};
+
+export type NetworkData = {
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+  unconnected: Contact[];
+};

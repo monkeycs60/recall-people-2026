@@ -1,6 +1,6 @@
 import * as Crypto from 'expo-crypto';
 import { getDatabase } from '@/lib/db';
-import { Contact, ContactWithDetails, Fact, Note } from '@/types';
+import { Contact, ContactWithDetails, Fact, Note, Tag } from '@/types';
 
 export const contactService = {
   getAll: async (): Promise<Contact[]> => {
@@ -111,7 +111,7 @@ export const contactService = {
     firstName: string;
     lastName?: string;
     nickname?: string;
-    tags?: string[];
+    tags?: Tag[];
   }): Promise<Contact> => {
     const db = await getDatabase();
     const id = Crypto.randomUUID();

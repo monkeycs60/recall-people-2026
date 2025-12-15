@@ -73,11 +73,23 @@ export const initDatabase = async () => {
       FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE CASCADE
     );
 
+    -- Similarity cache (for network graph)
+    CREATE TABLE IF NOT EXISTS similarity_cache (
+      id TEXT PRIMARY KEY,
+      fact_value_1 TEXT NOT NULL,
+      fact_value_2 TEXT NOT NULL,
+      fact_type TEXT NOT NULL,
+      similarity_score REAL NOT NULL,
+      created_at TEXT DEFAULT (datetime('now')),
+      expires_at TEXT NOT NULL
+    );
+
     -- Index
     CREATE INDEX IF NOT EXISTS idx_contacts_last_contact ON contacts(last_contact_at DESC);
     CREATE INDEX IF NOT EXISTS idx_facts_contact ON facts(contact_id);
     CREATE INDEX IF NOT EXISTS idx_notes_contact ON notes(contact_id);
     CREATE INDEX IF NOT EXISTS idx_notes_created ON notes(created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_similarity_lookup ON similarity_cache(fact_type, fact_value_1, fact_value_2);
   `);
 
   // Run migrations for existing databases

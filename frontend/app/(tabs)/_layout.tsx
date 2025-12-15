@@ -1,5 +1,5 @@
 import { Tabs, useRouter } from 'expo-router';
-import { Home, Users } from 'lucide-react-native';
+import { Home, Users, Share2 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { isLoggedIn } from '@/lib/auth';
 import { View, Text } from 'react-native';
@@ -50,6 +50,13 @@ export default function TabLayout() {
         options={{
           title: 'Contacts',
           tabBarIcon: ({ color, size }) => <Users color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="network"
+        options={{
+          title: 'Réseau',
+          tabBarIcon: ({ color, size }) => <Share2 color={color} size={size} />,
         }}
       />
     </Tabs>
