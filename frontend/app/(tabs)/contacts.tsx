@@ -1,17 +1,27 @@
-import { View, Text, FlatList, Pressable, RefreshControl } from 'react-native';
+import { View, Text, FlatList, Pressable, RefreshControl, TextInput } from 'react-native';
 import { useState, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useContactsStore } from '@/stores/contacts-store';
 import { Contact } from '@/types';
-import { User } from 'lucide-react-native';
+import { User, Search } from 'lucide-react-native';
 
 export default function ContactsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { contacts, loadContacts, isLoading } = useContactsStore();
   const [refreshing, setRefreshing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredContacts = searchQuery
+    ? contacts.filter(
+        (contact) =>
+          contact.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (contact.lastName && contact.lastName.toLowerCase().includes(searchQuery.toLowerCase())) ||
+          (contact.nickname && contact.nickname.toLowerCase().includes(searchQuery.toLowerCase()))
+      )
+    : contacts;
 
   useFocusEffect(
     useCallback(() => {
@@ -59,19 +69,31 @@ export default function ContactsScreen() {
   return (
     <View className="flex-1 bg-background">
       <View style={{ paddingTop: insets.top + 10, paddingHorizontal: 24 }}>
-        <Text className="text-3xl font-bold text-textPrimary mb-6">Contacts</Text>
+        <Text className="text-3xl font-bold text-textPrimary mb-4">Contacts</Text>
+
+        <View className="bg-surface rounded-lg flex-row items-center px-4 mb-4">
+          <Search size={20} color="#9CA3AF" />
+          <TextInput
+            className="flex-1 py-3 px-3 text-textPrimary"
+            placeholder="Rechercher un contact..."
+            placeholderTextColor="#71717a"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
       </View>
 
-      {contacts.length === 0 && !isLoading ? (
+      {filteredContacts.length === 0 && !isLoading ? (
         <View className="flex-1 items-center justify-center px-6">
           <Text className="text-textSecondary text-center">
-            Aucun contact pour le moment.{'\n'}
-            Créez votre première note vocale !
+            {searchQuery
+              ? 'Aucun résultat trouvé'
+              : 'Aucun contact pour le moment.\nCréez votre première note vocale !'}
           </Text>
         </View>
       ) : (
         <FlatList
-          data={contacts}
+          data={filteredContacts}
           renderItem={renderContact}
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ paddingBottom: 20, paddingHorizontal: 24 }}

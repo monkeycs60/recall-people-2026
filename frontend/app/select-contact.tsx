@@ -39,7 +39,7 @@ export default function SelectContactScreen() {
     return null;
   }, [transcription]);
 
-  const [searchQuery, setSearchQuery] = useState(detectedName || '');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const matchingContacts = detectedName ? findContactsByFirstName(detectedName) : [];
 
