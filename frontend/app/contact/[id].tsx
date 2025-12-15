@@ -374,13 +374,34 @@ export default function ContactDetailScreen() {
           </View>
         )}
 
-        {contact.highlights.length === 0 && !isAddingHighlight ? (
-          <View className="bg-surface/50 p-4 rounded-lg border border-dashed border-surfaceHover">
-            <Text className="text-textMuted text-center">
-              Ajoutez des points clés manuellement
-            </Text>
-          </View>
-        ) : (
+        {/* Auto-generated highlights from facts if no manual highlights */}
+        {contact.highlights.length === 0 && !isAddingHighlight && (
+          <>
+            {contact.facts.filter((fact) =>
+              ['hobby', 'sport', 'work', 'company', 'location'].includes(fact.factType)
+            ).length > 0 ? (
+              contact.facts
+                .filter((fact) => ['hobby', 'sport', 'work', 'company', 'location'].includes(fact.factType))
+                .slice(0, 4)
+                .map((fact, index) => (
+                  <View key={`auto-${index}`} className="bg-surface/50 rounded-lg mb-2 p-4 flex-row items-center">
+                    <Text className="text-primary/70 mr-3">•</Text>
+                    <Text className="text-textSecondary flex-1">
+                      {fact.factKey}: {fact.factValue}
+                    </Text>
+                  </View>
+                ))
+            ) : (
+              <View className="bg-surface/50 p-4 rounded-lg border border-dashed border-surfaceHover">
+                <Text className="text-textMuted text-center">
+                  Ajoutez des points clés manuellement
+                </Text>
+              </View>
+            )}
+          </>
+        )}
+
+        {contact.highlights.length > 0 && (
           contact.highlights.map((highlight, index) => (
             <View key={index} className="bg-surface rounded-lg mb-2 overflow-hidden">
               {editingHighlight?.index === index ? (

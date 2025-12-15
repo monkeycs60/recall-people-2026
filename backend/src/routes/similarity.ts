@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { createAnthropic } from '@ai-sdk/anthropic';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
@@ -8,7 +8,7 @@ type Bindings = {
 	DATABASE_URL: string;
 	BETTER_AUTH_SECRET: string;
 	BETTER_AUTH_URL: string;
-	GOOGLE_GEMINI_API_KEY: string;
+	ANTHROPIC_API_KEY: string;
 };
 
 type FactInput = {
@@ -44,7 +44,6 @@ similarityRoutes.post('/batch', async (c) => {
 			return c.json({ error: 'No facts provided' }, 400);
 		}
 
-		// Group facts by type for comparison
 		const factsByType: Record<string, string[]> = {};
 		for (const fact of facts) {
 			if (!factsByType[fact.factType]) {
@@ -56,7 +55,6 @@ similarityRoutes.post('/batch', async (c) => {
 			}
 		}
 
-		// Filter types with at least 2 unique values (otherwise no comparison needed)
 		const typesWithMultipleValues = Object.entries(factsByType).filter(
 			([_, values]) => values.length >= 2
 		);
@@ -65,14 +63,14 @@ similarityRoutes.post('/batch', async (c) => {
 			return c.json({ success: true, similarities: [] });
 		}
 
-		const google = createGoogleGenerativeAI({
-			apiKey: c.env.GOOGLE_GEMINI_API_KEY,
+		const anthropic = createAnthropic({
+			apiKey: c.env.ANTHROPIC_API_KEY,
 		});
 
 		const prompt = buildSimilarityPrompt(typesWithMultipleValues);
 
 		const { object: result } = await generateObject({
-			model: google('gemini-2.5-flash-preview-09-2025'),
+			model: anthropic('claude-opus-4-5-20251101'),
 			schema: similaritySchema,
 			prompt,
 		});
@@ -104,12 +102,13 @@ ${typesAndValues}
 RÈGLES:
 - Compare UNIQUEMENT les valeurs au sein du MÊME type (ne compare pas un hobby avec un sport)
 - Score 1.0 = valeurs identiques ou quasi-identiques
-- Score 0.7-0.9 = très similaire (ex: tennis/padel, banquier/trader, Paris/Île-de-France)
-- Score 0.4-0.6 = même catégorie générale (ex: tennis/natation = sports, comptable/RH = bureau)
-- Score 0.1-0.3 = faible lien
-- Score 0.0 = aucun lien
+- Score 0.85-0.99 = très similaire (ex: "ski" et "ski de fond", "tennis" et "padel")
+- Score 0.5-0.84 = même catégorie mais différent (ex: "ski" et "natation" = sports différents)
+- Score 0.0-0.49 = peu ou pas de lien
 
 IMPORTANT:
+- Sois STRICT sur les scores élevés (>0.85) : réserve-les aux choses vraiment similaires
+- "Semi-marathon" et "ski" ne sont PAS similaires (score < 0.5)
 - Génère TOUTES les paires possibles pour chaque type
 - N'oublie aucune comparaison
 - Renvoie le factType original pour chaque paire`;

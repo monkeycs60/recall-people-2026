@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { createAnthropic } from '@ai-sdk/anthropic';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
@@ -81,14 +81,14 @@ extractRoutes.post('/', async (c) => {
       return c.json({ error: 'No transcription provided' }, 400);
     }
 
-    const google = createGoogleGenerativeAI({
-      apiKey: c.env.GOOGLE_GEMINI_API_KEY,
+    const anthropic = createAnthropic({
+      apiKey: c.env.ANTHROPIC_API_KEY,
     });
 
     const prompt = buildExtractionPrompt(transcription, currentContact);
 
     const { object: extraction } = await generateObject({
-			model: google('gemini-2.5-flash-preview-09-2025'),
+			model: anthropic('claude-opus-4-5-20251101'),
 			schema: extractionSchema,
 			prompt,
 		});
@@ -175,8 +175,8 @@ RÈGLES D'EXTRACTION:
    Catégories:
    - work: métier, poste, profession (factKey="Poste", factValue="Développeur")
    - company: entreprise, société (factKey="Entreprise", factValue="Google")
-   - hobby: loisirs, passions (factKey="Loisir", factValue="Photographie")
-   - sport: sports pratiqués (factKey="Sport", factValue="Tennis")
+   - hobby: loisirs, passions, activités régulières (factKey="Loisir", factValue="Yoga" ou "Méditation" ou "Lecture" ou "Jardinage")
+   - sport: sports pratiqués régulièrement (factKey="Sport", factValue="Tennis" ou "Running" ou "Natation")
    - relationship: liens familiaux/sociaux (factKey="Fils", factValue="Thomas")
    - partner: conjoint (factKey="Femme" ou "Mari" ou "Compagnon", factValue=prénom ou statut)
    - location: lieu de vie (factKey="Ville", factValue="Paris")
@@ -184,6 +184,8 @@ RÈGLES D'EXTRACTION:
    - birthday: anniversaire (factKey="Anniversaire", factValue="15 mars")
    - contact: coordonnées (factKey="Téléphone" ou "Email", factValue=valeur)
    - other: autre info structurée permanente
+
+   IMPORTANT: Si quelqu'un "fait du yoga", "pratique la méditation", "aime lire" → C'EST UN FACT (hobby), PAS un noteBlock !
 
 3. NOTEBLOCKS (Événements et anecdotes TEMPORAIRES):
    Ce qui va dans noteBlocks (PAS dans facts):

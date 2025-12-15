@@ -152,7 +152,7 @@ export type ContactDetailParams = {
 };
 
 // ============================================
-// Network Graph (Réseau)
+// Network / Clusters (Réseau)
 // ============================================
 
 export type SimilarityScore = {
@@ -162,27 +162,16 @@ export type SimilarityScore = {
   score: number;
 };
 
-export type GraphNode = {
+export type Cluster = {
   id: string;
-  contactId: string;
-  label: string;
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-};
-
-export type GraphEdge = {
-  id: string;
-  source: string;
-  target: string;
   factType: FactType;
   label: string;
-  similarity: number;
+  contacts: Contact[];
+  color: string;
+  emoji: string;
 };
 
-export type NetworkData = {
-  nodes: GraphNode[];
-  edges: GraphEdge[];
+export type ClusterData = {
+  clusters: Cluster[];
   unconnected: Contact[];
 };

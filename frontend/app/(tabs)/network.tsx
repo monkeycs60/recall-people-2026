@@ -3,31 +3,16 @@ import { useState, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { RefreshCw, User, Loader2 } from 'lucide-react-native';
-import { NetworkGraph } from '@/components/NetworkGraph';
+import { ClusterCard } from '@/components/ClusterCard';
 import { useNetworkGraph } from '@/hooks/useNetworkGraph';
-import { Contact, GraphNode, GraphEdge } from '@/types';
-
-const FACT_TYPE_LABELS: Record<string, string> = {
-  work: 'Travail',
-  company: 'Entreprise',
-  hobby: 'Loisir',
-  sport: 'Sport',
-  relationship: 'Relation',
-  partner: 'Partenaire',
-  location: 'Lieu',
-  education: 'Formation',
-  birthday: 'Anniversaire',
-  contact: 'Contact',
-  other: 'Autre',
-};
+import { Contact } from '@/types';
 
 export default function NetworkScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const {
-    networkData,
+    clusterData,
     isLoading,
     isCalculating,
     error,
@@ -50,8 +35,8 @@ export default function NetworkScreen() {
 
   const handleForceRefresh = () => {
     Alert.alert(
-      'Recalculer les similarités',
-      'Cela va recalculer toutes les similarités entre vos contacts. Cette opération utilise l\'IA et peut prendre quelques secondes.',
+      'Recalculer les connexions',
+      'Cela va analyser à nouveau les points communs entre vos contacts. Cette opération peut prendre quelques secondes.',
       [
         { text: 'Annuler', style: 'cancel' },
         {
@@ -64,120 +49,114 @@ export default function NetworkScreen() {
     );
   };
 
-  const handleNodePress = (node: GraphNode) => {
-    router.push(`/contact/${node.contactId}`);
+  const handleUnconnectedPress = (contact: Contact) => {
+    router.push(`/contact/${contact.id}`);
   };
-
-  const handleEdgePress = (edge: GraphEdge) => {
-    const typeLabel = FACT_TYPE_LABELS[edge.factType] || edge.factType;
-    Alert.alert(
-      `${typeLabel}`,
-      edge.label,
-      [{ text: 'OK' }]
-    );
-  };
-
-  const renderUnconnectedContact = (contact: Contact) => (
-    <Pressable
-      key={contact.id}
-      className="bg-surface p-3 rounded-lg mb-2 flex-row items-center"
-      onPress={() => router.push(`/contact/${contact.id}`)}
-    >
-      <View className="w-10 h-10 bg-gray-200 rounded-full items-center justify-center mr-3">
-        <User size={20} color="#9CA3AF" />
-      </View>
-      <Text className="text-textPrimary font-medium">
-        {contact.firstName} {contact.lastName || ''}
-      </Text>
-    </Pressable>
-  );
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <View className="flex-1 bg-background">
-        <View
-          className="flex-row items-center justify-between"
-          style={{ paddingTop: insets.top + 10, paddingHorizontal: 24 }}
+    <View className="flex-1 bg-background">
+      <View
+        className="flex-row items-center justify-between mb-2"
+        style={{ paddingTop: insets.top + 10, paddingHorizontal: 20 }}
+      >
+        <Text className="text-3xl font-bold text-textPrimary">Réseau</Text>
+        <Pressable
+          onPress={handleForceRefresh}
+          disabled={isLoading || isCalculating}
+          className="w-10 h-10 rounded-full bg-surface items-center justify-center"
         >
-          <Text className="text-3xl font-bold text-textPrimary">Réseau</Text>
-          <Pressable
-            onPress={handleForceRefresh}
-            disabled={isLoading || isCalculating}
-            className="p-2"
-          >
-            {isCalculating ? (
-              <Loader2 size={24} color="#8B5CF6" />
-            ) : (
-              <RefreshCw size={24} color="#8B5CF6" />
-            )}
-          </Pressable>
-        </View>
-
-        <ScrollView
-          className="flex-1"
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 40 }}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={handleRefresh}
-              tintColor="#8B5CF6"
-            />
-          }
-        >
-          {isLoading && !refreshing ? (
-            <View className="items-center justify-center py-20">
-              <Loader2 size={32} color="#8B5CF6" />
-              <Text className="text-textSecondary mt-4">
-                {isCalculating ? 'Calcul des similarités...' : 'Chargement...'}
-              </Text>
-            </View>
-          ) : error ? (
-            <View className="items-center justify-center py-20">
-              <Text className="text-red-500 text-center">{error}</Text>
-              <Pressable
-                onPress={handleRefresh}
-                className="mt-4 bg-primary px-4 py-2 rounded-lg"
-              >
-                <Text className="text-white font-medium">Réessayer</Text>
-              </Pressable>
-            </View>
-          ) : networkData ? (
-            <>
-              {networkData.nodes.length > 0 ? (
-                <View className="mt-4">
-                  <Text className="text-textSecondary text-sm mb-3">
-                    {networkData.nodes.length} contact{networkData.nodes.length > 1 ? 's' : ''} connecté{networkData.nodes.length > 1 ? 's' : ''} par {networkData.edges.length} lien{networkData.edges.length > 1 ? 's' : ''}
-                  </Text>
-                  <NetworkGraph
-                    data={networkData}
-                    onNodePress={handleNodePress}
-                    onEdgePress={handleEdgePress}
-                  />
-                  <Text className="text-textMuted text-xs text-center mt-2">
-                    Double-tap pour réinitialiser le zoom
-                  </Text>
-                </View>
-              ) : (
-                <View className="items-center justify-center py-10">
-                  <Text className="text-textSecondary text-center">
-                    Pas encore de connexions entre vos contacts.{'\n'}
-                    Ajoutez plus de faits pour découvrir des liens !
-                  </Text>
-                </View>
-              )}
-
-              {networkData.unconnected.length > 0 && (
-                <View className="mt-6">
-                  <Text className="text-lg font-semibold text-textPrimary mb-3">
-                    Non classés ({networkData.unconnected.length})
-                  </Text>
-                  {networkData.unconnected.map(renderUnconnectedContact)}
-                </View>
-              )}
-            </>
-          ) : null}
-        </ScrollView>
+          {isCalculating ? (
+            <Loader2 size={20} color="#8B5CF6" />
+          ) : (
+            <RefreshCw size={20} color="#8B5CF6" />
+          )}
+        </Pressable>
       </View>
-    </GestureHandlerRootView>
+
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40, paddingTop: 8 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor="#8B5CF6"
+          />
+        }
+      >
+        {isLoading && !refreshing ? (
+          <View className="items-center justify-center py-20">
+            <View className="w-16 h-16 rounded-2xl bg-surface items-center justify-center mb-4">
+              <Loader2 size={28} color="#8B5CF6" />
+            </View>
+            <Text className="text-textSecondary text-base">
+              {isCalculating ? 'Analyse des connexions...' : 'Chargement...'}
+            </Text>
+          </View>
+        ) : error ? (
+          <View className="items-center justify-center py-20">
+            <Text className="text-red-500 text-center mb-4">{error}</Text>
+            <Pressable
+              onPress={handleRefresh}
+              className="bg-primary px-6 py-3 rounded-xl"
+            >
+              <Text className="text-white font-semibold">Réessayer</Text>
+            </Pressable>
+          </View>
+        ) : clusterData ? (
+          <>
+            {clusterData.clusters.length > 0 ? (
+              <View>
+                <Text className="text-textMuted text-sm mb-5">
+                  {clusterData.clusters.length} groupe{clusterData.clusters.length > 1 ? 's' : ''} de contacts avec des points communs
+                </Text>
+                {clusterData.clusters.map((cluster) => (
+                  <ClusterCard key={cluster.id} cluster={cluster} />
+                ))}
+              </View>
+            ) : (
+              <View className="items-center justify-center py-16 px-6">
+                <View className="w-20 h-20 rounded-2xl bg-surface items-center justify-center mb-4">
+                  <Text className="text-4xl">🔗</Text>
+                </View>
+                <Text className="text-textPrimary font-semibold text-lg text-center mb-2">
+                  Pas encore de connexions
+                </Text>
+                <Text className="text-textMuted text-center">
+                  Ajoutez plus d'informations sur vos contacts pour découvrir leurs points communs !
+                </Text>
+              </View>
+            )}
+
+            {clusterData.unconnected.length > 0 && (
+              <View className="mt-4">
+                <Text className="text-lg font-semibold text-textPrimary mb-4">
+                  Sans groupe ({clusterData.unconnected.length})
+                </Text>
+                <View className="bg-surface rounded-2xl p-4">
+                  <View className="flex-row flex-wrap" style={{ gap: 10 }}>
+                    {clusterData.unconnected.map((contact) => (
+                      <Pressable
+                        key={contact.id}
+                        onPress={() => handleUnconnectedPress(contact)}
+                        className="flex-row items-center bg-background rounded-xl px-4 py-3"
+                      >
+                        <View className="w-8 h-8 rounded-full bg-zinc-700 items-center justify-center mr-3">
+                          <User size={14} color="#9CA3AF" />
+                        </View>
+                        <Text className="text-textPrimary font-medium">
+                          {contact.firstName}
+                          {contact.lastName ? ` ${contact.lastName}` : ''}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                </View>
+              </View>
+            )}
+          </>
+        ) : null}
+      </ScrollView>
+    </View>
   );
 }

@@ -12,6 +12,7 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^2.0.56",
     "@ai-sdk/google": "^2.0.46",
     "@anthropic-ai/sdk": "^0.24.0",
     "@deepgram/sdk": "^3.5.0",
