@@ -19,7 +19,12 @@ app.use('*', logger());
 app.use(
   '*',
   cors({
-    origin: ['recall-people://', 'http://localhost:8081', 'http://192.168.1.12:8081'],
+    origin: [
+      'recall-people://',
+      'http://localhost:8081',
+      'http://192.168.1.12:8081',
+      'http://172.17.14.198:8081',
+    ],
     credentials: true,
   })
 );
