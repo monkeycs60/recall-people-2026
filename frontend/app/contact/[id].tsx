@@ -1,22 +1,23 @@
-import { View, Text, ScrollView, Pressable, TextInput, Alert, Modal } from 'react-native';
-import { useState, useEffect, useCallback } from 'react';
+import { View, Text, ScrollView, Pressable, TextInput, Alert } from 'react-native';
+import { useState, useCallback } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useContacts } from '@/hooks/useContacts';
 import { ContactWithDetails, Fact } from '@/types';
 import { factService } from '@/services/fact.service';
-import { Edit3, Trash2, Plus, ChevronDown, ChevronUp, X, Check } from 'lucide-react-native';
+import { hotTopicService } from '@/services/hot-topic.service';
+import { noteService } from '@/services/note.service';
+import { Edit3 } from 'lucide-react-native';
+import { AISummary } from '@/components/contact/AISummary';
+import { ProfileCard } from '@/components/contact/ProfileCard';
+import { HotTopicsList } from '@/components/contact/HotTopicsList';
+import { TranscriptionArchive } from '@/components/contact/TranscriptionArchive';
 
 type EditingFact = {
   id: string;
   factKey: string;
   factValue: string;
-};
-
-type EditingHighlight = {
-  index: number;
-  value: string;
 };
 
 export default function ContactDetailScreen() {
@@ -31,13 +32,7 @@ export default function ContactDetailScreen() {
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedFirstName, setEditedFirstName] = useState('');
   const [editedLastName, setEditedLastName] = useState('');
-
   const [editingFact, setEditingFact] = useState<EditingFact | null>(null);
-  const [expandedFactId, setExpandedFactId] = useState<string | null>(null);
-
-  const [editingHighlight, setEditingHighlight] = useState<EditingHighlight | null>(null);
-  const [newHighlight, setNewHighlight] = useState('');
-  const [isAddingHighlight, setIsAddingHighlight] = useState(false);
 
   const loadContact = useCallback(async () => {
     const loaded = await getContactById(contactId);
@@ -84,6 +79,14 @@ export default function ContactDetailScreen() {
     setIsEditingName(false);
   };
 
+  const handleEditFact = (fact: Fact) => {
+    setEditingFact({
+      id: fact.id,
+      factKey: fact.factKey,
+      factValue: fact.factValue,
+    });
+  };
+
   const handleSaveFact = async () => {
     if (!editingFact) return;
     await factService.update(editingFact.id, {
@@ -112,42 +115,29 @@ export default function ContactDetailScreen() {
     );
   };
 
-  const handleAddHighlight = async () => {
-    if (!contact || !newHighlight.trim()) return;
-    const updatedHighlights = [...contact.highlights, newHighlight.trim()];
-    await updateContact(contact.id, { highlights: updatedHighlights });
+  const handleResolveHotTopic = async (id: string) => {
+    await hotTopicService.resolve(id);
     await loadContact();
-    setNewHighlight('');
-    setIsAddingHighlight(false);
   };
 
-  const handleSaveHighlight = async () => {
-    if (!contact || !editingHighlight || !editingHighlight.value.trim()) return;
-    const updatedHighlights = [...contact.highlights];
-    updatedHighlights[editingHighlight.index] = editingHighlight.value.trim();
-    await updateContact(contact.id, { highlights: updatedHighlights });
+  const handleReopenHotTopic = async (id: string) => {
+    await hotTopicService.reopen(id);
     await loadContact();
-    setEditingHighlight(null);
   };
 
-  const handleDeleteHighlight = (index: number) => {
-    if (!contact) return;
-    Alert.alert(
-      'Supprimer ce point',
-      'Êtes-vous sûr ?',
-      [
-        { text: 'Annuler', style: 'cancel' },
-        {
-          text: 'Supprimer',
-          style: 'destructive',
-          onPress: async () => {
-            const updatedHighlights = contact.highlights.filter((_, idx) => idx !== index);
-            await updateContact(contact.id, { highlights: updatedHighlights });
-            await loadContact();
-          },
-        },
-      ]
-    );
+  const handleDeleteHotTopic = async (id: string) => {
+    await hotTopicService.delete(id);
+    await loadContact();
+  };
+
+  const handleEditHotTopic = async (id: string, data: { title: string; context?: string }) => {
+    await hotTopicService.update(id, data);
+    await loadContact();
+  };
+
+  const handleDeleteNote = async (id: string) => {
+    await noteService.delete(id);
+    await loadContact();
   };
 
   if (!contact) {
@@ -208,7 +198,7 @@ export default function ContactDetailScreen() {
             onPress={() => setIsEditingName(true)}
           >
             <Text className="text-3xl font-bold text-textPrimary mr-3">
-              {contact.firstName} {contact.lastName || contact.nickname || ''}
+              {contact.firstName} {contact.lastName || ''}
             </Text>
             <Edit3 size={20} color="#9CA3AF" />
           </Pressable>
@@ -231,242 +221,68 @@ export default function ContactDetailScreen() {
         )}
       </View>
 
-      {/* Facts / Informations */}
-      {contact.facts.length > 0 && (
-        <View className="mb-6">
-          <Text className="text-xl font-semibold text-textPrimary mb-3">
-            Informations
-          </Text>
+      {/* AI Summary */}
+      <AISummary summary={contact.aiSummary} />
 
-          {contact.facts.map((fact) => (
-            <View key={fact.id} className="bg-surface rounded-lg mb-2 overflow-hidden">
-              {editingFact?.id === fact.id ? (
-                <View className="p-4">
-                  <TextInput
-                    className="bg-background py-2 px-3 rounded-lg text-textSecondary text-sm mb-2"
-                    value={editingFact.factKey}
-                    onChangeText={(value) => setEditingFact({ ...editingFact, factKey: value })}
-                    placeholder="Label"
-                    placeholderTextColor="#71717a"
-                  />
-                  <TextInput
-                    className="bg-background py-2 px-3 rounded-lg text-textPrimary mb-3"
-                    value={editingFact.factValue}
-                    onChangeText={(value) => setEditingFact({ ...editingFact, factValue: value })}
-                    placeholder="Valeur"
-                    placeholderTextColor="#71717a"
-                  />
-                  <View className="flex-row gap-2">
-                    <Pressable
-                      className="flex-1 py-2 rounded-lg bg-surfaceHover items-center"
-                      onPress={() => setEditingFact(null)}
-                    >
-                      <Text className="text-textSecondary">Annuler</Text>
-                    </Pressable>
-                    <Pressable
-                      className="flex-1 py-2 rounded-lg bg-primary items-center"
-                      onPress={handleSaveFact}
-                    >
-                      <Text className="text-white font-semibold">OK</Text>
-                    </Pressable>
-                  </View>
-                </View>
-              ) : (
-                <View>
-                  <Pressable
-                    className="p-4 flex-row items-start justify-between"
-                    onPress={() => setEditingFact({
-                      id: fact.id,
-                      factKey: fact.factKey,
-                      factValue: fact.factValue,
-                    })}
-                  >
-                    <View className="flex-1">
-                      <Text className="text-textSecondary text-sm">{fact.factKey}</Text>
-                      <Text className="text-textPrimary font-medium">{fact.factValue}</Text>
-                      {fact.previousValues.length > 0 && (
-                        <Pressable
-                          className="flex-row items-center mt-1"
-                          onPress={() => setExpandedFactId(
-                            expandedFactId === fact.id ? null : fact.id
-                          )}
-                        >
-                          <Text className="text-textMuted text-xs mr-1">
-                            {fact.previousValues.length} ancien{fact.previousValues.length > 1 ? 's' : ''}
-                          </Text>
-                          {expandedFactId === fact.id ? (
-                            <ChevronUp size={12} color="#71717a" />
-                          ) : (
-                            <ChevronDown size={12} color="#71717a" />
-                          )}
-                        </Pressable>
-                      )}
-                    </View>
-                    <Pressable
-                      className="p-2"
-                      onPress={() => handleDeleteFact(fact)}
-                    >
-                      <Trash2 size={18} color="#EF4444" />
-                    </Pressable>
-                  </Pressable>
-
-                  {expandedFactId === fact.id && fact.previousValues.length > 0 && (
-                    <View className="px-4 pb-4 pt-0">
-                      {fact.previousValues.map((prevValue, idx) => (
-                        <View key={idx} className="flex-row items-center mt-1">
-                          <View className="w-2 h-2 rounded-full bg-textMuted mr-2" />
-                          <Text className="text-textMuted text-sm line-through">
-                            {prevValue}
-                          </Text>
-                        </View>
-                      ))}
-                    </View>
-                  )}
-                </View>
-              )}
-            </View>
-          ))}
-        </View>
-      )}
-
-      {/* Highlights / Bullet points */}
+      {/* Profile Section */}
       <View className="mb-6">
-        <View className="flex-row items-center justify-between mb-3">
-          <Text className="text-xl font-semibold text-textPrimary">
-            Points clés
-          </Text>
-          <Pressable
-            className="p-2"
-            onPress={() => setIsAddingHighlight(true)}
-          >
-            <Plus size={20} color="#8B5CF6" />
-          </Pressable>
-        </View>
-
-        {isAddingHighlight && (
+        <Text className="text-xl font-semibold text-textPrimary mb-3">Profil</Text>
+        {editingFact ? (
           <View className="bg-surface p-4 rounded-lg mb-3">
             <TextInput
-              className="bg-background py-3 px-4 rounded-lg text-textPrimary mb-3"
-              value={newHighlight}
-              onChangeText={setNewHighlight}
-              placeholder="Nouveau point clé..."
+              className="bg-background py-2 px-3 rounded-lg text-textSecondary text-sm mb-2"
+              value={editingFact.factKey}
+              onChangeText={(value) => setEditingFact({ ...editingFact, factKey: value })}
+              placeholder="Label"
               placeholderTextColor="#71717a"
-              multiline
-              autoFocus
+            />
+            <TextInput
+              className="bg-background py-2 px-3 rounded-lg text-textPrimary mb-3"
+              value={editingFact.factValue}
+              onChangeText={(value) => setEditingFact({ ...editingFact, factValue: value })}
+              placeholder="Valeur"
+              placeholderTextColor="#71717a"
             />
             <View className="flex-row gap-2">
               <Pressable
                 className="flex-1 py-2 rounded-lg bg-surfaceHover items-center"
-                onPress={() => {
-                  setIsAddingHighlight(false);
-                  setNewHighlight('');
-                }}
+                onPress={() => setEditingFact(null)}
               >
                 <Text className="text-textSecondary">Annuler</Text>
               </Pressable>
               <Pressable
                 className="flex-1 py-2 rounded-lg bg-primary items-center"
-                onPress={handleAddHighlight}
+                onPress={handleSaveFact}
               >
-                <Text className="text-white font-semibold">Ajouter</Text>
+                <Text className="text-white font-semibold">OK</Text>
               </Pressable>
             </View>
           </View>
-        )}
-
-        {/* Auto-generated highlights from facts if no manual highlights */}
-        {contact.highlights.length === 0 && !isAddingHighlight && (
-          <>
-            {contact.facts.filter((fact) =>
-              ['hobby', 'sport', 'work', 'company', 'location'].includes(fact.factType)
-            ).length > 0 ? (
-              contact.facts
-                .filter((fact) => ['hobby', 'sport', 'work', 'company', 'location'].includes(fact.factType))
-                .slice(0, 4)
-                .map((fact, index) => (
-                  <View key={`auto-${index}`} className="bg-surface/50 rounded-lg mb-2 p-4 flex-row items-center">
-                    <Text className="text-primary/70 mr-3">•</Text>
-                    <Text className="text-textSecondary flex-1">
-                      {fact.factKey}: {fact.factValue}
-                    </Text>
-                  </View>
-                ))
-            ) : (
-              <View className="bg-surface/50 p-4 rounded-lg border border-dashed border-surfaceHover">
-                <Text className="text-textMuted text-center">
-                  Ajoutez des points clés manuellement
-                </Text>
-              </View>
-            )}
-          </>
-        )}
-
-        {contact.highlights.length > 0 && (
-          contact.highlights.map((highlight, index) => (
-            <View key={index} className="bg-surface rounded-lg mb-2 overflow-hidden">
-              {editingHighlight?.index === index ? (
-                <View className="p-4">
-                  <TextInput
-                    className="bg-background py-3 px-4 rounded-lg text-textPrimary mb-3"
-                    value={editingHighlight.value}
-                    onChangeText={(value) => setEditingHighlight({ ...editingHighlight, value })}
-                    multiline
-                    autoFocus
-                  />
-                  <View className="flex-row gap-2">
-                    <Pressable
-                      className="flex-1 py-2 rounded-lg bg-surfaceHover items-center"
-                      onPress={() => setEditingHighlight(null)}
-                    >
-                      <Text className="text-textSecondary">Annuler</Text>
-                    </Pressable>
-                    <Pressable
-                      className="flex-1 py-2 rounded-lg bg-primary items-center"
-                      onPress={handleSaveHighlight}
-                    >
-                      <Text className="text-white font-semibold">OK</Text>
-                    </Pressable>
-                  </View>
-                </View>
-              ) : (
-                <Pressable
-                  className="p-4 flex-row items-start"
-                  onPress={() => setEditingHighlight({ index, value: highlight })}
-                >
-                  <Text className="text-primary mr-3">•</Text>
-                  <Text className="text-textPrimary flex-1">{highlight}</Text>
-                  <Pressable
-                    className="p-1"
-                    onPress={() => handleDeleteHighlight(index)}
-                  >
-                    <Trash2 size={16} color="#EF4444" />
-                  </Pressable>
-                </Pressable>
-              )}
-            </View>
-          ))
+        ) : (
+          <ProfileCard
+            facts={contact.facts}
+            onEditFact={handleEditFact}
+            onDeleteFact={handleDeleteFact}
+          />
         )}
       </View>
 
-      {/* Notes */}
-      {contact.notes.length > 0 && (
-        <View className="mb-6">
-          <Text className="text-xl font-semibold text-textPrimary mb-3">
-            Notes ({contact.notes.length})
-          </Text>
+      {/* Hot Topics Section */}
+      <View className="mb-6">
+        <Text className="text-xl font-semibold text-textPrimary mb-3">Sujets chauds</Text>
+        <HotTopicsList
+          hotTopics={contact.hotTopics}
+          onResolve={handleResolveHotTopic}
+          onReopen={handleReopenHotTopic}
+          onDelete={handleDeleteHotTopic}
+          onEdit={handleEditHotTopic}
+        />
+      </View>
 
-          {contact.notes.map((note) => (
-            <View key={note.id} className="bg-surface p-4 rounded-lg mb-3">
-              {note.summary && (
-                <Text className="text-textPrimary mb-2">{note.summary}</Text>
-              )}
-              <Text className="text-textMuted text-xs">
-                {new Date(note.createdAt).toLocaleDateString()}
-              </Text>
-            </View>
-          ))}
-        </View>
-      )}
+      {/* Transcriptions Archive */}
+      <View className="mb-6">
+        <TranscriptionArchive notes={contact.notes} onDelete={handleDeleteNote} />
+      </View>
 
       {/* Delete button */}
       <Pressable
