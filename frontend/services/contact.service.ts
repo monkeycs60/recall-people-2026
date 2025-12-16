@@ -65,6 +65,7 @@ export const contactService = {
     const notesRows = await db.getAllAsync<{
       id: string;
       contact_id: string;
+      title: string | null;
       audio_uri: string | null;
       audio_duration_ms: number | null;
       transcription: string | null;
@@ -110,6 +111,7 @@ export const contactService = {
       notes: notesRows.map((row) => ({
         id: row.id,
         contactId: row.contact_id,
+        title: row.title || undefined,
         audioUri: row.audio_uri || undefined,
         audioDurationMs: row.audio_duration_ms || undefined,
         transcription: row.transcription || undefined,
