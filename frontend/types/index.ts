@@ -5,17 +5,27 @@
 export type Tag = 'client' | 'prospect' | 'ami' | 'famille' | 'collegue' | 'autre';
 
 export type FactType =
-  | 'work'        // Poste, métier, profession
-  | 'company'     // Entreprise, société
-  | 'hobby'       // Loisirs, passions
-  | 'sport'       // Sports pratiqués
-  | 'relationship'// Relations (fils, fille, frère, ami, collègue)
-  | 'partner'     // Conjoint, compagnon, femme, mari
-  | 'location'    // Ville, pays, adresse
-  | 'education'   // École, diplôme, formation
-  | 'birthday'    // Date d'anniversaire
+  | 'work'        // Métier
+  | 'company'     // Entreprise
+  | 'education'   // Formation
+  | 'location'    // Lieu de vie
+  | 'origin'      // Origine / Nationalité
+  | 'partner'     // Conjoint
+  | 'children'    // Enfants
+  | 'hobby'       // Loisirs
+  | 'sport'       // Sports
+  | 'language'    // Langues parlées
+  | 'pet'         // Animaux
+  | 'birthday'    // Anniversaire
+  | 'how_met'     // Comment connu
+  | 'where_met'   // Lieu de rencontre
+  | 'shared_ref'  // Références communes
+  | 'trait'       // Signe distinctif
+  | 'gift_idea'   // Idées cadeaux
+  | 'gift_given'  // Cadeaux faits
   | 'contact'     // Téléphone, email
-  | 'other';      // Autres infos importantes structurées
+  | 'relationship'// Relations familiales (legacy)
+  | 'other';
 
 export type FactAction = 'add' | 'update';
 
@@ -24,6 +34,8 @@ export type PendingFactStatus = 'pending' | 'applied' | 'rejected';
 export type RecordingState = 'idle' | 'recording' | 'processing' | 'reviewing';
 
 export type Confidence = 'high' | 'medium' | 'low';
+
+export type HotTopicStatus = 'active' | 'resolved';
 
 // ============================================
 // Entités principales
@@ -37,6 +49,7 @@ export type Contact = {
   photoUri?: string;
   tags: Tag[];
   highlights: string[];
+  aiSummary?: string;
   lastContactAt?: string;
   createdAt: string;
   updatedAt: string;
@@ -57,6 +70,7 @@ export type Fact = {
 export type Note = {
   id: string;
   contactId: string;
+  title?: string;
   audioUri?: string;
   audioDurationMs?: number;
   transcription?: string;
@@ -75,6 +89,18 @@ export type PendingFact = {
   previousValue?: string;
   status: PendingFactStatus;
   createdAt: string;
+};
+
+export type HotTopic = {
+  id: string;
+  contactId: string;
+  title: string;
+  context?: string;
+  status: HotTopicStatus;
+  sourceNoteId?: string;
+  createdAt: string;
+  updatedAt: string;
+  resolvedAt?: string;
 };
 
 // ============================================
@@ -113,6 +139,7 @@ export type ExtractionResult = {
 export type ContactWithDetails = Contact & {
   facts: Fact[];
   notes: Note[];
+  hotTopics: HotTopic[];
 };
 
 export type DisambiguationOption = {
