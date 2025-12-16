@@ -39,33 +39,28 @@ const extractionSchema = z.object({
     lastName: z.string().nullable().describe('Nom de famille si mentionné'),
     confidence: z.enum(['high', 'medium', 'low']),
   }),
+  noteTitle: z.string().describe('Titre court de 2-4 mots résumant le contexte de la note (ex: "Café rattrapage", "Soirée Marc", "Appel pro")'),
   facts: z.array(
     z.object({
       factType: z.enum([
-        'work',
-        'company',
-        'hobby',
-        'sport',
-        'relationship',
-        'partner',
-        'location',
-        'education',
-        'birthday',
-        'contact',
-        'other',
+        'work', 'company', 'education', 'location', 'origin', 'partner',
+        'children', 'hobby', 'sport', 'language', 'pet', 'birthday',
+        'how_met', 'where_met', 'shared_ref', 'trait', 'gift_idea',
+        'gift_given', 'contact', 'relationship', 'other',
       ]),
-      factKey: z.string().describe('Label lisible en français (ex: Poste, Tennis, Fils)'),
+      factKey: z.string().describe('Label lisible en français'),
       factValue: z.string().describe('La valeur extraite'),
       action: z.enum(['add', 'update']),
       previousValue: z.string().nullable(),
     })
   ),
-  noteBlocks: z.array(
+  hotTopics: z.array(
     z.object({
-      content: z.string().describe('Résumé court de cette information/anecdote'),
-      eventDate: z.string().nullable().describe('Date de l\'événement si mentionnée (format: YYYY-MM-DD ou description relative)'),
+      title: z.string().describe('Titre court du sujet (ex: "Examen de droit", "Recherche appart")'),
+      context: z.string().describe('1-2 phrases de contexte'),
+      resolvesExisting: z.string().nullable().describe('Titre du sujet existant que cette info résout, si applicable'),
     })
-  ).describe('Anecdotes, événements, et informations contextuelles qui ne sont pas des facts structurés'),
+  ).describe('Sujets temporels/actionnables: projets en cours, événements à venir, situations à suivre'),
 });
 
 export const extractRoutes = new Hono<{ Bindings: Bindings }>();
@@ -126,12 +121,14 @@ extractRoutes.post('/', async (c) => {
         suggestedMatches,
         suggestedNickname,
       },
+      noteTitle: extraction.noteTitle,
       facts: extraction.facts,
+      hotTopics: extraction.hotTopics,
       note: {
-        summary: extraction.noteBlocks.length > 0
-          ? extraction.noteBlocks.map((block) => block.content).join(' ')
+        summary: extraction.hotTopics.length > 0
+          ? extraction.hotTopics.map((topic) => topic.context).join(' ')
           : 'Note vocale enregistrée.',
-        keyPoints: extraction.noteBlocks.map((block) => block.content),
+        keyPoints: extraction.hotTopics.map((topic) => topic.title),
       },
     };
 
@@ -167,38 +164,46 @@ TRANSCRIPTION DE LA NOTE VOCALE:
 RÈGLES D'EXTRACTION:
 
 1. IDENTIFICATION DU CONTACT:
-   - Extrais le prénom COMPLET de la personne mentionnée (ex: "Jean-Luc", "Marie-Claire", "Pierre-Antoine")
-   - Les prénoms composés avec trait d'union sont UN SEUL prénom (Jean-Luc = prénom, pas Jean = prénom + Luc = nom)
-   - Extrais le nom de famille SEULEMENT s'il est explicitement mentionné comme tel
+   - Extrais le prénom COMPLET (Jean-Luc = UN prénom)
+   - Nom de famille SEULEMENT si explicitement mentionné
 
-2. FACTS (Informations structurées PERMANENTES à afficher sur le profil):
+2. TITRE DE LA NOTE:
+   - Génère un titre court (2-4 mots) décrivant le contexte
+   - Exemples: "Café rattrapage", "Après soirée Marc", "Appel pro", "Déjeuner networking"
+
+3. FACTS (Profil permanent - infos stables):
    Catégories:
-   - work: métier, poste, profession (factKey="Poste", factValue="Développeur")
-   - company: entreprise, société (factKey="Entreprise", factValue="Google")
-   - hobby: loisirs, passions, activités régulières (factKey="Loisir", factValue="Yoga" ou "Méditation" ou "Lecture" ou "Jardinage")
-   - sport: sports pratiqués régulièrement (factKey="Sport", factValue="Tennis" ou "Running" ou "Natation")
-   - relationship: liens familiaux/sociaux (factKey="Fils", factValue="Thomas")
-   - partner: conjoint (factKey="Femme" ou "Mari" ou "Compagnon", factValue=prénom ou statut)
-   - location: lieu de vie (factKey="Ville", factValue="Paris")
-   - education: formation (factKey="École", factValue="HEC")
-   - birthday: anniversaire (factKey="Anniversaire", factValue="15 mars")
-   - contact: coordonnées (factKey="Téléphone" ou "Email", factValue=valeur)
-   - other: autre info structurée permanente
+   - work: métier/poste (factKey="Métier")
+   - company: entreprise (factKey="Entreprise")
+   - education: formation/école (factKey="Formation")
+   - location: lieu de vie (factKey="Ville")
+   - origin: nationalité/origine (factKey="Origine")
+   - partner: conjoint (factKey="Conjoint")
+   - children: enfants avec prénoms (factKey="Enfants")
+   - hobby: loisirs (factKey="Loisir")
+   - sport: sports (factKey="Sport")
+   - language: langues (factKey="Langue")
+   - pet: animaux (factKey="Animal")
+   - birthday: anniversaire (factKey="Anniversaire")
+   - how_met: comment connu (factKey="Rencontre")
+   - where_met: lieu de rencontre (factKey="Lieu rencontre")
+   - shared_ref: références communes/inside jokes (factKey="Référence")
+   - trait: signe distinctif (factKey="Trait")
+   - gift_idea: idées cadeaux (factKey="Idée cadeau")
+   - gift_given: cadeaux faits (factKey="Cadeau fait")
+   - contact: coordonnées (factKey="Contact")
 
-   IMPORTANT: Si quelqu'un "fait du yoga", "pratique la méditation", "aime lire" → C'EST UN FACT (hobby), PAS un noteBlock !
+4. HOT TOPICS (Sujets chauds - temporaires/actionnables):
+   - Projets en cours: "Cherche un appart", "Prépare un examen"
+   - Événements à suivre: "Mariage prévu en juin"
+   - Situations: "Problème au travail", "En recherche d'emploi"
 
-3. NOTEBLOCKS (Événements et anecdotes TEMPORAIRES):
-   Ce qui va dans noteBlocks (PAS dans facts):
-   - Événements: "Sa femme est décédée hier"
-   - Anecdotes: "Rencontré au supermarché"
-   - Projets: "Cherche un nouveau travail"
-   - Contexte: "A eu une promotion récemment"
-
-   Chaque bloc = 1 phrase courte. Sépare les infos différentes.
+   Si la note RÉSOUT un sujet existant (ex: "Il a eu son examen"),
+   indique dans resolvesExisting le titre du sujet clos.
 
 RÈGLES:
-- N'extrais QUE ce qui est EXPLICITEMENT dit
-- facts = infos PERMANENTES (métier, sport pratiqué, famille)
-- noteBlocks = événements TEMPORAIRES/anecdotes
-- action="add" pour nouvelle info, "update" si modification`;
+- facts = infos PERMANENTES du profil
+- hotTopics = situations TEMPORAIRES à suivre
+- N'extrais QUE ce qui est EXPLICITEMENT mentionné
+- action="add" pour nouvelle info, "update" si modification d'un fact existant`;
 };
