@@ -42,6 +42,7 @@ export const contactService = {
       photo_uri: string | null;
       tags: string;
       highlights: string | null;
+      ai_summary: string | null;
       last_contact_at: string | null;
       created_at: string;
       updated_at: string;
@@ -71,6 +72,18 @@ export const contactService = {
       created_at: string;
     }>('SELECT * FROM notes WHERE contact_id = ? ORDER BY created_at DESC', [id]);
 
+    const hotTopicsRows = await db.getAllAsync<{
+      id: string;
+      contact_id: string;
+      title: string;
+      context: string | null;
+      status: string;
+      source_note_id: string | null;
+      created_at: string;
+      updated_at: string;
+      resolved_at: string | null;
+    }>('SELECT * FROM hot_topics WHERE contact_id = ? ORDER BY created_at DESC', [id]);
+
     const contact: ContactWithDetails = {
       id: contactRow.id,
       firstName: contactRow.first_name,
@@ -79,6 +92,7 @@ export const contactService = {
       photoUri: contactRow.photo_uri || undefined,
       tags: JSON.parse(contactRow.tags),
       highlights: JSON.parse(contactRow.highlights || '[]'),
+      aiSummary: contactRow.ai_summary || undefined,
       lastContactAt: contactRow.last_contact_at || undefined,
       createdAt: contactRow.created_at,
       updatedAt: contactRow.updated_at,
@@ -101,6 +115,17 @@ export const contactService = {
         transcription: row.transcription || undefined,
         summary: row.summary || undefined,
         createdAt: row.created_at,
+      })),
+      hotTopics: hotTopicsRows.map((row) => ({
+        id: row.id,
+        contactId: row.contact_id,
+        title: row.title,
+        context: row.context || undefined,
+        status: row.status as 'active' | 'resolved',
+        sourceNoteId: row.source_note_id || undefined,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        resolvedAt: row.resolved_at || undefined,
       })),
     };
 
@@ -152,6 +177,7 @@ export const contactService = {
       nickname: string;
       tags: string[];
       highlights: string[];
+      aiSummary: string;
       lastContactAt: string;
     }>
   ): Promise<void> => {
@@ -178,6 +204,10 @@ export const contactService = {
     if (data.highlights !== undefined) {
       updates.push('highlights = ?');
       values.push(JSON.stringify(data.highlights));
+    }
+    if (data.aiSummary !== undefined) {
+      updates.push('ai_summary = ?');
+      values.push(data.aiSummary || null);
     }
     if (data.lastContactAt) {
       updates.push('last_contact_at = ?');
