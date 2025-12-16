@@ -8,6 +8,7 @@ export const useNotes = () => {
 
   const createNote = async (data: {
     contactId: string;
+    title?: string;
     audioUri?: string;
     audioDurationMs?: number;
     transcription?: string;

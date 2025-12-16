@@ -10,6 +10,14 @@ import {
   GraduationCap,
   Phone,
   CircleDot,
+  Globe,
+  Baby,
+  Languages,
+  PawPrint,
+  UserPlus,
+  Quote,
+  Fingerprint,
+  Gift,
 } from 'lucide-react-native';
 import { FactType } from '@/types';
 
@@ -24,6 +32,16 @@ export const factIcons: Record<FactType, typeof Briefcase> = {
   education: GraduationCap,
   birthday: Cake,
   contact: Phone,
+  origin: Globe,
+  children: Baby,
+  language: Languages,
+  pet: PawPrint,
+  how_met: UserPlus,
+  where_met: MapPin,
+  shared_ref: Quote,
+  trait: Fingerprint,
+  gift_idea: Gift,
+  gift_given: Gift,
   other: CircleDot,
 };
 
@@ -38,5 +56,15 @@ export const factLabels: Record<FactType, string> = {
   education: 'Formation',
   birthday: 'Anniversaire',
   contact: 'Contact',
+  origin: 'Origine',
+  children: 'Enfants',
+  language: 'Langue',
+  pet: 'Animal',
+  how_met: 'Comment connu',
+  where_met: 'Lieu de rencontre',
+  shared_ref: 'Référence commune',
+  trait: 'Trait distinctif',
+  gift_idea: 'Idée cadeau',
+  gift_given: 'Cadeau offert',
   other: 'Autre',
 };

@@ -17,6 +17,16 @@ const FACT_TYPE_CONFIG: Record<FactType, { color: string; emoji: string; prefix:
   partner: { color: '#ec4899', emoji: '💑', prefix: 'Conjoint :' },
   birthday: { color: '#f97316', emoji: '🎂', prefix: 'Anniversaire' },
   contact: { color: '#64748b', emoji: '📞', prefix: 'Contact' },
+  origin: { color: '#10b981', emoji: '🌍', prefix: 'Origine :' },
+  children: { color: '#f59e0b', emoji: '👶', prefix: 'Enfants :' },
+  language: { color: '#3b82f6', emoji: '🗣️', prefix: 'Parlent' },
+  pet: { color: '#8b5cf6', emoji: '🐾', prefix: 'Animaux :' },
+  how_met: { color: '#06b6d4', emoji: '🤝', prefix: 'Rencontrés via' },
+  where_met: { color: '#ec4899', emoji: '📍', prefix: 'Rencontrés à' },
+  shared_ref: { color: '#f97316', emoji: '💬', prefix: 'Référence :' },
+  trait: { color: '#64748b', emoji: '✨', prefix: 'Trait :' },
+  gift_idea: { color: '#10b981', emoji: '🎁', prefix: 'Idée cadeau :' },
+  gift_given: { color: '#ef4444', emoji: '🎁', prefix: 'Cadeau offert :' },
   other: { color: '#6b7280', emoji: '📌', prefix: '' },
 };
 
