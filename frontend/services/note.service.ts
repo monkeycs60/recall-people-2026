@@ -8,6 +8,7 @@ export const noteService = {
     const result = await db.getAllAsync<{
       id: string;
       contact_id: string;
+      title: string | null;
       audio_uri: string | null;
       audio_duration_ms: number | null;
       transcription: string | null;
@@ -18,6 +19,7 @@ export const noteService = {
     return result.map((row) => ({
       id: row.id,
       contactId: row.contact_id,
+      title: row.title || undefined,
       audioUri: row.audio_uri || undefined,
       audioDurationMs: row.audio_duration_ms || undefined,
       transcription: row.transcription || undefined,
@@ -28,6 +30,7 @@ export const noteService = {
 
   create: async (data: {
     contactId: string;
+    title?: string;
     audioUri?: string;
     audioDurationMs?: number;
     transcription?: string;
@@ -38,11 +41,12 @@ export const noteService = {
     const now = new Date().toISOString();
 
     await db.runAsync(
-      `INSERT INTO notes (id, contact_id, audio_uri, audio_duration_ms, transcription, summary, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO notes (id, contact_id, title, audio_uri, audio_duration_ms, transcription, summary, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         data.contactId,
+        data.title || null,
         data.audioUri || null,
         data.audioDurationMs || null,
         data.transcription || null,
@@ -54,6 +58,7 @@ export const noteService = {
     return {
       id,
       contactId: data.contactId,
+      title: data.title,
       audioUri: data.audioUri,
       audioDurationMs: data.audioDurationMs,
       transcription: data.transcription,
