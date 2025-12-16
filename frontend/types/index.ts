@@ -115,6 +115,12 @@ export type ExtractedFact = {
   previousValue?: string;
 };
 
+export type ExtractedHotTopic = {
+  title: string;
+  context: string;
+  resolvesExisting?: string;
+};
+
 export type ExtractionResult = {
   contactIdentified: {
     id: string | null;
@@ -125,7 +131,9 @@ export type ExtractionResult = {
     suggestedMatches?: string[];
     suggestedNickname?: string;
   };
+  noteTitle: string;
   facts: ExtractedFact[];
+  hotTopics: ExtractedHotTopic[];
   note: {
     summary: string;
     keyPoints: string[];

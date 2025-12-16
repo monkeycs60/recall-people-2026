@@ -6,6 +6,7 @@ import { ExtractionResult } from '@/types';
 import { useContacts } from '@/hooks/useContacts';
 import { useNotes } from '@/hooks/useNotes';
 import { factService } from '@/services/fact.service';
+import { hotTopicService } from '@/services/hot-topic.service';
 import { useAppStore } from '@/stores/app-store';
 
 export default function ReviewScreen() {
@@ -50,6 +51,7 @@ export default function ReviewScreen() {
 
       const note = await createNote({
         contactId: finalContactId,
+        title: extraction.noteTitle,
         audioUri,
         transcription,
         summary: extraction.note.summary,
@@ -75,6 +77,18 @@ export default function ReviewScreen() {
             factType: fact.factType,
             factKey: fact.factKey,
             factValue: fact.factValue,
+            sourceNoteId: note.id,
+          });
+        }
+      }
+
+      // Save hot topics
+      if (extraction.hotTopics && extraction.hotTopics.length > 0) {
+        for (const topic of extraction.hotTopics) {
+          await hotTopicService.create({
+            contactId: finalContactId,
+            title: topic.title,
+            context: topic.context,
             sourceNoteId: note.id,
           });
         }
