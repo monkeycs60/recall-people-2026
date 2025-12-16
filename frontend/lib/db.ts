@@ -26,6 +26,7 @@ export const initDatabase = async () => {
       photo_uri TEXT,
       tags TEXT DEFAULT '[]',
       highlights TEXT DEFAULT '[]',
+      ai_summary TEXT,
       last_contact_at TEXT,
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now'))
@@ -49,6 +50,7 @@ export const initDatabase = async () => {
     CREATE TABLE IF NOT EXISTS notes (
       id TEXT PRIMARY KEY,
       contact_id TEXT NOT NULL,
+      title TEXT,
       audio_uri TEXT,
       audio_duration_ms INTEGER,
       transcription TEXT,
@@ -84,12 +86,28 @@ export const initDatabase = async () => {
       expires_at TEXT NOT NULL
     );
 
+    -- Hot Topics (sujets chauds)
+    CREATE TABLE IF NOT EXISTS hot_topics (
+      id TEXT PRIMARY KEY,
+      contact_id TEXT NOT NULL,
+      title TEXT NOT NULL,
+      context TEXT,
+      status TEXT DEFAULT 'active',
+      source_note_id TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now')),
+      resolved_at TEXT,
+      FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE CASCADE
+    );
+
     -- Index
     CREATE INDEX IF NOT EXISTS idx_contacts_last_contact ON contacts(last_contact_at DESC);
     CREATE INDEX IF NOT EXISTS idx_facts_contact ON facts(contact_id);
     CREATE INDEX IF NOT EXISTS idx_notes_contact ON notes(contact_id);
     CREATE INDEX IF NOT EXISTS idx_notes_created ON notes(created_at DESC);
     CREATE INDEX IF NOT EXISTS idx_similarity_lookup ON similarity_cache(fact_type, fact_value_1, fact_value_2);
+    CREATE INDEX IF NOT EXISTS idx_hot_topics_contact ON hot_topics(contact_id);
+    CREATE INDEX IF NOT EXISTS idx_hot_topics_status ON hot_topics(status);
   `);
 
   // Run migrations for existing databases
@@ -114,4 +132,37 @@ const runMigrations = async (database: SQLite.SQLiteDatabase) => {
   if (!hasPreviousValues) {
     await database.execAsync("ALTER TABLE facts ADD COLUMN previous_values TEXT DEFAULT '[]'");
   }
+
+  // Check if title column exists on notes
+  const notesInfo = await database.getAllAsync<{ name: string }>(
+    "PRAGMA table_info(notes)"
+  );
+  const hasTitle = notesInfo.some((col) => col.name === 'title');
+  if (!hasTitle) {
+    await database.execAsync("ALTER TABLE notes ADD COLUMN title TEXT");
+  }
+
+  // Check if ai_summary column exists on contacts
+  const hasAiSummary = contactsInfo.some((col) => col.name === 'ai_summary');
+  if (!hasAiSummary) {
+    await database.execAsync("ALTER TABLE contacts ADD COLUMN ai_summary TEXT");
+  }
+
+  // Create hot_topics table if not exists
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS hot_topics (
+      id TEXT PRIMARY KEY,
+      contact_id TEXT NOT NULL,
+      title TEXT NOT NULL,
+      context TEXT,
+      status TEXT DEFAULT 'active',
+      source_note_id TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now')),
+      resolved_at TEXT,
+      FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_hot_topics_contact ON hot_topics(contact_id);
+    CREATE INDEX IF NOT EXISTS idx_hot_topics_status ON hot_topics(status);
+  `);
 };
