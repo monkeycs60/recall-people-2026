@@ -95,4 +95,30 @@ export const extractInfo = async (data: {
   });
 };
 
+export const generateSummary = async (data: {
+  contact: {
+    firstName: string;
+    lastName?: string;
+  };
+  facts: Array<{
+    factType: string;
+    factKey: string;
+    factValue: string;
+  }>;
+  hotTopics: Array<{
+    title: string;
+    context: string;
+    status: string;
+  }>;
+}): Promise<string> => {
+  const response = await apiCall<{ success: boolean; summary: string }>(
+    '/api/summary',
+    {
+      method: 'POST',
+      body: data,
+    }
+  );
+  return response.summary;
+};
+
 export { apiCall };

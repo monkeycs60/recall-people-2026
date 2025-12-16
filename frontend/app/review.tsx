@@ -7,6 +7,8 @@ import { useContacts } from '@/hooks/useContacts';
 import { useNotes } from '@/hooks/useNotes';
 import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
+import { contactService } from '@/services/contact.service';
+import { generateSummary } from '@/lib/api';
 import { useAppStore } from '@/stores/app-store';
 
 export default function ReviewScreen() {
@@ -97,6 +99,35 @@ export default function ReviewScreen() {
       await updateContact(finalContactId, {
         lastContactAt: new Date().toISOString(),
       });
+
+      // Generate AI summary in background (non-blocking)
+      const contactDetails = await contactService.getById(finalContactId);
+      if (contactDetails) {
+        generateSummary({
+          contact: {
+            firstName: contactDetails.firstName,
+            lastName: contactDetails.lastName,
+          },
+          facts: contactDetails.facts.map((fact) => ({
+            factType: fact.factType,
+            factKey: fact.factKey,
+            factValue: fact.factValue,
+          })),
+          hotTopics: contactDetails.hotTopics
+            .filter((topic) => topic.status === 'active')
+            .map((topic) => ({
+              title: topic.title,
+              context: topic.context || '',
+              status: topic.status,
+            })),
+        })
+          .then(async (summary) => {
+            await contactService.update(finalContactId, { aiSummary: summary });
+          })
+          .catch((error) => {
+            console.warn('Summary generation failed:', error);
+          });
+      }
 
       setRecordingState('idle');
       router.replace(`/contact/${finalContactId}`);
