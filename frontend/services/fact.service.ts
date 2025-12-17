@@ -155,4 +155,40 @@ export const factService = {
     const db = await getDatabase();
     await db.runAsync('DELETE FROM facts WHERE id = ?', [id]);
   },
+
+  findByTypeAndValue: async (
+    contactId: string,
+    factType: FactType,
+    factValue: string
+  ): Promise<Fact | null> => {
+    const db = await getDatabase();
+    const row = await db.getFirstAsync<{
+      id: string;
+      contact_id: string;
+      fact_type: string;
+      fact_key: string;
+      fact_value: string;
+      previous_values: string | null;
+      source_note_id: string | null;
+      created_at: string;
+      updated_at: string;
+    }>(
+      'SELECT * FROM facts WHERE contact_id = ? AND fact_type = ? AND LOWER(fact_value) = LOWER(?)',
+      [contactId, factType, factValue]
+    );
+
+    if (!row) return null;
+
+    return {
+      id: row.id,
+      contactId: row.contact_id,
+      factType: row.fact_type as FactType,
+      factKey: row.fact_key,
+      factValue: row.fact_value,
+      previousValues: JSON.parse(row.previous_values || '[]'),
+      sourceNoteId: row.source_note_id || undefined,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    };
+  },
 };

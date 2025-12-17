@@ -59,21 +59,30 @@ export default function ReviewScreen() {
         summary: extraction.note.summary,
       });
 
+      // Types cumulatifs : on ajoute sans écraser, sauf si même valeur existe déjà
+      const cumulativeTypes = [
+        'hobby', 'sport', 'children', 'language', 'pet',
+        'shared_ref', 'trait', 'gift_idea', 'gift_given'
+      ];
+
       for (const index of selectedFacts) {
         const fact = extraction.facts[index];
+        const isCumulative = cumulativeTypes.includes(fact.factType);
 
-        // Check if a similar fact already exists (same type and key)
-        const existingFact = await factService.findByTypeAndKey(
-          finalContactId,
-          fact.factType,
-          fact.factKey
-        );
+        if (isCumulative) {
+          // Pour les types cumulatifs : vérifier si la même VALEUR existe déjà
+          const existingWithSameValue = await factService.findByTypeAndValue(
+            finalContactId,
+            fact.factType,
+            fact.factValue
+          );
 
-        if (existingFact) {
-          // Update existing fact with history
-          await factService.updateWithHistory(existingFact.id, fact.factValue);
-        } else {
-          // Create new fact
+          if (existingWithSameValue) {
+            // Même valeur existe déjà → ne rien faire
+            continue;
+          }
+
+          // Valeur différente → créer un nouveau fact (pas d'update)
           await factService.create({
             contactId: finalContactId,
             factType: fact.factType,
@@ -81,6 +90,31 @@ export default function ReviewScreen() {
             factValue: fact.factValue,
             sourceNoteId: note.id,
           });
+        } else {
+          // Pour les types singuliers : chercher par type et key, puis update ou create
+          const existingFact = await factService.findByTypeAndKey(
+            finalContactId,
+            fact.factType,
+            fact.factKey
+          );
+
+          if (existingFact) {
+            // Même valeur → ne rien faire
+            if (existingFact.factValue.toLowerCase() === fact.factValue.toLowerCase()) {
+              continue;
+            }
+            // Valeur différente → update avec historique
+            await factService.updateWithHistory(existingFact.id, fact.factValue);
+          } else {
+            // Nouveau fact
+            await factService.create({
+              contactId: finalContactId,
+              factType: fact.factType,
+              factKey: fact.factKey,
+              factValue: fact.factValue,
+              sourceNoteId: note.id,
+            });
+          }
         }
       }
 
