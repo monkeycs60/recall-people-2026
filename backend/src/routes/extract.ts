@@ -164,8 +164,13 @@ TRANSCRIPTION DE LA NOTE VOCALE:
 RÈGLES D'EXTRACTION:
 
 1. IDENTIFICATION DU CONTACT:
-   - Extrais le prénom COMPLET (Jean-Luc = UN prénom)
-   - Nom de famille SEULEMENT si explicitement mentionné
+   - Extrais le prénom de la personne dont on parle dans la note
+   - ATTENTION: Le prénom doit être un VRAI prénom français ou international (Marie, Jean, Sophie, Mohamed, etc.)
+   - NE JAMAIS extraire de mots qui ne sont pas des prénoms ("si", "la", "le", "un", "elle", "il", "on", etc.)
+   - Les prénoms composés comptent comme UN prénom (Jean-Luc, Marie-Claire, Pierre-Antoine)
+   - Si aucun prénom clair n'est mentionné, utilise "Contact" comme placeholder
+   - Nom de famille SEULEMENT si explicitement mentionné comme tel
+   - En cas de doute entre plusieurs mots, choisis celui qui ressemble le plus à un prénom courant
 
 2. TITRE DE LA NOTE:
    - Génère un titre court (2-4 mots) décrivant le contexte

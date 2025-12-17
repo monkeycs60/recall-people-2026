@@ -224,6 +224,18 @@ export default function ContactDetailScreen() {
       {/* AI Summary */}
       <AISummary summary={contact.aiSummary} />
 
+      {/* Hot Topics Section - En premier pour l'actionnable */}
+      <View className="mb-6">
+        <Text className="text-xl font-semibold text-textPrimary mb-3">Sujets chauds</Text>
+        <HotTopicsList
+          hotTopics={contact.hotTopics}
+          onResolve={handleResolveHotTopic}
+          onReopen={handleReopenHotTopic}
+          onDelete={handleDeleteHotTopic}
+          onEdit={handleEditHotTopic}
+        />
+      </View>
+
       {/* Profile Section */}
       <View className="mb-6">
         <Text className="text-xl font-semibold text-textPrimary mb-3">Profil</Text>
@@ -265,18 +277,6 @@ export default function ContactDetailScreen() {
             onDeleteFact={handleDeleteFact}
           />
         )}
-      </View>
-
-      {/* Hot Topics Section */}
-      <View className="mb-6">
-        <Text className="text-xl font-semibold text-textPrimary mb-3">Sujets chauds</Text>
-        <HotTopicsList
-          hotTopics={contact.hotTopics}
-          onResolve={handleResolveHotTopic}
-          onReopen={handleReopenHotTopic}
-          onDelete={handleDeleteHotTopic}
-          onEdit={handleEditHotTopic}
-        />
       </View>
 
       {/* Transcriptions Archive */}

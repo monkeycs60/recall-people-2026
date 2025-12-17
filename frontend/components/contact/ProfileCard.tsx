@@ -33,25 +33,39 @@ const FACT_TYPE_CONFIG: Record<FactType, { label: string; priority: number; sing
   other: { label: 'Autre', priority: 99, singular: false },
 };
 
+type GroupedFacts = {
+  type: FactType;
+  config: { label: string; priority: number; singular: boolean };
+  facts: Fact[];
+};
+
 export function ProfileCard({ facts, onEditFact, onDeleteFact }: ProfileCardProps) {
-  const [expandedFactId, setExpandedFactId] = useState<string | null>(null);
+  const [expandedType, setExpandedType] = useState<FactType | null>(null);
 
-  const sortedFacts = [...facts].sort((factA, factB) => {
-    const configA = FACT_TYPE_CONFIG[factA.factType] || FACT_TYPE_CONFIG.other;
-    const configB = FACT_TYPE_CONFIG[factB.factType] || FACT_TYPE_CONFIG.other;
-    return configA.priority - configB.priority;
-  });
+  // Grouper les facts par type
+  const groupedByType = facts.reduce<Record<FactType, Fact[]>>((acc, fact) => {
+    if (!acc[fact.factType]) {
+      acc[fact.factType] = [];
+    }
+    acc[fact.factType].push(fact);
+    return acc;
+  }, {} as Record<FactType, Fact[]>);
 
-  const primaryFacts = sortedFacts.filter(
-    (fact) => ['work', 'company'].includes(fact.factType)
-  );
-  const secondaryFacts = sortedFacts.filter(
-    (fact) => !['work', 'company'].includes(fact.factType)
-  );
+  // Convertir en array et trier par priorité
+  const groups: GroupedFacts[] = Object.entries(groupedByType)
+    .map(([type, typeFacts]) => ({
+      type: type as FactType,
+      config: FACT_TYPE_CONFIG[type as FactType] || FACT_TYPE_CONFIG.other,
+      facts: typeFacts,
+    }))
+    .sort((groupA, groupB) => groupA.config.priority - groupB.config.priority);
 
-  const renderFact = (fact: Fact, isPrimary = false) => {
+  const primaryGroups = groups.filter((group) => ['work', 'company'].includes(group.type));
+  const secondaryGroups = groups.filter((group) => !['work', 'company'].includes(group.type));
+
+  const renderSingularFact = (fact: Fact, isPrimary = false) => {
     const config = FACT_TYPE_CONFIG[fact.factType] || FACT_TYPE_CONFIG.other;
-    const isExpanded = expandedFactId === fact.id;
+    const isExpanded = expandedType === fact.factType;
 
     return (
       <View
@@ -66,11 +80,11 @@ export function ProfileCard({ facts, onEditFact, onDeleteFact }: ProfileCardProp
             <Text className={`text-textPrimary ${isPrimary ? 'font-semibold text-lg' : 'font-medium'}`}>
               {fact.factValue}
             </Text>
-            <Text className="text-textSecondary text-xs mt-0.5">{fact.factKey}</Text>
+            <Text className="text-textSecondary text-xs mt-0.5">{config.label}</Text>
             {fact.previousValues.length > 0 && (
               <Pressable
                 className="flex-row items-center mt-1"
-                onPress={() => setExpandedFactId(isExpanded ? null : fact.id)}
+                onPress={() => setExpandedType(isExpanded ? null : fact.factType)}
               >
                 <Text className="text-textMuted text-xs mr-1">
                   {fact.previousValues.length} ancien{fact.previousValues.length > 1 ? 's' : ''}
@@ -102,6 +116,66 @@ export function ProfileCard({ facts, onEditFact, onDeleteFact }: ProfileCardProp
     );
   };
 
+  const renderCumulativeGroup = (group: GroupedFacts) => {
+    const isExpanded = expandedType === group.type;
+    const values = group.facts.map((fact) => fact.factValue);
+
+    return (
+      <View key={group.type} className="bg-surface rounded-lg overflow-hidden mb-2">
+        <View className="p-3">
+          <View className="flex-row items-start justify-between">
+            <View className="flex-1">
+              <Text className="text-textPrimary font-medium">
+                {values.join(', ')}
+              </Text>
+              <Pressable
+                className="flex-row items-center mt-1"
+                onPress={() => setExpandedType(isExpanded ? null : group.type)}
+              >
+                <Text className="text-textSecondary text-xs mr-1">
+                  {group.config.label} ({group.facts.length})
+                </Text>
+                {isExpanded ? (
+                  <ChevronUp size={12} color="#71717a" />
+                ) : (
+                  <ChevronDown size={12} color="#71717a" />
+                )}
+              </Pressable>
+            </View>
+          </View>
+        </View>
+
+        {isExpanded && (
+          <View className="px-3 pb-3 border-t border-surfaceHover pt-2">
+            {group.facts.map((fact) => (
+              <View key={fact.id} className="flex-row items-center justify-between py-1.5">
+                <View className="flex-row items-center flex-1">
+                  <Text className="text-primary mr-2">•</Text>
+                  <Pressable onPress={() => onEditFact(fact)} className="flex-1">
+                    <Text className="text-textPrimary">{fact.factValue}</Text>
+                  </Pressable>
+                </View>
+                <Pressable className="p-1" onPress={() => onDeleteFact(fact)}>
+                  <Trash2 size={14} color="#EF4444" />
+                </Pressable>
+              </View>
+            ))}
+          </View>
+        )}
+      </View>
+    );
+  };
+
+  const renderGroup = (group: GroupedFacts, isPrimary = false) => {
+    if (group.config.singular) {
+      // Pour les types singuliers, on affiche le premier fact (le plus récent)
+      return renderSingularFact(group.facts[0], isPrimary);
+    } else {
+      // Pour les types cumulatifs, on groupe dans une seule carte
+      return renderCumulativeGroup(group);
+    }
+  };
+
   if (facts.length === 0) {
     return (
       <View className="bg-surface/30 p-4 rounded-lg border border-dashed border-surfaceHover">
@@ -114,12 +188,12 @@ export function ProfileCard({ facts, onEditFact, onDeleteFact }: ProfileCardProp
 
   return (
     <View>
-      {primaryFacts.length > 0 && (
+      {primaryGroups.length > 0 && (
         <View className="flex-row gap-2 mb-3">
-          {primaryFacts.map((fact) => renderFact(fact, true))}
+          {primaryGroups.map((group) => renderGroup(group, true))}
         </View>
       )}
-      {secondaryFacts.map((fact) => renderFact(fact, false))}
+      {secondaryGroups.map((group) => renderGroup(group, false))}
     </View>
   );
 }
