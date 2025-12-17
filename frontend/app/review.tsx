@@ -1,8 +1,8 @@
 import { View, Text, ScrollView, Pressable } from 'react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ExtractionResult } from '@/types';
+import { ExtractionResult, HotTopic } from '@/types';
 import { useContacts } from '@/hooks/useContacts';
 import { useNotes } from '@/hooks/useNotes';
 import { factService } from '@/services/fact.service';
@@ -10,6 +10,7 @@ import { hotTopicService } from '@/services/hot-topic.service';
 import { contactService } from '@/services/contact.service';
 import { generateSummary } from '@/lib/api';
 import { useAppStore } from '@/stores/app-store';
+import { Archive } from 'lucide-react-native';
 
 export default function ReviewScreen() {
   const router = useRouter();
@@ -28,6 +29,32 @@ export default function ReviewScreen() {
     extraction.facts.map((_, index) => index)
   );
   const [isSaving, setIsSaving] = useState(false);
+  const [existingHotTopics, setExistingHotTopics] = useState<HotTopic[]>([]);
+  const [selectedResolvedIds, setSelectedResolvedIds] = useState<string[]>(
+    extraction.resolvedTopicIds || []
+  );
+
+  // Load existing hot topics to display titles for resolved ones
+  useEffect(() => {
+    const loadHotTopics = async () => {
+      if (contactId !== 'new') {
+        const topics = await hotTopicService.getByContact(contactId);
+        setExistingHotTopics(topics.filter((topic) => topic.status === 'active'));
+      }
+    };
+    loadHotTopics();
+  }, [contactId]);
+
+  // Get resolved topics with their full data
+  const resolvedTopics = existingHotTopics.filter((topic) =>
+    extraction.resolvedTopicIds?.includes(topic.id)
+  );
+
+  const toggleResolvedTopic = (topicId: string) => {
+    setSelectedResolvedIds((prev) =>
+      prev.includes(topicId) ? prev.filter((id) => id !== topicId) : [...prev, topicId]
+    );
+  };
 
   const toggleFact = (index: number) => {
     setSelectedFacts((prev) =>
@@ -118,7 +145,7 @@ export default function ReviewScreen() {
         }
       }
 
-      // Save hot topics
+      // Save new hot topics
       if (extraction.hotTopics && extraction.hotTopics.length > 0) {
         for (const topic of extraction.hotTopics) {
           await hotTopicService.create({
@@ -127,6 +154,13 @@ export default function ReviewScreen() {
             context: topic.context,
             sourceNoteId: note.id,
           });
+        }
+      }
+
+      // Resolve selected hot topics
+      if (selectedResolvedIds.length > 0) {
+        for (const topicId of selectedResolvedIds) {
+          await hotTopicService.resolve(topicId);
         }
       }
 
@@ -213,6 +247,46 @@ export default function ReviewScreen() {
                   <Text className="text-warning text-xs mt-1">
                     Ancien: {fact.previousValue}
                   </Text>
+                )}
+              </View>
+            </Pressable>
+          ))}
+        </View>
+      )}
+
+      {/* Resolved Hot Topics Section */}
+      {resolvedTopics.length > 0 && (
+        <View className="mb-6">
+          <View className="flex-row items-center mb-3">
+            <Archive size={20} color="#10B981" />
+            <Text className="text-lg font-semibold text-textPrimary ml-2">
+              Sujets à archiver
+            </Text>
+          </View>
+          <Text className="text-textMuted text-sm mb-3">
+            Ces sujets semblent résolus. Décochez ceux qui sont encore actifs.
+          </Text>
+
+          {resolvedTopics.map((topic) => (
+            <Pressable
+              key={topic.id}
+              className="bg-success/10 border border-success/30 p-4 rounded-lg mb-3 flex-row items-start"
+              onPress={() => toggleResolvedTopic(topic.id)}
+            >
+              <View
+                className={`w-5 h-5 rounded mr-3 items-center justify-center mt-0.5 ${
+                  selectedResolvedIds.includes(topic.id) ? 'bg-success' : 'bg-surfaceHover'
+                }`}
+              >
+                {selectedResolvedIds.includes(topic.id) && (
+                  <Text className="text-white text-xs">✓</Text>
+                )}
+              </View>
+
+              <View className="flex-1">
+                <Text className="text-textPrimary font-medium">{topic.title}</Text>
+                {topic.context && (
+                  <Text className="text-textSecondary text-sm mt-1">{topic.context}</Text>
                 )}
               </View>
             </Pressable>

@@ -134,6 +134,7 @@ export type ExtractionResult = {
   noteTitle: string;
   facts: ExtractedFact[];
   hotTopics: ExtractedHotTopic[];
+  resolvedTopicIds: string[];
   note: {
     summary: string;
     keyPoints: string[];

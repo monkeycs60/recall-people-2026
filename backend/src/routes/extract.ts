@@ -30,6 +30,11 @@ type ExtractionRequest = {
       factKey: string;
       factValue: string;
     }>;
+    hotTopics: Array<{
+      id: string;
+      title: string;
+      context?: string;
+    }>;
   };
 };
 
@@ -58,9 +63,9 @@ const extractionSchema = z.object({
     z.object({
       title: z.string().describe('Titre court du sujet (ex: "Examen de droit", "Recherche appart")'),
       context: z.string().describe('1-2 phrases de contexte'),
-      resolvesExisting: z.string().nullable().describe('Titre du sujet existant que cette info résout, si applicable'),
     })
-  ).describe('Sujets temporels/actionnables: projets en cours, événements à venir, situations à suivre'),
+  ).describe('NOUVEAUX sujets temporels/actionnables mentionnés dans la note'),
+  resolvedTopicIds: z.array(z.string()).describe('IDs des sujets chauds existants qui semblent résolus/terminés selon la note'),
 });
 
 export const extractRoutes = new Hono<{ Bindings: Bindings }>();
@@ -124,6 +129,7 @@ extractRoutes.post('/', async (c) => {
       noteTitle: extraction.noteTitle,
       facts: extraction.facts,
       hotTopics: extraction.hotTopics,
+      resolvedTopicIds: extraction.resolvedTopicIds,
       note: {
         summary: extraction.hotTopics.length > 0
           ? extraction.hotTopics.map((topic) => topic.context).join(' ')
@@ -146,17 +152,27 @@ const buildExtractionPrompt = (
   transcription: string,
   currentContact?: ExtractionRequest['currentContact']
 ): string => {
-  const currentContactContext = currentContact
-    ? `
+  let currentContactContext = '';
+  let existingHotTopicsContext = '';
+
+  if (currentContact) {
+    currentContactContext = `
 CONTACT ACTUELLEMENT SÉLECTIONNÉ:
 - Nom: ${currentContact.firstName} ${currentContact.lastName || ''}
 - ID: ${currentContact.id}
 - Infos existantes:
-${currentContact.facts.map((fact) => `  • ${fact.factKey}: ${fact.factValue}`).join('\n')}`
-    : '';
+${currentContact.facts.map((fact) => `  • ${fact.factKey}: ${fact.factValue}`).join('\n')}`;
+
+    if (currentContact.hotTopics && currentContact.hotTopics.length > 0) {
+      existingHotTopicsContext = `
+SUJETS CHAUDS EXISTANTS (à analyser pour détection de résolution):
+${currentContact.hotTopics.map((topic) => `  • [ID: ${topic.id}] "${topic.title}"${topic.context ? ` - ${topic.context}` : ''}`).join('\n')}`;
+    }
+  }
 
   return `Tu es un assistant qui extrait des informations structurées à partir de notes vocales en français.
 ${currentContactContext}
+${existingHotTopicsContext}
 
 TRANSCRIPTION DE LA NOTE VOCALE:
 "${transcription}"
@@ -199,16 +215,24 @@ RÈGLES D'EXTRACTION:
    - contact: coordonnées (factKey="Contact")
 
 4. HOT TOPICS (Sujets chauds - temporaires/actionnables):
+   NOUVEAUX sujets à créer:
    - Projets en cours: "Cherche un appart", "Prépare un examen"
    - Événements à suivre: "Mariage prévu en juin"
    - Situations: "Problème au travail", "En recherche d'emploi"
 
-   Si la note RÉSOUT un sujet existant (ex: "Il a eu son examen"),
-   indique dans resolvesExisting le titre du sujet clos.
+5. DÉTECTION DE RÉSOLUTION DE SUJETS EXISTANTS:
+   Si des SUJETS CHAUDS EXISTANTS (listés ci-dessus) semblent RÉSOLUS ou TERMINÉS selon la transcription:
+   - Retourne leurs IDs dans resolvedTopicIds
+   - Exemples de résolution:
+     • "Semi-marathon de Niko" → résolu si la note dit "Niko a couru son semi en 1h40"
+     • "Recherche d'emploi" → résolu si la note dit "Il a trouvé un job"
+     • "Examen de droit" → résolu si la note dit "Elle a eu son examen"
+   - Ne marque comme résolu QUE si la transcription indique CLAIREMENT que c'est terminé
 
 RÈGLES:
 - facts = infos PERMANENTES du profil
-- hotTopics = situations TEMPORAIRES à suivre
+- hotTopics = NOUVEAUX sujets TEMPORAIRES à suivre (pas ceux existants)
+- resolvedTopicIds = IDs des sujets existants qui sont maintenant TERMINÉS
 - N'extrais QUE ce qui est EXPLICITEMENT mentionné
 - action="add" pour nouvelle info, "update" si modification d'un fact existant`;
 };

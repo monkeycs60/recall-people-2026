@@ -85,6 +85,11 @@ export const extractInfo = async (data: {
       factKey: string;
       factValue: string;
     }>;
+    hotTopics: Array<{
+      id: string;
+      title: string;
+      context?: string;
+    }>;
   };
 }): Promise<{
   extraction: ExtractionResult;
