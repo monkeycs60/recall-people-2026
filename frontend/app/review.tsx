@@ -1,8 +1,8 @@
-import { View, Text, ScrollView, Pressable } from 'react-native';
+import { View, Text, ScrollView, Pressable, TextInput } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ExtractionResult, HotTopic } from '@/types';
+import { ExtractionResult, HotTopic, ResolvedTopic } from '@/types';
 import { useContacts } from '@/hooks/useContacts';
 import { useNotes } from '@/hooks/useNotes';
 import { factService } from '@/services/fact.service';
@@ -10,7 +10,7 @@ import { hotTopicService } from '@/services/hot-topic.service';
 import { contactService } from '@/services/contact.service';
 import { generateSummary } from '@/lib/api';
 import { useAppStore } from '@/stores/app-store';
-import { Archive } from 'lucide-react-native';
+import { Archive, Edit3 } from 'lucide-react-native';
 
 export default function ReviewScreen() {
   const router = useRouter();
@@ -30,9 +30,12 @@ export default function ReviewScreen() {
   );
   const [isSaving, setIsSaving] = useState(false);
   const [existingHotTopics, setExistingHotTopics] = useState<HotTopic[]>([]);
-  const [selectedResolvedIds, setSelectedResolvedIds] = useState<string[]>(
-    extraction.resolvedTopicIds || []
+
+  // Store resolved topics with editable resolutions
+  const [resolvedTopicsState, setResolvedTopicsState] = useState<ResolvedTopic[]>(
+    extraction.resolvedTopics || []
   );
+  const [editingResolutionId, setEditingResolutionId] = useState<string | null>(null);
 
   // Load existing hot topics to display titles for resolved ones
   useEffect(() => {
@@ -45,14 +48,32 @@ export default function ReviewScreen() {
     loadHotTopics();
   }, [contactId]);
 
-  // Get resolved topics with their full data
-  const resolvedTopics = existingHotTopics.filter((topic) =>
-    extraction.resolvedTopicIds?.includes(topic.id)
-  );
+  // Get resolved topics with their full data (combining existing topic info with resolutions)
+  const resolvedTopicsWithData = existingHotTopics
+    .filter((topic) => resolvedTopicsState.some((resolved) => resolved.id === topic.id))
+    .map((topic) => ({
+      ...topic,
+      proposedResolution: resolvedTopicsState.find((resolved) => resolved.id === topic.id)?.resolution || '',
+    }));
 
   const toggleResolvedTopic = (topicId: string) => {
-    setSelectedResolvedIds((prev) =>
-      prev.includes(topicId) ? prev.filter((id) => id !== topicId) : [...prev, topicId]
+    setResolvedTopicsState((prev) => {
+      const exists = prev.some((resolved) => resolved.id === topicId);
+      if (exists) {
+        return prev.filter((resolved) => resolved.id !== topicId);
+      } else {
+        // Re-add with original resolution from extraction
+        const originalResolution = extraction.resolvedTopics?.find((resolved) => resolved.id === topicId)?.resolution || '';
+        return [...prev, { id: topicId, resolution: originalResolution }];
+      }
+    });
+  };
+
+  const updateResolution = (topicId: string, resolution: string) => {
+    setResolvedTopicsState((prev) =>
+      prev.map((resolved) =>
+        resolved.id === topicId ? { ...resolved, resolution } : resolved
+      )
     );
   };
 
@@ -157,10 +178,10 @@ export default function ReviewScreen() {
         }
       }
 
-      // Resolve selected hot topics
-      if (selectedResolvedIds.length > 0) {
-        for (const topicId of selectedResolvedIds) {
-          await hotTopicService.resolve(topicId);
+      // Resolve selected hot topics with their resolutions
+      if (resolvedTopicsState.length > 0) {
+        for (const resolved of resolvedTopicsState) {
+          await hotTopicService.resolve(resolved.id, resolved.resolution || undefined);
         }
       }
 
@@ -255,7 +276,7 @@ export default function ReviewScreen() {
       )}
 
       {/* Resolved Hot Topics Section */}
-      {resolvedTopics.length > 0 && (
+      {(resolvedTopicsWithData.length > 0 || extraction.resolvedTopics?.length > 0) && (
         <View className="mb-6">
           <View className="flex-row items-center mb-3">
             <Archive size={20} color="#10B981" />
@@ -267,30 +288,77 @@ export default function ReviewScreen() {
             Ces sujets semblent résolus. Décochez ceux qui sont encore actifs.
           </Text>
 
-          {resolvedTopics.map((topic) => (
-            <Pressable
-              key={topic.id}
-              className="bg-success/10 border border-success/30 p-4 rounded-lg mb-3 flex-row items-start"
-              onPress={() => toggleResolvedTopic(topic.id)}
-            >
-              <View
-                className={`w-5 h-5 rounded mr-3 items-center justify-center mt-0.5 ${
-                  selectedResolvedIds.includes(topic.id) ? 'bg-success' : 'bg-surfaceHover'
-                }`}
-              >
-                {selectedResolvedIds.includes(topic.id) && (
-                  <Text className="text-white text-xs">✓</Text>
-                )}
-              </View>
+          {existingHotTopics
+            .filter((topic) => extraction.resolvedTopics?.some((resolved) => resolved.id === topic.id))
+            .map((topic) => {
+              const isSelected = resolvedTopicsState.some((resolved) => resolved.id === topic.id);
+              const currentResolution = resolvedTopicsState.find((resolved) => resolved.id === topic.id)?.resolution || '';
+              const isEditing = editingResolutionId === topic.id;
 
-              <View className="flex-1">
-                <Text className="text-textPrimary font-medium">{topic.title}</Text>
-                {topic.context && (
-                  <Text className="text-textSecondary text-sm mt-1">{topic.context}</Text>
-                )}
-              </View>
-            </Pressable>
-          ))}
+              return (
+                <View
+                  key={topic.id}
+                  className="bg-success/10 border border-success/30 p-4 rounded-lg mb-3"
+                >
+                  <Pressable
+                    className="flex-row items-start"
+                    onPress={() => toggleResolvedTopic(topic.id)}
+                  >
+                    <View
+                      className={`w-5 h-5 rounded mr-3 items-center justify-center mt-0.5 ${
+                        isSelected ? 'bg-success' : 'bg-surfaceHover'
+                      }`}
+                    >
+                      {isSelected && (
+                        <Text className="text-white text-xs">✓</Text>
+                      )}
+                    </View>
+
+                    <View className="flex-1">
+                      <Text className="text-textPrimary font-medium">{topic.title}</Text>
+                      {topic.context && (
+                        <Text className="text-textSecondary text-sm mt-1">{topic.context}</Text>
+                      )}
+                    </View>
+                  </Pressable>
+
+                  {isSelected && (
+                    <View className="mt-3 ml-8">
+                      <Text className="text-success text-xs font-medium mb-1">Résolution :</Text>
+                      {isEditing ? (
+                        <View>
+                          <TextInput
+                            className="bg-background py-2 px-3 rounded-lg text-textPrimary text-sm"
+                            value={currentResolution}
+                            onChangeText={(value) => updateResolution(topic.id, value)}
+                            placeholder="Comment ça s'est terminé..."
+                            placeholderTextColor="#71717a"
+                            multiline
+                            autoFocus
+                          />
+                          <Pressable
+                            className="mt-2 py-1.5 px-3 bg-success/20 rounded items-center self-start"
+                            onPress={() => setEditingResolutionId(null)}
+                          >
+                            <Text className="text-success text-sm">OK</Text>
+                          </Pressable>
+                        </View>
+                      ) : (
+                        <Pressable
+                          className="flex-row items-center"
+                          onPress={() => setEditingResolutionId(topic.id)}
+                        >
+                          <Text className="text-success text-sm flex-1">
+                            {currentResolution || 'Ajouter une résolution...'}
+                          </Text>
+                          <Edit3 size={14} color="#10B981" />
+                        </Pressable>
+                      )}
+                    </View>
+                  )}
+                </View>
+              );
+            })}
         </View>
       )}
 

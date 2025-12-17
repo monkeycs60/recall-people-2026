@@ -15,6 +15,7 @@ export const hotTopicService = {
       contact_id: string;
       title: string;
       context: string | null;
+      resolution: string | null;
       status: string;
       source_note_id: string | null;
       created_at: string;
@@ -27,6 +28,7 @@ export const hotTopicService = {
       contactId: row.contact_id,
       title: row.title,
       context: row.context || undefined,
+      resolution: row.resolution || undefined,
       status: row.status as HotTopicStatus,
       sourceNoteId: row.source_note_id || undefined,
       createdAt: row.created_at,
@@ -89,12 +91,12 @@ export const hotTopicService = {
     await db.runAsync(`UPDATE hot_topics SET ${updates.join(', ')} WHERE id = ?`, values);
   },
 
-  resolve: async (id: string): Promise<void> => {
+  resolve: async (id: string, resolution?: string): Promise<void> => {
     const db = await getDatabase();
     const now = new Date().toISOString();
     await db.runAsync(
-      'UPDATE hot_topics SET status = ?, resolved_at = ?, updated_at = ? WHERE id = ?',
-      ['resolved', now, now, id]
+      'UPDATE hot_topics SET status = ?, resolution = ?, resolved_at = ?, updated_at = ? WHERE id = ?',
+      ['resolved', resolution || null, now, now, id]
     );
   },
 
@@ -102,8 +104,17 @@ export const hotTopicService = {
     const db = await getDatabase();
     const now = new Date().toISOString();
     await db.runAsync(
-      'UPDATE hot_topics SET status = ?, resolved_at = NULL, updated_at = ? WHERE id = ?',
+      'UPDATE hot_topics SET status = ?, resolution = NULL, resolved_at = NULL, updated_at = ? WHERE id = ?',
       ['active', now, id]
+    );
+  },
+
+  updateResolution: async (id: string, resolution: string): Promise<void> => {
+    const db = await getDatabase();
+    const now = new Date().toISOString();
+    await db.runAsync(
+      'UPDATE hot_topics SET resolution = ?, updated_at = ? WHERE id = ?',
+      [resolution, now, id]
     );
   },
 

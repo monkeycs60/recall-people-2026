@@ -115,8 +115,8 @@ export default function ContactDetailScreen() {
     );
   };
 
-  const handleResolveHotTopic = async (id: string) => {
-    await hotTopicService.resolve(id);
+  const handleResolveHotTopic = async (id: string, resolution?: string) => {
+    await hotTopicService.resolve(id, resolution);
     await loadContact();
   };
 
@@ -132,6 +132,11 @@ export default function ContactDetailScreen() {
 
   const handleEditHotTopic = async (id: string, data: { title: string; context?: string }) => {
     await hotTopicService.update(id, data);
+    await loadContact();
+  };
+
+  const handleUpdateResolution = async (id: string, resolution: string) => {
+    await hotTopicService.updateResolution(id, resolution);
     await loadContact();
   };
 
@@ -233,6 +238,7 @@ export default function ContactDetailScreen() {
           onReopen={handleReopenHotTopic}
           onDelete={handleDeleteHotTopic}
           onEdit={handleEditHotTopic}
+          onUpdateResolution={handleUpdateResolution}
         />
       </View>
 

@@ -1,14 +1,15 @@
 import { View, Text, Pressable, TextInput, Alert } from 'react-native';
 import { useState } from 'react';
-import { Check, RotateCcw, Trash2, ChevronDown, ChevronUp } from 'lucide-react-native';
+import { Check, RotateCcw, Trash2, ChevronDown, ChevronUp, Edit3 } from 'lucide-react-native';
 import { HotTopic } from '@/types';
 
 type HotTopicsListProps = {
   hotTopics: HotTopic[];
-  onResolve: (id: string) => void;
+  onResolve: (id: string, resolution?: string) => void;
   onReopen: (id: string) => void;
   onDelete: (id: string) => void;
   onEdit: (id: string, data: { title: string; context?: string }) => void;
+  onUpdateResolution?: (id: string, resolution: string) => void;
 };
 
 export function HotTopicsList({
@@ -17,11 +18,16 @@ export function HotTopicsList({
   onReopen,
   onDelete,
   onEdit,
+  onUpdateResolution,
 }: HotTopicsListProps) {
   const [showResolved, setShowResolved] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editContext, setEditContext] = useState('');
+  const [resolvingId, setResolvingId] = useState<string | null>(null);
+  const [resolutionText, setResolutionText] = useState('');
+  const [editingResolutionId, setEditingResolutionId] = useState<string | null>(null);
+  const [editResolutionText, setEditResolutionText] = useState('');
 
   const activeTopics = hotTopics.filter((topic) => topic.status === 'active');
   const resolvedTopics = hotTopics.filter((topic) => topic.status === 'resolved');
@@ -49,9 +55,35 @@ export function HotTopicsList({
     );
   };
 
+  const handleStartResolve = (topic: HotTopic) => {
+    setResolvingId(topic.id);
+    setResolutionText('');
+  };
+
+  const handleConfirmResolve = () => {
+    if (!resolvingId) return;
+    onResolve(resolvingId, resolutionText.trim() || undefined);
+    setResolvingId(null);
+    setResolutionText('');
+  };
+
+  const handleStartEditResolution = (topic: HotTopic) => {
+    setEditingResolutionId(topic.id);
+    setEditResolutionText(topic.resolution || '');
+  };
+
+  const handleSaveResolution = () => {
+    if (!editingResolutionId || !onUpdateResolution) return;
+    onUpdateResolution(editingResolutionId, editResolutionText.trim());
+    setEditingResolutionId(null);
+    setEditResolutionText('');
+  };
+
   const renderTopic = (topic: HotTopic) => {
     const isResolved = topic.status === 'resolved';
     const isEditing = editingId === topic.id;
+    const isResolving = resolvingId === topic.id;
+    const isEditingResolution = editingResolutionId === topic.id;
 
     if (isEditing) {
       return (
@@ -89,29 +121,107 @@ export function HotTopicsList({
       );
     }
 
+    if (isResolving) {
+      return (
+        <View key={topic.id} className="bg-success/10 border border-success/30 p-4 rounded-lg mb-2">
+          <Text className="text-textPrimary font-medium mb-2">{topic.title}</Text>
+          <Text className="text-success text-xs font-medium mb-1">Résolution (optionnel) :</Text>
+          <TextInput
+            className="bg-background py-2 px-3 rounded-lg text-textPrimary text-sm mb-3"
+            value={resolutionText}
+            onChangeText={setResolutionText}
+            placeholder="Comment ça s'est terminé..."
+            placeholderTextColor="#71717a"
+            multiline
+            autoFocus
+          />
+          <View className="flex-row gap-2">
+            <Pressable
+              className="flex-1 py-2 rounded-lg bg-surfaceHover items-center"
+              onPress={() => setResolvingId(null)}
+            >
+              <Text className="text-textSecondary">Annuler</Text>
+            </Pressable>
+            <Pressable
+              className="flex-1 py-2 rounded-lg bg-success items-center"
+              onPress={handleConfirmResolve}
+            >
+              <Text className="text-white font-semibold">Archiver</Text>
+            </Pressable>
+          </View>
+        </View>
+      );
+    }
+
     return (
       <View
         key={topic.id}
-        className={`bg-surface rounded-lg mb-2 overflow-hidden ${isResolved ? 'opacity-60' : ''}`}
+        className={`bg-surface rounded-lg mb-2 overflow-hidden ${isResolved ? 'opacity-70' : ''}`}
       >
         <Pressable
           className="p-4 flex-row items-start"
-          onPress={() => handleStartEdit(topic)}
+          onPress={() => !isResolved && handleStartEdit(topic)}
         >
           <View
             className={`w-2.5 h-2.5 rounded-full mt-1.5 mr-3 ${
-              isResolved ? 'bg-textMuted' : 'bg-orange-500'
+              isResolved ? 'bg-success' : 'bg-orange-500'
             }`}
           />
           <View className="flex-1">
             <Text className={`font-medium ${isResolved ? 'text-textMuted line-through' : 'text-textPrimary'}`}>
               {topic.title}
             </Text>
-            {topic.context && (
+            {topic.context && !isResolved && (
               <Text className="text-textSecondary text-sm mt-1">{topic.context}</Text>
             )}
+            {isResolved && topic.resolution && !isEditingResolution && (
+              <Pressable
+                className="flex-row items-center mt-1"
+                onPress={() => onUpdateResolution && handleStartEditResolution(topic)}
+              >
+                <Text className="text-success text-sm flex-1">→ {topic.resolution}</Text>
+                {onUpdateResolution && <Edit3 size={12} color="#10B981" />}
+              </Pressable>
+            )}
+            {isResolved && !topic.resolution && onUpdateResolution && !isEditingResolution && (
+              <Pressable
+                className="mt-1"
+                onPress={() => handleStartEditResolution(topic)}
+              >
+                <Text className="text-textMuted text-sm italic">+ Ajouter une résolution</Text>
+              </Pressable>
+            )}
+            {isEditingResolution && (
+              <View className="mt-2">
+                <TextInput
+                  className="bg-background py-2 px-3 rounded-lg text-textPrimary text-sm mb-2"
+                  value={editResolutionText}
+                  onChangeText={setEditResolutionText}
+                  placeholder="Comment ça s'est terminé..."
+                  placeholderTextColor="#71717a"
+                  multiline
+                  autoFocus
+                />
+                <View className="flex-row gap-2">
+                  <Pressable
+                    className="py-1.5 px-3 bg-surfaceHover rounded"
+                    onPress={() => setEditingResolutionId(null)}
+                  >
+                    <Text className="text-textSecondary text-sm">Annuler</Text>
+                  </Pressable>
+                  <Pressable
+                    className="py-1.5 px-3 bg-success/20 rounded"
+                    onPress={handleSaveResolution}
+                  >
+                    <Text className="text-success text-sm">OK</Text>
+                  </Pressable>
+                </View>
+              </View>
+            )}
             <Text className="text-textMuted text-xs mt-1">
-              {new Date(topic.updatedAt).toLocaleDateString()}
+              {isResolved && topic.resolvedAt
+                ? `Résolu le ${new Date(topic.resolvedAt).toLocaleDateString()}`
+                : new Date(topic.updatedAt).toLocaleDateString()}
             </Text>
           </View>
           <View className="flex-row items-center gap-2">
@@ -120,7 +230,7 @@ export function HotTopicsList({
                 <RotateCcw size={18} color="#8B5CF6" />
               </Pressable>
             ) : (
-              <Pressable className="p-2" onPress={() => onResolve(topic.id)}>
+              <Pressable className="p-2" onPress={() => handleStartResolve(topic)}>
                 <Check size={18} color="#22C55E" />
               </Pressable>
             )}

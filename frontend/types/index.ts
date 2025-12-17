@@ -96,6 +96,7 @@ export type HotTopic = {
   contactId: string;
   title: string;
   context?: string;
+  resolution?: string;
   status: HotTopicStatus;
   sourceNoteId?: string;
   createdAt: string;
@@ -121,6 +122,11 @@ export type ExtractedHotTopic = {
   resolvesExisting?: string;
 };
 
+export type ResolvedTopic = {
+  id: string;
+  resolution: string;
+};
+
 export type ExtractionResult = {
   contactIdentified: {
     id: string | null;
@@ -134,7 +140,7 @@ export type ExtractionResult = {
   noteTitle: string;
   facts: ExtractedFact[];
   hotTopics: ExtractedHotTopic[];
-  resolvedTopicIds: string[];
+  resolvedTopics: ResolvedTopic[];
   note: {
     summary: string;
     keyPoints: string[];

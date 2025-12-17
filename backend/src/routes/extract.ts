@@ -65,7 +65,12 @@ const extractionSchema = z.object({
       context: z.string().describe('1-2 phrases de contexte'),
     })
   ).describe('NOUVEAUX sujets temporels/actionnables mentionnés dans la note'),
-  resolvedTopicIds: z.array(z.string()).describe('IDs des sujets chauds existants qui semblent résolus/terminés selon la note'),
+  resolvedTopics: z.array(
+    z.object({
+      id: z.string().describe('ID du sujet chaud existant'),
+      resolution: z.string().describe('Ce qui s\'est passé / comment ça s\'est terminé (ex: "A couru le marathon en 3h12", "A eu son examen avec mention")'),
+    })
+  ).describe('Sujets chauds existants qui semblent résolus/terminés selon la note, avec leur résolution'),
 });
 
 export const extractRoutes = new Hono<{ Bindings: Bindings }>();
@@ -129,7 +134,7 @@ extractRoutes.post('/', async (c) => {
       noteTitle: extraction.noteTitle,
       facts: extraction.facts,
       hotTopics: extraction.hotTopics,
-      resolvedTopicIds: extraction.resolvedTopicIds,
+      resolvedTopics: extraction.resolvedTopics,
       note: {
         summary: extraction.hotTopics.length > 0
           ? extraction.hotTopics.map((topic) => topic.context).join(' ')
@@ -222,17 +227,22 @@ RÈGLES D'EXTRACTION:
 
 5. DÉTECTION DE RÉSOLUTION DE SUJETS EXISTANTS:
    Si des SUJETS CHAUDS EXISTANTS (listés ci-dessus) semblent RÉSOLUS ou TERMINÉS selon la transcription:
-   - Retourne leurs IDs dans resolvedTopicIds
-   - Exemples de résolution:
-     • "Semi-marathon de Niko" → résolu si la note dit "Niko a couru son semi en 1h40"
-     • "Recherche d'emploi" → résolu si la note dit "Il a trouvé un job"
-     • "Examen de droit" → résolu si la note dit "Elle a eu son examen"
+   - Retourne leurs IDs dans resolvedTopics avec une résolution
+   - La résolution décrit CE QUI S'EST PASSÉ / COMMENT ÇA S'EST TERMINÉ
+   - Exemples:
+     • Sujet: "Semi-marathon de Niko" + Note dit "Niko a couru son semi en 1h40"
+       → { id: "...", resolution: "A couru le semi en 1h40" }
+     • Sujet: "Recherche d'emploi" + Note dit "Il a trouvé un job chez Google"
+       → { id: "...", resolution: "A trouvé un poste chez Google" }
+     • Sujet: "Examen de droit" + Note dit "Elle a eu son examen avec 15/20"
+       → { id: "...", resolution: "Réussi avec 15/20" }
    - Ne marque comme résolu QUE si la transcription indique CLAIREMENT que c'est terminé
+   - La résolution doit être COURTE (quelques mots) mais INFORMATIVE
 
 RÈGLES:
 - facts = infos PERMANENTES du profil
 - hotTopics = NOUVEAUX sujets TEMPORAIRES à suivre (pas ceux existants)
-- resolvedTopicIds = IDs des sujets existants qui sont maintenant TERMINÉS
+- resolvedTopics = sujets existants TERMINÉS avec leur résolution
 - N'extrais QUE ce qui est EXPLICITEMENT mentionné
 - action="add" pour nouvelle info, "update" si modification d'un fact existant`;
 };

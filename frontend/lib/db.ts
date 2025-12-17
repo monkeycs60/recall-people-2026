@@ -92,6 +92,7 @@ export const initDatabase = async () => {
       contact_id TEXT NOT NULL,
       title TEXT NOT NULL,
       context TEXT,
+      resolution TEXT,
       status TEXT DEFAULT 'active',
       source_note_id TEXT,
       created_at TEXT DEFAULT (datetime('now')),
@@ -155,6 +156,7 @@ const runMigrations = async (database: SQLite.SQLiteDatabase) => {
       contact_id TEXT NOT NULL,
       title TEXT NOT NULL,
       context TEXT,
+      resolution TEXT,
       status TEXT DEFAULT 'active',
       source_note_id TEXT,
       created_at TEXT DEFAULT (datetime('now')),
@@ -165,4 +167,13 @@ const runMigrations = async (database: SQLite.SQLiteDatabase) => {
     CREATE INDEX IF NOT EXISTS idx_hot_topics_contact ON hot_topics(contact_id);
     CREATE INDEX IF NOT EXISTS idx_hot_topics_status ON hot_topics(status);
   `);
+
+  // Check if resolution column exists on hot_topics
+  const hotTopicsInfo = await database.getAllAsync<{ name: string }>(
+    "PRAGMA table_info(hot_topics)"
+  );
+  const hasResolution = hotTopicsInfo.some((col) => col.name === 'resolution');
+  if (!hasResolution) {
+    await database.execAsync("ALTER TABLE hot_topics ADD COLUMN resolution TEXT");
+  }
 };
