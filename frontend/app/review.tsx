@@ -300,9 +300,8 @@ export default function ReviewScreen() {
 
       // Generate AI summary in background (non-blocking)
       const contactDetails = await contactService.getById(finalContactId);
-      console.log('[Summary] contactDetails:', contactDetails ? 'found' : 'null');
       if (contactDetails) {
-        const summaryPayload = {
+        generateSummary({
           contact: {
             firstName: contactDetails.firstName,
             lastName: contactDetails.lastName,
@@ -319,18 +318,11 @@ export default function ReviewScreen() {
               context: topic.context || '',
               status: topic.status,
             })),
-        };
-        console.log('[Summary] Calling API with payload:', JSON.stringify(summaryPayload, null, 2));
-        generateSummary(summaryPayload)
+        })
           .then(async (summary) => {
-            console.log('[Summary] Success! Summary:', summary);
             await contactService.update(finalContactId, { aiSummary: summary });
           })
-          .catch((error) => {
-            console.error('[Summary] FAILED:', error);
-          });
-      } else {
-        console.error('[Summary] contactDetails is null, skipping summary generation');
+          .catch(() => {});
       }
 
       setRecordingState('idle');

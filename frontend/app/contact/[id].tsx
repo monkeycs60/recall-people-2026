@@ -78,7 +78,7 @@ export default function ContactDetailScreen() {
           onPress: async () => {
             if (contact) {
               await deleteContact(contact.id);
-              router.back();
+              router.replace('/(tabs)/contacts');
             }
           },
         },

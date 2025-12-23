@@ -1,13 +1,15 @@
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import '../global.css';
 import { initDatabase } from '@/lib/db';
-import { Text, View } from 'react-native';
+import { Text, View, Pressable } from 'react-native';
+import { ArrowLeft } from 'lucide-react-native';
 
 // Initialize DB once at module level
 let isDbInitialized = false;
 
 export default function RootLayout() {
+  const router = useRouter();
   const [dbReady, setDbReady] = useState(isDbInitialized);
   const [dbError, setDbError] = useState<string | null>(null);
 
@@ -53,7 +55,21 @@ export default function RootLayout() {
       <Stack.Screen name="select-contact" options={{ headerShown: true, title: 'Sélectionner le contact' }} />
       <Stack.Screen name="review" options={{ headerShown: true, title: 'Vérification' }} />
       <Stack.Screen name="disambiguation" options={{ headerShown: true, title: 'Sélectionner le contact' }} />
-      <Stack.Screen name="contact/[id]" options={{ headerShown: true, title: 'Contact' }} />
+      <Stack.Screen
+          name="contact/[id]"
+          options={{
+            headerShown: true,
+            title: 'Contact',
+            headerLeft: () => (
+              <Pressable
+                onPress={() => router.replace('/(tabs)/contacts')}
+                className="p-2 -ml-2"
+              >
+                <ArrowLeft size={24} color="black" />
+              </Pressable>
+            ),
+          }}
+        />
     </Stack>
   );
 }

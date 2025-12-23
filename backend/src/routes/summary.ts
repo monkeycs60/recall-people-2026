@@ -60,19 +60,10 @@ Règles OBLIGATOIRES:
 - Pas de liste, que du texte fluide
 - NE PAS faire une seule phrase courte`;
 
-    console.log('[Summary] Prompt:', prompt);
-
-    const { text, finishReason, usage } = await generateText({
+    const { text } = await generateText({
       model: google('gemini-3-flash-preview'),
       prompt,
       maxOutputTokens: 2048,
-    });
-
-    console.log('[Summary] Response:', {
-      text,
-      finishReason,
-      usage,
-      textLength: text.length,
     });
 
     return c.json({
