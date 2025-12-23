@@ -109,8 +109,9 @@ extractRoutes.post('/', async (c) => {
     const suggestedMatches = matchingContacts.map((contact) => contact.id);
 
     // Generate suggested nickname based on the most distinctive fact
+    // Only for NEW contacts (no currentContact provided)
     let suggestedNickname: string | null = null;
-    if (extraction.facts.length > 0) {
+    if (!currentContact && extraction.facts.length > 0) {
       const priorityOrder = ['work', 'company', 'sport', 'hobby', 'location', 'education'];
       const sortedFacts = [...extraction.facts].sort((factA, factB) => {
         const indexA = priorityOrder.indexOf(factA.factType);
@@ -121,14 +122,15 @@ extractRoutes.post('/', async (c) => {
       suggestedNickname = mainFact.factValue.split(' ')[0]; // First word of the value
     }
 
+    // For existing contacts, use their stored name instead of extracted name
     const formattedExtraction = {
       contactIdentified: {
-        id: null as string | null,
-        firstName: extraction.contactIdentified.firstName,
-        lastName: extraction.contactIdentified.lastName,
+        id: currentContact?.id || null,
+        firstName: currentContact?.firstName || extraction.contactIdentified.firstName,
+        lastName: currentContact?.lastName || extraction.contactIdentified.lastName,
         confidence: extraction.contactIdentified.confidence,
-        needsDisambiguation,
-        suggestedMatches,
+        needsDisambiguation: currentContact ? false : needsDisambiguation,
+        suggestedMatches: currentContact ? [] : suggestedMatches,
         suggestedNickname,
       },
       noteTitle: extraction.noteTitle,

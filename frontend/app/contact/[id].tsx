@@ -207,7 +207,7 @@ export default function ContactDetailScreen() {
             onPress={() => setIsEditingName(true)}
           >
             <Text className="text-3xl font-bold text-textPrimary mr-3">
-              {contact.firstName} {contact.lastName || ''}
+              {contact.firstName} {contact.lastName || contact.nickname || ''}
             </Text>
             <Edit3 size={20} color="#9CA3AF" />
           </Pressable>

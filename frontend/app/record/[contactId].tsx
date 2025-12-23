@@ -27,7 +27,7 @@ export default function RecordForContactScreen() {
 
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [contact, setContact] = useState<{ firstName: string; lastName?: string } | null>(null);
+  const [contact, setContact] = useState<{ firstName: string; lastName?: string; nickname?: string } | null>(null);
 
   useEffect(() => {
     const init = async () => {
@@ -41,7 +41,11 @@ export default function RecordForContactScreen() {
   useEffect(() => {
     const foundContact = contacts.find((c) => c.id === contactId);
     if (foundContact) {
-      setContact({ firstName: foundContact.firstName, lastName: foundContact.lastName });
+      setContact({
+        firstName: foundContact.firstName,
+        lastName: foundContact.lastName,
+        nickname: foundContact.nickname,
+      });
     }
   }, [contacts, contactId]);
 
@@ -186,7 +190,7 @@ export default function RecordForContactScreen() {
       {/* Content */}
       <View className="flex-1 items-center justify-center px-6">
         <Text className="text-3xl font-bold text-textPrimary mb-2 text-center">
-          {contact ? `${contact.firstName} ${contact.lastName || ''}`.trim() : 'Chargement...'}
+          {contact ? `${contact.firstName} ${contact.lastName || contact.nickname || ''}`.trim() : 'Chargement...'}
         </Text>
 
         <Text className="text-textSecondary mb-12 text-center">
