@@ -78,6 +78,7 @@ export const contactService = {
       contact_id: string;
       title: string;
       context: string | null;
+      resolution: string | null;
       status: string;
       source_note_id: string | null;
       created_at: string;
@@ -123,6 +124,7 @@ export const contactService = {
         contactId: row.contact_id,
         title: row.title,
         context: row.context || undefined,
+        resolution: row.resolution || undefined,
         status: row.status as 'active' | 'resolved',
         sourceNoteId: row.source_note_id || undefined,
         createdAt: row.created_at,
