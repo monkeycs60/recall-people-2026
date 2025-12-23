@@ -41,8 +41,8 @@ summaryRoutes.post('/', async (c) => {
     const activeTopics = hotTopics.filter((topic) => topic.status === 'active');
     const topicsText = activeTopics.map((topic) => topic.title).join(', ');
 
-    const prompt = `Génère un résumé de 2-3 phrases maximum décrivant cette personne.
-Le résumé doit être naturel, comme si tu présentais quelqu'un à un ami.
+    const prompt = `Génère un résumé de EXACTEMENT 2 à 3 phrases décrivant cette personne.
+Le résumé doit faire entre 150 et 250 caractères, comme si tu présentais quelqu'un à un ami.
 
 Prénom: ${contact.firstName}${contact.lastName ? ` ${contact.lastName}` : ''}
 
@@ -51,18 +51,28 @@ ${factsText || 'Aucune information'}
 
 ${activeTopics.length > 0 ? `Sujets actuels: ${topicsText}` : ''}
 
-Règles:
-- 2-3 phrases maximum
-- Commence par le métier/entreprise si connu
-- Mentionne un trait personnel (hobby, sport, origine)
-- Si pertinent, mentionne comment vous vous êtes rencontrés
+Règles OBLIGATOIRES:
+- MINIMUM 2 phrases complètes, MAXIMUM 3 phrases
+- Première phrase: métier/entreprise si connu
+- Deuxième phrase: trait personnel (hobby, sport, origine) ou comment vous vous êtes rencontrés
+- Troisième phrase (optionnelle): sujet actuel ou détail supplémentaire
 - Ton naturel et chaleureux
-- Pas de liste, que du texte fluide`;
+- Pas de liste, que du texte fluide
+- NE PAS faire une seule phrase courte`;
 
-    const { text } = await generateText({
+    console.log('[Summary] Prompt:', prompt);
+
+    const { text, finishReason, usage } = await generateText({
       model: google('gemini-3-flash-preview'),
       prompt,
-      maxOutputTokens: 200,
+      maxOutputTokens: 2048,
+    });
+
+    console.log('[Summary] Response:', {
+      text,
+      finishReason,
+      usage,
+      textLength: text.length,
     });
 
     return c.json({
