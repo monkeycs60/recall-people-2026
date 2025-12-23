@@ -247,13 +247,7 @@ export default function ContactDetailScreen() {
         <Text className="text-xl font-semibold text-textPrimary mb-3">Profil</Text>
         {editingFact ? (
           <View className="bg-surface p-4 rounded-lg mb-3">
-            <TextInput
-              className="bg-background py-2 px-3 rounded-lg text-textSecondary text-sm mb-2"
-              value={editingFact.factKey}
-              onChangeText={(value) => setEditingFact({ ...editingFact, factKey: value })}
-              placeholder="Label"
-              placeholderTextColor="#71717a"
-            />
+            <Text className="text-textSecondary text-sm mb-2">{editingFact.factKey}</Text>
             <TextInput
               className="bg-background py-2 px-3 rounded-lg text-textPrimary mb-3"
               value={editingFact.factValue}

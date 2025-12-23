@@ -290,13 +290,7 @@ export default function ReviewScreen() {
             if (isEditing) {
               return (
                 <View key={index} className="bg-surface p-4 rounded-lg mb-3">
-                  <TextInput
-                    className="bg-background py-2 px-3 rounded-lg text-textSecondary text-sm mb-2"
-                    value={fact.factKey}
-                    onChangeText={(value) => updateFact(index, 'factKey', value)}
-                    placeholder="Label"
-                    placeholderTextColor="#71717a"
-                  />
+                  <Text className="text-textSecondary text-sm mb-2">{fact.factKey}</Text>
                   <TextInput
                     className="bg-background py-2 px-3 rounded-lg text-textPrimary mb-3"
                     value={fact.factValue}
