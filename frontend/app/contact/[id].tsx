@@ -8,7 +8,7 @@ import { ContactWithDetails, Fact } from '@/types';
 import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { noteService } from '@/services/note.service';
-import { Edit3 } from 'lucide-react-native';
+import { Edit3, Mic } from 'lucide-react-native';
 import { AISummary } from '@/components/contact/AISummary';
 import { ProfileCard } from '@/components/contact/ProfileCard';
 import { HotTopicsList } from '@/components/contact/HotTopicsList';
@@ -145,6 +145,10 @@ export default function ContactDetailScreen() {
     await loadContact();
   };
 
+  const handleAddNote = () => {
+    router.push(`/record/${contactId}`);
+  };
+
   if (!contact) {
     return (
       <View className="flex-1 bg-background items-center justify-center">
@@ -223,6 +227,17 @@ export default function ContactDetailScreen() {
           <Text className="text-textSecondary mt-2">
             Dernier contact : {new Date(contact.lastContactAt).toLocaleDateString()}
           </Text>
+        )}
+
+        {/* Add note button */}
+        {!isEditingName && (
+          <Pressable
+            className="flex-row items-center justify-center bg-primary py-3 px-4 rounded-lg mt-4"
+            onPress={handleAddNote}
+          >
+            <Mic size={20} color="#FFFFFF" />
+            <Text className="text-white font-semibold ml-2">Ajouter une note</Text>
+          </Pressable>
         )}
       </View>
 

@@ -7,6 +7,7 @@ type AppState = {
   currentAudioUri: string | null;
   currentTranscription: string | null;
   currentExtraction: ExtractionResult | null;
+  preselectedContactId: string | null;
 };
 
 type AppActions = {
@@ -14,6 +15,7 @@ type AppActions = {
   setCurrentAudioUri: (uri: string | null) => void;
   setCurrentTranscription: (text: string | null) => void;
   setCurrentExtraction: (extraction: ExtractionResult | null) => void;
+  setPreselectedContactId: (contactId: string | null) => void;
   resetRecording: () => void;
 };
 
@@ -24,17 +26,20 @@ export const useAppStore = create<AppState & AppActions>()(
       currentAudioUri: null,
       currentTranscription: null,
       currentExtraction: null,
+      preselectedContactId: null,
 
       setRecordingState: (recordingState) => set({ recordingState }),
       setCurrentAudioUri: (currentAudioUri) => set({ currentAudioUri }),
       setCurrentTranscription: (currentTranscription) => set({ currentTranscription }),
       setCurrentExtraction: (currentExtraction) => set({ currentExtraction }),
+      setPreselectedContactId: (preselectedContactId) => set({ preselectedContactId }),
       resetRecording: () =>
         set({
           recordingState: 'idle',
           currentAudioUri: null,
           currentTranscription: null,
           currentExtraction: null,
+          preselectedContactId: null,
         }),
     }),
     { name: 'app-store' }

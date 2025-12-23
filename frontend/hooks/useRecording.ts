@@ -8,17 +8,22 @@ import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { useAppStore } from '@/stores/app-store';
 import { useContactsStore } from '@/stores/contacts-store';
-import { transcribeAudio } from '@/lib/api';
+import { transcribeAudio, extractInfo } from '@/lib/api';
+import { factService } from '@/services/fact.service';
+import { hotTopicService } from '@/services/hot-topic.service';
 
 export const useRecording = () => {
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const router = useRouter();
-  const { loadContacts, isInitialized } = useContactsStore();
+  const { contacts, loadContacts, isInitialized } = useContactsStore();
   const {
     recordingState,
     setRecordingState,
     setCurrentAudioUri,
     setCurrentTranscription,
+    setCurrentExtraction,
+    preselectedContactId,
+    setPreselectedContactId,
   } = useAppStore();
 
   const toggleRecording = async () => {
@@ -79,6 +84,70 @@ export const useRecording = () => {
       const transcriptionResult = await transcribeAudio(uri);
       setCurrentTranscription(transcriptionResult.transcript);
 
+      // If a contact is preselected, skip selection and go directly to review
+      if (preselectedContactId) {
+        const preselectedContact = contacts.find((contact) => contact.id === preselectedContactId);
+
+        if (preselectedContact) {
+          const contactsForExtraction = contacts.map((contact) => ({
+            id: contact.id,
+            firstName: contact.firstName,
+            lastName: contact.lastName,
+            tags: contact.tags,
+          }));
+
+          // Load facts and hot topics for the preselected contact
+          const [facts, hotTopics] = await Promise.all([
+            factService.getByContact(preselectedContactId),
+            hotTopicService.getByContact(preselectedContactId),
+          ]);
+
+          const activeHotTopics = hotTopics.filter((topic) => topic.status === 'active');
+
+          const { extraction } = await extractInfo({
+            transcription: transcriptionResult.transcript,
+            existingContacts: contactsForExtraction,
+            currentContact: {
+              id: preselectedContact.id,
+              firstName: preselectedContact.firstName,
+              lastName: preselectedContact.lastName,
+              facts: facts.map((fact) => ({
+                factType: fact.factType,
+                factKey: fact.factKey,
+                factValue: fact.factValue,
+              })),
+              hotTopics: activeHotTopics.map((topic) => ({
+                id: topic.id,
+                title: topic.title,
+                context: topic.context,
+              })),
+            },
+          });
+
+          // Override the contact ID with preselected contact
+          extraction.contactIdentified.id = preselectedContact.id;
+          extraction.contactIdentified.needsDisambiguation = false;
+
+          setCurrentExtraction(extraction);
+          setPreselectedContactId(null);
+
+          router.replace({
+            pathname: '/review',
+            params: {
+              contactId: preselectedContact.id,
+              audioUri: uri,
+              transcription: transcriptionResult.transcript,
+              extraction: JSON.stringify(extraction),
+            },
+          });
+
+          return { uri, transcription: transcriptionResult.transcript };
+        }
+
+        // If preselected contact not found, clear and continue to normal flow
+        setPreselectedContactId(null);
+      }
+
       // Navigate to contact selection screen
       router.push({
         pathname: '/select-contact',
@@ -97,6 +166,7 @@ export const useRecording = () => {
         } catch {}
       }
       setRecordingState('idle');
+      setPreselectedContactId(null);
       throw error;
     }
   };
