@@ -1,9 +1,11 @@
-import { View, Text, FlatList, Pressable, RefreshControl, TextInput } from 'react-native';
-import { useState, useCallback } from 'react';
+import { View, Text, FlatList, Pressable, RefreshControl, TextInput, ScrollView } from 'react-native';
+import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useContactsStore } from '@/stores/contacts-store';
+import { useGroupsStore } from '@/stores/groups-store';
+import { groupService } from '@/services/group.service';
 import { Contact } from '@/types';
 import { User, Search } from 'lucide-react-native';
 
@@ -11,27 +13,52 @@ export default function ContactsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { contacts, loadContacts, isLoading } = useContactsStore();
+  const { groups, loadGroups, selectedGroupId, setSelectedGroup } = useGroupsStore();
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-
-  const filteredContacts = searchQuery
-    ? contacts.filter(
-        (contact) =>
-          contact.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (contact.lastName && contact.lastName.toLowerCase().includes(searchQuery.toLowerCase())) ||
-          (contact.nickname && contact.nickname.toLowerCase().includes(searchQuery.toLowerCase()))
-      )
-    : contacts;
+  const [contactIdsByGroup, setContactIdsByGroup] = useState<string[]>([]);
 
   useFocusEffect(
     useCallback(() => {
       loadContacts();
+      loadGroups();
     }, [])
   );
+
+  // Load contact IDs when group filter changes
+  useEffect(() => {
+    const loadFilteredContacts = async () => {
+      if (selectedGroupId) {
+        const ids = await groupService.getContactIdsForGroup(selectedGroupId);
+        setContactIdsByGroup(ids);
+      } else {
+        setContactIdsByGroup([]);
+      }
+    };
+    loadFilteredContacts();
+  }, [selectedGroupId]);
+
+  const filteredContacts = contacts.filter((contact) => {
+    // Group filter
+    if (selectedGroupId && !contactIdsByGroup.includes(contact.id)) {
+      return false;
+    }
+    // Search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      return (
+        contact.firstName.toLowerCase().includes(query) ||
+        (contact.lastName && contact.lastName.toLowerCase().includes(query)) ||
+        (contact.nickname && contact.nickname.toLowerCase().includes(query))
+      );
+    }
+    return true;
+  });
 
   const handleRefresh = async () => {
     setRefreshing(true);
     await loadContacts();
+    await loadGroups();
     setRefreshing(false);
   };
 
@@ -48,15 +75,6 @@ export default function ContactsScreen() {
         <Text className="text-textPrimary font-semibold text-lg">
           {item.firstName} {item.lastName || item.nickname || ''}
         </Text>
-        {item.tags && item.tags.length > 0 && (
-          <View className="flex-row gap-2 mt-1">
-            {item.tags.slice(0, 2).map((tag) => (
-              <View key={tag} className="bg-primary/20 px-2 py-0.5 rounded">
-                <Text className="text-primary text-xs">{tag}</Text>
-              </View>
-            ))}
-          </View>
-        )}
         {item.lastContactAt && (
           <Text className="text-textMuted text-xs mt-1">
             Dernier contact : {new Date(item.lastContactAt).toLocaleDateString()}
@@ -82,6 +100,44 @@ export default function ContactsScreen() {
           />
         </View>
       </View>
+
+      {/* Group filter chips */}
+      {groups.length > 0 && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          className="mb-4"
+          contentContainerStyle={{ paddingHorizontal: 24 }}
+        >
+          <Pressable
+            className={`px-4 py-2 rounded-full mr-2 ${
+              !selectedGroupId ? 'bg-primary' : 'bg-surface'
+            }`}
+            onPress={() => setSelectedGroup(null)}
+          >
+            <Text className={!selectedGroupId ? 'text-white font-medium' : 'text-textSecondary'}>
+              Tous
+            </Text>
+          </Pressable>
+          {groups.map((group) => (
+            <Pressable
+              key={group.id}
+              className={`px-4 py-2 rounded-full mr-2 ${
+                selectedGroupId === group.id ? 'bg-primary' : 'bg-surface'
+              }`}
+              onPress={() => setSelectedGroup(group.id)}
+            >
+              <Text
+                className={
+                  selectedGroupId === group.id ? 'text-white font-medium' : 'text-textSecondary'
+                }
+              >
+                {group.name}
+              </Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+      )}
 
       {filteredContacts.length === 0 && !isLoading ? (
         <View className="flex-1 items-center justify-center px-6">

@@ -74,7 +74,10 @@ export const extractInfo = async (data: {
     id: string;
     firstName: string;
     lastName?: string;
-    tags: string[];
+  }>;
+  existingGroups?: Array<{
+    id: string;
+    name: string;
   }>;
   currentContact?: {
     id: string;

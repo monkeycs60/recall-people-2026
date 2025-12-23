@@ -8,6 +8,7 @@ import { extractInfo } from '@/lib/api';
 import { Contact } from '@/types';
 import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
+import { groupService } from '@/services/group.service';
 import { User, Plus, Search, Sparkles, Edit3 } from 'lucide-react-native';
 
 export default function SelectContactScreen() {
@@ -65,7 +66,6 @@ export default function SelectContactScreen() {
         id: c.id,
         firstName: c.firstName,
         lastName: c.lastName,
-        tags: c.tags,
       }));
 
       // Load facts and hot topics for the selected contact
@@ -124,12 +124,19 @@ export default function SelectContactScreen() {
         id: c.id,
         firstName: c.firstName,
         lastName: c.lastName,
-        tags: c.tags,
+      }));
+
+      // Load groups for suggestions (only for new contacts)
+      const groups = await groupService.getAll();
+      const groupsForExtraction = groups.map((g) => ({
+        id: g.id,
+        name: g.name,
       }));
 
       const { extraction } = await extractInfo({
         transcription,
         existingContacts: contactsForExtraction,
+        existingGroups: groupsForExtraction,
       });
 
       // Override the first name if user edited it

@@ -1,6 +1,6 @@
 import * as Crypto from 'expo-crypto';
 import { getDatabase } from '@/lib/db';
-import { Contact, ContactWithDetails, Fact, Note, Tag } from '@/types';
+import { Contact, ContactWithDetails, Fact, Note } from '@/types';
 
 export const contactService = {
   getAll: async (): Promise<Contact[]> => {
@@ -11,7 +11,6 @@ export const contactService = {
       last_name: string | null;
       nickname: string | null;
       photo_uri: string | null;
-      tags: string;
       highlights: string | null;
       last_contact_at: string | null;
       created_at: string;
@@ -24,7 +23,6 @@ export const contactService = {
       lastName: row.last_name || undefined,
       nickname: row.nickname || undefined,
       photoUri: row.photo_uri || undefined,
-      tags: JSON.parse(row.tags),
       highlights: JSON.parse(row.highlights || '[]'),
       lastContactAt: row.last_contact_at || undefined,
       createdAt: row.created_at,
@@ -40,7 +38,6 @@ export const contactService = {
       last_name: string | null;
       nickname: string | null;
       photo_uri: string | null;
-      tags: string;
       highlights: string | null;
       ai_summary: string | null;
       last_contact_at: string | null;
@@ -92,7 +89,6 @@ export const contactService = {
       lastName: contactRow.last_name || undefined,
       nickname: contactRow.nickname || undefined,
       photoUri: contactRow.photo_uri || undefined,
-      tags: JSON.parse(contactRow.tags),
       highlights: JSON.parse(contactRow.highlights || '[]'),
       aiSummary: contactRow.ai_summary || undefined,
       lastContactAt: contactRow.last_contact_at || undefined,
@@ -140,21 +136,19 @@ export const contactService = {
     firstName: string;
     lastName?: string;
     nickname?: string;
-    tags?: Tag[];
   }): Promise<Contact> => {
     const db = await getDatabase();
     const id = Crypto.randomUUID();
     const now = new Date().toISOString();
 
     await db.runAsync(
-      `INSERT INTO contacts (id, first_name, last_name, nickname, tags, highlights, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO contacts (id, first_name, last_name, nickname, highlights, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         data.firstName,
         data.lastName || null,
         data.nickname || null,
-        JSON.stringify(data.tags || []),
         JSON.stringify([]),
         now,
         now,
@@ -166,7 +160,6 @@ export const contactService = {
       firstName: data.firstName,
       lastName: data.lastName,
       nickname: data.nickname,
-      tags: data.tags || [],
       highlights: [],
       createdAt: now,
       updatedAt: now,
@@ -179,7 +172,6 @@ export const contactService = {
       firstName: string;
       lastName: string;
       nickname: string;
-      tags: string[];
       highlights: string[];
       aiSummary: string;
       lastContactAt: string;
@@ -200,10 +192,6 @@ export const contactService = {
     if (data.nickname !== undefined) {
       updates.push('nickname = ?');
       values.push(data.nickname || null);
-    }
-    if (data.tags) {
-      updates.push('tags = ?');
-      values.push(JSON.stringify(data.tags));
     }
     if (data.highlights !== undefined) {
       updates.push('highlights = ?');

@@ -19,7 +19,10 @@ type ExtractionRequest = {
     id: string;
     firstName: string;
     lastName?: string;
-    tags: string[];
+  }>;
+  existingGroups?: Array<{
+    id: string;
+    name: string;
   }>;
   currentContact?: {
     id: string;
@@ -71,6 +74,14 @@ const extractionSchema = z.object({
       resolution: z.string().describe('Ce qui s\'est passé / comment ça s\'est terminé (ex: "A couru le marathon en 3h12", "A eu son examen avec mention")'),
     })
   ).describe('Sujets chauds existants qui semblent résolus/terminés selon la note, avec leur résolution'),
+  suggestedGroups: z.array(
+    z.object({
+      name: z.string().describe('Nom du groupe suggéré'),
+      sourceFactType: z.enum([
+        'company', 'how_met', 'where_met', 'sport', 'hobby'
+      ]).describe('Le type de fact qui a déclenché cette suggestion'),
+    })
+  ).describe('Groupes suggérés basés sur les facts contextuels. UNIQUEMENT pour nouveaux contacts (pas de currentContact).'),
 });
 
 export const extractRoutes = new Hono<{ Bindings: Bindings }>();
@@ -122,6 +133,21 @@ extractRoutes.post('/', async (c) => {
       suggestedNickname = mainFact.factValue.split(' ')[0]; // First word of the value
     }
 
+    // Process suggested groups - match with existing or mark as new
+    const processedGroups = (!currentContact && extraction.suggestedGroups)
+      ? extraction.suggestedGroups.map((suggested) => {
+          const existingGroup = body.existingGroups?.find(
+            (group) => group.name.toLowerCase() === suggested.name.toLowerCase()
+          );
+          return {
+            name: existingGroup?.name || suggested.name,
+            isNew: !existingGroup,
+            existingId: existingGroup?.id,
+            sourceFactType: suggested.sourceFactType,
+          };
+        })
+      : [];
+
     // For existing contacts, use their stored name instead of extracted name
     const formattedExtraction = {
       contactIdentified: {
@@ -137,6 +163,7 @@ extractRoutes.post('/', async (c) => {
       facts: extraction.facts,
       hotTopics: extraction.hotTopics,
       resolvedTopics: extraction.resolvedTopics,
+      suggestedGroups: processedGroups,
       note: {
         summary: extraction.hotTopics.length > 0
           ? extraction.hotTopics.map((topic) => topic.context).join(' ')
@@ -241,10 +268,20 @@ RÈGLES D'EXTRACTION:
    - Ne marque comme résolu QUE si la transcription indique CLAIREMENT que c'est terminé
    - La résolution doit être COURTE (quelques mots) mais INFORMATIVE
 
+6. SUGGESTION DE GROUPES (uniquement si pas de currentContact fourni):
+   Suggère des groupes basés sur les facts de type contextuel:
+   - company: nom de l'entreprise → groupe (ex: "Affilae" → groupe "Affilae")
+   - how_met: contexte de rencontre → groupe (ex: "meetup React" → groupe "Meetup React")
+   - where_met: lieu de rencontre → groupe (ex: "salle de sport" → groupe "Sport")
+   - sport: sport pratiqué → groupe (ex: "running" → groupe "Running")
+   - hobby: loisir → groupe (ex: "échecs" → groupe "Échecs")
+   Si currentContact est fourni, retourne un tableau vide pour suggestedGroups.
+
 RÈGLES:
 - facts = infos PERMANENTES du profil
 - hotTopics = NOUVEAUX sujets TEMPORAIRES à suivre (pas ceux existants)
 - resolvedTopics = sujets existants TERMINÉS avec leur résolution
+- suggestedGroups = groupes suggérés UNIQUEMENT pour nouveaux contacts
 - N'extrais QUE ce qui est EXPLICITEMENT mentionné
 - action="add" pour nouvelle info, "update" si modification d'un fact existant`;
 };

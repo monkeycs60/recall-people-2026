@@ -2,15 +2,16 @@ import { View, Text, ScrollView, Pressable, TextInput } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ExtractionResult, HotTopic, ResolvedTopic } from '@/types';
+import { ExtractionResult, HotTopic, ResolvedTopic, Group, SuggestedGroup } from '@/types';
 import { useContacts } from '@/hooks/useContacts';
 import { useNotes } from '@/hooks/useNotes';
 import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { contactService } from '@/services/contact.service';
+import { groupService } from '@/services/group.service';
 import { generateSummary } from '@/lib/api';
 import { useAppStore } from '@/stores/app-store';
-import { Archive, Edit3 } from 'lucide-react-native';
+import { Archive, Edit3, Plus, X } from 'lucide-react-native';
 
 export default function ReviewScreen() {
   const router = useRouter();
@@ -53,6 +54,16 @@ export default function ReviewScreen() {
   );
   const [editingResolutionId, setEditingResolutionId] = useState<string | null>(null);
 
+  // Groups state (only for new contacts)
+  const [selectedGroups, setSelectedGroups] = useState<Array<{
+    name: string;
+    isNew: boolean;
+    existingId?: string;
+  }>>(extraction.suggestedGroups || []);
+  const [isAddingGroup, setIsAddingGroup] = useState(false);
+  const [newGroupSearch, setNewGroupSearch] = useState('');
+  const [allGroups, setAllGroups] = useState<Group[]>([]);
+
   // Load existing hot topics to display titles for resolved ones
   useEffect(() => {
     const loadHotTopics = async () => {
@@ -62,6 +73,17 @@ export default function ReviewScreen() {
       }
     };
     loadHotTopics();
+  }, [contactId]);
+
+  // Load all groups for new contact
+  useEffect(() => {
+    const loadGroups = async () => {
+      if (contactId === 'new') {
+        const groups = await groupService.getAll();
+        setAllGroups(groups);
+      }
+    };
+    loadGroups();
   }, [contactId]);
 
   // Get resolved topics with their full data (combining existing topic info with resolutions)
@@ -121,6 +143,37 @@ export default function ReviewScreen() {
     );
   };
 
+  // Group handlers
+  const toggleGroup = (group: { name: string; isNew: boolean; existingId?: string }) => {
+    setSelectedGroups((prev) => {
+      const exists = prev.some((g) => g.name.toLowerCase() === group.name.toLowerCase());
+      if (exists) {
+        return prev.filter((g) => g.name.toLowerCase() !== group.name.toLowerCase());
+      }
+      return [...prev, group];
+    });
+  };
+
+  const addNewGroup = (name: string) => {
+    const existing = allGroups.find((g) => g.name.toLowerCase() === name.toLowerCase());
+    const group = existing
+      ? { name: existing.name, isNew: false, existingId: existing.id }
+      : { name: name.trim(), isNew: true };
+
+    if (!selectedGroups.some((g) => g.name.toLowerCase() === group.name.toLowerCase())) {
+      setSelectedGroups((prev) => [...prev, group]);
+    }
+    setNewGroupSearch('');
+    setIsAddingGroup(false);
+  };
+
+  const filteredGroupsForSearch = newGroupSearch.trim()
+    ? allGroups.filter((g) =>
+        g.name.toLowerCase().includes(newGroupSearch.toLowerCase()) &&
+        !selectedGroups.some((sg) => sg.existingId === g.id || sg.name.toLowerCase() === g.name.toLowerCase())
+      )
+    : [];
+
   const handleSave = async () => {
     if (isSaving) return;
     setIsSaving(true);
@@ -135,6 +188,20 @@ export default function ReviewScreen() {
           nickname: extraction.contactIdentified.suggestedNickname,
         });
         finalContactId = newContact.id;
+
+        // Save groups for new contact
+        if (selectedGroups.length > 0) {
+          const groupIds: string[] = [];
+          for (const group of selectedGroups) {
+            if (group.existingId) {
+              groupIds.push(group.existingId);
+            } else {
+              const newGroup = await groupService.create(group.name);
+              groupIds.push(newGroup.id);
+            }
+          }
+          await groupService.setContactGroups(finalContactId, groupIds);
+        }
       }
 
       const note = await createNote({
@@ -340,6 +407,95 @@ export default function ReviewScreen() {
               </View>
             );
           })}
+        </View>
+      )}
+
+      {/* Groups Section - Only for new contacts */}
+      {contactId === 'new' && (
+        <View className="mb-6">
+          <Text className="text-lg font-semibold text-textPrimary mb-3">
+            Groupes
+          </Text>
+
+          {/* Selected groups as chips */}
+          <View className="flex-row flex-wrap gap-2 mb-3">
+            {selectedGroups.map((group) => (
+              <Pressable
+                key={group.name}
+                className="flex-row items-center bg-primary/20 px-3 py-1.5 rounded-full"
+                onPress={() => toggleGroup(group)}
+              >
+                <Text className="text-primary mr-1">{group.name}</Text>
+                {group.isNew && (
+                  <Text className="text-primary/60 text-xs mr-1">(nouveau)</Text>
+                )}
+                <X size={14} color="#8B5CF6" />
+              </Pressable>
+            ))}
+          </View>
+
+          {/* Add group input */}
+          {isAddingGroup ? (
+            <View className="bg-surface p-3 rounded-lg">
+              <TextInput
+                className="bg-background py-2 px-3 rounded-lg text-textPrimary mb-2"
+                value={newGroupSearch}
+                onChangeText={setNewGroupSearch}
+                placeholder="Nom du groupe..."
+                placeholderTextColor="#71717a"
+                autoFocus
+              />
+
+              {/* Search results */}
+              {filteredGroupsForSearch.length > 0 && (
+                <View className="mb-2">
+                  {filteredGroupsForSearch.map((group) => (
+                    <Pressable
+                      key={group.id}
+                      className="py-2 px-3 bg-surfaceHover rounded mb-1"
+                      onPress={() => addNewGroup(group.name)}
+                    >
+                      <Text className="text-textPrimary">{group.name}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+              )}
+
+              {/* Create new option */}
+              {newGroupSearch.trim() && !filteredGroupsForSearch.some(
+                (g) => g.name.toLowerCase() === newGroupSearch.toLowerCase()
+              ) && !allGroups.some(
+                (g) => g.name.toLowerCase() === newGroupSearch.toLowerCase()
+              ) && (
+                <Pressable
+                  className="py-2 px-3 bg-primary/10 rounded mb-2"
+                  onPress={() => addNewGroup(newGroupSearch)}
+                >
+                  <Text className="text-primary">
+                    Créer "{newGroupSearch.trim()}"
+                  </Text>
+                </Pressable>
+              )}
+
+              <Pressable
+                className="py-2 items-center"
+                onPress={() => {
+                  setIsAddingGroup(false);
+                  setNewGroupSearch('');
+                }}
+              >
+                <Text className="text-textSecondary">Annuler</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <Pressable
+              className="flex-row items-center py-2"
+              onPress={() => setIsAddingGroup(true)}
+            >
+              <Plus size={18} color="#8B5CF6" />
+              <Text className="text-primary ml-2">Ajouter un groupe</Text>
+            </Pressable>
+          )}
         </View>
       )}
 

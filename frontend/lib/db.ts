@@ -101,6 +101,24 @@ export const initDatabase = async () => {
       FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE CASCADE
     );
 
+    -- Groups
+    CREATE TABLE IF NOT EXISTS groups (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL UNIQUE COLLATE NOCASE,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now'))
+    );
+
+    -- Contact-Group relationship
+    CREATE TABLE IF NOT EXISTS contact_groups (
+      contact_id TEXT NOT NULL,
+      group_id TEXT NOT NULL,
+      created_at TEXT DEFAULT (datetime('now')),
+      PRIMARY KEY (contact_id, group_id),
+      FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE CASCADE,
+      FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE
+    );
+
     -- Index
     CREATE INDEX IF NOT EXISTS idx_contacts_last_contact ON contacts(last_contact_at DESC);
     CREATE INDEX IF NOT EXISTS idx_facts_contact ON facts(contact_id);
@@ -109,6 +127,8 @@ export const initDatabase = async () => {
     CREATE INDEX IF NOT EXISTS idx_similarity_lookup ON similarity_cache(fact_type, fact_value_1, fact_value_2);
     CREATE INDEX IF NOT EXISTS idx_hot_topics_contact ON hot_topics(contact_id);
     CREATE INDEX IF NOT EXISTS idx_hot_topics_status ON hot_topics(status);
+    CREATE INDEX IF NOT EXISTS idx_contact_groups_contact ON contact_groups(contact_id);
+    CREATE INDEX IF NOT EXISTS idx_contact_groups_group ON contact_groups(group_id);
   `);
 
   // Run migrations for existing databases
@@ -176,4 +196,26 @@ const runMigrations = async (database: SQLite.SQLiteDatabase) => {
   if (!hasResolution) {
     await database.execAsync("ALTER TABLE hot_topics ADD COLUMN resolution TEXT");
   }
+
+  // Create groups tables if not exist
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS groups (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL UNIQUE COLLATE NOCASE,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS contact_groups (
+      contact_id TEXT NOT NULL,
+      group_id TEXT NOT NULL,
+      created_at TEXT DEFAULT (datetime('now')),
+      PRIMARY KEY (contact_id, group_id),
+      FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE CASCADE,
+      FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_contact_groups_contact ON contact_groups(contact_id);
+    CREATE INDEX IF NOT EXISTS idx_contact_groups_group ON contact_groups(group_id);
+  `);
 };

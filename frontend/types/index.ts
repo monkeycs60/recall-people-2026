@@ -2,8 +2,6 @@
 // Enums et types de base
 // ============================================
 
-export type Tag = 'client' | 'prospect' | 'ami' | 'famille' | 'collegue' | 'autre';
-
 export type FactType =
   | 'work'        // Métier
   | 'company'     // Entreprise
@@ -47,7 +45,6 @@ export type Contact = {
   lastName?: string;
   nickname?: string;
   photoUri?: string;
-  tags: Tag[];
   highlights: string[];
   aiSummary?: string;
   lastContactAt?: string;
@@ -104,6 +101,13 @@ export type HotTopic = {
   resolvedAt?: string;
 };
 
+export type Group = {
+  id: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 // ============================================
 // Résultats d'extraction IA
 // ============================================
@@ -127,6 +131,13 @@ export type ResolvedTopic = {
   resolution: string;
 };
 
+export type SuggestedGroup = {
+  name: string;
+  isNew: boolean;
+  existingId?: string;
+  sourceFactType: FactType;
+};
+
 export type ExtractionResult = {
   contactIdentified: {
     id: string | null;
@@ -141,6 +152,7 @@ export type ExtractionResult = {
   facts: ExtractedFact[];
   hotTopics: ExtractedHotTopic[];
   resolvedTopics: ResolvedTopic[];
+  suggestedGroups?: SuggestedGroup[];
   note: {
     summary: string;
     keyPoints: string[];
@@ -155,6 +167,10 @@ export type ContactWithDetails = Contact & {
   facts: Fact[];
   notes: Note[];
   hotTopics: HotTopic[];
+};
+
+export type ContactWithGroups = Contact & {
+  groups: Group[];
 };
 
 export type DisambiguationOption = {
