@@ -167,12 +167,15 @@ export default function ReviewScreen() {
     setIsAddingGroup(false);
   };
 
+  const availableGroups = allGroups.filter((g) =>
+    !selectedGroups.some((sg) => sg.existingId === g.id || sg.name.toLowerCase() === g.name.toLowerCase())
+  );
+
   const filteredGroupsForSearch = newGroupSearch.trim()
-    ? allGroups.filter((g) =>
-        g.name.toLowerCase().includes(newGroupSearch.toLowerCase()) &&
-        !selectedGroups.some((sg) => sg.existingId === g.id || sg.name.toLowerCase() === g.name.toLowerCase())
+    ? availableGroups.filter((g) =>
+        g.name.toLowerCase().includes(newGroupSearch.toLowerCase())
       )
-    : [];
+    : availableGroups.slice(0, 5);
 
   const handleSave = async () => {
     if (isSaving) return;

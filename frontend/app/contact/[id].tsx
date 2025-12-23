@@ -200,12 +200,13 @@ export default function ContactDetailScreen() {
     setGroupSearchQuery('');
   };
 
+  const availableGroups = allGroups.filter((g) => !editedGroupIds.includes(g.id));
+
   const filteredGroupsForSearch = groupSearchQuery.trim()
-    ? allGroups.filter((g) =>
-        g.name.toLowerCase().includes(groupSearchQuery.toLowerCase()) &&
-        !editedGroupIds.includes(g.id)
+    ? availableGroups.filter((g) =>
+        g.name.toLowerCase().includes(groupSearchQuery.toLowerCase())
       )
-    : [];
+    : availableGroups.slice(0, 5);
 
   if (!contact) {
     return (

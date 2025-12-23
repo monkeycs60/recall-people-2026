@@ -103,40 +103,41 @@ export default function ContactsScreen() {
 
       {/* Group filter chips */}
       {groups.length > 0 && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          className="mb-4"
-          contentContainerStyle={{ paddingHorizontal: 24 }}
-        >
-          <Pressable
-            className={`px-4 py-2 rounded-full mr-2 ${
-              !selectedGroupId ? 'bg-primary' : 'bg-surface'
-            }`}
-            onPress={() => setSelectedGroup(null)}
+        <View className="px-6 mb-4">
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: 8 }}
           >
-            <Text className={!selectedGroupId ? 'text-white font-medium' : 'text-textSecondary'}>
-              Tous
-            </Text>
-          </Pressable>
-          {groups.map((group) => (
             <Pressable
-              key={group.id}
-              className={`px-4 py-2 rounded-full mr-2 ${
-                selectedGroupId === group.id ? 'bg-primary' : 'bg-surface'
+              className={`px-3 py-1.5 rounded-full ${
+                !selectedGroupId ? 'bg-primary' : 'bg-surface'
               }`}
-              onPress={() => setSelectedGroup(group.id)}
+              onPress={() => setSelectedGroup(null)}
             >
-              <Text
-                className={
-                  selectedGroupId === group.id ? 'text-white font-medium' : 'text-textSecondary'
-                }
-              >
-                {group.name}
+              <Text className={`text-sm ${!selectedGroupId ? 'text-white' : 'text-textSecondary'}`}>
+                Tous
               </Text>
             </Pressable>
-          ))}
-        </ScrollView>
+            {groups.map((group) => (
+              <Pressable
+                key={group.id}
+                className={`px-3 py-1.5 rounded-full ${
+                  selectedGroupId === group.id ? 'bg-primary' : 'bg-surface'
+                }`}
+                onPress={() => setSelectedGroup(group.id)}
+              >
+                <Text
+                  className={`text-sm ${
+                    selectedGroupId === group.id ? 'text-white' : 'text-textSecondary'
+                  }`}
+                >
+                  {group.name}
+                </Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+        </View>
       )}
 
       {filteredContacts.length === 0 && !isLoading ? (
