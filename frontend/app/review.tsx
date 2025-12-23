@@ -25,9 +25,25 @@ export default function ReviewScreen() {
   const transcription = params.transcription as string;
   const contactId = params.contactId as string;
 
+  // Debug: vérifier les résolutions de l'IA
+  console.log('=== EXTRACTION resolvedTopics ===', JSON.stringify(extraction.resolvedTopics, null, 2));
+
   const [selectedFacts, setSelectedFacts] = useState<number[]>(
     extraction.facts.map((_, index) => index)
   );
+  const [editableFacts, setEditableFacts] = useState(
+    extraction.facts.map((fact) => ({ ...fact }))
+  );
+  const [editingFactIndex, setEditingFactIndex] = useState<number | null>(null);
+
+  const [selectedHotTopics, setSelectedHotTopics] = useState<number[]>(
+    extraction.hotTopics?.map((_, index) => index) || []
+  );
+  const [editableHotTopics, setEditableHotTopics] = useState(
+    extraction.hotTopics?.map((topic) => ({ ...topic })) || []
+  );
+  const [editingHotTopicIndex, setEditingHotTopicIndex] = useState<number | null>(null);
+
   const [isSaving, setIsSaving] = useState(false);
   const [existingHotTopics, setExistingHotTopics] = useState<HotTopic[]>([]);
 
@@ -83,6 +99,28 @@ export default function ReviewScreen() {
     );
   };
 
+  const toggleHotTopic = (index: number) => {
+    setSelectedHotTopics((prev) =>
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
+    );
+  };
+
+  const updateFact = (index: number, field: 'factKey' | 'factValue', value: string) => {
+    setEditableFacts((prev) =>
+      prev.map((fact, factIndex) =>
+        factIndex === index ? { ...fact, [field]: value } : fact
+      )
+    );
+  };
+
+  const updateHotTopic = (index: number, field: 'title' | 'context', value: string) => {
+    setEditableHotTopics((prev) =>
+      prev.map((topic, topicIndex) =>
+        topicIndex === index ? { ...topic, [field]: value } : topic
+      )
+    );
+  };
+
   const handleSave = async () => {
     if (isSaving) return;
     setIsSaving(true);
@@ -114,7 +152,7 @@ export default function ReviewScreen() {
       ];
 
       for (const index of selectedFacts) {
-        const fact = extraction.facts[index];
+        const fact = editableFacts[index];
         const isCumulative = cumulativeTypes.includes(fact.factType);
 
         if (isCumulative) {
@@ -166,9 +204,10 @@ export default function ReviewScreen() {
         }
       }
 
-      // Save new hot topics
-      if (extraction.hotTopics && extraction.hotTopics.length > 0) {
-        for (const topic of extraction.hotTopics) {
+      // Save new hot topics (only selected ones)
+      if (editableHotTopics.length > 0) {
+        for (const index of selectedHotTopics) {
+          const topic = editableHotTopics[index];
           await hotTopicService.create({
             contactId: finalContactId,
             title: topic.title,
@@ -239,39 +278,74 @@ export default function ReviewScreen() {
         {contactId === 'new' ? 'Nouveau contact' : 'Mise à jour'}
       </Text>
 
-      {extraction.facts.length > 0 && (
+      {editableFacts.length > 0 && (
         <View className="mb-6">
           <Text className="text-lg font-semibold text-textPrimary mb-3">
             Informations extraites
           </Text>
 
-          {extraction.facts.map((fact, index) => (
-            <Pressable
-              key={index}
-              className="bg-surface p-4 rounded-lg mb-3 flex-row items-start"
-              onPress={() => toggleFact(index)}
-            >
-              <View
-                className={`w-5 h-5 rounded mr-3 items-center justify-center mt-0.5 ${
-                  selectedFacts.includes(index) ? 'bg-primary' : 'bg-surfaceHover'
-                }`}
-              >
-                {selectedFacts.includes(index) && (
-                  <Text className="text-white text-xs">✓</Text>
-                )}
-              </View>
+          {editableFacts.map((fact, index) => {
+            const isEditing = editingFactIndex === index;
 
-              <View className="flex-1">
-                <Text className="text-textSecondary text-sm">{fact.factKey}</Text>
-                <Text className="text-textPrimary font-medium">{fact.factValue}</Text>
-                {fact.action === 'update' && fact.previousValue && (
-                  <Text className="text-warning text-xs mt-1">
-                    Ancien: {fact.previousValue}
-                  </Text>
-                )}
+            if (isEditing) {
+              return (
+                <View key={index} className="bg-surface p-4 rounded-lg mb-3">
+                  <TextInput
+                    className="bg-background py-2 px-3 rounded-lg text-textSecondary text-sm mb-2"
+                    value={fact.factKey}
+                    onChangeText={(value) => updateFact(index, 'factKey', value)}
+                    placeholder="Label"
+                    placeholderTextColor="#71717a"
+                  />
+                  <TextInput
+                    className="bg-background py-2 px-3 rounded-lg text-textPrimary mb-3"
+                    value={fact.factValue}
+                    onChangeText={(value) => updateFact(index, 'factValue', value)}
+                    placeholder="Valeur"
+                    placeholderTextColor="#71717a"
+                  />
+                  <Pressable
+                    className="py-2 px-4 bg-primary/20 rounded items-center self-start"
+                    onPress={() => setEditingFactIndex(null)}
+                  >
+                    <Text className="text-primary font-medium">OK</Text>
+                  </Pressable>
+                </View>
+              );
+            }
+
+            return (
+              <View
+                key={index}
+                className="bg-surface p-4 rounded-lg mb-3 flex-row items-start"
+              >
+                <Pressable onPress={() => toggleFact(index)}>
+                  <View
+                    className={`w-5 h-5 rounded mr-3 items-center justify-center mt-0.5 ${
+                      selectedFacts.includes(index) ? 'bg-primary' : 'bg-surfaceHover'
+                    }`}
+                  >
+                    {selectedFacts.includes(index) && (
+                      <Text className="text-white text-xs">✓</Text>
+                    )}
+                  </View>
+                </Pressable>
+
+                <Pressable className="flex-1" onPress={() => setEditingFactIndex(index)}>
+                  <View className="flex-row items-center">
+                    <Text className="text-textSecondary text-sm flex-1">{fact.factKey}</Text>
+                    <Edit3 size={14} color="#9CA3AF" />
+                  </View>
+                  <Text className="text-textPrimary font-medium">{fact.factValue}</Text>
+                  {fact.action === 'update' && fact.previousValue && (
+                    <Text className="text-warning text-xs mt-1">
+                      Ancien: {fact.previousValue}
+                    </Text>
+                  )}
+                </Pressable>
               </View>
-            </Pressable>
-          ))}
+            );
+          })}
         </View>
       )}
 
@@ -362,12 +436,76 @@ export default function ReviewScreen() {
         </View>
       )}
 
-      <View className="mb-6">
-        <Text className="text-lg font-semibold text-textPrimary mb-3">Résumé</Text>
-        <View className="bg-surface p-4 rounded-lg">
-          <Text className="text-textPrimary">{extraction.note.summary}</Text>
+      {editableHotTopics.length > 0 && (
+        <View className="mb-6">
+          <Text className="text-lg font-semibold text-textPrimary mb-3">Actualité</Text>
+
+          {editableHotTopics.map((topic, index) => {
+            const isEditing = editingHotTopicIndex === index;
+
+            if (isEditing) {
+              return (
+                <View key={index} className="bg-surface p-4 rounded-lg mb-2">
+                  <TextInput
+                    className="bg-background py-2 px-3 rounded-lg text-textPrimary font-medium mb-2"
+                    value={topic.title}
+                    onChangeText={(value) => updateHotTopic(index, 'title', value)}
+                    placeholder="Titre"
+                    placeholderTextColor="#71717a"
+                  />
+                  <TextInput
+                    className="bg-background py-2 px-3 rounded-lg text-textSecondary mb-3"
+                    value={topic.context || ''}
+                    onChangeText={(value) => updateHotTopic(index, 'context', value)}
+                    placeholder="Contexte (optionnel)"
+                    placeholderTextColor="#71717a"
+                    multiline
+                  />
+                  <Pressable
+                    className="py-2 px-4 bg-primary/20 rounded items-center self-start"
+                    onPress={() => setEditingHotTopicIndex(null)}
+                  >
+                    <Text className="text-primary font-medium">OK</Text>
+                  </Pressable>
+                </View>
+              );
+            }
+
+            return (
+              <View
+                key={index}
+                className="bg-surface rounded-lg mb-2 flex-row items-start p-4"
+              >
+                <Pressable onPress={() => toggleHotTopic(index)}>
+                  <View
+                    className={`w-5 h-5 rounded mr-3 items-center justify-center mt-0.5 ${
+                      selectedHotTopics.includes(index) ? 'bg-primary' : 'bg-surfaceHover'
+                    }`}
+                  >
+                    {selectedHotTopics.includes(index) && (
+                      <Text className="text-white text-xs">✓</Text>
+                    )}
+                  </View>
+                </Pressable>
+
+                <View
+                  className="w-2.5 h-2.5 rounded-full mt-1.5 mr-3 bg-orange-500"
+                />
+
+                <Pressable className="flex-1" onPress={() => setEditingHotTopicIndex(index)}>
+                  <View className="flex-row items-center">
+                    <Text className="text-textPrimary font-medium flex-1">{topic.title}</Text>
+                    <Edit3 size={14} color="#9CA3AF" />
+                  </View>
+                  {topic.context && (
+                    <Text className="text-textSecondary text-sm mt-1">{topic.context}</Text>
+                  )}
+                </Pressable>
+              </View>
+            );
+          })}
         </View>
-      </View>
+      )}
 
       <Pressable
         className={`py-4 rounded-lg items-center ${isSaving ? 'bg-primary/50' : 'bg-primary'}`}

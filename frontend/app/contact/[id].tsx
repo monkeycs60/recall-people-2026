@@ -231,7 +231,7 @@ export default function ContactDetailScreen() {
 
       {/* Hot Topics Section - En premier pour l'actionnable */}
       <View className="mb-6">
-        <Text className="text-xl font-semibold text-textPrimary mb-3">Sujets chauds</Text>
+        <Text className="text-xl font-semibold text-textPrimary mb-3">Actualité</Text>
         <HotTopicsList
           hotTopics={contact.hotTopics}
           onResolve={handleResolveHotTopic}

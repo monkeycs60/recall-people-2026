@@ -46,7 +46,7 @@ export function HotTopicsList({
 
   const handleDelete = (topic: HotTopic) => {
     Alert.alert(
-      'Supprimer ce sujet',
+      'Supprimer cette actualité',
       `Supprimer "${topic.title}" ?`,
       [
         { text: 'Annuler', style: 'cancel' },
@@ -248,7 +248,7 @@ export function HotTopicsList({
       {activeTopics.length === 0 && resolvedTopics.length === 0 && (
         <View className="bg-surface/30 p-4 rounded-lg border border-dashed border-surfaceHover">
           <Text className="text-textMuted text-center">
-            Aucun sujet en cours
+            Aucune actualité en cours
           </Text>
         </View>
       )}
