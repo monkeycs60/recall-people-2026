@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { createAnthropic } from '@ai-sdk/anthropic';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
@@ -9,7 +9,6 @@ type Bindings = {
   BETTER_AUTH_SECRET: string;
   BETTER_AUTH_URL: string;
   DEEPGRAM_API_KEY: string;
-  ANTHROPIC_API_KEY: string;
   GOOGLE_GEMINI_API_KEY: string;
 };
 
@@ -97,14 +96,14 @@ extractRoutes.post('/', async (c) => {
       return c.json({ error: 'No transcription provided' }, 400);
     }
 
-    const anthropic = createAnthropic({
-      apiKey: c.env.ANTHROPIC_API_KEY,
+    const google = createGoogleGenerativeAI({
+      apiKey: c.env.GOOGLE_GEMINI_API_KEY,
     });
 
     const prompt = buildExtractionPrompt(transcription, currentContact);
 
     const { object: extraction } = await generateObject({
-			model: anthropic('claude-opus-4-5-20251101'),
+			model: google('gemini-3-flash-preview'),
 			schema: extractionSchema,
 			prompt,
 		});

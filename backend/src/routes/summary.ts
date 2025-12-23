@@ -1,10 +1,10 @@
 import { Hono } from 'hono';
-import { createAnthropic } from '@ai-sdk/anthropic';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateText } from 'ai';
 import { authMiddleware } from '../middleware/auth';
 
 type Bindings = {
-  ANTHROPIC_API_KEY: string;
+  GOOGLE_GEMINI_API_KEY: string;
 };
 
 type SummaryRequest = {
@@ -33,8 +33,8 @@ summaryRoutes.post('/', async (c) => {
     const body = await c.req.json<SummaryRequest>();
     const { contact, facts, hotTopics } = body;
 
-    const anthropic = createAnthropic({
-      apiKey: c.env.ANTHROPIC_API_KEY,
+    const google = createGoogleGenerativeAI({
+      apiKey: c.env.GOOGLE_GEMINI_API_KEY,
     });
 
     const factsText = facts.map((fact) => `${fact.factKey}: ${fact.factValue}`).join('\n');
@@ -60,9 +60,9 @@ Règles:
 - Pas de liste, que du texte fluide`;
 
     const { text } = await generateText({
-      model: anthropic('claude-sonnet-4-20250514'),
+      model: google('gemini-3-flash-preview'),
       prompt,
-      maxTokens: 200,
+      maxOutputTokens: 200,
     });
 
     return c.json({

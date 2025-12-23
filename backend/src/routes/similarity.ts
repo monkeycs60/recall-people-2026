@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { createAnthropic } from '@ai-sdk/anthropic';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
@@ -8,7 +8,7 @@ type Bindings = {
 	DATABASE_URL: string;
 	BETTER_AUTH_SECRET: string;
 	BETTER_AUTH_URL: string;
-	ANTHROPIC_API_KEY: string;
+	GOOGLE_GEMINI_API_KEY: string;
 };
 
 type FactInput = {
@@ -63,14 +63,14 @@ similarityRoutes.post('/batch', async (c) => {
 			return c.json({ success: true, similarities: [] });
 		}
 
-		const anthropic = createAnthropic({
-			apiKey: c.env.ANTHROPIC_API_KEY,
+		const google = createGoogleGenerativeAI({
+			apiKey: c.env.GOOGLE_GEMINI_API_KEY,
 		});
 
 		const prompt = buildSimilarityPrompt(typesWithMultipleValues);
 
 		const { object: result } = await generateObject({
-			model: anthropic('claude-opus-4-5-20251101'),
+			model: google('gemini-3-flash-preview'),
 			schema: similaritySchema,
 			prompt,
 		});
