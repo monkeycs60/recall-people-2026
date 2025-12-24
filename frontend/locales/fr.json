@@ -1,0 +1,66 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "confirm": "Confirmer",
+    "back": "Retour",
+    "error": "Erreur",
+    "success": "Succès"
+  },
+  "tabs": {
+    "home": "Accueil",
+    "contacts": "Contacts",
+    "search": "Recherche",
+    "profile": "Profil"
+  },
+  "home": {
+    "pressToRecord": "Appuie pour enregistrer",
+    "recording": "Enregistrement...",
+    "processing": "Traitement...",
+    "transcribing": "Transcription..."
+  },
+  "contacts": {
+    "title": "Contacts",
+    "searchPlaceholder": "Rechercher un contact...",
+    "noContacts": "Aucun contact",
+    "addFirst": "Enregistrez une note vocale pour ajouter votre premier contact"
+  },
+  "search": {
+    "title": "Recherche",
+    "placeholder": "Rechercher dans vos contacts...",
+    "noResults": "Aucun résultat",
+    "searching": "Recherche en cours..."
+  },
+  "profile": {
+    "title": "Profil",
+    "connectedWith": "Connecté via {{provider}}",
+    "sections": {
+      "language": "Langue",
+      "data": "Données",
+      "about": "À propos"
+    },
+    "language": {
+      "appLanguage": "Langue de l'app",
+      "appLanguageDescription": "App + transcription IA"
+    },
+    "data": {
+      "statistics": "Statistiques",
+      "export": "Exporter mes données",
+      "clearCache": "Vider le cache"
+    },
+    "about": {
+      "version": "Version",
+      "feedback": "Donner un feedback",
+      "legal": "Mentions légales"
+    },
+    "logout": "Se déconnecter",
+    "logoutConfirm": "Voulez-vous vraiment vous déconnecter ?"
+  },
+  "languagePicker": {
+    "title": "Choisir la langue",
+    "description": "Cette langue sera utilisée pour l'interface et la transcription vocale"
+  }
+}
