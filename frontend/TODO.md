@@ -1,0 +1,3 @@
+- connecteur google authentication
+- implémentation google calendar par événements futurs dans hot topics
+- RAG pour les infos sur les contacts ??

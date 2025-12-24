@@ -1,6 +1,6 @@
 import * as Crypto from 'expo-crypto';
 import { getDatabase } from '@/lib/db';
-import { Contact, ContactWithDetails, Fact, Note } from '@/types';
+import { Contact, ContactWithDetails, Fact, Note, Memory } from '@/types';
 
 export const contactService = {
   getAll: async (): Promise<Contact[]> => {
@@ -83,6 +83,16 @@ export const contactService = {
       resolved_at: string | null;
     }>('SELECT * FROM hot_topics WHERE contact_id = ? ORDER BY created_at DESC', [id]);
 
+    const memoriesRows = await db.getAllAsync<{
+      id: string;
+      contact_id: string;
+      description: string;
+      event_date: string | null;
+      is_shared: number;
+      source_note_id: string | null;
+      created_at: string;
+    }>('SELECT * FROM memories WHERE contact_id = ? ORDER BY created_at DESC', [id]);
+
     const contact: ContactWithDetails = {
       id: contactRow.id,
       firstName: contactRow.first_name,
@@ -126,6 +136,15 @@ export const contactService = {
         createdAt: row.created_at,
         updatedAt: row.updated_at,
         resolvedAt: row.resolved_at || undefined,
+      })),
+      memories: memoriesRows.map((row) => ({
+        id: row.id,
+        contactId: row.contact_id,
+        description: row.description,
+        eventDate: row.event_date || undefined,
+        isShared: Boolean(row.is_shared),
+        sourceNoteId: row.source_note_id || undefined,
+        createdAt: row.created_at,
       })),
     };
 

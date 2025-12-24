@@ -73,6 +73,13 @@ const extractionSchema = z.object({
       resolution: z.string().describe('Ce qui s\'est passé / comment ça s\'est terminé (ex: "A couru le marathon en 3h12", "A eu son examen avec mention")'),
     })
   ).describe('Sujets chauds existants qui semblent résolus/terminés selon la note, avec leur résolution'),
+  memories: z.array(
+    z.object({
+      description: z.string().describe('Description courte de l\'événement/souvenir (ex: "Saut à l\'élastique à Chamonix", "Week-end à la Baule ensemble")'),
+      eventDate: z.string().nullable().describe('Date approximative si mentionnée (ex: "novembre 2024", "la semaine dernière")'),
+      isShared: z.boolean().describe('true si c\'est un moment vécu ENSEMBLE avec le contact, false si c\'est quelque chose que le contact a fait seul'),
+    })
+  ).describe('Événements ponctuels/souvenirs marquants (PAS des loisirs réguliers). Ex: saut à l\'élastique, voyage, sortie exceptionnelle'),
   suggestedGroups: z.array(
     z.object({
       name: z.string().describe('Nom du groupe suggéré'),
@@ -162,6 +169,11 @@ extractRoutes.post('/', async (c) => {
       facts: extraction.facts,
       hotTopics: extraction.hotTopics,
       resolvedTopics: extraction.resolvedTopics,
+      memories: extraction.memories.map((memory) => ({
+        description: memory.description,
+        eventDate: memory.eventDate || undefined,
+        isShared: memory.isShared,
+      })),
       suggestedGroups: processedGroups,
       note: {
         summary: extraction.hotTopics.length > 0
@@ -267,7 +279,23 @@ RÈGLES D'EXTRACTION:
    - Ne marque comme résolu QUE si la transcription indique CLAIREMENT que c'est terminé
    - La résolution doit être COURTE (quelques mots) mais INFORMATIVE
 
-6. SUGGESTION DE GROUPES (uniquement si pas de currentContact fourni):
+6. MEMORIES (Souvenirs / Événements ponctuels):
+   DISTINCTION IMPORTANTE entre hobby (fact) et memory:
+   - HOBBY/SPORT (fact): activité pratiquée RÉGULIÈREMENT ou comme loisir habituel
+     Ex: "Il fait du running", "Elle joue aux échecs", "Il fait de l'escalade"
+   - MEMORY: événement PONCTUEL, exceptionnel, une expérience unique
+     Ex: "Il a fait un saut à l'élastique", "On est allés à la Baule ensemble", "Elle a fait un trek au Népal"
+
+   Types de memories:
+   - Sorties exceptionnelles: restaurant spécial, concert, événement
+   - Voyages/excursions: week-end quelque part, vacances
+   - Expériences uniques: saut en parachute, baptême de plongée
+   - Moments partagés ensemble: "on a fait X ensemble"
+
+   isShared = true si TU as vécu ça AVEC la personne
+   isShared = false si la personne a fait ça de son côté
+
+7. SUGGESTION DE GROUPES (uniquement si pas de currentContact fourni):
    Suggère des groupes basés sur les facts de type contextuel:
    - company: nom de l'entreprise → groupe (ex: "Affilae" → groupe "Affilae")
    - how_met: contexte de rencontre → groupe (ex: "meetup React" → groupe "Meetup React")
@@ -277,9 +305,10 @@ RÈGLES D'EXTRACTION:
    Si currentContact est fourni, retourne un tableau vide pour suggestedGroups.
 
 RÈGLES:
-- facts = infos PERMANENTES du profil
+- facts = infos PERMANENTES du profil (hobbies = activités régulières)
 - hotTopics = NOUVEAUX sujets TEMPORAIRES à suivre (pas ceux existants)
 - resolvedTopics = sujets existants TERMINÉS avec leur résolution
+- memories = événements PONCTUELS / souvenirs (PAS des hobbies réguliers)
 - suggestedGroups = groupes suggérés UNIQUEMENT pour nouveaux contacts
 - N'extrais QUE ce qui est EXPLICITEMENT mentionné
 - action="add" pour nouvelle info, "update" si modification d'un fact existant`;

@@ -101,6 +101,16 @@ export type HotTopic = {
   resolvedAt?: string;
 };
 
+export type Memory = {
+  id: string;
+  contactId: string;
+  description: string;
+  eventDate?: string;
+  isShared: boolean;
+  sourceNoteId?: string;
+  createdAt: string;
+};
+
 export type Group = {
   id: string;
   name: string;
@@ -131,6 +141,12 @@ export type ResolvedTopic = {
   resolution: string;
 };
 
+export type ExtractedMemory = {
+  description: string;
+  eventDate?: string;
+  isShared: boolean;
+};
+
 export type SuggestedGroup = {
   name: string;
   isNew: boolean;
@@ -152,6 +168,7 @@ export type ExtractionResult = {
   facts: ExtractedFact[];
   hotTopics: ExtractedHotTopic[];
   resolvedTopics: ResolvedTopic[];
+  memories: ExtractedMemory[];
   suggestedGroups?: SuggestedGroup[];
   note: {
     summary: string;
@@ -167,6 +184,7 @@ export type ContactWithDetails = Contact & {
   facts: Fact[];
   notes: Note[];
   hotTopics: HotTopic[];
+  memories: Memory[];
 };
 
 export type ContactWithGroups = Contact & {

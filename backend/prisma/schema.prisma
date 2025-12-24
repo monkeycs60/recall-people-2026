@@ -89,9 +89,10 @@ model Contact {
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
-  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  facts Fact[]
-  notes Note[]
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  facts    Fact[]
+  notes    Note[]
+  memories Memory[]
 
   @@map("contacts")
 }
@@ -125,4 +126,18 @@ model Note {
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notes")
+}
+
+model Memory {
+  id           String   @id @default(cuid())
+  contactId    String   @map("contact_id")
+  description  String
+  eventDate    String?  @map("event_date")
+  isShared     Boolean  @default(false) @map("is_shared")
+  sourceNoteId String?  @map("source_note_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@map("memories")
 }

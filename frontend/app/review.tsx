@@ -2,11 +2,12 @@ import { View, Text, ScrollView, Pressable, TextInput } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ExtractionResult, HotTopic, ResolvedTopic, Group, SuggestedGroup } from '@/types';
+import { ExtractionResult, HotTopic, ResolvedTopic, Group, SuggestedGroup, ExtractedMemory } from '@/types';
 import { useContacts } from '@/hooks/useContacts';
 import { useNotes } from '@/hooks/useNotes';
 import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
+import { memoryService } from '@/services/memory.service';
 import { contactService } from '@/services/contact.service';
 import { groupService } from '@/services/group.service';
 import { generateSummary } from '@/lib/api';
@@ -44,6 +45,14 @@ export default function ReviewScreen() {
     extraction.hotTopics?.map((topic) => ({ ...topic })) || []
   );
   const [editingHotTopicIndex, setEditingHotTopicIndex] = useState<number | null>(null);
+
+  const [selectedMemories, setSelectedMemories] = useState<number[]>(
+    extraction.memories?.map((_, index) => index) || []
+  );
+  const [editableMemories, setEditableMemories] = useState<ExtractedMemory[]>(
+    extraction.memories?.map((memory) => ({ ...memory })) || []
+  );
+  const [editingMemoryIndex, setEditingMemoryIndex] = useState<number | null>(null);
 
   const [isSaving, setIsSaving] = useState(false);
   const [existingHotTopics, setExistingHotTopics] = useState<HotTopic[]>([]);
@@ -139,6 +148,20 @@ export default function ReviewScreen() {
     setEditableHotTopics((prev) =>
       prev.map((topic, topicIndex) =>
         topicIndex === index ? { ...topic, [field]: value } : topic
+      )
+    );
+  };
+
+  const toggleMemory = (index: number) => {
+    setSelectedMemories((prev) =>
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
+    );
+  };
+
+  const updateMemory = (index: number, field: 'description' | 'eventDate', value: string) => {
+    setEditableMemories((prev) =>
+      prev.map((memory, memoryIndex) =>
+        memoryIndex === index ? { ...memory, [field]: value } : memory
       )
     );
   };
@@ -291,6 +314,20 @@ export default function ReviewScreen() {
       if (resolvedTopicsState.length > 0) {
         for (const resolved of resolvedTopicsState) {
           await hotTopicService.resolve(resolved.id, resolved.resolution || undefined);
+        }
+      }
+
+      // Save new memories (only selected ones)
+      if (editableMemories.length > 0) {
+        for (const index of selectedMemories) {
+          const memory = editableMemories[index];
+          await memoryService.create({
+            contactId: finalContactId,
+            description: memory.description,
+            eventDate: memory.eventDate || undefined,
+            isShared: memory.isShared,
+            sourceNoteId: note.id,
+          });
         }
       }
 
@@ -651,6 +688,84 @@ export default function ReviewScreen() {
                   {topic.context && (
                     <Text className="text-textSecondary text-sm mt-1">{topic.context}</Text>
                   )}
+                </Pressable>
+              </View>
+            );
+          })}
+        </View>
+      )}
+
+      {editableMemories.length > 0 && (
+        <View className="mb-6">
+          <Text className="text-lg font-semibold text-textPrimary mb-3">Souvenirs</Text>
+
+          {editableMemories.map((memory, index) => {
+            const isEditing = editingMemoryIndex === index;
+
+            if (isEditing) {
+              return (
+                <View key={index} className="bg-surface p-4 rounded-lg mb-2">
+                  <TextInput
+                    className="bg-background py-2 px-3 rounded-lg text-textPrimary mb-2"
+                    value={memory.description}
+                    onChangeText={(value) => updateMemory(index, 'description', value)}
+                    placeholder="Description"
+                    placeholderTextColor="#71717a"
+                    multiline
+                  />
+                  <TextInput
+                    className="bg-background py-2 px-3 rounded-lg text-textSecondary mb-3"
+                    value={memory.eventDate || ''}
+                    onChangeText={(value) => updateMemory(index, 'eventDate', value)}
+                    placeholder="Date (optionnel)"
+                    placeholderTextColor="#71717a"
+                  />
+                  <Pressable
+                    className="py-2 px-4 bg-primary/20 rounded items-center self-start"
+                    onPress={() => setEditingMemoryIndex(null)}
+                  >
+                    <Text className="text-primary font-medium">OK</Text>
+                  </Pressable>
+                </View>
+              );
+            }
+
+            return (
+              <View
+                key={index}
+                className="bg-surface rounded-lg mb-2 flex-row items-start p-4"
+              >
+                <Pressable onPress={() => toggleMemory(index)}>
+                  <View
+                    className={`w-5 h-5 rounded mr-3 items-center justify-center mt-0.5 ${
+                      selectedMemories.includes(index) ? 'bg-primary' : 'bg-surfaceHover'
+                    }`}
+                  >
+                    {selectedMemories.includes(index) && (
+                      <Text className="text-white text-xs">✓</Text>
+                    )}
+                  </View>
+                </Pressable>
+
+                <View
+                  className={`w-2.5 h-2.5 rounded-full mt-1.5 mr-3 ${
+                    memory.isShared ? 'bg-blue-500' : 'bg-purple-500'
+                  }`}
+                />
+
+                <Pressable className="flex-1" onPress={() => setEditingMemoryIndex(index)}>
+                  <View className="flex-row items-center">
+                    <Text className="text-textPrimary font-medium flex-1">{memory.description}</Text>
+                    <Edit3 size={14} color="#9CA3AF" />
+                  </View>
+                  <View className="flex-row items-center mt-1">
+                    {memory.eventDate && (
+                      <Text className="text-textSecondary text-sm mr-2">{memory.eventDate}</Text>
+                    )}
+                    <Text className="text-textMuted text-xs">
+                      {memory.isShared ? 'Ensemble' : 'Solo'}
+                    </Text>
+                  </View>
                 </Pressable>
               </View>
             );

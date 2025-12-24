@@ -8,12 +8,14 @@ import { useContactQuery } from '@/hooks/useContactQuery';
 import { Fact, Group } from '@/types';
 import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
+import { memoryService } from '@/services/memory.service';
 import { noteService } from '@/services/note.service';
 import { groupService } from '@/services/group.service';
 import { Edit3, Mic, X, Plus } from 'lucide-react-native';
 import { AISummary } from '@/components/contact/AISummary';
 import { ProfileCard } from '@/components/contact/ProfileCard';
 import { HotTopicsList } from '@/components/contact/HotTopicsList';
+import { MemoriesList } from '@/components/contact/MemoriesList';
 import { TranscriptionArchive } from '@/components/contact/TranscriptionArchive';
 
 type EditingFact = {
@@ -156,6 +158,16 @@ export default function ContactDetailScreen() {
 
   const handleDeleteNote = async (id: string) => {
     await noteService.delete(id);
+    invalidate();
+  };
+
+  const handleEditMemory = async (id: string, data: { description: string; eventDate?: string }) => {
+    await memoryService.update(id, data);
+    invalidate();
+  };
+
+  const handleDeleteMemory = async (id: string) => {
+    await memoryService.delete(id);
     invalidate();
   };
 
@@ -447,6 +459,18 @@ export default function ContactDetailScreen() {
           />
         )}
       </View>
+
+      {/* Memories Section */}
+      {contact.memories.length > 0 && (
+        <View className="mb-6">
+          <Text className="text-xl font-semibold text-textPrimary mb-3">Souvenirs</Text>
+          <MemoriesList
+            memories={contact.memories}
+            onEdit={handleEditMemory}
+            onDelete={handleDeleteMemory}
+          />
+        </View>
+      )}
 
       {/* Transcriptions Archive */}
       <View className="mb-6">

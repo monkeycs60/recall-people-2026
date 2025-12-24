@@ -119,6 +119,18 @@ export const initDatabase = async () => {
       FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE
     );
 
+    -- Memories (événements ponctuels / souvenirs)
+    CREATE TABLE IF NOT EXISTS memories (
+      id TEXT PRIMARY KEY,
+      contact_id TEXT NOT NULL,
+      description TEXT NOT NULL,
+      event_date TEXT,
+      is_shared INTEGER DEFAULT 0,
+      source_note_id TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE CASCADE
+    );
+
     -- Index
     CREATE INDEX IF NOT EXISTS idx_contacts_last_contact ON contacts(last_contact_at DESC);
     CREATE INDEX IF NOT EXISTS idx_facts_contact ON facts(contact_id);
@@ -129,6 +141,8 @@ export const initDatabase = async () => {
     CREATE INDEX IF NOT EXISTS idx_hot_topics_status ON hot_topics(status);
     CREATE INDEX IF NOT EXISTS idx_contact_groups_contact ON contact_groups(contact_id);
     CREATE INDEX IF NOT EXISTS idx_contact_groups_group ON contact_groups(group_id);
+    CREATE INDEX IF NOT EXISTS idx_memories_contact ON memories(contact_id);
+    CREATE INDEX IF NOT EXISTS idx_memories_created ON memories(created_at DESC);
   `);
 
   // Run migrations for existing databases
@@ -217,5 +231,21 @@ const runMigrations = async (database: SQLite.SQLiteDatabase) => {
 
     CREATE INDEX IF NOT EXISTS idx_contact_groups_contact ON contact_groups(contact_id);
     CREATE INDEX IF NOT EXISTS idx_contact_groups_group ON contact_groups(group_id);
+  `);
+
+  // Create memories table if not exists
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS memories (
+      id TEXT PRIMARY KEY,
+      contact_id TEXT NOT NULL,
+      description TEXT NOT NULL,
+      event_date TEXT,
+      is_shared INTEGER DEFAULT 0,
+      source_note_id TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_memories_contact ON memories(contact_id);
+    CREATE INDEX IF NOT EXISTS idx_memories_created ON memories(created_at DESC);
   `);
 };
