@@ -13,6 +13,7 @@ export default function SearchScreen() {
   const { loadContacts } = useContactsStore();
   const { results, isLoading, error, search, clearResults } = useSemanticSearch();
   const [query, setQuery] = useState('');
+  const [hasSearched, setHasSearched] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -22,18 +23,21 @@ export default function SearchScreen() {
 
   const handleSubmit = () => {
     if (query.trim()) {
+      setHasSearched(true);
       search(query.trim());
     }
   };
 
   const handleClear = () => {
     setQuery('');
+    setHasSearched(false);
     clearResults();
   };
 
   const handleChangeText = (text: string) => {
     setQuery(text);
     if (text.length === 0) {
+      setHasSearched(false);
       clearResults();
     }
   };
@@ -68,7 +72,7 @@ export default function SearchScreen() {
         {isLoading ? (
           <SearchSkeleton />
         ) : (
-          <SearchResults results={results} query={query} />
+          <SearchResults results={results} hasSearched={hasSearched} />
         )}
       </View>
     </KeyboardAvoidingView>
