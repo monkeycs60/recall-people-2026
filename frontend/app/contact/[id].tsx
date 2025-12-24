@@ -55,7 +55,7 @@ export default function ContactDetailScreen() {
   const contactId = params.id as string;
 
   const { deleteContact, updateContact } = useContacts();
-  const { contact, isWaitingForSummary, invalidate } = useContactQuery(contactId);
+  const { contact, isLoading, isWaitingForSummary, invalidate } = useContactQuery(contactId);
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedFirstName, setEditedFirstName] = useState('');
@@ -316,10 +316,18 @@ export default function ContactDetailScreen() {
       )
     : availableGroups.slice(0, 5);
 
-  if (!contact) {
+  if (isLoading) {
     return (
       <View className="flex-1 bg-background items-center justify-center">
         <Text className="text-textSecondary">Chargement...</Text>
+      </View>
+    );
+  }
+
+  if (!contact) {
+    return (
+      <View className="flex-1 bg-background items-center justify-center">
+        <Text className="text-textSecondary">Contact introuvable</Text>
       </View>
     );
   }
