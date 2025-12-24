@@ -1,5 +1,6 @@
-import { View, Text, ScrollView, Pressable, TextInput, Alert } from 'react-native';
+import { View, Text, ScrollView, Pressable, TextInput, Alert, Platform, KeyboardAvoidingView } from 'react-native';
 import { useState, useCallback, useRef, useEffect } from 'react';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -81,7 +82,8 @@ export default function ContactDetailScreen() {
 
   const [isAddingMemory, setIsAddingMemory] = useState(false);
   const [newMemoryDescription, setNewMemoryDescription] = useState('');
-  const [newMemoryEventDate, setNewMemoryEventDate] = useState('');
+  const [newMemoryEventDate, setNewMemoryEventDate] = useState<Date | null>(null);
+  const [showMemoryDatePicker, setShowMemoryDatePicker] = useState(false);
   const [newMemoryIsShared, setNewMemoryIsShared] = useState(false);
 
   const [isAddingFact, setIsAddingFact] = useState(false);
@@ -251,11 +253,12 @@ export default function ContactDetailScreen() {
     await memoryService.create({
       contactId,
       description: newMemoryDescription.trim(),
-      eventDate: newMemoryEventDate.trim() || undefined,
+      eventDate: newMemoryEventDate ? newMemoryEventDate.toISOString().split('T')[0] : undefined,
       isShared: newMemoryIsShared,
     });
     setNewMemoryDescription('');
-    setNewMemoryEventDate('');
+    setNewMemoryEventDate(null);
+    setShowMemoryDatePicker(false);
     setNewMemoryIsShared(false);
     setIsAddingMemory(false);
     invalidate();
@@ -351,11 +354,17 @@ export default function ContactDetailScreen() {
   }
 
   return (
-    <ScrollView
-      ref={scrollViewRef}
-      className="flex-1 bg-background px-6"
-      contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1 }}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
     >
+      <ScrollView
+        ref={scrollViewRef}
+        className="flex-1 bg-background px-6"
+        contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
+        keyboardShouldPersistTaps="handled"
+      >
       {/* Header with name */}
       <View className="mb-6 mt-4">
         {isEditingName ? (
@@ -629,8 +638,8 @@ export default function ContactDetailScreen() {
             </Pressable>
 
             {showFactTypeDropdown && (
-              <View className="bg-background rounded-lg mb-3 max-h-48">
-                <ScrollView>
+              <View className="bg-background rounded-lg mb-3" style={{ maxHeight: 200 }}>
+                <ScrollView nestedScrollEnabled showsVerticalScrollIndicator>
                   {getAvailableFactTypes().map((type) => (
                     <Pressable
                       key={type}
@@ -747,13 +756,43 @@ export default function ContactDetailScreen() {
               numberOfLines={2}
             />
             <Text className="text-textSecondary text-sm mb-2">Date de l'événement (optionnel)</Text>
-            <TextInput
-              className="bg-background py-3 px-4 rounded-lg text-textPrimary mb-3"
-              value={newMemoryEventDate}
-              onChangeText={setNewMemoryEventDate}
-              placeholder="Ex: 2024-01-15"
-              placeholderTextColor="#71717a"
-            />
+            <Pressable
+              className="bg-background py-3 px-4 rounded-lg mb-3"
+              onPress={() => setShowMemoryDatePicker(true)}
+            >
+              <Text className={newMemoryEventDate ? "text-textPrimary" : "text-textMuted"}>
+                {newMemoryEventDate
+                  ? newMemoryEventDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+                  : "Sélectionner une date..."}
+              </Text>
+            </Pressable>
+            {showMemoryDatePicker && (
+              <View className="mb-3">
+                <DateTimePicker
+                  value={newMemoryEventDate || new Date()}
+                  mode="date"
+                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                  onChange={(event, selectedDate) => {
+                    if (Platform.OS === 'android') {
+                      setShowMemoryDatePicker(false);
+                    }
+                    if (event.type === 'set' && selectedDate) {
+                      setNewMemoryEventDate(selectedDate);
+                    }
+                  }}
+                  maximumDate={new Date()}
+                  locale="fr"
+                />
+                {Platform.OS === 'ios' && (
+                  <Pressable
+                    className="py-2 items-center"
+                    onPress={() => setShowMemoryDatePicker(false)}
+                  >
+                    <Text className="text-primary font-medium">Valider</Text>
+                  </Pressable>
+                )}
+              </View>
+            )}
             <Pressable
               className="flex-row items-center mb-3"
               onPress={() => setNewMemoryIsShared(!newMemoryIsShared)}
@@ -769,7 +808,8 @@ export default function ContactDetailScreen() {
                 onPress={() => {
                   setIsAddingMemory(false);
                   setNewMemoryDescription('');
-                  setNewMemoryEventDate('');
+                  setNewMemoryEventDate(null);
+                  setShowMemoryDatePicker(false);
                   setNewMemoryIsShared(false);
                 }}
               >
@@ -824,6 +864,7 @@ export default function ContactDetailScreen() {
       >
         <Text className="text-error font-semibold">Supprimer le contact</Text>
       </Pressable>
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

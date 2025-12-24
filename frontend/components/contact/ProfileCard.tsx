@@ -43,8 +43,10 @@ type GroupedFacts = {
 export function ProfileCard({ facts, onEditFact, onDeleteFact, highlightId }: ProfileCardProps) {
   const [expandedType, setExpandedType] = useState<FactType | null>(null);
 
-  // Grouper les facts par type
-  const groupedByType = facts.reduce<Record<FactType, Fact[]>>((acc, fact) => {
+  // Filtrer les facts avec des valeurs vides puis grouper par type
+  const validFacts = facts.filter((fact) => fact.factValue && fact.factValue.trim() !== '');
+
+  const groupedByType = validFacts.reduce<Record<FactType, Fact[]>>((acc, fact) => {
     if (!acc[fact.factType]) {
       acc[fact.factType] = [];
     }
@@ -64,7 +66,7 @@ export function ProfileCard({ facts, onEditFact, onDeleteFact, highlightId }: Pr
   const primaryGroups = groups.filter((group) => ['work', 'company'].includes(group.type));
   const secondaryGroups = groups.filter((group) => !['work', 'company'].includes(group.type));
 
-  const renderSingularFact = (fact: Fact, isPrimary = false) => {
+  const renderSingularFact = (fact: Fact) => {
     const config = FACT_TYPE_CONFIG[fact.factType] || FACT_TYPE_CONFIG.other;
     const isExpanded = expandedType === fact.factType;
     const isHighlighted = highlightId === fact.id;
@@ -72,7 +74,7 @@ export function ProfileCard({ facts, onEditFact, onDeleteFact, highlightId }: Pr
     return (
       <View
         key={fact.id}
-        className={`rounded-lg overflow-hidden ${isPrimary ? 'flex-1' : 'mb-2'}`}
+        className="rounded-lg overflow-hidden mb-2"
         style={{
           backgroundColor: isHighlighted ? '#8b5cf620' : '#18181b',
           borderWidth: isHighlighted ? 2 : 0,
@@ -84,7 +86,7 @@ export function ProfileCard({ facts, onEditFact, onDeleteFact, highlightId }: Pr
           onPress={() => onEditFact(fact)}
         >
           <View className="flex-1">
-            <Text className={`text-textPrimary ${isPrimary ? 'font-semibold text-lg' : 'font-medium'}`}>
+            <Text className="text-textPrimary font-medium">
               {fact.factValue}
             </Text>
             <Text className="text-textSecondary text-xs mt-0.5">{config.label}</Text>
@@ -190,17 +192,15 @@ export function ProfileCard({ facts, onEditFact, onDeleteFact, highlightId }: Pr
     );
   };
 
-  const renderGroup = (group: GroupedFacts, isPrimary = false) => {
+  const renderGroup = (group: GroupedFacts) => {
     if (group.config.singular) {
-      // Pour les types singuliers, on affiche le premier fact (le plus récent)
-      return renderSingularFact(group.facts[0], isPrimary);
+      return renderSingularFact(group.facts[0]);
     } else {
-      // Pour les types cumulatifs, on groupe dans une seule carte
       return renderCumulativeGroup(group);
     }
   };
 
-  if (facts.length === 0) {
+  if (validFacts.length === 0) {
     return (
       <View className="bg-surface/30 p-4 rounded-lg border border-dashed border-surfaceHover">
         <Text className="text-textMuted text-center">
@@ -212,12 +212,8 @@ export function ProfileCard({ facts, onEditFact, onDeleteFact, highlightId }: Pr
 
   return (
     <View>
-      {primaryGroups.length > 0 && (
-        <View className="flex-row gap-2 mb-3">
-          {primaryGroups.map((group) => renderGroup(group, true))}
-        </View>
-      )}
-      {secondaryGroups.map((group) => renderGroup(group, false))}
+      {primaryGroups.map((group) => renderGroup(group))}
+      {secondaryGroups.map((group) => renderGroup(group))}
     </View>
   );
 }
