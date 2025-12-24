@@ -24,13 +24,16 @@ export const useAuthStore = create<AuthState & AuthActions>()(
   devtools(
     (set, get) => ({
       user: null,
-      isLoading: true,
+      isLoading: false,
       isInitialized: false,
 
       setUser: (user) => set({ user }),
 
       initialize: async () => {
-        if (get().isInitialized) return;
+        const state = get();
+
+        // Prevent multiple concurrent initializations
+        if (state.isInitialized || state.isLoading) return;
 
         set({ isLoading: true });
 
@@ -52,9 +55,14 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
       logout: async () => {
         await clearAuth();
-        set({ user: null });
+        set({ user: null, isInitialized: false });
       },
     }),
     { name: 'auth-store' }
   )
 );
+
+// Reset initialization flag on module reload (for development hot reload)
+if (__DEV__) {
+  useAuthStore.setState({ isInitialized: false });
+}
