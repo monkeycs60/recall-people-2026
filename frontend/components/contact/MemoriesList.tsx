@@ -7,9 +7,10 @@ type MemoriesListProps = {
   memories: Memory[];
   onEdit: (id: string, data: { description: string; eventDate?: string }) => void;
   onDelete: (id: string) => void;
+  highlightId?: string;
 };
 
-export function MemoriesList({ memories, onEdit, onDelete }: MemoriesListProps) {
+export function MemoriesList({ memories, onEdit, onDelete, highlightId }: MemoriesListProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDescription, setEditDescription] = useState('');
   const [editEventDate, setEditEventDate] = useState('');
@@ -91,8 +92,18 @@ export function MemoriesList({ memories, onEdit, onDelete }: MemoriesListProps) 
           );
         }
 
+        const isHighlighted = highlightId === memory.id;
+
         return (
-          <View key={memory.id} className="bg-surface rounded-lg mb-2 overflow-hidden">
+          <View
+            key={memory.id}
+            className="rounded-lg mb-2 overflow-hidden"
+            style={{
+              backgroundColor: isHighlighted ? '#8b5cf620' : '#18181b',
+              borderWidth: isHighlighted ? 2 : 0,
+              borderColor: isHighlighted ? '#8b5cf6' : 'transparent',
+            }}
+          >
             <Pressable
               className="p-4 flex-row items-start"
               onPress={() => handleStartEdit(memory)}

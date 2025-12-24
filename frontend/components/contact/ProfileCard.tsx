@@ -7,6 +7,7 @@ type ProfileCardProps = {
   facts: Fact[];
   onEditFact: (fact: Fact) => void;
   onDeleteFact: (fact: Fact) => void;
+  highlightId?: string;
 };
 
 const FACT_TYPE_CONFIG: Record<FactType, { label: string; priority: number; singular: boolean }> = {
@@ -39,7 +40,7 @@ type GroupedFacts = {
   facts: Fact[];
 };
 
-export function ProfileCard({ facts, onEditFact, onDeleteFact }: ProfileCardProps) {
+export function ProfileCard({ facts, onEditFact, onDeleteFact, highlightId }: ProfileCardProps) {
   const [expandedType, setExpandedType] = useState<FactType | null>(null);
 
   // Grouper les facts par type
@@ -66,11 +67,17 @@ export function ProfileCard({ facts, onEditFact, onDeleteFact }: ProfileCardProp
   const renderSingularFact = (fact: Fact, isPrimary = false) => {
     const config = FACT_TYPE_CONFIG[fact.factType] || FACT_TYPE_CONFIG.other;
     const isExpanded = expandedType === fact.factType;
+    const isHighlighted = highlightId === fact.id;
 
     return (
       <View
         key={fact.id}
-        className={`bg-surface rounded-lg overflow-hidden ${isPrimary ? 'flex-1' : 'mb-2'}`}
+        className={`rounded-lg overflow-hidden ${isPrimary ? 'flex-1' : 'mb-2'}`}
+        style={{
+          backgroundColor: isHighlighted ? '#8b5cf620' : '#18181b',
+          borderWidth: isHighlighted ? 2 : 0,
+          borderColor: isHighlighted ? '#8b5cf6' : 'transparent',
+        }}
       >
         <Pressable
           className="p-3 flex-row items-start justify-between"
@@ -117,11 +124,20 @@ export function ProfileCard({ facts, onEditFact, onDeleteFact }: ProfileCardProp
   };
 
   const renderCumulativeGroup = (group: GroupedFacts) => {
-    const isExpanded = expandedType === group.type;
+    const hasHighlightedFact = group.facts.some((fact) => fact.id === highlightId);
+    const isExpanded = expandedType === group.type || hasHighlightedFact;
     const values = group.facts.map((fact) => fact.factValue);
 
     return (
-      <View key={group.type} className="bg-surface rounded-lg overflow-hidden mb-2">
+      <View
+        key={group.type}
+        className="rounded-lg overflow-hidden mb-2"
+        style={{
+          backgroundColor: hasHighlightedFact ? '#8b5cf620' : '#18181b',
+          borderWidth: hasHighlightedFact ? 2 : 0,
+          borderColor: hasHighlightedFact ? '#8b5cf6' : 'transparent',
+        }}
+      >
         <View className="p-3">
           <View className="flex-row items-start justify-between">
             <View className="flex-1">
@@ -148,7 +164,15 @@ export function ProfileCard({ facts, onEditFact, onDeleteFact }: ProfileCardProp
         {isExpanded && (
           <View className="px-3 pb-3 border-t border-surfaceHover pt-2">
             {group.facts.map((fact) => (
-              <View key={fact.id} className="flex-row items-center justify-between py-1.5">
+              <View
+                key={fact.id}
+                className="flex-row items-center justify-between py-1.5"
+                style={{
+                  backgroundColor: fact.id === highlightId ? '#8b5cf630' : 'transparent',
+                  borderRadius: 8,
+                  paddingHorizontal: fact.id === highlightId ? 8 : 0,
+                }}
+              >
                 <View className="flex-row items-center flex-1">
                   <Text className="text-primary mr-2">•</Text>
                   <Pressable onPress={() => onEditFact(fact)} className="flex-1">

@@ -1,11 +1,11 @@
 import { View, Text, ScrollView, Pressable, TextInput, Alert } from 'react-native';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useContacts } from '@/hooks/useContacts';
 import { useContactQuery } from '@/hooks/useContactQuery';
-import { Fact, Group, FactType } from '@/types';
+import { Fact, Group, FactType, SearchSourceType } from '@/types';
 import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { memoryService } from '@/services/memory.service';
@@ -53,6 +53,11 @@ export default function ContactDetailScreen() {
   const params = useLocalSearchParams();
   const insets = useSafeAreaInsets();
   const contactId = params.id as string;
+  const highlightType = params.highlightType as SearchSourceType | undefined;
+  const highlightId = params.highlightId as string | undefined;
+
+  const scrollViewRef = useRef<ScrollView>(null);
+  const sectionPositions = useRef<Record<string, number>>({});
 
   const { deleteContact, updateContact } = useContacts();
   const { contact, isLoading, isWaitingForSummary, invalidate } = useContactQuery(contactId);
@@ -103,6 +108,19 @@ export default function ContactDetailScreen() {
       loadGroups();
     }, [loadGroups])
   );
+
+  useEffect(() => {
+    if (highlightType && highlightId && contact && !isLoading) {
+      const timer = setTimeout(() => {
+        const sectionKey = `${highlightType}-section`;
+        const position = sectionPositions.current[sectionKey];
+        if (position !== undefined && scrollViewRef.current) {
+          scrollViewRef.current.scrollTo({ y: position - 100, animated: true });
+        }
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [highlightType, highlightId, contact, isLoading]);
 
   const handleDelete = () => {
     Alert.alert(
@@ -334,6 +352,7 @@ export default function ContactDetailScreen() {
 
   return (
     <ScrollView
+      ref={scrollViewRef}
       className="flex-1 bg-background px-6"
       contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
     >
@@ -581,7 +600,12 @@ export default function ContactDetailScreen() {
       </View>
 
       {/* Profile Section */}
-      <View className="mb-6">
+      <View
+        className="mb-6"
+        onLayout={(e) => {
+          sectionPositions.current['fact-section'] = e.nativeEvent.layout.y;
+        }}
+      >
         <View className="flex-row items-center justify-between mb-3">
           <Text className="text-xl font-semibold text-textPrimary">Profil</Text>
           <Pressable
@@ -688,12 +712,18 @@ export default function ContactDetailScreen() {
             facts={contact.facts}
             onEditFact={handleEditFact}
             onDeleteFact={handleDeleteFact}
+            highlightId={highlightType === 'fact' ? highlightId : undefined}
           />
         )}
       </View>
 
       {/* Memories Section */}
-      <View className="mb-6">
+      <View
+        className="mb-6"
+        onLayout={(e) => {
+          sectionPositions.current['memory-section'] = e.nativeEvent.layout.y;
+        }}
+      >
         <View className="flex-row items-center justify-between mb-3">
           <Text className="text-xl font-semibold text-textPrimary">Souvenirs</Text>
           <Pressable
@@ -760,6 +790,7 @@ export default function ContactDetailScreen() {
             memories={contact.memories}
             onEdit={handleEditMemory}
             onDelete={handleDeleteMemory}
+            highlightId={highlightType === 'memory' ? highlightId : undefined}
           />
         ) : (
           !isAddingMemory && (
@@ -773,8 +804,17 @@ export default function ContactDetailScreen() {
       </View>
 
       {/* Transcriptions Archive */}
-      <View className="mb-6">
-        <TranscriptionArchive notes={contact.notes} onDelete={handleDeleteNote} />
+      <View
+        className="mb-6"
+        onLayout={(e) => {
+          sectionPositions.current['note-section'] = e.nativeEvent.layout.y;
+        }}
+      >
+        <TranscriptionArchive
+          notes={contact.notes}
+          onDelete={handleDeleteNote}
+          highlightId={highlightType === 'note' ? highlightId : undefined}
+        />
       </View>
 
       {/* Delete button */}

@@ -14,7 +14,13 @@ export function SearchResults({ results, hasSearched }: SearchResultsProps) {
   const router = useRouter();
 
   const handleResultPress = (result: SemanticSearchResult) => {
-    router.push(`/contact/${result.contactId}`);
+    router.push({
+      pathname: `/contact/${result.contactId}`,
+      params: {
+        highlightType: result.sourceType,
+        highlightId: result.sourceId,
+      },
+    });
   };
 
   if (results.length === 0 && hasSearched) {
