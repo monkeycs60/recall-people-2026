@@ -31,6 +31,12 @@
           <string>com.monkeycs60.recallpeople2026</string>
         </array>
       </dict>
+      <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>com.googleusercontent.apps.546590152270-jsk7vkud486vg1eqsos9bt463fcbljug</string>
+        </array>
+      </dict>
     </array>
     <key>CFBundleVersion</key>
     <string>1</string>

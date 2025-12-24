@@ -1,15 +1,12 @@
-import * as Google from 'expo-auth-session/providers/google';
-import * as WebBrowser from 'expo-web-browser';
-import { useEffect, useCallback } from 'react';
-import { Platform } from 'react-native';
+import { useState, useEffect, useCallback } from 'react';
+import {
+  GoogleSignin,
+  isSuccessResponse,
+  isErrorWithCode,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
 
-WebBrowser.maybeCompleteAuthSession();
-
-const GOOGLE_CLIENT_IDS = {
-  web: 'REDACTED_GOOGLE_CLIENT_ID_WEB',
-  ios: 'REDACTED_GOOGLE_CLIENT_ID_IOS',
-  android: 'REDACTED_GOOGLE_CLIENT_ID_ANDROID',
-};
+const GOOGLE_WEB_CLIENT_ID = 'REDACTED_GOOGLE_CLIENT_ID_WEB';
 
 type GoogleAuthResult = {
   idToken: string;
@@ -22,41 +19,60 @@ type UseGoogleAuthReturn = {
 };
 
 export const useGoogleAuth = (): UseGoogleAuthReturn => {
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: GOOGLE_CLIENT_IDS.web,
-    iosClientId: GOOGLE_CLIENT_IDS.ios,
-    androidClientId: GOOGLE_CLIENT_IDS.android,
-    scopes: ['openid', 'profile', 'email'],
-  });
+  const [isReady, setIsReady] = useState(false);
 
-  const handlePromptAsync = useCallback(async (): Promise<GoogleAuthResult | null> => {
-    if (!request) {
-      console.error('Google Auth request not ready');
-      return null;
-    }
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: GOOGLE_WEB_CLIENT_ID,
+      offlineAccess: false,
+    });
+    setIsReady(true);
+  }, []);
 
-    const result = await promptAsync();
+  const promptAsync = useCallback(async (): Promise<GoogleAuthResult | null> => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const response = await GoogleSignin.signIn();
 
-    if (result?.type === 'success') {
-      const { authentication } = result;
+      if (isSuccessResponse(response)) {
+        const idToken = response.data.idToken;
 
-      if (authentication?.idToken) {
+        if (!idToken) {
+          console.error('No idToken received from Google Sign-In');
+          return null;
+        }
+
         return {
-          idToken: authentication.idToken,
-          accessToken: authentication.accessToken,
+          idToken,
+          accessToken: null,
         };
       }
-    }
 
-    if (result?.type === 'error') {
-      console.error('Google Auth error:', result.error);
+      return null;
+    } catch (error) {
+      if (isErrorWithCode(error)) {
+        switch (error.code) {
+          case statusCodes.IN_PROGRESS:
+            console.log('Google Sign-In already in progress');
+            break;
+          case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+            console.error('Google Play Services not available');
+            break;
+          case statusCodes.SIGN_IN_CANCELLED:
+            console.log('Google Sign-In cancelled by user');
+            break;
+          default:
+            console.error('Google Sign-In error:', error.code, error.message);
+        }
+      } else {
+        console.error('Google Sign-In unexpected error:', error);
+      }
+      return null;
     }
-
-    return null;
-  }, [request, promptAsync]);
+  }, []);
 
   return {
-    promptAsync: handlePromptAsync,
-    isReady: !!request,
+    promptAsync,
+    isReady,
   };
 };
