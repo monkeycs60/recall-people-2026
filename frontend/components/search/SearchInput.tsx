@@ -1,5 +1,5 @@
 import { View, TextInput, Pressable } from 'react-native';
-import { Search, X, Sparkles } from 'lucide-react-native';
+import { X, Sparkles, SendHorizonal } from 'lucide-react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -17,8 +17,6 @@ type SearchInputProps = {
   onClear: () => void;
   isLoading: boolean;
 };
-
-const AnimatedView = Animated.createAnimatedComponent(View);
 
 export function SearchInput({
   value,
@@ -44,7 +42,7 @@ export function SearchInput({
     }
   }, [isLoading, borderColorProgress]);
 
-  const containerStyle = useAnimatedStyle(() => ({
+  const animatedBorderStyle = useAnimatedStyle(() => ({
     borderColor: interpolateColor(
       borderColorProgress.value,
       [0, 1],
@@ -52,22 +50,40 @@ export function SearchInput({
     ),
   }));
 
+  const canSubmit = value.trim().length > 0 && !isLoading;
+
   return (
-    <AnimatedView
-      style={containerStyle}
-      className="flex-row items-center bg-surface rounded-2xl px-4 h-14 border-2"
+    <Animated.View
+      style={[
+        {
+          flexDirection: 'row',
+          alignItems: 'center',
+          backgroundColor: '#18181b',
+          borderRadius: 16,
+          paddingLeft: 16,
+          paddingRight: 8,
+          height: 56,
+          borderWidth: 2,
+        },
+        animatedBorderStyle,
+      ]}
     >
-      <View className="mr-3">
+      <View style={{ marginRight: 12 }}>
         {isLoading ? (
           <Sparkles size={22} color="#8b5cf6" />
         ) : (
-          <Search size={22} color="#71717a" />
+          <Sparkles size={22} color="#71717a" />
         )}
       </View>
 
       <TextInput
-        className="flex-1 text-textPrimary text-base h-full"
-        placeholder="Rechercher dans vos contacts..."
+        style={{
+          flex: 1,
+          color: '#fafafa',
+          fontSize: 16,
+          height: '100%',
+        }}
+        placeholder="Posez une question..."
         placeholderTextColor="#52525b"
         value={value}
         onChangeText={onChangeText}
@@ -81,11 +97,34 @@ export function SearchInput({
       {value.length > 0 && !isLoading && (
         <Pressable
           onPress={onClear}
-          className="ml-2 w-8 h-8 rounded-full bg-surfaceHover items-center justify-center"
+          style={{
+            marginLeft: 4,
+            width: 32,
+            height: 32,
+            borderRadius: 16,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
         >
-          <X size={16} color="#a1a1aa" />
+          <X size={18} color="#71717a" />
         </Pressable>
       )}
-    </AnimatedView>
+
+      <Pressable
+        onPress={onSubmit}
+        disabled={!canSubmit}
+        style={{
+          marginLeft: 4,
+          width: 40,
+          height: 40,
+          borderRadius: 12,
+          backgroundColor: canSubmit ? '#8b5cf6' : '#27272a',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <SendHorizonal size={20} color={canSubmit ? '#fafafa' : '#52525b'} />
+      </Pressable>
+    </Animated.View>
   );
 }

@@ -10,8 +10,6 @@ import Animated, {
 import { useEffect, useState } from 'react';
 import { Brain, Sparkles, Search } from 'lucide-react-native';
 
-const AnimatedView = Animated.createAnimatedComponent(View);
-
 const LOADING_MESSAGES = [
   { text: 'Analyse de vos contacts...', icon: Search },
   { text: 'Recherche sémantique...', icon: Brain },
@@ -40,9 +38,16 @@ function SkeletonLine({ width, delay }: { width: DimensionValue; delay: number }
   }));
 
   return (
-    <AnimatedView
-      style={[shimmerStyle, { width }]}
-      className="h-4 bg-surfaceHover rounded-full"
+    <Animated.View
+      style={[
+        shimmerStyle,
+        {
+          width,
+          height: 16,
+          backgroundColor: '#27272a',
+          borderRadius: 9999,
+        },
+      ]}
     />
   );
 }
@@ -62,19 +67,37 @@ function SkeletonCard({ delay }: { delay: number }) {
   }));
 
   return (
-    <AnimatedView style={cardStyle} className="bg-surface rounded-2xl p-4 mb-3">
-      <View className="flex-row items-center mb-3">
-        <View className="w-12 h-12 rounded-xl bg-surfaceHover mr-3" />
-        <View className="flex-1">
+    <Animated.View
+      style={[
+        cardStyle,
+        {
+          backgroundColor: '#18181b',
+          borderRadius: 16,
+          padding: 16,
+          marginBottom: 12,
+        },
+      ]}
+    >
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+        <View
+          style={{
+            width: 48,
+            height: 48,
+            borderRadius: 12,
+            backgroundColor: '#27272a',
+            marginRight: 12,
+          }}
+        />
+        <View style={{ flex: 1 }}>
           <SkeletonLine width="60%" delay={delay + 100} />
-          <View className="h-2" />
+          <View style={{ height: 8 }} />
           <SkeletonLine width="40%" delay={delay + 200} />
         </View>
       </View>
       <SkeletonLine width="90%" delay={delay + 300} />
-      <View className="h-2" />
+      <View style={{ height: 8 }} />
       <SkeletonLine width="70%" delay={delay + 400} />
-    </AnimatedView>
+    </Animated.View>
   );
 }
 
@@ -104,18 +127,35 @@ export function SearchSkeleton() {
   const IconComponent = currentMessage.icon;
 
   return (
-    <View className="flex-1 px-1">
-      <AnimatedView
-        style={messageStyle}
-        className="flex-row items-center justify-center py-6"
+    <View style={{ flex: 1, paddingHorizontal: 4 }}>
+      <Animated.View
+        style={[
+          messageStyle,
+          {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            paddingVertical: 24,
+          },
+        ]}
       >
-        <View className="w-10 h-10 rounded-full bg-primary/20 items-center justify-center mr-3">
+        <View
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            backgroundColor: 'rgba(139, 92, 246, 0.2)',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginRight: 12,
+          }}
+        >
           <IconComponent size={20} color="#8b5cf6" />
         </View>
         <Text className="text-textSecondary text-base font-medium">
           {currentMessage.text}
         </Text>
-      </AnimatedView>
+      </Animated.View>
 
       <SkeletonCard delay={0} />
       <SkeletonCard delay={150} />
