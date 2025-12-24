@@ -37,28 +37,46 @@ summaryRoutes.post('/', async (c) => {
       apiKey: c.env.XAI_API_KEY,
     });
 
-    const factsText = facts.map((fact) => `${fact.factKey}: ${fact.factValue}`).join('\n');
+    // Catégoriser les facts par importance
+    const professionalTypes = ['work', 'company', 'education'];
+    const contextTypes = ['how_met', 'where_met', 'shared_ref'];
+    const personalTypes = ['hobby', 'sport', 'origin', 'location', 'partner', 'children'];
+
+    const professionalFacts = facts.filter((fact) => professionalTypes.includes(fact.factType));
+    const contextFacts = facts.filter((fact) => contextTypes.includes(fact.factType));
+    const personalFacts = facts.filter((fact) => personalTypes.includes(fact.factType));
+
     const activeTopics = hotTopics.filter((topic) => topic.status === 'active');
-    const topicsText = activeTopics.map((topic) => topic.title).join(', ');
 
-    const prompt = `Génère un résumé de EXACTEMENT 2 à 3 phrases décrivant cette personne.
-Le résumé doit faire entre 150 et 250 caractères, comme si tu présentais quelqu'un à un ami.
+    const formatFacts = (factList: typeof facts) =>
+      factList.map((fact) => `- ${fact.factKey}: ${fact.factValue}`).join('\n');
 
-Prénom: ${contact.firstName}${contact.lastName ? ` ${contact.lastName}` : ''}
+    const prompt = `Tu es un assistant qui aide à se souvenir des gens. Génère un résumé concis et mémorable de cette personne.
 
-Informations connues:
-${factsText || 'Aucune information'}
+PERSONNE: ${contact.firstName}${contact.lastName ? ` ${contact.lastName}` : ''}
 
-${activeTopics.length > 0 ? `Sujets actuels: ${topicsText}` : ''}
+${professionalFacts.length > 0 ? `PROFESSIONNEL:\n${formatFacts(professionalFacts)}` : ''}
 
-Règles OBLIGATOIRES:
-- MINIMUM 2 phrases complètes, MAXIMUM 3 phrases
-- Première phrase: métier/entreprise si connu
-- Deuxième phrase: trait personnel (hobby, sport, origine) ou comment vous vous êtes rencontrés
-- Troisième phrase (optionnelle): sujet actuel ou détail supplémentaire
-- Ton naturel et chaleureux
-- Pas de liste, que du texte fluide
-- NE PAS faire une seule phrase courte`;
+${contextFacts.length > 0 ? `CONTEXTE DE RENCONTRE:\n${formatFacts(contextFacts)}` : ''}
+
+${personalFacts.length > 0 ? `PERSONNEL:\n${formatFacts(personalFacts)}` : ''}
+
+${activeTopics.length > 0 ? `ACTUALITÉS (sujets en cours - PRIORITAIRE):\n${activeTopics.map((topic) => `- ${topic.title}${topic.context ? `: ${topic.context}` : ''}`).join('\n')}` : ''}
+
+OBJECTIF: Écrire 2-3 phrases qui permettent de se rappeler rapidement qui est cette personne avant de la revoir.
+
+HIÉRARCHIE D'IMPORTANCE:
+1. ACTUALITÉS en cours (si présentes) = info la plus utile pour reprendre contact
+2. Comment on s'est rencontrés = contexte relationnel
+3. Métier/entreprise = identité professionnelle
+4. Trait distinctif personnel = ce qui rend la personne mémorable
+
+FORMAT:
+- 2 à 3 phrases fluides, ton naturel comme si tu briefais un ami
+- Commence par l'info la plus pertinente pour une prochaine interaction
+- Si actualité en cours, l'intégrer naturellement (ex: "qui prépare actuellement son marathon")
+- Évite les formules génériques, sois spécifique
+- Maximum 200 caractères`;
 
     const { text } = await generateText({
       model: xai('grok-4-1-fast'),
