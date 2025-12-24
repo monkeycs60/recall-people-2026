@@ -1,10 +1,13 @@
 import { Stack, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import '../global.css';
+import '@/lib/i18n';
 import { initDatabase } from '@/lib/db';
 import { Text, View, Pressable } from 'react-native';
 import { ArrowLeft } from 'lucide-react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useSettingsStore } from '@/stores/settings-store';
+import { changeLanguage } from '@/lib/i18n';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,6 +25,15 @@ export default function RootLayout() {
   const router = useRouter();
   const [dbReady, setDbReady] = useState(isDbInitialized);
   const [dbError, setDbError] = useState<string | null>(null);
+  const language = useSettingsStore((state) => state.language);
+  const isHydrated = useSettingsStore((state) => state.isHydrated);
+
+  // Sync language when settings are hydrated
+  useEffect(() => {
+    if (isHydrated) {
+      changeLanguage(language);
+    }
+  }, [language, isHydrated]);
 
   // Initialize database only once
   useEffect(() => {
