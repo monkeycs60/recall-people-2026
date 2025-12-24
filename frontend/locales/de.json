@@ -1,0 +1,66 @@
+{
+  "common": {
+    "loading": "Laden...",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "confirm": "Bestätigen",
+    "back": "Zurück",
+    "error": "Fehler",
+    "success": "Erfolg"
+  },
+  "tabs": {
+    "home": "Start",
+    "contacts": "Kontakte",
+    "search": "Suche",
+    "profile": "Profil"
+  },
+  "home": {
+    "pressToRecord": "Zum Aufnehmen drücken",
+    "recording": "Aufnahme...",
+    "processing": "Verarbeitung...",
+    "transcribing": "Transkription..."
+  },
+  "contacts": {
+    "title": "Kontakte",
+    "searchPlaceholder": "Kontakt suchen...",
+    "noContacts": "Keine Kontakte",
+    "addFirst": "Nimm eine Sprachnotiz auf, um deinen ersten Kontakt hinzuzufügen"
+  },
+  "search": {
+    "title": "Suche",
+    "placeholder": "In Kontakten suchen...",
+    "noResults": "Keine Ergebnisse",
+    "searching": "Suche läuft..."
+  },
+  "profile": {
+    "title": "Profil",
+    "connectedWith": "Verbunden mit {{provider}}",
+    "sections": {
+      "language": "Sprache",
+      "data": "Daten",
+      "about": "Über"
+    },
+    "language": {
+      "appLanguage": "App-Sprache",
+      "appLanguageDescription": "App + KI-Transkription"
+    },
+    "data": {
+      "statistics": "Statistiken",
+      "export": "Meine Daten exportieren",
+      "clearCache": "Cache leeren"
+    },
+    "about": {
+      "version": "Version",
+      "feedback": "Feedback geben",
+      "legal": "Rechtliches"
+    },
+    "logout": "Abmelden",
+    "logoutConfirm": "Möchtest du dich wirklich abmelden?"
+  },
+  "languagePicker": {
+    "title": "Sprache wählen",
+    "description": "Diese Sprache wird für die Oberfläche und Sprachtranskription verwendet"
+  }
+}

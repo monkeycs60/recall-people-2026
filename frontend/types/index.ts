@@ -297,3 +297,5 @@ export type ClusterData = {
   clusters: Cluster[];
   unconnected: Contact[];
 };
+
+export * from './i18n';

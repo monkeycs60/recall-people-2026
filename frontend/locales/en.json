@@ -1,0 +1,66 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "confirm": "Confirm",
+    "back": "Back",
+    "error": "Error",
+    "success": "Success"
+  },
+  "tabs": {
+    "home": "Home",
+    "contacts": "Contacts",
+    "search": "Search",
+    "profile": "Profile"
+  },
+  "home": {
+    "pressToRecord": "Press to record",
+    "recording": "Recording...",
+    "processing": "Processing...",
+    "transcribing": "Transcribing..."
+  },
+  "contacts": {
+    "title": "Contacts",
+    "searchPlaceholder": "Search contacts...",
+    "noContacts": "No contacts",
+    "addFirst": "Record a voice note to add your first contact"
+  },
+  "search": {
+    "title": "Search",
+    "placeholder": "Search your contacts...",
+    "noResults": "No results",
+    "searching": "Searching..."
+  },
+  "profile": {
+    "title": "Profile",
+    "connectedWith": "Connected with {{provider}}",
+    "sections": {
+      "language": "Language",
+      "data": "Data",
+      "about": "About"
+    },
+    "language": {
+      "appLanguage": "App language",
+      "appLanguageDescription": "App + AI transcription"
+    },
+    "data": {
+      "statistics": "Statistics",
+      "export": "Export my data",
+      "clearCache": "Clear cache"
+    },
+    "about": {
+      "version": "Version",
+      "feedback": "Give feedback",
+      "legal": "Legal notices"
+    },
+    "logout": "Log out",
+    "logoutConfirm": "Are you sure you want to log out?"
+  },
+  "languagePicker": {
+    "title": "Choose language",
+    "description": "This language will be used for the interface and voice transcription"
+  }
+}
