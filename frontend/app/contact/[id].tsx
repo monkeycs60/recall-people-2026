@@ -5,13 +5,13 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useContacts } from '@/hooks/useContacts';
 import { useContactQuery } from '@/hooks/useContactQuery';
-import { Fact, Group } from '@/types';
+import { Fact, Group, FactType } from '@/types';
 import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { memoryService } from '@/services/memory.service';
 import { noteService } from '@/services/note.service';
 import { groupService } from '@/services/group.service';
-import { Edit3, Mic, X, Plus } from 'lucide-react-native';
+import { Edit3, Mic, X, Plus, Check } from 'lucide-react-native';
 import { AISummary } from '@/components/contact/AISummary';
 import { ProfileCard } from '@/components/contact/ProfileCard';
 import { HotTopicsList } from '@/components/contact/HotTopicsList';
@@ -22,6 +22,30 @@ type EditingFact = {
   id: string;
   factKey: string;
   factValue: string;
+};
+
+const FACT_TYPE_CONFIG: Record<FactType, { label: string; singular: boolean }> = {
+  work: { label: 'Métier', singular: true },
+  company: { label: 'Entreprise', singular: true },
+  education: { label: 'Formation', singular: true },
+  location: { label: 'Ville', singular: true },
+  origin: { label: 'Origine', singular: true },
+  partner: { label: 'Conjoint', singular: true },
+  children: { label: 'Enfants', singular: false },
+  hobby: { label: 'Loisirs', singular: false },
+  sport: { label: 'Sports', singular: false },
+  language: { label: 'Langues', singular: false },
+  pet: { label: 'Animaux', singular: false },
+  birthday: { label: 'Anniversaire', singular: true },
+  how_met: { label: 'Rencontre', singular: true },
+  where_met: { label: 'Lieu rencontre', singular: true },
+  shared_ref: { label: 'Références', singular: false },
+  trait: { label: 'Traits', singular: false },
+  gift_idea: { label: 'Idées cadeaux', singular: false },
+  gift_given: { label: 'Cadeaux faits', singular: false },
+  contact: { label: 'Contact', singular: false },
+  relationship: { label: 'Relations', singular: false },
+  other: { label: 'Autre', singular: false },
 };
 
 export default function ContactDetailScreen() {
@@ -44,6 +68,21 @@ export default function ContactDetailScreen() {
   const [editedGroupIds, setEditedGroupIds] = useState<string[]>([]);
   const [allGroups, setAllGroups] = useState<Group[]>([]);
   const [groupSearchQuery, setGroupSearchQuery] = useState('');
+
+  // Adding new items state
+  const [isAddingHotTopic, setIsAddingHotTopic] = useState(false);
+  const [newHotTopicTitle, setNewHotTopicTitle] = useState('');
+  const [newHotTopicContext, setNewHotTopicContext] = useState('');
+
+  const [isAddingMemory, setIsAddingMemory] = useState(false);
+  const [newMemoryDescription, setNewMemoryDescription] = useState('');
+  const [newMemoryEventDate, setNewMemoryEventDate] = useState('');
+  const [newMemoryIsShared, setNewMemoryIsShared] = useState(false);
+
+  const [isAddingFact, setIsAddingFact] = useState(false);
+  const [newFactType, setNewFactType] = useState<FactType | null>(null);
+  const [newFactValue, setNewFactValue] = useState('');
+  const [showFactTypeDropdown, setShowFactTypeDropdown] = useState(false);
 
   const loadGroups = useCallback(async () => {
     if (contact) {
@@ -173,6 +212,66 @@ export default function ContactDetailScreen() {
 
   const handleAddNote = () => {
     router.push(`/record/${contactId}`);
+  };
+
+  // Add new items handlers
+  const handleAddHotTopic = async () => {
+    if (!newHotTopicTitle.trim()) return;
+    await hotTopicService.create({
+      contactId,
+      title: newHotTopicTitle.trim(),
+      context: newHotTopicContext.trim() || undefined,
+    });
+    setNewHotTopicTitle('');
+    setNewHotTopicContext('');
+    setIsAddingHotTopic(false);
+    invalidate();
+  };
+
+  const handleAddMemory = async () => {
+    if (!newMemoryDescription.trim()) return;
+    await memoryService.create({
+      contactId,
+      description: newMemoryDescription.trim(),
+      eventDate: newMemoryEventDate.trim() || undefined,
+      isShared: newMemoryIsShared,
+    });
+    setNewMemoryDescription('');
+    setNewMemoryEventDate('');
+    setNewMemoryIsShared(false);
+    setIsAddingMemory(false);
+    invalidate();
+  };
+
+  const handleAddFact = async () => {
+    if (!newFactType || !newFactValue.trim()) return;
+
+    const config = FACT_TYPE_CONFIG[newFactType];
+    await factService.create({
+      contactId,
+      factType: newFactType,
+      factKey: config.label,
+      factValue: newFactValue.trim(),
+    });
+
+    setNewFactType(null);
+    setNewFactValue('');
+    setIsAddingFact(false);
+    invalidate();
+  };
+
+  const getAvailableFactTypes = (): FactType[] => {
+    if (!contact) return [];
+
+    const existingSingularTypes = new Set(
+      contact.facts
+        .filter(fact => FACT_TYPE_CONFIG[fact.factType].singular)
+        .map(fact => fact.factType)
+    );
+
+    return (Object.keys(FACT_TYPE_CONFIG) as FactType[]).filter(
+      type => !existingSingularTypes.has(type)
+    );
   };
 
   // Group handlers
@@ -412,7 +511,57 @@ export default function ContactDetailScreen() {
 
       {/* Hot Topics Section - En premier pour l'actionnable */}
       <View className="mb-6">
-        <Text className="text-xl font-semibold text-textPrimary mb-3">Actualité</Text>
+        <View className="flex-row items-center justify-between mb-3">
+          <Text className="text-xl font-semibold text-textPrimary">Actualité</Text>
+          <Pressable
+            className="flex-row items-center"
+            onPress={() => setIsAddingHotTopic(true)}
+          >
+            <Plus size={20} color="#8B5CF6" />
+          </Pressable>
+        </View>
+
+        {isAddingHotTopic && (
+          <View className="bg-surface p-4 rounded-lg mb-3">
+            <Text className="text-textSecondary text-sm mb-2">Titre *</Text>
+            <TextInput
+              className="bg-background py-3 px-4 rounded-lg text-textPrimary mb-3"
+              value={newHotTopicTitle}
+              onChangeText={setNewHotTopicTitle}
+              placeholder="Ex: Recherche appartement"
+              placeholderTextColor="#71717a"
+            />
+            <Text className="text-textSecondary text-sm mb-2">Contexte (optionnel)</Text>
+            <TextInput
+              className="bg-background py-3 px-4 rounded-lg text-textPrimary mb-3"
+              value={newHotTopicContext}
+              onChangeText={setNewHotTopicContext}
+              placeholder="Plus de détails..."
+              placeholderTextColor="#71717a"
+              multiline
+              numberOfLines={3}
+            />
+            <View className="flex-row gap-3">
+              <Pressable
+                className="flex-1 py-3 rounded-lg bg-surfaceHover items-center"
+                onPress={() => {
+                  setIsAddingHotTopic(false);
+                  setNewHotTopicTitle('');
+                  setNewHotTopicContext('');
+                }}
+              >
+                <Text className="text-textSecondary">Annuler</Text>
+              </Pressable>
+              <Pressable
+                className="flex-1 py-3 rounded-lg bg-primary items-center"
+                onPress={handleAddHotTopic}
+              >
+                <Text className="text-white font-semibold">Ajouter</Text>
+              </Pressable>
+            </View>
+          </View>
+        )}
+
         <HotTopicsList
           hotTopics={contact.hotTopics}
           onResolve={handleResolveHotTopic}
@@ -425,7 +574,82 @@ export default function ContactDetailScreen() {
 
       {/* Profile Section */}
       <View className="mb-6">
-        <Text className="text-xl font-semibold text-textPrimary mb-3">Profil</Text>
+        <View className="flex-row items-center justify-between mb-3">
+          <Text className="text-xl font-semibold text-textPrimary">Profil</Text>
+          <Pressable
+            className="flex-row items-center"
+            onPress={() => setIsAddingFact(true)}
+          >
+            <Plus size={20} color="#8B5CF6" />
+          </Pressable>
+        </View>
+
+        {isAddingFact && (
+          <View className="bg-surface p-4 rounded-lg mb-3">
+            <Text className="text-textSecondary text-sm mb-2">Type d'information *</Text>
+            <Pressable
+              className="bg-background py-3 px-4 rounded-lg mb-3"
+              onPress={() => setShowFactTypeDropdown(!showFactTypeDropdown)}
+            >
+              <Text className={newFactType ? "text-textPrimary" : "text-textMuted"}>
+                {newFactType ? FACT_TYPE_CONFIG[newFactType].label : "Sélectionner un type..."}
+              </Text>
+            </Pressable>
+
+            {showFactTypeDropdown && (
+              <View className="bg-background rounded-lg mb-3 max-h-48">
+                <ScrollView>
+                  {getAvailableFactTypes().map((type) => (
+                    <Pressable
+                      key={type}
+                      className="py-3 px-4 border-b border-surfaceHover"
+                      onPress={() => {
+                        setNewFactType(type);
+                        setShowFactTypeDropdown(false);
+                      }}
+                    >
+                      <Text className="text-textPrimary">{FACT_TYPE_CONFIG[type].label}</Text>
+                    </Pressable>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+
+            {newFactType && (
+              <>
+                <Text className="text-textSecondary text-sm mb-2">Valeur *</Text>
+                <TextInput
+                  className="bg-background py-3 px-4 rounded-lg text-textPrimary mb-3"
+                  value={newFactValue}
+                  onChangeText={setNewFactValue}
+                  placeholder={`Ex: ${newFactType === 'work' ? 'Développeur' : newFactType === 'hobby' ? 'Guitare' : 'Valeur...'}`}
+                  placeholderTextColor="#71717a"
+                />
+              </>
+            )}
+
+            <View className="flex-row gap-3">
+              <Pressable
+                className="flex-1 py-3 rounded-lg bg-surfaceHover items-center"
+                onPress={() => {
+                  setIsAddingFact(false);
+                  setNewFactType(null);
+                  setNewFactValue('');
+                  setShowFactTypeDropdown(false);
+                }}
+              >
+                <Text className="text-textSecondary">Annuler</Text>
+              </Pressable>
+              <Pressable
+                className="flex-1 py-3 rounded-lg bg-primary items-center"
+                onPress={handleAddFact}
+              >
+                <Text className="text-white font-semibold">Ajouter</Text>
+              </Pressable>
+            </View>
+          </View>
+        )}
+
         {editingFact ? (
           <View className="bg-surface p-4 rounded-lg mb-3">
             <Text className="text-textSecondary text-sm mb-2">{editingFact.factKey}</Text>
@@ -461,16 +685,84 @@ export default function ContactDetailScreen() {
       </View>
 
       {/* Memories Section */}
-      {contact.memories.length > 0 && (
-        <View className="mb-6">
-          <Text className="text-xl font-semibold text-textPrimary mb-3">Souvenirs</Text>
+      <View className="mb-6">
+        <View className="flex-row items-center justify-between mb-3">
+          <Text className="text-xl font-semibold text-textPrimary">Souvenirs</Text>
+          <Pressable
+            className="flex-row items-center"
+            onPress={() => setIsAddingMemory(true)}
+          >
+            <Plus size={20} color="#8B5CF6" />
+          </Pressable>
+        </View>
+
+        {isAddingMemory && (
+          <View className="bg-surface p-4 rounded-lg mb-3">
+            <Text className="text-textSecondary text-sm mb-2">Description *</Text>
+            <TextInput
+              className="bg-background py-3 px-4 rounded-lg text-textPrimary mb-3"
+              value={newMemoryDescription}
+              onChangeText={setNewMemoryDescription}
+              placeholder="Ex: Week-end ski à Chamonix"
+              placeholderTextColor="#71717a"
+              multiline
+              numberOfLines={2}
+            />
+            <Text className="text-textSecondary text-sm mb-2">Date de l'événement (optionnel)</Text>
+            <TextInput
+              className="bg-background py-3 px-4 rounded-lg text-textPrimary mb-3"
+              value={newMemoryEventDate}
+              onChangeText={setNewMemoryEventDate}
+              placeholder="Ex: 2024-01-15"
+              placeholderTextColor="#71717a"
+            />
+            <Pressable
+              className="flex-row items-center mb-3"
+              onPress={() => setNewMemoryIsShared(!newMemoryIsShared)}
+            >
+              <View className={`w-5 h-5 rounded border-2 ${newMemoryIsShared ? 'bg-primary border-primary' : 'border-textMuted'} items-center justify-center mr-2`}>
+                {newMemoryIsShared && <Check size={14} color="#FFFFFF" />}
+              </View>
+              <Text className="text-textPrimary">Moment partagé</Text>
+            </Pressable>
+            <View className="flex-row gap-3">
+              <Pressable
+                className="flex-1 py-3 rounded-lg bg-surfaceHover items-center"
+                onPress={() => {
+                  setIsAddingMemory(false);
+                  setNewMemoryDescription('');
+                  setNewMemoryEventDate('');
+                  setNewMemoryIsShared(false);
+                }}
+              >
+                <Text className="text-textSecondary">Annuler</Text>
+              </Pressable>
+              <Pressable
+                className="flex-1 py-3 rounded-lg bg-primary items-center"
+                onPress={handleAddMemory}
+              >
+                <Text className="text-white font-semibold">Ajouter</Text>
+              </Pressable>
+            </View>
+          </View>
+        )}
+
+        {contact.memories.length > 0 ? (
           <MemoriesList
             memories={contact.memories}
             onEdit={handleEditMemory}
             onDelete={handleDeleteMemory}
           />
-        </View>
-      )}
+        ) : (
+          !isAddingMemory && (
+            <View className="bg-surface/30 p-4 rounded-lg border border-dashed border-surfaceHover">
+              <Text className="text-textMuted text-center">
+                Aucun souvenir ajouté
+              </Text>
+            </View>
+          )
+        )}
+      </View>
 
       {/* Transcriptions Archive */}
       <View className="mb-6">
