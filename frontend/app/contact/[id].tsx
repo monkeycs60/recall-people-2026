@@ -4,7 +4,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useContacts } from '@/hooks/useContacts';
-import { ContactWithDetails, Fact, Group } from '@/types';
+import { useContactQuery } from '@/hooks/useContactQuery';
+import { Fact, Group } from '@/types';
 import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { noteService } from '@/services/note.service';
@@ -27,8 +28,8 @@ export default function ContactDetailScreen() {
   const insets = useSafeAreaInsets();
   const contactId = params.id as string;
 
-  const { getContactById, deleteContact, updateContact } = useContacts();
-  const [contact, setContact] = useState<ContactWithDetails | null>(null);
+  const { deleteContact, updateContact } = useContacts();
+  const { contact, isWaitingForSummary, invalidate } = useContactQuery(contactId);
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedFirstName, setEditedFirstName] = useState('');
@@ -42,28 +43,24 @@ export default function ContactDetailScreen() {
   const [allGroups, setAllGroups] = useState<Group[]>([]);
   const [groupSearchQuery, setGroupSearchQuery] = useState('');
 
-  const loadContact = useCallback(async () => {
-    const loaded = await getContactById(contactId);
-    setContact(loaded);
-    if (loaded) {
-      setEditedFirstName(loaded.firstName);
-      setEditedLastName(loaded.lastName || '');
+  const loadGroups = useCallback(async () => {
+    if (contact) {
+      setEditedFirstName(contact.firstName);
+      setEditedLastName(contact.lastName || '');
 
-      // Load groups
       const contactGroups = await groupService.getGroupsForContact(contactId);
       setGroups(contactGroups);
-      setEditedGroupIds(contactGroups.map((g) => g.id));
+      setEditedGroupIds(contactGroups.map((group) => group.id));
 
-      // Load all groups for editing
       const all = await groupService.getAll();
       setAllGroups(all);
     }
-  }, [contactId, getContactById]);
+  }, [contact, contactId]);
 
   useFocusEffect(
     useCallback(() => {
-      loadContact();
-    }, [loadContact])
+      loadGroups();
+    }, [loadGroups])
   );
 
   const handleDelete = () => {
@@ -92,7 +89,7 @@ export default function ContactDetailScreen() {
       firstName: editedFirstName.trim(),
       lastName: editedLastName.trim() || undefined,
     });
-    await loadContact();
+    invalidate();
     setIsEditingName(false);
   };
 
@@ -110,7 +107,7 @@ export default function ContactDetailScreen() {
       factKey: editingFact.factKey,
       factValue: editingFact.factValue,
     });
-    await loadContact();
+    invalidate();
     setEditingFact(null);
   };
 
@@ -125,7 +122,7 @@ export default function ContactDetailScreen() {
           style: 'destructive',
           onPress: async () => {
             await factService.delete(fact.id);
-            await loadContact();
+            invalidate();
           },
         },
       ]
@@ -134,32 +131,32 @@ export default function ContactDetailScreen() {
 
   const handleResolveHotTopic = async (id: string, resolution?: string) => {
     await hotTopicService.resolve(id, resolution);
-    await loadContact();
+    invalidate();
   };
 
   const handleReopenHotTopic = async (id: string) => {
     await hotTopicService.reopen(id);
-    await loadContact();
+    invalidate();
   };
 
   const handleDeleteHotTopic = async (id: string) => {
     await hotTopicService.delete(id);
-    await loadContact();
+    invalidate();
   };
 
   const handleEditHotTopic = async (id: string, data: { title: string; context?: string }) => {
     await hotTopicService.update(id, data);
-    await loadContact();
+    invalidate();
   };
 
   const handleUpdateResolution = async (id: string, resolution: string) => {
     await hotTopicService.updateResolution(id, resolution);
-    await loadContact();
+    invalidate();
   };
 
   const handleDeleteNote = async (id: string) => {
     await noteService.delete(id);
-    await loadContact();
+    invalidate();
   };
 
   const handleAddNote = () => {
@@ -180,7 +177,7 @@ export default function ContactDetailScreen() {
 
   const handleSaveGroups = async () => {
     await groupService.setContactGroups(contactId, editedGroupIds);
-    await loadContact();
+    await loadGroups();
     setIsEditingGroups(false);
     setGroupSearchQuery('');
   };
@@ -399,7 +396,7 @@ export default function ContactDetailScreen() {
       </View>
 
       {/* AI Summary */}
-      <AISummary summary={contact.aiSummary} />
+      <AISummary summary={contact.aiSummary} isLoading={isWaitingForSummary} />
 
       {/* Hot Topics Section - En premier pour l'actionnable */}
       <View className="mb-6">

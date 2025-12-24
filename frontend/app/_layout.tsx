@@ -4,6 +4,16 @@ import '../global.css';
 import { initDatabase } from '@/lib/db';
 import { Text, View, Pressable } from 'react-native';
 import { ArrowLeft } from 'lucide-react-native';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60, // 1 minute
+      retry: 1,
+    },
+  },
+});
 
 // Initialize DB once at module level
 let isDbInitialized = false;
@@ -49,27 +59,29 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="select-contact" options={{ headerShown: true, title: 'Sélectionner le contact' }} />
-      <Stack.Screen name="review" options={{ headerShown: true, title: 'Vérification' }} />
-      <Stack.Screen name="disambiguation" options={{ headerShown: true, title: 'Sélectionner le contact' }} />
-      <Stack.Screen
-          name="contact/[id]"
-          options={{
-            headerShown: true,
-            title: 'Contact',
-            headerLeft: () => (
-              <Pressable
-                onPress={() => router.replace('/(tabs)/contacts')}
-                className="p-2 -ml-2"
-              >
-                <ArrowLeft size={24} color="black" />
-              </Pressable>
-            ),
-          }}
-        />
-    </Stack>
+    <QueryClientProvider client={queryClient}>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="select-contact" options={{ headerShown: true, title: 'Sélectionner le contact' }} />
+        <Stack.Screen name="review" options={{ headerShown: true, title: 'Vérification' }} />
+        <Stack.Screen name="disambiguation" options={{ headerShown: true, title: 'Sélectionner le contact' }} />
+        <Stack.Screen
+            name="contact/[id]"
+            options={{
+              headerShown: true,
+              title: 'Contact',
+              headerLeft: () => (
+                <Pressable
+                  onPress={() => router.replace('/(tabs)/contacts')}
+                  className="p-2 -ml-2"
+                >
+                  <ArrowLeft size={24} color="black" />
+                </Pressable>
+              ),
+            }}
+          />
+      </Stack>
+    </QueryClientProvider>
   );
 }
