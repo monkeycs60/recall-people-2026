@@ -112,6 +112,97 @@ authRoutes.post('/login', async (c) => {
 	}
 });
 
+// Google OAuth
+authRoutes.post('/google', async (c) => {
+	try {
+		const { idToken } = await c.req.json();
+
+		if (!idToken) {
+			return c.json({ error: 'Missing idToken' }, 400);
+		}
+
+		// Verify Google ID token
+		const googleResponse = await fetch(
+			`https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`
+		);
+
+		if (!googleResponse.ok) {
+			return c.json({ error: 'Invalid Google token' }, 401);
+		}
+
+		const googlePayload = (await googleResponse.json()) as {
+			aud: string;
+			email: string;
+			name?: string;
+			picture?: string;
+		};
+
+		// Verify the token is for our app
+		const validClientIds = [
+			'546590152270-o0or7j3b42vc9a5k8m7etjqv1hvgd5vt.apps.googleusercontent.com', // Web
+			'546590152270-jsk7vkud486vg1eqsos9bt463fcbljug.apps.googleusercontent.com', // iOS
+			'546590152270-5mhpmj00qsus5dnmrb5o6dbbmb3eu4g2.apps.googleusercontent.com', // Android
+		];
+
+		if (!validClientIds.includes(googlePayload.aud)) {
+			return c.json({ error: 'Token not issued for this app' }, 401);
+		}
+
+		const { email, name, picture } = googlePayload;
+
+		if (!email) {
+			return c.json({ error: 'Email not provided by Google' }, 400);
+		}
+
+		const prisma = getPrisma(c.env.DATABASE_URL);
+
+		// Find or create user
+		let user = await prisma.user.findUnique({
+			where: { email },
+		});
+
+		if (!user) {
+			user = await prisma.user.create({
+				data: {
+					email,
+					name: name || email.split('@')[0],
+					image: picture || null,
+					emailVerified: true,
+				},
+			});
+		} else if (picture && !user.image) {
+			// Update image if user doesn't have one
+			user = await prisma.user.update({
+				where: { id: user.id },
+				data: { image: picture },
+			});
+		}
+
+		// Generate JWT token
+		const token = await sign(
+			{
+				sub: user.id,
+				email: user.email,
+				name: user.name,
+				exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30, // 30 days
+			},
+			c.env.JWT_SECRET
+		);
+
+		return c.json({
+			user: {
+				id: user.id,
+				email: user.email,
+				name: user.name,
+			},
+			token,
+		});
+	} catch (error) {
+		console.error('Google auth error:', error);
+		return c.json({ error: 'Google authentication failed' }, 500);
+	}
+});
+
 // Verify token
 authRoutes.get('/verify', async (c) => {
 	try {

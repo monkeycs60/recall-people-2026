@@ -85,6 +85,25 @@ export const logout = async () => {
   await clearAuth();
 };
 
+// Login with Google
+export const loginWithGoogle = async (idToken: string): Promise<AuthResponse> => {
+  const response = await fetch(`${API_URL}/auth/google`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ idToken }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Google login failed');
+  }
+
+  const data: AuthResponse = await response.json();
+  await setToken(data.token);
+  await setUser(data.user);
+  return data;
+};
+
 // Verify token
 export const verifyToken = async (): Promise<User | null> => {
   const token = await getToken();

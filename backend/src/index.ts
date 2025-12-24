@@ -6,6 +6,7 @@ import { transcribeRoutes } from './routes/transcribe';
 import { extractRoutes } from './routes/extract';
 import { similarityRoutes } from './routes/similarity';
 import { summaryRoutes } from './routes/summary';
+import { searchRoutes } from './routes/search';
 
 type Bindings = {
   DATABASE_URL: string;
@@ -39,5 +40,6 @@ app.route('/api/transcribe', transcribeRoutes);
 app.route('/api/extract', extractRoutes);
 app.route('/api/similarity', similarityRoutes);
 app.route('/api/summary', summaryRoutes);
+app.route('/api/search', searchRoutes);
 
 export default app;
