@@ -228,6 +228,52 @@ export type ContactDetailParams = {
 };
 
 // ============================================
+// Semantic Search
+// ============================================
+
+export type SearchSourceType = 'fact' | 'memory' | 'note';
+
+export type SemanticSearchResult = {
+  contactId: string;
+  contactName: string;
+  answer: string;
+  reference: string;
+  sourceType: SearchSourceType;
+  sourceId: string;
+  relevanceScore: number;
+};
+
+export type SearchRequest = {
+  query: string;
+  facts: Array<{
+    id: string;
+    contactId: string;
+    contactName: string;
+    factType: FactType;
+    factKey: string;
+    factValue: string;
+  }>;
+  memories: Array<{
+    id: string;
+    contactId: string;
+    contactName: string;
+    description: string;
+    eventDate?: string;
+  }>;
+  notes: Array<{
+    id: string;
+    contactId: string;
+    contactName: string;
+    transcription: string;
+  }>;
+};
+
+export type SearchResponse = {
+  results: SemanticSearchResult[];
+  processingTimeMs: number;
+};
+
+// ============================================
 // Network / Clusters (Réseau)
 // ============================================
 

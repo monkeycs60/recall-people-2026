@@ -1,0 +1,76 @@
+import { View, Text, KeyboardAvoidingView, Platform } from 'react-native';
+import { useState, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useContactsStore } from '@/stores/contacts-store';
+import { useSemanticSearch } from '@/hooks/useSemanticSearch';
+import { SearchInput } from '@/components/search/SearchInput';
+import { SearchSkeleton } from '@/components/search/SearchSkeleton';
+import { SearchResults } from '@/components/search/SearchResults';
+
+export default function SearchScreen() {
+  const insets = useSafeAreaInsets();
+  const { loadContacts } = useContactsStore();
+  const { results, isLoading, error, search, clearResults } = useSemanticSearch();
+  const [query, setQuery] = useState('');
+
+  useFocusEffect(
+    useCallback(() => {
+      loadContacts();
+    }, [loadContacts])
+  );
+
+  const handleSubmit = () => {
+    if (query.trim()) {
+      search(query.trim());
+    }
+  };
+
+  const handleClear = () => {
+    setQuery('');
+    clearResults();
+  };
+
+  const handleChangeText = (text: string) => {
+    setQuery(text);
+    if (text.length === 0) {
+      clearResults();
+    }
+  };
+
+  return (
+    <KeyboardAvoidingView
+      className="flex-1 bg-background"
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <View
+        className="mb-4"
+        style={{ paddingTop: insets.top + 10, paddingHorizontal: 20 }}
+      >
+        <Text className="text-3xl font-bold text-textPrimary mb-4">Recherche</Text>
+
+        <SearchInput
+          value={query}
+          onChangeText={handleChangeText}
+          onSubmit={handleSubmit}
+          onClear={handleClear}
+          isLoading={isLoading}
+        />
+      </View>
+
+      <View className="flex-1 px-5">
+        {error && (
+          <View className="bg-error/20 rounded-xl p-4 mb-4">
+            <Text className="text-error text-center">{error}</Text>
+          </View>
+        )}
+
+        {isLoading ? (
+          <SearchSkeleton />
+        ) : (
+          <SearchResults results={results} query={query} />
+        )}
+      </View>
+    </KeyboardAvoidingView>
+  );
+}
