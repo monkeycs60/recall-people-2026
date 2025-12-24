@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { createXai } from '@ai-sdk/xai';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
@@ -8,7 +8,7 @@ type Bindings = {
 	DATABASE_URL: string;
 	BETTER_AUTH_SECRET: string;
 	BETTER_AUTH_URL: string;
-	GOOGLE_GEMINI_API_KEY: string;
+	XAI_API_KEY: string;
 };
 
 type FactInput = {
@@ -63,14 +63,14 @@ similarityRoutes.post('/batch', async (c) => {
 			return c.json({ success: true, similarities: [] });
 		}
 
-		const google = createGoogleGenerativeAI({
-			apiKey: c.env.GOOGLE_GEMINI_API_KEY,
+		const xai = createXai({
+			apiKey: c.env.XAI_API_KEY,
 		});
 
 		const prompt = buildSimilarityPrompt(typesWithMultipleValues);
 
 		const { object: result } = await generateObject({
-			model: google('gemini-3-flash-preview'),
+			model: xai('grok-4-1-fast'),
 			schema: similaritySchema,
 			prompt,
 		});

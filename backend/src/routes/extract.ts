@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { createXai } from '@ai-sdk/xai';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
@@ -9,7 +9,7 @@ type Bindings = {
   BETTER_AUTH_SECRET: string;
   BETTER_AUTH_URL: string;
   DEEPGRAM_API_KEY: string;
-  GOOGLE_GEMINI_API_KEY: string;
+  XAI_API_KEY: string;
 };
 
 type ExtractionRequest = {
@@ -96,14 +96,14 @@ extractRoutes.post('/', async (c) => {
       return c.json({ error: 'No transcription provided' }, 400);
     }
 
-    const google = createGoogleGenerativeAI({
-      apiKey: c.env.GOOGLE_GEMINI_API_KEY,
+    const xai = createXai({
+      apiKey: c.env.XAI_API_KEY,
     });
 
     const prompt = buildExtractionPrompt(transcription, currentContact);
 
     const { object: extraction } = await generateObject({
-			model: google('gemini-3-flash-preview'),
+			model: xai('grok-4-1-fast'),
 			schema: extractionSchema,
 			prompt,
 		});

@@ -11,7 +11,7 @@ type Bindings = {
   DATABASE_URL: string;
   JWT_SECRET: string;
   DEEPGRAM_API_KEY: string;
-  GOOGLE_GEMINI_API_KEY: string;
+  XAI_API_KEY: string;
 };
 
 const app = new Hono<{ Bindings: Bindings }>();

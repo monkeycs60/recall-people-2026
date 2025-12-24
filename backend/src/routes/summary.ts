@@ -1,10 +1,10 @@
 import { Hono } from 'hono';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { createXai } from '@ai-sdk/xai';
 import { generateText } from 'ai';
 import { authMiddleware } from '../middleware/auth';
 
 type Bindings = {
-  GOOGLE_GEMINI_API_KEY: string;
+  XAI_API_KEY: string;
 };
 
 type SummaryRequest = {
@@ -33,8 +33,8 @@ summaryRoutes.post('/', async (c) => {
     const body = await c.req.json<SummaryRequest>();
     const { contact, facts, hotTopics } = body;
 
-    const google = createGoogleGenerativeAI({
-      apiKey: c.env.GOOGLE_GEMINI_API_KEY,
+    const xai = createXai({
+      apiKey: c.env.XAI_API_KEY,
     });
 
     const factsText = facts.map((fact) => `${fact.factKey}: ${fact.factValue}`).join('\n');
@@ -61,9 +61,8 @@ Règles OBLIGATOIRES:
 - NE PAS faire une seule phrase courte`;
 
     const { text } = await generateText({
-      model: google('gemini-3-flash-preview'),
+      model: xai('grok-4-1-fast'),
       prompt,
-      maxOutputTokens: 2048,
     });
 
     return c.json({
