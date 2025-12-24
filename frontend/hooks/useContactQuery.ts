@@ -7,12 +7,13 @@ export const contactKeys = {
   detail: (id: string) => ['contacts', id] as const,
 };
 
-export function useContactQuery(contactId: string) {
+export function useContactQuery(contactId: string | undefined) {
   const queryClient = useQueryClient();
 
   const query = useQuery({
-    queryKey: contactKeys.detail(contactId),
-    queryFn: () => contactService.getById(contactId),
+    queryKey: contactKeys.detail(contactId || ''),
+    queryFn: () => contactService.getById(contactId!),
+    enabled: !!contactId,
     refetchInterval: (query) => {
       const contact = query.state.data;
       if (!contact) return false;
@@ -36,7 +37,9 @@ export function useContactQuery(contactId: string) {
     (query.data.facts.length > 0 || query.data.hotTopics.length > 0);
 
   const invalidate = () => {
-    queryClient.invalidateQueries({ queryKey: contactKeys.detail(contactId) });
+    if (contactId) {
+      queryClient.invalidateQueries({ queryKey: contactKeys.detail(contactId) });
+    }
   };
 
   return {

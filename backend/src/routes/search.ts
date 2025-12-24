@@ -112,20 +112,20 @@ const buildSearchPrompt = (
 	notes: NoteInput[]
 ): string => {
 	const factsSection = facts
-		.map((f) => `[FACT:${f.id}] ${f.contactName} - ${f.factKey}: ${f.factValue}`)
+		.map((f) => `[FACT:${f.id}] [CONTACT:${f.contactId}] ${f.contactName} - ${f.factKey}: ${f.factValue}`)
 		.join('\n');
 
 	const memoriesSection = memories
 		.map(
 			(m) =>
-				`[MEMORY:${m.id}] ${m.contactName} - ${m.description}${m.eventDate ? ` (${m.eventDate})` : ''}`
+				`[MEMORY:${m.id}] [CONTACT:${m.contactId}] ${m.contactName} - ${m.description}${m.eventDate ? ` (${m.eventDate})` : ''}`
 		)
 		.join('\n');
 
 	const notesSection = notes
 		.map((n) => {
 			const truncatedTranscription = n.transcription.slice(0, 300);
-			return `[NOTE:${n.id}] ${n.contactName} - ${truncatedTranscription}${n.transcription.length > 300 ? '...' : ''}`;
+			return `[NOTE:${n.id}] [CONTACT:${n.contactId}] ${n.contactName} - ${truncatedTranscription}${n.transcription.length > 300 ? '...' : ''}`;
 		})
 		.join('\n');
 
@@ -140,7 +140,8 @@ INSTRUCTIONS:
 4. Score de 0-100 basé sur la pertinence (100 = correspondance exacte)
 5. "answer" doit être une réponse concise et directe à la requête
 6. "reference" doit donner le contexte ou la source de l'info
-7. "sourceId" doit contenir l'ID exact entre crochets (sans le préfixe FACT:/MEMORY:/NOTE:)
+7. "sourceId" doit contenir l'ID exact après [FACT:], [MEMORY:] ou [NOTE:] (UUID)
+8. "contactId" doit contenir l'UUID exact après [CONTACT:] (pas le nom!)
 
 Si aucun résultat pertinent, retourne un tableau "results" vide.
 
