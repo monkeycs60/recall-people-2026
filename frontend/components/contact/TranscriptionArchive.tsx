@@ -6,10 +6,12 @@ import { Note } from '@/types';
 type TranscriptionArchiveProps = {
   notes: Note[];
   onDelete: (id: string) => void;
+  highlightId?: string;
 };
 
-export function TranscriptionArchive({ notes, onDelete }: TranscriptionArchiveProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+export function TranscriptionArchive({ notes, onDelete, highlightId }: TranscriptionArchiveProps) {
+  const hasHighlightedNote = highlightId ? notes.some((note) => note.id === highlightId) : false;
+  const [isExpanded, setIsExpanded] = useState(hasHighlightedNote);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
 
   const handleDelete = (note: Note) => {
@@ -55,21 +57,29 @@ export function TranscriptionArchive({ notes, onDelete }: TranscriptionArchivePr
 
       {isExpanded && (
         <View className="bg-surface/30 rounded-lg overflow-hidden">
-          {notes.map((note, index) => (
-            <Pressable
-              key={note.id}
-              className={`flex-row items-center p-3 ${
-                index < notes.length - 1 ? 'border-b border-surfaceHover' : ''
-              }`}
-              onPress={() => setSelectedNote(note)}
-            >
-              <Text className="text-textMuted mr-2">📝</Text>
-              <Text className="text-textSecondary flex-1">
-                {new Date(note.createdAt).toLocaleDateString()}
-                {note.title && ` — ${note.title}`}
-              </Text>
-            </Pressable>
-          ))}
+          {notes.map((note, index) => {
+            const isHighlighted = highlightId === note.id;
+            return (
+              <Pressable
+                key={note.id}
+                className={`flex-row items-center p-3 ${
+                  index < notes.length - 1 ? 'border-b border-surfaceHover' : ''
+                }`}
+                style={{
+                  backgroundColor: isHighlighted ? '#8b5cf630' : 'transparent',
+                  borderLeftWidth: isHighlighted ? 3 : 0,
+                  borderLeftColor: isHighlighted ? '#8b5cf6' : 'transparent',
+                }}
+                onPress={() => setSelectedNote(note)}
+              >
+                <Text className="text-textMuted mr-2">📝</Text>
+                <Text className={isHighlighted ? 'text-textPrimary flex-1 font-medium' : 'text-textSecondary flex-1'}>
+                  {new Date(note.createdAt).toLocaleDateString()}
+                  {note.title && ` — ${note.title}`}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
       )}
 
