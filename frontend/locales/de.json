@@ -100,6 +100,10 @@
     },
     "export": {
       "title": "Daten exportieren",
+      "selectFormat": "Exportformat wählen",
+      "jsonDescription": "Vollständige Daten mit allen Details",
+      "csvDescription": "Tabellenkalkulation-kompatibles Format",
+      "exportButton": "Exportieren",
       "success": "Daten erfolgreich exportiert",
       "error": "Export fehlgeschlagen"
     },
@@ -114,12 +118,27 @@
     },
     "legal": {
       "title": "Rechtliches",
-      "privacy": "Datenschutz",
-      "privacyText": "Ihre Daten werden sicher gespeichert und ohne Ihre Zustimmung niemals an Dritte weitergegeben.",
-      "terms": "Nutzungsbedingungen",
-      "termsText": "Durch die Nutzung dieser App akzeptieren Sie unsere Nutzungsbedingungen.",
-      "contact": "Kontakt",
-      "contactText": "Bei Fragen kontaktieren Sie uns unter support@recall.app"
+      "privacyFirst": {
+        "title": "Datenschutz zuerst",
+        "description": "Recall wurde mit Datenschutz als Kernprinzip entwickelt. Wir glauben, dass Ihre persönlichen Beziehungen und die Informationen, die Sie aufzeichnen, privat bleiben und unter Ihrer Kontrolle sein sollten."
+      },
+      "localStorage": {
+        "title": "100% lokale Speicherung",
+        "description": "Alle Ihre Kontaktdaten, Notizen, Fakten und Erinnerungen werden ausschließlich auf Ihrem Gerät in einer sicheren lokalen Datenbank gespeichert. Ihre Daten verlassen niemals Ihr Telefon ohne Ihre explizite Aktion."
+      },
+      "dataSovereignty": {
+        "title": "Datensouveränität",
+        "description": "Sie haben das vollständige Eigentum an Ihren Daten. Exportieren Sie sie jederzeit im JSON- oder CSV-Format. Löschen Sie sie wann Sie wollen. Kein Cloud-Speicher, kein Data Mining, kein Zugriff Dritter."
+      },
+      "aiProcessing": {
+        "title": "KI-Verarbeitung",
+        "description": "Sprachtranskription und Textanalyse werden nur bei der Aufnahme über sichere APIs verarbeitet. Der verarbeitete Inhalt wird lokal gespeichert und niemals zum Training von KI-Modellen verwendet."
+      },
+      "contact": {
+        "title": "Kontaktieren Sie uns",
+        "description": "Fragen zu Ihrem Datenschutz oder Ihren Daten? Wir sind hier, um zu helfen."
+      },
+      "lastUpdated": "Zuletzt aktualisiert: Dezember 2024"
     }
   },
   "languagePicker": {

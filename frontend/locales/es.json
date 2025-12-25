@@ -100,6 +100,10 @@
     },
     "export": {
       "title": "Exportar datos",
+      "selectFormat": "Elegir formato de exportación",
+      "jsonDescription": "Datos completos con todos los detalles",
+      "csvDescription": "Formato compatible con hojas de cálculo",
+      "exportButton": "Exportar",
       "success": "Datos exportados con éxito",
       "error": "Error al exportar los datos"
     },
@@ -114,12 +118,27 @@
     },
     "legal": {
       "title": "Avisos legales",
-      "privacy": "Política de privacidad",
-      "privacyText": "Tus datos se almacenan de forma segura y nunca se comparten con terceros sin tu consentimiento.",
-      "terms": "Términos de servicio",
-      "termsText": "Al usar esta aplicación, aceptas nuestros términos de servicio.",
-      "contact": "Contacto",
-      "contactText": "Para cualquier pregunta, contáctanos en support@recall.app"
+      "privacyFirst": {
+        "title": "Privacidad ante todo",
+        "description": "Recall está construido con la privacidad como principio fundamental. Creemos que tus relaciones personales y la información que registras deben permanecer privadas y bajo tu control."
+      },
+      "localStorage": {
+        "title": "Almacenamiento 100% local",
+        "description": "Todos tus datos de contactos, notas, hechos y recuerdos se almacenan exclusivamente en tu dispositivo en una base de datos local segura. Tus datos nunca salen de tu teléfono sin tu acción explícita."
+      },
+      "dataSovereignty": {
+        "title": "Soberanía de datos",
+        "description": "Tienes la propiedad completa de tus datos. Expórtalos en cualquier momento en formato JSON o CSV. Elimínalos cuando quieras. Sin almacenamiento en la nube, sin minería de datos, sin acceso de terceros."
+      },
+      "aiProcessing": {
+        "title": "Procesamiento de IA",
+        "description": "La transcripción de voz y el análisis de texto se procesan a través de APIs seguras solo cuando grabas. El contenido procesado se almacena localmente y nunca se usa para entrenar modelos de IA."
+      },
+      "contact": {
+        "title": "Contáctanos",
+        "description": "¿Preguntas sobre tu privacidad o datos? Estamos aquí para ayudarte."
+      },
+      "lastUpdated": "Última actualización: Diciembre 2024"
     }
   },
   "languagePicker": {

@@ -100,6 +100,10 @@
     },
     "export": {
       "title": "Export Data",
+      "selectFormat": "Choose export format",
+      "jsonDescription": "Complete data with all details",
+      "csvDescription": "Spreadsheet compatible format",
+      "exportButton": "Export",
       "success": "Data exported successfully",
       "error": "Failed to export data"
     },
@@ -114,12 +118,27 @@
     },
     "legal": {
       "title": "Legal Notices",
-      "privacy": "Privacy Policy",
-      "privacyText": "Your data is stored securely and never shared with third parties without your consent.",
-      "terms": "Terms of Service",
-      "termsText": "By using this app, you agree to our terms of service.",
-      "contact": "Contact",
-      "contactText": "For any questions, contact us at support@recall.app"
+      "privacyFirst": {
+        "title": "Privacy First",
+        "description": "Recall is built with privacy as a core principle. We believe your personal relationships and the information you record about them should remain private and under your control."
+      },
+      "localStorage": {
+        "title": "100% Local Storage",
+        "description": "All your contact data, notes, facts, and memories are stored exclusively on your device in a secure local database. Your data never leaves your phone without your explicit action."
+      },
+      "dataSovereignty": {
+        "title": "Data Sovereignty",
+        "description": "You have complete ownership of your data. Export it anytime in JSON or CSV format. Delete it whenever you want. No cloud storage, no data mining, no third-party access."
+      },
+      "aiProcessing": {
+        "title": "AI Processing",
+        "description": "Voice transcription and text analysis are processed through secure APIs only when you record. The processed content is stored locally and is never used to train AI models."
+      },
+      "contact": {
+        "title": "Contact Us",
+        "description": "Questions about your privacy or data? We're here to help."
+      },
+      "lastUpdated": "Last updated: December 2024"
     }
   },
   "languagePicker": {

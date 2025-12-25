@@ -1,11 +1,10 @@
 import { View, Text, ScrollView, Alert, Linking } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as FileSystem from 'expo-file-system/legacy';
-import * as Sharing from 'expo-sharing';
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import {
   Globe,
   BarChart3,
@@ -18,15 +17,14 @@ import {
 } from 'lucide-react-native';
 import { useAuthStore } from '@/stores/auth-store';
 import { useSettingsStore } from '@/stores/settings-store';
-import { useContactsStore } from '@/stores/contacts-store';
-import { useGroupsStore } from '@/stores/groups-store';
 import { LANGUAGE_NAMES } from '@/types';
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { SettingsSection } from '@/components/profile/SettingsSection';
 import { SettingsRow } from '@/components/profile/SettingsRow';
 import { LanguagePicker } from '@/components/profile/LanguagePicker';
-import { StatisticsModal } from '@/components/profile/StatisticsModal';
-import { LegalNoticesModal } from '@/components/profile/LegalNoticesModal';
+import { StatisticsSheet } from '@/components/profile/StatisticsSheet';
+import { ExportDataSheet } from '@/components/profile/ExportDataSheet';
+import { LegalNoticesSheet } from '@/components/profile/LegalNoticesSheet';
 import Constants from 'expo-constants';
 
 export default function ProfileScreen() {
@@ -36,30 +34,27 @@ export default function ProfileScreen() {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const language = useSettingsStore((state) => state.language);
-  const contacts = useContactsStore((state) => state.contacts);
-  const groups = useGroupsStore((state) => state.groups);
-  const [showLanguagePicker, setShowLanguagePicker] = useState(false);
-  const [showStatistics, setShowStatistics] = useState(false);
-  const [showLegalNotices, setShowLegalNotices] = useState(false);
 
-  const handleExportData = async () => {
-    try {
-      const exportData = {
-        exportedAt: new Date().toISOString(),
-        contacts,
-        groups,
-      };
-      const jsonString = JSON.stringify(exportData, null, 2);
-      const fileUri = `${FileSystem.cacheDirectory}recall-export-${Date.now()}.json`;
-      await FileSystem.writeAsStringAsync(fileUri, jsonString);
-      await Sharing.shareAsync(fileUri, {
-        mimeType: 'application/json',
-        dialogTitle: t('profile.export.title'),
-      });
-    } catch {
-      Alert.alert(t('common.error'), t('profile.export.error'));
-    }
-  };
+  const languagePickerRef = useRef<BottomSheetModal>(null);
+  const statisticsSheetRef = useRef<BottomSheetModal>(null);
+  const exportDataSheetRef = useRef<BottomSheetModal>(null);
+  const legalNoticesSheetRef = useRef<BottomSheetModal>(null);
+
+  const handleOpenLanguagePicker = useCallback(() => {
+    languagePickerRef.current?.present();
+  }, []);
+
+  const handleOpenStatistics = useCallback(() => {
+    statisticsSheetRef.current?.present();
+  }, []);
+
+  const handleOpenExport = useCallback(() => {
+    exportDataSheetRef.current?.present();
+  }, []);
+
+  const handleOpenLegal = useCallback(() => {
+    legalNoticesSheetRef.current?.present();
+  }, []);
 
   const handleClearCache = () => {
     Alert.alert(
@@ -107,8 +102,8 @@ export default function ProfileScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <ScrollView className="flex-1 px-4" style={{ paddingTop: insets.top }}>
-        <Text className="text-textPrimary text-2xl font-bold mt-4 mb-6">
+      <ScrollView className="flex-1 px-6" style={{ paddingTop: insets.top + 10 }}>
+        <Text className="text-3xl font-bold text-textPrimary mb-4">
           {t('profile.title')}
         </Text>
 
@@ -125,7 +120,7 @@ export default function ProfileScreen() {
             icon={<Globe size={20} color="#8b5cf6" />}
             label={t('profile.language.appLanguage')}
             value={LANGUAGE_NAMES[language]}
-            onPress={() => setShowLanguagePicker(true)}
+            onPress={handleOpenLanguagePicker}
           />
         </SettingsSection>
 
@@ -133,12 +128,12 @@ export default function ProfileScreen() {
           <SettingsRow
             icon={<BarChart3 size={20} color="#8b5cf6" />}
             label={t('profile.data.statistics')}
-            onPress={() => setShowStatistics(true)}
+            onPress={handleOpenStatistics}
           />
           <SettingsRow
             icon={<Download size={20} color="#8b5cf6" />}
             label={t('profile.data.export')}
-            onPress={handleExportData}
+            onPress={handleOpenExport}
           />
           <SettingsRow
             icon={<Trash2 size={20} color="#8b5cf6" />}
@@ -163,7 +158,7 @@ export default function ProfileScreen() {
           <SettingsRow
             icon={<FileText size={20} color="#8b5cf6" />}
             label={t('profile.about.legal')}
-            onPress={() => setShowLegalNotices(true)}
+            onPress={handleOpenLegal}
           />
         </SettingsSection>
 
@@ -178,20 +173,10 @@ export default function ProfileScreen() {
         </View>
       </ScrollView>
 
-      <LanguagePicker
-        visible={showLanguagePicker}
-        onClose={() => setShowLanguagePicker(false)}
-      />
-
-      <StatisticsModal
-        visible={showStatistics}
-        onClose={() => setShowStatistics(false)}
-      />
-
-      <LegalNoticesModal
-        visible={showLegalNotices}
-        onClose={() => setShowLegalNotices(false)}
-      />
+      <LanguagePicker ref={languagePickerRef} />
+      <StatisticsSheet ref={statisticsSheetRef} />
+      <ExportDataSheet ref={exportDataSheetRef} />
+      <LegalNoticesSheet ref={legalNoticesSheetRef} />
     </View>
   );
 }
