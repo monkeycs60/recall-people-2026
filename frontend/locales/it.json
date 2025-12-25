@@ -92,7 +92,35 @@
       "legal": "Note legali"
     },
     "logout": "Disconnetti",
-    "logoutConfirm": "Sei sicuro di volerti disconnettere?"
+    "logoutConfirm": "Sei sicuro di volerti disconnettere?",
+    "statistics": {
+      "title": "Statistiche",
+      "contacts": "Contatti",
+      "groups": "Gruppi"
+    },
+    "export": {
+      "title": "Esporta dati",
+      "success": "Dati esportati con successo",
+      "error": "Errore durante l'esportazione"
+    },
+    "clearCache": {
+      "title": "Svuota cache",
+      "confirm": "Questo eliminerà tutti i dati locali. Sei sicuro?",
+      "success": "Cache svuotata con successo"
+    },
+    "feedback": {
+      "subject": "Feedback per Recall",
+      "body": "Ciao,\n\nHo un feedback su Recall:\n\n"
+    },
+    "legal": {
+      "title": "Note legali",
+      "privacy": "Privacy Policy",
+      "privacyText": "I tuoi dati sono archiviati in modo sicuro e non vengono mai condivisi con terze parti senza il tuo consenso.",
+      "terms": "Termini di servizio",
+      "termsText": "Utilizzando questa app, accetti i nostri termini di servizio.",
+      "contact": "Contatto",
+      "contactText": "Per qualsiasi domanda, contattaci a support@recall.app"
+    }
   },
   "languagePicker": {
     "title": "Scegli lingua",

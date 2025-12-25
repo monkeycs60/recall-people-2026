@@ -1,8 +1,11 @@
-import { View, Text, ScrollView, Alert } from 'react-native';
+import { View, Text, ScrollView, Alert, Linking } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as FileSystem from 'expo-file-system/legacy';
+import * as Sharing from 'expo-sharing';
 import {
   Globe,
   BarChart3,
@@ -15,11 +18,15 @@ import {
 } from 'lucide-react-native';
 import { useAuthStore } from '@/stores/auth-store';
 import { useSettingsStore } from '@/stores/settings-store';
+import { useContactsStore } from '@/stores/contacts-store';
+import { useGroupsStore } from '@/stores/groups-store';
 import { LANGUAGE_NAMES } from '@/types';
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { SettingsSection } from '@/components/profile/SettingsSection';
 import { SettingsRow } from '@/components/profile/SettingsRow';
 import { LanguagePicker } from '@/components/profile/LanguagePicker';
+import { StatisticsModal } from '@/components/profile/StatisticsModal';
+import { LegalNoticesModal } from '@/components/profile/LegalNoticesModal';
 import Constants from 'expo-constants';
 
 export default function ProfileScreen() {
@@ -29,7 +36,54 @@ export default function ProfileScreen() {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const language = useSettingsStore((state) => state.language);
+  const contacts = useContactsStore((state) => state.contacts);
+  const groups = useGroupsStore((state) => state.groups);
   const [showLanguagePicker, setShowLanguagePicker] = useState(false);
+  const [showStatistics, setShowStatistics] = useState(false);
+  const [showLegalNotices, setShowLegalNotices] = useState(false);
+
+  const handleExportData = async () => {
+    try {
+      const exportData = {
+        exportedAt: new Date().toISOString(),
+        contacts,
+        groups,
+      };
+      const jsonString = JSON.stringify(exportData, null, 2);
+      const fileUri = `${FileSystem.cacheDirectory}recall-export-${Date.now()}.json`;
+      await FileSystem.writeAsStringAsync(fileUri, jsonString);
+      await Sharing.shareAsync(fileUri, {
+        mimeType: 'application/json',
+        dialogTitle: t('profile.export.title'),
+      });
+    } catch {
+      Alert.alert(t('common.error'), t('profile.export.error'));
+    }
+  };
+
+  const handleClearCache = () => {
+    Alert.alert(
+      t('profile.clearCache.title'),
+      t('profile.clearCache.confirm'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.confirm'),
+          style: 'destructive',
+          onPress: async () => {
+            await AsyncStorage.clear();
+            Alert.alert(t('common.success'), t('profile.clearCache.success'));
+          },
+        },
+      ]
+    );
+  };
+
+  const handleFeedback = () => {
+    const subject = encodeURIComponent(t('profile.feedback.subject'));
+    const body = encodeURIComponent(t('profile.feedback.body'));
+    Linking.openURL(`mailto:support@recall.app?subject=${subject}&body=${body}`);
+  };
 
   const handleLogout = () => {
     Alert.alert(
@@ -79,17 +133,17 @@ export default function ProfileScreen() {
           <SettingsRow
             icon={<BarChart3 size={20} color="#8b5cf6" />}
             label={t('profile.data.statistics')}
-            onPress={() => {}}
+            onPress={() => setShowStatistics(true)}
           />
           <SettingsRow
             icon={<Download size={20} color="#8b5cf6" />}
             label={t('profile.data.export')}
-            onPress={() => {}}
+            onPress={handleExportData}
           />
           <SettingsRow
             icon={<Trash2 size={20} color="#8b5cf6" />}
             label={t('profile.data.clearCache')}
-            onPress={() => {}}
+            onPress={handleClearCache}
             showChevron={false}
           />
         </SettingsSection>
@@ -104,12 +158,12 @@ export default function ProfileScreen() {
           <SettingsRow
             icon={<MessageSquare size={20} color="#8b5cf6" />}
             label={t('profile.about.feedback')}
-            onPress={() => {}}
+            onPress={handleFeedback}
           />
           <SettingsRow
             icon={<FileText size={20} color="#8b5cf6" />}
             label={t('profile.about.legal')}
-            onPress={() => {}}
+            onPress={() => setShowLegalNotices(true)}
           />
         </SettingsSection>
 
@@ -127,6 +181,16 @@ export default function ProfileScreen() {
       <LanguagePicker
         visible={showLanguagePicker}
         onClose={() => setShowLanguagePicker(false)}
+      />
+
+      <StatisticsModal
+        visible={showStatistics}
+        onClose={() => setShowStatistics(false)}
+      />
+
+      <LegalNoticesModal
+        visible={showLegalNotices}
+        onClose={() => setShowLegalNotices(false)}
       />
     </View>
   );
