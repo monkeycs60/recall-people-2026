@@ -248,5 +248,35 @@
   "languagePicker": {
     "title": "Choose language",
     "description": "This language will be used for the interface and voice transcription"
+  },
+  "onboarding": {
+    "skip": "Skip",
+    "next": "Next",
+    "getStarted": "Get Started",
+    "language": {
+      "title": "Choose your language",
+      "description": "This language will be used for the app interface and to transcribe your audio recordings with AI."
+    },
+    "welcome": {
+      "title": "Welcome to Recall",
+      "description": "Stay in touch with the people who matter. Record voice notes and let AI automatically extract important information."
+    },
+    "record": {
+      "title": "Record your conversations",
+      "description": "Press the button to record a voice note after a meeting, call, or important discussion."
+    },
+    "ai": {
+      "title": "AI extracts the info",
+      "description": "Our AI analyzes your recordings and automatically extracts facts, hot topics, and shared memories."
+    },
+    "contacts": {
+      "title": "Organize your contacts",
+      "description": "Easily find all information about your loved ones: their profile, your shared memories, and ongoing topics."
+    },
+    "search": {
+      "title": "Semantic search",
+      "description": "Ask questions in natural language to find any information about your contacts."
+    },
+    "redoTour": "Redo guided tour"
   }
 }
