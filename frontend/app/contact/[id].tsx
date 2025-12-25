@@ -4,6 +4,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useContacts } from '@/hooks/useContacts';
 import { useContactQuery } from '@/hooks/useContactQuery';
 import { Fact, Group, FactType, SearchSourceType } from '@/types';
@@ -50,6 +51,7 @@ const FACT_TYPE_CONFIG: Record<FactType, { label: string; singular: boolean }> =
 };
 
 export default function ContactDetailScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const params = useLocalSearchParams();
   const insets = useSafeAreaInsets();
@@ -126,12 +128,12 @@ export default function ContactDetailScreen() {
 
   const handleDelete = () => {
     Alert.alert(
-      'Supprimer le contact',
-      `Êtes-vous sûr de vouloir supprimer ${contact?.firstName} ?`,
+      t('contact.deleteContact'),
+      `${t('contact.deleteContactConfirm')} ${contact?.firstName} ?`,
       [
-        { text: 'Annuler', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Supprimer',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
             if (contact) {
@@ -394,13 +396,13 @@ export default function ContactDetailScreen() {
                   setEditedLastName(contact.lastName || '');
                 }}
               >
-                <Text className="text-textSecondary">Annuler</Text>
+                <Text className="text-textSecondary">{t('common.cancel')}</Text>
               </Pressable>
               <Pressable
                 className="flex-1 py-3 rounded-lg bg-primary items-center"
                 onPress={handleSaveName}
               >
-                <Text className="text-white font-semibold">Enregistrer</Text>
+                <Text className="text-white font-semibold">{t('common.save')}</Text>
               </Pressable>
             </View>
           </View>
@@ -420,7 +422,7 @@ export default function ContactDetailScreen() {
         {!isEditingName && (
           isEditingGroups ? (
             <View className="bg-surface p-4 rounded-lg mt-3">
-              <Text className="text-textSecondary text-sm mb-2">Modifier les groupes</Text>
+              <Text className="text-textSecondary text-sm mb-2">{t('contact.editGroups')}</Text>
 
               {/* Current groups as removable chips */}
               <View className="flex-row flex-wrap gap-2 mb-3">
@@ -445,7 +447,7 @@ export default function ContactDetailScreen() {
                 className="bg-background py-2 px-3 rounded-lg text-textPrimary mb-2"
                 value={groupSearchQuery}
                 onChangeText={setGroupSearchQuery}
-                placeholder="Ajouter un groupe..."
+                placeholder={t('contact.addGroupPlaceholder')}
                 placeholderTextColor="#71717a"
               />
 
@@ -484,13 +486,13 @@ export default function ContactDetailScreen() {
                   className="flex-1 py-2 rounded-lg bg-surfaceHover items-center"
                   onPress={handleCancelEditingGroups}
                 >
-                  <Text className="text-textSecondary">Annuler</Text>
+                  <Text className="text-textSecondary">{t('common.cancel')}</Text>
                 </Pressable>
                 <Pressable
                   className="flex-1 py-2 rounded-lg bg-primary items-center"
                   onPress={handleSaveGroups}
                 >
-                  <Text className="text-white font-semibold">Enregistrer</Text>
+                  <Text className="text-white font-semibold">{t('common.save')}</Text>
                 </Pressable>
               </View>
             </View>
@@ -518,7 +520,7 @@ export default function ContactDetailScreen() {
                 onPress={handleStartEditingGroups}
               >
                 <Plus size={16} color="#8B5CF6" />
-                <Text className="text-primary ml-1">Ajouter un groupe</Text>
+                <Text className="text-primary ml-1">{t('contact.addGroup')}</Text>
               </Pressable>
             )
           )
@@ -526,7 +528,7 @@ export default function ContactDetailScreen() {
 
         {contact.lastContactAt && !isEditingName && (
           <Text className="text-textSecondary mt-2">
-            Dernier contact : {new Date(contact.lastContactAt).toLocaleDateString()}
+            {t('contact.lastContact')} : {new Date(contact.lastContactAt).toLocaleDateString()}
           </Text>
         )}
 
@@ -537,7 +539,7 @@ export default function ContactDetailScreen() {
             onPress={handleAddNote}
           >
             <Mic size={20} color="#FFFFFF" />
-            <Text className="text-white font-semibold ml-2">Ajouter une note</Text>
+            <Text className="text-white font-semibold ml-2">{t('contact.addNote')}</Text>
           </Pressable>
         )}
       </View>
@@ -548,7 +550,7 @@ export default function ContactDetailScreen() {
       {/* Hot Topics Section - En premier pour l'actionnable */}
       <View className="mb-6">
         <View className="flex-row items-center justify-between mb-3">
-          <Text className="text-xl font-semibold text-textPrimary">Actualité</Text>
+          <Text className="text-xl font-semibold text-textPrimary">{t('contact.sections.news')}</Text>
           <Pressable
             className="flex-row items-center"
             onPress={() => setIsAddingHotTopic(true)}
@@ -586,13 +588,13 @@ export default function ContactDetailScreen() {
                   setNewHotTopicContext('');
                 }}
               >
-                <Text className="text-textSecondary">Annuler</Text>
+                <Text className="text-textSecondary">{t('common.cancel')}</Text>
               </Pressable>
               <Pressable
                 className="flex-1 py-3 rounded-lg bg-primary items-center"
                 onPress={handleAddHotTopic}
               >
-                <Text className="text-white font-semibold">Ajouter</Text>
+                <Text className="text-white font-semibold">{t('common.add')}</Text>
               </Pressable>
             </View>
           </View>
@@ -616,7 +618,7 @@ export default function ContactDetailScreen() {
         }}
       >
         <View className="flex-row items-center justify-between mb-3">
-          <Text className="text-xl font-semibold text-textPrimary">Profil</Text>
+          <Text className="text-xl font-semibold text-textPrimary">{t('contact.sections.profile')}</Text>
           <Pressable
             className="flex-row items-center"
             onPress={() => setIsAddingFact(true)}
@@ -633,7 +635,7 @@ export default function ContactDetailScreen() {
               onPress={() => setShowFactTypeDropdown(!showFactTypeDropdown)}
             >
               <Text className={newFactType ? "text-textPrimary" : "text-textMuted"}>
-                {newFactType ? FACT_TYPE_CONFIG[newFactType].label : "Sélectionner un type..."}
+                {newFactType ? FACT_TYPE_CONFIG[newFactType].label : t('contact.fact.selectType')}
               </Text>
             </Pressable>
 
@@ -679,13 +681,13 @@ export default function ContactDetailScreen() {
                   setShowFactTypeDropdown(false);
                 }}
               >
-                <Text className="text-textSecondary">Annuler</Text>
+                <Text className="text-textSecondary">{t('common.cancel')}</Text>
               </Pressable>
               <Pressable
                 className="flex-1 py-3 rounded-lg bg-primary items-center"
                 onPress={handleAddFact}
               >
-                <Text className="text-white font-semibold">Ajouter</Text>
+                <Text className="text-white font-semibold">{t('common.add')}</Text>
               </Pressable>
             </View>
           </View>
@@ -706,13 +708,13 @@ export default function ContactDetailScreen() {
                 className="flex-1 py-2 rounded-lg bg-surfaceHover items-center"
                 onPress={() => setEditingFact(null)}
               >
-                <Text className="text-textSecondary">Annuler</Text>
+                <Text className="text-textSecondary">{t('common.cancel')}</Text>
               </Pressable>
               <Pressable
                 className="flex-1 py-2 rounded-lg bg-primary items-center"
                 onPress={handleSaveFact}
               >
-                <Text className="text-white font-semibold">OK</Text>
+                <Text className="text-white font-semibold">{t('common.save')}</Text>
               </Pressable>
             </View>
           </View>
@@ -734,7 +736,7 @@ export default function ContactDetailScreen() {
         }}
       >
         <View className="flex-row items-center justify-between mb-3">
-          <Text className="text-xl font-semibold text-textPrimary">Souvenirs</Text>
+          <Text className="text-xl font-semibold text-textPrimary">{t('contact.sections.memories')}</Text>
           <Pressable
             className="flex-row items-center"
             onPress={() => setIsAddingMemory(true)}
@@ -763,7 +765,7 @@ export default function ContactDetailScreen() {
               <Text className={newMemoryEventDate ? "text-textPrimary" : "text-textMuted"}>
                 {newMemoryEventDate
                   ? newMemoryEventDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
-                  : "Sélectionner une date..."}
+                  : t('contact.memory.selectDate')}
               </Text>
             </Pressable>
             {showMemoryDatePicker && (
@@ -813,13 +815,13 @@ export default function ContactDetailScreen() {
                   setNewMemoryIsShared(false);
                 }}
               >
-                <Text className="text-textSecondary">Annuler</Text>
+                <Text className="text-textSecondary">{t('common.cancel')}</Text>
               </Pressable>
               <Pressable
                 className="flex-1 py-3 rounded-lg bg-primary items-center"
                 onPress={handleAddMemory}
               >
-                <Text className="text-white font-semibold">Ajouter</Text>
+                <Text className="text-white font-semibold">{t('common.add')}</Text>
               </Pressable>
             </View>
           </View>
@@ -862,7 +864,7 @@ export default function ContactDetailScreen() {
         className="bg-error/20 border border-error py-3 rounded-lg items-center"
         onPress={handleDelete}
       >
-        <Text className="text-error font-semibold">Supprimer le contact</Text>
+        <Text className="text-error font-semibold">{t('contact.deleteContact')}</Text>
       </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>

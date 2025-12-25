@@ -8,7 +8,9 @@
     "confirm": "Bestätigen",
     "back": "Zurück",
     "error": "Fehler",
-    "success": "Erfolg"
+    "success": "Erfolg",
+    "add": "Hinzufügen",
+    "all": "Alle"
   },
   "tabs": {
     "home": "Start",
@@ -32,7 +34,40 @@
     "title": "Suche",
     "placeholder": "In Kontakten suchen...",
     "noResults": "Keine Ergebnisse",
-    "searching": "Suche läuft..."
+    "searching": "Suche läuft...",
+    "emptyStateTitle": "Stellen Sie eine Frage in natürlicher Sprache, um Informationen über Ihre Kontakte zu finden",
+    "examples": "Beispiele",
+    "example1": "Wer macht Musik?",
+    "example2": "Kontakte, die Sport mögen",
+    "example3": "Wer arbeitet in der Technik?"
+  },
+  "contact": {
+    "title": "Kontakt",
+    "lastContact": "Letzter Kontakt",
+    "addNote": "Notiz hinzufügen",
+    "editGroups": "Gruppen bearbeiten",
+    "addGroup": "Gruppe hinzufügen",
+    "addGroupPlaceholder": "Gruppe hinzufügen...",
+    "deleteContact": "Kontakt löschen",
+    "deleteContactConfirm": "Möchten Sie diesen Kontakt wirklich löschen?",
+    "sections": {
+      "news": "Aktuelles",
+      "profile": "Profil",
+      "memories": "Erinnerungen",
+      "notes": "Notizen"
+    },
+    "hotTopic": {
+      "addPlaceholder": "Neues Thema...",
+      "contextPlaceholder": "Kontext (optional)..."
+    },
+    "fact": {
+      "addPlaceholder": "Neue Information...",
+      "selectType": "Typ auswählen..."
+    },
+    "memory": {
+      "addPlaceholder": "Neue Erinnerung...",
+      "selectDate": "Datum auswählen..."
+    }
   },
   "profile": {
     "title": "Profil",

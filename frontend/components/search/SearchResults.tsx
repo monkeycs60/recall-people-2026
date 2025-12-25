@@ -72,20 +72,20 @@ export function SearchResults({ results, hasSearched }: SearchResultsProps) {
         }}
       >
         <Text className="text-textSecondary text-base text-center px-8 leading-relaxed mb-6">
-          Posez une question en langage naturel pour trouver des informations sur vos contacts
+          {t('search.emptyStateTitle')}
         </Text>
         <View style={{ paddingHorizontal: 32 }}>
           <Text className="text-textMuted text-sm italic text-center mb-3">
-            Exemples :
+            {t('search.examples')} :
           </Text>
           <Text className="text-primary text-sm text-center mb-2">
-            "Qui fait de la musique ?"
+            "{t('search.example1')}"
           </Text>
           <Text className="text-primary text-sm text-center mb-2">
-            "Contacts qui aiment le sport"
+            "{t('search.example2')}"
           </Text>
           <Text className="text-primary text-sm text-center">
-            "Qui travaille dans la tech ?"
+            "{t('search.example3')}"
           </Text>
         </View>
       </Animated.View>
