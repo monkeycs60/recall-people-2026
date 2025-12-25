@@ -1,6 +1,17 @@
-import { Pressable } from 'react-native';
+import { View, Pressable, StyleSheet } from 'react-native';
 import { Mic, Square } from 'lucide-react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring, withRepeat, withTiming } from 'react-native-reanimated';
+import { Colors } from '@/constants/theme';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withRepeat,
+  withTiming,
+  withSequence,
+  Easing,
+  useEffect as useReanimatedEffect,
+} from 'react-native-reanimated';
+import { useEffect } from 'react';
 
 type RecordButtonProps = {
   onPress: () => void;
@@ -12,46 +23,104 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export function RecordButton({ onPress, isRecording, isProcessing }: RecordButtonProps) {
   const scale = useSharedValue(1);
-  const pulse = useSharedValue(1);
+  const ringScale = useSharedValue(1);
+  const ringOpacity = useSharedValue(0);
 
-  if (isRecording) {
-    pulse.value = withRepeat(
-      withTiming(1.1, { duration: 800 }),
-      -1,
-      true
-    );
-  } else {
-    pulse.value = 1;
-  }
+  useEffect(() => {
+    if (isRecording) {
+      ringOpacity.value = withTiming(1, { duration: 300 });
+      ringScale.value = withRepeat(
+        withSequence(
+          withTiming(1.3, { duration: 1000, easing: Easing.out(Easing.ease) }),
+          withTiming(1, { duration: 1000, easing: Easing.in(Easing.ease) })
+        ),
+        -1,
+        false
+      );
+    } else {
+      ringOpacity.value = withTiming(0, { duration: 300 });
+      ringScale.value = withTiming(1, { duration: 300 });
+    }
+  }, [isRecording, ringOpacity, ringScale]);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: withSpring(scale.value * pulse.value) }],
+  const buttonAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const ringAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: ringScale.value }],
+    opacity: ringOpacity.value,
   }));
 
   const handlePressIn = () => {
-    scale.value = 0.95;
+    scale.value = withSpring(0.92, { damping: 15, stiffness: 300 });
   };
 
   const handlePressOut = () => {
-    scale.value = 1;
+    scale.value = withSpring(1, { damping: 15, stiffness: 300 });
   };
 
+  const buttonColor = isRecording
+    ? Colors.error
+    : isProcessing
+    ? Colors.textMuted
+    : Colors.primary;
+
   return (
-    <AnimatedPressable
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
-      onPress={onPress}
-      disabled={isProcessing}
-      style={animatedStyle}
-      className={`w-32 h-32 rounded-full items-center justify-center ${
-        isRecording ? 'bg-error' : isProcessing ? 'bg-textMuted' : 'bg-primary'
-      }`}
-    >
-      {isRecording ? (
-        <Square size={40} color="white" fill="white" />
-      ) : (
-        <Mic size={48} color="white" />
-      )}
-    </AnimatedPressable>
+    <View style={styles.container}>
+      <Animated.View
+        style={[
+          styles.ring,
+          ringAnimatedStyle,
+          { borderColor: Colors.primary },
+        ]}
+      />
+
+      <AnimatedPressable
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        onPress={onPress}
+        disabled={isProcessing}
+        style={[
+          styles.button,
+          buttonAnimatedStyle,
+          { backgroundColor: buttonColor },
+        ]}
+      >
+        {isRecording ? (
+          <Square size={36} color={Colors.textInverse} fill={Colors.textInverse} />
+        ) : (
+          <Mic size={44} color={Colors.textInverse} strokeWidth={2} />
+        )}
+      </AnimatedPressable>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    width: 140,
+    height: 140,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ring: {
+    position: 'absolute',
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    borderWidth: 3,
+  },
+  button: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+});
