@@ -26,28 +26,32 @@ type EditingFact = {
   factValue: string;
 };
 
-const FACT_TYPE_CONFIG: Record<FactType, { label: string; singular: boolean }> = {
-  work: { label: 'Métier', singular: true },
-  company: { label: 'Entreprise', singular: true },
-  education: { label: 'Formation', singular: true },
-  location: { label: 'Ville', singular: true },
-  origin: { label: 'Origine', singular: true },
-  partner: { label: 'Conjoint', singular: true },
-  children: { label: 'Enfants', singular: false },
-  hobby: { label: 'Loisirs', singular: false },
-  sport: { label: 'Sports', singular: false },
-  language: { label: 'Langues', singular: false },
-  pet: { label: 'Animaux', singular: false },
-  birthday: { label: 'Anniversaire', singular: true },
-  how_met: { label: 'Rencontre', singular: true },
-  where_met: { label: 'Lieu rencontre', singular: true },
-  shared_ref: { label: 'Références', singular: false },
-  trait: { label: 'Traits', singular: false },
-  gift_idea: { label: 'Idées cadeaux', singular: false },
-  gift_given: { label: 'Cadeaux faits', singular: false },
-  contact: { label: 'Contact', singular: false },
-  relationship: { label: 'Relations', singular: false },
-  other: { label: 'Autre', singular: false },
+const FACT_TYPE_CONFIG: Record<FactType, { singular: boolean }> = {
+  work: { singular: true },
+  company: { singular: true },
+  education: { singular: true },
+  location: { singular: true },
+  origin: { singular: true },
+  partner: { singular: true },
+  children: { singular: false },
+  hobby: { singular: false },
+  sport: { singular: false },
+  language: { singular: false },
+  pet: { singular: false },
+  birthday: { singular: true },
+  how_met: { singular: true },
+  where_met: { singular: true },
+  shared_ref: { singular: false },
+  trait: { singular: false },
+  gift_idea: { singular: false },
+  gift_given: { singular: false },
+  contact: { singular: false },
+  relationship: { singular: false },
+  other: { singular: false },
+};
+
+const getFactTypeLabel = (t: (key: string) => string, factType: FactType): string => {
+  return t(`contact.factTypes.${factType}`);
 };
 
 export default function ContactDetailScreen() {
@@ -176,12 +180,12 @@ export default function ContactDetailScreen() {
 
   const handleDeleteFact = (fact: Fact) => {
     Alert.alert(
-      'Supprimer cette information',
-      `Supprimer "${fact.factKey}: ${fact.factValue}" ?`,
+      t('contact.fact.deleteTitle'),
+      t('contact.fact.deleteConfirm', { key: fact.factKey, value: fact.factValue }),
       [
-        { text: 'Annuler', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Supprimer',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
             await factService.delete(fact.id);
@@ -269,11 +273,10 @@ export default function ContactDetailScreen() {
   const handleAddFact = async () => {
     if (!newFactType || !newFactValue.trim()) return;
 
-    const config = FACT_TYPE_CONFIG[newFactType];
     await factService.create({
       contactId,
       factType: newFactType,
-      factKey: config.label,
+      factKey: getFactTypeLabel(t, newFactType),
       factValue: newFactValue.trim(),
     });
 
@@ -355,7 +358,7 @@ export default function ContactDetailScreen() {
   if (isLoading) {
     return (
       <View className="flex-1 bg-background items-center justify-center">
-        <Text className="text-textSecondary">Chargement...</Text>
+        <Text className="text-textSecondary">{t('common.loading')}</Text>
       </View>
     );
   }
@@ -363,7 +366,7 @@ export default function ContactDetailScreen() {
   if (!contact) {
     return (
       <View className="flex-1 bg-background items-center justify-center">
-        <Text className="text-textSecondary">Contact introuvable</Text>
+        <Text className="text-textSecondary">{t('contact.notFound')}</Text>
       </View>
     );
   }
@@ -384,20 +387,20 @@ export default function ContactDetailScreen() {
       <View className="mb-6 mt-4">
         {isEditingName ? (
           <View className="bg-surface p-4 rounded-lg">
-            <Text className="text-textSecondary text-sm mb-2">Prénom</Text>
+            <Text className="text-textSecondary text-sm mb-2">{t('contact.name.firstName')}</Text>
             <TextInput
               className="bg-background py-3 px-4 rounded-lg text-textPrimary mb-3"
               value={editedFirstName}
               onChangeText={setEditedFirstName}
-              placeholder="Prénom"
+              placeholder={t('contact.name.firstNamePlaceholder')}
               placeholderTextColor="#71717a"
             />
-            <Text className="text-textSecondary text-sm mb-2">Nom</Text>
+            <Text className="text-textSecondary text-sm mb-2">{t('contact.name.lastName')}</Text>
             <TextInput
               className="bg-background py-3 px-4 rounded-lg text-textPrimary mb-3"
               value={editedLastName}
               onChangeText={setEditedLastName}
-              placeholder="Nom (optionnel)"
+              placeholder={t('contact.name.lastNamePlaceholder')}
               placeholderTextColor="#71717a"
             />
             <View className="flex-row gap-3">
@@ -488,7 +491,7 @@ export default function ContactDetailScreen() {
                   onPress={() => handleCreateAndAddGroup(groupSearchQuery.trim())}
                 >
                   <Text className="text-primary">
-                    Créer "{groupSearchQuery.trim()}"
+                    {t('contact.createGroup', { name: groupSearchQuery.trim() })}
                   </Text>
                 </Pressable>
               )}
@@ -574,20 +577,20 @@ export default function ContactDetailScreen() {
 
         {isAddingHotTopic && (
           <View className="bg-surface p-4 rounded-lg mb-3">
-            <Text className="text-textSecondary text-sm mb-2">Titre *</Text>
+            <Text className="text-textSecondary text-sm mb-2">{t('contact.addHotTopic.titleLabel')}</Text>
             <TextInput
               className="bg-background py-3 px-4 rounded-lg text-textPrimary mb-3"
               value={newHotTopicTitle}
               onChangeText={setNewHotTopicTitle}
-              placeholder="Ex: Recherche appartement"
+              placeholder={t('contact.addHotTopic.titlePlaceholder')}
               placeholderTextColor="#71717a"
             />
-            <Text className="text-textSecondary text-sm mb-2">Contexte (optionnel)</Text>
+            <Text className="text-textSecondary text-sm mb-2">{t('contact.addHotTopic.contextLabel')}</Text>
             <TextInput
               className="bg-background py-3 px-4 rounded-lg text-textPrimary mb-3"
               value={newHotTopicContext}
               onChangeText={setNewHotTopicContext}
-              placeholder="Plus de détails..."
+              placeholder={t('contact.addHotTopic.contextPlaceholder')}
               placeholderTextColor="#71717a"
               multiline
               numberOfLines={3}
@@ -642,13 +645,13 @@ export default function ContactDetailScreen() {
 
         {isAddingFact && (
           <View className="bg-surface p-4 rounded-lg mb-3">
-            <Text className="text-textSecondary text-sm mb-2">Type d'information *</Text>
+            <Text className="text-textSecondary text-sm mb-2">{t('contact.fact.infoTypeLabel')}</Text>
             <Pressable
               className="bg-background py-3 px-4 rounded-lg mb-3"
               onPress={() => setShowFactTypeDropdown(!showFactTypeDropdown)}
             >
               <Text className={newFactType ? "text-textPrimary" : "text-textMuted"}>
-                {newFactType ? FACT_TYPE_CONFIG[newFactType].label : t('contact.fact.selectType')}
+                {newFactType ? getFactTypeLabel(t, newFactType) : t('contact.fact.selectType')}
               </Text>
             </Pressable>
 
@@ -664,7 +667,7 @@ export default function ContactDetailScreen() {
                         setShowFactTypeDropdown(false);
                       }}
                     >
-                      <Text className="text-textPrimary">{FACT_TYPE_CONFIG[type].label}</Text>
+                      <Text className="text-textPrimary">{getFactTypeLabel(t, type)}</Text>
                     </Pressable>
                   ))}
                 </ScrollView>
@@ -673,7 +676,7 @@ export default function ContactDetailScreen() {
 
             {newFactType && (
               <>
-                <Text className="text-textSecondary text-sm mb-2">Valeur *</Text>
+                <Text className="text-textSecondary text-sm mb-2">{t('contact.fact.valueLabel')}</Text>
                 <TextInput
                   className="bg-background py-3 px-4 rounded-lg text-textPrimary mb-3"
                   value={newFactValue}
@@ -760,17 +763,17 @@ export default function ContactDetailScreen() {
 
         {isAddingMemory && (
           <View className="bg-surface p-4 rounded-lg mb-3">
-            <Text className="text-textSecondary text-sm mb-2">Description *</Text>
+            <Text className="text-textSecondary text-sm mb-2">{t('contact.memory.descriptionLabel')}</Text>
             <TextInput
               className="bg-background py-3 px-4 rounded-lg text-textPrimary mb-3"
               value={newMemoryDescription}
               onChangeText={setNewMemoryDescription}
-              placeholder="Ex: Week-end ski à Chamonix"
+              placeholder={t('contact.memory.descriptionPlaceholder')}
               placeholderTextColor="#71717a"
               multiline
               numberOfLines={2}
             />
-            <Text className="text-textSecondary text-sm mb-2">Date de l'événement (optionnel)</Text>
+            <Text className="text-textSecondary text-sm mb-2">{t('contact.memory.eventDateLabel')}</Text>
             <Pressable
               className="bg-background py-3 px-4 rounded-lg mb-3"
               onPress={() => setShowMemoryDatePicker(true)}
@@ -803,7 +806,7 @@ export default function ContactDetailScreen() {
                     className="py-2 items-center"
                     onPress={() => setShowMemoryDatePicker(false)}
                   >
-                    <Text className="text-primary font-medium">Valider</Text>
+                    <Text className="text-primary font-medium">{t('contact.memory.validate')}</Text>
                   </Pressable>
                 )}
               </View>
@@ -815,7 +818,7 @@ export default function ContactDetailScreen() {
               <View className={`w-5 h-5 rounded border-2 ${newMemoryIsShared ? 'bg-primary border-primary' : 'border-textMuted'} items-center justify-center mr-2`}>
                 {newMemoryIsShared && <Check size={14} color="#FFFFFF" />}
               </View>
-              <Text className="text-textPrimary">Moment partagé</Text>
+              <Text className="text-textPrimary">{t('contact.memory.sharedMoment')}</Text>
             </Pressable>
             <View className="flex-row gap-3">
               <Pressable
@@ -851,7 +854,7 @@ export default function ContactDetailScreen() {
           !isAddingMemory && (
             <View className="bg-surface/30 p-4 rounded-lg border border-dashed border-surfaceHover">
               <Text className="text-textMuted text-center">
-                Aucun souvenir ajouté
+                {t('contact.memory.emptyState')}
               </Text>
             </View>
           )

@@ -1,3 +1,5 @@
-- connecteur google authentication
 - implémentation google calendar par événements futurs dans hot topics
-- RAG pour les infos sur les contacts ??
+- les infos des record ne sont pas traduits dans la langue choisie si différent de fr
+- guided tour de l'app
+- landing page astro pour l'app
+- update fichiers de traduction pour les autres langues (hors en et fr)
