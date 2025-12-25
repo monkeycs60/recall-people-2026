@@ -100,6 +100,10 @@
     },
     "export": {
       "title": "Exporter les données",
+      "selectFormat": "Choisir le format d'export",
+      "jsonDescription": "Données complètes avec tous les détails",
+      "csvDescription": "Format compatible tableur",
+      "exportButton": "Exporter",
       "success": "Données exportées avec succès",
       "error": "Échec de l'export des données"
     },
@@ -114,12 +118,27 @@
     },
     "legal": {
       "title": "Mentions légales",
-      "privacy": "Politique de confidentialité",
-      "privacyText": "Vos données sont stockées de manière sécurisée et ne sont jamais partagées avec des tiers sans votre consentement.",
-      "terms": "Conditions d'utilisation",
-      "termsText": "En utilisant cette application, vous acceptez nos conditions d'utilisation.",
-      "contact": "Contact",
-      "contactText": "Pour toute question, contactez-nous à support@recall.app"
+      "privacyFirst": {
+        "title": "Vie privée avant tout",
+        "description": "Recall est conçu avec la vie privée comme principe fondamental. Nous croyons que vos relations personnelles et les informations que vous enregistrez doivent rester privées et sous votre contrôle."
+      },
+      "localStorage": {
+        "title": "Stockage 100% local",
+        "description": "Toutes vos données de contacts, notes, faits et souvenirs sont stockées exclusivement sur votre appareil dans une base de données locale sécurisée. Vos données ne quittent jamais votre téléphone sans votre action explicite."
+      },
+      "dataSovereignty": {
+        "title": "Souveraineté des données",
+        "description": "Vous avez la propriété complète de vos données. Exportez-les à tout moment en JSON ou CSV. Supprimez-les quand vous voulez. Pas de cloud, pas de data mining, pas d'accès tiers."
+      },
+      "aiProcessing": {
+        "title": "Traitement IA",
+        "description": "La transcription vocale et l'analyse de texte sont traitées via des API sécurisées uniquement lors de l'enregistrement. Le contenu traité est stocké localement et n'est jamais utilisé pour entraîner des modèles IA."
+      },
+      "contact": {
+        "title": "Nous contacter",
+        "description": "Des questions sur votre vie privée ou vos données ? Nous sommes là pour vous aider."
+      },
+      "lastUpdated": "Dernière mise à jour : Décembre 2024"
     }
   },
   "languagePicker": {

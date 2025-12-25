@@ -8,6 +8,8 @@ import { ArrowLeft } from 'lucide-react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useSettingsStore } from '@/stores/settings-store';
 import { changeLanguage } from '@/lib/i18n';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -71,29 +73,33 @@ export default function RootLayout() {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="select-contact" options={{ headerShown: true, title: 'Sélectionner le contact' }} />
-        <Stack.Screen name="review" options={{ headerShown: true, title: 'Vérification' }} />
-        <Stack.Screen name="disambiguation" options={{ headerShown: true, title: 'Sélectionner le contact' }} />
-        <Stack.Screen
-            name="contact/[id]"
-            options={{
-              headerShown: true,
-              title: 'Contact',
-              headerLeft: () => (
-                <Pressable
-                  onPress={() => router.replace('/(tabs)/contacts')}
-                  className="p-2 -ml-2"
-                >
-                  <ArrowLeft size={24} color="black" />
-                </Pressable>
-              ),
-            }}
-          />
-      </Stack>
-    </QueryClientProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <BottomSheetModalProvider>
+        <QueryClientProvider client={queryClient}>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="select-contact" options={{ headerShown: true, title: 'Sélectionner le contact' }} />
+            <Stack.Screen name="review" options={{ headerShown: true, title: 'Vérification' }} />
+            <Stack.Screen name="disambiguation" options={{ headerShown: true, title: 'Sélectionner le contact' }} />
+            <Stack.Screen
+              name="contact/[id]"
+              options={{
+                headerShown: true,
+                title: 'Contact',
+                headerLeft: () => (
+                  <Pressable
+                    onPress={() => router.replace('/(tabs)/contacts')}
+                    className="p-2 -ml-2"
+                  >
+                    <ArrowLeft size={24} color="black" />
+                  </Pressable>
+                ),
+              }}
+            />
+          </Stack>
+        </QueryClientProvider>
+      </BottomSheetModalProvider>
+    </GestureHandlerRootView>
   );
 }
