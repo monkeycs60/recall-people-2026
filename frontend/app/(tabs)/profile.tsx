@@ -14,6 +14,7 @@ import {
   MessageSquare,
   FileText,
   LogOut,
+  BookOpen,
 } from 'lucide-react-native';
 import { useAuthStore } from '@/stores/auth-store';
 import { useSettingsStore } from '@/stores/settings-store';
@@ -35,6 +36,7 @@ export default function ProfileScreen() {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const language = useSettingsStore((state) => state.language);
+  const setHasSeenOnboarding = useSettingsStore((state) => state.setHasSeenOnboarding);
 
   const languagePickerRef = useRef<BottomSheetModal>(null);
   const statisticsSheetRef = useRef<BottomSheetModal>(null);
@@ -79,6 +81,10 @@ export default function ProfileScreen() {
     const subject = encodeURIComponent(t('profile.feedback.subject'));
     const body = encodeURIComponent(t('profile.feedback.body'));
     Linking.openURL(`mailto:support@recall.app?subject=${subject}&body=${body}`);
+  };
+
+  const handleRedoTour = () => {
+    setHasSeenOnboarding(false);
   };
 
   const handleLogout = () => {
@@ -152,6 +158,11 @@ export default function ProfileScreen() {
             label={t('profile.about.version')}
             value={appVersion}
             showChevron={false}
+          />
+          <SettingsRow
+            icon={<BookOpen size={20} color={Colors.primary} />}
+            label={t('onboarding.redoTour')}
+            onPress={handleRedoTour}
           />
           <SettingsRow
             icon={<MessageSquare size={20} color={Colors.primary} />}

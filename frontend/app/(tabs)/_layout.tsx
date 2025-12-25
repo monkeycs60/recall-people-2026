@@ -4,13 +4,16 @@ import { useEffect, useState } from 'react';
 import { isLoggedIn } from '@/lib/auth';
 import { View, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useSettingsStore } from '@/stores/settings-store';
+import { Onboarding } from '@/components/Onboarding';
 import { Colors } from '@/constants/theme';
-import { CustomTabBar } from '@/components/ui/CustomTabBar';
 
 export default function TabLayout() {
   const router = useRouter();
   const [checking, setChecking] = useState(true);
   const { t } = useTranslation();
+  const hasSeenOnboarding = useSettingsStore((state) => state.hasSeenOnboarding);
+  const setHasSeenOnboarding = useSettingsStore((state) => state.setHasSeenOnboarding);
 
   useEffect(() => {
     isLoggedIn().then((loggedIn) => {
@@ -22,12 +25,21 @@ export default function TabLayout() {
     });
   }, []);
 
+  const handleOnboardingComplete = () => {
+    setHasSeenOnboarding(true);
+  };
+
   if (checking) {
     return (
       <View className="flex-1 items-center justify-center bg-background">
         <ActivityIndicator size="large" color={Colors.primary} />
       </View>
     );
+  }
+
+  // Show onboarding if user hasn't seen it yet
+  if (!hasSeenOnboarding) {
+    return <Onboarding onComplete={handleOnboardingComplete} />;
   }
 
   return (

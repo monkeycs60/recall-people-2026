@@ -248,5 +248,35 @@
   "languagePicker": {
     "title": "Choisir la langue",
     "description": "Cette langue sera utilisée pour l'interface et la transcription vocale"
+  },
+  "onboarding": {
+    "skip": "Passer",
+    "next": "Suivant",
+    "getStarted": "Commencer",
+    "language": {
+      "title": "Choisissez votre langue",
+      "description": "Cette langue sera utilisée pour l'interface de l'app et pour transcrire vos enregistrements audio avec l'IA."
+    },
+    "welcome": {
+      "title": "Bienvenue sur Recall",
+      "description": "Gardez contact avec les gens qui comptent. Enregistrez des notes vocales et laissez l'IA extraire automatiquement les infos importantes."
+    },
+    "record": {
+      "title": "Enregistrez vos conversations",
+      "description": "Appuyez sur le bouton pour enregistrer une note vocale après une rencontre, un appel ou une discussion importante."
+    },
+    "ai": {
+      "title": "L'IA extrait les infos",
+      "description": "Notre IA analyse vos enregistrements et extrait automatiquement les faits, sujets d'actualité et souvenirs partagés."
+    },
+    "contacts": {
+      "title": "Organisez vos contacts",
+      "description": "Retrouvez facilement toutes les informations sur vos proches : leur profil, vos souvenirs ensemble, et les sujets en cours."
+    },
+    "search": {
+      "title": "Recherche sémantique",
+      "description": "Posez des questions en langage naturel pour retrouver n'importe quelle information sur vos contacts."
+    },
+    "redoTour": "Refaire le tour guidé"
   }
 }

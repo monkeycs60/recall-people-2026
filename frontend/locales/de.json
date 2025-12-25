@@ -144,5 +144,35 @@
   "languagePicker": {
     "title": "Sprache wählen",
     "description": "Diese Sprache wird für die Oberfläche und Sprachtranskription verwendet"
+  },
+  "onboarding": {
+    "skip": "Überspringen",
+    "next": "Weiter",
+    "getStarted": "Loslegen",
+    "language": {
+      "title": "Wähle deine Sprache",
+      "description": "Diese Sprache wird für die App-Oberfläche und zur Transkription deiner Audioaufnahmen mit KI verwendet."
+    },
+    "welcome": {
+      "title": "Willkommen bei Recall",
+      "description": "Bleib in Kontakt mit den Menschen, die wichtig sind. Nimm Sprachnotizen auf und lass die KI automatisch wichtige Informationen extrahieren."
+    },
+    "record": {
+      "title": "Nimm deine Gespräche auf",
+      "description": "Drücke den Button, um nach einem Treffen, Anruf oder einer wichtigen Diskussion eine Sprachnotiz aufzunehmen."
+    },
+    "ai": {
+      "title": "Die KI extrahiert die Infos",
+      "description": "Unsere KI analysiert deine Aufnahmen und extrahiert automatisch Fakten, aktuelle Themen und gemeinsame Erinnerungen."
+    },
+    "contacts": {
+      "title": "Organisiere deine Kontakte",
+      "description": "Finde alle Informationen über deine Liebsten: ihr Profil, eure gemeinsamen Erinnerungen und laufende Themen."
+    },
+    "search": {
+      "title": "Semantische Suche",
+      "description": "Stelle Fragen in natürlicher Sprache, um jede Information über deine Kontakte zu finden."
+    },
+    "redoTour": "Geführte Tour wiederholen"
   }
 }

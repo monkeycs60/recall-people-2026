@@ -9,11 +9,13 @@ import { getToken } from '@/lib/auth';
 type SettingsState = {
   language: Language;
   isHydrated: boolean;
+  hasSeenOnboarding: boolean;
 };
 
 type SettingsActions = {
   setLanguage: (language: Language) => void;
   setHydrated: (hydrated: boolean) => void;
+  setHasSeenOnboarding: (seen: boolean) => void;
   detectDeviceLanguage: () => Language;
 };
 
@@ -35,6 +37,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       (set) => ({
         language: detectDeviceLanguage(),
         isHydrated: false,
+        hasSeenOnboarding: false,
 
         setLanguage: async (language) => {
           set({ language });
@@ -50,6 +53,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
           }
         },
         setHydrated: (isHydrated) => set({ isHydrated }),
+        setHasSeenOnboarding: (hasSeenOnboarding) => set({ hasSeenOnboarding }),
         detectDeviceLanguage,
       }),
       {
@@ -58,7 +62,10 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         onRehydrateStorage: () => (state) => {
           state?.setHydrated(true);
         },
-        partialize: (state) => ({ language: state.language }),
+        partialize: (state) => ({
+          language: state.language,
+          hasSeenOnboarding: state.hasSeenOnboarding
+        }),
       }
     ),
     { name: 'settings-store' }
