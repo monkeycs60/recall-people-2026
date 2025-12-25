@@ -6,7 +6,8 @@ This is an EXPO application, developping a mobile app in React Native.
 
 ### Prohibited Practices
 
--  **No SafeAreaView with NativeWind**: Use `View` + `useSafeAreaInsets()` instead - SafeAreaView doesn't support NativeWind classes.
+-  **No NativeWind/Tailwind classes**: NativeWind is unreliable and causes styling bugs. Use `StyleSheet.create()` or inline styles exclusively. Always use colors from `@/constants/theme.ts` (Colors, Spacing, BorderRadius, Typography).
+-  **No SafeAreaView**: Use `View` + `useSafeAreaInsets()` instead.
 -  **No useEffect**: Use fetch in server components via services, or handle side effects via event handlers
 -  **No TypeScript any or as any**: Always use strong typing (not any or as any) ; if you need custom types, reuse them via @/types/ ; never use ts ignore comments.
 -  **No OOP patterns**: Avoid classes or object-oriented approaches
@@ -63,7 +64,7 @@ Expo application with modern stack and strict development standards:
 
 -  **Expo** with React Native and Turbopack
 -  **TypeScript** with strict mode enabled
--  **Tailwind CSS v4** for styling
+-  **StyleSheet/Inline styles** for styling (NO NativeWind/Tailwind)
 -  **Zustand** for global state management
 
 ---

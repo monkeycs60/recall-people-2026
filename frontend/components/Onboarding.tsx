@@ -1,4 +1,4 @@
-import { View, Text, Pressable, Dimensions, ScrollView } from 'react-native';
+import { View, Text, Pressable, Dimensions, ScrollView, StyleSheet } from 'react-native';
 import { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -9,10 +9,11 @@ import Animated, {
   interpolate,
   Extrapolation,
 } from 'react-native-reanimated';
-import { Mic, Brain, Users, Search, Globe, CheckCircle } from 'lucide-react-native';
+import { Mic, Brain, Users, Search, Globe, Check } from 'lucide-react-native';
 import { useSettingsStore } from '@/stores/settings-store';
 import { changeLanguage } from '@/lib/i18n';
 import { Language, SUPPORTED_LANGUAGES, LANGUAGE_NAMES, LANGUAGE_FLAGS } from '@/types';
+import { Colors, Spacing, BorderRadius } from '@/constants/theme';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -36,36 +37,12 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
   };
 
   const slides = [
-    {
-      id: 0,
-      icon: Globe,
-      key: 'language',
-    },
-    {
-      id: 1,
-      icon: CheckCircle,
-      key: 'welcome',
-    },
-    {
-      id: 2,
-      icon: Mic,
-      key: 'record',
-    },
-    {
-      id: 3,
-      icon: Brain,
-      key: 'ai',
-    },
-    {
-      id: 4,
-      icon: Users,
-      key: 'contacts',
-    },
-    {
-      id: 5,
-      icon: Search,
-      key: 'search',
-    },
+    { id: 0, icon: Globe, key: 'language' },
+    { id: 1, icon: Check, key: 'welcome' },
+    { id: 2, icon: Mic, key: 'record' },
+    { id: 3, icon: Brain, key: 'ai' },
+    { id: 4, icon: Users, key: 'contacts' },
+    { id: 5, icon: Search, key: 'search' },
   ];
 
   const handleNext = () => {
@@ -85,7 +62,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
     onComplete();
   };
 
-  const handleScroll = (event: any) => {
+  const handleScroll = (event: { nativeEvent: { contentOffset: { x: number } } }) => {
     const offsetX = event.nativeEvent.contentOffset.x;
     scrollX.value = offsetX;
     const slide = Math.round(offsetX / SCREEN_WIDTH);
@@ -93,32 +70,31 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
   };
 
   const renderLanguageSlide = () => (
-    <View className="flex-1 px-6 justify-center" style={{ width: SCREEN_WIDTH }}>
-      <View className="items-center mb-8">
-        <View className="bg-primary/20 p-6 rounded-full mb-6">
-          <Globe size={64} color="#8b5cf6" />
+    <View style={[styles.slideContainer, { width: SCREEN_WIDTH }]}>
+      <View style={styles.slideContent}>
+        <View style={styles.iconContainer}>
+          <Globe size={40} color={Colors.primary} />
         </View>
-        <Text className="text-textPrimary text-3xl font-bold text-center mb-4">
-          {t('onboarding.language.title')}
-        </Text>
-        <Text className="text-textSecondary text-base text-center">
-          {t('onboarding.language.description')}
-        </Text>
+        <Text style={styles.title}>{t('onboarding.language.title')}</Text>
+        <Text style={styles.description}>{t('onboarding.language.description')}</Text>
       </View>
 
-      <View className="bg-surface rounded-2xl p-4 mb-6">
+      <View style={styles.languageList}>
         {SUPPORTED_LANGUAGES.map((language) => (
           <Pressable
             key={language}
-            className="flex-row items-center px-4 py-4 rounded-xl active:bg-surfaceHover"
+            style={({ pressed }) => [
+              styles.languageRow,
+              pressed && styles.languageRowPressed,
+            ]}
             onPress={() => handleSelectLanguage(language)}
           >
-            <Text className="text-3xl mr-4">{LANGUAGE_FLAGS[language]}</Text>
-            <Text className="flex-1 text-textPrimary text-lg font-medium">
-              {LANGUAGE_NAMES[language]}
-            </Text>
+            <Text style={styles.languageFlag}>{LANGUAGE_FLAGS[language]}</Text>
+            <Text style={styles.languageName}>{LANGUAGE_NAMES[language]}</Text>
             {currentLanguage === language && (
-              <CheckCircle size={24} color="#8b5cf6" fill="#8b5cf6" />
+              <View style={styles.checkContainer}>
+                <Check size={16} color={Colors.textInverse} strokeWidth={3} />
+              </View>
             )}
           </Pressable>
         ))}
@@ -126,7 +102,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
     </View>
   );
 
-  const renderSlide = (slide: typeof slides[0]) => {
+  const renderSlide = (slide: (typeof slides)[0]) => {
     if (slide.key === 'language') {
       return renderLanguageSlide();
     }
@@ -134,38 +110,33 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
     const Icon = slide.icon;
 
     return (
-      <View className="flex-1 px-6 justify-center" style={{ width: SCREEN_WIDTH }}>
-        <View className="items-center">
-          <View className="bg-primary/20 p-6 rounded-full mb-8">
-            <Icon size={64} color="#8b5cf6" />
+      <View style={[styles.slideContainer, { width: SCREEN_WIDTH }]}>
+        <View style={styles.slideContent}>
+          <View style={styles.iconContainer}>
+            <Icon size={40} color={Colors.primary} />
           </View>
-          <Text className="text-textPrimary text-3xl font-bold text-center mb-4">
-            {t(`onboarding.${slide.key}.title`)}
-          </Text>
-          <Text className="text-textSecondary text-base text-center leading-6">
-            {t(`onboarding.${slide.key}.description`)}
-          </Text>
+          <Text style={styles.title}>{t(`onboarding.${slide.key}.title`)}</Text>
+          <Text style={styles.description}>{t(`onboarding.${slide.key}.description`)}</Text>
         </View>
       </View>
     );
   };
 
   return (
-    <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
-      {/* Skip button */}
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       {currentSlide < slides.length - 1 && (
         <Pressable
           onPress={handleSkip}
-          className="absolute right-6 z-10 px-4 py-2 rounded-full bg-surface active:bg-surfaceHover"
-          style={{ top: insets.top + 12 }}
+          style={({ pressed }) => [
+            styles.skipButton,
+            { top: insets.top + Spacing.md },
+            pressed && styles.skipButtonPressed,
+          ]}
         >
-          <Text className="text-textSecondary font-medium">
-            {t('onboarding.skip')}
-          </Text>
+          <Text style={styles.skipText}>{t('onboarding.skip')}</Text>
         </Pressable>
       )}
 
-      {/* Slides */}
       <ScrollView
         ref={scrollViewRef}
         horizontal
@@ -180,10 +151,8 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
         ))}
       </ScrollView>
 
-      {/* Bottom section */}
-      <View className="px-6" style={{ paddingBottom: Math.max(insets.bottom, 24) }}>
-        {/* Pagination dots */}
-        <View className="flex-row justify-center mb-8">
+      <View style={[styles.bottomSection, { paddingBottom: Math.max(insets.bottom, Spacing.lg) }]}>
+        <View style={styles.pagination}>
           {slides.map((_, index) => {
             const dotStyle = useAnimatedStyle(() => {
               const inputRange = [
@@ -192,13 +161,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
                 (index + 1) * SCREEN_WIDTH,
               ];
 
-              const width = interpolate(
-                scrollX.value,
-                inputRange,
-                [8, 24, 8],
-                Extrapolation.CLAMP
-              );
-
+              const width = interpolate(scrollX.value, inputRange, [8, 24, 8], Extrapolation.CLAMP);
               const opacity = interpolate(
                 scrollX.value,
                 inputRange,
@@ -212,28 +175,129 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
               };
             });
 
-            return (
-              <Animated.View
-                key={index}
-                style={[dotStyle]}
-                className="h-2 rounded-full bg-primary mx-1"
-              />
-            );
+            return <Animated.View key={index} style={[styles.dot, dotStyle]} />;
           })}
         </View>
 
-        {/* Next/Get Started button */}
         <Pressable
           onPress={handleNext}
-          className="bg-primary py-4 rounded-2xl active:bg-primary/90"
+          style={({ pressed }) => [styles.nextButton, pressed && styles.nextButtonPressed]}
         >
-          <Text className="text-white text-center text-lg font-semibold">
-            {currentSlide === slides.length - 1
-              ? t('onboarding.getStarted')
-              : t('onboarding.next')}
+          <Text style={styles.nextButtonText}>
+            {currentSlide === slides.length - 1 ? t('onboarding.getStarted') : t('onboarding.next')}
           </Text>
         </Pressable>
       </View>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  skipButton: {
+    position: 'absolute',
+    right: Spacing.lg,
+    zIndex: 10,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.surface,
+  },
+  skipButtonPressed: {
+    backgroundColor: Colors.surfaceHover,
+  },
+  skipText: {
+    color: Colors.textSecondary,
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  slideContainer: {
+    flex: 1,
+    paddingHorizontal: Spacing.lg,
+    justifyContent: 'center',
+  },
+  slideContent: {
+    alignItems: 'center',
+    marginBottom: Spacing.xl,
+  },
+  iconContainer: {
+    backgroundColor: Colors.primaryLight,
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.full,
+    marginBottom: Spacing.lg,
+  },
+  title: {
+    color: Colors.textPrimary,
+    fontSize: 28,
+    fontWeight: '700',
+    textAlign: 'center',
+    marginBottom: Spacing.md,
+  },
+  description: {
+    color: Colors.textSecondary,
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  languageList: {
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.sm,
+  },
+  languageRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
+  },
+  languageRowPressed: {
+    backgroundColor: Colors.surfaceHover,
+  },
+  languageFlag: {
+    fontSize: 28,
+    marginRight: Spacing.md,
+  },
+  languageName: {
+    flex: 1,
+    color: Colors.textPrimary,
+    fontSize: 17,
+    fontWeight: '500',
+  },
+  checkContainer: {
+    backgroundColor: Colors.primary,
+    borderRadius: BorderRadius.full,
+    padding: 4,
+  },
+  bottomSection: {
+    paddingHorizontal: Spacing.lg,
+  },
+  pagination: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: Spacing.xl,
+  },
+  dot: {
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.primary,
+    marginHorizontal: 4,
+  },
+  nextButton: {
+    backgroundColor: Colors.primary,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.lg,
+  },
+  nextButtonPressed: {
+    backgroundColor: Colors.primaryDark,
+  },
+  nextButtonText: {
+    color: Colors.textInverse,
+    textAlign: 'center',
+    fontSize: 17,
+    fontWeight: '600',
+  },
+});
