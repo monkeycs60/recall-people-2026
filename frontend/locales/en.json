@@ -92,7 +92,35 @@
       "legal": "Legal notices"
     },
     "logout": "Log out",
-    "logoutConfirm": "Are you sure you want to log out?"
+    "logoutConfirm": "Are you sure you want to log out?",
+    "statistics": {
+      "title": "Statistics",
+      "contacts": "Contacts",
+      "groups": "Groups"
+    },
+    "export": {
+      "title": "Export Data",
+      "success": "Data exported successfully",
+      "error": "Failed to export data"
+    },
+    "clearCache": {
+      "title": "Clear Cache",
+      "confirm": "This will clear all local data. Are you sure?",
+      "success": "Cache cleared successfully"
+    },
+    "feedback": {
+      "subject": "Feedback for Recall",
+      "body": "Hi,\n\nI have some feedback about Recall:\n\n"
+    },
+    "legal": {
+      "title": "Legal Notices",
+      "privacy": "Privacy Policy",
+      "privacyText": "Your data is stored securely and never shared with third parties without your consent.",
+      "terms": "Terms of Service",
+      "termsText": "By using this app, you agree to our terms of service.",
+      "contact": "Contact",
+      "contactText": "For any questions, contact us at support@recall.app"
+    }
   },
   "languagePicker": {
     "title": "Choose language",
