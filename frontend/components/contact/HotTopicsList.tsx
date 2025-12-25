@@ -1,8 +1,9 @@
-import { View, Text, Pressable, TextInput, Alert } from 'react-native';
+import { View, Text, Pressable, TextInput, Alert, StyleSheet } from 'react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, RotateCcw, Trash2, ChevronDown, ChevronUp, Edit3 } from 'lucide-react-native';
 import { HotTopic } from '@/types';
+import { Colors } from '@/constants/theme';
 
 type HotTopicsListProps = {
   hotTopics: HotTopic[];
@@ -89,34 +90,28 @@ export function HotTopicsList({
 
     if (isEditing) {
       return (
-        <View key={topic.id} className="bg-surface p-4 rounded-lg mb-2">
+        <View key={topic.id} style={styles.editCard}>
           <TextInput
-            className="bg-background py-2 px-3 rounded-lg text-textPrimary font-medium mb-2"
+            style={styles.editInput}
             value={editTitle}
             onChangeText={setEditTitle}
             placeholder={t('contact.hotTopic.titlePlaceholder')}
-            placeholderTextColor="#71717a"
+            placeholderTextColor={Colors.textMuted}
           />
           <TextInput
-            className="bg-background py-2 px-3 rounded-lg text-textSecondary mb-3"
+            style={[styles.editInput, styles.editInputContext]}
             value={editContext}
             onChangeText={setEditContext}
             placeholder={t('contact.hotTopic.contextEditPlaceholder')}
-            placeholderTextColor="#71717a"
+            placeholderTextColor={Colors.textMuted}
             multiline
           />
-          <View className="flex-row gap-2">
-            <Pressable
-              className="flex-1 py-2 rounded-lg bg-surfaceHover items-center"
-              onPress={() => setEditingId(null)}
-            >
-              <Text className="text-textSecondary">{t('common.cancel')}</Text>
+          <View style={styles.editActions}>
+            <Pressable style={styles.cancelButton} onPress={() => setEditingId(null)}>
+              <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
             </Pressable>
-            <Pressable
-              className="flex-1 py-2 rounded-lg bg-primary items-center"
-              onPress={handleSaveEdit}
-            >
-              <Text className="text-white font-semibold">{t('common.confirm')}</Text>
+            <Pressable style={styles.saveButton} onPress={handleSaveEdit}>
+              <Text style={styles.saveButtonText}>{t('common.confirm')}</Text>
             </Pressable>
           </View>
         </View>
@@ -125,30 +120,24 @@ export function HotTopicsList({
 
     if (isResolving) {
       return (
-        <View key={topic.id} className="bg-success/10 border border-success/30 p-4 rounded-lg mb-2">
-          <Text className="text-textPrimary font-medium mb-2">{topic.title}</Text>
-          <Text className="text-success text-xs font-medium mb-1">{t('contact.hotTopic.resolutionLabel')}</Text>
+        <View key={topic.id} style={styles.resolveCard}>
+          <Text style={styles.resolveTitle}>{topic.title}</Text>
+          <Text style={styles.resolveLabel}>{t('contact.hotTopic.resolutionLabel')}</Text>
           <TextInput
-            className="bg-background py-2 px-3 rounded-lg text-textPrimary text-sm mb-3"
+            style={styles.resolveInput}
             value={resolutionText}
             onChangeText={setResolutionText}
             placeholder={t('contact.hotTopic.resolutionPlaceholder')}
-            placeholderTextColor="#71717a"
+            placeholderTextColor={Colors.textMuted}
             multiline
             autoFocus
           />
-          <View className="flex-row gap-2">
-            <Pressable
-              className="flex-1 py-2 rounded-lg bg-surfaceHover items-center"
-              onPress={() => setResolvingId(null)}
-            >
-              <Text className="text-textSecondary">{t('common.cancel')}</Text>
+          <View style={styles.editActions}>
+            <Pressable style={styles.cancelButton} onPress={() => setResolvingId(null)}>
+              <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
             </Pressable>
-            <Pressable
-              className="flex-1 py-2 rounded-lg bg-success items-center"
-              onPress={handleConfirmResolve}
-            >
-              <Text className="text-white font-semibold">{t('contact.hotTopic.archive')}</Text>
+            <Pressable style={styles.successButton} onPress={handleConfirmResolve}>
+              <Text style={styles.saveButtonText}>{t('contact.hotTopic.archive')}</Text>
             </Pressable>
           </View>
         </View>
@@ -158,86 +147,73 @@ export function HotTopicsList({
     return (
       <View
         key={topic.id}
-        className={`bg-surface rounded-lg mb-2 overflow-hidden ${isResolved ? 'opacity-70' : ''}`}
+        style={[styles.topicCard, isResolved && styles.topicCardResolved]}
       >
         <Pressable
-          className="p-4 flex-row items-start"
+          style={styles.topicContent}
           onPress={() => !isResolved && handleStartEdit(topic)}
         >
-          <View
-            className={`w-2.5 h-2.5 rounded-full mt-1.5 mr-3 ${
-              isResolved ? 'bg-success' : 'bg-orange-500'
-            }`}
-          />
-          <View className="flex-1">
-            <Text className={`font-medium ${isResolved ? 'text-textMuted line-through' : 'text-textPrimary'}`}>
+          <View style={[styles.statusDot, isResolved ? styles.statusDotResolved : styles.statusDotActive]} />
+          <View style={styles.topicTextContainer}>
+            <Text style={[styles.topicTitle, isResolved && styles.topicTitleResolved]}>
               {topic.title}
             </Text>
             {topic.context && !isResolved && (
-              <Text className="text-textSecondary text-sm mt-1">{topic.context}</Text>
+              <Text style={styles.topicContext}>{topic.context}</Text>
             )}
             {isResolved && topic.resolution && !isEditingResolution && (
               <Pressable
-                className="flex-row items-center mt-1"
+                style={styles.resolutionRow}
                 onPress={() => onUpdateResolution && handleStartEditResolution(topic)}
               >
-                <Text className="text-success text-sm flex-1">→ {topic.resolution}</Text>
-                {onUpdateResolution && <Edit3 size={12} color="#10B981" />}
+                <Text style={styles.resolutionText}>→ {topic.resolution}</Text>
+                {onUpdateResolution && <Edit3 size={12} color={Colors.success} />}
               </Pressable>
             )}
             {isResolved && !topic.resolution && onUpdateResolution && !isEditingResolution && (
-              <Pressable
-                className="mt-1"
-                onPress={() => handleStartEditResolution(topic)}
-              >
-                <Text className="text-textMuted text-sm italic">{t('contact.hotTopic.addResolution')}</Text>
+              <Pressable style={styles.addResolutionButton} onPress={() => handleStartEditResolution(topic)}>
+                <Text style={styles.addResolutionText}>{t('contact.hotTopic.addResolution')}</Text>
               </Pressable>
             )}
             {isEditingResolution && (
-              <View className="mt-2">
+              <View style={styles.editResolutionContainer}>
                 <TextInput
-                  className="bg-background py-2 px-3 rounded-lg text-textPrimary text-sm mb-2"
+                  style={styles.editResolutionInput}
                   value={editResolutionText}
                   onChangeText={setEditResolutionText}
                   placeholder={t('contact.hotTopic.resolutionPlaceholder')}
-                  placeholderTextColor="#71717a"
+                  placeholderTextColor={Colors.textMuted}
                   multiline
                   autoFocus
                 />
-                <View className="flex-row gap-2">
-                  <Pressable
-                    className="py-1.5 px-3 bg-surfaceHover rounded"
-                    onPress={() => setEditingResolutionId(null)}
-                  >
-                    <Text className="text-textSecondary text-sm">{t('common.cancel')}</Text>
+                <View style={styles.editResolutionActions}>
+                  <Pressable style={styles.smallCancelButton} onPress={() => setEditingResolutionId(null)}>
+                    <Text style={styles.smallCancelText}>{t('common.cancel')}</Text>
                   </Pressable>
-                  <Pressable
-                    className="py-1.5 px-3 bg-success/20 rounded"
-                    onPress={handleSaveResolution}
-                  >
-                    <Text className="text-success text-sm">{t('common.confirm')}</Text>
+                  <Pressable style={styles.smallSuccessButton} onPress={handleSaveResolution}>
+                    <Text style={styles.smallSuccessText}>{t('common.confirm')}</Text>
                   </Pressable>
                 </View>
               </View>
             )}
-            <Text className="text-textMuted text-xs mt-1">
+            <Text style={styles.topicDate}>
               {isResolved && topic.resolvedAt
                 ? t('contact.hotTopic.resolvedAt', { date: new Date(topic.resolvedAt).toLocaleDateString() })
                 : new Date(topic.updatedAt).toLocaleDateString()}
             </Text>
           </View>
-          <View className="flex-row items-center gap-2">
+          <View style={styles.topicActions}>
             {isResolved ? (
-              <Pressable className="p-2" onPress={() => onReopen(topic.id)}>
-                <RotateCcw size={18} color="#8B5CF6" />
+              <Pressable style={styles.actionButton} onPress={() => onReopen(topic.id)}>
+                <RotateCcw size={18} color={Colors.primary} />
               </Pressable>
             ) : (
-              <Pressable className="p-2" onPress={() => handleStartResolve(topic)}>
-                <Check size={18} color="#22C55E" />
+              <Pressable style={styles.actionButton} onPress={() => handleStartResolve(topic)}>
+                <Check size={18} color={Colors.success} />
               </Pressable>
             )}
-            <Pressable className="p-2" onPress={() => handleDelete(topic)}>
-              <Trash2 size={18} color="#EF4444" />
+            <Pressable style={styles.actionButton} onPress={() => handleDelete(topic)}>
+              <Trash2 size={18} color={Colors.error} />
             </Pressable>
           </View>
         </Pressable>
@@ -248,27 +224,22 @@ export function HotTopicsList({
   return (
     <View>
       {activeTopics.length === 0 && resolvedTopics.length === 0 && (
-        <View className="bg-surface/30 p-4 rounded-lg border border-dashed border-surfaceHover">
-          <Text className="text-textMuted text-center">
-            {t('contact.hotTopic.emptyState')}
-          </Text>
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyStateText}>{t('contact.hotTopic.emptyState')}</Text>
         </View>
       )}
 
       {activeTopics.map(renderTopic)}
 
       {resolvedTopics.length > 0 && (
-        <Pressable
-          className="flex-row items-center justify-center py-3"
-          onPress={() => setShowResolved(!showResolved)}
-        >
-          <Text className="text-textSecondary text-sm mr-1">
+        <Pressable style={styles.showResolvedButton} onPress={() => setShowResolved(!showResolved)}>
+          <Text style={styles.showResolvedText}>
             {t('contact.hotTopic.showResolved', { count: resolvedTopics.length })}
           </Text>
           {showResolved ? (
-            <ChevronUp size={16} color="#9CA3AF" />
+            <ChevronUp size={16} color={Colors.textMuted} />
           ) : (
-            <ChevronDown size={16} color="#9CA3AF" />
+            <ChevronDown size={16} color={Colors.textMuted} />
           )}
         </Pressable>
       )}
@@ -277,3 +248,224 @@ export function HotTopicsList({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  emptyState: {
+    backgroundColor: `${Colors.surface}50`,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: Colors.border,
+  },
+  emptyStateText: {
+    fontSize: 14,
+    color: Colors.textMuted,
+    textAlign: 'center',
+  },
+  editCard: {
+    backgroundColor: Colors.surface,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  editInput: {
+    backgroundColor: Colors.background,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    fontSize: 15,
+    fontWeight: '500',
+    color: Colors.textPrimary,
+    marginBottom: 8,
+  },
+  editInputContext: {
+    fontWeight: '400',
+    marginBottom: 12,
+  },
+  editActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: Colors.surfaceHover,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    fontSize: 15,
+    color: Colors.textSecondary,
+  },
+  saveButton: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+  },
+  successButton: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: Colors.success,
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: Colors.textInverse,
+  },
+  resolveCard: {
+    backgroundColor: `${Colors.success}15`,
+    borderWidth: 1,
+    borderColor: `${Colors.success}40`,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  resolveTitle: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: Colors.textPrimary,
+    marginBottom: 8,
+  },
+  resolveLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: Colors.success,
+    marginBottom: 4,
+  },
+  resolveInput: {
+    backgroundColor: Colors.background,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    fontSize: 14,
+    color: Colors.textPrimary,
+    marginBottom: 12,
+  },
+  topicCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: 12,
+    marginBottom: 8,
+    overflow: 'hidden',
+  },
+  topicCardResolved: {
+    opacity: 0.7,
+  },
+  topicContent: {
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  statusDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginTop: 6,
+    marginRight: 12,
+  },
+  statusDotActive: {
+    backgroundColor: Colors.warning,
+  },
+  statusDotResolved: {
+    backgroundColor: Colors.success,
+  },
+  topicTextContainer: {
+    flex: 1,
+  },
+  topicTitle: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: Colors.textPrimary,
+  },
+  topicTitleResolved: {
+    color: Colors.textMuted,
+    textDecorationLine: 'line-through',
+  },
+  topicContext: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    marginTop: 4,
+  },
+  resolutionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  resolutionText: {
+    fontSize: 14,
+    color: Colors.success,
+    flex: 1,
+  },
+  addResolutionButton: {
+    marginTop: 4,
+  },
+  addResolutionText: {
+    fontSize: 14,
+    color: Colors.textMuted,
+    fontStyle: 'italic',
+  },
+  editResolutionContainer: {
+    marginTop: 8,
+  },
+  editResolutionInput: {
+    backgroundColor: Colors.background,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    fontSize: 14,
+    color: Colors.textPrimary,
+    marginBottom: 8,
+  },
+  editResolutionActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  smallCancelButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: Colors.surfaceHover,
+    borderRadius: 6,
+  },
+  smallCancelText: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+  },
+  smallSuccessButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: `${Colors.success}20`,
+    borderRadius: 6,
+  },
+  smallSuccessText: {
+    fontSize: 13,
+    color: Colors.success,
+  },
+  topicDate: {
+    fontSize: 12,
+    color: Colors.textMuted,
+    marginTop: 4,
+  },
+  topicActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  actionButton: {
+    padding: 8,
+  },
+  showResolvedButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+  },
+  showResolvedText: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    marginRight: 4,
+  },
+});

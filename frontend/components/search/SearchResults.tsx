@@ -1,10 +1,11 @@
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SearchX } from 'lucide-react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 import { SemanticSearchResult } from '@/types';
 import { SearchResultItem } from './SearchResultItem';
+import { Colors } from '@/constants/theme';
 
 type SearchResultsProps = {
   results: SemanticSearchResult[];
@@ -27,33 +28,12 @@ export function SearchResults({ results, hasSearched }: SearchResultsProps) {
 
   if (results.length === 0 && hasSearched) {
     return (
-      <Animated.View
-        entering={FadeIn}
-        style={{
-          flex: 1,
-          alignItems: 'center',
-          justifyContent: 'center',
-          paddingVertical: 64,
-        }}
-      >
-        <View
-          style={{
-            width: 80,
-            height: 80,
-            borderRadius: 40,
-            backgroundColor: '#27272a',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: 16,
-          }}
-        >
-          <SearchX size={36} color="#52525b" />
+      <Animated.View entering={FadeIn} style={styles.emptyContainer}>
+        <View style={styles.emptyIconContainer}>
+          <SearchX size={36} color={Colors.textMuted} />
         </View>
-        <Text className="text-textSecondary text-lg font-medium mb-2">
-          {t('search.noResults')}
-        </Text>
-        <Text className="text-textMuted text-center px-8">
-          {/* No translation key for this helper text, keeping as is */}
+        <Text style={styles.emptyTitle}>{t('search.noResults')}</Text>
+        <Text style={styles.emptySubtitle}>
           Essayez une recherche différente ou des termes plus généraux
         </Text>
       </Animated.View>
@@ -61,46 +41,17 @@ export function SearchResults({ results, hasSearched }: SearchResultsProps) {
   }
 
   if (results.length === 0) {
-    return (
-      <Animated.View
-        entering={FadeIn}
-        style={{
-          flex: 1,
-          alignItems: 'center',
-          justifyContent: 'center',
-          paddingVertical: 64,
-        }}
-      >
-        <Text className="text-textSecondary text-base text-center px-8 leading-relaxed mb-6">
-          {t('search.emptyStateTitle')}
-        </Text>
-        <View style={{ paddingHorizontal: 32 }}>
-          <Text className="text-textMuted text-sm italic text-center mb-3">
-            {t('search.examples')} :
-          </Text>
-          <Text className="text-primary text-sm text-center mb-2">
-            "{t('search.example1')}"
-          </Text>
-          <Text className="text-primary text-sm text-center mb-2">
-            "{t('search.example2')}"
-          </Text>
-          <Text className="text-primary text-sm text-center">
-            "{t('search.example3')}"
-          </Text>
-        </View>
-      </Animated.View>
-    );
+    return null;
   }
 
   return (
     <ScrollView
-      className="flex-1"
+      style={styles.scrollView}
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: 20 }}
+      contentContainerStyle={styles.scrollContent}
     >
-      <View className="flex-row items-center justify-between mb-4">
-        <Text className="text-textSecondary text-sm">
-          {/* No translation key for result count, keeping as is */}
+      <View style={styles.resultsHeader}>
+        <Text style={styles.resultsCount}>
           {results.length} résultat{results.length > 1 ? 's' : ''}
         </Text>
       </View>
@@ -116,3 +67,49 @@ export function SearchResults({ results, hasSearched }: SearchResultsProps) {
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 64,
+  },
+  emptyIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: Colors.textSecondary,
+    marginBottom: 8,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: Colors.textMuted,
+    textAlign: 'center',
+    paddingHorizontal: 32,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 100,
+  },
+  resultsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  resultsCount: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+  },
+});

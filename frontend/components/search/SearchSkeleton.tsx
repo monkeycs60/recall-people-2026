@@ -1,4 +1,4 @@
-import { View, Text, DimensionValue } from 'react-native';
+import { View, Text, DimensionValue, StyleSheet } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -9,6 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useEffect, useState } from 'react';
 import { Brain, Sparkles, Search } from 'lucide-react-native';
+import { Colors } from '@/constants/theme';
 
 const LOADING_MESSAGES = [
   { text: 'Analyse de vos contacts...', icon: Search },
@@ -44,7 +45,7 @@ function SkeletonLine({ width, delay }: { width: DimensionValue; delay: number }
         {
           width,
           height: 16,
-          backgroundColor: '#27272a',
+          backgroundColor: Colors.border,
           borderRadius: 9999,
         },
       ]}
@@ -67,28 +68,10 @@ function SkeletonCard({ delay }: { delay: number }) {
   }));
 
   return (
-    <Animated.View
-      style={[
-        cardStyle,
-        {
-          backgroundColor: '#18181b',
-          borderRadius: 16,
-          padding: 16,
-          marginBottom: 12,
-        },
-      ]}
-    >
-      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
-        <View
-          style={{
-            width: 48,
-            height: 48,
-            borderRadius: 12,
-            backgroundColor: '#27272a',
-            marginRight: 12,
-          }}
-        />
-        <View style={{ flex: 1 }}>
+    <Animated.View style={[cardStyle, styles.skeletonCard]}>
+      <View style={styles.skeletonHeader}>
+        <View style={styles.skeletonAvatar} />
+        <View style={styles.skeletonTextContainer}>
           <SkeletonLine width="60%" delay={delay + 100} />
           <View style={{ height: 8 }} />
           <SkeletonLine width="40%" delay={delay + 200} />
@@ -127,34 +110,12 @@ export function SearchSkeleton() {
   const IconComponent = currentMessage.icon;
 
   return (
-    <View style={{ flex: 1, paddingHorizontal: 4 }}>
-      <Animated.View
-        style={[
-          messageStyle,
-          {
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            paddingVertical: 24,
-          },
-        ]}
-      >
-        <View
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 20,
-            backgroundColor: 'rgba(139, 92, 246, 0.2)',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginRight: 12,
-          }}
-        >
-          <IconComponent size={20} color="#8b5cf6" />
+    <View style={styles.container}>
+      <Animated.View style={[messageStyle, styles.messageContainer]}>
+        <View style={styles.messageIconContainer}>
+          <IconComponent size={20} color={Colors.primary} />
         </View>
-        <Text className="text-textSecondary text-base font-medium">
-          {currentMessage.text}
-        </Text>
+        <Text style={styles.messageText}>{currentMessage.text}</Text>
       </Animated.View>
 
       <SkeletonCard delay={0} />
@@ -163,3 +124,56 @@ export function SearchSkeleton() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingHorizontal: 4,
+  },
+  messageContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 24,
+  },
+  messageIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  messageText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: Colors.textSecondary,
+  },
+  skeletonCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  skeletonHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  skeletonAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: Colors.primaryLight,
+    marginRight: 12,
+  },
+  skeletonTextContainer: {
+    flex: 1,
+  },
+});

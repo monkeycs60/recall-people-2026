@@ -1,3 +1,4 @@
+import { useState, useRef, useCallback } from 'react';
 import {
   useAudioRecorder,
   RecordingPresets,
@@ -16,6 +17,8 @@ export const useRecording = () => {
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const router = useRouter();
   const { contacts, loadContacts, isInitialized } = useContactsStore();
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const durationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const {
     recordingState,
     setRecordingState,
@@ -55,16 +58,31 @@ export const useRecording = () => {
       await audioRecorder.record();
 
       setRecordingState('recording');
+      setRecordingDuration(0);
+
+      durationIntervalRef.current = setInterval(() => {
+        setRecordingDuration((prev) => prev + 1);
+      }, 1000);
+
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     } catch (error) {
       console.error('[useRecording] Start error:', error);
       setRecordingState('idle');
+      if (durationIntervalRef.current) {
+        clearInterval(durationIntervalRef.current);
+        durationIntervalRef.current = null;
+      }
       throw error;
     }
   };
 
   const stopRecording = async () => {
     if (!audioRecorder.isRecording) return null;
+
+    if (durationIntervalRef.current) {
+      clearInterval(durationIntervalRef.current);
+      durationIntervalRef.current = null;
+    }
 
     try {
       setRecordingState('processing');
@@ -180,6 +198,7 @@ export const useRecording = () => {
 
   return {
     recordingState,
+    recordingDuration,
     toggleRecording,
     cancelRecording,
     isRecording: recordingState === 'recording',

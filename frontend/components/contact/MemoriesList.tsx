@@ -1,7 +1,8 @@
-import { View, Text, Pressable, TextInput, Alert } from 'react-native';
+import { View, Text, Pressable, TextInput, Alert, StyleSheet } from 'react-native';
 import { useState } from 'react';
 import { Trash2, Edit3, Users, User } from 'lucide-react-native';
 import { Memory } from '@/types';
+import { Colors } from '@/constants/theme';
 
 type MemoriesListProps = {
   memories: Memory[];
@@ -43,10 +44,8 @@ export function MemoriesList({ memories, onEdit, onDelete, highlightId }: Memori
 
   if (memories.length === 0) {
     return (
-      <View className="bg-surface/30 p-4 rounded-lg border border-dashed border-surfaceHover">
-        <Text className="text-textMuted text-center">
-          Aucun souvenir enregistré
-        </Text>
+      <View style={styles.emptyState}>
+        <Text style={styles.emptyStateText}>Aucun souvenir enregistré</Text>
       </View>
     );
   }
@@ -58,34 +57,28 @@ export function MemoriesList({ memories, onEdit, onDelete, highlightId }: Memori
 
         if (isEditing) {
           return (
-            <View key={memory.id} className="bg-surface p-4 rounded-lg mb-2">
+            <View key={memory.id} style={styles.editCard}>
               <TextInput
-                className="bg-background py-2 px-3 rounded-lg text-textPrimary mb-2"
+                style={styles.editInput}
                 value={editDescription}
                 onChangeText={setEditDescription}
                 placeholder="Description du souvenir"
-                placeholderTextColor="#71717a"
+                placeholderTextColor={Colors.textMuted}
                 multiline
               />
               <TextInput
-                className="bg-background py-2 px-3 rounded-lg text-textSecondary mb-3"
+                style={[styles.editInput, styles.editInputSecondary]}
                 value={editEventDate}
                 onChangeText={setEditEventDate}
                 placeholder="Date (optionnel)"
-                placeholderTextColor="#71717a"
+                placeholderTextColor={Colors.textMuted}
               />
-              <View className="flex-row gap-2">
-                <Pressable
-                  className="flex-1 py-2 rounded-lg bg-surfaceHover items-center"
-                  onPress={() => setEditingId(null)}
-                >
-                  <Text className="text-textSecondary">Annuler</Text>
+              <View style={styles.editActions}>
+                <Pressable style={styles.cancelButton} onPress={() => setEditingId(null)}>
+                  <Text style={styles.cancelButtonText}>Annuler</Text>
                 </Pressable>
-                <Pressable
-                  className="flex-1 py-2 rounded-lg bg-primary items-center"
-                  onPress={handleSaveEdit}
-                >
-                  <Text className="text-white font-semibold">OK</Text>
+                <Pressable style={styles.saveButton} onPress={handleSaveEdit}>
+                  <Text style={styles.saveButtonText}>OK</Text>
                 </Pressable>
               </View>
             </View>
@@ -97,48 +90,41 @@ export function MemoriesList({ memories, onEdit, onDelete, highlightId }: Memori
         return (
           <View
             key={memory.id}
-            className="rounded-lg mb-2 overflow-hidden"
-            style={{
-              backgroundColor: isHighlighted ? '#8b5cf620' : '#18181b',
-              borderWidth: isHighlighted ? 2 : 0,
-              borderColor: isHighlighted ? '#8b5cf6' : 'transparent',
-            }}
+            style={[styles.memoryCard, isHighlighted && styles.memoryCardHighlighted]}
           >
-            <Pressable
-              className="p-4 flex-row items-start"
-              onPress={() => handleStartEdit(memory)}
-            >
+            <Pressable style={styles.memoryContent} onPress={() => handleStartEdit(memory)}>
               <View
-                className={`w-7 h-7 rounded-full mr-3 items-center justify-center ${
-                  memory.isShared ? 'bg-blue-500/20' : 'bg-purple-500/20'
-                }`}
+                style={[
+                  styles.memoryIcon,
+                  { backgroundColor: memory.isShared ? `${Colors.info}20` : `${Colors.primary}20` },
+                ]}
               >
                 {memory.isShared ? (
-                  <Users size={14} color="#3B82F6" />
+                  <Users size={14} color={Colors.info} />
                 ) : (
-                  <User size={14} color="#A855F7" />
+                  <User size={14} color={Colors.primary} />
                 )}
               </View>
-              <View className="flex-1">
-                <Text className="text-textPrimary font-medium">{memory.description}</Text>
-                <View className="flex-row items-center mt-1">
+              <View style={styles.memoryTextContainer}>
+                <Text style={styles.memoryDescription}>{memory.description}</Text>
+                <View style={styles.memoryMeta}>
                   {memory.eventDate && (
-                    <Text className="text-textSecondary text-sm mr-2">{memory.eventDate}</Text>
+                    <Text style={styles.memoryDate}>{memory.eventDate}</Text>
                   )}
-                  <Text className="text-textMuted text-xs">
+                  <Text style={styles.memoryType}>
                     {memory.isShared ? 'Ensemble' : 'Solo'}
                   </Text>
                 </View>
-                <Text className="text-textMuted text-xs mt-1">
+                <Text style={styles.memoryCreatedAt}>
                   {new Date(memory.createdAt).toLocaleDateString()}
                 </Text>
               </View>
-              <View className="flex-row items-center gap-2">
-                <Pressable className="p-2" onPress={() => handleStartEdit(memory)}>
-                  <Edit3 size={16} color="#9CA3AF" />
+              <View style={styles.memoryActions}>
+                <Pressable style={styles.actionButton} onPress={() => handleStartEdit(memory)}>
+                  <Edit3 size={16} color={Colors.textMuted} />
                 </Pressable>
-                <Pressable className="p-2" onPress={() => handleDelete(memory)}>
-                  <Trash2 size={16} color="#EF4444" />
+                <Pressable style={styles.actionButton} onPress={() => handleDelete(memory)}>
+                  <Trash2 size={16} color={Colors.error} />
                 </Pressable>
               </View>
             </Pressable>
@@ -148,3 +134,123 @@ export function MemoriesList({ memories, onEdit, onDelete, highlightId }: Memori
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  emptyState: {
+    backgroundColor: `${Colors.surface}50`,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: Colors.border,
+  },
+  emptyStateText: {
+    fontSize: 14,
+    color: Colors.textMuted,
+    textAlign: 'center',
+  },
+  editCard: {
+    backgroundColor: Colors.surface,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  editInput: {
+    backgroundColor: Colors.background,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    fontSize: 15,
+    color: Colors.textPrimary,
+    marginBottom: 8,
+  },
+  editInputSecondary: {
+    marginBottom: 12,
+  },
+  editActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: Colors.surfaceHover,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    fontSize: 15,
+    color: Colors.textSecondary,
+  },
+  saveButton: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: Colors.textInverse,
+  },
+  memoryCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: 12,
+    marginBottom: 8,
+    overflow: 'hidden',
+  },
+  memoryCardHighlighted: {
+    borderWidth: 2,
+    borderColor: Colors.primary,
+    backgroundColor: `${Colors.primary}10`,
+  },
+  memoryContent: {
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  memoryIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    marginRight: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  memoryTextContainer: {
+    flex: 1,
+  },
+  memoryDescription: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: Colors.textPrimary,
+  },
+  memoryMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  memoryDate: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+    marginRight: 8,
+  },
+  memoryType: {
+    fontSize: 12,
+    color: Colors.textMuted,
+  },
+  memoryCreatedAt: {
+    fontSize: 12,
+    color: Colors.textMuted,
+    marginTop: 4,
+  },
+  memoryActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  actionButton: {
+    padding: 8,
+  },
+});

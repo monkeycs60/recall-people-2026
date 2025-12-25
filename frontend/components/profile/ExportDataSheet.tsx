@@ -8,6 +8,7 @@ import * as Sharing from 'expo-sharing';
 import { contactService } from '@/services/contact.service';
 import { useGroupsStore } from '@/stores/groups-store';
 import { ContactWithDetails, Group, FactType } from '@/types';
+import { Colors } from '@/constants/theme';
 
 type ExportFormat = 'json' | 'csv';
 
@@ -129,8 +130,8 @@ export const ExportDataSheet = forwardRef<BottomSheetModal>((_, ref) => {
       ref={ref}
       enableDynamicSizing
       backdropComponent={renderBackdrop}
-      backgroundStyle={{ backgroundColor: '#1a1a1a' }}
-      handleIndicatorStyle={{ backgroundColor: '#525252' }}
+      backgroundStyle={{ backgroundColor: Colors.surface }}
+      handleIndicatorStyle={{ backgroundColor: Colors.border }}
     >
       <BottomSheetView style={{ paddingBottom: 32 }}>
         <View className="px-4 pb-4 border-b border-surfaceHover">
@@ -144,35 +145,48 @@ export const ExportDataSheet = forwardRef<BottomSheetModal>((_, ref) => {
 
         <View className="p-4">
           <Pressable
-            className={`flex-row items-center p-4 rounded-xl mb-3 ${
-              selectedFormat === 'json' ? 'bg-violet-500/20 border border-violet-500' : 'bg-surface'
-            }`}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              padding: 16,
+              borderRadius: 12,
+              marginBottom: 12,
+              backgroundColor: selectedFormat === 'json' ? Colors.primaryLight : Colors.background,
+              borderWidth: selectedFormat === 'json' ? 1 : 0,
+              borderColor: Colors.primary,
+            }}
             onPress={() => setSelectedFormat('json')}
           >
-            <View className="w-10 h-10 bg-violet-500/20 rounded-full items-center justify-center mr-3">
-              <FileJson size={20} color="#8b5cf6" />
+            <View style={{ width: 40, height: 40, backgroundColor: Colors.primaryLight, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
+              <FileJson size={20} color={Colors.primary} />
             </View>
             <View className="flex-1">
               <Text className="text-textPrimary font-medium">JSON</Text>
               <Text className="text-textSecondary text-xs">{t('profile.export.jsonDescription')}</Text>
             </View>
-            {selectedFormat === 'json' && <Check size={20} color="#8b5cf6" />}
+            {selectedFormat === 'json' && <Check size={20} color={Colors.primary} />}
           </Pressable>
 
           <Pressable
-            className={`flex-row items-center p-4 rounded-xl ${
-              selectedFormat === 'csv' ? 'bg-violet-500/20 border border-violet-500' : 'bg-surface'
-            }`}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              padding: 16,
+              borderRadius: 12,
+              backgroundColor: selectedFormat === 'csv' ? Colors.primaryLight : Colors.background,
+              borderWidth: selectedFormat === 'csv' ? 1 : 0,
+              borderColor: Colors.primary,
+            }}
             onPress={() => setSelectedFormat('csv')}
           >
-            <View className="w-10 h-10 bg-violet-500/20 rounded-full items-center justify-center mr-3">
-              <FileSpreadsheet size={20} color="#8b5cf6" />
+            <View style={{ width: 40, height: 40, backgroundColor: Colors.primaryLight, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
+              <FileSpreadsheet size={20} color={Colors.primary} />
             </View>
             <View className="flex-1">
               <Text className="text-textPrimary font-medium">CSV</Text>
               <Text className="text-textSecondary text-xs">{t('profile.export.csvDescription')}</Text>
             </View>
-            {selectedFormat === 'csv' && <Check size={20} color="#8b5cf6" />}
+            {selectedFormat === 'csv' && <Check size={20} color={Colors.primary} />}
           </Pressable>
         </View>
 

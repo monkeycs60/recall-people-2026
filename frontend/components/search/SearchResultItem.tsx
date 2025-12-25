@@ -1,14 +1,13 @@
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { User, FileText, Brain, MessageSquare, ChevronRight } from 'lucide-react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-  withTiming,
-  withDelay,
   FadeInDown,
 } from 'react-native-reanimated';
 import { SemanticSearchResult, SearchSourceType } from '@/types';
+import { Colors } from '@/constants/theme';
 
 type SearchResultItemProps = {
   result: SemanticSearchResult;
@@ -17,9 +16,9 @@ type SearchResultItemProps = {
 };
 
 const SOURCE_CONFIG: Record<SearchSourceType, { icon: typeof FileText; color: string; label: string }> = {
-  fact: { icon: Brain, color: '#8b5cf6', label: 'Profil' },
-  memory: { icon: MessageSquare, color: '#22c55e', label: 'Souvenir' },
-  note: { icon: FileText, color: '#f59e0b', label: 'Note' },
+  fact: { icon: Brain, color: Colors.primary, label: 'Profil' },
+  memory: { icon: MessageSquare, color: Colors.success, label: 'Souvenir' },
+  note: { icon: FileText, color: Colors.warning, label: 'Note' },
 };
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -43,63 +42,46 @@ export function SearchResultItem({ result, index, onPress }: SearchResultItemPro
 
   const scoreColor =
     result.relevanceScore >= 80
-      ? '#22c55e'
+      ? Colors.success
       : result.relevanceScore >= 60
-        ? '#f59e0b'
-        : '#71717a';
+        ? Colors.warning
+        : Colors.textMuted;
 
   return (
     <AnimatedPressable
       entering={FadeInDown.delay(index * 80).springify()}
-      style={pressStyle}
+      style={[pressStyle, styles.card]}
       onPress={onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      className="bg-surface rounded-2xl overflow-hidden mb-3"
     >
-      <View className="p-4">
-        <View className="flex-row items-start">
-          <View
-            className="w-12 h-12 rounded-xl items-center justify-center mr-3"
-            style={{ backgroundColor: `${config.color}20` }}
-          >
+      <View style={styles.content}>
+        <View style={styles.row}>
+          <View style={[styles.avatar, { backgroundColor: `${config.color}20` }]}>
             <User size={22} color={config.color} />
           </View>
 
-          <View className="flex-1">
-            <View className="flex-row items-center justify-between mb-1">
-              <Text className="text-textPrimary font-semibold text-lg">
-                {result.contactName}
-              </Text>
-              <View className="flex-row items-center">
-                <Text
-                  className="text-sm font-medium mr-1"
-                  style={{ color: scoreColor }}
-                >
+          <View style={styles.textContainer}>
+            <View style={styles.header}>
+              <Text style={styles.contactName}>{result.contactName}</Text>
+              <View style={styles.scoreContainer}>
+                <Text style={[styles.score, { color: scoreColor }]}>
                   {result.relevanceScore}%
                 </Text>
-                <ChevronRight size={16} color="#52525b" />
+                <ChevronRight size={16} color={Colors.textMuted} />
               </View>
             </View>
 
-            <Text className="text-textPrimary text-base leading-relaxed mb-2">
-              {result.answer}
-            </Text>
+            <Text style={styles.answer}>{result.answer}</Text>
 
-            <View className="flex-row items-center">
-              <View
-                className="flex-row items-center rounded-full px-2.5 py-1"
-                style={{ backgroundColor: `${config.color}15` }}
-              >
+            <View style={styles.metaRow}>
+              <View style={[styles.typeBadge, { backgroundColor: `${config.color}15` }]}>
                 <IconComponent size={12} color={config.color} />
-                <Text
-                  className="text-xs font-medium ml-1.5"
-                  style={{ color: config.color }}
-                >
+                <Text style={[styles.typeLabel, { color: config.color }]}>
                   {config.label}
                 </Text>
               </View>
-              <Text className="text-textMuted text-sm ml-2 flex-1" numberOfLines={1}>
+              <Text style={styles.reference} numberOfLines={1}>
                 {result.reference}
               </Text>
             </View>
@@ -107,13 +89,91 @@ export function SearchResultItem({ result, index, onPress }: SearchResultItemPro
         </View>
       </View>
 
-      <View
-        className="h-1"
-        style={{
-          backgroundColor: config.color,
-          opacity: 0.6,
-        }}
-      />
+      <View style={[styles.accentBar, { backgroundColor: config.color }]} />
     </AnimatedPressable>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  content: {
+    padding: 16,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  avatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  textContainer: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  contactName: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+  },
+  scoreContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  score: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginRight: 4,
+  },
+  answer: {
+    fontSize: 15,
+    color: Colors.textPrimary,
+    lineHeight: 22,
+    marginBottom: 8,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  typeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  typeLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+    marginLeft: 6,
+  },
+  reference: {
+    fontSize: 13,
+    color: Colors.textMuted,
+    marginLeft: 8,
+    flex: 1,
+  },
+  accentBar: {
+    height: 3,
+    opacity: 0.6,
+  },
+});
