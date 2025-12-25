@@ -5,32 +5,66 @@ import { FileJson, FileSpreadsheet, Check } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
-import { useContactsStore } from '@/stores/contacts-store';
+import { contactService } from '@/services/contact.service';
 import { useGroupsStore } from '@/stores/groups-store';
-import { Contact, Group } from '@/types';
+import { ContactWithDetails, Group, FactType } from '@/types';
 
 type ExportFormat = 'json' | 'csv';
 
-const convertToCSV = (contacts: Contact[], groups: Group[]): string => {
-  const headers = ['firstName', 'lastName', 'nickname', 'lastContactAt', 'createdAt'];
-  const rows = contacts.map((contact) =>
-    headers.map((header) => {
-      const value = contact[header as keyof Contact];
-      if (value === null || value === undefined) return '';
-      const stringValue = String(value);
-      if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
-        return `"${stringValue.replace(/"/g, '""')}"`;
-      }
-      return stringValue;
-    }).join(',')
-  );
+const FACT_TYPE_COLUMNS: FactType[] = [
+  'work', 'company', 'education', 'location', 'origin',
+  'partner', 'children', 'hobby', 'sport', 'language',
+  'pet', 'birthday', 'how_met', 'where_met', 'contact'
+];
 
-  return [headers.join(','), ...rows].join('\n');
+const escapeCSV = (value: string | undefined): string => {
+  if (!value) return '';
+  const stringValue = String(value);
+  if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+    return `"${stringValue.replace(/"/g, '""')}"`;
+  }
+  return stringValue;
+};
+
+const convertToCSV = (contacts: ContactWithDetails[], groups: Group[]): string => {
+  const baseHeaders = ['firstName', 'lastName', 'nickname', 'lastContactAt', 'createdAt'];
+  const factHeaders = FACT_TYPE_COLUMNS;
+  const otherHeaders = ['hotTopics', 'memories', 'notes'];
+  const allHeaders = [...baseHeaders, ...factHeaders, ...otherHeaders];
+
+  const rows = contacts.map((contact) => {
+    const baseValues = [
+      escapeCSV(contact.firstName),
+      escapeCSV(contact.lastName),
+      escapeCSV(contact.nickname),
+      escapeCSV(contact.lastContactAt),
+      escapeCSV(contact.createdAt),
+    ];
+
+    const factValues = factHeaders.map((factType) => {
+      const factsOfType = contact.facts.filter((fact) => fact.factType === factType);
+      if (factsOfType.length === 0) return '';
+      return escapeCSV(factsOfType.map((fact) => fact.factValue).join('; '));
+    });
+
+    const hotTopicsValue = escapeCSV(
+      contact.hotTopics.map((ht) => ht.title).join('; ')
+    );
+    const memoriesValue = escapeCSV(
+      contact.memories.map((m) => m.description).join('; ')
+    );
+    const notesValue = escapeCSV(
+      contact.notes.map((n) => n.title || n.summary || '').filter(Boolean).join('; ')
+    );
+
+    return [...baseValues, ...factValues, hotTopicsValue, memoriesValue, notesValue].join(',');
+  });
+
+  return [allHeaders.join(','), ...rows].join('\n');
 };
 
 export const ExportDataSheet = forwardRef<BottomSheetModal>((_, ref) => {
   const { t } = useTranslation();
-  const contacts = useContactsStore((state) => state.contacts);
   const groups = useGroupsStore((state) => state.groups);
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>('json');
   const [isExporting, setIsExporting] = useState(false);
@@ -42,9 +76,18 @@ export const ExportDataSheet = forwardRef<BottomSheetModal>((_, ref) => {
     []
   );
 
+  const fetchAllContactsWithDetails = async (): Promise<ContactWithDetails[]> => {
+    const basicContacts = await contactService.getAll();
+    const detailedContacts = await Promise.all(
+      basicContacts.map((contact) => contactService.getById(contact.id))
+    );
+    return detailedContacts.filter((c): c is ContactWithDetails => c !== null);
+  };
+
   const handleExport = async () => {
     setIsExporting(true);
     try {
+      const contacts = await fetchAllContactsWithDetails();
       const timestamp = Date.now();
       let fileUri: string;
       let mimeType: string;
