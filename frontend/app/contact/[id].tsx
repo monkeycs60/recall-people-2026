@@ -986,6 +986,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 8,
     marginTop: 12,
+    marginBottom: 12,
     justifyContent: 'center',
   },
   groupChip: {
