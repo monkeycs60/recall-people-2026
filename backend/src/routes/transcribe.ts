@@ -27,11 +27,15 @@ transcribeRoutes.post('/', async (c) => {
 
     const audioBuffer = await audioFile.arrayBuffer();
 
+    const language = (formData.get('language') as string) || 'fr';
+    const validLanguages = ['fr', 'en', 'es', 'it', 'de'];
+    const transcriptionLanguage = validLanguages.includes(language) ? language : 'fr';
+
     const { result } = await deepgram.listen.prerecorded.transcribeFile(
       Buffer.from(audioBuffer),
       {
         model: 'nova-3',
-        language: 'fr',
+        language: transcriptionLanguage,
         smart_format: true,
         punctuate: true,
       }

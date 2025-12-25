@@ -7,6 +7,7 @@ import { extractRoutes } from './routes/extract';
 import { similarityRoutes } from './routes/similarity';
 import { summaryRoutes } from './routes/summary';
 import { searchRoutes } from './routes/search';
+import { settingsRoutes } from './routes/settings';
 
 type Bindings = {
   DATABASE_URL: string;
@@ -41,5 +42,6 @@ app.route('/api/extract', extractRoutes);
 app.route('/api/similarity', similarityRoutes);
 app.route('/api/summary', summaryRoutes);
 app.route('/api/search', searchRoutes);
+app.route('/api/settings', settingsRoutes);
 
 export default app;

@@ -20,6 +20,7 @@ model User {
   image         String?
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
+  preferredLanguage String @default("fr") @map("preferred_language")
 
   sessions Session[]
   accounts Account[]
