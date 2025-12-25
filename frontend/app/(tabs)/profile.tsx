@@ -1,5 +1,5 @@
 import { View, Text, ScrollView, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -25,6 +25,7 @@ import Constants from 'expo-constants';
 export default function ProfileScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const language = useSettingsStore((state) => state.language);
@@ -51,8 +52,8 @@ export default function ProfileScreen() {
   const appVersion = Constants.expoConfig?.version || '1.0.0';
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-      <ScrollView className="flex-1 px-4">
+    <View className="flex-1 bg-background">
+      <ScrollView className="flex-1 px-4" style={{ paddingTop: insets.top }}>
         <Text className="text-textPrimary text-2xl font-bold mt-4 mb-6">
           {t('profile.title')}
         </Text>
@@ -127,6 +128,6 @@ export default function ProfileScreen() {
         visible={showLanguagePicker}
         onClose={() => setShowLanguagePicker(false)}
       />
-    </SafeAreaView>
+    </View>
   );
 }
