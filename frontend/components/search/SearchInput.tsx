@@ -1,4 +1,4 @@
-import { View, TextInput, Pressable } from 'react-native';
+import { View, TextInput, Pressable, StyleSheet } from 'react-native';
 import { X, Sparkles, SendHorizonal } from 'lucide-react-native';
 import Animated, {
   useAnimatedStyle,
@@ -10,6 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Colors } from '@/constants/theme';
 
 type SearchInputProps = {
   value: string;
@@ -48,45 +49,22 @@ export function SearchInput({
     borderColor: interpolateColor(
       borderColorProgress.value,
       [0, 1],
-      ['#27272a', '#8b5cf6']
+      [Colors.border, Colors.primary]
     ),
   }));
 
   const canSubmit = value.trim().length > 0 && !isLoading;
 
   return (
-    <Animated.View
-      style={[
-        {
-          flexDirection: 'row',
-          alignItems: 'center',
-          backgroundColor: '#18181b',
-          borderRadius: 16,
-          paddingLeft: 16,
-          paddingRight: 8,
-          height: 56,
-          borderWidth: 2,
-        },
-        animatedBorderStyle,
-      ]}
-    >
-      <View style={{ marginRight: 12 }}>
-        {isLoading ? (
-          <Sparkles size={22} color="#8b5cf6" />
-        ) : (
-          <Sparkles size={22} color="#71717a" />
-        )}
+    <Animated.View style={[styles.container, animatedBorderStyle]}>
+      <View style={styles.iconContainer}>
+        <Sparkles size={22} color={isLoading ? Colors.primary : Colors.textMuted} />
       </View>
 
       <TextInput
-        style={{
-          flex: 1,
-          color: '#fafafa',
-          fontSize: 16,
-          height: '100%',
-        }}
+        style={styles.input}
         placeholder={t('search.placeholder')}
-        placeholderTextColor="#52525b"
+        placeholderTextColor={Colors.textMuted}
         value={value}
         onChangeText={onChangeText}
         onSubmitEditing={onSubmit}
@@ -97,36 +75,64 @@ export function SearchInput({
       />
 
       {value.length > 0 && !isLoading && (
-        <Pressable
-          onPress={onClear}
-          style={{
-            marginLeft: 4,
-            width: 32,
-            height: 32,
-            borderRadius: 16,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <X size={18} color="#71717a" />
+        <Pressable onPress={onClear} style={styles.clearButton}>
+          <X size={18} color={Colors.textMuted} />
         </Pressable>
       )}
 
       <Pressable
         onPress={onSubmit}
         disabled={!canSubmit}
-        style={{
-          marginLeft: 4,
-          width: 40,
-          height: 40,
-          borderRadius: 12,
-          backgroundColor: canSubmit ? '#8b5cf6' : '#27272a',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
+        style={[
+          styles.submitButton,
+          { backgroundColor: canSubmit ? Colors.primary : Colors.border },
+        ]}
       >
-        <SendHorizonal size={20} color={canSubmit ? '#fafafa' : '#52525b'} />
+        <SendHorizonal size={20} color={canSubmit ? Colors.textInverse : Colors.textMuted} />
       </Pressable>
     </Animated.View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.surface,
+    borderRadius: 12,
+    paddingLeft: 16,
+    paddingRight: 8,
+    height: 56,
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  iconContainer: {
+    marginRight: 12,
+  },
+  input: {
+    flex: 1,
+    color: Colors.textPrimary,
+    fontSize: 16,
+    height: '100%',
+  },
+  clearButton: {
+    marginLeft: 4,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  submitButton: {
+    marginLeft: 4,
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

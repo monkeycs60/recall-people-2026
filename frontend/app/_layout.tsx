@@ -159,7 +159,7 @@ export default function RootLayout() {
               name="record"
               options={{
                 headerShown: false,
-                presentation: 'modal',
+                presentation: 'fullScreenModal',
                 animation: 'slide_from_bottom',
               }}
             />
