@@ -1,8 +1,11 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import { getToken } from './auth';
 import { ExtractionResult } from '@/types';
+import { useSettingsStore } from '@/stores/settings-store';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
+
+const getCurrentLanguage = () => useSettingsStore.getState().language;
 
 type ApiOptions = {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
@@ -52,6 +55,7 @@ export const transcribeAudio = async (
     type: 'audio/m4a',
     name: 'recording.m4a',
   } as unknown as Blob);
+  formData.append('language', getCurrentLanguage());
 
   const response = await fetch(`${API_URL}/api/transcribe`, {
     method: 'POST',
@@ -99,7 +103,7 @@ export const extractInfo = async (data: {
 }> => {
   return apiCall('/api/extract', {
     method: 'POST',
-    body: data,
+    body: { ...data, language: getCurrentLanguage() },
   });
 };
 
@@ -123,10 +127,27 @@ export const generateSummary = async (data: {
     '/api/summary',
     {
       method: 'POST',
-      body: data,
+      body: { ...data, language: getCurrentLanguage() },
     }
   );
   return response.summary;
+};
+
+export const getUserSettings = async (): Promise<{
+  user: { id: string; name: string; email: string; preferredLanguage: string };
+}> => {
+  return apiCall('/api/settings');
+};
+
+export const updateUserSettings = async (data: {
+  preferredLanguage?: string;
+}): Promise<{
+  user: { id: string; name: string; email: string; preferredLanguage: string };
+}> => {
+  return apiCall('/api/settings', {
+    method: 'PATCH',
+    body: data,
+  });
 };
 
 export { apiCall };
