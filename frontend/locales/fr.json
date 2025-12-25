@@ -8,7 +8,9 @@
     "confirm": "Confirmer",
     "back": "Retour",
     "error": "Erreur",
-    "success": "Succès"
+    "success": "Succès",
+    "add": "Ajouter",
+    "all": "Tous"
   },
   "tabs": {
     "home": "Accueil",
@@ -32,7 +34,40 @@
     "title": "Recherche",
     "placeholder": "Rechercher dans vos contacts...",
     "noResults": "Aucun résultat",
-    "searching": "Recherche en cours..."
+    "searching": "Recherche en cours...",
+    "emptyStateTitle": "Posez une question en langage naturel pour trouver des informations sur vos contacts",
+    "examples": "Exemples",
+    "example1": "Qui fait de la musique ?",
+    "example2": "Contacts qui aiment le sport",
+    "example3": "Qui travaille dans la tech ?"
+  },
+  "contact": {
+    "title": "Contact",
+    "lastContact": "Dernier contact",
+    "addNote": "Ajouter une note",
+    "editGroups": "Modifier les groupes",
+    "addGroup": "Ajouter un groupe",
+    "addGroupPlaceholder": "Ajouter un groupe...",
+    "deleteContact": "Supprimer le contact",
+    "deleteContactConfirm": "Voulez-vous vraiment supprimer ce contact ?",
+    "sections": {
+      "news": "Actualité",
+      "profile": "Profil",
+      "memories": "Souvenirs",
+      "notes": "Notes"
+    },
+    "hotTopic": {
+      "addPlaceholder": "Nouveau sujet...",
+      "contextPlaceholder": "Contexte (optionnel)..."
+    },
+    "fact": {
+      "addPlaceholder": "Nouvelle info...",
+      "selectType": "Sélectionner un type..."
+    },
+    "memory": {
+      "addPlaceholder": "Nouveau souvenir...",
+      "selectDate": "Sélectionner une date..."
+    }
   },
   "profile": {
     "title": "Profil",

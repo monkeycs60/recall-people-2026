@@ -8,7 +8,9 @@
     "confirm": "Confirm",
     "back": "Back",
     "error": "Error",
-    "success": "Success"
+    "success": "Success",
+    "add": "Add",
+    "all": "All"
   },
   "tabs": {
     "home": "Home",
@@ -32,7 +34,40 @@
     "title": "Search",
     "placeholder": "Search your contacts...",
     "noResults": "No results",
-    "searching": "Searching..."
+    "searching": "Searching...",
+    "emptyStateTitle": "Ask a question in natural language to find information about your contacts",
+    "examples": "Examples",
+    "example1": "Who plays music?",
+    "example2": "Contacts who like sports",
+    "example3": "Who works in tech?"
+  },
+  "contact": {
+    "title": "Contact",
+    "lastContact": "Last contact",
+    "addNote": "Add a note",
+    "editGroups": "Edit groups",
+    "addGroup": "Add group",
+    "addGroupPlaceholder": "Add a group...",
+    "deleteContact": "Delete contact",
+    "deleteContactConfirm": "Are you sure you want to delete this contact?",
+    "sections": {
+      "news": "News",
+      "profile": "Profile",
+      "memories": "Memories",
+      "notes": "Notes"
+    },
+    "hotTopic": {
+      "addPlaceholder": "New topic...",
+      "contextPlaceholder": "Context (optional)..."
+    },
+    "fact": {
+      "addPlaceholder": "New info...",
+      "selectType": "Select a type..."
+    },
+    "memory": {
+      "addPlaceholder": "New memory...",
+      "selectDate": "Select a date..."
+    }
   },
   "profile": {
     "title": "Profile",
