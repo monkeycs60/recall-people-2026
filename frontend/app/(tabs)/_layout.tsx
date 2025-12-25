@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { useSettingsStore } from '@/stores/settings-store';
 import { Onboarding } from '@/components/Onboarding';
 import { Colors } from '@/constants/theme';
+import { CustomTabBar } from '@/components/ui/CustomTabBar';
 
 export default function TabLayout() {
   const router = useRouter();
