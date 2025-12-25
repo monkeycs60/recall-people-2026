@@ -1,6 +1,10 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { getToken, getUser, verifyToken, clearAuth } from '@/lib/auth';
+import { getUserSettings } from '@/lib/api';
+import { useSettingsStore } from './settings-store';
+import { changeLanguage } from '@/lib/i18n';
+import { Language, SUPPORTED_LANGUAGES } from '@/types';
 
 type User = {
   id: string;
@@ -47,6 +51,17 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
           const user = await verifyToken();
           set({ user, isLoading: false, isInitialized: true });
+
+          // Sync language from backend
+          try {
+            const { user: settings } = await getUserSettings();
+            if (settings.preferredLanguage && SUPPORTED_LANGUAGES.includes(settings.preferredLanguage as Language)) {
+              useSettingsStore.getState().setLanguage(settings.preferredLanguage as Language);
+              changeLanguage(settings.preferredLanguage as Language);
+            }
+          } catch {
+            // Ignore settings sync errors
+          }
         } catch {
           await clearAuth();
           set({ user: null, isLoading: false, isInitialized: true });

@@ -3,6 +3,8 @@ import { devtools, persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getLocales } from 'expo-localization';
 import { Language, SUPPORTED_LANGUAGES, DEFAULT_LANGUAGE } from '@/types';
+import { updateUserSettings } from '@/lib/api';
+import { getToken } from '@/lib/auth';
 
 type SettingsState = {
   language: Language;
@@ -34,7 +36,19 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         language: detectDeviceLanguage(),
         isHydrated: false,
 
-        setLanguage: (language) => set({ language }),
+        setLanguage: async (language) => {
+          set({ language });
+
+          // Sync to backend if authenticated
+          const token = await getToken();
+          if (token) {
+            try {
+              await updateUserSettings({ preferredLanguage: language });
+            } catch {
+              // Ignore sync errors - local change is already applied
+            }
+          }
+        },
         setHydrated: (isHydrated) => set({ isHydrated }),
         detectDeviceLanguage,
       }),
