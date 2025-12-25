@@ -40,6 +40,7 @@ type SearchRequest = {
 	facts: FactInput[];
 	memories: MemoryInput[];
 	notes: NoteInput[];
+	language?: 'fr' | 'en' | 'es' | 'it' | 'de';
 };
 
 const searchResultSchema = z.object({
@@ -83,7 +84,8 @@ searchRoutes.post('/', async (c) => {
 			apiKey: c.env.XAI_API_KEY,
 		});
 
-		const prompt = buildSearchPrompt(query, facts, memories, notes);
+		const language = body.language || 'fr';
+		const prompt = buildSearchPrompt(query, facts, memories, notes, language);
 
 		const { object: result } = await generateObject({
 			model: xai('grok-4-1-fast'),
@@ -109,7 +111,8 @@ const buildSearchPrompt = (
 	query: string,
 	facts: FactInput[],
 	memories: MemoryInput[],
-	notes: NoteInput[]
+	notes: NoteInput[],
+	language: string = 'fr'
 ): string => {
 	const factsSection = facts
 		.map((f) => `[FACT:${f.id}] [CONTACT:${f.contactId}] ${f.contactName} - ${f.factKey}: ${f.factValue}`)
@@ -154,5 +157,8 @@ ${factsSection || '(aucun fact)'}
 ${memoriesSection || '(aucun memory)'}
 
 === NOTES (transcriptions brutes, priorité basse) ===
-${notesSection || '(aucune note)'}`;
+${notesSection || '(aucune note)'}
+
+LANGUE DE RÉPONSE: Réponds dans la même langue que la requête utilisateur (${language}).
+Les champs "answer" et "reference" doivent être dans cette langue.`;
 };
