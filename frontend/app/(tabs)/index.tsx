@@ -1,10 +1,12 @@
 import { View, Text } from 'react-native';
 import { useState as useStateReact } from 'react';
+import { useTranslation } from 'react-i18next';
 import { RecordButton } from '@/components/RecordButton';
 import { useRecording } from '@/hooks/useRecording';
 import { useContactsStore } from '@/stores/contacts-store';
 
 export default function HomeScreen() {
+  const { t } = useTranslation();
   const { toggleRecording, isRecording, isProcessing } = useRecording();
   const { isInitialized, loadContacts } = useContactsStore();
   const [hasLoadedContacts, setHasLoadedContacts] = useStateReact(false);
@@ -23,10 +25,10 @@ export default function HomeScreen() {
 
       <Text className="text-textSecondary mb-12 text-center">
         {isRecording
-          ? 'Appuie pour arrêter'
+          ? t('home.recording')
           : isProcessing
-          ? 'Analyse en cours...'
-          : 'Appuie pour enregistrer'}
+          ? t('home.processing')
+          : t('home.pressToRecord')}
       </Text>
 
       <RecordButton
@@ -37,7 +39,7 @@ export default function HomeScreen() {
 
       {isProcessing && (
         <Text className="text-textMuted mt-8 text-center">
-          Transcription en cours...
+          {t('home.transcribing')}
         </Text>
       )}
     </View>

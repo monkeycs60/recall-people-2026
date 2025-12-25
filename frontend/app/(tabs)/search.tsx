@@ -2,6 +2,7 @@ import { View, Text, KeyboardAvoidingView, Platform } from 'react-native';
 import { useState, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useContactsStore } from '@/stores/contacts-store';
 import { useSemanticSearch } from '@/hooks/useSemanticSearch';
 import { SearchInput } from '@/components/search/SearchInput';
@@ -9,6 +10,7 @@ import { SearchSkeleton } from '@/components/search/SearchSkeleton';
 import { SearchResults } from '@/components/search/SearchResults';
 
 export default function SearchScreen() {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { loadContacts } = useContactsStore();
   const { results, isLoading, error, search, clearResults } = useSemanticSearch();
@@ -51,7 +53,7 @@ export default function SearchScreen() {
         className="mb-4"
         style={{ paddingTop: insets.top + 10, paddingHorizontal: 20 }}
       >
-        <Text className="text-3xl font-bold text-textPrimary mb-4">Recherche</Text>
+        <Text className="text-3xl font-bold text-textPrimary mb-4">{t('search.title')}</Text>
 
         <SearchInput
           value={query}

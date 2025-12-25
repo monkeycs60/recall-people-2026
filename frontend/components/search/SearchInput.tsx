@@ -9,6 +9,7 @@ import Animated, {
   interpolateColor,
 } from 'react-native-reanimated';
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 type SearchInputProps = {
   value: string;
@@ -25,6 +26,7 @@ export function SearchInput({
   onClear,
   isLoading,
 }: SearchInputProps) {
+  const { t } = useTranslation();
   const borderColorProgress = useSharedValue(0);
 
   useEffect(() => {
@@ -83,7 +85,7 @@ export function SearchInput({
           fontSize: 16,
           height: '100%',
         }}
-        placeholder="Posez une question..."
+        placeholder={t('search.placeholder')}
         placeholderTextColor="#52525b"
         value={value}
         onChangeText={onChangeText}
