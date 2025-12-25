@@ -29,13 +29,18 @@ authRoutes.post('/register', async (c) => {
 			return c.json({ error: 'User already exists' }, 400);
 		}
 
-		// Create user (in production, hash password with bcrypt!)
+		// Create user with account (in production, hash password with bcrypt!)
 		const user = await prisma.user.create({
 			data: {
 				email,
 				name,
-				// WARNING: In production, hash the password!
-				// For now, storing plain text for simplicity
+				accounts: {
+					create: {
+						accountId: email,
+						providerId: 'credentials',
+						password,
+					},
+				},
 			},
 		});
 
@@ -55,6 +60,7 @@ authRoutes.post('/register', async (c) => {
 				id: user.id,
 				email: user.email,
 				name: user.name,
+				provider: 'credentials',
 			},
 			token,
 		});
@@ -75,9 +81,10 @@ authRoutes.post('/login', async (c) => {
 
 		const prisma = getPrisma(c.env.DATABASE_URL);
 
-		// Find user
+		// Find user with accounts
 		const user = await prisma.user.findUnique({
 			where: { email },
+			include: { accounts: true },
 		});
 
 		if (!user) {
@@ -86,6 +93,9 @@ authRoutes.post('/login', async (c) => {
 
 		// In production, verify hashed password here!
 		// For now, just check if user exists
+
+		// Get the provider from the first account (credentials or google)
+		const provider = user.accounts[0]?.providerId || 'credentials';
 
 		// Generate JWT token
 		const token = await sign(
@@ -103,6 +113,7 @@ authRoutes.post('/login', async (c) => {
 				id: user.id,
 				email: user.email,
 				name: user.name,
+				provider,
 			},
 			token,
 		});
@@ -159,6 +170,7 @@ authRoutes.post('/google', async (c) => {
 		// Find or create user
 		let user = await prisma.user.findUnique({
 			where: { email },
+			include: { accounts: true },
 		});
 
 		if (!user) {
@@ -168,14 +180,36 @@ authRoutes.post('/google', async (c) => {
 					name: name || email.split('@')[0],
 					image: picture || null,
 					emailVerified: true,
+					accounts: {
+						create: {
+							accountId: email,
+							providerId: 'google',
+						},
+					},
 				},
+				include: { accounts: true },
 			});
-		} else if (picture && !user.image) {
+		} else {
+			// Check if user has a google account, if not create one
+			const hasGoogleAccount = user.accounts.some((account) => account.providerId === 'google');
+			if (!hasGoogleAccount) {
+				await prisma.account.create({
+					data: {
+						accountId: email,
+						providerId: 'google',
+						userId: user.id,
+					},
+				});
+			}
+
 			// Update image if user doesn't have one
-			user = await prisma.user.update({
-				where: { id: user.id },
-				data: { image: picture },
-			});
+			if (picture && !user.image) {
+				user = await prisma.user.update({
+					where: { id: user.id },
+					data: { image: picture },
+					include: { accounts: true },
+				});
+			}
 		}
 
 		// Generate JWT token
@@ -194,6 +228,7 @@ authRoutes.post('/google', async (c) => {
 				id: user.id,
 				email: user.email,
 				name: user.name,
+				provider: 'google',
 			},
 			token,
 		});
@@ -217,17 +252,23 @@ authRoutes.get('/verify', async (c) => {
 		const prisma = getPrisma(c.env.DATABASE_URL);
 		const user = await prisma.user.findUnique({
 			where: { id: payload.sub as string },
+			include: { accounts: true },
 		});
 
 		if (!user) {
 			return c.json({ error: 'User not found' }, 401);
 		}
 
+		// Get the provider - prioritize google if user has both
+		const hasGoogle = user.accounts.some((account) => account.providerId === 'google');
+		const provider = hasGoogle ? 'google' : (user.accounts[0]?.providerId || 'credentials');
+
 		return c.json({
 			user: {
 				id: user.id,
 				email: user.email,
 				name: user.name,
+				provider,
 			},
 		});
 	} catch (error) {

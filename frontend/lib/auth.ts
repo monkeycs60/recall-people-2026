@@ -8,6 +8,7 @@ type User = {
   id: string;
   email: string;
   name: string;
+  provider?: 'credentials' | 'google';
 };
 
 type AuthResponse = {

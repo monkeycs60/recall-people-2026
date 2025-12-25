@@ -7,6 +7,7 @@ import { Text, View, Pressable } from 'react-native';
 import { ArrowLeft } from 'lucide-react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useSettingsStore } from '@/stores/settings-store';
+import { useAppStore } from '@/stores/app-store';
 import { changeLanguage } from '@/lib/i18n';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
@@ -79,8 +80,42 @@ export default function RootLayout() {
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="(auth)" options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="select-contact" options={{ headerShown: true, title: 'Sélectionner le contact' }} />
-            <Stack.Screen name="review" options={{ headerShown: true, title: 'Vérification' }} />
+            <Stack.Screen
+              name="select-contact"
+              options={{
+                headerShown: true,
+                title: 'Sélectionner le contact',
+                headerLeft: () => (
+                  <Pressable
+                    onPress={() => {
+                      useAppStore.getState().resetRecording();
+                      router.back();
+                    }}
+                    className="p-2 -ml-2"
+                  >
+                    <ArrowLeft size={24} color="black" />
+                  </Pressable>
+                ),
+              }}
+            />
+            <Stack.Screen
+              name="review"
+              options={{
+                headerShown: true,
+                title: 'Vérification',
+                headerLeft: () => (
+                  <Pressable
+                    onPress={() => {
+                      useAppStore.getState().resetRecording();
+                      router.back();
+                    }}
+                    className="p-2 -ml-2"
+                  >
+                    <ArrowLeft size={24} color="black" />
+                  </Pressable>
+                ),
+              }}
+            />
             <Stack.Screen name="disambiguation" options={{ headerShown: true, title: 'Sélectionner le contact' }} />
             <Stack.Screen
               name="contact/[id]"

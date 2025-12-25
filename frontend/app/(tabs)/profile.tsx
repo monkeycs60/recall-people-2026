@@ -111,7 +111,7 @@ export default function ProfileScreen() {
           <ProfileHeader
             name={user.name}
             email={user.email}
-            provider="Google"
+            provider={user.provider}
           />
         )}
 
