@@ -38,6 +38,7 @@ type ExtractionRequest = {
       context?: string;
     }>;
   };
+  language?: 'fr' | 'en' | 'es' | 'it' | 'de';
 };
 
 const extractionSchema = z.object({
@@ -90,6 +91,14 @@ const extractionSchema = z.object({
   ).describe('Groupes suggérés basés sur les facts contextuels. UNIQUEMENT pour nouveaux contacts (pas de currentContact).'),
 });
 
+const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
+  fr: 'Tu DOIS répondre en français uniquement.',
+  en: 'You MUST respond in English only.',
+  es: 'DEBES responder solo en español.',
+  it: 'DEVI rispondere solo in italiano.',
+  de: 'Du MUSST nur auf Deutsch antworten.',
+};
+
 export const extractRoutes = new Hono<{ Bindings: Bindings }>();
 
 extractRoutes.use('/*', authMiddleware);
@@ -107,7 +116,8 @@ extractRoutes.post('/', async (c) => {
       apiKey: c.env.XAI_API_KEY,
     });
 
-    const prompt = buildExtractionPrompt(transcription, currentContact);
+    const language = body.language || 'fr';
+    const prompt = buildExtractionPrompt(transcription, currentContact, language);
 
     const { object: extraction } = await generateObject({
 			model: xai('grok-4-1-fast'),
@@ -195,7 +205,8 @@ extractRoutes.post('/', async (c) => {
 
 const buildExtractionPrompt = (
   transcription: string,
-  currentContact?: ExtractionRequest['currentContact']
+  currentContact?: ExtractionRequest['currentContact'],
+  language: string = 'fr'
 ): string => {
   let currentContactContext = '';
   let existingHotTopicsContext = '';
@@ -311,5 +322,9 @@ RÈGLES:
 - memories = événements PONCTUELS / souvenirs (PAS des hobbies réguliers)
 - suggestedGroups = groupes suggérés UNIQUEMENT pour nouveaux contacts
 - N'extrais QUE ce qui est EXPLICITEMENT mentionné
-- action="add" pour nouvelle info, "update" si modification d'un fact existant`;
+- action="add" pour nouvelle info, "update" si modification d'un fact existant
+
+LANGUE DE RÉPONSE:
+${LANGUAGE_INSTRUCTIONS[language] || LANGUAGE_INSTRUCTIONS.fr}
+Tous les champs textuels (noteTitle, factValue, hotTopics, memories, etc.) doivent être dans cette langue.`;
 };

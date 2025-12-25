@@ -22,6 +22,30 @@ type SummaryRequest = {
     context: string;
     status: string;
   }>;
+  language?: 'fr' | 'en' | 'es' | 'it' | 'de';
+};
+
+const LANGUAGE_INSTRUCTIONS: Record<string, { instruction: string; objective: string }> = {
+  fr: {
+    instruction: 'Réponds en français uniquement.',
+    objective: 'Écrire 2-3 phrases qui permettent de se rappeler rapidement qui est cette personne avant de la revoir.',
+  },
+  en: {
+    instruction: 'Respond in English only.',
+    objective: 'Write 2-3 sentences to quickly remember who this person is before seeing them again.',
+  },
+  es: {
+    instruction: 'Responde solo en español.',
+    objective: 'Escribe 2-3 frases para recordar rápidamente quién es esta persona antes de volver a verla.',
+  },
+  it: {
+    instruction: 'Rispondi solo in italiano.',
+    objective: 'Scrivi 2-3 frasi per ricordare velocemente chi è questa persona prima di rivederla.',
+  },
+  de: {
+    instruction: 'Antworte nur auf Deutsch.',
+    objective: 'Schreibe 2-3 Sätze, um sich schnell daran zu erinnern, wer diese Person ist, bevor man sie wiedersieht.',
+  },
 };
 
 export const summaryRoutes = new Hono<{ Bindings: Bindings }>();
@@ -32,6 +56,9 @@ summaryRoutes.post('/', async (c) => {
   try {
     const body = await c.req.json<SummaryRequest>();
     const { contact, facts, hotTopics } = body;
+
+    const language = body.language || 'fr';
+    const langConfig = LANGUAGE_INSTRUCTIONS[language] || LANGUAGE_INSTRUCTIONS.fr;
 
     const xai = createXai({
       apiKey: c.env.XAI_API_KEY,
@@ -63,7 +90,7 @@ ${personalFacts.length > 0 ? `PERSONNEL:\n${formatFacts(personalFacts)}` : ''}
 
 ${activeTopics.length > 0 ? `ACTUALITÉS (sujets en cours - PRIORITAIRE):\n${activeTopics.map((topic) => `- ${topic.title}${topic.context ? `: ${topic.context}` : ''}`).join('\n')}` : ''}
 
-OBJECTIF: Écrire 2-3 phrases qui permettent de se rappeler rapidement qui est cette personne avant de la revoir.
+OBJECTIF: ${langConfig.objective}
 
 HIÉRARCHIE D'IMPORTANCE:
 1. ACTUALITÉS en cours (si présentes) = info la plus utile pour reprendre contact
@@ -76,7 +103,9 @@ FORMAT:
 - Commence par l'info la plus pertinente pour une prochaine interaction
 - Si actualité en cours, l'intégrer naturellement (ex: "qui prépare actuellement son marathon")
 - Évite les formules génériques, sois spécifique
-- Maximum 200 caractères`;
+- Maximum 200 caractères
+
+LANGUE: ${langConfig.instruction}`;
 
     const { text } = await generateText({
       model: xai('grok-4-1-fast'),
