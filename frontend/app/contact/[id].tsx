@@ -310,7 +310,20 @@ export default function ContactDetailScreen() {
   };
 
   const handleSaveGroups = async () => {
-    await groupService.setContactGroups(contactId, editedGroupIds);
+    let finalGroupIds = editedGroupIds;
+
+    if (groupSearchQuery.trim()) {
+      const groupExists = allGroups.some(
+        (group) => group.name.toLowerCase() === groupSearchQuery.toLowerCase()
+      );
+      if (!groupExists) {
+        const newGroup = await groupService.create(groupSearchQuery.trim());
+        setAllGroups((prev) => [...prev, newGroup]);
+        finalGroupIds = [...editedGroupIds, newGroup.id];
+      }
+    }
+
+    await groupService.setContactGroups(contactId, finalGroupIds);
     await loadGroups();
     setIsEditingGroups(false);
     setGroupSearchQuery('');
