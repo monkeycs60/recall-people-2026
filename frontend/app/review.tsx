@@ -2,6 +2,7 @@ import { View, Text, ScrollView, Pressable, TextInput } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { ExtractionResult, HotTopic, ResolvedTopic, Group, SuggestedGroup, ExtractedMemory } from '@/types';
 import { useContacts } from '@/hooks/useContacts';
 import { useNotes } from '@/hooks/useNotes';
@@ -15,6 +16,7 @@ import { useAppStore } from '@/stores/app-store';
 import { Archive, Edit3, Plus, X } from 'lucide-react-native';
 
 export default function ReviewScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const params = useLocalSearchParams();
   const insets = useSafeAreaInsets();
@@ -380,13 +382,13 @@ export default function ReviewScreen() {
       </Text>
 
       <Text className="text-textSecondary mb-6">
-        {contactId === 'new' ? 'Nouveau contact' : 'Mise à jour'}
+        {contactId === 'new' ? t('review.newContact') : t('review.update')}
       </Text>
 
       {editableFacts.length > 0 && (
         <View className="mb-6">
           <Text className="text-lg font-semibold text-textPrimary mb-3">
-            Informations extraites
+            {t('review.extractedInfo')}
           </Text>
 
           {editableFacts.map((fact, index) => {
@@ -400,7 +402,7 @@ export default function ReviewScreen() {
                     className="bg-background py-2 px-3 rounded-lg text-textPrimary mb-3"
                     value={fact.factValue}
                     onChangeText={(value) => updateFact(index, 'factValue', value)}
-                    placeholder="Valeur"
+                    placeholder={t('review.valuePlaceholder')}
                     placeholderTextColor="#71717a"
                   />
                   <Pressable
@@ -438,7 +440,7 @@ export default function ReviewScreen() {
                   <Text className="text-textPrimary font-medium">{fact.factValue}</Text>
                   {fact.action === 'update' && fact.previousValue && (
                     <Text className="text-warning text-xs mt-1">
-                      Ancien: {fact.previousValue}
+                      {t('review.previousValue', { value: fact.previousValue })}
                     </Text>
                   )}
                 </Pressable>
@@ -452,7 +454,7 @@ export default function ReviewScreen() {
       {contactId === 'new' && (
         <View className="mb-6">
           <Text className="text-lg font-semibold text-textPrimary mb-3">
-            Groupes
+            {t('review.groups')}
           </Text>
 
           {/* Selected groups as chips */}
@@ -465,7 +467,7 @@ export default function ReviewScreen() {
               >
                 <Text className="text-primary mr-1">{group.name}</Text>
                 {group.isNew && (
-                  <Text className="text-primary/60 text-xs mr-1">(nouveau)</Text>
+                  <Text className="text-primary/60 text-xs mr-1">{t('review.new')}</Text>
                 )}
                 <X size={14} color="#8B5CF6" />
               </Pressable>
@@ -479,7 +481,7 @@ export default function ReviewScreen() {
                 className="bg-background py-2 px-3 rounded-lg text-textPrimary mb-2"
                 value={newGroupSearch}
                 onChangeText={setNewGroupSearch}
-                placeholder="Nom du groupe..."
+                placeholder={t('review.groupNamePlaceholder')}
                 placeholderTextColor="#71717a"
                 autoFocus
               />
@@ -510,7 +512,7 @@ export default function ReviewScreen() {
                   onPress={() => addNewGroup(newGroupSearch)}
                 >
                   <Text className="text-primary">
-                    Créer "{newGroupSearch.trim()}"
+                    {t('review.createGroup', { name: newGroupSearch.trim() })}
                   </Text>
                 </Pressable>
               )}
@@ -522,7 +524,7 @@ export default function ReviewScreen() {
                   setNewGroupSearch('');
                 }}
               >
-                <Text className="text-textSecondary">Annuler</Text>
+                <Text className="text-textSecondary">{t('common.cancel')}</Text>
               </Pressable>
             </View>
           ) : (
@@ -531,7 +533,7 @@ export default function ReviewScreen() {
               onPress={() => setIsAddingGroup(true)}
             >
               <Plus size={18} color="#8B5CF6" />
-              <Text className="text-primary ml-2">Ajouter un groupe</Text>
+              <Text className="text-primary ml-2">{t('review.addGroup')}</Text>
             </Pressable>
           )}
         </View>
@@ -543,11 +545,11 @@ export default function ReviewScreen() {
           <View className="flex-row items-center mb-3">
             <Archive size={20} color="#10B981" />
             <Text className="text-lg font-semibold text-textPrimary ml-2">
-              Sujets à archiver
+              {t('review.topicsToArchive')}
             </Text>
           </View>
           <Text className="text-textMuted text-sm mb-3">
-            Ces sujets semblent résolus. Décochez ceux qui sont encore actifs.
+            {t('review.topicsToArchiveDescription')}
           </Text>
 
           {existingHotTopics
@@ -586,14 +588,14 @@ export default function ReviewScreen() {
 
                   {isSelected && (
                     <View className="mt-3 ml-8">
-                      <Text className="text-success text-xs font-medium mb-1">Résolution :</Text>
+                      <Text className="text-success text-xs font-medium mb-1">{t('review.resolutionLabel')}</Text>
                       {isEditing ? (
                         <View>
                           <TextInput
                             className="bg-background py-2 px-3 rounded-lg text-textPrimary text-sm"
                             value={currentResolution}
                             onChangeText={(value) => updateResolution(topic.id, value)}
-                            placeholder="Comment ça s'est terminé..."
+                            placeholder={t('review.resolutionPlaceholder')}
                             placeholderTextColor="#71717a"
                             multiline
                             autoFocus
@@ -602,7 +604,7 @@ export default function ReviewScreen() {
                             className="mt-2 py-1.5 px-3 bg-success/20 rounded items-center self-start"
                             onPress={() => setEditingResolutionId(null)}
                           >
-                            <Text className="text-success text-sm">OK</Text>
+                            <Text className="text-success text-sm">{t('common.confirm')}</Text>
                           </Pressable>
                         </View>
                       ) : (
@@ -611,7 +613,7 @@ export default function ReviewScreen() {
                           onPress={() => setEditingResolutionId(topic.id)}
                         >
                           <Text className="text-success text-sm flex-1">
-                            {currentResolution || 'Ajouter une résolution...'}
+                            {currentResolution || t('review.addResolution')}
                           </Text>
                           <Edit3 size={14} color="#10B981" />
                         </Pressable>
@@ -626,7 +628,7 @@ export default function ReviewScreen() {
 
       {editableHotTopics.length > 0 && (
         <View className="mb-6">
-          <Text className="text-lg font-semibold text-textPrimary mb-3">Actualité</Text>
+          <Text className="text-lg font-semibold text-textPrimary mb-3">{t('review.news')}</Text>
 
           {editableHotTopics.map((topic, index) => {
             const isEditing = editingHotTopicIndex === index;
@@ -638,14 +640,14 @@ export default function ReviewScreen() {
                     className="bg-background py-2 px-3 rounded-lg text-textPrimary font-medium mb-2"
                     value={topic.title}
                     onChangeText={(value) => updateHotTopic(index, 'title', value)}
-                    placeholder="Titre"
+                    placeholder={t('review.titlePlaceholder')}
                     placeholderTextColor="#71717a"
                   />
                   <TextInput
                     className="bg-background py-2 px-3 rounded-lg text-textSecondary mb-3"
                     value={topic.context || ''}
                     onChangeText={(value) => updateHotTopic(index, 'context', value)}
-                    placeholder="Contexte (optionnel)"
+                    placeholder={t('review.contextPlaceholder')}
                     placeholderTextColor="#71717a"
                     multiline
                   />
@@ -653,7 +655,7 @@ export default function ReviewScreen() {
                     className="py-2 px-4 bg-primary/20 rounded items-center self-start"
                     onPress={() => setEditingHotTopicIndex(null)}
                   >
-                    <Text className="text-primary font-medium">OK</Text>
+                    <Text className="text-primary font-medium">{t('common.confirm')}</Text>
                   </Pressable>
                 </View>
               );
@@ -697,7 +699,7 @@ export default function ReviewScreen() {
 
       {editableMemories.length > 0 && (
         <View className="mb-6">
-          <Text className="text-lg font-semibold text-textPrimary mb-3">Souvenirs</Text>
+          <Text className="text-lg font-semibold text-textPrimary mb-3">{t('review.memories')}</Text>
 
           {editableMemories.map((memory, index) => {
             const isEditing = editingMemoryIndex === index;
@@ -709,7 +711,7 @@ export default function ReviewScreen() {
                     className="bg-background py-2 px-3 rounded-lg text-textPrimary mb-2"
                     value={memory.description}
                     onChangeText={(value) => updateMemory(index, 'description', value)}
-                    placeholder="Description"
+                    placeholder={t('review.descriptionPlaceholder')}
                     placeholderTextColor="#71717a"
                     multiline
                   />
@@ -717,14 +719,14 @@ export default function ReviewScreen() {
                     className="bg-background py-2 px-3 rounded-lg text-textSecondary mb-3"
                     value={memory.eventDate || ''}
                     onChangeText={(value) => updateMemory(index, 'eventDate', value)}
-                    placeholder="Date (optionnel)"
+                    placeholder={t('review.datePlaceholder')}
                     placeholderTextColor="#71717a"
                   />
                   <Pressable
                     className="py-2 px-4 bg-primary/20 rounded items-center self-start"
                     onPress={() => setEditingMemoryIndex(null)}
                   >
-                    <Text className="text-primary font-medium">OK</Text>
+                    <Text className="text-primary font-medium">{t('common.confirm')}</Text>
                   </Pressable>
                 </View>
               );
@@ -763,7 +765,7 @@ export default function ReviewScreen() {
                       <Text className="text-textSecondary text-sm mr-2">{memory.eventDate}</Text>
                     )}
                     <Text className="text-textMuted text-xs">
-                      {memory.isShared ? 'Ensemble' : 'Solo'}
+                      {memory.isShared ? t('review.together') : t('review.solo')}
                     </Text>
                   </View>
                 </Pressable>
@@ -779,7 +781,7 @@ export default function ReviewScreen() {
         disabled={isSaving}
       >
         <Text className="text-white font-semibold text-lg">
-          {isSaving ? 'Sauvegarde...' : 'Sauvegarder'}
+          {isSaving ? t('review.saving') : t('review.save')}
         </Text>
       </Pressable>
     </ScrollView>

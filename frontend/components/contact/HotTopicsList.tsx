@@ -1,5 +1,6 @@
 import { View, Text, Pressable, TextInput, Alert } from 'react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Check, RotateCcw, Trash2, ChevronDown, ChevronUp, Edit3 } from 'lucide-react-native';
 import { HotTopic } from '@/types';
 
@@ -20,6 +21,7 @@ export function HotTopicsList({
   onEdit,
   onUpdateResolution,
 }: HotTopicsListProps) {
+  const { t } = useTranslation();
   const [showResolved, setShowResolved] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
@@ -46,11 +48,11 @@ export function HotTopicsList({
 
   const handleDelete = (topic: HotTopic) => {
     Alert.alert(
-      'Supprimer cette actualité',
-      `Supprimer "${topic.title}" ?`,
+      t('contact.hotTopic.deleteTitle'),
+      t('contact.hotTopic.deleteConfirm', { title: topic.title }),
       [
-        { text: 'Annuler', style: 'cancel' },
-        { text: 'Supprimer', style: 'destructive', onPress: () => onDelete(topic.id) },
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('common.delete'), style: 'destructive', onPress: () => onDelete(topic.id) },
       ]
     );
   };
@@ -92,14 +94,14 @@ export function HotTopicsList({
             className="bg-background py-2 px-3 rounded-lg text-textPrimary font-medium mb-2"
             value={editTitle}
             onChangeText={setEditTitle}
-            placeholder="Titre du sujet"
+            placeholder={t('contact.hotTopic.titlePlaceholder')}
             placeholderTextColor="#71717a"
           />
           <TextInput
             className="bg-background py-2 px-3 rounded-lg text-textSecondary mb-3"
             value={editContext}
             onChangeText={setEditContext}
-            placeholder="Contexte (optionnel)"
+            placeholder={t('contact.hotTopic.contextEditPlaceholder')}
             placeholderTextColor="#71717a"
             multiline
           />
@@ -108,13 +110,13 @@ export function HotTopicsList({
               className="flex-1 py-2 rounded-lg bg-surfaceHover items-center"
               onPress={() => setEditingId(null)}
             >
-              <Text className="text-textSecondary">Annuler</Text>
+              <Text className="text-textSecondary">{t('common.cancel')}</Text>
             </Pressable>
             <Pressable
               className="flex-1 py-2 rounded-lg bg-primary items-center"
               onPress={handleSaveEdit}
             >
-              <Text className="text-white font-semibold">OK</Text>
+              <Text className="text-white font-semibold">{t('common.confirm')}</Text>
             </Pressable>
           </View>
         </View>
@@ -125,12 +127,12 @@ export function HotTopicsList({
       return (
         <View key={topic.id} className="bg-success/10 border border-success/30 p-4 rounded-lg mb-2">
           <Text className="text-textPrimary font-medium mb-2">{topic.title}</Text>
-          <Text className="text-success text-xs font-medium mb-1">Résolution (optionnel) :</Text>
+          <Text className="text-success text-xs font-medium mb-1">{t('contact.hotTopic.resolutionLabel')}</Text>
           <TextInput
             className="bg-background py-2 px-3 rounded-lg text-textPrimary text-sm mb-3"
             value={resolutionText}
             onChangeText={setResolutionText}
-            placeholder="Comment ça s'est terminé..."
+            placeholder={t('contact.hotTopic.resolutionPlaceholder')}
             placeholderTextColor="#71717a"
             multiline
             autoFocus
@@ -140,13 +142,13 @@ export function HotTopicsList({
               className="flex-1 py-2 rounded-lg bg-surfaceHover items-center"
               onPress={() => setResolvingId(null)}
             >
-              <Text className="text-textSecondary">Annuler</Text>
+              <Text className="text-textSecondary">{t('common.cancel')}</Text>
             </Pressable>
             <Pressable
               className="flex-1 py-2 rounded-lg bg-success items-center"
               onPress={handleConfirmResolve}
             >
-              <Text className="text-white font-semibold">Archiver</Text>
+              <Text className="text-white font-semibold">{t('contact.hotTopic.archive')}</Text>
             </Pressable>
           </View>
         </View>
@@ -188,7 +190,7 @@ export function HotTopicsList({
                 className="mt-1"
                 onPress={() => handleStartEditResolution(topic)}
               >
-                <Text className="text-textMuted text-sm italic">+ Ajouter une résolution</Text>
+                <Text className="text-textMuted text-sm italic">{t('contact.hotTopic.addResolution')}</Text>
               </Pressable>
             )}
             {isEditingResolution && (
@@ -197,7 +199,7 @@ export function HotTopicsList({
                   className="bg-background py-2 px-3 rounded-lg text-textPrimary text-sm mb-2"
                   value={editResolutionText}
                   onChangeText={setEditResolutionText}
-                  placeholder="Comment ça s'est terminé..."
+                  placeholder={t('contact.hotTopic.resolutionPlaceholder')}
                   placeholderTextColor="#71717a"
                   multiline
                   autoFocus
@@ -207,20 +209,20 @@ export function HotTopicsList({
                     className="py-1.5 px-3 bg-surfaceHover rounded"
                     onPress={() => setEditingResolutionId(null)}
                   >
-                    <Text className="text-textSecondary text-sm">Annuler</Text>
+                    <Text className="text-textSecondary text-sm">{t('common.cancel')}</Text>
                   </Pressable>
                   <Pressable
                     className="py-1.5 px-3 bg-success/20 rounded"
                     onPress={handleSaveResolution}
                   >
-                    <Text className="text-success text-sm">OK</Text>
+                    <Text className="text-success text-sm">{t('common.confirm')}</Text>
                   </Pressable>
                 </View>
               </View>
             )}
             <Text className="text-textMuted text-xs mt-1">
               {isResolved && topic.resolvedAt
-                ? `Résolu le ${new Date(topic.resolvedAt).toLocaleDateString()}`
+                ? t('contact.hotTopic.resolvedAt', { date: new Date(topic.resolvedAt).toLocaleDateString() })
                 : new Date(topic.updatedAt).toLocaleDateString()}
             </Text>
           </View>
@@ -248,7 +250,7 @@ export function HotTopicsList({
       {activeTopics.length === 0 && resolvedTopics.length === 0 && (
         <View className="bg-surface/30 p-4 rounded-lg border border-dashed border-surfaceHover">
           <Text className="text-textMuted text-center">
-            Aucune actualité en cours
+            {t('contact.hotTopic.emptyState')}
           </Text>
         </View>
       )}
@@ -261,7 +263,7 @@ export function HotTopicsList({
           onPress={() => setShowResolved(!showResolved)}
         >
           <Text className="text-textSecondary text-sm mr-1">
-            Voir résolus ({resolvedTopics.length})
+            {t('contact.hotTopic.showResolved', { count: resolvedTopics.length })}
           </Text>
           {showResolved ? (
             <ChevronUp size={16} color="#9CA3AF" />

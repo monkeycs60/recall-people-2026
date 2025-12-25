@@ -2,6 +2,7 @@ import { View, Text, ScrollView, Pressable, TextInput, ActivityIndicator } from 
 import { useState, useMemo } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useContactsStore } from '@/stores/contacts-store';
 import { useAppStore } from '@/stores/app-store';
 import { extractInfo } from '@/lib/api';
@@ -12,6 +13,7 @@ import { groupService } from '@/services/group.service';
 import { User, Plus, Search, Sparkles, Edit3 } from 'lucide-react-native';
 
 export default function SelectContactScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const params = useLocalSearchParams();
   const insets = useSafeAreaInsets();
@@ -170,7 +172,7 @@ export default function SelectContactScreen() {
     return (
       <View className="flex-1 bg-background items-center justify-center">
         <ActivityIndicator size="large" color="#8B5CF6" />
-        <Text className="text-textSecondary mt-4">Analyse en cours...</Text>
+        <Text className="text-textSecondary mt-4">{t('selectContact.analyzing')}</Text>
       </View>
     );
   }
@@ -183,7 +185,7 @@ export default function SelectContactScreen() {
       <View className="flex-row items-center mb-2">
         <Sparkles size={24} color="#8B5CF6" />
         <Text className="text-2xl font-bold text-textPrimary ml-2">
-          À qui appartient cette note ?
+          {t('selectContact.question')}
         </Text>
       </View>
 
@@ -196,7 +198,7 @@ export default function SelectContactScreen() {
         <Search size={20} color="#9CA3AF" />
         <TextInput
           className="flex-1 py-3 px-3 text-textPrimary"
-          placeholder="Rechercher un contact..."
+          placeholder={t('selectContact.searchPlaceholder')}
           placeholderTextColor="#9CA3AF"
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -207,7 +209,7 @@ export default function SelectContactScreen() {
       {matchingContacts.length > 0 && (
         <View className="mb-6">
           <Text className="text-lg font-semibold text-textPrimary mb-3">
-            Contacts suggérés ({detectedName})
+            {t('selectContact.suggestedContacts', { name: detectedName })}
           </Text>
 
           {matchingContacts.map((contact) => (
@@ -226,7 +228,7 @@ export default function SelectContactScreen() {
                 </Text>
                 {contact.lastContactAt && (
                   <Text className="text-textMuted text-xs">
-                    Dernier contact: {new Date(contact.lastContactAt).toLocaleDateString()}
+                    {t('selectContact.lastContact', { date: new Date(contact.lastContactAt).toLocaleDateString() })}
                   </Text>
                 )}
               </View>
@@ -238,15 +240,15 @@ export default function SelectContactScreen() {
       {/* Create new contact */}
       <View className="mb-6">
         <Text className="text-lg font-semibold text-textPrimary mb-3">
-          Nouveau contact
+          {t('selectContact.newContact')}
         </Text>
 
         {isEditingNewName ? (
           <View className="bg-surface p-4 rounded-lg mb-3">
-            <Text className="text-textSecondary text-sm mb-2">Nom du contact</Text>
+            <Text className="text-textSecondary text-sm mb-2">{t('selectContact.contactName')}</Text>
             <TextInput
               className="bg-background py-3 px-4 rounded-lg text-textPrimary"
-              placeholder="Prénom (ex: Jean-Luc)"
+              placeholder={t('selectContact.firstNamePlaceholder')}
               placeholderTextColor="#71717a"
               value={newContactName}
               onChangeText={setNewContactName}
@@ -262,7 +264,9 @@ export default function SelectContactScreen() {
           <View className="flex-row items-center">
             <Plus size={20} color="#8B5CF6" />
             <Text className="text-primary font-semibold ml-2">
-              Créer "{nameForNewContact || 'Nouveau contact'}"
+              {nameForNewContact
+                ? t('selectContact.createContact', { name: nameForNewContact })
+                : t('selectContact.createNewContact')}
             </Text>
           </View>
         </Pressable>
@@ -277,7 +281,7 @@ export default function SelectContactScreen() {
           >
             <Edit3 size={16} color="#9CA3AF" />
             <Text className="text-textMuted ml-2 text-sm">
-              Modifier le nom
+              {t('selectContact.editName')}
             </Text>
           </Pressable>
         )}
@@ -287,7 +291,7 @@ export default function SelectContactScreen() {
       {filteredContacts.length > 0 && (
         <View className="mb-6">
           <Text className="text-lg font-semibold text-textPrimary mb-3">
-            Tous les contacts
+            {t('selectContact.allContacts')}
           </Text>
 
           {filteredContacts
@@ -317,7 +321,7 @@ export default function SelectContactScreen() {
         className="py-3 items-center mb-6"
         onPress={handleCancel}
       >
-        <Text className="text-textMuted">Annuler</Text>
+        <Text className="text-textMuted">{t('common.cancel')}</Text>
       </Pressable>
     </ScrollView>
   );
