@@ -3,6 +3,7 @@ import { forwardRef, useCallback } from 'react';
 import { BottomSheetModal, BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { Shield, Database, Lock, Server, Mail, ExternalLink } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
+import { Colors } from '@/constants/theme';
 
 export const LegalNoticesSheet = forwardRef<BottomSheetModal>((_, ref) => {
   const { t } = useTranslation();
@@ -23,8 +24,8 @@ export const LegalNoticesSheet = forwardRef<BottomSheetModal>((_, ref) => {
       ref={ref}
       snapPoints={['85%']}
       backdropComponent={renderBackdrop}
-      backgroundStyle={{ backgroundColor: '#1a1a1a' }}
-      handleIndicatorStyle={{ backgroundColor: '#525252' }}
+      backgroundStyle={{ backgroundColor: Colors.surface }}
+      handleIndicatorStyle={{ backgroundColor: Colors.border }}
     >
       <BottomSheetScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 32 }}>
         <View className="px-4 pb-4 border-b border-surfaceHover">

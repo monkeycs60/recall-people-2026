@@ -5,6 +5,7 @@ import { Users, FolderOpen } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { useContactsStore } from '@/stores/contacts-store';
 import { useGroupsStore } from '@/stores/groups-store';
+import { Colors } from '@/constants/theme';
 
 export const StatisticsSheet = forwardRef<BottomSheetModal>((_, ref) => {
   const { t } = useTranslation();
@@ -23,8 +24,8 @@ export const StatisticsSheet = forwardRef<BottomSheetModal>((_, ref) => {
       ref={ref}
       enableDynamicSizing
       backdropComponent={renderBackdrop}
-      backgroundStyle={{ backgroundColor: '#1a1a1a' }}
-      handleIndicatorStyle={{ backgroundColor: '#525252' }}
+      backgroundStyle={{ backgroundColor: Colors.surface }}
+      handleIndicatorStyle={{ backgroundColor: Colors.border }}
     >
       <BottomSheetView style={{ paddingBottom: 32 }}>
         <View className="px-4 pb-4 border-b border-surfaceHover">
@@ -35,9 +36,9 @@ export const StatisticsSheet = forwardRef<BottomSheetModal>((_, ref) => {
 
         <View className="p-4">
           <View className="flex-row gap-4">
-            <View className="flex-1 bg-surface rounded-2xl p-4 items-center">
-              <View className="w-12 h-12 bg-violet-500/20 rounded-full items-center justify-center mb-2">
-                <Users size={24} color="#8b5cf6" />
+            <View className="flex-1 bg-background rounded-2xl p-4 items-center">
+              <View style={{ width: 48, height: 48, backgroundColor: Colors.primaryLight, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+                <Users size={24} color={Colors.primary} />
               </View>
               <Text className="text-textPrimary text-3xl font-bold">
                 {contacts.length}
@@ -47,9 +48,9 @@ export const StatisticsSheet = forwardRef<BottomSheetModal>((_, ref) => {
               </Text>
             </View>
 
-            <View className="flex-1 bg-surface rounded-2xl p-4 items-center">
-              <View className="w-12 h-12 bg-violet-500/20 rounded-full items-center justify-center mb-2">
-                <FolderOpen size={24} color="#8b5cf6" />
+            <View className="flex-1 bg-background rounded-2xl p-4 items-center">
+              <View style={{ width: 48, height: 48, backgroundColor: Colors.primaryLight, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+                <FolderOpen size={24} color={Colors.primary} />
               </View>
               <Text className="text-textPrimary text-3xl font-bold">
                 {groups.length}

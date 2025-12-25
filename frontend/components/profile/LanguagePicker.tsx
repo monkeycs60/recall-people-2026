@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Language, SUPPORTED_LANGUAGES, LANGUAGE_NAMES, LANGUAGE_FLAGS } from '@/types';
 import { useSettingsStore } from '@/stores/settings-store';
 import { changeLanguage } from '@/lib/i18n';
+import { Colors } from '@/constants/theme';
 
 export const LanguagePicker = forwardRef<BottomSheetModal>((_, ref) => {
   const { t } = useTranslation();
@@ -32,8 +33,8 @@ export const LanguagePicker = forwardRef<BottomSheetModal>((_, ref) => {
       ref={ref}
       enableDynamicSizing
       backdropComponent={renderBackdrop}
-      backgroundStyle={{ backgroundColor: '#1a1a1a' }}
-      handleIndicatorStyle={{ backgroundColor: '#525252' }}
+      backgroundStyle={{ backgroundColor: Colors.surface }}
+      handleIndicatorStyle={{ backgroundColor: Colors.border }}
     >
       <BottomSheetView style={{ paddingBottom: 32 }}>
         <View className="px-4 pb-2 border-b border-surfaceHover">
@@ -57,7 +58,7 @@ export const LanguagePicker = forwardRef<BottomSheetModal>((_, ref) => {
                 {LANGUAGE_NAMES[language]}
               </Text>
               {currentLanguage === language && (
-                <Check size={20} color="#8b5cf6" />
+                <Check size={20} color={Colors.primary} />
               )}
             </Pressable>
           ))}
