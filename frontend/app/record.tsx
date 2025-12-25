@@ -1,5 +1,5 @@
 import { View, Text, Pressable } from 'react-native';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { X } from 'lucide-react-native';
@@ -8,6 +8,7 @@ import { Colors } from '@/constants/theme';
 import { RecordButton } from '@/components/RecordButton';
 import { useRecording } from '@/hooks/useRecording';
 import { useContactsStore } from '@/stores/contacts-store';
+import { useAppStore } from '@/stores/app-store';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -25,13 +26,33 @@ const HELPER_PROMPTS = [
   'Partagez ce que vous avez appris...',
 ];
 
+const getContactPrompts = (firstName: string) => [
+  `Quoi de neuf avec ${firstName} ?`,
+  `Partagez vos dernières nouvelles...`,
+  `Comment va ${firstName} ?`,
+  `Qu'avez-vous appris sur ${firstName} ?`,
+];
+
 export default function RecordScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { toggleRecording, isRecording, isProcessing, recordingDuration } = useRecording();
-  const { isInitialized, loadContacts } = useContactsStore();
+  const { contacts, isInitialized, loadContacts } = useContactsStore();
+  const preselectedContactId = useAppStore((state) => state.preselectedContactId);
   const [promptIndex, setPromptIndex] = useState(0);
+
+  const preselectedContact = useMemo(() => {
+    if (!preselectedContactId) return null;
+    return contacts.find((contact) => contact.id === preselectedContactId) || null;
+  }, [preselectedContactId, contacts]);
+
+  const currentPrompts = useMemo(() => {
+    if (preselectedContact) {
+      return getContactPrompts(preselectedContact.firstName);
+    }
+    return HELPER_PROMPTS;
+  }, [preselectedContact]);
 
   useEffect(() => {
     if (!isInitialized) {
@@ -42,11 +63,11 @@ export default function RecordScreen() {
   useEffect(() => {
     if (!isRecording) {
       const interval = setInterval(() => {
-        setPromptIndex((prev) => (prev + 1) % HELPER_PROMPTS.length);
+        setPromptIndex((prev) => (prev + 1) % currentPrompts.length);
       }, 4000);
       return () => clearInterval(interval);
     }
-  }, [isRecording]);
+  }, [isRecording, currentPrompts.length]);
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -96,7 +117,7 @@ export default function RecordScreen() {
             marginBottom: 8,
           }}
         >
-          Recall People
+          {preselectedContact ? preselectedContact.firstName : 'Recall People'}
         </Text>
 
         {isRecording ? (
@@ -139,7 +160,7 @@ export default function RecordScreen() {
               minHeight: 24,
             }}
           >
-            {HELPER_PROMPTS[promptIndex]}
+            {currentPrompts[promptIndex]}
           </Animated.Text>
         )}
 
@@ -166,9 +187,11 @@ export default function RecordScreen() {
 
       <View style={{ paddingHorizontal: 32, paddingBottom: 32 }}>
         <Text style={{ color: Colors.textMuted, textAlign: 'center', fontSize: 12, lineHeight: 20 }}>
-          {t('home.helperText', {
-            defaultValue: 'Conseil : mentionnez le nom, le contexte de rencontre, et les details importants sur la personne.',
-          })}
+          {preselectedContact
+            ? `Parlez de ${preselectedContact.firstName} : actualités, anecdotes, détails importants...`
+            : t('home.helperText', {
+                defaultValue: 'Conseil : mentionnez le nom, le contexte de rencontre, et les details importants sur la personne.',
+              })}
         </Text>
       </View>
     </View>
