@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Alert, Linking } from 'react-native';
+import { View, Text, ScrollView, Alert, Linking, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useRef, useCallback } from 'react';
@@ -26,6 +26,7 @@ import { LanguagePicker } from '@/components/profile/LanguagePicker';
 import { StatisticsSheet } from '@/components/profile/StatisticsSheet';
 import { ExportDataSheet } from '@/components/profile/ExportDataSheet';
 import { LegalNoticesSheet } from '@/components/profile/LegalNoticesSheet';
+import { Colors } from '@/constants/theme';
 import Constants from 'expo-constants';
 
 export default function ProfileScreen() {
@@ -108,10 +109,12 @@ export default function ProfileScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <ScrollView className="flex-1 px-6" style={{ paddingTop: insets.top + 10 }}>
-        <Text className="text-3xl font-bold text-textPrimary mb-4">
-          {t('profile.title')}
-        </Text>
+      <ScrollView
+        className="flex-1"
+        style={{ paddingTop: insets.top + 16 }}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <Text style={styles.screenTitle}>{t('profile.title')}</Text>
 
         {user && (
           <ProfileHeader
@@ -123,7 +126,7 @@ export default function ProfileScreen() {
 
         <SettingsSection title={t('profile.sections.language')}>
           <SettingsRow
-            icon={<Globe size={20} color="#8b5cf6" />}
+            icon={<Globe size={20} color={Colors.primary} />}
             label={t('profile.language.appLanguage')}
             value={LANGUAGE_NAMES[language]}
             onPress={handleOpenLanguagePicker}
@@ -132,17 +135,17 @@ export default function ProfileScreen() {
 
         <SettingsSection title={t('profile.sections.data')}>
           <SettingsRow
-            icon={<BarChart3 size={20} color="#8b5cf6" />}
+            icon={<BarChart3 size={20} color={Colors.primary} />}
             label={t('profile.data.statistics')}
             onPress={handleOpenStatistics}
           />
           <SettingsRow
-            icon={<Download size={20} color="#8b5cf6" />}
+            icon={<Download size={20} color={Colors.primary} />}
             label={t('profile.data.export')}
             onPress={handleOpenExport}
           />
           <SettingsRow
-            icon={<Trash2 size={20} color="#8b5cf6" />}
+            icon={<Trash2 size={20} color={Colors.primary} />}
             label={t('profile.data.clearCache')}
             onPress={handleClearCache}
             showChevron={false}
@@ -151,31 +154,31 @@ export default function ProfileScreen() {
 
         <SettingsSection title={t('profile.sections.about')}>
           <SettingsRow
-            icon={<Smartphone size={20} color="#8b5cf6" />}
+            icon={<Smartphone size={20} color={Colors.primary} />}
             label={t('profile.about.version')}
             value={appVersion}
             showChevron={false}
           />
           <SettingsRow
-            icon={<BookOpen size={20} color="#8b5cf6" />}
+            icon={<BookOpen size={20} color={Colors.primary} />}
             label={t('onboarding.redoTour')}
             onPress={handleRedoTour}
           />
           <SettingsRow
-            icon={<MessageSquare size={20} color="#8b5cf6" />}
+            icon={<MessageSquare size={20} color={Colors.primary} />}
             label={t('profile.about.feedback')}
             onPress={handleFeedback}
           />
           <SettingsRow
-            icon={<FileText size={20} color="#8b5cf6" />}
+            icon={<FileText size={20} color={Colors.primary} />}
             label={t('profile.about.legal')}
             onPress={handleOpenLegal}
           />
         </SettingsSection>
 
-        <View className="mt-2 mb-8">
+        <View style={styles.logoutSection}>
           <SettingsRow
-            icon={<LogOut size={20} color="#ef4444" />}
+            icon={<LogOut size={20} color={Colors.error} />}
             label={t('profile.logout')}
             onPress={handleLogout}
             showChevron={false}
@@ -191,3 +194,20 @@ export default function ProfileScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  scrollContent: {
+    paddingHorizontal: 24,
+    paddingBottom: 100,
+  },
+  screenTitle: {
+    fontFamily: 'PlayfairDisplay_700Bold',
+    fontSize: 32,
+    color: Colors.textPrimary,
+    marginBottom: 24,
+  },
+  logoutSection: {
+    marginTop: 8,
+    marginBottom: 32,
+  },
+});

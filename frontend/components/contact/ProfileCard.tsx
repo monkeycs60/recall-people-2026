@@ -1,8 +1,9 @@
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { ChevronDown, ChevronUp, Trash2 } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Fact, FactType } from '@/types';
+import { Colors } from '@/constants/theme';
 
 type ProfileCardProps = {
   facts: Fact[];
@@ -80,49 +81,45 @@ export function ProfileCard({ facts, onEditFact, onDeleteFact, highlightId }: Pr
     return (
       <View
         key={fact.id}
-        className="rounded-lg overflow-hidden mb-2"
-        style={{
-          backgroundColor: isHighlighted ? '#8b5cf620' : '#18181b',
-          borderWidth: isHighlighted ? 2 : 0,
-          borderColor: isHighlighted ? '#8b5cf6' : 'transparent',
-        }}
+        style={[
+          styles.factCard,
+          isHighlighted && styles.factCardHighlighted,
+        ]}
       >
         <Pressable
-          className="p-3 flex-row items-start justify-between"
+          style={styles.factContent}
           onPress={() => onEditFact(fact)}
         >
-          <View className="flex-1">
-            <Text className="text-textPrimary font-medium">
-              {fact.factValue}
-            </Text>
-            <Text className="text-textSecondary text-xs mt-0.5">{getFactTypeLabel(fact.factType)}</Text>
+          <View style={styles.factTextContainer}>
+            <Text style={styles.factValue}>{fact.factValue}</Text>
+            <Text style={styles.factType}>{getFactTypeLabel(fact.factType)}</Text>
             {fact.previousValues.length > 0 && (
               <Pressable
-                className="flex-row items-center mt-1"
+                style={styles.previousValuesToggle}
                 onPress={() => setExpandedType(isExpanded ? null : fact.factType)}
               >
-                <Text className="text-textMuted text-xs mr-1">
+                <Text style={styles.previousValuesText}>
                   {t('contact.fact.previousCount', { count: fact.previousValues.length })}
                 </Text>
                 {isExpanded ? (
-                  <ChevronUp size={12} color="#71717a" />
+                  <ChevronUp size={12} color={Colors.textMuted} />
                 ) : (
-                  <ChevronDown size={12} color="#71717a" />
+                  <ChevronDown size={12} color={Colors.textMuted} />
                 )}
               </Pressable>
             )}
           </View>
-          <Pressable className="p-1" onPress={() => onDeleteFact(fact)}>
-            <Trash2 size={16} color="#EF4444" />
+          <Pressable style={styles.deleteButton} onPress={() => onDeleteFact(fact)}>
+            <Trash2 size={16} color={Colors.error} />
           </Pressable>
         </Pressable>
 
         {isExpanded && fact.previousValues.length > 0 && (
-          <View className="px-3 pb-3">
+          <View style={styles.previousValuesContainer}>
             {fact.previousValues.map((prevValue, idx) => (
-              <View key={idx} className="flex-row items-center mt-1">
-                <View className="w-1.5 h-1.5 rounded-full bg-textMuted mr-2" />
-                <Text className="text-textMuted text-sm line-through">{prevValue}</Text>
+              <View key={idx} style={styles.previousValueRow}>
+                <View style={styles.previousValueDot} />
+                <Text style={styles.previousValue}>{prevValue}</Text>
               </View>
             ))}
           </View>
@@ -139,56 +136,48 @@ export function ProfileCard({ facts, onEditFact, onDeleteFact, highlightId }: Pr
     return (
       <View
         key={group.type}
-        className="rounded-lg overflow-hidden mb-2"
-        style={{
-          backgroundColor: hasHighlightedFact ? '#8b5cf620' : '#18181b',
-          borderWidth: hasHighlightedFact ? 2 : 0,
-          borderColor: hasHighlightedFact ? '#8b5cf6' : 'transparent',
-        }}
+        style={[
+          styles.factCard,
+          hasHighlightedFact && styles.factCardHighlighted,
+        ]}
       >
-        <View className="p-3">
-          <View className="flex-row items-start justify-between">
-            <View className="flex-1">
-              <Text className="text-textPrimary font-medium">
-                {values.join(', ')}
+        <View style={styles.groupHeader}>
+          <View style={styles.factTextContainer}>
+            <Text style={styles.factValue}>{values.join(', ')}</Text>
+            <Pressable
+              style={styles.previousValuesToggle}
+              onPress={() => setExpandedType(isExpanded ? null : group.type)}
+            >
+              <Text style={styles.factType}>
+                {getFactTypeLabel(group.type)} ({group.facts.length})
               </Text>
-              <Pressable
-                className="flex-row items-center mt-1"
-                onPress={() => setExpandedType(isExpanded ? null : group.type)}
-              >
-                <Text className="text-textSecondary text-xs mr-1">
-                  {getFactTypeLabel(group.type)} ({group.facts.length})
-                </Text>
-                {isExpanded ? (
-                  <ChevronUp size={12} color="#71717a" />
-                ) : (
-                  <ChevronDown size={12} color="#71717a" />
-                )}
-              </Pressable>
-            </View>
+              {isExpanded ? (
+                <ChevronUp size={12} color={Colors.textMuted} />
+              ) : (
+                <ChevronDown size={12} color={Colors.textMuted} />
+              )}
+            </Pressable>
           </View>
         </View>
 
         {isExpanded && (
-          <View className="px-3 pb-3 border-t border-surfaceHover pt-2">
+          <View style={styles.expandedList}>
             {group.facts.map((fact) => (
               <View
                 key={fact.id}
-                className="flex-row items-center justify-between py-1.5"
-                style={{
-                  backgroundColor: fact.id === highlightId ? '#8b5cf630' : 'transparent',
-                  borderRadius: 8,
-                  paddingHorizontal: fact.id === highlightId ? 8 : 0,
-                }}
+                style={[
+                  styles.expandedItem,
+                  fact.id === highlightId && styles.expandedItemHighlighted,
+                ]}
               >
-                <View className="flex-row items-center flex-1">
-                  <Text className="text-primary mr-2">•</Text>
-                  <Pressable onPress={() => onEditFact(fact)} className="flex-1">
-                    <Text className="text-textPrimary">{fact.factValue}</Text>
+                <View style={styles.expandedItemContent}>
+                  <Text style={styles.bulletPoint}>•</Text>
+                  <Pressable onPress={() => onEditFact(fact)} style={styles.factTextContainer}>
+                    <Text style={styles.expandedItemText}>{fact.factValue}</Text>
                   </Pressable>
                 </View>
-                <Pressable className="p-1" onPress={() => onDeleteFact(fact)}>
-                  <Trash2 size={14} color="#EF4444" />
+                <Pressable style={styles.deleteButton} onPress={() => onDeleteFact(fact)}>
+                  <Trash2 size={14} color={Colors.error} />
                 </Pressable>
               </View>
             ))}
@@ -208,10 +197,8 @@ export function ProfileCard({ facts, onEditFact, onDeleteFact, highlightId }: Pr
 
   if (validFacts.length === 0) {
     return (
-      <View className="bg-surface/30 p-4 rounded-lg border border-dashed border-surfaceHover">
-        <Text className="text-textMuted text-center">
-          {t('contact.fact.emptyState')}
-        </Text>
+      <View style={styles.emptyState}>
+        <Text style={styles.emptyStateText}>{t('contact.fact.emptyState')}</Text>
       </View>
     );
   }
@@ -223,3 +210,118 @@ export function ProfileCard({ facts, onEditFact, onDeleteFact, highlightId }: Pr
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  factCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 8,
+  },
+  factCardHighlighted: {
+    borderWidth: 2,
+    borderColor: Colors.primary,
+    backgroundColor: `${Colors.primary}10`,
+  },
+  factContent: {
+    padding: 12,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+  },
+  factTextContainer: {
+    flex: 1,
+  },
+  factValue: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: Colors.textPrimary,
+  },
+  factType: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    marginTop: 2,
+  },
+  previousValuesToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  previousValuesText: {
+    fontSize: 12,
+    color: Colors.textMuted,
+    marginRight: 4,
+  },
+  deleteButton: {
+    padding: 4,
+  },
+  previousValuesContainer: {
+    paddingHorizontal: 12,
+    paddingBottom: 12,
+  },
+  previousValueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  previousValueDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Colors.textMuted,
+    marginRight: 8,
+  },
+  previousValue: {
+    fontSize: 13,
+    color: Colors.textMuted,
+    textDecorationLine: 'line-through',
+  },
+  groupHeader: {
+    padding: 12,
+  },
+  expandedList: {
+    paddingHorizontal: 12,
+    paddingBottom: 12,
+    borderTopWidth: 1,
+    borderTopColor: Colors.borderLight,
+    paddingTop: 8,
+  },
+  expandedItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 6,
+  },
+  expandedItemHighlighted: {
+    backgroundColor: `${Colors.primary}20`,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+  },
+  expandedItemContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  bulletPoint: {
+    color: Colors.primary,
+    marginRight: 8,
+    fontSize: 16,
+  },
+  expandedItemText: {
+    fontSize: 15,
+    color: Colors.textPrimary,
+  },
+  emptyState: {
+    backgroundColor: `${Colors.surface}50`,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: Colors.border,
+  },
+  emptyStateText: {
+    fontSize: 14,
+    color: Colors.textMuted,
+    textAlign: 'center',
+  },
+});
