@@ -5,15 +5,32 @@
 @import "nativewind/theme";
 
 @theme {
-  --color-background: #09090b;
-  --color-surface: #18181b;
-  --color-surfaceHover: #27272a;
-  --color-textPrimary: #fafafa;
-  --color-textSecondary: #a1a1aa;
-  --color-textMuted: #71717a;
-  --color-primary: #8b5cf6;
-  --color-primaryDark: #6366f1;
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
+  /* Backgrounds - Warm Light Mode */
+  --color-background: #FAF7F2;
+  --color-surface: #FFFFFF;
+  --color-surfaceElevated: #FFFFFF;
+
+  /* Text - Warm tones */
+  --color-textPrimary: #1A1612;
+  --color-textSecondary: #6B5E54;
+  --color-textMuted: #A69B8F;
+  --color-textInverse: #FFFFFF;
+
+  /* Accent - Terracotta/Amber */
+  --color-primary: #C67C4E;
+  --color-primaryLight: #E8D5C4;
+  --color-primaryDark: #A65D2E;
+
+  /* Semantic */
+  --color-success: #5D8C5A;
+  --color-warning: #D4A34A;
+  --color-error: #C45C4A;
+  --color-info: #5C7A8C;
+
+  /* Borders */
+  --color-border: #E8E2DB;
+  --color-borderLight: #F2EDE6;
+
+  /* Legacy support - mapped to new palette */
+  --color-surfaceHover: #F5F0E8;
 }

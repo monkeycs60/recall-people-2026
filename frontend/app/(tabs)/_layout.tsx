@@ -1,9 +1,11 @@
 import { Tabs, useRouter } from 'expo-router';
-import { Home, Users, Search, User } from 'lucide-react-native';
+import { Users, User } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { isLoggedIn } from '@/lib/auth';
-import { View, Text } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Colors } from '@/constants/theme';
+import { CustomTabBar } from '@/components/ui/CustomTabBar';
 
 export default function TabLayout() {
   const router = useRouter();
@@ -22,31 +24,19 @@ export default function TabLayout() {
 
   if (checking) {
     return (
-      <View className="flex-1 items-center justify-center">
-        <Text className="text-textPrimary">Loading...</Text>
+      <View className="flex-1 items-center justify-center bg-background">
+        <ActivityIndicator size="large" color={Colors.primary} />
       </View>
     );
   }
 
   return (
     <Tabs
+      tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{
-        tabBarActiveTintColor: '#8b5cf6',
-        tabBarInactiveTintColor: '#71717a',
-        tabBarStyle: {
-          backgroundColor: '#18181b',
-          borderTopColor: '#27272a',
-        },
         headerShown: false,
       }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: t('tabs.home'),
-          tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
-        }}
-      />
       <Tabs.Screen
         name="contacts"
         options={{
@@ -55,17 +45,22 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="search"
-        options={{
-          title: t('tabs.search'),
-          tabBarIcon: ({ color, size }) => <Search color={color} size={size} />,
-        }}
-      />
-      <Tabs.Screen
         name="profile"
         options={{
           title: t('tabs.profile'),
           tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="index"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="search"
+        options={{
+          href: null,
         }}
       />
     </Tabs>
