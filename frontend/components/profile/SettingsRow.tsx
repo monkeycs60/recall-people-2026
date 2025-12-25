@@ -1,6 +1,7 @@
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { ChevronRight } from 'lucide-react-native';
 import { ReactNode } from 'react';
+import { Colors } from '@/constants/theme';
 
 type SettingsRowProps = {
   icon: ReactNode;
@@ -21,24 +22,53 @@ export function SettingsRow({
 }: SettingsRowProps) {
   return (
     <Pressable
-      className="flex-row items-center px-4 py-3.5 border-b border-surfaceHover last:border-b-0 active:bg-surfaceHover"
+      style={({ pressed }) => [
+        styles.container,
+        pressed && styles.containerPressed,
+      ]}
       onPress={onPress}
       disabled={!onPress}
     >
-      <View className="w-8 items-center">
-        {icon}
-      </View>
-      <Text
-        className={`flex-1 ml-3 text-base ${destructive ? 'text-red-500' : 'text-textPrimary'}`}
-      >
+      <View style={styles.iconContainer}>{icon}</View>
+      <Text style={[styles.label, destructive && styles.labelDestructive]}>
         {label}
       </Text>
-      {value && (
-        <Text className="text-textSecondary mr-2">{value}</Text>
-      )}
+      {value && <Text style={styles.value}>{value}</Text>}
       {showChevron && onPress && (
-        <ChevronRight size={20} color="#71717a" />
+        <ChevronRight size={20} color={Colors.textMuted} />
       )}
     </Pressable>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
+  },
+  containerPressed: {
+    backgroundColor: Colors.surfaceHover,
+  },
+  iconContainer: {
+    width: 32,
+    alignItems: 'center',
+  },
+  label: {
+    flex: 1,
+    marginLeft: 12,
+    fontSize: 16,
+    color: Colors.textPrimary,
+  },
+  labelDestructive: {
+    color: Colors.error,
+  },
+  value: {
+    fontSize: 15,
+    color: Colors.textSecondary,
+    marginRight: 8,
+  },
+});

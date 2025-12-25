@@ -58,8 +58,8 @@ export default function LoginScreen() {
 
           <Animated.View
             entering={FadeInDown.duration(600).delay(200)}
-            className="flex-1 px-6 pt-8"
-            style={{ paddingBottom: insets.bottom + 24 }}
+            className="flex-1"
+            style={{ paddingHorizontal: 24, paddingTop: 32, paddingBottom: insets.bottom + 24 }}
           >
             <Text style={styles.sectionTitle}>Connexion</Text>
 

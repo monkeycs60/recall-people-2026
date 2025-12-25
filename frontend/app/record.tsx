@@ -62,27 +62,38 @@ export default function RecordScreen() {
 
   return (
     <View
-      className="flex-1 bg-background"
-      style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
+      style={{
+        flex: 1,
+        backgroundColor: Colors.background,
+        paddingTop: insets.top,
+        paddingBottom: insets.bottom,
+      }}
     >
-      <View className="flex-row justify-end px-4 pt-2">
+      <View style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 16, paddingTop: 8 }}>
         <Pressable
           onPress={handleClose}
-          className="w-10 h-10 items-center justify-center rounded-full"
-          style={{ backgroundColor: Colors.surfaceHover }}
+          style={{
+            width: 40,
+            height: 40,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 20,
+            backgroundColor: Colors.surfaceHover,
+          }}
           disabled={isRecording || isProcessing}
         >
           <X size={20} color={Colors.textSecondary} />
         </Pressable>
       </View>
 
-      <View className="flex-1 items-center justify-center px-8">
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 }}>
         <Text
-          className="text-center mb-2"
           style={{
             fontFamily: 'PlayfairDisplay_700Bold',
             fontSize: 32,
             color: Colors.textPrimary,
+            textAlign: 'center',
+            marginBottom: 8,
           }}
         >
           Recall People
@@ -91,11 +102,12 @@ export default function RecordScreen() {
         {isRecording ? (
           <Animated.View entering={FadeIn} exiting={FadeOut}>
             <Text
-              className="text-center mb-16"
               style={{
                 fontFamily: 'PlayfairDisplay_500Medium',
                 fontSize: 48,
                 color: Colors.primary,
+                textAlign: 'center',
+                marginBottom: 64,
               }}
             >
               {formatDuration(recordingDuration)}
@@ -104,7 +116,12 @@ export default function RecordScreen() {
         ) : isProcessing ? (
           <Animated.Text
             entering={FadeIn}
-            className="text-textSecondary text-center mb-16 text-lg"
+            style={{
+              color: Colors.textSecondary,
+              textAlign: 'center',
+              marginBottom: 64,
+              fontSize: 18,
+            }}
           >
             {t('home.transcribing')}
           </Animated.Text>
@@ -113,8 +130,14 @@ export default function RecordScreen() {
             key={promptIndex}
             entering={FadeIn.duration(500)}
             exiting={FadeOut.duration(300)}
-            className="text-textMuted text-center mb-16 text-base italic"
-            style={{ minHeight: 24 }}
+            style={{
+              color: Colors.textMuted,
+              textAlign: 'center',
+              marginBottom: 64,
+              fontSize: 16,
+              fontStyle: 'italic',
+              minHeight: 24,
+            }}
           >
             {HELPER_PROMPTS[promptIndex]}
           </Animated.Text>
@@ -129,15 +152,20 @@ export default function RecordScreen() {
         {isRecording && (
           <Animated.Text
             entering={FadeIn.delay(300)}
-            className="text-textMuted text-center mt-8 text-sm"
+            style={{
+              color: Colors.textMuted,
+              textAlign: 'center',
+              marginTop: 32,
+              fontSize: 14,
+            }}
           >
             Appuyez pour terminer
           </Animated.Text>
         )}
       </View>
 
-      <View className="px-8 pb-8">
-        <Text className="text-textMuted text-center text-xs leading-5">
+      <View style={{ paddingHorizontal: 32, paddingBottom: 32 }}>
+        <Text style={{ color: Colors.textMuted, textAlign: 'center', fontSize: 12, lineHeight: 20 }}>
           {t('home.helperText', {
             defaultValue: 'Conseil : mentionnez le nom, le contexte de rencontre, et les details importants sur la personne.',
           })}
