@@ -37,25 +37,30 @@ settingsRoutes.get('/', async (c) => {
 });
 
 settingsRoutes.patch('/', async (c) => {
-  const user = c.get('user');
-  const body = await c.req.json();
+  try {
+    const user = c.get('user');
+    const body = await c.req.json();
 
-  const parsed = updateSettingsSchema.safeParse(body);
-  if (!parsed.success) {
-    return c.json({ error: 'Invalid request body' }, 400);
+    const parsed = updateSettingsSchema.safeParse(body);
+    if (!parsed.success) {
+      return c.json({ error: 'Invalid request body' }, 400);
+    }
+
+    const prisma = getPrisma(c.env.DATABASE_URL);
+    const updatedUser = await prisma.user.update({
+      where: { id: user.id },
+      data: parsed.data,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        preferredLanguage: true,
+      },
+    });
+
+    return c.json({ success: true, user: updatedUser });
+  } catch (error) {
+    console.error('Settings update error:', error);
+    return c.json({ error: 'Failed to update settings' }, 500);
   }
-
-  const prisma = getPrisma(c.env.DATABASE_URL);
-  const updatedUser = await prisma.user.update({
-    where: { id: user.id },
-    data: parsed.data,
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      preferredLanguage: true,
-    },
-  });
-
-  return c.json({ success: true, user: updatedUser });
 });
