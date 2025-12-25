@@ -144,7 +144,8 @@ export default function RootLayout() {
               name="contact/[id]"
               options={{
                 headerShown: true,
-                title: 'Contact',
+                title: 'Contacts',
+                headerShadowVisible: false,
                 headerLeft: () => (
                   <Pressable
                     onPress={() => router.replace('/(tabs)/contacts')}
