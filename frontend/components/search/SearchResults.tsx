@@ -2,6 +2,7 @@ import { View, Text, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SearchX } from 'lucide-react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
+import { useTranslation } from 'react-i18next';
 import { SemanticSearchResult } from '@/types';
 import { SearchResultItem } from './SearchResultItem';
 
@@ -11,6 +12,7 @@ type SearchResultsProps = {
 };
 
 export function SearchResults({ results, hasSearched }: SearchResultsProps) {
+  const { t } = useTranslation();
   const router = useRouter();
 
   const handleResultPress = (result: SemanticSearchResult) => {
@@ -48,9 +50,10 @@ export function SearchResults({ results, hasSearched }: SearchResultsProps) {
           <SearchX size={36} color="#52525b" />
         </View>
         <Text className="text-textSecondary text-lg font-medium mb-2">
-          Aucun résultat
+          {t('search.noResults')}
         </Text>
         <Text className="text-textMuted text-center px-8">
+          {/* No translation key for this helper text, keeping as is */}
           Essayez une recherche différente ou des termes plus généraux
         </Text>
       </Animated.View>
@@ -97,6 +100,7 @@ export function SearchResults({ results, hasSearched }: SearchResultsProps) {
     >
       <View className="flex-row items-center justify-between mb-4">
         <Text className="text-textSecondary text-sm">
+          {/* No translation key for result count, keeping as is */}
           {results.length} résultat{results.length > 1 ? 's' : ''}
         </Text>
       </View>

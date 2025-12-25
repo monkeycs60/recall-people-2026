@@ -3,6 +3,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useContactsStore } from '@/stores/contacts-store';
 import { useGroupsStore } from '@/stores/groups-store';
 import { groupService } from '@/services/group.service';
@@ -10,6 +11,7 @@ import { Contact } from '@/types';
 import { User, Search } from 'lucide-react-native';
 
 export default function ContactsScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { contacts, loadContacts, isLoading } = useContactsStore();
@@ -77,7 +79,7 @@ export default function ContactsScreen() {
         </Text>
         {item.lastContactAt && (
           <Text className="text-textMuted text-xs mt-1">
-            Dernier contact : {new Date(item.lastContactAt).toLocaleDateString()}
+            {new Date(item.lastContactAt).toLocaleDateString()}
           </Text>
         )}
       </View>
@@ -87,13 +89,13 @@ export default function ContactsScreen() {
   return (
     <View className="flex-1 bg-background">
       <View style={{ paddingTop: insets.top + 10, paddingHorizontal: 24 }}>
-        <Text className="text-3xl font-bold text-textPrimary mb-4">Contacts</Text>
+        <Text className="text-3xl font-bold text-textPrimary mb-4">{t('contacts.title')}</Text>
 
         <View className="bg-surface rounded-lg flex-row items-center px-4 mb-4">
           <Search size={20} color="#9CA3AF" />
           <TextInput
             className="flex-1 py-3 px-3 text-textPrimary"
-            placeholder="Rechercher un contact..."
+            placeholder={t('contacts.searchPlaceholder')}
             placeholderTextColor="#71717a"
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -144,8 +146,8 @@ export default function ContactsScreen() {
         <View className="flex-1 items-center justify-center px-6">
           <Text className="text-textSecondary text-center">
             {searchQuery
-              ? 'Aucun résultat trouvé'
-              : 'Aucun contact pour le moment.\nCréez votre première note vocale !'}
+              ? t('search.noResults')
+              : t('contacts.noContacts')}
           </Text>
         </View>
       ) : (
