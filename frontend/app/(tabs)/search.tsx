@@ -1,4 +1,4 @@
-import { View, Text, KeyboardAvoidingView, Platform, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { View, Text, KeyboardAvoidingView, Platform, StyleSheet, Pressable } from 'react-native';
 import { useState, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -88,11 +88,7 @@ export default function SearchScreen() {
         {showSuggestions && (
           <Animated.View entering={FadeInDown.duration(400)}>
             <Text style={styles.suggestionsLabel}>{t('search.examples')} :</Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.chipsContainer}
-            >
+            <View style={styles.suggestionsColumn}>
               {SUGGESTION_CHIPS.map((chipKey, index) => (
                 <Animated.View
                   key={chipKey}
@@ -106,7 +102,7 @@ export default function SearchScreen() {
                   </Pressable>
                 </Animated.View>
               ))}
-            </ScrollView>
+            </View>
           </Animated.View>
         )}
 
@@ -146,21 +142,20 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     fontStyle: 'italic',
   },
-  chipsContainer: {
-    gap: 10,
-    paddingBottom: 24,
+  suggestionsColumn: {
+    gap: 12,
   },
   suggestionChip: {
     backgroundColor: Colors.primaryLight,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: Colors.primary,
   },
   suggestionChipText: {
     color: Colors.primary,
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '500',
   },
 });

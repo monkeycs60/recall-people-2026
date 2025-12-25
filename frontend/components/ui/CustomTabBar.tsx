@@ -29,8 +29,11 @@ export function CustomTabBar({ state, navigation }: TabBarProps) {
   const { t } = useTranslation();
   const fabScale = useSharedValue(1);
 
-  const tabs = [
+  const leftTabs = [
     { name: 'contacts', icon: Users, label: t('tabs.contacts') },
+  ];
+
+  const rightTabs = [
     { name: 'profile', icon: User, label: t('tabs.profile') },
   ];
 
@@ -45,35 +48,45 @@ export function CustomTabBar({ state, navigation }: TabBarProps) {
     transform: [{ scale: fabScale.value }],
   }));
 
+  const renderTab = (tab: { name: string; icon: typeof Users; label: string }) => {
+    const isActive = state.routes[state.index]?.name === tab.name;
+    const Icon = tab.icon;
+
+    return (
+      <Pressable
+        key={tab.name}
+        onPress={() => navigation.navigate(tab.name)}
+        style={styles.tabItem}
+      >
+        <Icon
+          size={24}
+          color={isActive ? Colors.primary : Colors.tabIconDefault}
+          strokeWidth={isActive ? 2.5 : 2}
+        />
+        <Animated.Text
+          style={[
+            styles.tabLabel,
+            { color: isActive ? Colors.primary : Colors.tabIconDefault },
+          ]}
+        >
+          {tab.label}
+        </Animated.Text>
+      </Pressable>
+    );
+  };
+
   return (
     <View style={[styles.container, { paddingBottom: insets.bottom }]}>
       <View style={styles.tabBar}>
-        {tabs.map((tab, index) => {
-          const isActive = state.routes[state.index]?.name === tab.name;
-          const Icon = tab.icon;
+        <View style={styles.tabGroup}>
+          {leftTabs.map(renderTab)}
+        </View>
 
-          return (
-            <Pressable
-              key={tab.name}
-              onPress={() => navigation.navigate(tab.name)}
-              style={styles.tabItem}
-            >
-              <Icon
-                size={24}
-                color={isActive ? Colors.primary : Colors.tabIconDefault}
-                strokeWidth={isActive ? 2.5 : 2}
-              />
-              <Animated.Text
-                style={[
-                  styles.tabLabel,
-                  { color: isActive ? Colors.primary : Colors.tabIconDefault },
-                ]}
-              >
-                {tab.label}
-              </Animated.Text>
-            </Pressable>
-          );
-        })}
+        <View style={styles.fabSpacer} />
+
+        <View style={styles.tabGroup}>
+          {rightTabs.map(renderTab)}
+        </View>
       </View>
 
       <AnimatedPressable
@@ -100,10 +113,17 @@ const styles = StyleSheet.create({
   },
   tabBar: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     alignItems: 'center',
     height: 60,
-    paddingHorizontal: 40,
+    paddingHorizontal: 16,
+  },
+  tabGroup: {
+    flexDirection: 'row',
+    flex: 1,
+  },
+  fabSpacer: {
+    width: 80,
   },
   tabItem: {
     flex: 1,

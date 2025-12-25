@@ -10,7 +10,7 @@ import { groupService } from '@/services/group.service';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { factService } from '@/services/fact.service';
 import { Contact, HotTopic, Fact } from '@/types';
-import { Search, ChevronRight, Flame } from 'lucide-react-native';
+import { Search, ChevronRight, Flame, Sparkles } from 'lucide-react-native';
 import { Colors } from '@/constants/theme';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
@@ -148,7 +148,16 @@ export default function ContactsScreen() {
   return (
     <View className="flex-1 bg-background">
       <View style={{ paddingTop: insets.top + 16, paddingHorizontal: 24 }}>
-        <Text style={styles.screenTitle}>{t('contacts.title')}</Text>
+        <View style={styles.headerRow}>
+          <Text style={styles.screenTitle}>{t('contacts.title')}</Text>
+          <Pressable
+            style={styles.aiSearchButton}
+            onPress={() => router.push('/(tabs)/search')}
+          >
+            <Sparkles size={16} color={Colors.primary} />
+            <Text style={styles.aiSearchButtonText}>AI</Text>
+          </Pressable>
+        </View>
 
         <View style={styles.searchContainer}>
           <Search size={20} color={Colors.textMuted} />
@@ -218,11 +227,32 @@ export default function ContactsScreen() {
 }
 
 const styles = StyleSheet.create({
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
   screenTitle: {
     fontFamily: 'PlayfairDisplay_700Bold',
     fontSize: 32,
     color: Colors.textPrimary,
-    marginBottom: 16,
+  },
+  aiSearchButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: Colors.primaryLight,
+    borderWidth: 1,
+    borderColor: Colors.primary,
+  },
+  aiSearchButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.primary,
   },
   searchContainer: {
     flexDirection: 'row',
