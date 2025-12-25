@@ -1,6 +1,7 @@
 import { View, Text, Pressable, Dimensions, ScrollView } from 'react-native';
 import { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -21,6 +22,7 @@ type OnboardingProps = {
 
 export const Onboarding = ({ onComplete }: OnboardingProps) => {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const [currentSlide, setCurrentSlide] = useState(0);
   const scrollViewRef = useRef<ScrollView>(null);
   const scrollX = useSharedValue(0);
@@ -116,9 +118,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
               {LANGUAGE_NAMES[language]}
             </Text>
             {currentLanguage === language && (
-              <View className="bg-primary rounded-full p-1">
-                <CheckCircle size={20} color="#ffffff" fill="#8b5cf6" />
-              </View>
+              <CheckCircle size={24} color="#8b5cf6" fill="#8b5cf6" />
             )}
           </Pressable>
         ))}
@@ -151,12 +151,13 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
   };
 
   return (
-    <View className="flex-1 bg-background">
+    <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
       {/* Skip button */}
       {currentSlide < slides.length - 1 && (
         <Pressable
           onPress={handleSkip}
-          className="absolute top-12 right-6 z-10 px-4 py-2 rounded-full bg-surface active:bg-surfaceHover"
+          className="absolute right-6 z-10 px-4 py-2 rounded-full bg-surface active:bg-surfaceHover"
+          style={{ top: insets.top + 12 }}
         >
           <Text className="text-textSecondary font-medium">
             {t('onboarding.skip')}
@@ -180,7 +181,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
       </ScrollView>
 
       {/* Bottom section */}
-      <View className="px-6 pb-12">
+      <View className="px-6" style={{ paddingBottom: Math.max(insets.bottom, 24) }}>
         {/* Pagination dots */}
         <View className="flex-row justify-center mb-8">
           {slides.map((_, index) => {
