@@ -205,14 +205,16 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.full,
     backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   skipButtonPressed: {
     backgroundColor: Colors.surfaceHover,
   },
   skipText: {
-    color: Colors.textSecondary,
-    fontSize: 14,
-    fontWeight: '500',
+    color: Colors.textPrimary,
+    fontSize: 15,
+    fontWeight: '600',
   },
   slideContainer: {
     flex: 1,
