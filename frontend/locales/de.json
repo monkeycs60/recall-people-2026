@@ -63,25 +63,31 @@
   },
   "contacts": {
     "title": "Kontakte",
-    "searchPlaceholder": "Kontakt suchen...",
-    "noContacts": "Keine Kontakte",
-    "addFirst": "Nimm eine Sprachnotiz auf, um deinen ersten Kontakt hinzuzufügen"
+    "searchPlaceholder": "Wen suchst du?",
+    "noContacts": "Dein Kreis beginnt hier",
+    "noContactsDescription": "Füge jemanden hinzu, der dir wichtig ist, und verliere nie den Faden seiner Geschichten."
   },
   "search": {
     "title": "Suche",
-    "placeholder": "In Kontakten suchen...",
+    "placeholder": "Frag dein Gedächtnis...",
     "noResults": "Keine Ergebnisse",
     "searching": "Suche läuft...",
-    "emptyStateTitle": "Stellen Sie eine Frage in natürlicher Sprache, um Informationen über Ihre Kontakte zu finden",
-    "examples": "Beispiele",
-    "example1": "Wer macht Musik?",
-    "example2": "Kontakte, die Sport mögen",
-    "example3": "Wer arbeitet in der Technik?"
+    "emptyStateTitle": "Frag dein Gedächtnis",
+    "examples": "Zum Beispiel",
+    "example1": "Wer arbeitet in Tech in Bordeaux?",
+    "example2": "Wer hat kleine Kinder?",
+    "example3": "Wem sollte ich heute eine Nachricht schicken?"
   },
   "contact": {
     "title": "Kontakt",
     "lastContact": "Letzter Kontakt",
-    "addNote": "Notiz hinzufügen",
+    "addNote": "Wie war euer Moment zusammen?",
+    "aiSummary": {
+      "header": "Das Wichtigste über {{firstName}}",
+      "contextHeader": "Das solltest du im Kopf haben, bevor du {{firstName}} wiedersiehst:",
+      "loading": "Bereite das Wichtigste vor...",
+      "empty": "Füge Notizen hinzu, um das Wichtigste über {{firstName}} zu erfahren"
+    },
     "editGroups": "Gruppen bearbeiten",
     "addGroup": "Gruppe hinzufügen",
     "addGroupPlaceholder": "Gruppe hinzufügen...",
@@ -95,7 +101,9 @@
     },
     "hotTopic": {
       "addPlaceholder": "Neues Thema...",
-      "contextPlaceholder": "Kontext (optional)..."
+      "contextPlaceholder": "Kontext (optional)...",
+      "emptyState": "Noch keine Abenteuer",
+      "emptyStateDescription": "Nimm nach deinem nächsten Anruf eine Notiz auf, um die Magie zu sehen."
     },
     "fact": {
       "addPlaceholder": "Neue Information...",

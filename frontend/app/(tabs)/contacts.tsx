@@ -146,7 +146,7 @@ export default function ContactsScreen() {
   };
 
   return (
-    <View className="flex-1 bg-background">
+    <View style={styles.container}>
       <View style={{ paddingTop: insets.top + 16, paddingHorizontal: 24 }}>
         <View style={styles.headerRow}>
           <Text style={styles.screenTitle}>{t('contacts.title')}</Text>
@@ -172,7 +172,7 @@ export default function ContactsScreen() {
       </View>
 
       {groups.length > 0 && (
-        <View className="px-6 mb-4">
+        <View style={styles.groupsContainer}>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -202,10 +202,15 @@ export default function ContactsScreen() {
       )}
 
       {filteredContacts.length === 0 && !isLoading ? (
-        <View className="flex-1 items-center justify-center px-6">
-          <Text className="text-textSecondary text-center text-base">
+        <View style={styles.emptyStateContainer}>
+          <Text style={styles.emptyStateTitle}>
             {searchQuery ? t('search.noResults') : t('contacts.noContacts')}
           </Text>
+          {!searchQuery && (
+            <Text style={styles.emptyStateDescription}>
+              {t('contacts.noContactsDescription')}
+            </Text>
+          )}
         </View>
       ) : (
         <FlatList
@@ -227,6 +232,14 @@ export default function ContactsScreen() {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  groupsContainer: {
+    paddingHorizontal: 24,
+    marginBottom: 16,
+  },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -353,5 +366,24 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.warning,
     fontWeight: '500',
+  },
+  emptyStateContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 32,
+  },
+  emptyStateTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  emptyStateDescription: {
+    fontSize: 15,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
   },
 });

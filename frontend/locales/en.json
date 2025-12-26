@@ -63,25 +63,31 @@
   },
   "contacts": {
     "title": "Contacts",
-    "searchPlaceholder": "Search contacts...",
-    "noContacts": "No contacts",
-    "addFirst": "Record a voice note to add your first contact"
+    "searchPlaceholder": "Who are you looking for?",
+    "noContacts": "Your circle starts here",
+    "noContactsDescription": "Add someone who matters to you and never lose track of their stories again."
   },
   "search": {
     "title": "Search",
-    "placeholder": "Search your contacts...",
+    "placeholder": "Ask your memory a question...",
     "noResults": "No results",
     "searching": "Searching...",
-    "emptyStateTitle": "Ask a question in natural language to find information about your contacts",
-    "examples": "Examples",
-    "example1": "Who plays music?",
-    "example2": "Contacts who like sports",
-    "example3": "Who works in tech?"
+    "emptyStateTitle": "Ask your memory a question",
+    "examples": "For example",
+    "example1": "Who works in tech in Bordeaux?",
+    "example2": "Who has young children?",
+    "example3": "Who should I message today?"
   },
   "contact": {
     "title": "Contact",
     "lastContact": "Last contact",
-    "addNote": "Add a note",
+    "addNote": "How was your moment together?",
+    "aiSummary": {
+      "header": "The essentials on {{firstName}}",
+      "contextHeader": "Here's what you should keep in mind before seeing {{firstName}} again:",
+      "loading": "Preparing the essentials...",
+      "empty": "Add notes to discover the essentials on {{firstName}}"
+    },
     "editGroups": "Edit groups",
     "addGroup": "Add group",
     "addGroupPlaceholder": "Add a group...",
@@ -97,7 +103,8 @@
     "hotTopic": {
       "addPlaceholder": "New topic...",
       "contextPlaceholder": "Context (optional)...",
-      "emptyState": "No current news",
+      "emptyState": "No adventures yet",
+      "emptyStateDescription": "Record a note after your next call to see the magic happen.",
       "deleteTitle": "Delete this news",
       "deleteConfirm": "Delete \"{{title}}\"?",
       "resolutionLabel": "Resolution (optional):",

@@ -63,25 +63,31 @@
   },
   "contacts": {
     "title": "Contactos",
-    "searchPlaceholder": "Buscar contacto...",
-    "noContacts": "Sin contactos",
-    "addFirst": "Graba una nota de voz para añadir tu primer contacto"
+    "searchPlaceholder": "¿A quién buscas?",
+    "noContacts": "Tu círculo empieza aquí",
+    "noContactsDescription": "Añade a alguien que te importa y nunca pierdas el hilo de sus historias."
   },
   "search": {
     "title": "Buscar",
-    "placeholder": "Buscar en tus contactos...",
+    "placeholder": "Pregunta a tu memoria...",
     "noResults": "Sin resultados",
     "searching": "Buscando...",
-    "emptyStateTitle": "Haz una pregunta en lenguaje natural para encontrar información sobre tus contactos",
-    "examples": "Ejemplos",
-    "example1": "¿Quién hace música?",
-    "example2": "Contactos a los que les gusta el deporte",
-    "example3": "¿Quién trabaja en tecnología?"
+    "emptyStateTitle": "Pregunta a tu memoria",
+    "examples": "Por ejemplo",
+    "example1": "¿Quién trabaja en tech en Bordeaux?",
+    "example2": "¿Quién tiene hijos pequeños?",
+    "example3": "¿A quién debería enviar un mensaje hoy?"
   },
   "contact": {
     "title": "Contacto",
     "lastContact": "Último contacto",
-    "addNote": "Añadir una nota",
+    "addNote": "¿Cómo fue vuestro momento?",
+    "aiSummary": {
+      "header": "Lo esencial sobre {{firstName}}",
+      "contextHeader": "Esto es lo que deberías tener en cuenta antes de volver a ver a {{firstName}}:",
+      "loading": "Preparando lo esencial...",
+      "empty": "Añade notas para descubrir lo esencial sobre {{firstName}}"
+    },
     "editGroups": "Editar grupos",
     "addGroup": "Añadir grupo",
     "addGroupPlaceholder": "Añadir un grupo...",
@@ -95,7 +101,9 @@
     },
     "hotTopic": {
       "addPlaceholder": "Nuevo tema...",
-      "contextPlaceholder": "Contexto (opcional)..."
+      "contextPlaceholder": "Contexto (opcional)...",
+      "emptyState": "Aún sin aventuras",
+      "emptyStateDescription": "Graba una nota después de tu próxima llamada para ver la magia."
     },
     "fact": {
       "addPlaceholder": "Nueva información...",
