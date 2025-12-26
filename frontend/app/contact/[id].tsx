@@ -1,18 +1,26 @@
 import { View, Text, ScrollView, Pressable, TextInput, Alert, Platform, KeyboardAvoidingView, StyleSheet } from 'react-native';
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { useContacts } from '@/hooks/useContacts';
-import { useContactQuery } from '@/hooks/useContactQuery';
-import { Fact, Group, FactType, SearchSourceType } from '@/types';
+import {
+  useContactQuery,
+  useResolveHotTopic,
+  useReopenHotTopic,
+  useDeleteHotTopic,
+  useUpdateHotTopic,
+  useUpdateHotTopicResolution,
+  useCreateMemory,
+  useUpdateMemory,
+  useDeleteMemory,
+  useDeleteNote,
+} from '@/hooks/useContactQuery';
+import { useUpdateContact, useDeleteContact } from '@/hooks/useContactsQuery';
+import { useGroupsQuery, useGroupsForContact, useSetContactGroups, useCreateGroup } from '@/hooks/useGroupsQuery';
+import { Fact, FactType, SearchSourceType } from '@/types';
 import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
-import { memoryService } from '@/services/memory.service';
-import { noteService } from '@/services/note.service';
-import { groupService } from '@/services/group.service';
 import { Edit3, Mic, X, Plus, Check, Trash2 } from 'lucide-react-native';
 import { AISummary } from '@/components/contact/AISummary';
 import { ProfileCard } from '@/components/contact/ProfileCard';
@@ -70,8 +78,26 @@ export default function ContactDetailScreen() {
   const scrollViewRef = useRef<ScrollView>(null);
   const sectionPositions = useRef<Record<string, number>>({});
 
-  const { deleteContact, updateContact } = useContacts();
   const { contact, isLoading, isWaitingForSummary, invalidate } = useContactQuery(contactId);
+
+  // TanStack Query mutations
+  const updateContactMutation = useUpdateContact();
+  const deleteContactMutation = useDeleteContact();
+  const resolveHotTopicMutation = useResolveHotTopic();
+  const reopenHotTopicMutation = useReopenHotTopic();
+  const deleteHotTopicMutation = useDeleteHotTopic();
+  const updateHotTopicMutation = useUpdateHotTopic();
+  const updateHotTopicResolutionMutation = useUpdateHotTopicResolution();
+  const createMemoryMutation = useCreateMemory();
+  const updateMemoryMutation = useUpdateMemory();
+  const deleteMemoryMutation = useDeleteMemory();
+  const deleteNoteMutation = useDeleteNote();
+  const setContactGroupsMutation = useSetContactGroups();
+  const createGroupMutation = useCreateGroup();
+
+  // Groups queries
+  const { groups: allGroups } = useGroupsQuery();
+  const { data: contactGroups = [] } = useGroupsForContact(contactId);
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedFirstName, setEditedFirstName] = useState('');
@@ -79,10 +105,8 @@ export default function ContactDetailScreen() {
   const [editingFact, setEditingFact] = useState<EditingFact | null>(null);
 
   // Groups state
-  const [groups, setGroups] = useState<Group[]>([]);
   const [isEditingGroups, setIsEditingGroups] = useState(false);
   const [editedGroupIds, setEditedGroupIds] = useState<string[]>([]);
-  const [allGroups, setAllGroups] = useState<Group[]>([]);
   const [groupSearchQuery, setGroupSearchQuery] = useState('');
 
   // Adding new items state
@@ -101,25 +125,18 @@ export default function ContactDetailScreen() {
   const [newFactValue, setNewFactValue] = useState('');
   const [showFactTypeDropdown, setShowFactTypeDropdown] = useState(false);
 
-  const loadGroups = useCallback(async () => {
+  // Sync contact data with local state
+  useEffect(() => {
     if (contact) {
       setEditedFirstName(contact.firstName);
       setEditedLastName(contact.lastName || '');
-
-      const contactGroups = await groupService.getGroupsForContact(contactId);
-      setGroups(contactGroups);
-      setEditedGroupIds(contactGroups.map((group) => group.id));
-
-      const all = await groupService.getAll();
-      setAllGroups(all);
     }
-  }, [contact, contactId]);
+  }, [contact]);
 
-  useFocusEffect(
-    useCallback(() => {
-      loadGroups();
-    }, [loadGroups])
-  );
+  // Sync contact groups with local state
+  useEffect(() => {
+    setEditedGroupIds(contactGroups.map((group) => group.id));
+  }, [contactGroups]);
 
   useEffect(() => {
     if (highlightType && highlightId && contact && !isLoading) {
@@ -145,7 +162,7 @@ export default function ContactDetailScreen() {
           style: 'destructive',
           onPress: async () => {
             if (contact) {
-              await deleteContact(contact.id);
+              await deleteContactMutation.mutateAsync(contact.id);
               router.replace('/(tabs)/contacts');
             }
           },
@@ -156,11 +173,13 @@ export default function ContactDetailScreen() {
 
   const handleSaveName = async () => {
     if (!contact || !editedFirstName.trim()) return;
-    await updateContact(contact.id, {
-      firstName: editedFirstName.trim(),
-      lastName: editedLastName.trim() || undefined,
+    await updateContactMutation.mutateAsync({
+      id: contact.id,
+      data: {
+        firstName: editedFirstName.trim(),
+        lastName: editedLastName.trim() || undefined,
+      },
     });
-    invalidate();
     setIsEditingName(false);
   };
 
@@ -201,43 +220,35 @@ export default function ContactDetailScreen() {
   };
 
   const handleResolveHotTopic = async (id: string, resolution?: string) => {
-    await hotTopicService.resolve(id, resolution);
-    invalidate();
+    await resolveHotTopicMutation.mutateAsync({ id, resolution });
   };
 
   const handleReopenHotTopic = async (id: string) => {
-    await hotTopicService.reopen(id);
-    invalidate();
+    await reopenHotTopicMutation.mutateAsync(id);
   };
 
   const handleDeleteHotTopic = async (id: string) => {
-    await hotTopicService.delete(id);
-    invalidate();
+    await deleteHotTopicMutation.mutateAsync(id);
   };
 
   const handleEditHotTopic = async (id: string, data: { title: string; context?: string }) => {
-    await hotTopicService.update(id, data);
-    invalidate();
+    await updateHotTopicMutation.mutateAsync({ id, data });
   };
 
   const handleUpdateResolution = async (id: string, resolution: string) => {
-    await hotTopicService.updateResolution(id, resolution);
-    invalidate();
+    await updateHotTopicResolutionMutation.mutateAsync({ id, resolution });
   };
 
   const handleDeleteNote = async (id: string) => {
-    await noteService.delete(id);
-    invalidate();
+    await deleteNoteMutation.mutateAsync(id);
   };
 
   const handleEditMemory = async (id: string, data: { description: string; eventDate?: string }) => {
-    await memoryService.update(id, data);
-    invalidate();
+    await updateMemoryMutation.mutateAsync({ id, data });
   };
 
   const handleDeleteMemory = async (id: string) => {
-    await memoryService.delete(id);
-    invalidate();
+    await deleteMemoryMutation.mutateAsync(id);
   };
 
   const handleAddNote = () => {
@@ -261,7 +272,7 @@ export default function ContactDetailScreen() {
 
   const handleAddMemory = async () => {
     if (!newMemoryDescription.trim()) return;
-    await memoryService.create({
+    await createMemoryMutation.mutateAsync({
       contactId,
       description: newMemoryDescription.trim(),
       eventDate: newMemoryEventDate ? newMemoryEventDate.toISOString().split('T')[0] : undefined,
@@ -272,7 +283,6 @@ export default function ContactDetailScreen() {
     setShowMemoryDatePicker(false);
     setNewMemoryIsShared(false);
     setIsAddingMemory(false);
-    invalidate();
   };
 
   const handleAddFact = async () => {
@@ -307,12 +317,12 @@ export default function ContactDetailScreen() {
 
   // Group handlers
   const handleStartEditingGroups = () => {
-    setEditedGroupIds(groups.map((g) => g.id));
+    setEditedGroupIds(contactGroups.map((group) => group.id));
     setIsEditingGroups(true);
   };
 
   const handleCancelEditingGroups = () => {
-    setEditedGroupIds(groups.map((g) => g.id));
+    setEditedGroupIds(contactGroups.map((group) => group.id));
     setIsEditingGroups(false);
     setGroupSearchQuery('');
   };
@@ -325,14 +335,12 @@ export default function ContactDetailScreen() {
         (group) => group.name.toLowerCase() === groupSearchQuery.toLowerCase()
       );
       if (!groupExists) {
-        const newGroup = await groupService.create(groupSearchQuery.trim());
-        setAllGroups((prev) => [...prev, newGroup]);
+        const newGroup = await createGroupMutation.mutateAsync(groupSearchQuery.trim());
         finalGroupIds = [...editedGroupIds, newGroup.id];
       }
     }
 
-    await groupService.setContactGroups(contactId, finalGroupIds);
-    await loadGroups();
+    await setContactGroupsMutation.mutateAsync({ contactId, groupIds: finalGroupIds });
     setIsEditingGroups(false);
     setGroupSearchQuery('');
   };
@@ -346,8 +354,7 @@ export default function ContactDetailScreen() {
   };
 
   const handleCreateAndAddGroup = async (name: string) => {
-    const newGroup = await groupService.create(name);
-    setAllGroups((prev) => [...prev, newGroup]);
+    const newGroup = await createGroupMutation.mutateAsync(name);
     setEditedGroupIds((prev) => [...prev, newGroup.id]);
     setGroupSearchQuery('');
   };
@@ -517,9 +524,9 @@ export default function ContactDetailScreen() {
                 </View>
               </View>
             ) : (
-              groups.length > 0 ? (
+              contactGroups.length > 0 ? (
                 <Pressable style={styles.groupChipsContainer} onPress={handleStartEditingGroups}>
-                  {groups.map((group) => (
+                  {contactGroups.map((group) => (
                     <View key={group.id} style={styles.groupChip}>
                       <Text style={styles.groupChipText}>{group.name}</Text>
                     </View>

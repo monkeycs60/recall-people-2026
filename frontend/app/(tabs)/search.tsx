@@ -1,9 +1,8 @@
 import { View, Text, KeyboardAvoidingView, Platform, StyleSheet, Pressable } from 'react-native';
-import { useState, useCallback } from 'react';
-import { useFocusEffect } from '@react-navigation/native';
+import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { useContactsStore } from '@/stores/contacts-store';
+import { useContactsQuery } from '@/hooks/useContactsQuery';
 import { useSemanticSearch } from '@/hooks/useSemanticSearch';
 import { SearchInput } from '@/components/search/SearchInput';
 import { SearchSkeleton } from '@/components/search/SearchSkeleton';
@@ -20,16 +19,10 @@ const SUGGESTION_CHIPS = [
 export default function SearchScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const { loadContacts } = useContactsStore();
+  useContactsQuery(); // Preload contacts data (cached by TanStack Query)
   const { results, isLoading, error, search, clearResults } = useSemanticSearch();
   const [query, setQuery] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
-
-  useFocusEffect(
-    useCallback(() => {
-      loadContacts();
-    }, [loadContacts])
-  );
 
   const handleSubmit = () => {
     if (query.trim()) {

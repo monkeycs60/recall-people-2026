@@ -1,73 +1,36 @@
 import { View, Text, FlatList, Pressable, RefreshControl, TextInput, ScrollView, StyleSheet } from 'react-native';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'expo-router';
-import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { useContactsStore } from '@/stores/contacts-store';
 import { useGroupsStore } from '@/stores/groups-store';
-import { groupService } from '@/services/group.service';
-import { hotTopicService } from '@/services/hot-topic.service';
-import { factService } from '@/services/fact.service';
-import { Contact, HotTopic, Fact } from '@/types';
+import { useContactsQuery } from '@/hooks/useContactsQuery';
+import { useGroupsQuery, useContactIdsForGroup } from '@/hooks/useGroupsQuery';
+import { useContactPreviewsQuery } from '@/hooks/useContactPreviewsQuery';
+import { Contact } from '@/types';
 import { Search, ChevronRight, Flame, Sparkles } from 'lucide-react-native';
 import { Colors } from '@/constants/theme';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-
-type ContactPreview = {
-  contact: Contact;
-  topFacts: Fact[];
-  activeHotTopic: HotTopic | null;
-};
 
 export default function ContactsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { contacts, loadContacts, isLoading } = useContactsStore();
-  const { groups, loadGroups, selectedGroupId, setSelectedGroup } = useGroupsStore();
-  const [refreshing, setRefreshing] = useState(false);
+
+  const { contacts, isLoading, isRefetching, refetch, isPlaceholderData } = useContactsQuery();
+  const { groups } = useGroupsQuery();
+  const { selectedGroupId, setSelectedGroup } = useGroupsStore();
+  const { previews: contactPreviews } = useContactPreviewsQuery(contacts);
+  const { data: contactIdsByGroup = [] } = useContactIdsForGroup(selectedGroupId);
+
   const [searchQuery, setSearchQuery] = useState('');
-  const [contactIdsByGroup, setContactIdsByGroup] = useState<string[]>([]);
-  const [contactPreviews, setContactPreviews] = useState<Map<string, { facts: Fact[]; hotTopic: HotTopic | null }>>(new Map());
 
-  useFocusEffect(
-    useCallback(() => {
-      loadContacts();
-      loadGroups();
-    }, [])
-  );
-
-  useEffect(() => {
-    const loadPreviews = async () => {
-      const previews = new Map<string, { facts: Fact[]; hotTopic: HotTopic | null }>();
-      for (const contact of contacts) {
-        const [facts, hotTopics] = await Promise.all([
-          factService.getByContact(contact.id),
-          hotTopicService.getByContact(contact.id),
-        ]);
-        const topFacts = facts.slice(0, 2);
-        const activeHotTopic = hotTopics.find((ht) => ht.status === 'active') || null;
-        previews.set(contact.id, { facts: topFacts, hotTopic: activeHotTopic });
-      }
-      setContactPreviews(previews);
-    };
-    if (contacts.length > 0) {
-      loadPreviews();
-    }
-  }, [contacts]);
-
-  useEffect(() => {
-    const loadFilteredContacts = async () => {
-      if (selectedGroupId) {
-        const ids = await groupService.getContactIdsForGroup(selectedGroupId);
-        setContactIdsByGroup(ids);
-      } else {
-        setContactIdsByGroup([]);
-      }
-    };
-    loadFilteredContacts();
-  }, [selectedGroupId]);
+  // Track si on a déjà montré l'animation initiale
+  const hasAnimatedRef = useRef(false);
+  const shouldAnimate = !hasAnimatedRef.current && !isPlaceholderData;
+  if (contacts.length > 0 && !isPlaceholderData) {
+    hasAnimatedRef.current = true;
+  }
 
   const filteredContacts = contacts.filter((contact) => {
     if (selectedGroupId && !contactIdsByGroup.includes(contact.id)) {
@@ -85,10 +48,7 @@ export default function ContactsScreen() {
   });
 
   const handleRefresh = async () => {
-    setRefreshing(true);
-    await loadContacts();
-    await loadGroups();
-    setRefreshing(false);
+    await refetch();
   };
 
   const getInitials = (contact: Contact) => {
@@ -102,12 +62,11 @@ export default function ContactsScreen() {
     const topFacts = preview?.facts || [];
     const activeHotTopic = preview?.hotTopic;
 
-    return (
-      <Animated.View entering={FadeInDown.delay(index * 50).duration(300)}>
-        <Pressable
-          style={styles.contactCard}
-          onPress={() => router.push(`/contact/${item.id}`)}
-        >
+    const content = (
+      <Pressable
+        style={styles.contactCard}
+        onPress={() => router.push(`/contact/${item.id}`)}
+      >
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>{getInitials(item)}</Text>
           </View>
@@ -141,8 +100,18 @@ export default function ContactsScreen() {
 
           <ChevronRight size={20} color={Colors.textMuted} />
         </Pressable>
-      </Animated.View>
     );
+
+    // Seulement animer au premier chargement, pas quand on revient avec des données en cache
+    if (shouldAnimate) {
+      return (
+        <Animated.View entering={FadeInDown.delay(index * 50).duration(300)}>
+          {content}
+        </Animated.View>
+      );
+    }
+
+    return content;
   };
 
   return (
@@ -220,7 +189,7 @@ export default function ContactsScreen() {
           contentContainerStyle={{ paddingBottom: 100, paddingHorizontal: 24 }}
           refreshControl={
             <RefreshControl
-              refreshing={refreshing}
+              refreshing={isRefetching}
               onRefresh={handleRefresh}
               tintColor={Colors.primary}
             />

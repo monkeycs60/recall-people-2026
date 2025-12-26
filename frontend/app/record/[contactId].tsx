@@ -1,5 +1,5 @@
 import { View, Text, Pressable, ActivityIndicator } from 'react-native';
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   useAudioRecorder,
@@ -9,7 +9,7 @@ import {
 } from 'expo-audio';
 import * as Haptics from 'expo-haptics';
 import { ArrowLeft } from 'lucide-react-native';
-import { useContactsStore } from '@/stores/contacts-store';
+import { useContactsQuery } from '@/hooks/useContactsQuery';
 import { useAppStore } from '@/stores/app-store';
 import { transcribeAudio, extractInfo } from '@/lib/api';
 import { factService } from '@/services/fact.service';
@@ -22,31 +22,22 @@ export default function RecordForContactScreen() {
   const contactId = params.contactId as string;
 
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
-  const { contacts, loadContacts, isInitialized } = useContactsStore();
+  const { contacts } = useContactsQuery();
   const { setCurrentExtraction } = useAppStore();
 
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [contact, setContact] = useState<{ firstName: string; lastName?: string; nickname?: string } | null>(null);
 
-  useEffect(() => {
-    const init = async () => {
-      if (!isInitialized) {
-        await loadContacts();
-      }
-    };
-    init();
-  }, [isInitialized, loadContacts]);
-
-  useEffect(() => {
+  const contact = useMemo(() => {
     const foundContact = contacts.find((c) => c.id === contactId);
     if (foundContact) {
-      setContact({
+      return {
         firstName: foundContact.firstName,
         lastName: foundContact.lastName,
         nickname: foundContact.nickname,
-      });
+      };
     }
+    return null;
   }, [contacts, contactId]);
 
   const startRecording = async () => {
@@ -85,9 +76,6 @@ export default function RecordForContactScreen() {
 
       if (!uri) throw new Error('No audio URI');
 
-      // Reload contacts
-      await loadContacts();
-
       // Transcribe audio
       const transcriptionResult = await transcribeAudio(uri);
 
@@ -101,7 +89,6 @@ export default function RecordForContactScreen() {
         id: c.id,
         firstName: c.firstName,
         lastName: c.lastName,
-        tags: c.tags,
       }));
 
       // Load facts and hot topics for the contact

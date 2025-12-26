@@ -3,13 +3,13 @@ import { useState, useMemo } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { useContactsStore } from '@/stores/contacts-store';
+import { useContactsQuery } from '@/hooks/useContactsQuery';
+import { useGroupsQuery } from '@/hooks/useGroupsQuery';
 import { useAppStore } from '@/stores/app-store';
 import { extractInfo } from '@/lib/api';
 import { Contact } from '@/types';
 import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
-import { groupService } from '@/services/group.service';
 import { User, Plus, Search, Sparkles, Edit3 } from 'lucide-react-native';
 
 export default function SelectContactScreen() {
@@ -20,7 +20,8 @@ export default function SelectContactScreen() {
   const audioUri = params.audioUri as string;
   const transcription = params.transcription as string;
 
-  const { contacts, findContactsByFirstName } = useContactsStore();
+  const { contacts } = useContactsQuery();
+  const { groups } = useGroupsQuery();
   const { setCurrentExtraction, setRecordingState } = useAppStore();
 
   const [isExtracting, setIsExtracting] = useState(false);
@@ -46,7 +47,13 @@ export default function SelectContactScreen() {
 
   const [searchQuery, setSearchQuery] = useState('');
 
-  const matchingContacts = detectedName ? findContactsByFirstName(detectedName) : [];
+  const matchingContacts = useMemo(() => {
+    if (!detectedName) return [];
+    const normalizedName = detectedName.toLowerCase().trim();
+    return contacts.filter(
+      (contact) => contact.firstName.toLowerCase().trim() === normalizedName
+    );
+  }, [detectedName, contacts]);
 
   const nameForNewContact = isEditingNewName && newContactName.trim()
     ? newContactName.trim()
@@ -128,8 +135,6 @@ export default function SelectContactScreen() {
         lastName: c.lastName,
       }));
 
-      // Load groups for suggestions (only for new contacts)
-      const groups = await groupService.getAll();
       const groupsForExtraction = groups.map((g) => ({
         id: g.id,
         name: g.name,

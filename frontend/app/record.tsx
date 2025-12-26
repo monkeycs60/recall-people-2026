@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { Colors } from '@/constants/theme';
 import { RecordButton } from '@/components/RecordButton';
 import { useRecording } from '@/hooks/useRecording';
-import { useContactsStore } from '@/stores/contacts-store';
+import { useContactsQuery } from '@/hooks/useContactsQuery';
 import { useAppStore } from '@/stores/app-store';
 import Animated, {
   useAnimatedStyle,
@@ -38,7 +38,7 @@ export default function RecordScreen() {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { toggleRecording, isRecording, isProcessing, recordingDuration } = useRecording();
-  const { contacts, isInitialized, loadContacts } = useContactsStore();
+  const { contacts } = useContactsQuery();
   const preselectedContactId = useAppStore((state) => state.preselectedContactId);
   const [promptIndex, setPromptIndex] = useState(0);
 
@@ -53,12 +53,6 @@ export default function RecordScreen() {
     }
     return HELPER_PROMPTS;
   }, [preselectedContact]);
-
-  useEffect(() => {
-    if (!isInitialized) {
-      loadContacts();
-    }
-  }, [isInitialized, loadContacts]);
 
   useEffect(() => {
     if (!isRecording) {

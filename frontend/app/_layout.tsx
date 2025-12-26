@@ -152,7 +152,7 @@ export default function RootLayout() {
                 headerShadowVisible: false,
                 headerLeft: () => (
                   <Pressable
-                    onPress={() => router.replace('/(tabs)/contacts')}
+                    onPress={() => router.back()}
                     style={styles.backButton}
                   >
                     <ArrowLeft size={24} color={Colors.textPrimary} />

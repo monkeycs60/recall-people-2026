@@ -3,8 +3,10 @@ import { useState, useEffect } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { ExtractionResult, HotTopic, ResolvedTopic, Group, SuggestedGroup, ExtractedMemory } from '@/types';
-import { useContacts } from '@/hooks/useContacts';
+import { useQueryClient } from '@tanstack/react-query';
+import { ExtractionResult, HotTopic, ResolvedTopic, ExtractedMemory } from '@/types';
+import { useCreateContact, useUpdateContact } from '@/hooks/useContactsQuery';
+import { useGroupsQuery } from '@/hooks/useGroupsQuery';
 import { useNotes } from '@/hooks/useNotes';
 import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
@@ -13,6 +15,7 @@ import { contactService } from '@/services/contact.service';
 import { groupService } from '@/services/group.service';
 import { generateSummary } from '@/lib/api';
 import { useAppStore } from '@/stores/app-store';
+import { queryKeys } from '@/lib/query-keys';
 import { Archive, Edit3, Plus, X } from 'lucide-react-native';
 
 export default function ReviewScreen() {
@@ -20,7 +23,10 @@ export default function ReviewScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const insets = useSafeAreaInsets();
-  const { createContact, updateContact } = useContacts();
+  const queryClient = useQueryClient();
+  const createContactMutation = useCreateContact();
+  const updateContactMutation = useUpdateContact();
+  const { groups: allGroups } = useGroupsQuery();
   const { createNote } = useNotes();
   const { setRecordingState } = useAppStore();
 
@@ -73,7 +79,6 @@ export default function ReviewScreen() {
   }>>(extraction.suggestedGroups || []);
   const [isAddingGroup, setIsAddingGroup] = useState(false);
   const [newGroupSearch, setNewGroupSearch] = useState('');
-  const [allGroups, setAllGroups] = useState<Group[]>([]);
 
   // Load existing hot topics to display titles for resolved ones
   useEffect(() => {
@@ -84,17 +89,6 @@ export default function ReviewScreen() {
       }
     };
     loadHotTopics();
-  }, [contactId]);
-
-  // Load all groups for new contact
-  useEffect(() => {
-    const loadGroups = async () => {
-      if (contactId === 'new') {
-        const groups = await groupService.getAll();
-        setAllGroups(groups);
-      }
-    };
-    loadGroups();
   }, [contactId]);
 
   // Get resolved topics with their full data (combining existing topic info with resolutions)
@@ -210,7 +204,7 @@ export default function ReviewScreen() {
       let finalContactId = contactId;
 
       if (contactId === 'new') {
-        const newContact = await createContact({
+        const newContact = await createContactMutation.mutateAsync({
           firstName: extraction.contactIdentified.firstName,
           lastName: extraction.contactIdentified.lastName,
           nickname: extraction.contactIdentified.suggestedNickname,
@@ -333,9 +327,17 @@ export default function ReviewScreen() {
         }
       }
 
-      await updateContact(finalContactId, {
-        lastContactAt: new Date().toISOString(),
+      await updateContactMutation.mutateAsync({
+        id: finalContactId,
+        data: { lastContactAt: new Date().toISOString() },
       });
+
+      // Invalidate all relevant queries to refresh data
+      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(finalContactId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.facts.byContact(finalContactId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.hotTopics.byContact(finalContactId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.memories.byContact(finalContactId) });
 
       // Generate AI summary in background (non-blocking)
       const contactDetails = await contactService.getById(finalContactId);
