@@ -9,3 +9,4 @@
 -  spacing pour le 'se connecter', 's'inscrire' link dans login screen / signup screen (trop proche du bouton du dessus)
 -  revenue cat paywall
 -  analytics
+-  Section "Ice Breakers" (Brise-glace) générée par l'IA dans la fiche contact : donne des hooks (questions) pour commencer une conversation ; généré au même moment que le résumé IA (résumé IA régénéré à chaque nouvelle note)
