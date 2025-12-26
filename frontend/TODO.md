@@ -4,3 +4,4 @@
 - update fichiers de traduction pour les autres langues (hors en et fr)
 - améliorer le résumé (ton plus sobre, meilleure hiérarchisation, n'affiche pas le nombre de caractères)
 - pour la recherche IA, meilleure explication du concept + push IA
+- rajouter screens de l'app dans la guided tour + préparer visuels pour stores
