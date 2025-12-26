@@ -1,4 +1,27 @@
 {
+  "auth": {
+    "tagline": "Speak. Recall People remembers.",
+    "login": {
+      "title": "Sign in",
+      "email": "Email",
+      "emailPlaceholder": "your@email.com",
+      "password": "Password",
+      "passwordPlaceholder": "Your password",
+      "submit": "Sign in",
+      "loading": "Signing in...",
+      "or": "or",
+      "google": "Continue with Google",
+      "noAccount": "No account?",
+      "createAccount": "Create one"
+    },
+    "register": {
+      "title": "Create account",
+      "submit": "Sign up",
+      "loading": "Signing up...",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in"
+    }
+  },
   "errors": {
     "offline": "Offline mode",
     "offlineDescription": "Audio recording and some features require an internet connection",
@@ -269,27 +292,23 @@
     "getStarted": "Get Started",
     "language": {
       "title": "Choose your language",
-      "description": "This language will be used for the app interface and to transcribe your audio recordings with AI."
+      "description": "This language will be used for the interface and to transcribe your voice recordings."
     },
-    "welcome": {
-      "title": "Welcome to Recall",
-      "description": "Stay in touch with the people who matter. Record voice notes and let AI automatically extract important information."
+    "problem": {
+      "title": "\"What was her daughter's name again?\"",
+      "description": "We forget 80% of details after a conversation. Don't let awkward moments happen again."
     },
-    "record": {
-      "title": "Record your conversations",
-      "description": "Press the button to record a voice note after a meeting, call, or important discussion."
+    "action": {
+      "title": "Speak. Recall People remembers.",
+      "description": "Right after a coffee or a call, record a voice note. AI automatically extracts the gems from your conversation."
     },
-    "ai": {
-      "title": "AI extracts the info",
-      "description": "Our AI analyzes your recordings and automatically extracts facts, hot topics, and shared memories."
+    "value": {
+      "title": "Be the one who never forgets.",
+      "description": "Names of loved ones, passions, ongoing projects... Find everything at a glance before your next meeting."
     },
-    "contacts": {
-      "title": "Organize your contacts",
-      "description": "Easily find all information about your loved ones: their profile, your shared memories, and ongoing topics."
-    },
-    "search": {
-      "title": "Semantic search",
-      "description": "Ask questions in natural language to find any information about your contacts."
+    "trust": {
+      "title": "Your secret garden is safe.",
+      "description": "Your memories are personal. Recall People encrypts your data so you're the only one with access."
     },
     "redoTour": "Redo guided tour"
   }

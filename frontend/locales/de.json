@@ -1,4 +1,27 @@
 {
+  "auth": {
+    "tagline": "Sprich. Recall People erinnert sich.",
+    "login": {
+      "title": "Anmelden",
+      "email": "Email",
+      "emailPlaceholder": "deine@email.com",
+      "password": "Passwort",
+      "passwordPlaceholder": "Dein Passwort",
+      "submit": "Anmelden",
+      "loading": "Anmeldung...",
+      "or": "oder",
+      "google": "Mit Google fortfahren",
+      "noAccount": "Kein Konto?",
+      "createAccount": "Erstelle eins"
+    },
+    "register": {
+      "title": "Konto erstellen",
+      "submit": "Registrieren",
+      "loading": "Registrierung...",
+      "hasAccount": "Schon ein Konto?",
+      "signIn": "Anmelden"
+    }
+  },
   "errors": {
     "offline": "Offline-Modus",
     "offlineDescription": "Audioaufnahme und einige Funktionen erfordern eine Internetverbindung",
@@ -165,27 +188,23 @@
     "getStarted": "Loslegen",
     "language": {
       "title": "Wähle deine Sprache",
-      "description": "Diese Sprache wird für die App-Oberfläche und zur Transkription deiner Audioaufnahmen mit KI verwendet."
+      "description": "Diese Sprache wird für die Oberfläche und zur Transkription deiner Sprachaufnahmen verwendet."
     },
-    "welcome": {
-      "title": "Willkommen bei Recall",
-      "description": "Bleib in Kontakt mit den Menschen, die wichtig sind. Nimm Sprachnotizen auf und lass die KI automatisch wichtige Informationen extrahieren."
+    "problem": {
+      "title": "„Wie hieß noch mal ihre Tochter?"",
+      "description": "Wir vergessen 80% der Details nach einem Gespräch. Lass peinliche Momente nicht wieder passieren."
     },
-    "record": {
-      "title": "Nimm deine Gespräche auf",
-      "description": "Drücke den Button, um nach einem Treffen, Anruf oder einer wichtigen Diskussion eine Sprachnotiz aufzunehmen."
+    "action": {
+      "title": "Sprich. Recall People erinnert sich.",
+      "description": "Gleich nach einem Kaffee oder Anruf, nimm eine Sprachnotiz auf. Die KI extrahiert automatisch die Perlen des Gesprächs."
     },
-    "ai": {
-      "title": "Die KI extrahiert die Infos",
-      "description": "Unsere KI analysiert deine Aufnahmen und extrahiert automatisch Fakten, aktuelle Themen und gemeinsame Erinnerungen."
+    "value": {
+      "title": "Sei die Person, die nie vergisst.",
+      "description": "Namen der Liebsten, Leidenschaften, laufende Projekte... Finde alles auf einen Blick vor deinem nächsten Treffen."
     },
-    "contacts": {
-      "title": "Organisiere deine Kontakte",
-      "description": "Finde alle Informationen über deine Liebsten: ihr Profil, eure gemeinsamen Erinnerungen und laufende Themen."
-    },
-    "search": {
-      "title": "Semantische Suche",
-      "description": "Stelle Fragen in natürlicher Sprache, um jede Information über deine Kontakte zu finden."
+    "trust": {
+      "title": "Dein geheimer Garten ist sicher.",
+      "description": "Deine Erinnerungen sind persönlich. Recall People verschlüsselt deine Daten, sodass nur du Zugriff hast."
     },
     "redoTour": "Geführte Tour wiederholen"
   }
