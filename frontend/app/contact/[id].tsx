@@ -554,7 +554,7 @@ export default function ContactDetailScreen() {
 
         {/* AI Summary */}
         <Animated.View entering={FadeInDown.delay(100).duration(300)} style={styles.section}>
-          <AISummary summary={contact.aiSummary} isLoading={isWaitingForSummary} />
+          <AISummary summary={contact.aiSummary} isLoading={isWaitingForSummary} firstName={contact.firstName} />
         </Animated.View>
 
         {/* Hot Topics Section */}

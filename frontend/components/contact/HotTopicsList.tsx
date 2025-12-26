@@ -225,7 +225,8 @@ export function HotTopicsList({
     <View>
       {activeTopics.length === 0 && resolvedTopics.length === 0 && (
         <View style={styles.emptyState}>
-          <Text style={styles.emptyStateText}>{t('contact.hotTopic.emptyState')}</Text>
+          <Text style={styles.emptyStateTitle}>{t('contact.hotTopic.emptyState')}</Text>
+          <Text style={styles.emptyStateDescription}>{t('contact.hotTopic.emptyStateDescription')}</Text>
         </View>
       )}
 
@@ -252,16 +253,24 @@ export function HotTopicsList({
 const styles = StyleSheet.create({
   emptyState: {
     backgroundColor: `${Colors.surface}50`,
-    padding: 16,
+    padding: 20,
     borderRadius: 12,
     borderWidth: 1,
     borderStyle: 'dashed',
     borderColor: Colors.border,
   },
-  emptyStateText: {
+  emptyStateTitle: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: 6,
+  },
+  emptyStateDescription: {
     fontSize: 14,
     color: Colors.textMuted,
     textAlign: 'center',
+    lineHeight: 20,
   },
   editCard: {
     backgroundColor: Colors.surface,

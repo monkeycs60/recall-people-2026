@@ -63,25 +63,31 @@
   },
   "contacts": {
     "title": "Contacts",
-    "searchPlaceholder": "Rechercher un contact...",
-    "noContacts": "Aucun contact",
-    "addFirst": "Enregistrez une note vocale pour ajouter votre premier contact"
+    "searchPlaceholder": "Qui cherchez-vous ?",
+    "noContacts": "Votre cercle commence ici",
+    "noContactsDescription": "Ajoutez une première personne qui compte pour vous et ne perdez plus jamais le fil de ses récits."
   },
   "search": {
     "title": "Recherche",
-    "placeholder": "Rechercher dans vos contacts...",
+    "placeholder": "Posez une question à votre mémoire...",
     "noResults": "Aucun résultat",
     "searching": "Recherche en cours...",
-    "emptyStateTitle": "Posez une question en langage naturel pour trouver des informations sur vos contacts",
-    "examples": "Exemples",
-    "example1": "Qui fait de la musique ?",
-    "example2": "Contacts qui aiment le sport",
-    "example3": "Qui travaille dans la tech ?"
+    "emptyStateTitle": "Posez une question à votre mémoire",
+    "examples": "Par exemple",
+    "example1": "Qui travaille dans la tech à Bordeaux ?",
+    "example2": "Qui a des enfants en bas âge ?",
+    "example3": "À qui devrais-je envoyer un message aujourd'hui ?"
   },
   "contact": {
     "title": "Contact",
     "lastContact": "Dernier contact",
-    "addNote": "Ajouter une note",
+    "addNote": "Comment s'est passé votre moment ?",
+    "aiSummary": {
+      "header": "L'essentiel sur {{firstName}}",
+      "contextHeader": "Voici ce que tu devrais avoir en tête avant de revoir {{firstName}} :",
+      "loading": "Préparation de l'essentiel...",
+      "empty": "Ajoutez des notes pour découvrir l'essentiel sur {{firstName}}"
+    },
     "editGroups": "Modifier les groupes",
     "addGroup": "Ajouter un groupe",
     "addGroupPlaceholder": "Ajouter un groupe...",
@@ -97,7 +103,8 @@
     "hotTopic": {
       "addPlaceholder": "Nouveau sujet...",
       "contextPlaceholder": "Contexte (optionnel)...",
-      "emptyState": "Aucune actualité en cours",
+      "emptyState": "Pas encore de nouvelles aventures",
+      "emptyStateDescription": "Enregistrez une note après votre prochain appel pour voir la magie opérer.",
       "deleteTitle": "Supprimer cette actualité",
       "deleteConfirm": "Supprimer \"{{title}}\" ?",
       "resolutionLabel": "Résolution (optionnel) :",
