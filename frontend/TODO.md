@@ -1,8 +1,11 @@
-- implémentation google calendar par événements futurs dans hot topics
-- les infos des record ne sont pas traduits dans la langue choisie si différent de fr
-- landing page astro pour l'app
-- update fichiers de traduction pour les autres langues (hors en et fr)
-- améliorer le résumé (ton plus sobre, meilleure hiérarchisation, n'affiche pas le nombre de caractères)
-- pour la recherche IA, meilleure explication du concept + push IA
-- rajouter screens de l'app dans la guided tour + préparer visuels pour stores
-- cache pour la navigation fiche de contact ==> go back to contact list
+-  implémentation google calendar par événements futurs dans hot topics
+-  les infos des record ne sont pas traduits dans la langue choisie si différent de fr
+-  landing page astro pour l'app
+-  update fichiers de traduction pour les autres langues (hors en et fr)
+-  améliorer le résumé (ton plus sobre, meilleure hiérarchisation, n'affiche pas le nombre de caractères)
+-  pour la recherche IA, meilleure explication du concept + push IA
+-  rajouter screens de l'app dans la guided tour + préparer visuels pour stores
+-  cache pour la navigation fiche de contact ==> go back to contact list
+-  spacing pour le 'se connecter', 's'inscrire' link dans login screen / signup screen (trop proche du bouton du dessus)
+-  revenue cat paywall
+-  analytics
