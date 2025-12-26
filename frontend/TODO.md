@@ -29,8 +29,14 @@
 
 ### Features
 - [ ] Quick actions fiche contact : boutons appeler / SMS / WhatsApp
-- [ ] Rappels de contact intelligents : "Ça fait X semaines que tu n'as pas parlé à Y"
-- [ ] Anniversaires/events : notifications pour dates importantes
+- [ ] **Système de notifications intelligentes** (voir NOTIFICATION_SYSTEM_SPEC.md)
+  - [ ] Contact Reminders : rappels personnalisés selon type de relation
+  - [ ] Anniversaires : notifications J-7, J-1, Jour J
+  - [ ] Google Calendar sync : rdv à venir avec contexte IA
+  - [ ] Hot Topics en attente : rappels sujets non résolus
+  - [ ] Ice Breakers proactifs : suggestions IA de conversation
+  - [ ] Écran Settings > Notifications (fréquences, DND)
+  - [ ] Paramètres custom par contact
 - [ ] Recherche IA : placeholders inspirants + meilleure explication du concept
 
 ### Infra
@@ -60,6 +66,9 @@
 
 - [ ] Widget iOS/Android quick add
 - [ ] Photos contacts et memories
-- [ ] Google Calendar : événements futurs dans hot topics
+- [x] ~~Google Calendar : événements futurs dans hot topics~~ (intégré dans système de notifications)
 - [ ] Voice search dans recherche IA
 - [ ] Demo mode / fake data pour nouveaux users
+- [ ] Analytics notifications (open rate, action rate, conversion rate)
+- [ ] Background tasks (expo-background-fetch) pour refresh auto des reminders
+- [ ] Proposition post-meeting d'ajouter une note

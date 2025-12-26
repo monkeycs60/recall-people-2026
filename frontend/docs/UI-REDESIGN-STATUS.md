@@ -113,12 +113,13 @@ Ces composants utilisent encore les anciens styles (classNames NativeWind avec c
 6. [ ] Refondre l'écran Register (`/(auth)/register.tsx`)
 7. [ ] Refondre l'écran Search (`/(tabs)/search.tsx` ou `index.tsx`)
 8. [ ] Refondre l'écran Profile (`/(tabs)/profile.tsx`)
+9. [ ] **Nouveau** : Écran Settings > Notifications (système de notifications intelligent)
 
 ### Priorité Basse (polish)
-9. [ ] Vérifier toutes les traductions i18n (certains textes sont hardcodés en français)
-10. [ ] Ajouter animations de transition entre écrans
-11. [ ] Tester sur iOS et Android
-12. [ ] Vérifier le thème sur les modals/bottom sheets
+10. [ ] Vérifier toutes les traductions i18n (certains textes sont hardcodés en français)
+11. [ ] Ajouter animations de transition entre écrans
+12. [ ] Tester sur iOS et Android
+13. [ ] Vérifier le thème sur les modals/bottom sheets
 
 ---
 
@@ -158,4 +159,45 @@ L'app attend que les fonts soient chargées avant de s'afficher.
 1. Lire ce fichier pour le contexte
 2. Continuer avec les composants enfants (ProfileCard, etc.)
 3. Puis les écrans restants (Register, Search, Profile)
-4. Tester l'ensemble sur émulateur/device
+4. Implémenter le système de notifications (voir `NOTIFICATION_SYSTEM_SPEC.md`)
+5. Tester l'ensemble sur émulateur/device
+
+---
+
+## Nouveautés - Décembre 2026
+
+### Système de Notifications Intelligentes
+
+Un nouveau système complet de notifications a été conçu (voir `/NOTIFICATION_SYSTEM_SPEC.md`). Ce système transforme l'app en coach social proactif avec :
+
+**Types de notifications :**
+- 🔔 **Contact Reminders** : rappels personnalisés selon type de relation (famille 14j, amis 21j, pro 30j)
+- 🎂 **Anniversaires** : notifications J-7, J-1, Jour J avec gift ideas
+- 📅 **Google Calendar** : sync rdv futurs + notifications 2h avant avec résumé IA
+- 🔥 **Hot Topics** : rappels pour sujets en attente de résolution
+- 💡 **Ice Breakers** : suggestions IA de conversation hebdomadaires
+
+**Architecture technique :**
+- Nouvelles tables SQLite : `notification_settings`, `notification_logs`, `calendar_events`
+- Services : `notification.service.ts`, `calendar.service.ts`, `reminder-scheduler.service.ts`
+- Background tasks avec `expo-background-fetch`
+- Google Calendar OAuth avec `expo-auth-session`
+
+**UX :**
+- Écran Settings > Notifications avec fréquences configurables
+- Paramètres custom par contact dans la fiche
+- Do Not Disturb (plage horaire)
+- Analytics (open rate, action rate, conversion rate)
+
+**Copywriting :**
+Messages chaleureux et actionnables :
+- _"Ça fait 3 semaines que tu n'as pas parlé à Marie. Et si tu prenais 5 minutes pour prendre des nouvelles ?"_
+- _"Rdv avec Gérard dans 2h. Voici ce que tu devrais avoir en tête..."_
+- _"L'anniversaire de Paul est dans 7 jours. Tu avais noté qu'il aime les vinyles de jazz !"_
+
+**Priorisation :**
+- Phase 1 (MVP) : Contact Reminders + Settings basiques
+- Phase 2 : Personnalisation + fréquences custom
+- Phase 3 : Google Calendar sync
+- Phase 4 : Anniversaires + Hot Topics
+- Phase 5 : Ice Breakers IA + Analytics
