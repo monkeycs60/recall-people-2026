@@ -1,6 +1,5 @@
 import { View, StyleSheet } from 'react-native';
 import Svg, { Rect, Circle } from 'react-native-svg';
-import { Colors } from '@/constants/theme';
 
 type ContactAvatarProps = {
   firstName: string;
@@ -14,41 +13,53 @@ const SIZE_MAP = {
   large: 100,
 } as const;
 
-// Duotone color pairs: [primary, secondary]
+// Duotone color pairs: [primary, secondary] - more variety
 const DUOTONE_PALETTES = [
   ['#C67C4E', '#F5DFC9'], // Terracotta warm
   ['#A65D2E', '#E8D5C4'], // Deep terracotta
   ['#D4926A', '#FBE8D8'], // Soft peach
-  ['#6B7D8A', '#E8ECEF'], // Blue grey (secondary)
+  ['#6B7D8A', '#E8ECEF'], // Blue grey
   ['#B86B3F', '#EDD5C0'], // Amber brown
+  ['#D98E5C', '#FAE5D3'], // Light terracotta
+  ['#8B6F5C', '#E5DCD5'], // Warm taupe
+  ['#7A8B8C', '#E0E5E6'], // Cool grey
 ];
 
+// Better hash function (djb2)
 function hashCode(str: string): number {
-  let hash = 0;
+  let hash = 5381;
   for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash;
+    hash = ((hash << 5) + hash) ^ str.charCodeAt(i);
   }
   return Math.abs(hash);
 }
 
-function getUnit(hash: number, range: number, index: number): number {
-  return ((hash >> (index * 4)) & 15) % range;
+// Secondary hash for more variation
+function hashCode2(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 6) + (hash << 16) - hash);
+  }
+  return Math.abs(hash);
 }
 
 export function ContactAvatar({ firstName, lastName, size = 'medium' }: ContactAvatarProps) {
   const displayName = lastName ? `${firstName} ${lastName}` : firstName;
   const pixelSize = SIZE_MAP[size];
-  const hash = hashCode(displayName);
 
-  const paletteIndex = getUnit(hash, DUOTONE_PALETTES.length, 0);
+  const hash1 = hashCode(displayName);
+  const hash2 = hashCode2(displayName);
+
+  // Use different hash bits for each property
+  const paletteIndex = hash1 % DUOTONE_PALETTES.length;
+  const patternType = hash2 % 6;
+  const offsetX = ((hash1 >> 8) % 40 - 20) / 100;
+  const offsetY = ((hash2 >> 8) % 40 - 20) / 100;
+  const sizeVar = 0.55 + ((hash1 >> 16) % 20) / 100;
+
   const palette = DUOTONE_PALETTES[paletteIndex];
-
-  // Determine shape pattern based on hash
-  const patternType = getUnit(hash, 4, 1);
-  const offsetX = (getUnit(hash, 40, 2) - 20) / 100;
-  const offsetY = (getUnit(hash, 40, 3) - 20) / 100;
+  const center = pixelSize / 2;
+  const radius = pixelSize / 2;
 
   const containerStyle = [
     styles.container,
@@ -61,17 +72,14 @@ export function ContactAvatar({ firstName, lastName, size = 'medium' }: ContactA
   ];
 
   const renderPattern = () => {
-    const center = pixelSize / 2;
-    const radius = pixelSize / 2;
-
     switch (patternType) {
       case 0:
         // Large circle offset
         return (
           <Circle
-            cx={center + radius * offsetX}
-            cy={center + radius * offsetY}
-            r={radius * 0.65}
+            cx={center + radius * offsetX * 1.5}
+            cy={center + radius * offsetY * 1.5}
+            r={radius * sizeVar}
             fill={palette[1]}
           />
         );
@@ -80,15 +88,15 @@ export function ContactAvatar({ firstName, lastName, size = 'medium' }: ContactA
         return (
           <>
             <Circle
-              cx={center - radius * 0.2}
-              cy={center}
-              r={radius * 0.5}
+              cx={center - radius * 0.25 + offsetX * radius}
+              cy={center + offsetY * radius}
+              r={radius * 0.45}
               fill={palette[1]}
             />
             <Circle
-              cx={center + radius * 0.25}
+              cx={center + radius * 0.2}
               cy={center + radius * 0.15}
-              r={radius * 0.4}
+              r={radius * 0.35}
               fill={palette[1]}
               opacity={0.7}
             />
@@ -99,41 +107,68 @@ export function ContactAvatar({ firstName, lastName, size = 'medium' }: ContactA
         return (
           <>
             <Rect
-              x={center - radius * 0.4}
-              y={center - radius * 0.5}
-              width={radius * 0.9}
-              height={radius * 1.1}
+              x={center - radius * 0.35 + offsetX * radius}
+              y={center - radius * 0.45}
+              width={radius * 0.8}
+              height={radius * 1.0}
               fill={palette[1]}
               rx={4}
             />
             <Circle
-              cx={center + radius * 0.3}
-              cy={center - radius * 0.2}
-              r={radius * 0.35}
+              cx={center + radius * 0.25}
+              cy={center - radius * 0.15}
+              r={radius * 0.3}
               fill={palette[0]}
-              opacity={0.5}
+              opacity={0.4}
             />
           </>
         );
       case 3:
-      default:
-        // Split diagonal
+        // Three small circles
         return (
           <>
             <Circle
-              cx={center - radius * 0.15}
-              cy={center - radius * 0.15}
-              r={radius * 0.55}
+              cx={center - radius * 0.2}
+              cy={center - radius * 0.2}
+              r={radius * 0.35}
               fill={palette[1]}
             />
             <Circle
-              cx={center + radius * 0.2}
-              cy={center + radius * 0.2}
-              r={radius * 0.4}
+              cx={center + radius * 0.25}
+              cy={center}
+              r={radius * 0.3}
+              fill={palette[1]}
+              opacity={0.8}
+            />
+            <Circle
+              cx={center}
+              cy={center + radius * 0.3}
+              r={radius * 0.25}
               fill={palette[1]}
               opacity={0.6}
             />
           </>
+        );
+      case 4:
+        // Large offset circle bottom-right
+        return (
+          <Circle
+            cx={center + radius * 0.2 + offsetX * radius}
+            cy={center + radius * 0.2 + offsetY * radius}
+            r={radius * sizeVar * 1.1}
+            fill={palette[1]}
+          />
+        );
+      case 5:
+      default:
+        // Half moon style
+        return (
+          <Circle
+            cx={center - radius * 0.3 + offsetX * radius}
+            cy={center - radius * 0.1 + offsetY * radius}
+            r={radius * 0.6}
+            fill={palette[1]}
+          />
         );
     }
   };
@@ -141,14 +176,12 @@ export function ContactAvatar({ firstName, lastName, size = 'medium' }: ContactA
   return (
     <View style={containerStyle}>
       <Svg width={pixelSize} height={pixelSize} viewBox={`0 0 ${pixelSize} ${pixelSize}`}>
-        {/* Background circle */}
         <Circle
-          cx={pixelSize / 2}
-          cy={pixelSize / 2}
-          r={pixelSize / 2}
+          cx={center}
+          cy={center}
+          r={radius}
           fill={palette[0]}
         />
-        {/* Pattern overlay */}
         {renderPattern()}
       </Svg>
     </View>
