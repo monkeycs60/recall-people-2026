@@ -2,36 +2,71 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { getToken } from './auth';
 import { ExtractionResult } from '@/types';
 import { useSettingsStore } from '@/stores/settings-store';
+import { ApiError, NetworkError, showApiError } from './error-handler';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 const getCurrentLanguage = () => useSettingsStore.getState().language;
 
 type ApiOptions = {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   body?: unknown;
   headers?: Record<string, string>;
+  showErrorToast?: boolean;
 };
 
+function isNetworkError(error: unknown): boolean {
+  if (error instanceof TypeError && error.message === 'Network request failed') {
+    return true;
+  }
+  if (error instanceof Error && error.message.includes('network')) {
+    return true;
+  }
+  return false;
+}
+
 const apiCall = async <T>(endpoint: string, options: ApiOptions = {}): Promise<T> => {
+  const { showErrorToast = true, ...fetchOptions } = options;
   const token = await getToken();
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    method: options.method || 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
-      ...options.headers,
-    },
-    body: options.body ? JSON.stringify(options.body) : undefined,
-  });
+  try {
+    const response = await fetch(`${API_URL}${endpoint}`, {
+      method: fetchOptions.method || 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+        ...fetchOptions.headers,
+      },
+      body: fetchOptions.body ? JSON.stringify(fetchOptions.body) : undefined,
+    });
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-    throw new Error(error.error || `API Error: ${response.status}`);
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+      const apiError = new ApiError(
+        errorData.error || `API Error: ${response.status}`,
+        response.status,
+        errorData.error || errorData.message
+      );
+      if (showErrorToast) {
+        showApiError(apiError);
+      }
+      throw apiError;
+    }
+
+    return response.json();
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    if (isNetworkError(error)) {
+      const networkError = new NetworkError();
+      if (showErrorToast) {
+        showApiError(networkError);
+      }
+      throw networkError;
+    }
+    throw error;
   }
-
-  return response.json();
 };
 
 export const transcribeAudio = async (
@@ -57,19 +92,38 @@ export const transcribeAudio = async (
   } as unknown as Blob);
   formData.append('language', getCurrentLanguage());
 
-  const response = await fetch(`${API_URL}/api/transcribe`, {
-    method: 'POST',
-    headers: {
-      ...(token && { Authorization: `Bearer ${token}` }),
-    },
-    body: formData,
-  });
+  try {
+    const response = await fetch(`${API_URL}/api/transcribe`, {
+      method: 'POST',
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      body: formData,
+    });
 
-  if (!response.ok) {
-    throw new Error('Transcription failed');
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: 'Transcription failed' }));
+      const apiError = new ApiError(
+        errorData.error || 'Transcription failed',
+        response.status,
+        errorData.error || errorData.message
+      );
+      showApiError(apiError);
+      throw apiError;
+    }
+
+    return response.json();
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    if (isNetworkError(error)) {
+      const networkError = new NetworkError();
+      showApiError(networkError);
+      throw networkError;
+    }
+    throw error;
   }
-
-  return response.json();
 };
 
 export const extractInfo = async (data: {

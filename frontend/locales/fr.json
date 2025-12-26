@@ -1,4 +1,18 @@
 {
+  "errors": {
+    "offline": "Mode hors-ligne",
+    "offlineDescription": "L'enregistrement audio et certaines fonctionnalités nécessitent une connexion internet",
+    "networkError": "Erreur de connexion",
+    "checkConnection": "Vérifie ta connexion internet et réessaie",
+    "unauthorized": "Session expirée",
+    "unauthorizedDescription": "Reconnecte-toi pour continuer",
+    "notFound": "Ressource introuvable",
+    "tooManyRequests": "Trop de requêtes",
+    "tooManyRequestsDescription": "Attends un moment avant de réessayer",
+    "serverError": "Erreur serveur",
+    "serverErrorDescription": "Un problème est survenu, réessaie plus tard",
+    "generic": "Une erreur est survenue"
+  },
   "common": {
     "loading": "Chargement...",
     "save": "Enregistrer",

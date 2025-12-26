@@ -1,4 +1,18 @@
 {
+  "errors": {
+    "offline": "Modo sin conexión",
+    "offlineDescription": "La grabación de audio y algunas funciones requieren conexión a internet",
+    "networkError": "Error de conexión",
+    "checkConnection": "Verifica tu conexión a internet e intenta de nuevo",
+    "unauthorized": "Sesión expirada",
+    "unauthorizedDescription": "Inicia sesión de nuevo para continuar",
+    "notFound": "Recurso no encontrado",
+    "tooManyRequests": "Demasiadas solicitudes",
+    "tooManyRequestsDescription": "Espera un momento antes de intentar de nuevo",
+    "serverError": "Error del servidor",
+    "serverErrorDescription": "Algo salió mal, intenta más tarde",
+    "generic": "Ocurrió un error"
+  },
   "common": {
     "loading": "Cargando...",
     "save": "Guardar",

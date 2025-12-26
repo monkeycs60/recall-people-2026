@@ -1,4 +1,18 @@
 {
+  "errors": {
+    "offline": "Modalità offline",
+    "offlineDescription": "La registrazione audio e alcune funzionalità richiedono una connessione internet",
+    "networkError": "Errore di connessione",
+    "checkConnection": "Controlla la tua connessione internet e riprova",
+    "unauthorized": "Sessione scaduta",
+    "unauthorizedDescription": "Accedi nuovamente per continuare",
+    "notFound": "Risorsa non trovata",
+    "tooManyRequests": "Troppe richieste",
+    "tooManyRequestsDescription": "Attendi un momento prima di riprovare",
+    "serverError": "Errore del server",
+    "serverErrorDescription": "Qualcosa è andato storto, riprova più tardi",
+    "generic": "Si è verificato un errore"
+  },
   "common": {
     "loading": "Caricamento...",
     "save": "Salva",
