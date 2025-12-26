@@ -1,4 +1,4 @@
-import { View, Text, Pressable, Dimensions, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, Pressable, Dimensions, ScrollView, StyleSheet, Image } from 'react-native';
 import { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -9,11 +9,18 @@ import Animated, {
   interpolate,
   Extrapolation,
 } from 'react-native-reanimated';
-import { Mic, Brain, Users, Search, Globe, Check } from 'lucide-react-native';
+import { Globe, Check } from 'lucide-react-native';
 import { useSettingsStore } from '@/stores/settings-store';
 import { changeLanguage } from '@/lib/i18n';
 import { Language, SUPPORTED_LANGUAGES, LANGUAGE_NAMES, LANGUAGE_FLAGS } from '@/types';
 import { Colors, Spacing, BorderRadius } from '@/constants/theme';
+
+const ILLUSTRATIONS = {
+  problem: require('@/assets/ai-assets/guy-wondering-questions.png'),
+  action: require('@/assets/ai-assets/guy-talking-to-his-phone.png'),
+  value: require('@/assets/ai-assets/guy-with-cards-and-labels-background.png'),
+  trust: require('@/assets/ai-assets/guy-with-privacy-label.png'),
+};
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -37,12 +44,11 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
   };
 
   const slides = [
-    { id: 0, icon: Globe, key: 'language' },
-    { id: 1, icon: Check, key: 'welcome' },
-    { id: 2, icon: Mic, key: 'record' },
-    { id: 3, icon: Brain, key: 'ai' },
-    { id: 4, icon: Users, key: 'contacts' },
-    { id: 5, icon: Search, key: 'search' },
+    { id: 0, key: 'language', type: 'language' as const },
+    { id: 1, key: 'problem', type: 'illustration' as const, image: ILLUSTRATIONS.problem },
+    { id: 2, key: 'action', type: 'illustration' as const, image: ILLUSTRATIONS.action },
+    { id: 3, key: 'value', type: 'illustration' as const, image: ILLUSTRATIONS.value },
+    { id: 4, key: 'trust', type: 'illustration' as const, image: ILLUSTRATIONS.trust },
   ];
 
   const handleNext = () => {
@@ -103,18 +109,20 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
   );
 
   const renderSlide = (slide: (typeof slides)[0]) => {
-    if (slide.key === 'language') {
+    if (slide.type === 'language') {
       return renderLanguageSlide();
     }
 
-    const Icon = slide.icon;
-
     return (
       <View style={[styles.slideContainer, { width: SCREEN_WIDTH }]}>
-        <View style={styles.slideContent}>
-          <View style={styles.iconContainer}>
-            <Icon size={40} color={Colors.primary} />
-          </View>
+        <View style={styles.illustrationContainer}>
+          <Image
+            source={slide.image}
+            style={styles.illustration}
+            resizeMode="contain"
+          />
+        </View>
+        <View style={styles.textContent}>
           <Text style={styles.title}>{t(`onboarding.${slide.key}.title`)}</Text>
           <Text style={styles.description}>{t(`onboarding.${slide.key}.description`)}</Text>
         </View>
@@ -225,6 +233,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: Spacing.xl,
   },
+  illustrationContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: Spacing.xl,
+  },
+  illustration: {
+    width: SCREEN_WIDTH * 0.75,
+    height: SCREEN_WIDTH * 0.75,
+    maxHeight: 300,
+  },
+  textContent: {
+    paddingBottom: Spacing.xl,
+    alignItems: 'center',
+  },
   iconContainer: {
     backgroundColor: Colors.primaryLight,
     padding: Spacing.lg,
@@ -233,16 +256,18 @@ const styles = StyleSheet.create({
   },
   title: {
     color: Colors.textPrimary,
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: '700',
     textAlign: 'center',
     marginBottom: Spacing.md,
+    paddingHorizontal: Spacing.md,
   },
   description: {
     color: Colors.textSecondary,
     fontSize: 16,
     textAlign: 'center',
     lineHeight: 24,
+    paddingHorizontal: Spacing.sm,
   },
   languageList: {
     backgroundColor: Colors.surface,

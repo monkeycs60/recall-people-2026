@@ -1,4 +1,27 @@
 {
+  "auth": {
+    "tagline": "Parlez. Recall People se souvient.",
+    "login": {
+      "title": "Connexion",
+      "email": "Email",
+      "emailPlaceholder": "votre@email.com",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "Votre mot de passe",
+      "submit": "Se connecter",
+      "loading": "Connexion...",
+      "or": "ou",
+      "google": "Continuer avec Google",
+      "noAccount": "Pas de compte ?",
+      "createAccount": "Créer un compte"
+    },
+    "register": {
+      "title": "Créer un compte",
+      "submit": "S'inscrire",
+      "loading": "Inscription...",
+      "hasAccount": "Déjà un compte ?",
+      "signIn": "Se connecter"
+    }
+  },
   "errors": {
     "offline": "Mode hors-ligne",
     "offlineDescription": "L'enregistrement audio et certaines fonctionnalités nécessitent une connexion internet",
@@ -269,27 +292,23 @@
     "getStarted": "Commencer",
     "language": {
       "title": "Choisissez votre langue",
-      "description": "Cette langue sera utilisée pour l'interface de l'app et pour transcrire vos enregistrements audio avec l'IA."
+      "description": "Cette langue sera utilisée pour l'interface et pour transcrire vos enregistrements vocaux."
     },
-    "welcome": {
-      "title": "Bienvenue sur Recall",
-      "description": "Gardez contact avec les gens qui comptent. Enregistrez des notes vocales et laissez l'IA extraire automatiquement les infos importantes."
+    "problem": {
+      "title": "« Comment s'appelait sa fille, déjà ? »",
+      "description": "On oublie 80% des détails après une discussion. Ne laissez plus la gêne s'installer."
     },
-    "record": {
-      "title": "Enregistrez vos conversations",
-      "description": "Appuyez sur le bouton pour enregistrer une note vocale après une rencontre, un appel ou une discussion importante."
+    "action": {
+      "title": "Parlez. Recall People se souvient.",
+      "description": "Juste après un café ou un appel, enregistrez un vocal. L'IA extrait automatiquement les pépites de la conversation."
     },
-    "ai": {
-      "title": "L'IA extrait les infos",
-      "description": "Notre IA analyse vos enregistrements et extrait automatiquement les faits, sujets d'actualité et souvenirs partagés."
+    "value": {
+      "title": "Soyez la personne qui n'oublie jamais.",
+      "description": "Prénoms des proches, passions, projets en cours... Retrouvez tout en un coup d'œil avant votre prochaine rencontre."
     },
-    "contacts": {
-      "title": "Organisez vos contacts",
-      "description": "Retrouvez facilement toutes les informations sur vos proches : leur profil, vos souvenirs ensemble, et les sujets en cours."
-    },
-    "search": {
-      "title": "Recherche sémantique",
-      "description": "Posez des questions en langage naturel pour retrouver n'importe quelle information sur vos contacts."
+    "trust": {
+      "title": "Votre jardin secret est bien gardé.",
+      "description": "Vos souvenirs sont personnels. Recall People chiffre vos données pour que vous soyez le seul à y avoir accès."
     },
     "redoTour": "Refaire le tour guidé"
   }
