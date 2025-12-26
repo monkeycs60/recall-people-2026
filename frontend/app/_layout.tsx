@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import '../global.css';
 import '@/lib/i18n';
 import { initDatabase } from '@/lib/db';
-import { Text, View, Pressable, ActivityIndicator } from 'react-native';
+import { Text, View, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
 import { ArrowLeft } from 'lucide-react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useSettingsStore } from '@/stores/settings-store';
@@ -19,6 +19,9 @@ import {
   PlayfairDisplay_700Bold,
 } from '@expo-google-fonts/playfair-display';
 import { Colors } from '@/constants/theme';
+import Toast from 'react-native-toast-message';
+import { toastConfig } from '@/components/ui/ToastConfig';
+import { OfflineBanner } from '@/components/ui/OfflineBanner';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -73,23 +76,24 @@ export default function RootLayout() {
 
   if (dbError) {
     return (
-      <View className="flex-1 items-center justify-center px-5 bg-background">
-        <Text className="text-error mb-2">Database Error:</Text>
-        <Text className="text-error">{dbError}</Text>
+      <View style={styles.centerContainer}>
+        <Text style={styles.errorTitle}>Database Error:</Text>
+        <Text style={styles.errorText}>{dbError}</Text>
       </View>
     );
   }
 
   if (!dbReady || !fontsLoaded) {
     return (
-      <View className="flex-1 items-center justify-center bg-background">
+      <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color={Colors.primary} />
       </View>
     );
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: Colors.background }}>
+    <GestureHandlerRootView style={styles.rootContainer}>
+      <OfflineBanner />
       <BottomSheetModalProvider>
         <QueryClientProvider client={queryClient}>
           <Stack
@@ -114,7 +118,7 @@ export default function RootLayout() {
                       useAppStore.getState().resetRecording();
                       router.back();
                     }}
-                    className="p-2 -ml-2"
+                    style={styles.backButton}
                   >
                     <ArrowLeft size={24} color={Colors.textPrimary} />
                   </Pressable>
@@ -132,7 +136,7 @@ export default function RootLayout() {
                       useAppStore.getState().resetRecording();
                       router.back();
                     }}
-                    className="p-2 -ml-2"
+                    style={styles.backButton}
                   >
                     <ArrowLeft size={24} color={Colors.textPrimary} />
                   </Pressable>
@@ -149,7 +153,7 @@ export default function RootLayout() {
                 headerLeft: () => (
                   <Pressable
                     onPress={() => router.replace('/(tabs)/contacts')}
-                    className="p-2 -ml-2"
+                    style={styles.backButton}
                   >
                     <ArrowLeft size={24} color={Colors.textPrimary} />
                   </Pressable>
@@ -167,6 +171,33 @@ export default function RootLayout() {
           </Stack>
         </QueryClientProvider>
       </BottomSheetModalProvider>
+      <Toast config={toastConfig} />
     </GestureHandlerRootView>
   );
 }
+
+const styles = StyleSheet.create({
+  rootContainer: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  centerContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    backgroundColor: Colors.background,
+  },
+  errorTitle: {
+    color: Colors.error,
+    marginBottom: 8,
+    fontWeight: '600',
+  },
+  errorText: {
+    color: Colors.error,
+  },
+  backButton: {
+    padding: 8,
+    marginLeft: -8,
+  },
+});

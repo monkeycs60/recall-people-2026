@@ -1,4 +1,18 @@
 {
+  "errors": {
+    "offline": "Offline-Modus",
+    "offlineDescription": "Audioaufnahme und einige Funktionen erfordern eine Internetverbindung",
+    "networkError": "Verbindungsfehler",
+    "checkConnection": "Überprüfe deine Internetverbindung und versuche es erneut",
+    "unauthorized": "Sitzung abgelaufen",
+    "unauthorizedDescription": "Melde dich erneut an, um fortzufahren",
+    "notFound": "Ressource nicht gefunden",
+    "tooManyRequests": "Zu viele Anfragen",
+    "tooManyRequestsDescription": "Warte einen Moment, bevor du es erneut versuchst",
+    "serverError": "Serverfehler",
+    "serverErrorDescription": "Etwas ist schiefgelaufen, versuche es später erneut",
+    "generic": "Ein Fehler ist aufgetreten"
+  },
   "common": {
     "loading": "Laden...",
     "save": "Speichern",

@@ -1,5 +1,6 @@
 - implémentation google calendar par événements futurs dans hot topics
 - les infos des record ne sont pas traduits dans la langue choisie si différent de fr
-- guided tour de l'app
 - landing page astro pour l'app
 - update fichiers de traduction pour les autres langues (hors en et fr)
+- améliorer le résumé (ton plus sobre, meilleure hiérarchisation, n'affiche pas le nombre de caractères)
+- pour la recherche IA, meilleure explication du concept + push IA
