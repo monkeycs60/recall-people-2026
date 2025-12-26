@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing } from '@/constants/theme';
-import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
 const LOGIN_ILLUSTRATION = require('@/assets/ai-assets/two-guys-chatting-coffee.png');
 
@@ -40,31 +40,25 @@ export default function LoginScreen() {
         style={styles.keyboardView}
       >
         <ScrollView
-          contentContainerStyle={{ flexGrow: 1 }}
+          contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          <Animated.View
-            entering={FadeInUp.duration(600)}
-            style={[styles.heroSection, { paddingTop: insets.top + 20 }]}
-          >
-            <Image
-              source={LOGIN_ILLUSTRATION}
-              style={styles.heroIllustration}
-              resizeMode="contain"
-            />
-            <Text style={styles.brandTitle}>
-              Recall People
-            </Text>
-            <Text style={styles.tagline}>
-              {t('auth.tagline')}
-            </Text>
+          <Animated.View entering={FadeIn.duration(600)} style={styles.headerSection}>
+            <View style={styles.illustrationContainer}>
+              <View style={styles.illustrationBackground} />
+              <Image
+                source={LOGIN_ILLUSTRATION}
+                style={styles.illustration}
+                resizeMode="contain"
+              />
+            </View>
+            <Text style={styles.brandTitle}>Recall People</Text>
+            <Text style={styles.tagline}>{t('auth.tagline')}</Text>
           </Animated.View>
 
-          <Animated.View
-            entering={FadeInDown.duration(600).delay(200)}
-            style={[styles.formSection, { paddingBottom: insets.bottom + 24 }]}
-          >
-            <Text style={styles.sectionTitle}>{t('auth.login.title')}</Text>
+          <Animated.View entering={FadeInDown.duration(500).delay(200)} style={styles.formCard}>
+            <Text style={styles.formTitle}>{t('auth.login.title')}</Text>
 
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>{t('auth.login.email')}</Text>
@@ -80,7 +74,7 @@ export default function LoginScreen() {
               />
             </View>
 
-            <View style={styles.inputGroupSpaced}>
+            <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>{t('auth.login.password')}</Text>
               <TextInput
                 style={styles.input}
@@ -118,21 +112,19 @@ export default function LoginScreen() {
               onPress={handleGoogleLogin}
               disabled={!isGoogleReady || isLoading}
             >
-              <Ionicons name="logo-google" size={20} color="#DB4437" style={{ marginRight: 12 }} />
-              <Text style={styles.googleButtonText}>
-                {t('auth.login.google')}
+              <Ionicons name="logo-google" size={20} color="#DB4437" style={styles.googleIcon} />
+              <Text style={styles.googleButtonText}>{t('auth.login.google')}</Text>
+            </Pressable>
+          </Animated.View>
+
+          <Link href="/(auth)/register" asChild>
+            <Pressable style={styles.switchAuthContainer}>
+              <Text style={styles.switchAuthText}>
+                {t('auth.login.noAccount')}{' '}
+                <Text style={styles.switchAuthLink}>{t('auth.login.createAccount')}</Text>
               </Text>
             </Pressable>
-
-            <Link href="/(auth)/register" asChild>
-              <Pressable style={styles.switchAuthContainer}>
-                <Text style={styles.switchAuthText}>
-                  {t('auth.login.noAccount')}{' '}
-                  <Text style={styles.switchAuthLink}>{t('auth.login.createAccount')}</Text>
-                </Text>
-              </Pressable>
-            </Link>
-          </Animated.View>
+          </Link>
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
@@ -147,23 +139,40 @@ const styles = StyleSheet.create({
   keyboardView: {
     flex: 1,
   },
-  heroSection: {
-    backgroundColor: Colors.primaryLight,
-    paddingBottom: Spacing.xl,
-    paddingHorizontal: Spacing.lg,
-    alignItems: 'center',
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: 24,
   },
-  heroIllustration: {
+  headerSection: {
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  illustrationContainer: {
+    position: 'relative',
     width: 200,
     height: 160,
-    marginBottom: Spacing.md,
+    marginBottom: 20,
+  },
+  illustrationBackground: {
+    position: 'absolute',
+    bottom: 0,
+    left: '50%',
+    marginLeft: -70,
+    width: 140,
+    height: 110,
+    backgroundColor: Colors.primaryLight,
+    borderRadius: 70,
+    transform: [{ scaleX: 1.2 }],
+  },
+  illustration: {
+    width: '100%',
+    height: '100%',
   },
   brandTitle: {
     fontFamily: 'PlayfairDisplay_700Bold',
     fontSize: 32,
     color: Colors.textPrimary,
     textAlign: 'center',
-    marginBottom: Spacing.xs,
   },
   tagline: {
     fontFamily: 'PlayfairDisplay_400Regular',
@@ -171,31 +180,35 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     textAlign: 'center',
     fontStyle: 'italic',
+    marginTop: 6,
   },
-  formSection: {
-    flex: 1,
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.xl,
+  formCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: 20,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    elevation: 3,
   },
-  sectionTitle: {
+  formTitle: {
     fontFamily: 'PlayfairDisplay_600SemiBold',
-    fontSize: 28,
+    fontSize: 24,
     color: Colors.textPrimary,
+    marginBottom: 20,
   },
   inputGroup: {
-    marginTop: Spacing.lg,
-  },
-  inputGroupSpaced: {
-    marginTop: Spacing.md,
+    marginBottom: 16,
   },
   inputLabel: {
     color: Colors.textSecondary,
     fontSize: 14,
     fontWeight: '500',
-    marginBottom: Spacing.xs,
+    marginBottom: 8,
   },
   input: {
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.background,
     borderWidth: 1,
     borderColor: Colors.border,
     borderRadius: 12,
@@ -207,17 +220,16 @@ const styles = StyleSheet.create({
   errorText: {
     color: Colors.error,
     fontSize: 14,
-    marginTop: Spacing.sm,
+    marginBottom: 16,
   },
   primaryButton: {
     backgroundColor: Colors.primary,
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
-    marginTop: Spacing.lg,
     shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.25,
     shadowRadius: 8,
     elevation: 4,
   },
@@ -232,7 +244,7 @@ const styles = StyleSheet.create({
   dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: Spacing.lg,
+    marginVertical: 20,
   },
   dividerLine: {
     flex: 1,
@@ -242,17 +254,20 @@ const styles = StyleSheet.create({
   dividerText: {
     color: Colors.textMuted,
     fontSize: 14,
-    marginHorizontal: Spacing.md,
+    marginHorizontal: 16,
   },
   googleButton: {
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.background,
     borderWidth: 1,
     borderColor: Colors.border,
     paddingVertical: 14,
     borderRadius: 12,
-    alignItems: 'center',
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'center',
+  },
+  googleIcon: {
+    marginRight: 12,
   },
   googleButtonText: {
     color: Colors.textPrimary,
@@ -260,7 +275,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   switchAuthContainer: {
-    marginTop: Spacing.xl,
+    marginTop: 24,
+    paddingVertical: 8,
   },
   switchAuthText: {
     color: Colors.textSecondary,

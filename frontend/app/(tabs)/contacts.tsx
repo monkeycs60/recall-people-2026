@@ -11,6 +11,8 @@ import { Contact } from '@/types';
 import { Search, ChevronRight, Flame, Sparkles } from 'lucide-react-native';
 import { Colors } from '@/constants/theme';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { ContactAvatar } from '@/components/contact/ContactAvatar';
+import { getContactDisplayName } from '@/utils/contactDisplayName';
 
 export default function ContactsScreen() {
   const { t } = useTranslation();
@@ -51,12 +53,6 @@ export default function ContactsScreen() {
     await refetch();
   };
 
-  const getInitials = (contact: Contact) => {
-    const first = contact.firstName.charAt(0).toUpperCase();
-    const last = contact.lastName ? contact.lastName.charAt(0).toUpperCase() : '';
-    return first + last;
-  };
-
   const renderContact = ({ item, index }: { item: Contact; index: number }) => {
     const preview = contactPreviews.get(item.id);
     const topFacts = preview?.facts || [];
@@ -67,13 +63,17 @@ export default function ContactsScreen() {
         style={styles.contactCard}
         onPress={() => router.push(`/contact/${item.id}`)}
       >
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{getInitials(item)}</Text>
+          <View style={styles.avatarContainer}>
+            <ContactAvatar
+              firstName={item.firstName}
+              lastName={item.lastName}
+              size="medium"
+            />
           </View>
 
           <View style={styles.contactInfo}>
             <Text style={styles.contactName}>
-              {item.firstName} {item.lastName || ''}
+              {getContactDisplayName(item)}
             </Text>
 
             {topFacts.length > 0 && (
@@ -123,7 +123,7 @@ export default function ContactsScreen() {
             style={styles.aiSearchButton}
             onPress={() => router.push('/(tabs)/search')}
           >
-            <Sparkles size={16} color={Colors.primary} />
+            <Sparkles size={16} color={Colors.secondary} />
             <Text style={styles.aiSearchButtonText}>AI</Text>
           </Pressable>
         </View>
@@ -227,14 +227,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 20,
-    backgroundColor: Colors.primaryLight,
+    backgroundColor: Colors.secondaryLight,
     borderWidth: 1,
-    borderColor: Colors.primary,
+    borderColor: Colors.secondary,
   },
   aiSearchButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.primary,
+    color: Colors.secondary,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -286,19 +286,8 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
   },
-  avatar: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: Colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
+  avatarContainer: {
     marginRight: 14,
-  },
-  avatarText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: Colors.primary,
   },
   contactInfo: {
     flex: 1,

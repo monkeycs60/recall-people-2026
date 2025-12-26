@@ -2,6 +2,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Check } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Colors } from '@/constants/theme';
+import { UserAvatar } from './UserAvatar';
 
 type ProfileHeaderProps = {
   name: string;
@@ -19,16 +20,10 @@ export function ProfileHeader({ name, email, provider }: ProfileHeaderProps) {
   const showProvider = provider && provider !== 'credentials';
   const providerDisplayName = provider ? PROVIDER_DISPLAY_NAMES[provider] : null;
 
-  const initials = name
-    .split(' ')
-    .map((word) => word.charAt(0).toUpperCase())
-    .slice(0, 2)
-    .join('');
-
   return (
     <View style={styles.container}>
-      <View style={styles.avatarContainer}>
-        <Text style={styles.avatarText}>{initials}</Text>
+      <View style={styles.avatarWrapper}>
+        <UserAvatar name={name} size={64} />
       </View>
       <View style={styles.infoContainer}>
         <Text style={styles.name}>{name}</Text>
@@ -60,19 +55,8 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
   },
-  avatarContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: Colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
+  avatarWrapper: {
     marginRight: 16,
-  },
-  avatarText: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.primary,
   },
   infoContainer: {
     flex: 1,

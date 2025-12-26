@@ -27,6 +27,7 @@ import { ProfileCard } from '@/components/contact/ProfileCard';
 import { HotTopicsList } from '@/components/contact/HotTopicsList';
 import { MemoriesList } from '@/components/contact/MemoriesList';
 import { TranscriptionArchive } from '@/components/contact/TranscriptionArchive';
+import { ContactAvatar } from '@/components/contact/ContactAvatar';
 import { Colors } from '@/constants/theme';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { useAppStore } from '@/stores/app-store';
@@ -367,13 +368,6 @@ export default function ContactDetailScreen() {
       )
     : availableGroups.slice(0, 5);
 
-  const getInitials = () => {
-    if (!contact) return '';
-    const first = contact.firstName.charAt(0).toUpperCase();
-    const last = contact.lastName ? contact.lastName.charAt(0).toUpperCase() : '';
-    return first + last;
-  };
-
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
@@ -404,8 +398,12 @@ export default function ContactDetailScreen() {
       >
         {/* Hero Header with Avatar */}
         <Animated.View entering={FadeIn.duration(400)} style={styles.heroSection}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{getInitials()}</Text>
+          <View style={styles.avatarContainer}>
+            <ContactAvatar
+              firstName={contact.firstName}
+              lastName={contact.lastName}
+              size="large"
+            />
           </View>
 
           {isEditingName ? (
@@ -892,24 +890,8 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
     alignItems: 'center',
   },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: Colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
+  avatarContainer: {
     marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 6,
-  },
-  avatarText: {
-    fontSize: 36,
-    fontWeight: '700',
-    color: Colors.primary,
   },
   nameRow: {
     flexDirection: 'row',

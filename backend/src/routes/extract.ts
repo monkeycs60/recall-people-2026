@@ -226,9 +226,13 @@ ${currentContact.hotTopics.map((topic) => `  • [ID: ${topic.id}] "${topic.titl
     }
   }
 
-  return `Tu es un assistant qui extrait des informations structurées à partir de notes vocales en français.
+  return `Tu es un assistant qui extrait des informations structurées à partir de notes vocales dans la langue : ${language}.
 ${currentContactContext}
 ${existingHotTopicsContext}
+
+LANGUE DE RÉPONSE:
+${LANGUAGE_INSTRUCTIONS[language] || LANGUAGE_INSTRUCTIONS.fr}
+Tous les champs textuels (noteTitle, factValue, hotTopics, memories, etc.) doivent être dans cette langue.
 
 TRANSCRIPTION DE LA NOTE VOCALE:
 "${transcription}"
@@ -238,7 +242,7 @@ RÈGLES D'EXTRACTION:
 1. IDENTIFICATION DU CONTACT:
    - Extrais le prénom de la personne dont on parle dans la note
    - ATTENTION: Le prénom doit être un VRAI prénom français ou international (Marie, Jean, Sophie, Mohamed, etc.)
-   - NE JAMAIS extraire de mots qui ne sont pas des prénoms ("si", "la", "le", "un", "elle", "il", "on", etc.)
+   - NE JAMAIS extraire de mots qui ne sont pas des prénoms
    - Les prénoms composés comptent comme UN prénom (Jean-Luc, Marie-Claire, Pierre-Antoine)
    - Si aucun prénom clair n'est mentionné, utilise "Contact" comme placeholder
    - Nom de famille SEULEMENT si explicitement mentionné comme tel
@@ -322,9 +326,5 @@ RÈGLES:
 - memories = événements PONCTUELS / souvenirs (PAS des hobbies réguliers)
 - suggestedGroups = groupes suggérés UNIQUEMENT pour nouveaux contacts
 - N'extrais QUE ce qui est EXPLICITEMENT mentionné
-- action="add" pour nouvelle info, "update" si modification d'un fact existant
-
-LANGUE DE RÉPONSE:
-${LANGUAGE_INSTRUCTIONS[language] || LANGUAGE_INSTRUCTIONS.fr}
-Tous les champs textuels (noteTitle, factValue, hotTopics, memories, etc.) doivent être dans cette langue.`;
+- action="add" pour nouvelle info, "update" si modification d'un fact existant`;
 };

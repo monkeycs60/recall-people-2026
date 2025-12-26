@@ -13,10 +13,14 @@ export const Colors = {
   textMuted: '#A69B8F',
   textInverse: '#FFFFFF',
 
-  // Accent - Terracotta/Amber
+  // Accent - Terracotta/Amber (brand principal)
   primary: '#C67C4E',
   primaryLight: '#E8D5C4',
   primaryDark: '#A65D2E',
+
+  // Accent secondaire (bleu gris doux)
+  secondary: '#6B7D8A',
+  secondaryLight: '#E8ECEF',
 
   // Semantic
   success: '#5D8C5A',

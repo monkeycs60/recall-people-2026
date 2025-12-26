@@ -36,7 +36,7 @@ export function AISummary({ summary, isLoading, firstName }: AISummaryProps) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Sparkles size={16} color={Colors.primary} />
+        <Sparkles size={16} color={Colors.secondary} />
         <Text style={styles.headerText}>{t('contact.aiSummary.header', { firstName })}</Text>
       </View>
       <Text style={styles.contextHeader}>
@@ -49,12 +49,12 @@ export function AISummary({ summary, isLoading, firstName }: AISummaryProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.primaryLight,
+    backgroundColor: Colors.secondaryLight,
     padding: 16,
     borderRadius: 12,
     marginBottom: 16,
     borderLeftWidth: 4,
-    borderLeftColor: Colors.primary,
+    borderLeftColor: Colors.secondary,
   },
   header: {
     flexDirection: 'row',
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 13,
     fontWeight: '600',
-    color: Colors.primary,
+    color: Colors.secondary,
     marginLeft: 6,
   },
   contextHeader: {

@@ -14,16 +14,18 @@
 - [ ] RevenueCat paywall (freemium: gratuit sans IA, premium avec IA/transcription/rappels)
 
 ### UX Fixes
-- [ ] Spacing login/signup : espace entre bouton CTA et lien "Se connecter"/"Créer un compte"
 - [ ] Résumé IA : header contextuel ("Voici ce que tu devrais avoir en tête avant de revoir [Prénom]")
 - [ ] Résumé IA : ton plus sobre, meilleure hiérarchisation, retirer le nombre de caractères
+
+
+- Possibilité de supprimer un contact
+- Ajout du téléphone, mail, sur la fiche d'un contact (champs spéciaux, pas dans infos, mais carrément dans le header : lien pour whats app ou répertoire)
 
 ---
 
 ## P1 - Post-Launch Prioritaire
 
 ### Visuel
-- [ ] Illustration écran login (remplacer formes abstraites)
 - [ ] Icônes contextuelles Memories (trophy, baby, airplane, briefcase, heart selon type)
 - [ ] Icônes menu Profile en terracotta (pas gris)
 

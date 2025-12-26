@@ -16,10 +16,23 @@
     },
     "register": {
       "title": "Create account",
-      "submit": "Sign up",
-      "loading": "Signing up...",
+      "subtitle": "Join us and never lose track again.",
+      "name": "Name",
+      "namePlaceholder": "Your name",
+      "email": "Email",
+      "emailPlaceholder": "your@email.com",
+      "password": "Password",
+      "passwordPlaceholder": "8 char. min.",
+      "confirmPassword": "Confirm",
+      "confirmPasswordPlaceholder": "Repeat",
+      "submit": "Create my account",
+      "loading": "Creating...",
+      "or": "or",
+      "google": "Continue with Google",
       "hasAccount": "Already have an account?",
-      "signIn": "Sign in"
+      "signIn": "Sign in",
+      "passwordMismatch": "Passwords do not match",
+      "passwordTooShort": "Password must be at least 8 characters"
     }
   },
   "errors": {
