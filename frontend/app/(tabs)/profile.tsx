@@ -198,7 +198,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 24,
-    paddingBottom: 100,
+    paddingBottom: 180,
   },
   screenTitle: {
     fontFamily: 'PlayfairDisplay_700Bold',
