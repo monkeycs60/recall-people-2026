@@ -13,6 +13,7 @@ import { Colors } from '@/constants/theme';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { ContactAvatar } from '@/components/contact/ContactAvatar';
 import { getContactDisplayName } from '@/utils/contactDisplayName';
+import { ContactListSkeleton } from '@/components/skeleton/ContactListSkeleton';
 
 export default function ContactsScreen() {
   const { t } = useTranslation();
@@ -23,7 +24,7 @@ export default function ContactsScreen() {
   const { groups } = useGroupsQuery();
   const { selectedGroupId, setSelectedGroup } = useGroupsStore();
   const { previews: contactPreviews } = useContactPreviewsQuery(contacts);
-  const { data: contactIdsByGroup = [] } = useContactIdsForGroup(selectedGroupId);
+  const { data: contactIdsByGroup = [], isFetching: isGroupFilterLoading } = useContactIdsForGroup(selectedGroupId);
 
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -170,7 +171,9 @@ export default function ContactsScreen() {
         </View>
       )}
 
-      {filteredContacts.length === 0 && !isLoading ? (
+      {isLoading || isGroupFilterLoading ? (
+        <ContactListSkeleton count={6} />
+      ) : filteredContacts.length === 0 ? (
         <View style={styles.emptyStateContainer}>
           <Text style={styles.emptyStateTitle}>
             {searchQuery ? t('search.noResults') : t('contacts.noContacts')}

@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { generateObject } from 'ai';
+import { generateText } from 'ai';
 import { z } from 'zod';
 import { createCerebras } from '@ai-sdk/cerebras';
 import { authMiddleware } from '../middleware/auth';
@@ -52,7 +52,32 @@ const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
   de: 'Antworte auf Deutsch.',
 };
 
-const DEFAULT_MODEL = 'llama-3.1-8b';
+const DEFAULT_MODEL = 'llama3.1-8b';
+
+type DetectionResult = z.infer<typeof detectionSchema>;
+
+function parseDetectionResponse(rawResponse: string): DetectionResult {
+  // Try to extract JSON from the response
+  const jsonMatch = rawResponse.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    throw new Error(`No JSON found in response: ${rawResponse.slice(0, 200)}`);
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(jsonMatch[0]);
+  } catch {
+    throw new Error(`Invalid JSON in response: ${jsonMatch[0].slice(0, 200)}`);
+  }
+
+  // Validate and coerce with Zod
+  const result = detectionSchema.safeParse(parsed);
+  if (!result.success) {
+    throw new Error(`Schema validation failed: ${result.error.message}`);
+  }
+
+  return result.data;
+}
 
 export const detectContactRoutes = new Hono<{ Bindings: Bindings }>();
 
@@ -96,10 +121,9 @@ detectContactRoutes.post('/', async (c) => {
       input: { transcription, contactsCount: contacts.length },
     });
 
-    const { object: detection } = await measurePerformance(
-      () => generateObject({
+    const { text: rawResponse } = await measurePerformance(
+      () => generateText({
         model,
-        schema: detectionSchema,
         prompt,
         experimental_telemetry: {
           isEnabled: c.env.ENABLE_LANGFUSE === 'true',
@@ -114,12 +138,15 @@ detectContactRoutes.post('/', async (c) => {
         route: '/detect-contact',
         provider: 'cerebras',
         model: modelName,
-        operationType: 'object-generation',
+        operationType: 'text-generation',
         inputSize: new TextEncoder().encode(prompt).length,
         metadata: { language, contactsCount: contacts.length },
         enabled: c.env.ENABLE_PERFORMANCE_LOGGING === 'true' || c.env.ENABLE_PERFORMANCE_LOGGING === true,
       }
     );
+
+    // Parse JSON from response
+    const detection = parseDetectionResponse(rawResponse);
 
     // Update Langfuse generation with output
     generation?.end({ output: detection });
@@ -228,5 +255,16 @@ RÈGLES D'IDENTIFICATION:
    - Combine le prénom avec l'info la plus distinctive
    - Priorise: entreprise > métier > hobby/sport > lieu
    - Format court: "Prénom Info" (2-3 mots max)
-   - Ne génère un nickname QUE si lastName est null et isNew est true`;
+   - Ne génère un nickname QUE si lastName est null et isNew est true
+
+IMPORTANT: Réponds UNIQUEMENT avec un objet JSON valide, sans aucun texte avant ou après.
+
+Exemple pour un contact existant identifié:
+{"contactId": "abc123", "firstName": "Marie", "lastName": null, "suggestedNickname": null, "confidence": "high", "isNew": false, "candidateIds": []}
+
+Exemple pour un nouveau contact sans nom de famille:
+{"contactId": null, "firstName": "Paul", "lastName": null, "suggestedNickname": "Paul Google", "confidence": "high", "isNew": true, "candidateIds": []}
+
+Exemple avec ambiguïté:
+{"contactId": null, "firstName": "Marie", "lastName": null, "suggestedNickname": null, "confidence": "medium", "isNew": false, "candidateIds": ["id1", "id2"]}`;
 }

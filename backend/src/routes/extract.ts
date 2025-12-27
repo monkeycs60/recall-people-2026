@@ -144,7 +144,7 @@ extractRoutes.post('/', async (c) => {
         operationType: 'object-generation',
         inputSize: new TextEncoder().encode(prompt).length,
         metadata: { language, hasCurrentContact: !!currentContact },
-        enabled: c.env.ENABLE_PERFORMANCE_LOGGING === 'true' || c.env.ENABLE_PERFORMANCE_LOGGING === true,
+        enabled: !!c.env.ENABLE_PERFORMANCE_LOGGING as boolean,
       }
     );
 

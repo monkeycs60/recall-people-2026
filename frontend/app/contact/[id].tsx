@@ -32,6 +32,7 @@ import { ContactAvatar } from '@/components/contact/ContactAvatar';
 import { Colors } from '@/constants/theme';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { useAppStore } from '@/stores/app-store';
+import { ContactDetailSkeleton } from '@/components/skeleton/ContactDetailSkeleton';
 
 type EditingFact = {
   id: string;
@@ -370,11 +371,7 @@ export default function ContactDetailScreen() {
     : availableGroups.slice(0, 5);
 
   if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>{t('common.loading')}</Text>
-      </View>
-    );
+    return <ContactDetailSkeleton />;
   }
 
   if (!contact) {
