@@ -1,8 +1,10 @@
-import { View, Text, Pressable, TextInput, Alert, StyleSheet } from 'react-native';
+import { View, Text, Pressable, TextInput, Alert, StyleSheet, Image } from 'react-native';
 import { useState } from 'react';
 import { Trash2, Edit3, Users, User } from 'lucide-react-native';
 import { Memory } from '@/types';
 import { Colors } from '@/constants/theme';
+
+const EMPTY_MEMORIES_ILLUSTRATION = require('@/assets/ai-assets/empty-memories.png');
 
 type MemoriesListProps = {
   memories: Memory[];
@@ -45,6 +47,11 @@ export function MemoriesList({ memories, onEdit, onDelete, highlightId }: Memori
   if (memories.length === 0) {
     return (
       <View style={styles.emptyState}>
+        <Image
+          source={EMPTY_MEMORIES_ILLUSTRATION}
+          style={styles.emptyStateIllustration}
+          resizeMode="contain"
+        />
         <Text style={styles.emptyStateText}>Aucun souvenir enregistré</Text>
       </View>
     );
@@ -138,11 +145,17 @@ export function MemoriesList({ memories, onEdit, onDelete, highlightId }: Memori
 const styles = StyleSheet.create({
   emptyState: {
     backgroundColor: `${Colors.surface}50`,
-    padding: 16,
+    padding: 20,
     borderRadius: 12,
     borderWidth: 1,
     borderStyle: 'dashed',
     borderColor: Colors.border,
+    alignItems: 'center',
+  },
+  emptyStateIllustration: {
+    width: 140,
+    height: 110,
+    marginBottom: 16,
   },
   emptyStateText: {
     fontSize: 14,

@@ -1,6 +1,6 @@
 {
   "auth": {
-    "tagline": "Sprich. Recall People erinnert sich.",
+    "tagline": "Was war nochmal sein neues Projekt?",
     "login": {
       "title": "Anmelden",
       "email": "Email",
@@ -16,6 +16,7 @@
     },
     "register": {
       "title": "Konto erstellen",
+      "subtitle": "Die Namen ihrer Kinder. Der Beruf ihres Partners. Vergiss sie nie wieder.",
       "submit": "Registrieren",
       "loading": "Registrierung...",
       "hasAccount": "Schon ein Konto?",
@@ -64,15 +65,16 @@
   "contacts": {
     "title": "Kontakte",
     "searchPlaceholder": "Wen suchst du?",
-    "noContacts": "Dein Kreis beginnt hier",
-    "noContactsDescription": "Füge jemanden hinzu, der dir wichtig ist, und verliere nie den Faden seiner Geschichten."
+    "noContacts": "Der Beruf ihres Partners. Die Namen ihrer Kinder. Das Projekt, auf das er so stolz ist.",
+    "noContactsDescription": "Werde nie wieder auf dem falschen Fuß erwischt."
   },
   "search": {
     "title": "Suche",
-    "placeholder": "Frag dein Gedächtnis...",
+    "placeholder": "Beschreibe, was du suchst...",
     "noResults": "Keine Ergebnisse",
     "searching": "Suche läuft...",
     "emptyStateTitle": "Frag dein Gedächtnis",
+    "description": "Kein exakter Begriff nötig. Unsere KI durchsucht deine Erinnerungen und findet die Information.",
     "examples": "Zum Beispiel",
     "example1": "Wer arbeitet in Tech in Bordeaux?",
     "example2": "Wer hat kleine Kinder?",
@@ -106,8 +108,8 @@
     "hotTopic": {
       "addPlaceholder": "Neues Thema...",
       "contextPlaceholder": "Kontext (optional)...",
-      "emptyState": "Noch keine Abenteuer",
-      "emptyStateDescription": "Nimm nach deinem nächsten Anruf eine Notiz auf, um die Magie zu sehen."
+      "emptyState": "Ihre Projekte. Ihre News. Ihre Kämpfe.",
+      "emptyStateDescription": "Eine Sprachnotiz nach deinem nächsten Gespräch, und es ist gespeichert."
     },
     "fact": {
       "addPlaceholder": "Neue Information...",
@@ -207,7 +209,7 @@
       "description": "Wir vergessen 80% der Details nach einem Gespräch. Lass peinliche Momente nicht wieder passieren."
     },
     "action": {
-      "title": "Sprich. Recall People erinnert sich.",
+      "title": "Deine Geheimwaffe für Beziehungen.",
       "description": "Gleich nach einem Kaffee oder Anruf, nimm eine Sprachnotiz auf. Die KI extrahiert automatisch die Perlen des Gesprächs."
     },
     "value": {

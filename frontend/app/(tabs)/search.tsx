@@ -80,6 +80,7 @@ export default function SearchScreen() {
 
         {showSuggestions && (
           <Animated.View entering={FadeInDown.duration(400)}>
+            <Text style={styles.descriptionText}>{t('search.description')}</Text>
             <Text style={styles.suggestionsLabel}>{t('search.examples')} :</Text>
             <View style={styles.suggestionsColumn}>
               {SUGGESTION_CHIPS.map((chipKey, index) => (
@@ -128,6 +129,12 @@ const styles = StyleSheet.create({
     color: Colors.error,
     textAlign: 'center',
     fontSize: 14,
+  },
+  descriptionText: {
+    fontSize: 15,
+    color: Colors.textSecondary,
+    marginBottom: 20,
+    lineHeight: 22,
   },
   suggestionsLabel: {
     fontSize: 14,

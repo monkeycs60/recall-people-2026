@@ -5,8 +5,9 @@ import { authMiddleware } from '../middleware/auth';
 import { wrapUserInput, sanitize, getSecurityInstructions } from '../lib/security';
 import { searchRequestSchema } from '../lib/validation';
 import { auditLog } from '../lib/audit';
-import { createAIModel, getAIProviderName, getAIModel, getTelemetryOptions } from '../lib/ai-provider';
+import { createAIModel, getAIProviderName, getAIModel } from '../lib/ai-provider';
 import { measurePerformance } from '../lib/performance-logger';
+import { getLangfuseClient } from '../lib/telemetry';
 
 type Bindings = {
 	DATABASE_URL: string;
@@ -70,6 +71,12 @@ export const searchRoutes = new Hono<{ Bindings: Bindings }>();
 searchRoutes.use('/*', authMiddleware);
 
 searchRoutes.post('/', async (c) => {
+	const langfuse = getLangfuseClient();
+	const trace = langfuse?.trace({
+		name: 'search',
+		metadata: { route: '/api/search' },
+	});
+
 	const startTime = Date.now();
 
 	try {
@@ -78,6 +85,7 @@ searchRoutes.post('/', async (c) => {
 		// Validate request body
 		const validation = searchRequestSchema.safeParse(body);
 		if (!validation.success) {
+			trace?.update({ output: { error: 'Validation failed', issues: validation.error.issues } });
 			await auditLog(c, {
 				userId: c.get('user')?.id,
 				action: 'search',
@@ -92,6 +100,7 @@ searchRoutes.post('/', async (c) => {
 
 		const hasData = facts.length > 0 || memories.length > 0 || notes.length > 0;
 		if (!hasData) {
+			trace?.update({ output: { results: [], skipped: true } });
 			return c.json({
 				results: [],
 				processingTimeMs: Date.now() - startTime,
@@ -110,13 +119,20 @@ searchRoutes.post('/', async (c) => {
 		};
 
 		const model = createAIModel(providerConfig);
+		const modelName = getAIModel(providerConfig);
+
+		// Create Langfuse generation span
+		const generation = trace?.generation({
+			name: 'search-generation',
+			model: modelName,
+			input: { query, factsCount: facts.length, memoriesCount: memories.length, notesCount: notes.length },
+		});
 
 		const { object: result } = await measurePerformance(
 			() => generateObject({
 				model,
 				schema: searchResultSchema,
 				prompt,
-				...getTelemetryOptions(providerConfig),
 			}),
 			{
 				route: '/search',
@@ -135,6 +151,10 @@ searchRoutes.post('/', async (c) => {
 
 		const processingTimeMs = Date.now() - startTime;
 
+		// Update Langfuse generation with output
+		generation?.end({ output: sortedResults });
+		trace?.update({ output: { success: true, resultsCount: sortedResults.length, processingTimeMs } });
+
 		await auditLog(c, {
 			userId: c.get('user')?.id,
 			action: 'search',
@@ -149,6 +169,7 @@ searchRoutes.post('/', async (c) => {
 		});
 	} catch (error) {
 		console.error('Search error:', error);
+		trace?.update({ output: { error: String(error) } });
 		await auditLog(c, {
 			userId: c.get('user')?.id,
 			action: 'search',

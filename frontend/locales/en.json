@@ -1,6 +1,6 @@
 {
   "auth": {
-    "tagline": "Speak. Recall People remembers.",
+    "tagline": "What was their new project again?",
     "login": {
       "title": "Sign in",
       "email": "Email",
@@ -16,7 +16,7 @@
     },
     "register": {
       "title": "Create account",
-      "subtitle": "Join us and never lose track again.",
+      "subtitle": "Their kids' names. Their partner's job. Never forget them again.",
       "name": "Name",
       "namePlaceholder": "Your name",
       "email": "Email",
@@ -77,15 +77,16 @@
   "contacts": {
     "title": "Contacts",
     "searchPlaceholder": "Who are you looking for?",
-    "noContacts": "Your circle starts here",
-    "noContactsDescription": "Add someone who matters to you and never lose track of their stories again."
+    "noContacts": "Their partner's job. Their kids' names. That project they're so proud of.",
+    "noContactsDescription": "Never be caught off guard again."
   },
   "search": {
     "title": "Search",
-    "placeholder": "Ask your memory a question...",
+    "placeholder": "Describe what you're looking for...",
     "noResults": "No results",
     "searching": "Searching...",
     "emptyStateTitle": "Ask your memory a question",
+    "description": "No exact match needed. Our AI digs through your memories and finds the information.",
     "examples": "For example",
     "example1": "Who works in tech in Bordeaux?",
     "example2": "Who has young children?",
@@ -120,11 +121,11 @@
     "hotTopic": {
       "addPlaceholder": "New topic...",
       "contextPlaceholder": "Context (optional)...",
-      "emptyState": "No adventures yet",
-      "emptyStateDescription": "Record a note after your next call to see the magic happen.",
+      "emptyState": "Their projects. Their news. Their struggles.",
+      "emptyStateDescription": "One voice note after your next chat, and it's saved.",
       "deleteTitle": "Delete this news",
       "deleteConfirm": "Delete \"{{title}}\"?",
-      "resolutionLabel": "Resolution (optional):",
+      "resolutionLabel": "How it ended:",
       "resolutionPlaceholder": "How did it end...",
       "archive": "Archive",
       "addResolution": "+ Add resolution",
@@ -212,7 +213,7 @@
     "title": "Review",
     "newContact": "New contact",
     "update": "Update",
-    "extractedInfo": "Extracted information",
+    "extractedInfo": "What I noted",
     "groups": "Groups",
     "addGroup": "Add a group",
     "groupNamePlaceholder": "Group name...",
@@ -325,7 +326,7 @@
       "description": "We forget 80% of details after a conversation. Don't let awkward moments happen again."
     },
     "action": {
-      "title": "Speak. Recall People remembers.",
+      "title": "Your secret weapon for relationships.",
       "description": "Right after a coffee or a call, record a voice note. AI automatically extracts the gems from your conversation."
     },
     "value": {

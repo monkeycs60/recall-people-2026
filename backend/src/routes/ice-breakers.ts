@@ -3,7 +3,8 @@ import { generateText } from 'ai';
 import { authMiddleware } from '../middleware/auth';
 import { iceBreakersRequestSchema } from '../lib/validation';
 import { auditLog } from '../lib/audit';
-import { createAIModel, getTelemetryOptions } from '../lib/ai-provider';
+import { createAIModel, getAIModel } from '../lib/ai-provider';
+import { getLangfuseClient } from '../lib/telemetry';
 
 type Bindings = {
 	XAI_API_KEY: string;
@@ -76,12 +77,19 @@ export const iceBreakersRoutes = new Hono<{ Bindings: Bindings }>();
 iceBreakersRoutes.use('/*', authMiddleware);
 
 iceBreakersRoutes.post('/', async (c) => {
+	const langfuse = getLangfuseClient();
+	const trace = langfuse?.trace({
+		name: 'ice-breakers',
+		metadata: { route: '/api/ice-breakers' },
+	});
+
 	try {
 		const body = await c.req.json();
 
 		// Validate request body
 		const validation = iceBreakersRequestSchema.safeParse(body);
 		if (!validation.success) {
+			trace?.update({ output: { error: 'Validation failed', issues: validation.error.issues } });
 			await auditLog(c, {
 				userId: c.get('user')?.id,
 				action: 'extract',
@@ -164,11 +172,18 @@ Tu as eu le temps de reprendre la guitare récemment ?
 		};
 
 		const model = createAIModel(providerConfig);
+		const modelName = getAIModel(providerConfig);
+
+		// Create Langfuse generation span
+		const generation = trace?.generation({
+			name: 'ice-breakers-generation',
+			model: modelName,
+			input: { contact: contact.firstName, hotTopicsCount: activeTopics.length },
+		});
 
 		const { text } = await generateText({
 			model,
 			prompt,
-			...getTelemetryOptions(providerConfig),
 		});
 
 		const iceBreakers = text
@@ -177,6 +192,10 @@ Tu as eu le temps de reprendre la guitare récemment ?
 			.map((line) => line.trim())
 			.filter((line) => line.length > 0)
 			.slice(0, 3);
+
+		// Update Langfuse generation with output
+		generation?.end({ output: iceBreakers });
+		trace?.update({ output: { success: true, iceBreakers } });
 
 		await auditLog(c, {
 			userId: c.get('user')?.id,
@@ -192,6 +211,7 @@ Tu as eu le temps de reprendre la guitare récemment ?
 		});
 	} catch (error) {
 		console.error('Ice breakers generation error:', error);
+		trace?.update({ output: { error: String(error) } });
 		await auditLog(c, {
 			userId: c.get('user')?.id,
 			action: 'extract',

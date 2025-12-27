@@ -3,8 +3,9 @@ import { generateObject } from 'ai';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
 import { wrapUserInput, getSecurityInstructions } from '../lib/security';
-import { createAIModel, getAIProviderName, getAIModel, getTelemetryOptions } from '../lib/ai-provider';
+import { createAIModel, getAIProviderName, getAIModel } from '../lib/ai-provider';
 import { measurePerformance } from '../lib/performance-logger';
+import { getLangfuseClient } from '../lib/telemetry';
 
 type Bindings = {
   DATABASE_URL: string;
@@ -110,11 +111,18 @@ export const extractRoutes = new Hono<{ Bindings: Bindings }>();
 extractRoutes.use('/*', authMiddleware);
 
 extractRoutes.post('/', async (c) => {
+  const langfuse = getLangfuseClient();
+  const trace = langfuse?.trace({
+    name: 'extract',
+    metadata: { route: '/api/extract' },
+  });
+
   try {
     const body = await c.req.json<ExtractionRequest>();
     const { transcription, existingContacts, currentContact } = body;
 
     if (!transcription) {
+      trace?.update({ output: { error: 'No transcription provided' } });
       return c.json({ error: 'No transcription provided' }, 400);
     }
 
@@ -130,13 +138,20 @@ extractRoutes.post('/', async (c) => {
     };
 
     const model = createAIModel(providerConfig);
+    const modelName = getAIModel(providerConfig);
+
+    // Create Langfuse generation span
+    const generation = trace?.generation({
+      name: 'extract-generation',
+      model: modelName,
+      input: { transcription: transcription.slice(0, 500), hasCurrentContact: !!currentContact },
+    });
 
     const { object: extraction } = await measurePerformance(
       () => generateObject({
         model,
         schema: extractionSchema,
         prompt,
-        ...getTelemetryOptions(providerConfig),
       }),
       {
         route: '/extract',
@@ -230,12 +245,17 @@ extractRoutes.post('/', async (c) => {
       },
     };
 
+    // Update Langfuse generation with output
+    generation?.end({ output: formattedExtraction });
+    trace?.update({ output: { success: true, extraction: formattedExtraction } });
+
     return c.json({
       success: true,
       extraction: formattedExtraction,
     });
   } catch (error) {
     console.error('Extraction error:', error);
+    trace?.update({ output: { error: String(error) } });
     return c.json({ error: 'Extraction failed' }, 500);
   }
 });

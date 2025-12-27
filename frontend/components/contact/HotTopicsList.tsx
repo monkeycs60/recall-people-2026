@@ -1,9 +1,11 @@
-import { View, Text, Pressable, TextInput, Alert, StyleSheet } from 'react-native';
+import { View, Text, Pressable, TextInput, Alert, StyleSheet, Image } from 'react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, RotateCcw, Trash2, ChevronDown, ChevronUp, Edit3 } from 'lucide-react-native';
 import { HotTopic } from '@/types';
 import { Colors } from '@/constants/theme';
+
+const EMPTY_NEWS_ILLUSTRATION = require('@/assets/ai-assets/empty-news.png');
 
 type HotTopicsListProps = {
   hotTopics: HotTopic[];
@@ -225,6 +227,11 @@ export function HotTopicsList({
     <View>
       {activeTopics.length === 0 && resolvedTopics.length === 0 && (
         <View style={styles.emptyState}>
+          <Image
+            source={EMPTY_NEWS_ILLUSTRATION}
+            style={styles.emptyStateIllustration}
+            resizeMode="contain"
+          />
           <Text style={styles.emptyStateTitle}>{t('contact.hotTopic.emptyState')}</Text>
           <Text style={styles.emptyStateDescription}>{t('contact.hotTopic.emptyStateDescription')}</Text>
         </View>
@@ -258,6 +265,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderStyle: 'dashed',
     borderColor: Colors.border,
+    alignItems: 'center',
+  },
+  emptyStateIllustration: {
+    width: 140,
+    height: 110,
+    marginBottom: 16,
   },
   emptyStateTitle: {
     fontSize: 15,

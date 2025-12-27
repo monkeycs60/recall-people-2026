@@ -4,8 +4,9 @@ import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
 import { similarityRequestSchema } from '../lib/validation';
 import { auditLog } from '../lib/audit';
-import { createAIModel, getAIProviderName, getAIModel, getTelemetryOptions } from '../lib/ai-provider';
+import { createAIModel, getAIProviderName, getAIModel } from '../lib/ai-provider';
 import { measurePerformance } from '../lib/performance-logger';
+import { getLangfuseClient } from '../lib/telemetry';
 
 type Bindings = {
 	DATABASE_URL: string;
@@ -43,12 +44,19 @@ export const similarityRoutes = new Hono<{ Bindings: Bindings }>();
 similarityRoutes.use('/*', authMiddleware);
 
 similarityRoutes.post('/batch', async (c) => {
+	const langfuse = getLangfuseClient();
+	const trace = langfuse?.trace({
+		name: 'similarity',
+		metadata: { route: '/api/similarity/batch' },
+	});
+
 	try {
 		const body = await c.req.json();
 
 		// Validate request body
 		const validation = similarityRequestSchema.safeParse(body);
 		if (!validation.success) {
+			trace?.update({ output: { error: 'Validation failed', issues: validation.error.issues } });
 			await auditLog(c, {
 				userId: c.get('user')?.id,
 				action: 'extract',
@@ -77,6 +85,7 @@ similarityRoutes.post('/batch', async (c) => {
 		);
 
 		if (typesWithMultipleValues.length === 0) {
+			trace?.update({ output: { success: true, similarities: [], skipped: true } });
 			return c.json({ success: true, similarities: [] });
 		}
 
@@ -91,13 +100,20 @@ similarityRoutes.post('/batch', async (c) => {
 		};
 
 		const model = createAIModel(providerConfig);
+		const modelName = getAIModel(providerConfig);
+
+		// Create Langfuse generation span
+		const generation = trace?.generation({
+			name: 'similarity-generation',
+			model: modelName,
+			input: { factsCount: facts.length, typesCount: typesWithMultipleValues.length },
+		});
 
 		const { object: result } = await measurePerformance(
 			() => generateObject({
 				model,
 				schema: similaritySchema,
 				prompt,
-				...getTelemetryOptions(providerConfig),
 			}),
 			{
 				route: '/similarity',
@@ -109,6 +125,10 @@ similarityRoutes.post('/batch', async (c) => {
 				enabled: c.env.ENABLE_PERFORMANCE_LOGGING === 'true' || c.env.ENABLE_PERFORMANCE_LOGGING === true,
 			}
 		);
+
+		// Update Langfuse generation with output
+		generation?.end({ output: result.similarities });
+		trace?.update({ output: { success: true, similarities: result.similarities } });
 
 		await auditLog(c, {
 			userId: c.get('user')?.id,
@@ -124,6 +144,7 @@ similarityRoutes.post('/batch', async (c) => {
 		});
 	} catch (error) {
 		console.error('Similarity calculation error:', error);
+		trace?.update({ output: { error: String(error) } });
 		await auditLog(c, {
 			userId: c.get('user')?.id,
 			action: 'extract',

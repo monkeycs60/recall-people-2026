@@ -1,6 +1,6 @@
 {
   "auth": {
-    "tagline": "Parlez. Recall People se souvient.",
+    "tagline": "C'était quoi son nouveau projet, déjà ?",
     "login": {
       "title": "Connexion",
       "email": "Email",
@@ -16,7 +16,7 @@
     },
     "register": {
       "title": "Créer un compte",
-      "subtitle": "Rejoignez-nous et ne perdez plus jamais le fil.",
+      "subtitle": "Le prénom de ses enfants. Le métier de sa compagne. Ne les oubliez plus.",
       "name": "Nom",
       "namePlaceholder": "Votre nom",
       "email": "Email",
@@ -77,15 +77,16 @@
   "contacts": {
     "title": "Contacts",
     "searchPlaceholder": "Qui cherchez-vous ?",
-    "noContacts": "Votre cercle commence ici",
-    "noContactsDescription": "Ajoutez une première personne qui compte pour vous et ne perdez plus jamais le fil de ses récits."
+    "noContacts": "Le métier de sa compagne. Le prénom de ses enfants. Ce projet dont il est si fier.",
+    "noContactsDescription": "Ne soyez plus jamais pris au dépourvu."
   },
   "search": {
     "title": "Recherche",
-    "placeholder": "Posez une question à votre mémoire...",
+    "placeholder": "Décrivez ce que vous cherchez...",
     "noResults": "Aucun résultat",
     "searching": "Recherche en cours...",
     "emptyStateTitle": "Posez une question à votre mémoire",
+    "description": "Pas besoin d'un terme exact. Notre IA fouille dans vos souvenirs et retrouve l'information.",
     "examples": "Par exemple",
     "example1": "Qui travaille dans la tech à Bordeaux ?",
     "example2": "Qui a des enfants en bas âge ?",
@@ -120,11 +121,11 @@
     "hotTopic": {
       "addPlaceholder": "Nouveau sujet...",
       "contextPlaceholder": "Contexte (optionnel)...",
-      "emptyState": "Pas encore de nouvelles aventures",
-      "emptyStateDescription": "Enregistrez une note après votre prochain appel pour voir la magie opérer.",
+      "emptyState": "Ses projets. Ses news. Ses galères.",
+      "emptyStateDescription": "Un vocal après votre prochain échange, et c'est noté.",
       "deleteTitle": "Supprimer cette actualité",
       "deleteConfirm": "Supprimer \"{{title}}\" ?",
-      "resolutionLabel": "Résolution (optionnel) :",
+      "resolutionLabel": "Comment ça s'est terminé :",
       "resolutionPlaceholder": "Comment ça s'est terminé...",
       "archive": "Archiver",
       "addResolution": "+ Ajouter une résolution",
@@ -212,7 +213,7 @@
     "title": "Vérification",
     "newContact": "Nouveau contact",
     "update": "Mise à jour",
-    "extractedInfo": "Informations extraites",
+    "extractedInfo": "Ce que j'ai noté",
     "groups": "Groupes",
     "addGroup": "Ajouter un groupe",
     "groupNamePlaceholder": "Nom du groupe...",
@@ -325,7 +326,7 @@
       "description": "On oublie 80% des détails après une discussion. Ne laissez plus la gêne s'installer."
     },
     "action": {
-      "title": "Parlez. Recall People se souvient.",
+      "title": "Votre arme secrète pour les relations.",
       "description": "Juste après un café ou un appel, enregistrez un vocal. L'IA extrait automatiquement les pépites de la conversation."
     },
     "value": {

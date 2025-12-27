@@ -7,11 +7,13 @@ import {
 	TextInput,
 	ScrollView,
 	StyleSheet,
+	Image,
 } from 'react-native';
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import { useQueryClient, QueryClient } from '@tanstack/react-query';
 import { useGroupsStore } from '@/stores/groups-store';
 import { useContactsQuery } from '@/hooks/useContactsQuery';
 import { useGroupsQuery, useContactIdsForGroup } from '@/hooks/useGroupsQuery';
@@ -29,11 +31,27 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { ContactAvatar } from '@/components/contact/ContactAvatar';
 import { getContactDisplayName } from '@/utils/contactDisplayName';
 import { ContactListSkeleton } from '@/components/skeleton/ContactListSkeleton';
+import { queryKeys } from '@/lib/query-keys';
+import { contactService } from '@/services/contact.service';
+
+const EMPTY_CONTACTS_ILLUSTRATION = require('@/assets/ai-assets/empty-contacts.png');
+
+const prefetchContactDetails = (
+	queryClient: QueryClient,
+	contactId: string
+) => {
+	queryClient.prefetchQuery({
+		queryKey: queryKeys.contacts.detail(contactId),
+		queryFn: () => contactService.getById(contactId),
+		staleTime: 5 * 60 * 1000,
+	});
+};
 
 export default function ContactsScreen() {
 	const { t } = useTranslation();
 	const router = useRouter();
 	const insets = useSafeAreaInsets();
+	const queryClient = useQueryClient();
 
 	const { contacts, isLoading, isRefetching, refetch, isPlaceholderData } =
 		useContactsQuery();
@@ -44,6 +62,20 @@ export default function ContactsScreen() {
 		useContactIdsForGroup(selectedGroupId);
 
 	const [searchQuery, setSearchQuery] = useState('');
+
+	const viewabilityConfig = useRef({
+		itemVisiblePercentThreshold: 50,
+		minimumViewTime: 300,
+	}).current;
+
+	const onViewableItemsChanged = useCallback(
+		({ viewableItems }: { viewableItems: Array<{ item: Contact }> }) => {
+			viewableItems.forEach(({ item }) => {
+				prefetchContactDetails(queryClient, item.id);
+			});
+		},
+		[queryClient]
+	);
 
 	// Track si on a déjà montré l'animation initiale
 	const hasAnimatedRef = useRef(false);
@@ -225,6 +257,13 @@ export default function ContactsScreen() {
 				<ContactListSkeleton count={6} />
 			) : filteredContacts.length === 0 ? (
 				<View style={styles.emptyStateContainer}>
+					{!searchQuery && (
+						<Image
+							source={EMPTY_CONTACTS_ILLUSTRATION}
+							style={styles.emptyStateIllustration}
+							resizeMode="contain"
+						/>
+					)}
 					<Text style={styles.emptyStateTitle}>
 						{searchQuery
 							? t('search.noResults')
@@ -245,6 +284,8 @@ export default function ContactsScreen() {
 						paddingBottom: 100,
 						paddingHorizontal: 24,
 					}}
+					onViewableItemsChanged={onViewableItemsChanged}
+					viewabilityConfig={viewabilityConfig}
 					refreshControl={
 						<RefreshControl
 							refreshing={isRefetching}
@@ -398,12 +439,18 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		paddingHorizontal: 32,
 	},
+	emptyStateIllustration: {
+		width: 180,
+		height: 140,
+		marginBottom: 24,
+	},
 	emptyStateTitle: {
-		fontSize: 20,
+		fontSize: 18,
 		fontWeight: '600',
 		color: Colors.textPrimary,
 		textAlign: 'center',
 		marginBottom: 12,
+		lineHeight: 26,
 	},
 	emptyStateDescription: {
 		fontSize: 15,

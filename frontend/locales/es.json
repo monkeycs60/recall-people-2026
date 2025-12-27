@@ -1,6 +1,6 @@
 {
   "auth": {
-    "tagline": "Habla. Recall People recuerda.",
+    "tagline": "¿Cuál era su nuevo proyecto?",
     "login": {
       "title": "Iniciar sesión",
       "email": "Email",
@@ -16,6 +16,7 @@
     },
     "register": {
       "title": "Crear cuenta",
+      "subtitle": "Los nombres de sus hijos. El trabajo de su pareja. No los olvides nunca más.",
       "submit": "Registrarse",
       "loading": "Registrando...",
       "hasAccount": "¿Ya tienes cuenta?",
@@ -64,15 +65,16 @@
   "contacts": {
     "title": "Contactos",
     "searchPlaceholder": "¿A quién buscas?",
-    "noContacts": "Tu círculo empieza aquí",
-    "noContactsDescription": "Añade a alguien que te importa y nunca pierdas el hilo de sus historias."
+    "noContacts": "El trabajo de su pareja. Los nombres de sus hijos. Ese proyecto del que está tan orgulloso.",
+    "noContactsDescription": "Nunca más te pillarán desprevenido."
   },
   "search": {
     "title": "Buscar",
-    "placeholder": "Pregunta a tu memoria...",
+    "placeholder": "Describe lo que buscas...",
     "noResults": "Sin resultados",
     "searching": "Buscando...",
     "emptyStateTitle": "Pregunta a tu memoria",
+    "description": "No necesitas un término exacto. Nuestra IA busca en tus recuerdos y encuentra la información.",
     "examples": "Por ejemplo",
     "example1": "¿Quién trabaja en tech en Bordeaux?",
     "example2": "¿Quién tiene hijos pequeños?",
@@ -106,8 +108,8 @@
     "hotTopic": {
       "addPlaceholder": "Nuevo tema...",
       "contextPlaceholder": "Contexto (opcional)...",
-      "emptyState": "Aún sin aventuras",
-      "emptyStateDescription": "Graba una nota después de tu próxima llamada para ver la magia."
+      "emptyState": "Sus proyectos. Sus noticias. Sus problemas.",
+      "emptyStateDescription": "Una nota de voz después de tu próxima charla, y queda guardado."
     },
     "fact": {
       "addPlaceholder": "Nueva información...",
@@ -207,7 +209,7 @@
       "description": "Olvidamos el 80% de los detalles después de una conversación. No dejes que los momentos incómodos vuelvan a pasar."
     },
     "action": {
-      "title": "Habla. Recall People recuerda.",
+      "title": "Tu arma secreta para las relaciones.",
       "description": "Justo después de un café o una llamada, graba una nota de voz. La IA extrae automáticamente las joyas de la conversación."
     },
     "value": {

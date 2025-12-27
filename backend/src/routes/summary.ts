@@ -8,9 +8,9 @@ import {
 	createAIModel,
 	getAIProviderName,
 	getAIModel,
-	getTelemetryOptions,
 } from '../lib/ai-provider';
 import { measurePerformance } from '../lib/performance-logger';
+import { getLangfuseClient } from '../lib/telemetry';
 
 type Bindings = {
 	XAI_API_KEY: string;
@@ -74,12 +74,19 @@ export const summaryRoutes = new Hono<{ Bindings: Bindings }>();
 summaryRoutes.use('/*', authMiddleware);
 
 summaryRoutes.post('/', async (c) => {
+	const langfuse = getLangfuseClient();
+	const trace = langfuse?.trace({
+		name: 'summary',
+		metadata: { route: '/api/summary' },
+	});
+
 	try {
 		const body = await c.req.json();
 
 		// Validate request body
 		const validation = summaryRequestSchema.safeParse(body);
 		if (!validation.success) {
+			trace?.update({ output: { error: 'Validation failed', issues: validation.error.issues } });
 			await auditLog(c, {
 				userId: c.get('user')?.id,
 				action: 'summary',
@@ -184,13 +191,20 @@ FORMAT:
 		};
 
 		const model = createAIModel(providerConfig);
+		const modelName = getAIModel(providerConfig);
+
+		// Create Langfuse generation span
+		const generation = trace?.generation({
+			name: 'summary-generation',
+			model: modelName,
+			input: { contact: contact.firstName, factsCount: facts.length },
+		});
 
 		const { text } = await measurePerformance(
 			() =>
 				generateText({
 					model,
 					prompt,
-					...getTelemetryOptions(providerConfig),
 				}),
 			{
 				route: '/summary',
@@ -202,6 +216,10 @@ FORMAT:
 				enabled: !!(c.env.ENABLE_PERFORMANCE_LOGGING as boolean),
 			}
 		);
+
+		// Update Langfuse generation with output
+		generation?.end({ output: text.trim() });
+		trace?.update({ output: { success: true, summary: text.trim() } });
 
 		await auditLog(c, {
 			userId: c.get('user')?.id,
@@ -217,6 +235,7 @@ FORMAT:
 		});
 	} catch (error) {
 		console.error('Summary generation error:', error);
+		trace?.update({ output: { error: String(error) } });
 		await auditLog(c, {
 			userId: c.get('user')?.id,
 			action: 'summary',
