@@ -16,8 +16,7 @@ function generateRandomHex(byteLength: number): string {
 		.join('');
 }
 
-// const ACCESS_TOKEN_EXPIRY = 60 * 60; // 1 hour
-const ACCESS_TOKEN_EXPIRY = 60; // 1 minute
+const ACCESS_TOKEN_EXPIRY = 60 * 60; // 1 hour
 const REFRESH_TOKEN_EXPIRY = 60 * 60 * 24 * 30; // 30 days
 
 export interface TokenPair {
