@@ -15,6 +15,7 @@ import {
   FileText,
   LogOut,
   BookOpen,
+  Shield,
 } from 'lucide-react-native';
 import { useAuthStore } from '@/stores/auth-store';
 import { useSettingsStore } from '@/stores/settings-store';
@@ -107,6 +108,14 @@ export default function ProfileScreen() {
 
   const appVersion = Constants.expoConfig?.version || '1.0.0';
 
+  // Vérifier si l'utilisateur est admin (via variable d'environnement)
+  const adminEmail = process.env.EXPO_PUBLIC_ADMIN_EMAIL || '';
+  const isAdmin = adminEmail && user?.email === adminEmail;
+
+  const handleOpenMonitoring = () => {
+    router.push('/admin/monitoring');
+  };
+
   return (
     <View className="flex-1 bg-background">
       <ScrollView
@@ -151,6 +160,16 @@ export default function ProfileScreen() {
             showChevron={false}
           />
         </SettingsSection>
+
+        {isAdmin && (
+          <SettingsSection title="Admin">
+            <SettingsRow
+              icon={<Shield size={20} color={Colors.primary} />}
+              label="Monitoring & Logs"
+              onPress={handleOpenMonitoring}
+            />
+          </SettingsSection>
+        )}
 
         <SettingsSection title={t('profile.sections.about')}>
           <SettingsRow

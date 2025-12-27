@@ -7,6 +7,7 @@ import type { User } from '@prisma/client';
 type Bindings = {
   DATABASE_URL: string;
   JWT_SECRET: string;
+  ADMIN_EMAIL: string;
 };
 
 type Variables = {
@@ -27,9 +28,9 @@ export const adminRoutes = new Hono<{ Bindings: Bindings; Variables: Variables }
 const adminOnly = async (c: any, next: any) => {
   const user = c.get('user');
 
-  // TODO: Adapter selon ta logique d'admin
-  // Option 1: Email spécifique
-  const isAdmin = user.email === 'admin@recall-people.com';
+  // Email admin depuis les variables d'environnement
+  const adminEmail = c.env.ADMIN_EMAIL || '';
+  const isAdmin = adminEmail && user.email === adminEmail;
 
   // Option 2: Champ isAdmin dans la table User (à ajouter au schema Prisma)
   // const isAdmin = user.isAdmin === true;
