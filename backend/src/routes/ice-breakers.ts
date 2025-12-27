@@ -2,6 +2,8 @@ import { Hono } from 'hono';
 import { createXai } from '@ai-sdk/xai';
 import { generateText } from 'ai';
 import { authMiddleware } from '../middleware/auth';
+import { iceBreakersRequestSchema } from '../lib/validation';
+import { auditLog } from '../lib/audit';
 
 type Bindings = {
 	XAI_API_KEY: string;
@@ -72,10 +74,23 @@ iceBreakersRoutes.use('/*', authMiddleware);
 
 iceBreakersRoutes.post('/', async (c) => {
 	try {
-		const body = await c.req.json<IceBreakersRequest>();
-		const { contact, facts, hotTopics } = body;
+		const body = await c.req.json();
 
-		const language = body.language || 'fr';
+		// Validate request body
+		const validation = iceBreakersRequestSchema.safeParse(body);
+		if (!validation.success) {
+			await auditLog(c, {
+				userId: c.get('user')?.id,
+				action: 'extract',
+				resource: 'extract',
+				success: false,
+				details: { error: 'Validation failed', issues: validation.error.issues },
+			});
+			return c.json({ error: 'Invalid input', details: validation.error.issues }, 400);
+		}
+
+		const { contact, facts, hotTopics } = validation.data;
+		const language = validation.data.language || 'fr';
 		const langConfig =
 			LANGUAGE_INSTRUCTIONS[language] || LANGUAGE_INSTRUCTIONS.fr;
 
@@ -154,12 +169,27 @@ Tu as eu le temps de reprendre la guitare récemment ?
 			.filter((line) => line.length > 0)
 			.slice(0, 3);
 
+		await auditLog(c, {
+			userId: c.get('user')?.id,
+			action: 'extract',
+			resource: 'extract',
+			success: true,
+			details: { language, contact: contact.firstName, count: iceBreakers.length },
+		});
+
 		return c.json({
 			success: true,
 			iceBreakers,
 		});
 	} catch (error) {
 		console.error('Ice breakers generation error:', error);
+		await auditLog(c, {
+			userId: c.get('user')?.id,
+			action: 'extract',
+			resource: 'extract',
+			success: false,
+			details: { error: String(error) },
+		});
 		return c.json({ error: 'Ice breakers generation failed' }, 500);
 	}
 });

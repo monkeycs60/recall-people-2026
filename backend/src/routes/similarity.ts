@@ -3,6 +3,8 @@ import { createXai } from '@ai-sdk/xai';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
+import { similarityRequestSchema } from '../lib/validation';
+import { auditLog } from '../lib/audit';
 
 type Bindings = {
 	DATABASE_URL: string;
@@ -37,12 +39,22 @@ similarityRoutes.use('/*', authMiddleware);
 
 similarityRoutes.post('/batch', async (c) => {
 	try {
-		const body = await c.req.json<SimilarityRequest>();
-		const { facts } = body;
+		const body = await c.req.json();
 
-		if (!facts || facts.length === 0) {
-			return c.json({ error: 'No facts provided' }, 400);
+		// Validate request body
+		const validation = similarityRequestSchema.safeParse(body);
+		if (!validation.success) {
+			await auditLog(c, {
+				userId: c.get('user')?.id,
+				action: 'extract',
+				resource: 'extract',
+				success: false,
+				details: { error: 'Validation failed', issues: validation.error.issues },
+			});
+			return c.json({ error: 'Invalid input', details: validation.error.issues }, 400);
 		}
+
+		const { facts } = validation.data;
 
 		const factsByType: Record<string, string[]> = {};
 		for (const fact of facts) {
@@ -75,12 +87,27 @@ similarityRoutes.post('/batch', async (c) => {
 			prompt,
 		});
 
+		await auditLog(c, {
+			userId: c.get('user')?.id,
+			action: 'extract',
+			resource: 'extract',
+			success: true,
+			details: { count: result.similarities.length },
+		});
+
 		return c.json({
 			success: true,
 			similarities: result.similarities,
 		});
 	} catch (error) {
 		console.error('Similarity calculation error:', error);
+		await auditLog(c, {
+			userId: c.get('user')?.id,
+			action: 'extract',
+			resource: 'extract',
+			success: false,
+			details: { error: String(error) },
+		});
 		return c.json({ error: 'Similarity calculation failed' }, 500);
 	}
 });

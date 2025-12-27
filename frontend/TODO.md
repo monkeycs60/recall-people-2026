@@ -12,7 +12,12 @@ npx wrangler secret put XAI_API_KEY
 npx wrangler secret put GOOGLE_CLIENT_ID_WEB
 npx wrangler secret put GOOGLE_CLIENT_ID_IOS
 npx wrangler secret put GOOGLE_CLIENT_ID_ANDROID
+npx wrangler secret put ADMIN_EMAIL
 ```
+
+### Variables d'environnement frontend (à configurer)
+
+- [ ] Ajouter `EXPO_PUBLIC_ADMIN_EMAIL` dans `frontend/.env` (email de l'admin qui a accès au monitoring)
 
 ### Sécurité - Fait ✅
 
@@ -24,14 +29,11 @@ npx wrangler secret put GOOGLE_CLIENT_ID_ANDROID
 - [x] Rate limiting (KV Cloudflare)
 - [x] Protection prompt injection (sanitize + délimiteurs + instructions)
 - [x] CI/CD GitHub Actions
-
-### Sécurité - À faire
-
-- [ ] Réduire expiration JWT (30j → 1h) + refresh tokens
-- [ ] Headers de sécurité (CSP, HSTS, X-Frame-Options)
-- [ ] Validation Zod complète sur tous les endpoints
-- [ ] Audit logging (qui fait quoi, quand)
-- [ ] HTTPS enforcement en prod
+- [x] Réduire expiration JWT (30j → 1h) + refresh tokens
+- [x] Headers de sécurité (CSP, HSTS, X-Frame-Options)
+- [x] Validation Zod complète sur tous les endpoints
+- [x] Audit logging (qui fait quoi, quand)
+- [x] HTTPS enforcement en prod
 
 ---
 
@@ -79,6 +81,13 @@ npx wrangler secret put GOOGLE_CLIENT_ID_ANDROID
 ### Infra
 
 -  [ ] Analytics
+-  [ ] **Monitoring & Audit Logging** (voir MONITORING.md)
+   -  [x] API Admin avec endpoints de monitoring
+   -  [ ] Dashboard admin (React/Next.js) pour visualiser les métriques
+   -  [ ] Grafana + PostgreSQL pour graphiques temps réel
+   -  [ ] Alertes automatiques (Cloudflare Workers Cron + Slack/Discord)
+   -  [ ] Sentry pour error tracking
+   -  [ ] Définir les métriques clés à suivre quotidiennement
 -  [ ] Landing page Astro
 -  [ ] Cache navigation fiche contact (back → liste sans reload)
 -  [ ] Traduction infos extraites dans la langue choisie
