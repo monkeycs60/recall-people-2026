@@ -169,6 +169,12 @@ const runMigrations = async (database: SQLite.SQLiteDatabase) => {
     await database.execAsync("ALTER TABLE facts ADD COLUMN previous_values TEXT DEFAULT '[]'");
   }
 
+  // Check if title column exists on facts (for "other" fact types)
+  const hasFactTitle = factsInfo.some((col) => col.name === 'title');
+  if (!hasFactTitle) {
+    await database.execAsync("ALTER TABLE facts ADD COLUMN title TEXT");
+  }
+
   // Check if title column exists on notes
   const notesInfo = await database.getAllAsync<{ name: string }>(
     "PRAGMA table_info(notes)"
