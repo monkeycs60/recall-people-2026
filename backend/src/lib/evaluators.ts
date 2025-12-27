@@ -187,6 +187,88 @@ Score de 0 à 10 (sois strict et objectif).`;
 }
 
 /**
+ * Evaluate search quality: Are the search results relevant and accurate?
+ *
+ * Measures:
+ * - Relevance: Results match the user's query
+ * - Accuracy: Answers correspond to source data (facts/memories/notes)
+ * - Relevance scores: Scores are coherent and well-calibrated
+ * - No hallucinations: Nothing invented that doesn't exist in sources
+ *
+ * @param query - User's search query
+ * @param sourceData - Available data (facts, memories, notes)
+ * @param searchResults - AI-generated search results
+ * @param config - Evaluator configuration
+ * @returns Evaluation result or null if skipped
+ */
+export async function evaluateSearch(
+	query: string,
+	sourceData: {
+		facts: any[];
+		memories: any[];
+		notes: any[];
+	},
+	searchResults: any[],
+	config: EvaluatorConfig
+): Promise<EvaluationResult | null> {
+	// Skip if evaluation is disabled
+	if (!config.enableEvaluation) {
+		return null;
+	}
+
+	// Apply sampling (25% by default)
+	if (!shouldEvaluate(config.samplingRate)) {
+		return null;
+	}
+
+	try {
+		const grok = createXai({
+			apiKey: config.XAI_API_KEY,
+		});
+
+		const evaluatorModel = grok('grok-4-1-fast');
+
+		const prompt = `Tu es un évaluateur de qualité pour un moteur de recherche dans une base de contacts.
+
+REQUÊTE DE L'UTILISATEUR:
+"${query}"
+
+DONNÉES DISPONIBLES (sources):
+Facts: ${JSON.stringify(sourceData.facts, null, 2)}
+Memories: ${JSON.stringify(sourceData.memories, null, 2)}
+Notes: ${JSON.stringify(sourceData.notes, null, 2)}
+
+RÉSULTATS GÉNÉRÉS PAR LE MOTEUR:
+${JSON.stringify(searchResults, null, 2)}
+
+Évalue la qualité selon ces critères:
+1. PERTINENCE: Les résultats correspondent-ils à la requête?
+2. EXACTITUDE: Les réponses proviennent-elles bien des sources?
+3. SCORES COHÉRENTS: Les relevanceScore sont-ils bien calibrés?
+4. PAS D'HALLUCINATIONS: Rien n'a été inventé qui n'existe pas dans les sources?
+
+Score de 0 à 10:
+- 10: Parfait, résultats très pertinents et exacts
+- 7-9: Très bon, résultats utiles
+- 4-6: Moyen, pertinence partielle ou imprécisions
+- 0-3: Mauvais, résultats non pertinents ou hallucinations
+
+Sois strict et objectif.`;
+
+		const { object: evaluation } = await generateObject({
+			model: evaluatorModel,
+			schema: evaluationSchema,
+			prompt,
+		});
+
+		return evaluation;
+	} catch (error) {
+		console.error('Search evaluation failed:', error);
+		return null;
+	}
+}
+
+/**
  * Get evaluation statistics for monitoring
  * This can be called periodically to see average quality scores
  */
