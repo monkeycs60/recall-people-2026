@@ -209,7 +209,7 @@ Page dédiée rassurante sur la confidentialité des données
 - [ ] Illustrations guided tour
 - [ ] Nouvelle tagline "Parlez. Recall se souvient."
 - [ ] Empty states avec copy émotionnel
-- [ ] Ice Breakers feature
+- [x] Ice Breakers feature ✅
 - [ ] RevenueCat paywall
 
 ### P1 - Important
