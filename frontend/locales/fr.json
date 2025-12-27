@@ -94,7 +94,7 @@
   "contact": {
     "title": "Contact",
     "lastContact": "Dernier contact",
-    "addNote": "Comment s'est passé votre moment ?",
+    "addNote": "Quoi de neuf avec {{firstName}} ?",
     "aiSummary": {
       "header": "L'essentiel sur {{firstName}}",
       "loading": "Préparation de l'essentiel...",

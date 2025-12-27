@@ -4,7 +4,11 @@ import { authMiddleware } from '../middleware/auth';
 import { sanitize, getSecurityInstructions } from '../lib/security';
 import { summaryRequestSchema } from '../lib/validation';
 import { auditLog } from '../lib/audit';
-import { createAIModel, getAIProviderName, getAIModel } from '../lib/ai-provider';
+import {
+	createAIModel,
+	getAIProviderName,
+	getAIModel,
+} from '../lib/ai-provider';
 import { measurePerformance } from '../lib/performance-logger';
 
 type Bindings = {
@@ -80,9 +84,15 @@ summaryRoutes.post('/', async (c) => {
 				action: 'summary',
 				resource: 'summary',
 				success: false,
-				details: { error: 'Validation failed', issues: validation.error.issues },
+				details: {
+					error: 'Validation failed',
+					issues: validation.error.issues,
+				},
 			});
-			return c.json({ error: 'Invalid input', details: validation.error.issues }, 400);
+			return c.json(
+				{ error: 'Invalid input', details: validation.error.issues },
+				400
+			);
 		}
 
 		const { contact, facts } = validation.data;
@@ -114,14 +124,19 @@ summaryRoutes.post('/', async (c) => {
 
 		const formatFacts = (factList: typeof facts) =>
 			factList
-				.map((fact) => `- ${sanitize(fact.factKey)}: ${sanitize(fact.factValue)}`)
+				.map(
+					(fact) =>
+						`- ${sanitize(fact.factKey)}: ${sanitize(fact.factValue)}`
+				)
 				.join('\n');
 
 		const prompt = `Tu es un assistant qui aide à se souvenir des gens. Génère un résumé concis et mémorable de cette personne.
 ${getSecurityInstructions(language)}
 Réponds dans la langue : ${language}.
 
-PERSONNE: ${sanitize(contact.firstName)}${contact.lastName ? ` ${sanitize(contact.lastName)}` : ''}
+PERSONNE: ${sanitize(contact.firstName)}${
+			contact.lastName ? ` ${sanitize(contact.lastName)}` : ''
+		}
 
 ${
 	professionalFacts.length > 0
@@ -139,10 +154,16 @@ ${personalFacts.length > 0 ? `PERSONNEL:\n${formatFacts(personalFacts)}` : ''}
 
 OBJECTIF: ${langConfig.objective}
 
-HIÉRARCHIE D'IMPORTANCE:
-1. Trait distinctif personnel = ce qui rend la personne mémorable
-2. Métier/entreprise = identité professionnelle
-3. Comment on s'est rencontrés = contexte relationnel
+RÈGLES STRICTES:
+- NE JAMAIS INVENTER d'informations absentes des données ci-dessus
+- Si aucune circonstance de rencontre n'est fournie, NE PAS en mentionner
+- Se concentrer sur ce qui est réellement connu de la personne, n'invente pas d'adjectifs qualificatifs ou de descriptions
+
+HIÉRARCHIE D'IMPORTANCE (uniquement si l'info existe):
+1. Trait distinctif personnel (ce qui rend la personne mémorable) - seulement si explicitement fourni
+2. Métier/entreprise - seulement si explicitement fourni
+3. Hobbies - seulement si explicitement fourni
+4. Contexte de rencontre = seulement si explicitement fourni
 
 FORMAT:
 - 2 ou 3 phrases fluides, ton neutre et professionnel, genre présentation objective
@@ -164,10 +185,11 @@ FORMAT:
 		const model = createAIModel(providerConfig);
 
 		const { text } = await measurePerformance(
-			() => generateText({
-				model,
-				prompt,
-			}),
+			() =>
+				generateText({
+					model,
+					prompt,
+				}),
 			{
 				route: '/summary',
 				provider: getAIProviderName(providerConfig),
@@ -175,7 +197,7 @@ FORMAT:
 				operationType: 'text-generation',
 				inputSize: new TextEncoder().encode(prompt).length,
 				metadata: { language, factsCount: facts.length },
-				enabled: c.env.ENABLE_PERFORMANCE_LOGGING === 'true' || c.env.ENABLE_PERFORMANCE_LOGGING === true,
+				enabled: !!(c.env.ENABLE_PERFORMANCE_LOGGING as boolean),
 			}
 		);
 

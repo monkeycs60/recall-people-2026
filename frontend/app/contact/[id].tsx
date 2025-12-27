@@ -550,7 +550,7 @@ export default function ContactDetailScreen() {
           {!isEditingName && (
             <Pressable style={styles.addNoteButton} onPress={handleAddNote}>
               <Mic size={20} color={Colors.textInverse} />
-              <Text style={styles.addNoteButtonText}>{t('contact.addNote')}</Text>
+              <Text style={styles.addNoteButtonText}>{t('contact.addNote', { firstName: contact.firstName })}</Text>
             </Pressable>
           )}
         </Animated.View>

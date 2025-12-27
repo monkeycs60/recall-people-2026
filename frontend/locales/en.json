@@ -94,7 +94,7 @@
   "contact": {
     "title": "Contact",
     "lastContact": "Last contact",
-    "addNote": "How was your moment together?",
+    "addNote": "What's new with {{firstName}}?",
     "aiSummary": {
       "header": "The essentials on {{firstName}}",
       "loading": "Preparing the essentials...",

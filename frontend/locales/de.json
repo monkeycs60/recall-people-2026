@@ -81,7 +81,7 @@
   "contact": {
     "title": "Kontakt",
     "lastContact": "Letzter Kontakt",
-    "addNote": "Wie war euer Moment zusammen?",
+    "addNote": "Was gibt's Neues bei {{firstName}}?",
     "aiSummary": {
       "header": "Das Wichtigste über {{firstName}}",
       "loading": "Bereite das Wichtigste vor...",
