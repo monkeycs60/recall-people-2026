@@ -213,6 +213,36 @@ export const generateIceBreakers = async (data: {
   return response.iceBreakers;
 };
 
+export type DetectionResult = {
+  contactId: string | null;
+  firstName: string;
+  lastName: string | null;
+  suggestedNickname: string | null;
+  confidence: 'high' | 'medium' | 'low';
+  isNew: boolean;
+  candidateIds: string[];
+};
+
+export const detectContact = async (data: {
+  transcription: string;
+  contacts: Array<{
+    id: string;
+    firstName: string;
+    lastName?: string;
+    nickname?: string;
+    aiSummary?: string;
+    hotTopics: Array<{
+      title: string;
+      context?: string;
+    }>;
+  }>;
+}): Promise<{ detection: DetectionResult }> => {
+  return apiCall('/api/detect-contact', {
+    method: 'POST',
+    body: { ...data, language: getCurrentLanguage() },
+  });
+};
+
 export const getUserSettings = async (): Promise<{
   user: { id: string; name: string; email: string; preferredLanguage: string };
 }> => {

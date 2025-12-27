@@ -269,6 +269,103 @@ Sois strict et objectif.`;
 }
 
 /**
+ * Evaluate contact detection quality: Is the detected contact correct?
+ *
+ * Measures:
+ * - Correct protagonist: Did we identify the main person being discussed?
+ * - Correct match: If existing contact, did we match the right one?
+ * - Nickname quality: If new contact, is the nickname relevant?
+ * - No hallucinations: Nothing invented
+ *
+ * @param transcription - Original transcription
+ * @param contacts - Available contacts with context
+ * @param detection - AI-generated detection
+ * @param config - Evaluator configuration
+ * @returns Evaluation result or null if skipped
+ */
+export async function evaluateDetection(
+	transcription: string,
+	contacts: Array<{
+		id: string;
+		firstName: string;
+		lastName?: string;
+		nickname?: string;
+		aiSummary?: string;
+		hotTopics: Array<{ title: string; context?: string }>;
+	}>,
+	detection: {
+		contactId: string | null;
+		firstName: string;
+		lastName: string | null;
+		suggestedNickname: string | null;
+		confidence: string;
+		isNew: boolean;
+		candidateIds: string[];
+	},
+	config: EvaluatorConfig
+): Promise<EvaluationResult | null> {
+	// Skip if evaluation is disabled
+	if (!config.enableEvaluation) {
+		return null;
+	}
+
+	// Apply sampling (25% by default)
+	if (!shouldEvaluate(config.samplingRate)) {
+		return null;
+	}
+
+	try {
+		const grok = createXai({
+			apiKey: config.XAI_API_KEY,
+		});
+
+		const evaluatorModel = grok('grok-4-1-fast');
+
+		const contactsSummary = contacts.map((contact) => {
+			const name = `${contact.firstName}${contact.lastName ? ` ${contact.lastName}` : ''}${contact.nickname ? ` (${contact.nickname})` : ''}`;
+			return `- [${contact.id}] ${name}: ${contact.aiSummary || 'Pas de résumé'}`;
+		}).join('\n');
+
+		const prompt = `Tu es un évaluateur de qualité pour un système de détection de contacts.
+
+TRANSCRIPTION ORIGINALE:
+"${transcription}"
+
+CONTACTS DISPONIBLES:
+${contactsSummary || 'Aucun contact'}
+
+DÉTECTION GÉNÉRÉE:
+${JSON.stringify(detection, null, 2)}
+
+Évalue la qualité selon ces critères:
+1. PROTAGONISTE CORRECT: Le prénom détecté correspond-il à la personne principale de la note?
+2. MATCH CORRECT: Si contactId est fourni, est-ce le bon contact?
+3. GESTION D'AMBIGUÏTÉ: Si plusieurs contacts possibles, candidateIds est-il correct?
+4. NICKNAME PERTINENT: Si nouveau contact sans nom, le nickname suggéré est-il utile?
+5. PAS D'HALLUCINATIONS: Rien n'a été inventé?
+
+Score de 0 à 10:
+- 10: Détection parfaite
+- 7-9: Très bon, contact correctement identifié
+- 4-6: Moyen, erreur d'identification ou ambiguïté mal gérée
+- 0-3: Mauvais, mauvais contact ou hallucination
+
+Sois strict et objectif.`;
+
+		const { object: evaluation } = await generateObject({
+			model: evaluatorModel,
+			schema: evaluationSchema,
+			prompt,
+		});
+
+		return evaluation;
+	} catch (error) {
+		console.error('Detection evaluation failed:', error);
+		return null;
+	}
+}
+
+/**
  * Get evaluation statistics for monitoring
  * This can be called periodically to see average quality scores
  */

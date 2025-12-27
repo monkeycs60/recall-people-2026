@@ -9,7 +9,7 @@ import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { useAppStore } from '@/stores/app-store';
 import { useContactsStore } from '@/stores/contacts-store';
-import { transcribeAudio, extractInfo } from '@/lib/api';
+import { transcribeAudio, extractInfo, detectContact } from '@/lib/api';
 import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
 
@@ -166,12 +166,28 @@ export const useRecording = () => {
         setPreselectedContactId(null);
       }
 
-      // Navigate to contact selection screen
+      // Detect contact using LLM
+      const contactsForDetection = contacts.map((contact) => ({
+        id: contact.id,
+        firstName: contact.firstName,
+        lastName: contact.lastName,
+        nickname: contact.nickname,
+        aiSummary: contact.aiSummary,
+        hotTopics: [] as Array<{ title: string; context?: string }>,
+      }));
+
+      const { detection } = await detectContact({
+        transcription: transcriptionResult.transcript,
+        contacts: contactsForDetection,
+      });
+
+      // Navigate to contact selection screen with detection result
       router.push({
         pathname: '/select-contact',
         params: {
           audioUri: uri,
           transcription: transcriptionResult.transcript,
+          detection: JSON.stringify(detection),
         },
       });
 

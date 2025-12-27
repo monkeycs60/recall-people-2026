@@ -196,6 +196,8 @@
     "analyzing": "Analyse en cours...",
     "question": "À qui appartient cette note ?",
     "searchPlaceholder": "Rechercher un contact...",
+    "suggestion": "Suggestion",
+    "multipleMatches": "Plusieurs \"{{name}}\" trouvés",
     "suggestedContacts": "Contacts suggérés ({{name}})",
     "lastContact": "Dernier contact: {{date}}",
     "newContact": "Nouveau contact",

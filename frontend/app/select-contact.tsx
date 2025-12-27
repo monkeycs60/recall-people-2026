@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Pressable, TextInput, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, Pressable, TextInput, ActivityIndicator, StyleSheet } from 'react-native';
 import { useState, useMemo } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -6,11 +6,12 @@ import { useTranslation } from 'react-i18next';
 import { useContactsQuery } from '@/hooks/useContactsQuery';
 import { useGroupsQuery } from '@/hooks/useGroupsQuery';
 import { useAppStore } from '@/stores/app-store';
-import { extractInfo } from '@/lib/api';
+import { extractInfo, DetectionResult } from '@/lib/api';
 import { Contact } from '@/types';
 import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
-import { User, Plus, Search, Sparkles, Edit3 } from 'lucide-react-native';
+import { User, Plus, Search, Sparkles, Edit3, CheckCircle2 } from 'lucide-react-native';
+import { Colors, Spacing, BorderRadius, Typography } from '@/constants/theme';
 
 export default function SelectContactScreen() {
   const { t } = useTranslation();
@@ -19,6 +20,16 @@ export default function SelectContactScreen() {
   const insets = useSafeAreaInsets();
   const audioUri = params.audioUri as string;
   const transcription = params.transcription as string;
+  const detectionParam = params.detection as string | undefined;
+
+  const detection: DetectionResult | null = useMemo(() => {
+    if (!detectionParam) return null;
+    try {
+      return JSON.parse(detectionParam) as DetectionResult;
+    } catch {
+      return null;
+    }
+  }, [detectionParam]);
 
   const { contacts } = useContactsQuery();
   const { groups } = useGroupsQuery();
@@ -27,57 +38,64 @@ export default function SelectContactScreen() {
   const [isExtracting, setIsExtracting] = useState(false);
   const [isEditingNewName, setIsEditingNewName] = useState(false);
   const [newContactName, setNewContactName] = useState('');
-
-  // Extract first name from transcription for suggestions (computed once)
-  const detectedName = useMemo(() => {
-    const patterns = [
-      /j'ai (?:vu|rencontré|croisé|parlé à|revu)\s+([\w-]+)/i,
-      /(?:avec|de)\s+([\w-]+)/i,
-      /([\w-]+)\s+m'a\s+dit/i,
-    ];
-
-    for (const pattern of patterns) {
-      const match = transcription.match(pattern);
-      if (match) {
-        return match[1].charAt(0).toUpperCase() + match[1].slice(1).toLowerCase();
-      }
-    }
-    return null;
-  }, [transcription]);
-
   const [searchQuery, setSearchQuery] = useState('');
 
-  const matchingContacts = useMemo(() => {
-    if (!detectedName) return [];
-    const normalizedName = detectedName.toLowerCase().trim();
-    return contacts.filter(
-      (contact) => contact.firstName.toLowerCase().trim() === normalizedName
-    );
-  }, [detectedName, contacts]);
+  const suggestedContact = useMemo(() => {
+    if (!detection?.contactId) return null;
+    return contacts.find((contact) => contact.id === detection.contactId) || null;
+  }, [detection, contacts]);
 
-  const nameForNewContact = isEditingNewName && newContactName.trim()
-    ? newContactName.trim()
-    : detectedName;
+  const candidateContacts = useMemo(() => {
+    if (!detection?.candidateIds?.length) return [];
+    return contacts.filter((contact) => detection.candidateIds.includes(contact.id));
+  }, [detection, contacts]);
 
-  const filteredContacts = searchQuery
-    ? contacts.filter(
-        (contact) =>
-          contact.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (contact.lastName?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-          (contact.nickname?.toLowerCase().includes(searchQuery.toLowerCase()))
-      )
-    : contacts;
+  const hasSuggestions = suggestedContact || candidateContacts.length > 0;
+
+  const suggestedIds = useMemo(() => {
+    const ids = new Set<string>();
+    if (suggestedContact) ids.add(suggestedContact.id);
+    candidateContacts.forEach((contact) => ids.add(contact.id));
+    return ids;
+  }, [suggestedContact, candidateContacts]);
+
+  const newContactDisplayName = useMemo(() => {
+    if (isEditingNewName && newContactName.trim()) {
+      return newContactName.trim();
+    }
+    if (detection?.isNew) {
+      if (detection.lastName) {
+        return `${detection.firstName} ${detection.lastName}`;
+      }
+      if (detection.suggestedNickname) {
+        return detection.suggestedNickname;
+      }
+      return detection.firstName;
+    }
+    return detection?.firstName || '';
+  }, [detection, isEditingNewName, newContactName]);
+
+  const filteredContacts = useMemo(() => {
+    const filtered = searchQuery
+      ? contacts.filter(
+          (contact) =>
+            contact.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (contact.lastName?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+            (contact.nickname?.toLowerCase().includes(searchQuery.toLowerCase()))
+        )
+      : contacts;
+    return filtered.filter((contact) => !suggestedIds.has(contact.id));
+  }, [contacts, searchQuery, suggestedIds]);
 
   const handleSelectContact = async (contact: Contact) => {
     setIsExtracting(true);
     try {
-      const contactsForExtraction = contacts.map((c) => ({
-        id: c.id,
-        firstName: c.firstName,
-        lastName: c.lastName,
+      const contactsForExtraction = contacts.map((contactItem) => ({
+        id: contactItem.id,
+        firstName: contactItem.firstName,
+        lastName: contactItem.lastName,
       }));
 
-      // Load facts and hot topics for the selected contact
       const [facts, hotTopics] = await Promise.all([
         factService.getByContact(contact.id),
         hotTopicService.getByContact(contact.id),
@@ -105,7 +123,6 @@ export default function SelectContactScreen() {
         },
       });
 
-      // Override the contact ID with selected contact
       extraction.contactIdentified.id = contact.id;
       extraction.contactIdentified.needsDisambiguation = false;
 
@@ -129,15 +146,15 @@ export default function SelectContactScreen() {
   const handleCreateNew = async () => {
     setIsExtracting(true);
     try {
-      const contactsForExtraction = contacts.map((c) => ({
-        id: c.id,
-        firstName: c.firstName,
-        lastName: c.lastName,
+      const contactsForExtraction = contacts.map((contactItem) => ({
+        id: contactItem.id,
+        firstName: contactItem.firstName,
+        lastName: contactItem.lastName,
       }));
 
-      const groupsForExtraction = groups.map((g) => ({
-        id: g.id,
-        name: g.name,
+      const groupsForExtraction = groups.map((group) => ({
+        id: group.id,
+        name: group.name,
       }));
 
       const { extraction } = await extractInfo({
@@ -146,9 +163,22 @@ export default function SelectContactScreen() {
         existingGroups: groupsForExtraction,
       });
 
-      // Override the first name if user edited it
-      if (nameForNewContact && nameForNewContact !== extraction.contactIdentified.firstName) {
-        extraction.contactIdentified.firstName = nameForNewContact;
+      if (detection) {
+        extraction.contactIdentified.firstName = detection.firstName;
+        if (detection.lastName) {
+          extraction.contactIdentified.lastName = detection.lastName;
+        }
+        if (detection.suggestedNickname) {
+          extraction.contactIdentified.suggestedNickname = detection.suggestedNickname;
+        }
+      }
+
+      if (isEditingNewName && newContactName.trim()) {
+        const parts = newContactName.trim().split(' ');
+        extraction.contactIdentified.firstName = parts[0];
+        if (parts.length > 1) {
+          extraction.contactIdentified.lastName = parts.slice(1).join(' ');
+        }
       }
 
       setCurrentExtraction(extraction);
@@ -175,159 +205,365 @@ export default function SelectContactScreen() {
 
   if (isExtracting) {
     return (
-      <View className="flex-1 bg-background items-center justify-center">
-        <ActivityIndicator size="large" color="#8B5CF6" />
-        <Text className="text-textSecondary mt-4">{t('selectContact.analyzing')}</Text>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+        <Text style={styles.loadingText}>{t('selectContact.analyzing')}</Text>
       </View>
     );
   }
 
   return (
     <ScrollView
-      className="flex-1 bg-background px-6 pt-4"
+      style={styles.container}
       contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
     >
-      <View className="flex-row items-center mb-2">
-        <Sparkles size={24} color="#8B5CF6" />
-        <Text className="text-2xl font-bold text-textPrimary ml-2">
-          {t('selectContact.question')}
-        </Text>
+      <View style={styles.header}>
+        <Sparkles size={24} color={Colors.primary} />
+        <Text style={styles.title}>{t('selectContact.question')}</Text>
       </View>
 
-      <Text className="text-textMuted mb-4 text-sm italic">
+      <Text style={styles.transcriptionPreview}>
         "{transcription.slice(0, 100)}{transcription.length > 100 ? '...' : ''}"
       </Text>
 
-      {/* Search */}
-      <View className="bg-surface rounded-lg flex-row items-center px-4 mb-6">
-        <Search size={20} color="#9CA3AF" />
-        <TextInput
-          className="flex-1 py-3 px-3 text-textPrimary"
-          placeholder={t('selectContact.searchPlaceholder')}
-          placeholderTextColor="#9CA3AF"
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-      </View>
+      {hasSuggestions && (
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <CheckCircle2 size={18} color={Colors.primary} />
+            <Text style={styles.sectionTitle}>{t('selectContact.suggestion')}</Text>
+          </View>
 
-      {/* Suggested contacts (matching first name) */}
-      {matchingContacts.length > 0 && (
-        <View className="mb-6">
-          <Text className="text-lg font-semibold text-textPrimary mb-3">
-            {t('selectContact.suggestedContacts', { name: detectedName })}
-          </Text>
-
-          {matchingContacts.map((contact) => (
+          {suggestedContact && (
             <Pressable
-              key={contact.id}
-              className="bg-primary/10 border border-primary/30 p-4 rounded-lg mb-3 flex-row items-center"
-              onPress={() => handleSelectContact(contact)}
+              style={styles.suggestedContactCard}
+              onPress={() => handleSelectContact(suggestedContact)}
             >
-              <View className="w-12 h-12 bg-primary/20 rounded-full items-center justify-center mr-4">
-                <User size={24} color="#8B5CF6" />
+              <View style={styles.avatarPrimary}>
+                <User size={24} color={Colors.primary} />
               </View>
-
-              <View className="flex-1">
-                <Text className="text-textPrimary font-semibold text-lg">
-                  {contact.firstName} {contact.lastName || contact.nickname || ''}
+              <View style={styles.contactInfo}>
+                <Text style={styles.contactName}>
+                  {suggestedContact.firstName} {suggestedContact.lastName || suggestedContact.nickname || ''}
                 </Text>
-                {contact.lastContactAt && (
-                  <Text className="text-textMuted text-xs">
-                    {t('selectContact.lastContact', { date: new Date(contact.lastContactAt).toLocaleDateString() })}
+                {suggestedContact.aiSummary && (
+                  <Text style={styles.contactSummary} numberOfLines={1}>
+                    {suggestedContact.aiSummary}
                   </Text>
                 )}
+              </View>
+            </Pressable>
+          )}
+
+          {candidateContacts.length > 0 && !suggestedContact && (
+            <>
+              <Text style={styles.disambiguationHint}>
+                {t('selectContact.multipleMatches', { name: detection?.firstName })}
+              </Text>
+              {candidateContacts.map((contact) => (
+                <Pressable
+                  key={contact.id}
+                  style={styles.candidateContactCard}
+                  onPress={() => handleSelectContact(contact)}
+                >
+                  <View style={styles.avatarSecondary}>
+                    <User size={20} color={Colors.primary} />
+                  </View>
+                  <View style={styles.contactInfo}>
+                    <Text style={styles.contactName}>
+                      {contact.firstName} {contact.lastName || contact.nickname || ''}
+                    </Text>
+                    {contact.aiSummary && (
+                      <Text style={styles.contactSummary} numberOfLines={1}>
+                        {contact.aiSummary}
+                      </Text>
+                    )}
+                  </View>
+                </Pressable>
+              ))}
+            </>
+          )}
+        </View>
+      )}
+
+      {(detection?.isNew || !hasSuggestions) && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('selectContact.newContact')}</Text>
+
+          {isEditingNewName && (
+            <View style={styles.editNameContainer}>
+              <Text style={styles.editNameLabel}>{t('selectContact.contactName')}</Text>
+              <TextInput
+                style={styles.editNameInput}
+                placeholder={t('selectContact.firstNamePlaceholder')}
+                placeholderTextColor={Colors.textMuted}
+                value={newContactName}
+                onChangeText={setNewContactName}
+                autoFocus
+              />
+            </View>
+          )}
+
+          <Pressable style={styles.createNewButton} onPress={handleCreateNew}>
+            <View style={styles.createNewContent}>
+              <Plus size={20} color={Colors.primary} />
+              <Text style={styles.createNewText}>
+                {newContactDisplayName
+                  ? t('selectContact.createContact', { name: newContactDisplayName })
+                  : t('selectContact.createNewContact')}
+              </Text>
+            </View>
+          </Pressable>
+
+          {!isEditingNewName && (
+            <Pressable
+              style={styles.editNameButton}
+              onPress={() => {
+                setIsEditingNewName(true);
+                setNewContactName(detection?.firstName || '');
+              }}
+            >
+              <Edit3 size={16} color={Colors.textMuted} />
+              <Text style={styles.editNameButtonText}>{t('selectContact.editName')}</Text>
+            </Pressable>
+          )}
+        </View>
+      )}
+
+      <View style={styles.section}>
+        <View style={styles.searchContainer}>
+          <Search size={20} color={Colors.textMuted} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder={t('selectContact.searchPlaceholder')}
+            placeholderTextColor={Colors.textMuted}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
+      </View>
+
+      {filteredContacts.length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('selectContact.allContacts')}</Text>
+
+          {filteredContacts.map((contact) => (
+            <Pressable
+              key={contact.id}
+              style={styles.contactCard}
+              onPress={() => handleSelectContact(contact)}
+            >
+              <View style={styles.avatarSmall}>
+                <User size={20} color={Colors.textMuted} />
+              </View>
+              <View style={styles.contactInfo}>
+                <Text style={styles.contactNameSmall}>
+                  {contact.firstName} {contact.lastName || contact.nickname || ''}
+                </Text>
               </View>
             </Pressable>
           ))}
         </View>
       )}
 
-      {/* Create new contact */}
-      <View className="mb-6">
-        <Text className="text-lg font-semibold text-textPrimary mb-3">
-          {t('selectContact.newContact')}
-        </Text>
-
-        {isEditingNewName ? (
-          <View className="bg-surface p-4 rounded-lg mb-3">
-            <Text className="text-textSecondary text-sm mb-2">{t('selectContact.contactName')}</Text>
-            <TextInput
-              className="bg-background py-3 px-4 rounded-lg text-textPrimary"
-              placeholder={t('selectContact.firstNamePlaceholder')}
-              placeholderTextColor="#71717a"
-              value={newContactName}
-              onChangeText={setNewContactName}
-              autoFocus
-            />
-          </View>
-        ) : null}
-
-        <Pressable
-          className="border-2 border-dashed border-primary/50 p-4 rounded-lg items-center bg-primary/5"
-          onPress={handleCreateNew}
-        >
-          <View className="flex-row items-center">
-            <Plus size={20} color="#8B5CF6" />
-            <Text className="text-primary font-semibold ml-2">
-              {nameForNewContact
-                ? t('selectContact.createContact', { name: nameForNewContact })
-                : t('selectContact.createNewContact')}
-            </Text>
-          </View>
-        </Pressable>
-
-        {!isEditingNewName && (
-          <Pressable
-            className="mt-2 py-2 items-center flex-row justify-center"
-            onPress={() => {
-              setIsEditingNewName(true);
-              setNewContactName(detectedName || '');
-            }}
-          >
-            <Edit3 size={16} color="#9CA3AF" />
-            <Text className="text-textMuted ml-2 text-sm">
-              {t('selectContact.editName')}
-            </Text>
-          </Pressable>
-        )}
-      </View>
-
-      {/* All contacts */}
-      {filteredContacts.length > 0 && (
-        <View className="mb-6">
-          <Text className="text-lg font-semibold text-textPrimary mb-3">
-            {t('selectContact.allContacts')}
-          </Text>
-
-          {filteredContacts
-            .filter((contact) => !matchingContacts.some((mc) => mc.id === contact.id))
-            .map((contact) => (
-              <Pressable
-                key={contact.id}
-                className="bg-surface p-4 rounded-lg mb-2 flex-row items-center"
-                onPress={() => handleSelectContact(contact)}
-              >
-                <View className="w-10 h-10 bg-surfaceHover rounded-full items-center justify-center mr-3">
-                  <User size={20} color="#9CA3AF" />
-                </View>
-
-                <View className="flex-1">
-                  <Text className="text-textPrimary font-medium">
-                    {contact.firstName} {contact.lastName || contact.nickname || ''}
-                  </Text>
-                </View>
-              </Pressable>
-            ))}
-        </View>
-      )}
-
-      {/* Cancel button */}
-      <Pressable
-        className="py-3 items-center mb-6"
-        onPress={handleCancel}
-      >
-        <Text className="text-textMuted">{t('common.cancel')}</Text>
+      <Pressable style={styles.cancelButton} onPress={handleCancel}>
+        <Text style={styles.cancelText}>{t('common.cancel')}</Text>
       </Pressable>
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.md,
+  },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: Colors.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    color: Colors.textSecondary,
+    marginTop: Spacing.md,
+    ...Typography.bodyMedium,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Spacing.xs,
+  },
+  title: {
+    ...Typography.headlineLarge,
+    color: Colors.textPrimary,
+    marginLeft: Spacing.sm,
+  },
+  transcriptionPreview: {
+    color: Colors.textMuted,
+    marginBottom: Spacing.md,
+    ...Typography.bodySmall,
+    fontStyle: 'italic',
+  },
+  section: {
+    marginBottom: Spacing.lg,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Spacing.sm,
+  },
+  sectionTitle: {
+    ...Typography.titleLarge,
+    color: Colors.textPrimary,
+    marginLeft: Spacing.xs,
+  },
+  disambiguationHint: {
+    color: Colors.textSecondary,
+    ...Typography.bodySmall,
+    marginBottom: Spacing.sm,
+  },
+  suggestedContactCard: {
+    backgroundColor: Colors.primary + '15',
+    borderWidth: 1,
+    borderColor: Colors.primary + '40',
+    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  candidateContactCard: {
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.primary + '30',
+    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Spacing.sm,
+  },
+  contactCard: {
+    backgroundColor: Colors.surface,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Spacing.xs,
+  },
+  avatarPrimary: {
+    width: 48,
+    height: 48,
+    backgroundColor: Colors.primary + '25',
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: Spacing.md,
+  },
+  avatarSecondary: {
+    width: 40,
+    height: 40,
+    backgroundColor: Colors.primary + '15',
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: Spacing.md,
+  },
+  avatarSmall: {
+    width: 40,
+    height: 40,
+    backgroundColor: Colors.surfaceHover,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: Spacing.sm,
+  },
+  contactInfo: {
+    flex: 1,
+  },
+  contactName: {
+    color: Colors.textPrimary,
+    ...Typography.titleLarge,
+  },
+  contactNameSmall: {
+    color: Colors.textPrimary,
+    ...Typography.titleMedium,
+  },
+  contactSummary: {
+    color: Colors.textMuted,
+    ...Typography.bodySmall,
+    marginTop: 2,
+  },
+  editNameContainer: {
+    backgroundColor: Colors.surface,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    marginBottom: Spacing.sm,
+  },
+  editNameLabel: {
+    color: Colors.textSecondary,
+    ...Typography.bodySmall,
+    marginBottom: Spacing.xs,
+  },
+  editNameInput: {
+    backgroundColor: Colors.background,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.md,
+    color: Colors.textPrimary,
+    ...Typography.bodyMedium,
+  },
+  createNewButton: {
+    borderWidth: 2,
+    borderStyle: 'dashed',
+    borderColor: Colors.primary + '60',
+    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    alignItems: 'center',
+    backgroundColor: Colors.primary + '08',
+  },
+  createNewContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  createNewText: {
+    color: Colors.primary,
+    ...Typography.titleMedium,
+    marginLeft: Spacing.sm,
+  },
+  editNameButton: {
+    marginTop: Spacing.sm,
+    paddingVertical: Spacing.sm,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  editNameButtonText: {
+    color: Colors.textMuted,
+    marginLeft: Spacing.sm,
+    ...Typography.bodySmall,
+  },
+  searchContainer: {
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.md,
+  },
+  searchInput: {
+    flex: 1,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.sm,
+    color: Colors.textPrimary,
+    ...Typography.bodyMedium,
+  },
+  cancelButton: {
+    paddingVertical: Spacing.sm,
+    alignItems: 'center',
+    marginBottom: Spacing.lg,
+  },
+  cancelText: {
+    color: Colors.textMuted,
+    ...Typography.bodyMedium,
+  },
+});
