@@ -12,7 +12,12 @@ npx wrangler secret put XAI_API_KEY
 npx wrangler secret put GOOGLE_CLIENT_ID_WEB
 npx wrangler secret put GOOGLE_CLIENT_ID_IOS
 npx wrangler secret put GOOGLE_CLIENT_ID_ANDROID
+npx wrangler secret put ADMIN_EMAIL
 ```
+
+### Variables d'environnement frontend (à configurer)
+
+- [ ] Ajouter `EXPO_PUBLIC_ADMIN_EMAIL` dans `frontend/.env` (email de l'admin qui a accès au monitoring)
 
 ### Sécurité - Fait ✅
 
