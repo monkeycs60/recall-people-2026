@@ -1,6 +1,7 @@
 import { Context, Next } from 'hono';
 import { verify } from 'hono/jwt';
 import { getPrisma } from '../lib/db';
+import type { User } from '@prisma/client';
 
 type Bindings = {
   DATABASE_URL: string;
@@ -9,8 +10,12 @@ type Bindings = {
   ANTHROPIC_API_KEY: string;
 };
 
+type Variables = {
+  user: User;
+};
+
 export const authMiddleware = async (
-  c: Context<{ Bindings: Bindings }>,
+  c: Context<{ Bindings: Bindings; Variables: Variables }>,
   next: Next
 ) => {
   try {

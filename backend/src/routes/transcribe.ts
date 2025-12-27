@@ -17,17 +17,19 @@ transcribeRoutes.use('/*', authMiddleware);
 transcribeRoutes.post('/', async (c) => {
   try {
     const formData = await c.req.formData();
-    const audioFile = formData.get('audio') as File;
+    const audioFile = formData.get('audio');
 
-    if (!audioFile) {
+    if (!audioFile || typeof audioFile === 'string') {
       return c.json({ error: 'No audio file provided' }, 400);
     }
 
     const deepgram = createClient(c.env.DEEPGRAM_API_KEY);
 
-    const audioBuffer = await audioFile.arrayBuffer();
+    // audioFile is Blob (File extends Blob in Workers)
+    const audioBuffer = await (audioFile as Blob).arrayBuffer();
 
-    const language = (formData.get('language') as string) || 'fr';
+    const languageParam = formData.get('language');
+    const language = typeof languageParam === 'string' ? languageParam : 'fr';
     const validLanguages = ['fr', 'en', 'es', 'it', 'de'];
     const transcriptionLanguage = validLanguages.includes(language) ? language : 'fr';
 
@@ -41,13 +43,17 @@ transcribeRoutes.post('/', async (c) => {
       }
     );
 
+    if (!result?.results?.channels?.[0]?.alternatives?.[0]) {
+      return c.json({ error: 'Transcription failed - no result' }, 500);
+    }
+
     const transcript = result.results.channels[0].alternatives[0].transcript;
 
     return c.json({
       success: true,
       transcript,
       confidence: result.results.channels[0].alternatives[0].confidence,
-      duration: result.metadata.duration,
+      duration: result.metadata?.duration,
     });
   } catch (error) {
     console.error('Transcription error:', error);
