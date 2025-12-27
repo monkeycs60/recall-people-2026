@@ -79,6 +79,107 @@ function parseDetectionResponse(rawResponse: string): DetectionResult {
   return result.data;
 }
 
+function normalizeFirstName(name: string): string {
+  return name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+function validateDetection(
+  detection: DetectionResult,
+  contacts: DetectContactRequest['contacts']
+): DetectionResult {
+  const detectedFirstName = normalizeFirstName(detection.firstName);
+
+  // If contactId is provided, verify it matches the firstName
+  if (detection.contactId) {
+    const matchedContact = contacts.find((contact) => contact.id === detection.contactId);
+
+    if (matchedContact) {
+      const contactFirstName = normalizeFirstName(matchedContact.firstName);
+
+      // If firstName matches, the detection is valid
+      if (contactFirstName === detectedFirstName) {
+        return detection;
+      }
+    }
+
+    // contactId doesn't match firstName - this is a hallucination
+    // Try to find the correct contact by firstName
+    const correctContact = contacts.find(
+      (contact) => normalizeFirstName(contact.firstName) === detectedFirstName
+    );
+
+    if (correctContact) {
+      // Found the correct contact - fix the ID
+      return {
+        ...detection,
+        contactId: correctContact.id,
+        isNew: false,
+        candidateIds: [],
+      };
+    }
+
+    // No contact with this firstName exists - mark as new
+    return {
+      ...detection,
+      contactId: null,
+      isNew: true,
+      candidateIds: [],
+    };
+  }
+
+  // No contactId provided - check if firstName exists in contacts
+  if (!detection.isNew) {
+    const matchingContacts = contacts.filter(
+      (contact) => normalizeFirstName(contact.firstName) === detectedFirstName
+    );
+
+    if (matchingContacts.length === 1) {
+      // Exactly one match - set the correct contactId
+      return {
+        ...detection,
+        contactId: matchingContacts[0].id,
+        isNew: false,
+        candidateIds: [],
+      };
+    }
+
+    if (matchingContacts.length > 1) {
+      // Multiple matches - ambiguity
+      return {
+        ...detection,
+        contactId: null,
+        isNew: false,
+        candidateIds: matchingContacts.map((contact) => contact.id),
+      };
+    }
+
+    // No matches but isNew is false - fix it
+    return {
+      ...detection,
+      contactId: null,
+      isNew: true,
+      candidateIds: [],
+    };
+  }
+
+  // isNew is true and no contactId - verify firstName doesn't exist
+  const existingContact = contacts.find(
+    (contact) => normalizeFirstName(contact.firstName) === detectedFirstName
+  );
+
+  if (existingContact) {
+    // Actually exists - fix the detection
+    return {
+      ...detection,
+      contactId: existingContact.id,
+      isNew: false,
+      candidateIds: [],
+    };
+  }
+
+  return detection;
+}
+
 export const detectContactRoutes = new Hono<{ Bindings: Bindings }>();
 
 detectContactRoutes.use('/*', authMiddleware);
@@ -148,8 +249,11 @@ detectContactRoutes.post('/', async (c) => {
     // Parse JSON from response
     const detection = parseDetectionResponse(rawResponse);
 
+    // Validate and correct hallucinated IDs
+    const validatedDetection = validateDetection(detection, contacts);
+
     // Update Langfuse generation with output
-    generation?.end({ output: detection });
+    generation?.end({ output: validatedDetection });
 
     // Run evaluation in background (non-blocking)
     if (c.env.XAI_API_KEY && c.executionCtx) {
@@ -157,7 +261,7 @@ detectContactRoutes.post('/', async (c) => {
         evaluateDetection(
           transcription,
           contacts,
-          detection,
+          validatedDetection,
           {
             XAI_API_KEY: c.env.XAI_API_KEY,
             enableEvaluation: c.env.ENABLE_EVALUATION === 'true',
@@ -176,13 +280,13 @@ detectContactRoutes.post('/', async (c) => {
     }
 
     const result = {
-      contactId: detection.contactId,
-      firstName: detection.firstName,
-      lastName: detection.lastName,
-      suggestedNickname: detection.suggestedNickname,
-      confidence: detection.confidence,
-      isNew: detection.isNew,
-      candidateIds: detection.candidateIds,
+      contactId: validatedDetection.contactId,
+      firstName: validatedDetection.firstName,
+      lastName: validatedDetection.lastName,
+      suggestedNickname: validatedDetection.suggestedNickname,
+      confidence: validatedDetection.confidence,
+      isNew: validatedDetection.isNew,
+      candidateIds: validatedDetection.candidateIds,
     };
 
     trace?.update({ output: { success: true, detection: result } });
@@ -209,7 +313,12 @@ function buildDetectionPrompt(
     const name = `${contact.firstName}${contact.lastName ? ` ${contact.lastName}` : ''}${contact.nickname ? ` (${contact.nickname})` : ''}`;
     const summary = contact.aiSummary || 'Aucun résumé';
     const topics = contact.hotTopics.length > 0
-      ? contact.hotTopics.map((topic) => topic.title).join(', ')
+      ? contact.hotTopics.map((topic) => {
+          if (topic.context) {
+            return `${topic.title} (${topic.context})`;
+          }
+          return topic.title;
+        }).join(', ')
       : 'Aucun';
     return `- [ID: ${contact.id}] ${name}\n  Résumé: ${summary}\n  Sujets actuels: ${topics}`;
   }).join('\n');
@@ -229,33 +338,44 @@ RÈGLES D'IDENTIFICATION:
    - Identifie LA personne dont on parle principalement dans la note
    - Ignore les mentions secondaires (ex: "Marie m'a parlé de son frère Paul" → protagoniste = Marie)
    - Le prénom doit être un VRAI prénom (pas "contact", "ami", "collègue", "quelqu'un")
+   - ATTENTION aux pronoms "elle/lui/il": cherche QUI est cette personne en utilisant les sujets actuels des contacts
+     Ex: "Elle m'a raconté son date avec François" + contact Inès a sujet "Date François" → protagoniste = Inès
 
-2. SI UN CONTACT EXISTANT CORRESPOND:
+2. UTILISATION DES SUJETS ACTUELS:
+   - Les sujets actuels contiennent des indices précieux sur les contacts
+   - Si un nom mentionné dans la transcription apparaît dans un sujet d'un contact, ce contact est probablement le protagoniste
+   - Ex: transcription parle de "François" + Inès a sujet "Date François" → le protagoniste est Inès (pas François)
+
+3. SI UN CONTACT EXISTANT CORRESPOND:
+   - Le prénom du protagoniste DOIT correspondre EXACTEMENT à un prénom dans la liste (firstName)
    - Compare avec le résumé et les sujets actuels pour confirmer l'identité
    - Si 2+ contacts ont le même prénom: utilise le contexte pour choisir le bon
    - Si le contexte ne permet pas de trancher: retourne tous les IDs candidats dans candidateIds
-   - contactId = ID du contact identifié (ou null si ambiguïté)
+   - contactId = UNIQUEMENT un ID de la liste ci-dessus (jamais inventé)
    - isNew = false
 
-3. SI AMBIGUÏTÉ (plusieurs contacts possibles):
+4. SI AMBIGUÏTÉ (plusieurs contacts possibles):
    - contactId = null
-   - candidateIds = liste des IDs des contacts candidats
+   - candidateIds = liste des IDs des contacts candidats (UNIQUEMENT des IDs de la liste ci-dessus)
    - confidence = "medium" ou "low"
    - isNew = false
 
-4. SI NOUVEAU CONTACT (prénom pas dans la liste):
+5. SI NOUVEAU CONTACT:
+   - VÉRIFIE que le prénom du protagoniste N'EXISTE PAS dans la liste des contacts
+   - Si le prénom n'est dans AUCUN firstName de la liste → isNew = true
    - contactId = null
    - candidateIds = [] (vide)
-   - isNew = true
    - Si le nom de famille est mentionné: lastName = le nom
    - Sinon: génère un suggestedNickname intelligent basé sur l'info principale
      Exemples: "Paul Google" (entreprise), "Marie running" (hobby), "Sophie RH" (métier)
 
-5. GÉNÉRATION DU NICKNAME:
+6. GÉNÉRATION DU NICKNAME:
    - Combine le prénom avec l'info la plus distinctive
    - Priorise: entreprise > métier > hobby/sport > lieu
    - Format court: "Prénom Info" (2-3 mots max)
    - Ne génère un nickname QUE si lastName est null et isNew est true
+
+RÈGLE CRITIQUE: Ne JAMAIS inventer un contactId. Si le prénom n'existe pas dans la liste → isNew = true et contactId = null.
 
 IMPORTANT: Réponds UNIQUEMENT avec un objet JSON valide, sans aucun texte avant ou après.
 
@@ -266,5 +386,10 @@ Exemple pour un nouveau contact sans nom de famille:
 {"contactId": null, "firstName": "Paul", "lastName": null, "suggestedNickname": "Paul Google", "confidence": "high", "isNew": true, "candidateIds": []}
 
 Exemple avec ambiguïté:
-{"contactId": null, "firstName": "Marie", "lastName": null, "suggestedNickname": null, "confidence": "medium", "isNew": false, "candidateIds": ["id1", "id2"]}`;
+{"contactId": null, "firstName": "Marie", "lastName": null, "suggestedNickname": null, "confidence": "medium", "isNew": false, "candidateIds": ["id1", "id2"]}
+
+Exemple avec pronom et indice dans les sujets:
+Transcription: "Elle m'a raconté son date avec François"
+Contact Inès avec sujet "Date François"
+→ {"contactId": "ines-id", "firstName": "Inès", "lastName": null, "suggestedNickname": null, "confidence": "high", "isNew": false, "candidateIds": []}`;
 }

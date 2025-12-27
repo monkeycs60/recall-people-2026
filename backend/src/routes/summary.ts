@@ -163,7 +163,7 @@ HIÉRARCHIE D'IMPORTANCE (uniquement si l'info existe):
 1. Trait distinctif personnel (ce qui rend la personne mémorable) - seulement si explicitement fourni
 2. Métier/entreprise - seulement si explicitement fourni
 3. Hobbies - seulement si explicitement fourni
-4. Contexte de rencontre = seulement si explicitement fourni
+4. Contexte de rencontre = seulement si explicitement fourni OU relation avec l'utilisateur si explicitement mentionnée
 
 FORMAT:
 - 2 ou 3 phrases fluides, ton neutre et professionnel, genre présentation objective

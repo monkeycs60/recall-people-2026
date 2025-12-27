@@ -17,23 +17,9 @@ npx wrangler secret put ADMIN_EMAIL
 
 ### Variables d'environnement frontend (à configurer)
 
-- [ ] Ajouter `EXPO_PUBLIC_ADMIN_EMAIL` dans `frontend/.env` (email de l'admin qui a accès au monitoring)
+-  [ ] Ajouter `EXPO_PUBLIC_ADMIN_EMAIL` dans `frontend/.env` (email de l'admin qui a accès au monitoring)
 
 ### Sécurité - Fait ✅
-
-- [x] Hashage mots de passe (bcrypt)
-- [x] Vérification mot de passe au login
-- [x] JWT_SECRET sécurisé (512 bits)
-- [x] Google Client IDs en variables d'environnement
-- [x] Historique git nettoyé (clés API supprimées)
-- [x] Rate limiting (KV Cloudflare)
-- [x] Protection prompt injection (sanitize + délimiteurs + instructions)
-- [x] CI/CD GitHub Actions
-- [x] Réduire expiration JWT (30j → 1h) + refresh tokens
-- [x] Headers de sécurité (CSP, HSTS, X-Frame-Options)
-- [x] Validation Zod complète sur tous les endpoints
-- [x] Audit logging (qui fait quoi, quand)
-- [x] HTTPS enforcement en prod
 
 ---
 
@@ -41,15 +27,12 @@ npx wrangler secret put ADMIN_EMAIL
 
 ### Copywriting & Onboarding
 
--  [ ] Nouvelle tagline : "Parlez. Recall se souvient."
--  [ ] Refonte textes onboarding (4 écrans avec storytelling émotionnel)
--  [ ] Illustrations guided tour (4 images, voir prompts dans IMPROVEMENT_ROADMAP.md)
--  [ ] Empty states : copy émotionnel pour liste contacts vide + pas de news
+-  [ ] Nouvelle tagline : "Parlez. Recall se souvient." ==> corriger wording horrible et pas engageant
+-  [ ] Empty states : copy émotionnel pour liste contacts vide + pas de news ==> ajouter des illustrations
 -  [ ] Vocabulaire UI : remplacer termes techniques par langage relationnel
 
 ### Features Core
 
--  [x] Ice Breakers : section "Une idée pour relancer la conversation ?" dans fiche contact (généré avec résumé IA)
 -  [ ] RevenueCat paywall (freemium: gratuit sans IA, premium avec IA/transcription/rappels)
 
 -  Possibilité de supprimer un contact

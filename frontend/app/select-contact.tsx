@@ -63,7 +63,7 @@ export default function SelectContactScreen() {
     if (isEditingNewName && newContactName.trim()) {
       return newContactName.trim();
     }
-    if (detection?.isNew) {
+    if (detection) {
       if (detection.lastName) {
         return `${detection.firstName} ${detection.lastName}`;
       }
@@ -72,7 +72,7 @@ export default function SelectContactScreen() {
       }
       return detection.firstName;
     }
-    return detection?.firstName || '';
+    return '';
   }, [detection, isEditingNewName, newContactName]);
 
   const filteredContacts = useMemo(() => {
@@ -285,49 +285,47 @@ export default function SelectContactScreen() {
         </View>
       )}
 
-      {(detection?.isNew || !hasSuggestions) && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('selectContact.newContact')}</Text>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t('selectContact.newContact')}</Text>
 
-          {isEditingNewName && (
-            <View style={styles.editNameContainer}>
-              <Text style={styles.editNameLabel}>{t('selectContact.contactName')}</Text>
-              <TextInput
-                style={styles.editNameInput}
-                placeholder={t('selectContact.firstNamePlaceholder')}
-                placeholderTextColor={Colors.textMuted}
-                value={newContactName}
-                onChangeText={setNewContactName}
-                autoFocus
-              />
-            </View>
-          )}
+        {isEditingNewName && (
+          <View style={styles.editNameContainer}>
+            <Text style={styles.editNameLabel}>{t('selectContact.contactName')}</Text>
+            <TextInput
+              style={styles.editNameInput}
+              placeholder={t('selectContact.firstNamePlaceholder')}
+              placeholderTextColor={Colors.textMuted}
+              value={newContactName}
+              onChangeText={setNewContactName}
+              autoFocus
+            />
+          </View>
+        )}
 
-          <Pressable style={styles.createNewButton} onPress={handleCreateNew}>
-            <View style={styles.createNewContent}>
-              <Plus size={20} color={Colors.primary} />
-              <Text style={styles.createNewText}>
-                {newContactDisplayName
-                  ? t('selectContact.createContact', { name: newContactDisplayName })
-                  : t('selectContact.createNewContact')}
-              </Text>
-            </View>
+        <Pressable style={styles.createNewButton} onPress={handleCreateNew}>
+          <View style={styles.createNewContent}>
+            <Plus size={20} color={Colors.primary} />
+            <Text style={styles.createNewText}>
+              {newContactDisplayName
+                ? t('selectContact.createContact', { name: newContactDisplayName })
+                : t('selectContact.createNewContact')}
+            </Text>
+          </View>
+        </Pressable>
+
+        {!isEditingNewName && (
+          <Pressable
+            style={styles.editNameButton}
+            onPress={() => {
+              setIsEditingNewName(true);
+              setNewContactName(detection?.firstName || '');
+            }}
+          >
+            <Edit3 size={16} color={Colors.textMuted} />
+            <Text style={styles.editNameButtonText}>{t('selectContact.editName')}</Text>
           </Pressable>
-
-          {!isEditingNewName && (
-            <Pressable
-              style={styles.editNameButton}
-              onPress={() => {
-                setIsEditingNewName(true);
-                setNewContactName(detection?.firstName || '');
-              }}
-            >
-              <Edit3 size={16} color={Colors.textMuted} />
-              <Text style={styles.editNameButtonText}>{t('selectContact.editName')}</Text>
-            </Pressable>
-          )}
-        </View>
-      )}
+        )}
+      </View>
 
       <View style={styles.section}>
         <View style={styles.searchContainer}>
