@@ -13,6 +13,7 @@ export type STTProviderConfig = {
 	DEEPGRAM_API_KEY?: string;
 	GROQ_API_KEY?: string;
 	STT_PROVIDER?: STTProviderType;
+	ENABLE_PERFORMANCE_LOGGING?: boolean;
 };
 
 export type TranscriptionResult = {
@@ -155,6 +156,13 @@ export async function transcribeAudio(
  * Gets the current STT provider name
  */
 export function getSTTProviderName(config: STTProviderConfig): string {
+	return (config.STT_PROVIDER || 'deepgram') as STTProviderType;
+}
+
+/**
+ * Gets the current STT model name
+ */
+export function getSTTModelName(config: STTProviderConfig): string {
 	const provider = config.STT_PROVIDER || 'deepgram';
 	return PROVIDER_MODELS[provider as STTProviderType];
 }

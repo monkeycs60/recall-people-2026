@@ -2,7 +2,8 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
 import { auditLog } from '../lib/audit';
-import { transcribeAudio } from '../lib/speech-to-text-provider';
+import { transcribeAudio, getSTTProviderName, getSTTModelName } from '../lib/speech-to-text-provider';
+import { measurePerformance } from '../lib/performance-logger';
 
 type Bindings = {
   DATABASE_URL: string;
@@ -11,6 +12,7 @@ type Bindings = {
   DEEPGRAM_API_KEY: string;
   GROQ_API_KEY?: string;
   STT_PROVIDER?: 'deepgram' | 'groq-whisper-v3' | 'groq-whisper-v3-turbo';
+  ENABLE_PERFORMANCE_LOGGING?: boolean;
   ANTHROPIC_API_KEY: string;
 };
 
@@ -44,15 +46,26 @@ transcribeRoutes.post('/', async (c) => {
     const languageValidation = languageSchema.safeParse(languageParam || 'fr');
     const transcriptionLanguage = languageValidation.success ? languageValidation.data : 'fr';
 
-    // Use the speech-to-text provider wrapper
-    const result = await transcribeAudio(
+    // Provider config
+    const providerConfig = {
+      DEEPGRAM_API_KEY: c.env.DEEPGRAM_API_KEY,
+      GROQ_API_KEY: c.env.GROQ_API_KEY,
+      STT_PROVIDER: c.env.STT_PROVIDER,
+      ENABLE_PERFORMANCE_LOGGING: c.env.ENABLE_PERFORMANCE_LOGGING,
+    };
+
+    // Use the speech-to-text provider wrapper with performance logging
+    const result = await measurePerformance(
+      () => transcribeAudio(providerConfig, audioBuffer, transcriptionLanguage),
       {
-        DEEPGRAM_API_KEY: c.env.DEEPGRAM_API_KEY,
-        GROQ_API_KEY: c.env.GROQ_API_KEY,
-        STT_PROVIDER: c.env.STT_PROVIDER,
-      },
-      audioBuffer,
-      transcriptionLanguage
+        route: '/transcribe',
+        provider: getSTTProviderName(providerConfig),
+        model: getSTTModelName(providerConfig),
+        operationType: 'speech-to-text',
+        inputSize: audioBuffer.byteLength,
+        metadata: { language: transcriptionLanguage },
+        enabled: c.env.ENABLE_PERFORMANCE_LOGGING === 'true' || c.env.ENABLE_PERFORMANCE_LOGGING === true,
+      }
     );
 
     const { transcript, confidence, duration } = result;

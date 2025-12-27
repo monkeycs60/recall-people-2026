@@ -3,7 +3,8 @@ import { generateObject } from 'ai';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
 import { wrapUserInput, getSecurityInstructions } from '../lib/security';
-import { createAIModel } from '../lib/ai-provider';
+import { createAIModel, getAIProviderName, getAIModel } from '../lib/ai-provider';
+import { measurePerformance } from '../lib/performance-logger';
 
 type Bindings = {
   DATABASE_URL: string;
@@ -13,6 +14,7 @@ type Bindings = {
   XAI_API_KEY: string;
   CEREBRAS_API_KEY?: string;
   AI_PROVIDER?: 'grok' | 'cerebras';
+  ENABLE_PERFORMANCE_LOGGING?: boolean;
 };
 
 type ExtractionRequest = {
@@ -118,17 +120,31 @@ extractRoutes.post('/', async (c) => {
     const language = body.language || 'fr';
     const prompt = buildExtractionPrompt(transcription, currentContact, language);
 
-    const model = createAIModel({
+    const providerConfig = {
       XAI_API_KEY: c.env.XAI_API_KEY,
       CEREBRAS_API_KEY: c.env.CEREBRAS_API_KEY,
       AI_PROVIDER: c.env.AI_PROVIDER,
-    });
+      ENABLE_PERFORMANCE_LOGGING: c.env.ENABLE_PERFORMANCE_LOGGING,
+    };
 
-    const { object: extraction } = await generateObject({
-			model,
-			schema: extractionSchema,
-			prompt,
-		});
+    const model = createAIModel(providerConfig);
+
+    const { object: extraction } = await measurePerformance(
+      () => generateObject({
+        model,
+        schema: extractionSchema,
+        prompt,
+      }),
+      {
+        route: '/extract',
+        provider: getAIProviderName(providerConfig),
+        model: getAIModel(providerConfig),
+        operationType: 'object-generation',
+        inputSize: new TextEncoder().encode(prompt).length,
+        metadata: { language, hasCurrentContact: !!currentContact },
+        enabled: c.env.ENABLE_PERFORMANCE_LOGGING === 'true' || c.env.ENABLE_PERFORMANCE_LOGGING === true,
+      }
+    );
 
     // Server-side matching: find contacts with same first name
     const extractedFirstName = extraction.contactIdentified.firstName.toLowerCase().trim();

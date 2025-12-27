@@ -5,7 +5,8 @@ import { authMiddleware } from '../middleware/auth';
 import { wrapUserInput, sanitize, getSecurityInstructions } from '../lib/security';
 import { searchRequestSchema } from '../lib/validation';
 import { auditLog } from '../lib/audit';
-import { createAIModel } from '../lib/ai-provider';
+import { createAIModel, getAIProviderName, getAIModel } from '../lib/ai-provider';
+import { measurePerformance } from '../lib/performance-logger';
 
 type Bindings = {
 	DATABASE_URL: string;
@@ -14,6 +15,7 @@ type Bindings = {
 	XAI_API_KEY: string;
 	CEREBRAS_API_KEY?: string;
 	AI_PROVIDER?: 'grok' | 'cerebras';
+	ENABLE_PERFORMANCE_LOGGING?: boolean;
 };
 
 type FactInput = {
@@ -98,17 +100,30 @@ searchRoutes.post('/', async (c) => {
 		const language = body.language || 'fr';
 		const prompt = buildSearchPrompt(query, facts, memories, notes, language);
 
-		const model = createAIModel({
+		const providerConfig = {
 			XAI_API_KEY: c.env.XAI_API_KEY,
 			CEREBRAS_API_KEY: c.env.CEREBRAS_API_KEY,
 			AI_PROVIDER: c.env.AI_PROVIDER,
-		});
+		};
 
-		const { object: result } = await generateObject({
-			model,
-			schema: searchResultSchema,
-			prompt,
-		});
+		const model = createAIModel(providerConfig);
+
+		const { object: result } = await measurePerformance(
+			() => generateObject({
+				model,
+				schema: searchResultSchema,
+				prompt,
+			}),
+			{
+				route: '/search',
+				provider: getAIProviderName(providerConfig),
+				model: getAIModel(providerConfig),
+				operationType: 'object-generation',
+				inputSize: new TextEncoder().encode(prompt).length,
+				metadata: { language, query, factsCount: facts.length },
+				enabled: c.env.ENABLE_PERFORMANCE_LOGGING === 'true' || c.env.ENABLE_PERFORMANCE_LOGGING === true,
+			}
+		);
 
 		const sortedResults = result.results.sort(
 			(a, b) => b.relevanceScore - a.relevanceScore

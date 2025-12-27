@@ -12,6 +12,7 @@ export type AIProviderConfig = {
 	XAI_API_KEY?: string;
 	CEREBRAS_API_KEY?: string;
 	AI_PROVIDER?: AIProviderType;
+	ENABLE_PERFORMANCE_LOGGING?: boolean;
 };
 
 /**
@@ -70,4 +71,11 @@ export function createAIModel(config: AIProviderConfig) {
 	const provider = createAIProvider(config);
 	const model = getAIModel(config);
 	return provider(model);
+}
+
+/**
+ * Get the current provider name (for logging)
+ */
+export function getAIProviderName(config: AIProviderConfig): string {
+	return (config.AI_PROVIDER || 'grok') as AIProviderType;
 }

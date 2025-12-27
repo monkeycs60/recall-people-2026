@@ -97,3 +97,95 @@
 - Groq Whisper est généralement plus rapide et moins cher que Deepgram
 - Tous les appels AI text sont centralisés dans `/backend/src/lib/ai-provider.ts`
 - Tous les appels STT sont centralisés dans `/backend/src/lib/speech-to-text-provider.ts`
+
+---
+
+## Performance Logging System
+
+### Activer le logging de performance:
+
+1. **Dans votre fichier .env:**
+   ```
+   ENABLE_PERFORMANCE_LOGGING=true
+   ```
+
+2. **Redémarrer le serveur:**
+   ```
+   npm run dev
+   ```
+
+### Ce qui est loggé:
+
+Le système de logging mesure et affiche pour chaque appel AI/STT :
+
+- ✅ **Provider** : quel provider est utilisé (grok, cerebras, deepgram, groq-whisper-v3, etc.)
+- ✅ **Model** : quel modèle spécifique (grok-4-1-fast, gpt-oss-120b, nova-3, whisper-large-v3-turbo)
+- ✅ **Route** : quelle route API (/transcribe, /extract, /search, etc.)
+- ✅ **Duration** : temps total de l'opération en millisecondes
+- ✅ **Input size** : taille de l'input en bytes
+- ✅ **Output size** : taille de l'output en bytes
+- ✅ **Success** : si l'opération a réussi ou échoué
+- ✅ **Metadata** : informations contextuelles (langue, nombre de facts, etc.)
+
+### Format des logs:
+
+```
+✅ PERFORMANCE LOG [10:30:45]
+Route: /transcribe
+Provider: groq-whisper-v3-turbo (whisper-large-v3-turbo)
+Operation: speech-to-text
+⏱️  Duration: 450ms
+Input: 245.5 KB
+Output: 1.2 KB
+Metadata: { language: 'fr' }
+```
+
+### Cas d'usage - Flow principal (Audio → Transcription → Extraction):
+
+Quand tu enregistres un audio et sélectionnes un contact :
+
+1. **`/transcribe`** : Log du temps de transcription (STT provider)
+   - Compare Deepgram vs Groq Whisper v3 Turbo
+
+2. **`/extract`** : Log du temps d'extraction (AI provider)
+   - Compare Grok vs Cerebras
+
+**Temps total du flow** = Temps transcription + Temps extraction
+
+### Comparer les providers:
+
+Pour comparer les performances entre providers :
+
+1. **Activer le logging** (`ENABLE_PERFORMANCE_LOGGING=true`)
+
+2. **Tester avec provider 1:**
+   ```
+   STT_PROVIDER=deepgram
+   AI_PROVIDER=grok
+   ```
+   → Enregistrer un audio et noter les temps
+
+3. **Tester avec provider 2:**
+   ```
+   STT_PROVIDER=groq-whisper-v3-turbo
+   AI_PROVIDER=cerebras
+   ```
+   → Enregistrer le même type d'audio et comparer
+
+4. **Analyser les résultats** dans la console pour voir quel combo est le plus rapide
+
+### Routes loggées:
+
+- `/transcribe` - Speech-to-text (operation: speech-to-text)
+- `/extract` - Extraction d'infos (operation: object-generation)
+- `/search` - Recherche sémantique (operation: object-generation)
+- `/summary` - Résumé de contact (operation: text-generation)
+- `/similarity` - Calcul de similarité (operation: object-generation)
+
+### Désactiver le logging:
+
+```
+ENABLE_PERFORMANCE_LOGGING=false
+```
+
+Ou simplement enlever la variable de .env

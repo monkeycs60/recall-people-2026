@@ -4,12 +4,14 @@ import { authMiddleware } from '../middleware/auth';
 import { sanitize, getSecurityInstructions } from '../lib/security';
 import { summaryRequestSchema } from '../lib/validation';
 import { auditLog } from '../lib/audit';
-import { createAIModel } from '../lib/ai-provider';
+import { createAIModel, getAIProviderName, getAIModel } from '../lib/ai-provider';
+import { measurePerformance } from '../lib/performance-logger';
 
 type Bindings = {
 	XAI_API_KEY: string;
 	CEREBRAS_API_KEY?: string;
 	AI_PROVIDER?: 'grok' | 'cerebras';
+	ENABLE_PERFORMANCE_LOGGING?: boolean;
 };
 
 type SummaryRequest = {
@@ -150,16 +152,29 @@ FORMAT:
 - NE MENTIONNE PAS les actualités ou sujets en cours (ils sont traités séparément)
 `;
 
-		const model = createAIModel({
+		const providerConfig = {
 			XAI_API_KEY: c.env.XAI_API_KEY,
 			CEREBRAS_API_KEY: c.env.CEREBRAS_API_KEY,
 			AI_PROVIDER: c.env.AI_PROVIDER,
-		});
+		};
 
-		const { text } = await generateText({
-			model,
-			prompt,
-		});
+		const model = createAIModel(providerConfig);
+
+		const { text } = await measurePerformance(
+			() => generateText({
+				model,
+				prompt,
+			}),
+			{
+				route: '/summary',
+				provider: getAIProviderName(providerConfig),
+				model: getAIModel(providerConfig),
+				operationType: 'text-generation',
+				inputSize: new TextEncoder().encode(prompt).length,
+				metadata: { language, factsCount: facts.length },
+				enabled: c.env.ENABLE_PERFORMANCE_LOGGING === 'true' || c.env.ENABLE_PERFORMANCE_LOGGING === true,
+			}
+		);
 
 		await auditLog(c, {
 			userId: c.get('user')?.id,
