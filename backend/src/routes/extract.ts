@@ -3,7 +3,7 @@ import { createXai } from '@ai-sdk/xai';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
-import { wrapUserInput, SECURITY_INSTRUCTIONS_FR } from '../lib/security';
+import { wrapUserInput, getSecurityInstructions } from '../lib/security';
 
 type Bindings = {
   DATABASE_URL: string;
@@ -230,7 +230,7 @@ ${currentContact.hotTopics.map((topic) => `  • [ID: ${topic.id}] "${topic.titl
   }
 
   return `Tu es un assistant qui extrait des informations structurées à partir de notes vocales dans la langue : ${language}.
-${SECURITY_INSTRUCTIONS_FR}
+${getSecurityInstructions(language)}
 ${currentContactContext}
 ${existingHotTopicsContext}
 

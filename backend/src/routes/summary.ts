@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { createXai } from '@ai-sdk/xai';
 import { generateText } from 'ai';
 import { authMiddleware } from '../middleware/auth';
-import { sanitize, SECURITY_INSTRUCTIONS_FR } from '../lib/security';
+import { sanitize, getSecurityInstructions } from '../lib/security';
 
 type Bindings = {
 	XAI_API_KEY: string;
@@ -102,7 +102,7 @@ summaryRoutes.post('/', async (c) => {
 				.join('\n');
 
 		const prompt = `Tu es un assistant qui aide à se souvenir des gens. Génère un résumé concis et mémorable de cette personne.
-${SECURITY_INSTRUCTIONS_FR}
+${getSecurityInstructions(language)}
 Réponds dans la langue : ${language}.
 
 PERSONNE: ${sanitize(contact.firstName)}${contact.lastName ? ` ${sanitize(contact.lastName)}` : ''}

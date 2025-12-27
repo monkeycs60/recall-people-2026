@@ -3,7 +3,7 @@ import { createXai } from '@ai-sdk/xai';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
-import { wrapUserInput, sanitize, SECURITY_INSTRUCTIONS_FR } from '../lib/security';
+import { wrapUserInput, sanitize, getSecurityInstructions } from '../lib/security';
 
 type Bindings = {
 	DATABASE_URL: string;
@@ -136,7 +136,7 @@ const buildSearchPrompt = (
 		.join('\n');
 
 	return `Tu es un assistant de recherche dans un carnet de contacts personnel.
-${SECURITY_INSTRUCTIONS_FR}
+${getSecurityInstructions(language)}
 
 REQUÊTE UTILISATEUR:
 ${wrappedQuery}
