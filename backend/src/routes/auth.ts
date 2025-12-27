@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { sign, verify } from 'hono/jwt';
 import { hash, compare } from 'bcryptjs';
 import { getPrisma } from '../lib/db';
+import { rateLimiters } from '../middleware/rateLimit';
 
 type Bindings = {
 	DATABASE_URL: string;
@@ -9,12 +10,13 @@ type Bindings = {
 	GOOGLE_CLIENT_ID_WEB: string;
 	GOOGLE_CLIENT_ID_IOS: string;
 	GOOGLE_CLIENT_ID_ANDROID: string;
+	RATE_LIMIT: KVNamespace;
 };
 
 export const authRoutes = new Hono<{ Bindings: Bindings }>();
 
 // Register
-authRoutes.post('/register', async (c) => {
+authRoutes.post('/register', rateLimiters.register, async (c) => {
 	try {
 		const { email, password, name } = await c.req.json();
 
@@ -77,7 +79,7 @@ authRoutes.post('/register', async (c) => {
 });
 
 // Login
-authRoutes.post('/login', async (c) => {
+authRoutes.post('/login', rateLimiters.login, async (c) => {
 	try {
 		const { email, password } = await c.req.json();
 

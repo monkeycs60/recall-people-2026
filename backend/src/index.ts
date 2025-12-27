@@ -9,12 +9,14 @@ import { summaryRoutes } from './routes/summary';
 import { iceBreakersRoutes } from './routes/ice-breakers';
 import { searchRoutes } from './routes/search';
 import { settingsRoutes } from './routes/settings';
+import { rateLimiters } from './middleware/rateLimit';
 
 type Bindings = {
   DATABASE_URL: string;
   JWT_SECRET: string;
   DEEPGRAM_API_KEY: string;
   XAI_API_KEY: string;
+  RATE_LIMIT: KVNamespace;
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -36,6 +38,14 @@ app.use(
 app.get('/', (c) =>
   c.json({ status: 'ok', service: 'recall-people-api', version: '1.0.0' })
 );
+
+// Rate limiting for API routes (applied after auth middleware in each route)
+app.use('/api/*', rateLimiters.api);
+
+// AI-heavy routes get additional stricter limits
+app.use('/api/extract/*', rateLimiters.aiExtract);
+app.use('/api/summary/*', rateLimiters.aiExtract);
+app.use('/api/search/*', rateLimiters.aiExtract);
 
 app.route('/auth', authRoutes);
 app.route('/api/transcribe', transcribeRoutes);

@@ -3,6 +3,13 @@ main = "src/index.ts"
 compatibility_date = "2025-01-01"
 node_compat = true
 
+# Rate limiting KV namespace
+# Run: npx wrangler kv:namespace create "RATE_LIMIT"
+# Then replace the id below with the returned ID
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "14ac4ad1ebd54bf8a597a9f7e1efbfa9"
+
 [env.dev]
 vars = { BETTER_AUTH_URL = "http://localhost:8787" }
 
