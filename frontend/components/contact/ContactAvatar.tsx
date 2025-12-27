@@ -16,14 +16,26 @@ const SIZE_MAP = {
 
 // Warm background colors matching our theme
 const BACKGROUND_COLORS = [
-  'F5DFC9', // Warm cream
-  'E8D5C4', // Soft beige
-  'FAE5D3', // Peach
-  'E8ECEF', // Blue grey light
-  'EDD5C0', // Amber light
-  'F7E4D4', // Rose sand
-  'E5DCD5', // Warm taupe light
-  'FBE8D8', // Soft apricot
+  'f5dfc9', // Warm cream
+  'e8d5c4', // Soft beige
+  'fae5d3', // Peach
+  'e8ecef', // Blue grey light
+  'edd5c0', // Amber light
+  'f7e4d4', // Rose sand
+  'fbe8d8', // Soft apricot
+  'f0e6dc', // Warm white
+];
+
+// Fun shirt colors - mix of warm tones and pops of color
+const SHIRT_COLORS = [
+  'c67c4e', // Terracotta (primary)
+  '6b7d8a', // Blue grey (secondary)
+  'd4926a', // Soft coral
+  '8b6f5c', // Warm brown
+  'a65d2e', // Deep terracotta
+  '7a8b8c', // Cool grey
+  'b86b3f', // Amber
+  'd98e5c', // Light terracotta
 ];
 
 function hashCode(str: string): number {
@@ -34,15 +46,27 @@ function hashCode(str: string): number {
   return Math.abs(hash);
 }
 
+function hashCode2(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 6) + (hash << 16) - hash);
+  }
+  return Math.abs(hash);
+}
+
 export function ContactAvatar({ firstName, lastName, size = 'medium' }: ContactAvatarProps) {
   const displayName = lastName ? `${firstName} ${lastName}` : firstName;
   const pixelSize = SIZE_MAP[size];
 
-  const hash = hashCode(displayName);
-  const bgColor = BACKGROUND_COLORS[hash % BACKGROUND_COLORS.length];
+  const hash1 = hashCode(displayName);
+  const hash2 = hashCode2(displayName);
 
-  // Build DiceBear URL with adventurer style
-  const avatarUrl = `https://api.dicebear.com/9.x/adventurer/svg?seed=${encodeURIComponent(displayName)}&backgroundColor=${bgColor}&backgroundType=solid&radius=50`;
+  const bgColor = BACKGROUND_COLORS[hash1 % BACKGROUND_COLORS.length];
+  const shirtColor = SHIRT_COLORS[hash2 % SHIRT_COLORS.length];
+
+  // Build DiceBear URL with Micah style
+  // baseColor=f9c9b6 for light skin tone
+  const avatarUrl = `https://api.dicebear.com/9.x/micah/svg?seed=${encodeURIComponent(displayName)}&backgroundColor=${bgColor}&shirtColor=${shirtColor}&baseColor=f9c9b6&backgroundType=solid&radius=50`;
 
   const containerStyle = [
     styles.container,

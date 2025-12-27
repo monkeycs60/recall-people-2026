@@ -8,10 +8,12 @@ type UserAvatarProps = {
 };
 
 export function UserAvatar({ name, size = 64 }: UserAvatarProps) {
-  // Use a warm background for user avatar (blue-grey to differentiate from contacts)
-  const bgColor = 'E8ECEF';
+  // User avatar with blue-grey background to differentiate from contacts
+  const bgColor = 'e8ecef';
+  const shirtColor = '6b7d8a'; // Secondary color
 
-  const avatarUrl = `https://api.dicebear.com/9.x/adventurer/svg?seed=${encodeURIComponent(name)}&backgroundColor=${bgColor}&backgroundType=solid&radius=50`;
+  // baseColor=f9c9b6 for light skin tone
+  const avatarUrl = `https://api.dicebear.com/9.x/micah/svg?seed=${encodeURIComponent(name)}&backgroundColor=${bgColor}&shirtColor=${shirtColor}&baseColor=f9c9b6&backgroundType=solid&radius=50`;
 
   const containerStyle = [
     styles.container,
