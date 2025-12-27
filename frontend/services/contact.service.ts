@@ -40,6 +40,7 @@ export const contactService = {
       photo_uri: string | null;
       highlights: string | null;
       ai_summary: string | null;
+      ice_breakers: string | null;
       last_contact_at: string | null;
       created_at: string;
       updated_at: string;
@@ -101,6 +102,7 @@ export const contactService = {
       photoUri: contactRow.photo_uri || undefined,
       highlights: JSON.parse(contactRow.highlights || '[]'),
       aiSummary: contactRow.ai_summary || undefined,
+      iceBreakers: contactRow.ice_breakers ? JSON.parse(contactRow.ice_breakers) : undefined,
       lastContactAt: contactRow.last_contact_at || undefined,
       createdAt: contactRow.created_at,
       updatedAt: contactRow.updated_at,
@@ -193,6 +195,7 @@ export const contactService = {
       nickname: string;
       highlights: string[];
       aiSummary: string;
+      iceBreakers: string[];
       lastContactAt: string;
     }>
   ): Promise<void> => {
@@ -219,6 +222,10 @@ export const contactService = {
     if (data.aiSummary !== undefined) {
       updates.push('ai_summary = ?');
       values.push(data.aiSummary || null);
+    }
+    if (data.iceBreakers !== undefined) {
+      updates.push('ice_breakers = ?');
+      values.push(data.iceBreakers ? JSON.stringify(data.iceBreakers) : null);
     }
     if (data.lastContactAt) {
       updates.push('last_contact_at = ?');

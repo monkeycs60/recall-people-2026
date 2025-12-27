@@ -27,6 +27,7 @@ export const initDatabase = async () => {
       tags TEXT DEFAULT '[]',
       highlights TEXT DEFAULT '[]',
       ai_summary TEXT,
+      ice_breakers TEXT,
       last_contact_at TEXT,
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now'))
@@ -181,6 +182,12 @@ const runMigrations = async (database: SQLite.SQLiteDatabase) => {
   const hasAiSummary = contactsInfo.some((col) => col.name === 'ai_summary');
   if (!hasAiSummary) {
     await database.execAsync("ALTER TABLE contacts ADD COLUMN ai_summary TEXT");
+  }
+
+  // Check if ice_breakers column exists on contacts
+  const hasIceBreakers = contactsInfo.some((col) => col.name === 'ice_breakers');
+  if (!hasIceBreakers) {
+    await database.execAsync("ALTER TABLE contacts ADD COLUMN ice_breakers TEXT");
   }
 
   // Create hot_topics table if not exists

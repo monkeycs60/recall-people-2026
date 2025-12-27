@@ -23,6 +23,7 @@ import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { Edit3, Mic, X, Plus, Check, Trash2 } from 'lucide-react-native';
 import { AISummary } from '@/components/contact/AISummary';
+import { IceBreakers } from '@/components/contact/IceBreakers';
 import { ProfileCard } from '@/components/contact/ProfileCard';
 import { HotTopicsList } from '@/components/contact/HotTopicsList';
 import { MemoriesList } from '@/components/contact/MemoriesList';
@@ -79,7 +80,7 @@ export default function ContactDetailScreen() {
   const scrollViewRef = useRef<ScrollView>(null);
   const sectionPositions = useRef<Record<string, number>>({});
 
-  const { contact, isLoading, isWaitingForSummary, invalidate } = useContactQuery(contactId);
+  const { contact, isLoading, isWaitingForSummary, isWaitingForIceBreakers, invalidate } = useContactQuery(contactId);
 
   // TanStack Query mutations
   const updateContactMutation = useUpdateContact();
@@ -560,6 +561,11 @@ export default function ContactDetailScreen() {
         {/* AI Summary */}
         <Animated.View entering={FadeInDown.delay(100).duration(300)} style={styles.section}>
           <AISummary summary={contact.aiSummary} isLoading={isWaitingForSummary} firstName={contact.firstName} />
+        </Animated.View>
+
+        {/* Ice Breakers */}
+        <Animated.View entering={FadeInDown.delay(125).duration(300)} style={styles.section}>
+          <IceBreakers iceBreakers={contact.iceBreakers} isLoading={isWaitingForIceBreakers} firstName={contact.firstName} />
         </Animated.View>
 
         {/* Hot Topics Section */}

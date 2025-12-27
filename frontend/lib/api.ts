@@ -187,6 +187,32 @@ export const generateSummary = async (data: {
   return response.summary;
 };
 
+export const generateIceBreakers = async (data: {
+  contact: {
+    firstName: string;
+    lastName?: string;
+  };
+  facts: Array<{
+    factType: string;
+    factKey: string;
+    factValue: string;
+  }>;
+  hotTopics: Array<{
+    title: string;
+    context: string;
+    status: string;
+  }>;
+}): Promise<string[]> => {
+  const response = await apiCall<{ success: boolean; iceBreakers: string[] }>(
+    '/api/ice-breakers',
+    {
+      method: 'POST',
+      body: { ...data, language: getCurrentLanguage() },
+    }
+  );
+  return response.iceBreakers;
+};
+
 export const getUserSettings = async (): Promise<{
   user: { id: string; name: string; email: string; preferredLanguage: string };
 }> => {

@@ -63,7 +63,7 @@ summaryRoutes.use('/*', authMiddleware);
 summaryRoutes.post('/', async (c) => {
 	try {
 		const body = await c.req.json<SummaryRequest>();
-		const { contact, facts, hotTopics } = body;
+		const { contact, facts } = body;
 
 		const language = body.language || 'fr';
 		const langConfig =
@@ -73,7 +73,7 @@ summaryRoutes.post('/', async (c) => {
 			apiKey: c.env.XAI_API_KEY,
 		});
 
-		// Catégoriser les facts par importance
+		// Catégoriser les facts par importance (profil uniquement, pas d'actualités)
 		const professionalTypes = ['work', 'company', 'education'];
 		const contextTypes = ['how_met', 'where_met', 'shared_ref'];
 		const personalTypes = [
@@ -93,10 +93,6 @@ summaryRoutes.post('/', async (c) => {
 		);
 		const personalFacts = facts.filter((fact) =>
 			personalTypes.includes(fact.factType)
-		);
-
-		const activeTopics = hotTopics.filter(
-			(topic) => topic.status === 'active'
 		);
 
 		const formatFacts = (factList: typeof facts) =>
@@ -123,32 +119,20 @@ ${
 
 ${personalFacts.length > 0 ? `PERSONNEL:\n${formatFacts(personalFacts)}` : ''}
 
-${
-	activeTopics.length > 0
-		? `ACTUALITÉS (sujets en cours - PRIORITAIRE):\n${activeTopics
-				.map(
-					(topic) =>
-						`- ${topic.title}${topic.context ? `: ${topic.context}` : ''}`
-				)
-				.join('\n')}`
-		: ''
-}
-
 OBJECTIF: ${langConfig.objective}
 
 HIÉRARCHIE D'IMPORTANCE:
 1. Trait distinctif personnel = ce qui rend la personne mémorable
 2. Métier/entreprise = identité professionnelle
 3. Comment on s'est rencontrés = contexte relationnel
-4. ACTUALITÉS en cours (si présentes) = info la plus utile pour reprendre contact
 
 FORMAT:
-- 2, 3 ou 4 phrases fluides, ton neutre et professionnel, genre présentation objective
-- Commence par l'info la plus importante et termine ton résumé par la plus pertinente pour une prochaine interaction
-- Si actualité en cours, l'intégrer naturellement (ex: "qui prépare actuellement son marathon")
+- 2 ou 3 phrases fluides, ton neutre et professionnel, genre présentation objective
+- Commence par l'info la plus importante
 - Évite les formules génériques, sois spécifique
-- environ 200 caractères
+- environ 150 caractères
 - Ne précise pas le nombre de caractères
+- NE MENTIONNE PAS les actualités ou sujets en cours (ils sont traités séparément)
 `;
 
 		const { text } = await generateText({

@@ -47,6 +47,7 @@ export type Contact = {
   photoUri?: string;
   highlights: string[];
   aiSummary?: string;
+  iceBreakers?: string[];
   lastContactAt?: string;
   createdAt: string;
   updatedAt: string;

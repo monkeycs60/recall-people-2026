@@ -13,7 +13,7 @@ import { hotTopicService } from '@/services/hot-topic.service';
 import { memoryService } from '@/services/memory.service';
 import { contactService } from '@/services/contact.service';
 import { groupService } from '@/services/group.service';
-import { generateSummary } from '@/lib/api';
+import { generateSummary, generateIceBreakers } from '@/lib/api';
 import { useAppStore } from '@/stores/app-store';
 import { queryKeys } from '@/lib/query-keys';
 import { Archive, Edit3, Plus, X } from 'lucide-react-native';
@@ -332,6 +332,9 @@ export default function ReviewScreen() {
         data: { lastContactAt: new Date().toISOString() },
       });
 
+      // Clear summary and ice breakers to trigger polling on contact page
+      await contactService.update(finalContactId, { aiSummary: '', iceBreakers: [] });
+
       // Invalidate all relevant queries to refresh data
       queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(finalContactId) });
@@ -339,10 +342,10 @@ export default function ReviewScreen() {
       queryClient.invalidateQueries({ queryKey: queryKeys.hotTopics.byContact(finalContactId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.memories.byContact(finalContactId) });
 
-      // Generate AI summary in background (non-blocking)
+      // Generate AI summary and ice breakers in background (non-blocking)
       const contactDetails = await contactService.getById(finalContactId);
       if (contactDetails) {
-        generateSummary({
+        const requestData = {
           contact: {
             firstName: contactDetails.firstName,
             lastName: contactDetails.lastName,
@@ -359,9 +362,19 @@ export default function ReviewScreen() {
               context: topic.context || '',
               status: topic.status,
             })),
-        })
+        };
+
+        // Generate summary (non-blocking)
+        generateSummary(requestData)
           .then(async (summary) => {
             await contactService.update(finalContactId, { aiSummary: summary });
+          })
+          .catch(() => {});
+
+        // Generate ice breakers (non-blocking)
+        generateIceBreakers(requestData)
+          .then(async (iceBreakers) => {
+            await contactService.update(finalContactId, { iceBreakers });
           })
           .catch(() => {});
       }

@@ -84,9 +84,13 @@
     "addNote": "Wie war euer Moment zusammen?",
     "aiSummary": {
       "header": "Das Wichtigste über {{firstName}}",
-      "contextHeader": "Das solltest du im Kopf haben, bevor du {{firstName}} wiedersiehst:",
       "loading": "Bereite das Wichtigste vor...",
       "empty": "Füge Notizen hinzu, um das Wichtigste über {{firstName}} zu erfahren"
+    },
+    "iceBreakers": {
+      "header": "Eine Idee, um das Gespräch wieder aufzunehmen?",
+      "loading": "Bereite Ideen vor...",
+      "empty": "Füge Notizen hinzu, um Gesprächsideen zu erhalten"
     },
     "editGroups": "Gruppen bearbeiten",
     "addGroup": "Gruppe hinzufügen",

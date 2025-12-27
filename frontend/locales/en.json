@@ -97,9 +97,13 @@
     "addNote": "How was your moment together?",
     "aiSummary": {
       "header": "The essentials on {{firstName}}",
-      "contextHeader": "Here's what you should keep in mind before seeing {{firstName}} again:",
       "loading": "Preparing the essentials...",
       "empty": "Add notes to discover the essentials on {{firstName}}"
+    },
+    "iceBreakers": {
+      "header": "Need an idea to restart the conversation?",
+      "loading": "Preparing ideas...",
+      "empty": "Add notes to get conversation ideas"
     },
     "editGroups": "Edit groups",
     "addGroup": "Add group",

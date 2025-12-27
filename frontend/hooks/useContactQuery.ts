@@ -18,10 +18,12 @@ export function useContactQuery(contactId: string | undefined) {
 
       const hasFacts = contact.facts.length > 0;
       const hasHotTopics = contact.hotTopics.length > 0;
+      const hasData = hasFacts || hasHotTopics;
       const hasNoSummary = !contact.aiSummary;
+      const hasNoIceBreakers = !contact.iceBreakers || contact.iceBreakers.length === 0;
 
-      // Poll every 1.5s if contact has data but no summary yet
-      if (hasNoSummary && (hasFacts || hasHotTopics)) {
+      // Poll every 1.5s if contact has data but no summary or ice breakers yet
+      if (hasData && (hasNoSummary || hasNoIceBreakers)) {
         return 1500;
       }
 
@@ -29,10 +31,12 @@ export function useContactQuery(contactId: string | undefined) {
     },
   });
 
-  const isWaitingForSummary =
-    query.data &&
-    !query.data.aiSummary &&
-    (query.data.facts.length > 0 || query.data.hotTopics.length > 0);
+  const hasData = query.data && (query.data.facts.length > 0 || query.data.hotTopics.length > 0);
+
+  const isWaitingForSummary = hasData && !query.data?.aiSummary;
+
+  const isWaitingForIceBreakers =
+    hasData && (!query.data?.iceBreakers || query.data.iceBreakers.length === 0);
 
   const invalidate = () => {
     if (contactId) {
@@ -48,6 +52,7 @@ export function useContactQuery(contactId: string | undefined) {
     contact: query.data ?? null,
     isLoading: query.isLoading,
     isWaitingForSummary: Boolean(isWaitingForSummary),
+    isWaitingForIceBreakers: Boolean(isWaitingForIceBreakers),
     refetch: query.refetch,
     invalidate,
   };

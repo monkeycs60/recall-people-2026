@@ -97,9 +97,13 @@
     "addNote": "Comment s'est passé votre moment ?",
     "aiSummary": {
       "header": "L'essentiel sur {{firstName}}",
-      "contextHeader": "Voici ce que tu devrais avoir en tête avant de revoir {{firstName}} :",
       "loading": "Préparation de l'essentiel...",
       "empty": "Ajoutez des notes pour découvrir l'essentiel sur {{firstName}}"
+    },
+    "iceBreakers": {
+      "header": "Une idée pour relancer la conversation ?",
+      "loading": "Préparation des idées...",
+      "empty": "Ajoutez des notes pour obtenir des idées de conversation"
     },
     "editGroups": "Modifier les groupes",
     "addGroup": "Ajouter un groupe",

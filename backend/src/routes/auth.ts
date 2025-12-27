@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { sign, verify } from 'hono/jwt';
+import { hash, compare } from 'bcryptjs';
 import { getPrisma } from '../lib/db';
 
 type Bindings = {
@@ -29,7 +30,9 @@ authRoutes.post('/register', async (c) => {
 			return c.json({ error: 'User already exists' }, 400);
 		}
 
-		// Create user with account (in production, hash password with bcrypt!)
+		// Hash password with bcrypt (cost factor 12)
+		const hashedPassword = await hash(password, 12);
+
 		const user = await prisma.user.create({
 			data: {
 				email,
@@ -38,7 +41,7 @@ authRoutes.post('/register', async (c) => {
 					create: {
 						accountId: email,
 						providerId: 'credentials',
-						password,
+						password: hashedPassword,
 					},
 				},
 			},
@@ -91,8 +94,20 @@ authRoutes.post('/login', async (c) => {
 			return c.json({ error: 'Invalid credentials' }, 401);
 		}
 
-		// In production, verify hashed password here!
-		// For now, just check if user exists
+		// Find the credentials account and verify password
+		const credentialsAccount = user.accounts.find(
+			(account) => account.providerId === 'credentials'
+		);
+
+		if (!credentialsAccount?.password) {
+			// User exists but has no credentials account (e.g., Google-only user)
+			return c.json({ error: 'Invalid credentials' }, 401);
+		}
+
+		const isPasswordValid = await compare(password, credentialsAccount.password);
+		if (!isPasswordValid) {
+			return c.json({ error: 'Invalid credentials' }, 401);
+		}
 
 		// Get the provider from the first account (credentials or google)
 		const provider = user.accounts[0]?.providerId || 'credentials';
