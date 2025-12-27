@@ -11,6 +11,7 @@ export const factService = {
       fact_type: string;
       fact_key: string;
       fact_value: string;
+      title: string | null;
       previous_values: string | null;
       source_note_id: string | null;
       created_at: string;
@@ -23,6 +24,7 @@ export const factService = {
       factType: row.fact_type as FactType,
       factKey: row.fact_key,
       factValue: row.fact_value,
+      title: row.title || undefined,
       previousValues: JSON.parse(row.previous_values || '[]'),
       sourceNoteId: row.source_note_id || undefined,
       createdAt: row.created_at,
@@ -35,6 +37,7 @@ export const factService = {
     factType: FactType;
     factKey: string;
     factValue: string;
+    title?: string;
     sourceNoteId?: string;
   }): Promise<Fact> => {
     const db = await getDatabase();
@@ -42,14 +45,15 @@ export const factService = {
     const now = new Date().toISOString();
 
     await db.runAsync(
-      `INSERT INTO facts (id, contact_id, fact_type, fact_key, fact_value, previous_values, source_note_id, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO facts (id, contact_id, fact_type, fact_key, fact_value, title, previous_values, source_note_id, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         data.contactId,
         data.factType,
         data.factKey,
         data.factValue,
+        data.title || null,
         JSON.stringify([]),
         data.sourceNoteId || null,
         now,
@@ -63,6 +67,7 @@ export const factService = {
       factType: data.factType,
       factKey: data.factKey,
       factValue: data.factValue,
+      title: data.title,
       previousValues: [],
       sourceNoteId: data.sourceNoteId,
       createdAt: now,
@@ -70,10 +75,10 @@ export const factService = {
     };
   },
 
-  update: async (id: string, data: { factKey?: string; factValue?: string }): Promise<void> => {
+  update: async (id: string, data: { factKey?: string; factValue?: string; title?: string }): Promise<void> => {
     const db = await getDatabase();
     const updates: string[] = [];
-    const values: string[] = [];
+    const values: (string | null)[] = [];
 
     if (data.factKey !== undefined) {
       updates.push('fact_key = ?');
@@ -82,6 +87,10 @@ export const factService = {
     if (data.factValue !== undefined) {
       updates.push('fact_value = ?');
       values.push(data.factValue);
+    }
+    if (data.title !== undefined) {
+      updates.push('title = ?');
+      values.push(data.title || null);
     }
 
     if (updates.length === 0) return;
@@ -127,6 +136,7 @@ export const factService = {
       fact_type: string;
       fact_key: string;
       fact_value: string;
+      title: string | null;
       previous_values: string | null;
       source_note_id: string | null;
       created_at: string;
@@ -144,6 +154,7 @@ export const factService = {
       factType: row.fact_type as FactType,
       factKey: row.fact_key,
       factValue: row.fact_value,
+      title: row.title || undefined,
       previousValues: JSON.parse(row.previous_values || '[]'),
       sourceNoteId: row.source_note_id || undefined,
       createdAt: row.created_at,
@@ -168,6 +179,7 @@ export const factService = {
       fact_type: string;
       fact_key: string;
       fact_value: string;
+      title: string | null;
       previous_values: string | null;
       source_note_id: string | null;
       created_at: string;
@@ -185,6 +197,7 @@ export const factService = {
       factType: row.fact_type as FactType,
       factKey: row.fact_key,
       factValue: row.fact_value,
+      title: row.title || undefined,
       previousValues: JSON.parse(row.previous_values || '[]'),
       sourceNoteId: row.source_note_id || undefined,
       createdAt: row.created_at,

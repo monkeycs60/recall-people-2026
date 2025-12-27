@@ -59,6 +59,7 @@ export type Fact = {
   factType: FactType;
   factKey: string;
   factValue: string;
+  title?: string;
   previousValues: string[];
   sourceNoteId?: string;
   createdAt: string;
@@ -127,6 +128,7 @@ export type ExtractedFact = {
   factType: FactType;
   factKey: string;
   factValue: string;
+  title?: string;
   action: FactAction;
   previousValue?: string;
 };
