@@ -4,6 +4,8 @@ import { generateObject } from 'ai';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
 import { wrapUserInput, sanitize, getSecurityInstructions } from '../lib/security';
+import { searchRequestSchema } from '../lib/validation';
+import { auditLog } from '../lib/audit';
 
 type Bindings = {
 	DATABASE_URL: string;
@@ -66,12 +68,22 @@ searchRoutes.post('/', async (c) => {
 	const startTime = Date.now();
 
 	try {
-		const body = await c.req.json<SearchRequest>();
-		const { query, facts, memories, notes } = body;
+		const body = await c.req.json();
 
-		if (!query || query.trim().length === 0) {
-			return c.json({ error: 'Query is required' }, 400);
+		// Validate request body
+		const validation = searchRequestSchema.safeParse(body);
+		if (!validation.success) {
+			await auditLog(c, {
+				userId: c.get('user')?.id,
+				action: 'search',
+				resource: 'search',
+				success: false,
+				details: { error: 'Validation failed', issues: validation.error.issues },
+			});
+			return c.json({ error: 'Invalid input', details: validation.error.issues }, 400);
 		}
+
+		const { query, facts, memories, notes } = validation.data;
 
 		const hasData = facts.length > 0 || memories.length > 0 || notes.length > 0;
 		if (!hasData) {
@@ -98,12 +110,29 @@ searchRoutes.post('/', async (c) => {
 			(a, b) => b.relevanceScore - a.relevanceScore
 		);
 
+		const processingTimeMs = Date.now() - startTime;
+
+		await auditLog(c, {
+			userId: c.get('user')?.id,
+			action: 'search',
+			resource: 'search',
+			success: true,
+			details: { query, resultsCount: sortedResults.length, processingTimeMs },
+		});
+
 		return c.json({
 			results: sortedResults,
-			processingTimeMs: Date.now() - startTime,
+			processingTimeMs,
 		});
 	} catch (error) {
 		console.error('Search error:', error);
+		await auditLog(c, {
+			userId: c.get('user')?.id,
+			action: 'search',
+			resource: 'search',
+			success: false,
+			details: { error: String(error) },
+		});
 		return c.json({ error: 'Search failed' }, 500);
 	}
 });

@@ -3,6 +3,8 @@ import { createXai } from '@ai-sdk/xai';
 import { generateText } from 'ai';
 import { authMiddleware } from '../middleware/auth';
 import { sanitize, getSecurityInstructions } from '../lib/security';
+import { summaryRequestSchema } from '../lib/validation';
+import { auditLog } from '../lib/audit';
 
 type Bindings = {
 	XAI_API_KEY: string;
@@ -63,10 +65,23 @@ summaryRoutes.use('/*', authMiddleware);
 
 summaryRoutes.post('/', async (c) => {
 	try {
-		const body = await c.req.json<SummaryRequest>();
-		const { contact, facts } = body;
+		const body = await c.req.json();
 
-		const language = body.language || 'fr';
+		// Validate request body
+		const validation = summaryRequestSchema.safeParse(body);
+		if (!validation.success) {
+			await auditLog(c, {
+				userId: c.get('user')?.id,
+				action: 'summary',
+				resource: 'summary',
+				success: false,
+				details: { error: 'Validation failed', issues: validation.error.issues },
+			});
+			return c.json({ error: 'Invalid input', details: validation.error.issues }, 400);
+		}
+
+		const { contact, facts } = validation.data;
+		const language = validation.data.language || 'fr';
 		const langConfig =
 			LANGUAGE_INSTRUCTIONS[language] || LANGUAGE_INSTRUCTIONS.fr;
 
@@ -142,12 +157,27 @@ FORMAT:
 			prompt,
 		});
 
+		await auditLog(c, {
+			userId: c.get('user')?.id,
+			action: 'summary',
+			resource: 'summary',
+			success: true,
+			details: { language, contact: contact.firstName },
+		});
+
 		return c.json({
 			success: true,
 			summary: text.trim(),
 		});
 	} catch (error) {
 		console.error('Summary generation error:', error);
+		await auditLog(c, {
+			userId: c.get('user')?.id,
+			action: 'summary',
+			resource: 'summary',
+			success: false,
+			details: { error: String(error) },
+		});
 		return c.json({ error: 'Summary generation failed' }, 500);
 	}
 });

@@ -10,6 +10,8 @@ import { iceBreakersRoutes } from './routes/ice-breakers';
 import { searchRoutes } from './routes/search';
 import { settingsRoutes } from './routes/settings';
 import { rateLimiters } from './middleware/rateLimit';
+import { securityHeaders } from './middleware/securityHeaders';
+import { httpsEnforcement } from './middleware/httpsEnforcement';
 
 type Bindings = {
   DATABASE_URL: string;
@@ -21,7 +23,14 @@ type Bindings = {
 
 const app = new Hono<{ Bindings: Bindings }>();
 
+// Security middleware (first)
+app.use('*', httpsEnforcement);
+app.use('*', securityHeaders);
+
+// Logger
 app.use('*', logger());
+
+// CORS
 app.use(
   '*',
   cors({

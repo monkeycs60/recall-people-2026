@@ -24,14 +24,11 @@ npx wrangler secret put GOOGLE_CLIENT_ID_ANDROID
 - [x] Rate limiting (KV Cloudflare)
 - [x] Protection prompt injection (sanitize + délimiteurs + instructions)
 - [x] CI/CD GitHub Actions
-
-### Sécurité - À faire
-
-- [ ] Réduire expiration JWT (30j → 1h) + refresh tokens
-- [ ] Headers de sécurité (CSP, HSTS, X-Frame-Options)
-- [ ] Validation Zod complète sur tous les endpoints
-- [ ] Audit logging (qui fait quoi, quand)
-- [ ] HTTPS enforcement en prod
+- [x] Réduire expiration JWT (30j → 1h) + refresh tokens
+- [x] Headers de sécurité (CSP, HSTS, X-Frame-Options)
+- [x] Validation Zod complète sur tous les endpoints
+- [x] Audit logging (qui fait quoi, quand)
+- [x] HTTPS enforcement en prod
 
 ---
 
