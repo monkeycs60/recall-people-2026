@@ -13,6 +13,7 @@ export type AIProviderConfig = {
 	CEREBRAS_API_KEY?: string;
 	AI_PROVIDER?: AIProviderType;
 	ENABLE_PERFORMANCE_LOGGING?: boolean;
+	ENABLE_LANGFUSE?: string; // 'true' or 'false'
 };
 
 /**
@@ -71,6 +72,22 @@ export function createAIModel(config: AIProviderConfig) {
 	const provider = createAIProvider(config);
 	const model = getAIModel(config);
 	return provider(model);
+}
+
+/**
+ * Get telemetry options for AI SDK calls
+ * @param config - Provider configuration
+ * @returns Telemetry options object or undefined
+ */
+export function getTelemetryOptions(config: AIProviderConfig) {
+	if (config.ENABLE_LANGFUSE === 'true') {
+		return {
+			experimental_telemetry: {
+				isEnabled: true,
+			},
+		};
+	}
+	return {};
 }
 
 /**

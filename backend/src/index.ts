@@ -13,6 +13,7 @@ import { adminRoutes } from './routes/admin';
 import { rateLimiters } from './middleware/rateLimit';
 import { securityHeaders } from './middleware/securityHeaders';
 import { httpsEnforcement } from './middleware/httpsEnforcement';
+import { langfuseMiddleware } from './middleware/langfuse';
 
 type Bindings = {
   DATABASE_URL: string;
@@ -20,6 +21,10 @@ type Bindings = {
   DEEPGRAM_API_KEY: string;
   XAI_API_KEY: string;
   RATE_LIMIT: KVNamespace;
+  LANGFUSE_SECRET_KEY?: string;
+  LANGFUSE_PUBLIC_KEY?: string;
+  LANGFUSE_BASE_URL?: string;
+  ENABLE_LANGFUSE?: string;
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -30,6 +35,9 @@ app.use('*', securityHeaders);
 
 // Logger
 app.use('*', logger());
+
+// LangFuse observability (before routes)
+app.use('*', langfuseMiddleware);
 
 // CORS
 app.use(

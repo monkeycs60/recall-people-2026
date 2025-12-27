@@ -9,6 +9,7 @@ type Bindings = {
 	XAI_API_KEY: string;
 	CEREBRAS_API_KEY?: string;
 	AI_PROVIDER?: 'grok' | 'cerebras';
+	ENABLE_LANGFUSE?: string;
 };
 
 type IceBreakersRequest = {
@@ -159,6 +160,7 @@ Tu as eu le temps de reprendre la guitare récemment ?
 			XAI_API_KEY: c.env.XAI_API_KEY,
 			CEREBRAS_API_KEY: c.env.CEREBRAS_API_KEY,
 			AI_PROVIDER: c.env.AI_PROVIDER,
+			ENABLE_LANGFUSE: c.env.ENABLE_LANGFUSE,
 		});
 
 		const { text } = await generateText({
