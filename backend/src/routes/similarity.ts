@@ -1,16 +1,18 @@
 import { Hono } from 'hono';
-import { createXai } from '@ai-sdk/xai';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
 import { similarityRequestSchema } from '../lib/validation';
 import { auditLog } from '../lib/audit';
+import { createAIModel } from '../lib/ai-provider';
 
 type Bindings = {
 	DATABASE_URL: string;
 	BETTER_AUTH_SECRET: string;
 	BETTER_AUTH_URL: string;
 	XAI_API_KEY: string;
+	CEREBRAS_API_KEY?: string;
+	AI_PROVIDER?: 'grok' | 'cerebras';
 };
 
 type FactInput = {
@@ -75,14 +77,16 @@ similarityRoutes.post('/batch', async (c) => {
 			return c.json({ success: true, similarities: [] });
 		}
 
-		const xai = createXai({
-			apiKey: c.env.XAI_API_KEY,
-		});
-
 		const prompt = buildSimilarityPrompt(typesWithMultipleValues);
 
+		const model = createAIModel({
+			XAI_API_KEY: c.env.XAI_API_KEY,
+			CEREBRAS_API_KEY: c.env.CEREBRAS_API_KEY,
+			AI_PROVIDER: c.env.AI_PROVIDER,
+		});
+
 		const { object: result } = await generateObject({
-			model: xai('grok-4-1-fast'),
+			model,
 			schema: similaritySchema,
 			prompt,
 		});
