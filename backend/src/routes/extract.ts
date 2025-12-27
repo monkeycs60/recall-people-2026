@@ -3,6 +3,7 @@ import { createXai } from '@ai-sdk/xai';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
+import { wrapUserInput, SECURITY_INSTRUCTIONS_FR } from '../lib/security';
 
 type Bindings = {
   DATABASE_URL: string;
@@ -208,6 +209,8 @@ const buildExtractionPrompt = (
   currentContact?: ExtractionRequest['currentContact'],
   language: string = 'fr'
 ): string => {
+  const { wrapped: wrappedTranscription } = wrapUserInput(transcription, 'TRANSCRIPTION');
+
   let currentContactContext = '';
   let existingHotTopicsContext = '';
 
@@ -227,6 +230,7 @@ ${currentContact.hotTopics.map((topic) => `  • [ID: ${topic.id}] "${topic.titl
   }
 
   return `Tu es un assistant qui extrait des informations structurées à partir de notes vocales dans la langue : ${language}.
+${SECURITY_INSTRUCTIONS_FR}
 ${currentContactContext}
 ${existingHotTopicsContext}
 
@@ -235,7 +239,7 @@ ${LANGUAGE_INSTRUCTIONS[language] || LANGUAGE_INSTRUCTIONS.fr}
 Tous les champs textuels (noteTitle, factValue, hotTopics, memories, etc.) doivent être dans cette langue.
 
 TRANSCRIPTION DE LA NOTE VOCALE:
-"${transcription}"
+${wrappedTranscription}
 
 RÈGLES D'EXTRACTION:
 

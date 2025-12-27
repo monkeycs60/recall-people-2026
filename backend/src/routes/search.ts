@@ -3,6 +3,7 @@ import { createXai } from '@ai-sdk/xai';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
+import { wrapUserInput, sanitize, SECURITY_INSTRUCTIONS_FR } from '../lib/security';
 
 type Bindings = {
 	DATABASE_URL: string;
@@ -114,27 +115,31 @@ const buildSearchPrompt = (
 	notes: NoteInput[],
 	language: string = 'fr'
 ): string => {
+	const { wrapped: wrappedQuery } = wrapUserInput(query, 'QUERY');
+
 	const factsSection = facts
-		.map((f) => `[FACT:${f.id}] [CONTACT:${f.contactId}] ${f.contactName} - ${f.factKey}: ${f.factValue}`)
+		.map((f) => `[FACT:${f.id}] [CONTACT:${f.contactId}] ${sanitize(f.contactName)} - ${sanitize(f.factKey)}: ${sanitize(f.factValue)}`)
 		.join('\n');
 
 	const memoriesSection = memories
 		.map(
 			(m) =>
-				`[MEMORY:${m.id}] [CONTACT:${m.contactId}] ${m.contactName} - ${m.description}${m.eventDate ? ` (${m.eventDate})` : ''}`
+				`[MEMORY:${m.id}] [CONTACT:${m.contactId}] ${sanitize(m.contactName)} - ${sanitize(m.description)}${m.eventDate ? ` (${m.eventDate})` : ''}`
 		)
 		.join('\n');
 
 	const notesSection = notes
 		.map((n) => {
-			const truncatedTranscription = n.transcription.slice(0, 300);
-			return `[NOTE:${n.id}] [CONTACT:${n.contactId}] ${n.contactName} - ${truncatedTranscription}${n.transcription.length > 300 ? '...' : ''}`;
+			const truncatedTranscription = sanitize(n.transcription).slice(0, 300);
+			return `[NOTE:${n.id}] [CONTACT:${n.contactId}] ${sanitize(n.contactName)} - ${truncatedTranscription}${n.transcription.length > 300 ? '...' : ''}`;
 		})
 		.join('\n');
 
 	return `Tu es un assistant de recherche dans un carnet de contacts personnel.
+${SECURITY_INSTRUCTIONS_FR}
 
-REQUÊTE UTILISATEUR: "${query}"
+REQUÊTE UTILISATEUR:
+${wrappedQuery}
 
 INSTRUCTIONS:
 1. Trouve TOUS les résultats pertinents pour la requête

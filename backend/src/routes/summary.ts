@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { createXai } from '@ai-sdk/xai';
 import { generateText } from 'ai';
 import { authMiddleware } from '../middleware/auth';
+import { sanitize, SECURITY_INSTRUCTIONS_FR } from '../lib/security';
 
 type Bindings = {
 	XAI_API_KEY: string;
@@ -97,13 +98,14 @@ summaryRoutes.post('/', async (c) => {
 
 		const formatFacts = (factList: typeof facts) =>
 			factList
-				.map((fact) => `- ${fact.factKey}: ${fact.factValue}`)
+				.map((fact) => `- ${sanitize(fact.factKey)}: ${sanitize(fact.factValue)}`)
 				.join('\n');
 
 		const prompt = `Tu es un assistant qui aide à se souvenir des gens. Génère un résumé concis et mémorable de cette personne.
-    Réponds dans la langue : ${language}.
+${SECURITY_INSTRUCTIONS_FR}
+Réponds dans la langue : ${language}.
 
-PERSONNE: ${contact.firstName}${contact.lastName ? ` ${contact.lastName}` : ''}
+PERSONNE: ${sanitize(contact.firstName)}${contact.lastName ? ` ${sanitize(contact.lastName)}` : ''}
 
 ${
 	professionalFacts.length > 0
