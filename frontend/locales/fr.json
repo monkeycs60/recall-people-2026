@@ -190,7 +190,41 @@
       "contextLabel": "Contexte (optionnel)",
       "contextPlaceholder": "Plus de détails..."
     },
-    "createGroup": "Créer \"{{name}}\""
+    "createGroup": "Créer \"{{name}}\"",
+    "contactCard": {
+      "phone": "Téléphone",
+      "email": "Email",
+      "birthday": "Anniversaire",
+      "addPhone": "+ Ajouter téléphone",
+      "addEmail": "+ Ajouter email",
+      "addBirthday": "+ Ajouter anniversaire",
+      "call": "Appeler",
+      "whatsapp": "WhatsApp",
+      "sms": "SMS",
+      "copy": "Copier",
+      "openMail": "Ouvrir mail",
+      "copied": "Copié !",
+      "inDays_one": "Dans {{count}} jour !",
+      "inDays_other": "Dans {{count}} jours !",
+      "years_one": "{{count}} an",
+      "years_other": "{{count}} ans"
+    },
+    "menu": {
+      "options": "Options",
+      "delete": "Supprimer le contact"
+    },
+    "deleteDialog": {
+      "title": "Supprimer ce contact ?",
+      "message": "Cette action est irréversible. Toutes les notes, souvenirs et informations de {{name}} seront supprimés.",
+      "cancel": "Annuler",
+      "confirm": "Supprimer"
+    },
+    "otherFact": {
+      "titleLabel": "Titre *",
+      "titlePlaceholder": "Ex: Allergie, Régime...",
+      "descriptionLabel": "Description *",
+      "descriptionPlaceholder": "Détails..."
+    }
   },
   "selectContact": {
     "title": "Sélectionner le contact",

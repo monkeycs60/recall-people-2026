@@ -190,7 +190,41 @@
       "contextLabel": "Context (optional)",
       "contextPlaceholder": "More details..."
     },
-    "createGroup": "Create \"{{name}}\""
+    "createGroup": "Create \"{{name}}\"",
+    "contactCard": {
+      "phone": "Phone",
+      "email": "Email",
+      "birthday": "Birthday",
+      "addPhone": "+ Add phone",
+      "addEmail": "+ Add email",
+      "addBirthday": "+ Add birthday",
+      "call": "Call",
+      "whatsapp": "WhatsApp",
+      "sms": "SMS",
+      "copy": "Copy",
+      "openMail": "Open mail",
+      "copied": "Copied!",
+      "inDays_one": "In {{count}} day!",
+      "inDays_other": "In {{count}} days!",
+      "years_one": "{{count}} year",
+      "years_other": "{{count}} years"
+    },
+    "menu": {
+      "options": "Options",
+      "delete": "Delete contact"
+    },
+    "deleteDialog": {
+      "title": "Delete this contact?",
+      "message": "This action cannot be undone. All notes, memories and information about {{name}} will be deleted.",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    },
+    "otherFact": {
+      "titleLabel": "Title *",
+      "titlePlaceholder": "E.g.: Allergy, Diet...",
+      "descriptionLabel": "Description *",
+      "descriptionPlaceholder": "Details..."
+    }
   },
   "selectContact": {
     "title": "Select contact",
