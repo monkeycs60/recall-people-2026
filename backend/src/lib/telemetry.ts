@@ -1,12 +1,10 @@
-import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
-import { LangfuseSpanProcessor } from '@langfuse/otel';
-import { trace } from '@opentelemetry/api';
+import { Langfuse } from 'langfuse';
 
 /**
  * LangFuse Observability Setup for Cloudflare Workers
  *
- * This module initializes OpenTelemetry with LangFuse for LLM observability.
- * It tracks all AI calls, costs, latency, and quality metrics.
+ * This module uses the Langfuse SDK directly (not OpenTelemetry)
+ * to be compatible with Cloudflare Workers edge runtime.
  */
 
 export type TelemetryConfig = {
@@ -16,17 +14,17 @@ export type TelemetryConfig = {
 	ENABLE_LANGFUSE?: string; // 'true' or 'false'
 };
 
-let langfuseSpanProcessor: LangfuseSpanProcessor | null = null;
+let langfuseClient: Langfuse | null = null;
 let isInitialized = false;
 
 /**
  * Initialize LangFuse telemetry
  * Call this once at application startup
  */
-export function initializeLangfuse(config: TelemetryConfig) {
+export function initializeLangfuse(config: TelemetryConfig): Langfuse | null {
 	// Skip if already initialized or disabled
 	if (isInitialized || config.ENABLE_LANGFUSE !== 'true') {
-		return null;
+		return langfuseClient;
 	}
 
 	// Validate required credentials
@@ -36,23 +34,18 @@ export function initializeLangfuse(config: TelemetryConfig) {
 	}
 
 	try {
-		// Create LangFuse span processor
-		langfuseSpanProcessor = new LangfuseSpanProcessor({
+		langfuseClient = new Langfuse({
 			secretKey: config.LANGFUSE_SECRET_KEY,
 			publicKey: config.LANGFUSE_PUBLIC_KEY,
 			baseUrl: config.LANGFUSE_BASE_URL || 'https://cloud.langfuse.com',
+			flushAt: 1, // Flush immediately for serverless
+			flushInterval: 0, // Disable interval-based flushing
 		});
-
-		// Set up OpenTelemetry tracer provider with LangFuse span processor
-		const tracerProvider = new NodeTracerProvider({
-			spanProcessors: [langfuseSpanProcessor],
-		});
-		tracerProvider.register();
 
 		isInitialized = true;
 		console.log('✅ LangFuse observability initialized');
 
-		return langfuseSpanProcessor;
+		return langfuseClient;
 	} catch (error) {
 		console.error('Failed to initialize LangFuse:', error);
 		return null;
@@ -60,11 +53,10 @@ export function initializeLangfuse(config: TelemetryConfig) {
 }
 
 /**
- * Get the LangFuse span processor instance
- * Used to flush traces in serverless environments
+ * Get the LangFuse client instance
  */
-export function getLangfuseSpanProcessor() {
-	return langfuseSpanProcessor;
+export function getLangfuseClient(): Langfuse | null {
+	return langfuseClient;
 }
 
 /**
@@ -74,27 +66,37 @@ export function getLangfuseSpanProcessor() {
  * @returns Promise that resolves when flush completes
  */
 export async function flushLangfuse(): Promise<void> {
-	if (!langfuseSpanProcessor) {
+	if (!langfuseClient) {
 		return;
 	}
 
 	try {
-		await langfuseSpanProcessor.forceFlush();
+		await langfuseClient.flushAsync();
 	} catch (error) {
 		console.error('Failed to flush LangFuse traces:', error);
 	}
 }
 
 /**
- * Get the current tracer instance
+ * Shutdown LangFuse client gracefully
  */
-export function getTracer() {
-	return trace.getTracer('recall-people-api');
+export async function shutdownLangfuse(): Promise<void> {
+	if (!langfuseClient) {
+		return;
+	}
+
+	try {
+		await langfuseClient.shutdownAsync();
+		langfuseClient = null;
+		isInitialized = false;
+	} catch (error) {
+		console.error('Failed to shutdown LangFuse:', error);
+	}
 }
 
 /**
  * Check if LangFuse is enabled and initialized
  */
 export function isLangfuseEnabled(): boolean {
-	return isInitialized && langfuseSpanProcessor !== null;
+	return isInitialized && langfuseClient !== null;
 }
