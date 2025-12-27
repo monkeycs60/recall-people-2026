@@ -17,6 +17,7 @@
 
 -  Possibilité de supprimer un contact
 -  Ajout du téléphone, mail, sur la fiche d'un contact (champs spéciaux, pas dans infos, mais carrément dans le header : lien pour whats app ou répertoire)
+-  La section autre doit être mieux présentée avec à chaque fois un title et description
 
 ---
 

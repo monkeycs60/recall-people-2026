@@ -6,6 +6,9 @@ import { getPrisma } from '../lib/db';
 type Bindings = {
 	DATABASE_URL: string;
 	JWT_SECRET: string;
+	GOOGLE_CLIENT_ID_WEB: string;
+	GOOGLE_CLIENT_ID_IOS: string;
+	GOOGLE_CLIENT_ID_ANDROID: string;
 };
 
 export const authRoutes = new Hono<{ Bindings: Bindings }>();
@@ -165,10 +168,10 @@ authRoutes.post('/google', async (c) => {
 
 		// Verify the token is for our app
 		const validClientIds = [
-			'REDACTED_GOOGLE_CLIENT_ID_WEB', // Web
-			'REDACTED_GOOGLE_CLIENT_ID_IOS', // iOS
-			'REDACTED_GOOGLE_CLIENT_ID_ANDROID', // Android
-		];
+			c.env.GOOGLE_CLIENT_ID_WEB,
+			c.env.GOOGLE_CLIENT_ID_IOS,
+			c.env.GOOGLE_CLIENT_ID_ANDROID,
+		].filter(Boolean);
 
 		if (!validClientIds.includes(googlePayload.aud)) {
 			return c.json({ error: 'Token not issued for this app' }, 401);
