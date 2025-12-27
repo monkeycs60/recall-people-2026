@@ -64,7 +64,8 @@ const extractionSchema = z.object({
         'gift_given', 'contact', 'relationship', 'other',
       ]),
       factKey: z.string().describe('Label lisible en français'),
-      factValue: z.string().describe('La valeur extraite'),
+      factValue: z.string().describe('La valeur extraite (description pour type "other")'),
+      title: z.string().nullable().describe('Titre court pour type "other" uniquement (ex: "Allergie", "Régime"). Null pour les autres types.'),
       action: z.enum(['add', 'update']),
       previousValue: z.string().nullable(),
     })
@@ -333,6 +334,9 @@ RÈGLES D'EXTRACTION:
    - gift_idea: idées cadeaux (factKey="Idée cadeau")
    - gift_given: cadeaux faits (factKey="Cadeau fait")
    - contact: coordonnées (factKey="Contact")
+   - other: information diverse (factKey="Autre", title=titre court obligatoire, factValue=description détaillée)
+     IMPORTANT pour "other": title ET factValue sont OBLIGATOIRES
+     Exemple: { factType: "other", title: "Allergie", factKey: "Autre", factValue: "Ne mange pas de fruits de mer, allergie sévère" }
 
 4. HOT TOPICS (Sujets chauds - temporaires/actionnables):
    NOUVEAUX sujets à créer:
