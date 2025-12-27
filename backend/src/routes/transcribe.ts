@@ -1,14 +1,18 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { createClient } from '@deepgram/sdk';
 import { authMiddleware } from '../middleware/auth';
 import { auditLog } from '../lib/audit';
+import { transcribeAudio, getSTTProviderName, getSTTModelName } from '../lib/speech-to-text-provider';
+import { measurePerformance } from '../lib/performance-logger';
 
 type Bindings = {
   DATABASE_URL: string;
   BETTER_AUTH_SECRET: string;
   BETTER_AUTH_URL: string;
   DEEPGRAM_API_KEY: string;
+  GROQ_API_KEY?: string;
+  STT_PROVIDER?: 'deepgram' | 'groq-whisper-v3' | 'groq-whisper-v3-turbo';
+  ENABLE_PERFORMANCE_LOGGING?: boolean;
   ANTHROPIC_API_KEY: string;
 };
 
@@ -34,8 +38,6 @@ transcribeRoutes.post('/', async (c) => {
       return c.json({ error: 'No audio file provided' }, 400);
     }
 
-    const deepgram = createClient(c.env.DEEPGRAM_API_KEY);
-
     // audioFile is Blob (File extends Blob in Workers)
     const audioBuffer = await (audioFile as Blob).arrayBuffer();
 
@@ -44,43 +46,43 @@ transcribeRoutes.post('/', async (c) => {
     const languageValidation = languageSchema.safeParse(languageParam || 'fr');
     const transcriptionLanguage = languageValidation.success ? languageValidation.data : 'fr';
 
-    const { result } = await deepgram.listen.prerecorded.transcribeFile(
-      Buffer.from(audioBuffer),
+    // Provider config
+    const providerConfig = {
+      DEEPGRAM_API_KEY: c.env.DEEPGRAM_API_KEY,
+      GROQ_API_KEY: c.env.GROQ_API_KEY,
+      STT_PROVIDER: c.env.STT_PROVIDER,
+      ENABLE_PERFORMANCE_LOGGING: c.env.ENABLE_PERFORMANCE_LOGGING,
+    };
+
+    // Use the speech-to-text provider wrapper with performance logging
+    const result = await measurePerformance(
+      () => transcribeAudio(providerConfig, audioBuffer, transcriptionLanguage),
       {
-        model: 'nova-3',
-        language: transcriptionLanguage,
-        smart_format: true,
-        punctuate: true,
+        route: '/transcribe',
+        provider: getSTTProviderName(providerConfig),
+        model: getSTTModelName(providerConfig),
+        operationType: 'speech-to-text',
+        inputSize: audioBuffer.byteLength,
+        metadata: { language: transcriptionLanguage },
+        enabled: c.env.ENABLE_PERFORMANCE_LOGGING === 'true' || c.env.ENABLE_PERFORMANCE_LOGGING === true,
       }
     );
 
-    if (!result?.results?.channels?.[0]?.alternatives?.[0]) {
-      await auditLog(c, {
-        userId: c.get('user')?.id,
-        action: 'transcribe',
-        resource: 'transcribe',
-        success: false,
-        details: { error: 'No transcription result' },
-      });
-      return c.json({ error: 'Transcription failed - no result' }, 500);
-    }
-
-    const transcript = result.results.channels[0].alternatives[0].transcript;
-    const confidence = result.results.channels[0].alternatives[0].confidence;
+    const { transcript, confidence, duration } = result;
 
     await auditLog(c, {
       userId: c.get('user')?.id,
       action: 'transcribe',
       resource: 'transcribe',
       success: true,
-      details: { language: transcriptionLanguage, confidence, duration: result.metadata?.duration },
+      details: { language: transcriptionLanguage, confidence, duration },
     });
 
     return c.json({
       success: true,
       transcript,
       confidence,
-      duration: result.metadata?.duration,
+      duration,
     });
   } catch (error) {
     console.error('Transcription error:', error);

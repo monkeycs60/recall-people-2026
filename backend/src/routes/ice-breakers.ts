@@ -1,12 +1,14 @@
 import { Hono } from 'hono';
-import { createXai } from '@ai-sdk/xai';
 import { generateText } from 'ai';
 import { authMiddleware } from '../middleware/auth';
 import { iceBreakersRequestSchema } from '../lib/validation';
 import { auditLog } from '../lib/audit';
+import { createAIModel } from '../lib/ai-provider';
 
 type Bindings = {
 	XAI_API_KEY: string;
+	CEREBRAS_API_KEY?: string;
+	AI_PROVIDER?: 'grok' | 'cerebras';
 };
 
 type IceBreakersRequest = {
@@ -94,10 +96,6 @@ iceBreakersRoutes.post('/', async (c) => {
 		const langConfig =
 			LANGUAGE_INSTRUCTIONS[language] || LANGUAGE_INSTRUCTIONS.fr;
 
-		const xai = createXai({
-			apiKey: c.env.XAI_API_KEY,
-		});
-
 		const activeTopics = hotTopics.filter(
 			(topic) => topic.status === 'active'
 		);
@@ -157,8 +155,14 @@ Et les enfants, ils s'adaptent à la nouvelle école ?
 Tu as eu le temps de reprendre la guitare récemment ?
 `;
 
+		const model = createAIModel({
+			XAI_API_KEY: c.env.XAI_API_KEY,
+			CEREBRAS_API_KEY: c.env.CEREBRAS_API_KEY,
+			AI_PROVIDER: c.env.AI_PROVIDER,
+		});
+
 		const { text } = await generateText({
-			model: xai('grok-4-1-fast'),
+			model,
 			prompt,
 		});
 
