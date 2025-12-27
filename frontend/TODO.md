@@ -47,7 +47,7 @@ npx wrangler secret put GOOGLE_CLIENT_ID_ANDROID
 
 ### Features Core
 
--  [ ] Ice Breakers : section "Une idée pour relancer la conversation ?" dans fiche contact (généré avec résumé IA)
+-  [x] Ice Breakers : section "Une idée pour relancer la conversation ?" dans fiche contact (généré avec résumé IA)
 -  [ ] RevenueCat paywall (freemium: gratuit sans IA, premium avec IA/transcription/rappels)
 
 -  Possibilité de supprimer un contact
