@@ -6,7 +6,7 @@ import { Contact, Fact, HotTopic } from '@/types';
 
 type ContactPreview = {
   facts: Fact[];
-  hotTopic: HotTopic | null;
+  hotTopics: HotTopic[];
 };
 
 export function useContactPreviewsQuery(contacts: Contact[]) {
@@ -35,10 +35,11 @@ export function useContactPreviewsQuery(contacts: Contact[]) {
   contacts.forEach((contact, index) => {
     const facts = factsQueries[index]?.data ?? [];
     const hotTopics = hotTopicsQueries[index]?.data ?? [];
+    const activeHotTopics = hotTopics.filter((hotTopic) => hotTopic.status === 'active').slice(0, 2);
 
     previews.set(contact.id, {
       facts: facts.slice(0, 2),
-      hotTopic: hotTopics.find((hotTopic) => hotTopic.status === 'active') ?? null,
+      hotTopics: activeHotTopics,
     });
   });
 

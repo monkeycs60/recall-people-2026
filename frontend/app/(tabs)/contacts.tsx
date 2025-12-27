@@ -57,7 +57,7 @@ export default function ContactsScreen() {
   const renderContact = ({ item, index }: { item: Contact; index: number }) => {
     const preview = contactPreviews.get(item.id);
     const topFacts = preview?.facts || [];
-    const activeHotTopic = preview?.hotTopic;
+    const hotTopics = preview?.hotTopics || [];
 
     const content = (
       <Pressable
@@ -89,12 +89,17 @@ export default function ContactsScreen() {
               </View>
             )}
 
-            {activeHotTopic && (
-              <View style={styles.hotTopicBadge}>
+            {hotTopics.length > 0 && (
+              <View style={styles.hotTopicsRow}>
                 <Flame size={12} color={Colors.warning} />
-                <Text style={styles.hotTopicText} numberOfLines={1}>
-                  {activeHotTopic.title}
-                </Text>
+                {hotTopics.map((hotTopic, hotTopicIndex) => (
+                  <View key={hotTopic.id} style={[styles.hotTopicItem, hotTopicIndex === 1 && styles.hotTopicItemEllipsis]}>
+                    {hotTopicIndex > 0 && <Text style={styles.hotTopicSeparator}>•</Text>}
+                    <Text style={styles.hotTopicText} numberOfLines={1}>
+                      {hotTopic.title}
+                    </Text>
+                  </View>
+                ))}
               </View>
             )}
           </View>
@@ -317,11 +322,24 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.textSecondary,
   },
-  hotTopicBadge: {
+  hotTopicsRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     marginTop: 6,
+  },
+  hotTopicItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  hotTopicItemEllipsis: {
+    flex: 1,
+    minWidth: 0,
+  },
+  hotTopicSeparator: {
+    fontSize: 12,
+    color: Colors.warning,
   },
   hotTopicText: {
     fontSize: 12,
