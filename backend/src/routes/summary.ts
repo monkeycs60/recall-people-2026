@@ -8,6 +8,7 @@ import {
 	createAIModel,
 	getAIProviderName,
 	getAIModel,
+	getTelemetryOptions,
 } from '../lib/ai-provider';
 import { measurePerformance } from '../lib/performance-logger';
 
@@ -189,6 +190,7 @@ FORMAT:
 				generateText({
 					model,
 					prompt,
+					...getTelemetryOptions(providerConfig),
 				}),
 			{
 				route: '/summary',

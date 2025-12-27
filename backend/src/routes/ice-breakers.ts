@@ -3,7 +3,7 @@ import { generateText } from 'ai';
 import { authMiddleware } from '../middleware/auth';
 import { iceBreakersRequestSchema } from '../lib/validation';
 import { auditLog } from '../lib/audit';
-import { createAIModel } from '../lib/ai-provider';
+import { createAIModel, getTelemetryOptions } from '../lib/ai-provider';
 
 type Bindings = {
 	XAI_API_KEY: string;
@@ -156,16 +156,19 @@ Et les enfants, ils s'adaptent à la nouvelle école ?
 Tu as eu le temps de reprendre la guitare récemment ?
 `;
 
-		const model = createAIModel({
+		const providerConfig = {
 			XAI_API_KEY: c.env.XAI_API_KEY,
 			CEREBRAS_API_KEY: c.env.CEREBRAS_API_KEY,
 			AI_PROVIDER: c.env.AI_PROVIDER,
 			ENABLE_LANGFUSE: c.env.ENABLE_LANGFUSE,
-		});
+		};
+
+		const model = createAIModel(providerConfig);
 
 		const { text } = await generateText({
 			model,
 			prompt,
+			...getTelemetryOptions(providerConfig),
 		});
 
 		const iceBreakers = text

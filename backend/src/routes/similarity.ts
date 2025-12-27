@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
 import { similarityRequestSchema } from '../lib/validation';
 import { auditLog } from '../lib/audit';
-import { createAIModel, getAIProviderName, getAIModel } from '../lib/ai-provider';
+import { createAIModel, getAIProviderName, getAIModel, getTelemetryOptions } from '../lib/ai-provider';
 import { measurePerformance } from '../lib/performance-logger';
 
 type Bindings = {
@@ -97,6 +97,7 @@ similarityRoutes.post('/batch', async (c) => {
 				model,
 				schema: similaritySchema,
 				prompt,
+				...getTelemetryOptions(providerConfig),
 			}),
 			{
 				route: '/similarity',

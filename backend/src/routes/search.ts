@@ -5,7 +5,7 @@ import { authMiddleware } from '../middleware/auth';
 import { wrapUserInput, sanitize, getSecurityInstructions } from '../lib/security';
 import { searchRequestSchema } from '../lib/validation';
 import { auditLog } from '../lib/audit';
-import { createAIModel, getAIProviderName, getAIModel } from '../lib/ai-provider';
+import { createAIModel, getAIProviderName, getAIModel, getTelemetryOptions } from '../lib/ai-provider';
 import { measurePerformance } from '../lib/performance-logger';
 
 type Bindings = {
@@ -116,6 +116,7 @@ searchRoutes.post('/', async (c) => {
 				model,
 				schema: searchResultSchema,
 				prompt,
+				...getTelemetryOptions(providerConfig),
 			}),
 			{
 				route: '/search',

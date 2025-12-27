@@ -3,7 +3,7 @@ import { generateObject } from 'ai';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
 import { wrapUserInput, getSecurityInstructions } from '../lib/security';
-import { createAIModel, getAIProviderName, getAIModel } from '../lib/ai-provider';
+import { createAIModel, getAIProviderName, getAIModel, getTelemetryOptions } from '../lib/ai-provider';
 import { measurePerformance } from '../lib/performance-logger';
 
 type Bindings = {
@@ -136,6 +136,7 @@ extractRoutes.post('/', async (c) => {
         model,
         schema: extractionSchema,
         prompt,
+        ...getTelemetryOptions(providerConfig),
       }),
       {
         route: '/extract',
