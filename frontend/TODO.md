@@ -76,6 +76,13 @@ npx wrangler secret put GOOGLE_CLIENT_ID_ANDROID
 ### Infra
 
 -  [ ] Analytics
+-  [ ] **Monitoring & Audit Logging** (voir MONITORING.md)
+   -  [x] API Admin avec endpoints de monitoring
+   -  [ ] Dashboard admin (React/Next.js) pour visualiser les métriques
+   -  [ ] Grafana + PostgreSQL pour graphiques temps réel
+   -  [ ] Alertes automatiques (Cloudflare Workers Cron + Slack/Discord)
+   -  [ ] Sentry pour error tracking
+   -  [ ] Définir les métriques clés à suivre quotidiennement
 -  [ ] Landing page Astro
 -  [ ] Cache navigation fiche contact (back → liste sans reload)
 -  [ ] Traduction infos extraites dans la langue choisie

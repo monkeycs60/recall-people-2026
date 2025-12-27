@@ -9,6 +9,7 @@ import { summaryRoutes } from './routes/summary';
 import { iceBreakersRoutes } from './routes/ice-breakers';
 import { searchRoutes } from './routes/search';
 import { settingsRoutes } from './routes/settings';
+import { adminRoutes } from './routes/admin';
 import { rateLimiters } from './middleware/rateLimit';
 import { securityHeaders } from './middleware/securityHeaders';
 import { httpsEnforcement } from './middleware/httpsEnforcement';
@@ -64,5 +65,6 @@ app.route('/api/summary', summaryRoutes);
 app.route('/api/ice-breakers', iceBreakersRoutes);
 app.route('/api/search', searchRoutes);
 app.route('/api/settings', settingsRoutes);
+app.route('/admin', adminRoutes);
 
 export default app;
