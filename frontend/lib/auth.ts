@@ -2,6 +2,7 @@ import * as SecureStore from 'expo-secure-store';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 const TOKEN_KEY = 'auth_token';
+const REFRESH_TOKEN_KEY = 'auth_refresh_token';
 const USER_KEY = 'auth_user';
 
 type User = {
@@ -13,7 +14,9 @@ type User = {
 
 type AuthResponse = {
   user: User;
-  token: string;
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: number;
 };
 
 // Store token
@@ -57,7 +60,7 @@ export const register = async (email: string, password: string, name: string): P
   }
 
   const data: AuthResponse = await response.json();
-  await setToken(data.token);
+  await setToken(data.accessToken);
   await setUser(data.user);
   return data;
 };
@@ -76,7 +79,7 @@ export const login = async (email: string, password: string): Promise<AuthRespon
   }
 
   const data: AuthResponse = await response.json();
-  await setToken(data.token);
+  await setToken(data.accessToken);
   await setUser(data.user);
   return data;
 };
@@ -100,7 +103,7 @@ export const loginWithGoogle = async (idToken: string): Promise<AuthResponse> =>
   }
 
   const data: AuthResponse = await response.json();
-  await setToken(data.token);
+  await setToken(data.accessToken);
   await setUser(data.user);
   return data;
 };

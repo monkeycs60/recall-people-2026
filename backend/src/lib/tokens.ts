@@ -4,7 +4,17 @@
 
 import { sign } from 'hono/jwt';
 import { getPrisma } from './db';
-import crypto from 'crypto';
+
+/**
+ * Generate random bytes using Web Crypto API (Cloudflare Workers compatible)
+ */
+function generateRandomHex(byteLength: number): string {
+  const bytes = new Uint8Array(byteLength);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
 
 const ACCESS_TOKEN_EXPIRY = 60 * 60; // 1 hour
 const REFRESH_TOKEN_EXPIRY = 60 * 60 * 24 * 30; // 30 days
@@ -49,7 +59,7 @@ export async function generateTokenPair(
   );
 
   // Generate refresh token (long-lived, stored in DB)
-  const refreshTokenValue = crypto.randomBytes(64).toString('hex');
+  const refreshTokenValue = generateRandomHex(64);
 
   const prisma = getPrisma(databaseUrl);
 
