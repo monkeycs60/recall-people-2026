@@ -15,6 +15,7 @@ type Bindings = {
 	CEREBRAS_API_KEY?: string;
 	AI_PROVIDER?: 'grok' | 'cerebras';
 	ENABLE_PERFORMANCE_LOGGING?: boolean;
+	ENABLE_LANGFUSE?: string;
 };
 
 type FactInput = {
@@ -85,6 +86,8 @@ similarityRoutes.post('/batch', async (c) => {
 			XAI_API_KEY: c.env.XAI_API_KEY,
 			CEREBRAS_API_KEY: c.env.CEREBRAS_API_KEY,
 			AI_PROVIDER: c.env.AI_PROVIDER,
+			ENABLE_PERFORMANCE_LOGGING: c.env.ENABLE_PERFORMANCE_LOGGING,
+			ENABLE_LANGFUSE: c.env.ENABLE_LANGFUSE,
 		};
 
 		const model = createAIModel(providerConfig);
