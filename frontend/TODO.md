@@ -42,7 +42,6 @@ npx wrangler secret put ADMIN_EMAIL
 ### Visuel
 
 -  [ ] Icônes contextuelles Memories (trophy, baby, airplane, briefcase, heart selon type)
--  [ ] Icônes menu Profile en terracotta (pas gris)
 
 ### Features
 

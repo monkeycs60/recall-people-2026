@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Pressable, TextInput } from 'react-native';
+import { View, Text, ScrollView, Pressable, TextInput, StyleSheet } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -16,6 +16,7 @@ import { groupService } from '@/services/group.service';
 import { generateSummary, generateIceBreakers } from '@/lib/api';
 import { useAppStore } from '@/stores/app-store';
 import { queryKeys } from '@/lib/query-keys';
+import { Colors } from '@/constants/theme';
 import { Archive, Edit3, Plus, X } from 'lucide-react-native';
 
 export default function ReviewScreen() {
@@ -34,9 +35,6 @@ export default function ReviewScreen() {
   const audioUri = params.audioUri as string;
   const transcription = params.transcription as string;
   const contactId = params.contactId as string;
-
-  // Debug: vérifier les résolutions de l'IA
-  console.log('=== EXTRACTION resolvedTopics ===', JSON.stringify(extraction.resolvedTopics, null, 2));
 
   const [selectedFacts, setSelectedFacts] = useState<number[]>(
     extraction.facts.map((_, index) => index)
@@ -65,13 +63,11 @@ export default function ReviewScreen() {
   const [isSaving, setIsSaving] = useState(false);
   const [existingHotTopics, setExistingHotTopics] = useState<HotTopic[]>([]);
 
-  // Store resolved topics with editable resolutions
   const [resolvedTopicsState, setResolvedTopicsState] = useState<ResolvedTopic[]>(
     extraction.resolvedTopics || []
   );
   const [editingResolutionId, setEditingResolutionId] = useState<string | null>(null);
 
-  // Groups state (only for new contacts)
   const [selectedGroups, setSelectedGroups] = useState<Array<{
     name: string;
     isNew: boolean;
@@ -80,7 +76,6 @@ export default function ReviewScreen() {
   const [isAddingGroup, setIsAddingGroup] = useState(false);
   const [newGroupSearch, setNewGroupSearch] = useState('');
 
-  // Load existing hot topics to display titles for resolved ones
   useEffect(() => {
     const loadHotTopics = async () => {
       if (contactId !== 'new') {
@@ -91,7 +86,6 @@ export default function ReviewScreen() {
     loadHotTopics();
   }, [contactId]);
 
-  // Get resolved topics with their full data (combining existing topic info with resolutions)
   const resolvedTopicsWithData = existingHotTopics
     .filter((topic) => resolvedTopicsState.some((resolved) => resolved.id === topic.id))
     .map((topic) => ({
@@ -105,7 +99,6 @@ export default function ReviewScreen() {
       if (exists) {
         return prev.filter((resolved) => resolved.id !== topicId);
       } else {
-        // Re-add with original resolution from extraction
         const originalResolution = extraction.resolvedTopics?.find((resolved) => resolved.id === topicId)?.resolution || '';
         return [...prev, { id: topicId, resolution: originalResolution }];
       }
@@ -162,7 +155,6 @@ export default function ReviewScreen() {
     );
   };
 
-  // Group handlers
   const toggleGroup = (group: { name: string; isNew: boolean; existingId?: string }) => {
     setSelectedGroups((prev) => {
       const exists = prev.some((g) => g.name.toLowerCase() === group.name.toLowerCase());
@@ -211,7 +203,6 @@ export default function ReviewScreen() {
         });
         finalContactId = newContact.id;
 
-        // Save groups for new contact
         if (selectedGroups.length > 0) {
           const groupIds: string[] = [];
           for (const group of selectedGroups) {
@@ -234,7 +225,6 @@ export default function ReviewScreen() {
         summary: extraction.note.summary,
       });
 
-      // Types cumulatifs : on ajoute sans écraser, sauf si même valeur existe déjà
       const cumulativeTypes = [
         'hobby', 'sport', 'children', 'language', 'pet',
         'shared_ref', 'trait', 'gift_idea', 'gift_given'
@@ -245,7 +235,6 @@ export default function ReviewScreen() {
         const isCumulative = cumulativeTypes.includes(fact.factType);
 
         if (isCumulative) {
-          // Pour les types cumulatifs : vérifier si la même VALEUR existe déjà
           const existingWithSameValue = await factService.findByTypeAndValue(
             finalContactId,
             fact.factType,
@@ -253,11 +242,9 @@ export default function ReviewScreen() {
           );
 
           if (existingWithSameValue) {
-            // Même valeur existe déjà → ne rien faire
             continue;
           }
 
-          // Valeur différente → créer un nouveau fact (pas d'update)
           await factService.create({
             contactId: finalContactId,
             factType: fact.factType,
@@ -266,7 +253,6 @@ export default function ReviewScreen() {
             sourceNoteId: note.id,
           });
         } else {
-          // Pour les types singuliers : chercher par type et key, puis update ou create
           const existingFact = await factService.findByTypeAndKey(
             finalContactId,
             fact.factType,
@@ -274,14 +260,11 @@ export default function ReviewScreen() {
           );
 
           if (existingFact) {
-            // Même valeur → ne rien faire
             if (existingFact.factValue.toLowerCase() === fact.factValue.toLowerCase()) {
               continue;
             }
-            // Valeur différente → update avec historique
             await factService.updateWithHistory(existingFact.id, fact.factValue);
           } else {
-            // Nouveau fact
             await factService.create({
               contactId: finalContactId,
               factType: fact.factType,
@@ -293,7 +276,6 @@ export default function ReviewScreen() {
         }
       }
 
-      // Save new hot topics (only selected ones)
       if (editableHotTopics.length > 0) {
         for (const index of selectedHotTopics) {
           const topic = editableHotTopics[index];
@@ -306,14 +288,12 @@ export default function ReviewScreen() {
         }
       }
 
-      // Resolve selected hot topics with their resolutions
       if (resolvedTopicsState.length > 0) {
         for (const resolved of resolvedTopicsState) {
           await hotTopicService.resolve(resolved.id, resolved.resolution || undefined);
         }
       }
 
-      // Save new memories (only selected ones)
       if (editableMemories.length > 0) {
         for (const index of selectedMemories) {
           const memory = editableMemories[index];
@@ -332,17 +312,14 @@ export default function ReviewScreen() {
         data: { lastContactAt: new Date().toISOString() },
       });
 
-      // Clear summary and ice breakers to trigger polling on contact page
       await contactService.update(finalContactId, { aiSummary: '', iceBreakers: [] });
 
-      // Invalidate all relevant queries to refresh data
       queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(finalContactId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.facts.byContact(finalContactId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.hotTopics.byContact(finalContactId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.memories.byContact(finalContactId) });
 
-      // Generate AI summary and ice breakers in background (non-blocking)
       const contactDetails = await contactService.getById(finalContactId);
       if (contactDetails) {
         const requestData = {
@@ -364,14 +341,12 @@ export default function ReviewScreen() {
             })),
         };
 
-        // Generate summary (non-blocking)
         generateSummary(requestData)
           .then(async (summary) => {
             await contactService.update(finalContactId, { aiSummary: summary });
           })
           .catch(() => {});
 
-        // Generate ice breakers (non-blocking)
         generateIceBreakers(requestData)
           .then(async (iceBreakers) => {
             await contactService.update(finalContactId, { iceBreakers });
@@ -389,20 +364,20 @@ export default function ReviewScreen() {
 
   return (
     <ScrollView
-      className="flex-1 bg-background px-6 pt-4"
+      style={styles.container}
       contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
     >
-      <Text className="text-2xl font-bold text-textPrimary mb-2">
+      <Text style={styles.contactName}>
         {extraction.contactIdentified.firstName} {extraction.contactIdentified.lastName || extraction.contactIdentified.suggestedNickname || ''}
       </Text>
 
-      <Text className="text-textSecondary mb-6">
+      <Text style={styles.subtitle}>
         {contactId === 'new' ? t('review.newContact') : t('review.update')}
       </Text>
 
       {editableFacts.length > 0 && (
-        <View className="mb-6">
-          <Text className="text-lg font-semibold text-textPrimary mb-3">
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
             {t('review.extractedInfo')}
           </Text>
 
@@ -411,50 +386,48 @@ export default function ReviewScreen() {
 
             if (isEditing) {
               return (
-                <View key={index} className="bg-surface p-4 rounded-lg mb-3">
-                  <Text className="text-textSecondary text-sm mb-2">{fact.factKey}</Text>
+                <View key={index} style={styles.card}>
+                  <Text style={styles.factLabel}>{fact.factKey}</Text>
                   <TextInput
-                    className="bg-background py-2 px-3 rounded-lg text-textPrimary mb-3"
+                    style={styles.textInput}
                     value={fact.factValue}
                     onChangeText={(value) => updateFact(index, 'factValue', value)}
                     placeholder={t('review.valuePlaceholder')}
-                    placeholderTextColor="#71717a"
+                    placeholderTextColor={Colors.textMuted}
                   />
                   <Pressable
-                    className="py-2 px-4 bg-primary/20 rounded items-center self-start"
+                    style={styles.confirmButton}
                     onPress={() => setEditingFactIndex(null)}
                   >
-                    <Text className="text-primary font-medium">OK</Text>
+                    <Text style={styles.confirmButtonText}>OK</Text>
                   </Pressable>
                 </View>
               );
             }
 
             return (
-              <View
-                key={index}
-                className="bg-surface p-4 rounded-lg mb-3 flex-row items-start"
-              >
+              <View key={index} style={styles.cardRow}>
                 <Pressable onPress={() => toggleFact(index)}>
                   <View
-                    className={`w-5 h-5 rounded mr-3 items-center justify-center mt-0.5 ${
-                      selectedFacts.includes(index) ? 'bg-primary' : 'bg-surfaceHover'
-                    }`}
+                    style={[
+                      styles.checkbox,
+                      selectedFacts.includes(index) && styles.checkboxSelected
+                    ]}
                   >
                     {selectedFacts.includes(index) && (
-                      <Text className="text-white text-xs">✓</Text>
+                      <Text style={styles.checkmark}>✓</Text>
                     )}
                   </View>
                 </Pressable>
 
-                <Pressable className="flex-1" onPress={() => setEditingFactIndex(index)}>
-                  <View className="flex-row items-center">
-                    <Text className="text-textSecondary text-sm flex-1">{fact.factKey}</Text>
-                    <Edit3 size={14} color="#9CA3AF" />
+                <Pressable style={styles.cardContent} onPress={() => setEditingFactIndex(index)}>
+                  <View style={styles.factRow}>
+                    <Text style={styles.factLabel}>{fact.factKey}</Text>
+                    <Edit3 size={14} color={Colors.textMuted} />
                   </View>
-                  <Text className="text-textPrimary font-medium">{fact.factValue}</Text>
+                  <Text style={styles.factValue}>{fact.factValue}</Text>
                   {fact.action === 'update' && fact.previousValue && (
-                    <Text className="text-warning text-xs mt-1">
+                    <Text style={styles.previousValue}>
                       {t('review.previousValue', { value: fact.previousValue })}
                     </Text>
                   )}
@@ -465,105 +438,99 @@ export default function ReviewScreen() {
         </View>
       )}
 
-      {/* Groups Section - Only for new contacts */}
       {contactId === 'new' && (
-        <View className="mb-6">
-          <Text className="text-lg font-semibold text-textPrimary mb-3">
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
             {t('review.groups')}
           </Text>
 
-          {/* Selected groups as chips */}
-          <View className="flex-row flex-wrap gap-2 mb-3">
+          <View style={styles.chipsRow}>
             {selectedGroups.map((group) => (
               <Pressable
                 key={group.name}
-                className="flex-row items-center bg-primary/20 px-3 py-1.5 rounded-full"
+                style={styles.groupChip}
                 onPress={() => toggleGroup(group)}
               >
-                <Text className="text-primary mr-1">{group.name}</Text>
+                <Text style={styles.groupChipText}>{group.name}</Text>
                 {group.isNew && (
-                  <Text className="text-primary/60 text-xs mr-1">{t('review.new')}</Text>
+                  <Text style={styles.groupChipNew}>{t('review.new')}</Text>
                 )}
-                <X size={14} color="#8B5CF6" />
+                <X size={14} color={Colors.primary} />
               </Pressable>
             ))}
           </View>
 
-          {/* Add group input */}
           {isAddingGroup ? (
-            <View className="bg-surface p-3 rounded-lg">
+            <View style={styles.card}>
               <TextInput
-                className="bg-background py-2 px-3 rounded-lg text-textPrimary mb-2"
+                style={styles.textInput}
                 value={newGroupSearch}
                 onChangeText={setNewGroupSearch}
                 placeholder={t('review.groupNamePlaceholder')}
-                placeholderTextColor="#71717a"
+                placeholderTextColor={Colors.textMuted}
                 autoFocus
               />
 
-              {/* Search results */}
               {filteredGroupsForSearch.length > 0 && (
-                <View className="mb-2">
+                <View style={styles.searchResults}>
                   {filteredGroupsForSearch.map((group) => (
                     <Pressable
                       key={group.id}
-                      className="py-2 px-3 bg-surfaceHover rounded mb-1"
+                      style={styles.searchResultItem}
                       onPress={() => addNewGroup(group.name)}
                     >
-                      <Text className="text-textPrimary">{group.name}</Text>
+                      <Text style={styles.searchResultText}>{group.name}</Text>
                     </Pressable>
                   ))}
                 </View>
               )}
 
-              {/* Create new option */}
               {newGroupSearch.trim() && !filteredGroupsForSearch.some(
                 (g) => g.name.toLowerCase() === newGroupSearch.toLowerCase()
               ) && !allGroups.some(
                 (g) => g.name.toLowerCase() === newGroupSearch.toLowerCase()
               ) && (
                 <Pressable
-                  className="py-2 px-3 bg-primary/10 rounded mb-2"
+                  style={styles.createGroupButton}
                   onPress={() => addNewGroup(newGroupSearch)}
                 >
-                  <Text className="text-primary">
+                  <Text style={styles.createGroupText}>
                     {t('review.createGroup', { name: newGroupSearch.trim() })}
                   </Text>
                 </Pressable>
               )}
 
               <Pressable
-                className="py-2 items-center"
+                style={styles.cancelButton}
                 onPress={() => {
                   setIsAddingGroup(false);
                   setNewGroupSearch('');
                 }}
               >
-                <Text className="text-textSecondary">{t('common.cancel')}</Text>
+                <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
               </Pressable>
             </View>
           ) : (
             <Pressable
-              className="flex-row items-center py-2"
+              style={styles.addGroupButton}
               onPress={() => setIsAddingGroup(true)}
             >
-              <Plus size={18} color="#8B5CF6" />
-              <Text className="text-primary ml-2">{t('review.addGroup')}</Text>
+              <Plus size={18} color={Colors.primary} />
+              <Text style={styles.addGroupText}>{t('review.addGroup')}</Text>
             </Pressable>
           )}
         </View>
       )}
 
-      {/* Resolved Hot Topics Section */}
-      {(resolvedTopicsWithData.length > 0 || extraction.resolvedTopics?.length > 0) && (
-        <View className="mb-6">
-          <View className="flex-row items-center mb-3">
-            <Archive size={20} color="#10B981" />
-            <Text className="text-lg font-semibold text-textPrimary ml-2">
+      {(resolvedTopicsWithData.length > 0 || (extraction.resolvedTopics?.length ?? 0) > 0) && (
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Archive size={20} color={Colors.success} />
+            <Text style={styles.sectionTitleWithIcon}>
               {t('review.topicsToArchive')}
             </Text>
           </View>
-          <Text className="text-textMuted text-sm mb-3">
+          <Text style={styles.sectionDescription}>
             {t('review.topicsToArchiveDescription')}
           </Text>
 
@@ -575,62 +542,60 @@ export default function ReviewScreen() {
               const isEditing = editingResolutionId === topic.id;
 
               return (
-                <View
-                  key={topic.id}
-                  className="bg-success/10 border border-success/30 p-4 rounded-lg mb-3"
-                >
+                <View key={topic.id} style={styles.resolvedCard}>
                   <Pressable
-                    className="flex-row items-start"
+                    style={styles.cardRowStart}
                     onPress={() => toggleResolvedTopic(topic.id)}
                   >
                     <View
-                      className={`w-5 h-5 rounded mr-3 items-center justify-center mt-0.5 ${
-                        isSelected ? 'bg-success' : 'bg-surfaceHover'
-                      }`}
+                      style={[
+                        styles.checkbox,
+                        isSelected && styles.checkboxSuccess
+                      ]}
                     >
                       {isSelected && (
-                        <Text className="text-white text-xs">✓</Text>
+                        <Text style={styles.checkmark}>✓</Text>
                       )}
                     </View>
 
-                    <View className="flex-1">
-                      <Text className="text-textPrimary font-medium">{topic.title}</Text>
+                    <View style={styles.cardContent}>
+                      <Text style={styles.factValue}>{topic.title}</Text>
                       {topic.context && (
-                        <Text className="text-textSecondary text-sm mt-1">{topic.context}</Text>
+                        <Text style={styles.contextText}>{topic.context}</Text>
                       )}
                     </View>
                   </Pressable>
 
                   {isSelected && (
-                    <View className="mt-3 ml-8">
-                      <Text className="text-success text-xs font-medium mb-1">{t('review.resolutionLabel')}</Text>
+                    <View style={styles.resolutionContainer}>
+                      <Text style={styles.resolutionLabel}>{t('review.resolutionLabel')}</Text>
                       {isEditing ? (
                         <View>
                           <TextInput
-                            className="bg-background py-2 px-3 rounded-lg text-textPrimary text-sm"
+                            style={styles.textInputSmall}
                             value={currentResolution}
                             onChangeText={(value) => updateResolution(topic.id, value)}
                             placeholder={t('review.resolutionPlaceholder')}
-                            placeholderTextColor="#71717a"
+                            placeholderTextColor={Colors.textMuted}
                             multiline
                             autoFocus
                           />
                           <Pressable
-                            className="mt-2 py-1.5 px-3 bg-success/20 rounded items-center self-start"
+                            style={styles.confirmButtonSuccess}
                             onPress={() => setEditingResolutionId(null)}
                           >
-                            <Text className="text-success text-sm">{t('common.confirm')}</Text>
+                            <Text style={styles.confirmButtonSuccessText}>{t('common.confirm')}</Text>
                           </Pressable>
                         </View>
                       ) : (
                         <Pressable
-                          className="flex-row items-center"
+                          style={styles.resolutionRow}
                           onPress={() => setEditingResolutionId(topic.id)}
                         >
-                          <Text className="text-success text-sm flex-1">
+                          <Text style={styles.resolutionText}>
                             {currentResolution || t('review.addResolution')}
                           </Text>
-                          <Edit3 size={14} color="#10B981" />
+                          <Edit3 size={14} color={Colors.success} />
                         </Pressable>
                       )}
                     </View>
@@ -642,68 +607,64 @@ export default function ReviewScreen() {
       )}
 
       {editableHotTopics.length > 0 && (
-        <View className="mb-6">
-          <Text className="text-lg font-semibold text-textPrimary mb-3">{t('review.news')}</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('review.news')}</Text>
 
           {editableHotTopics.map((topic, index) => {
             const isEditing = editingHotTopicIndex === index;
 
             if (isEditing) {
               return (
-                <View key={index} className="bg-surface p-4 rounded-lg mb-2">
+                <View key={index} style={styles.card}>
                   <TextInput
-                    className="bg-background py-2 px-3 rounded-lg text-textPrimary font-medium mb-2"
+                    style={[styles.textInput, styles.textInputBold]}
                     value={topic.title}
                     onChangeText={(value) => updateHotTopic(index, 'title', value)}
                     placeholder={t('review.titlePlaceholder')}
-                    placeholderTextColor="#71717a"
+                    placeholderTextColor={Colors.textMuted}
                   />
                   <TextInput
-                    className="bg-background py-2 px-3 rounded-lg text-textSecondary mb-3"
+                    style={styles.textInput}
                     value={topic.context || ''}
                     onChangeText={(value) => updateHotTopic(index, 'context', value)}
                     placeholder={t('review.contextPlaceholder')}
-                    placeholderTextColor="#71717a"
+                    placeholderTextColor={Colors.textMuted}
                     multiline
                   />
                   <Pressable
-                    className="py-2 px-4 bg-primary/20 rounded items-center self-start"
+                    style={styles.confirmButton}
                     onPress={() => setEditingHotTopicIndex(null)}
                   >
-                    <Text className="text-primary font-medium">{t('common.confirm')}</Text>
+                    <Text style={styles.confirmButtonText}>{t('common.confirm')}</Text>
                   </Pressable>
                 </View>
               );
             }
 
             return (
-              <View
-                key={index}
-                className="bg-surface rounded-lg mb-2 flex-row items-start p-4"
-              >
+              <View key={index} style={styles.cardRow}>
                 <Pressable onPress={() => toggleHotTopic(index)}>
                   <View
-                    className={`w-5 h-5 rounded mr-3 items-center justify-center mt-0.5 ${
-                      selectedHotTopics.includes(index) ? 'bg-primary' : 'bg-surfaceHover'
-                    }`}
+                    style={[
+                      styles.checkbox,
+                      selectedHotTopics.includes(index) && styles.checkboxSelected
+                    ]}
                   >
                     {selectedHotTopics.includes(index) && (
-                      <Text className="text-white text-xs">✓</Text>
+                      <Text style={styles.checkmark}>✓</Text>
                     )}
                   </View>
                 </Pressable>
 
-                <View
-                  className="w-2.5 h-2.5 rounded-full mt-1.5 mr-3 bg-orange-500"
-                />
+                <View style={styles.orangeDot} />
 
-                <Pressable className="flex-1" onPress={() => setEditingHotTopicIndex(index)}>
-                  <View className="flex-row items-center">
-                    <Text className="text-textPrimary font-medium flex-1">{topic.title}</Text>
-                    <Edit3 size={14} color="#9CA3AF" />
+                <Pressable style={styles.cardContent} onPress={() => setEditingHotTopicIndex(index)}>
+                  <View style={styles.factRow}>
+                    <Text style={styles.factValue}>{topic.title}</Text>
+                    <Edit3 size={14} color={Colors.textMuted} />
                   </View>
                   {topic.context && (
-                    <Text className="text-textSecondary text-sm mt-1">{topic.context}</Text>
+                    <Text style={styles.contextText}>{topic.context}</Text>
                   )}
                 </Pressable>
               </View>
@@ -713,73 +674,67 @@ export default function ReviewScreen() {
       )}
 
       {editableMemories.length > 0 && (
-        <View className="mb-6">
-          <Text className="text-lg font-semibold text-textPrimary mb-3">{t('review.memories')}</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('review.memories')}</Text>
 
           {editableMemories.map((memory, index) => {
             const isEditing = editingMemoryIndex === index;
 
             if (isEditing) {
               return (
-                <View key={index} className="bg-surface p-4 rounded-lg mb-2">
+                <View key={index} style={styles.card}>
                   <TextInput
-                    className="bg-background py-2 px-3 rounded-lg text-textPrimary mb-2"
+                    style={styles.textInput}
                     value={memory.description}
                     onChangeText={(value) => updateMemory(index, 'description', value)}
                     placeholder={t('review.descriptionPlaceholder')}
-                    placeholderTextColor="#71717a"
+                    placeholderTextColor={Colors.textMuted}
                     multiline
                   />
                   <TextInput
-                    className="bg-background py-2 px-3 rounded-lg text-textSecondary mb-3"
+                    style={styles.textInput}
                     value={memory.eventDate || ''}
                     onChangeText={(value) => updateMemory(index, 'eventDate', value)}
                     placeholder={t('review.datePlaceholder')}
-                    placeholderTextColor="#71717a"
+                    placeholderTextColor={Colors.textMuted}
                   />
                   <Pressable
-                    className="py-2 px-4 bg-primary/20 rounded items-center self-start"
+                    style={styles.confirmButton}
                     onPress={() => setEditingMemoryIndex(null)}
                   >
-                    <Text className="text-primary font-medium">{t('common.confirm')}</Text>
+                    <Text style={styles.confirmButtonText}>{t('common.confirm')}</Text>
                   </Pressable>
                 </View>
               );
             }
 
             return (
-              <View
-                key={index}
-                className="bg-surface rounded-lg mb-2 flex-row items-start p-4"
-              >
+              <View key={index} style={styles.cardRow}>
                 <Pressable onPress={() => toggleMemory(index)}>
                   <View
-                    className={`w-5 h-5 rounded mr-3 items-center justify-center mt-0.5 ${
-                      selectedMemories.includes(index) ? 'bg-primary' : 'bg-surfaceHover'
-                    }`}
+                    style={[
+                      styles.checkbox,
+                      selectedMemories.includes(index) && styles.checkboxSelected
+                    ]}
                   >
                     {selectedMemories.includes(index) && (
-                      <Text className="text-white text-xs">✓</Text>
+                      <Text style={styles.checkmark}>✓</Text>
                     )}
                   </View>
                 </Pressable>
 
-                <View
-                  className={`w-2.5 h-2.5 rounded-full mt-1.5 mr-3 ${
-                    memory.isShared ? 'bg-blue-500' : 'bg-purple-500'
-                  }`}
-                />
+                <View style={[styles.memoryDot, memory.isShared ? styles.blueDot : styles.purpleDot]} />
 
-                <Pressable className="flex-1" onPress={() => setEditingMemoryIndex(index)}>
-                  <View className="flex-row items-center">
-                    <Text className="text-textPrimary font-medium flex-1">{memory.description}</Text>
-                    <Edit3 size={14} color="#9CA3AF" />
+                <Pressable style={styles.cardContent} onPress={() => setEditingMemoryIndex(index)}>
+                  <View style={styles.factRow}>
+                    <Text style={styles.factValue}>{memory.description}</Text>
+                    <Edit3 size={14} color={Colors.textMuted} />
                   </View>
-                  <View className="flex-row items-center mt-1">
+                  <View style={styles.memoryMeta}>
                     {memory.eventDate && (
-                      <Text className="text-textSecondary text-sm mr-2">{memory.eventDate}</Text>
+                      <Text style={styles.memoryDate}>{memory.eventDate}</Text>
                     )}
-                    <Text className="text-textMuted text-xs">
+                    <Text style={styles.memoryType}>
                       {memory.isShared ? t('review.together') : t('review.solo')}
                     </Text>
                   </View>
@@ -791,14 +746,310 @@ export default function ReviewScreen() {
       )}
 
       <Pressable
-        className={`py-4 rounded-lg items-center ${isSaving ? 'bg-primary/50' : 'bg-primary'}`}
+        style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
         onPress={handleSave}
         disabled={isSaving}
       >
-        <Text className="text-white font-semibold text-lg">
+        <Text style={styles.saveButtonText}>
           {isSaving ? t('review.saving') : t('review.save')}
         </Text>
       </Pressable>
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+    paddingHorizontal: 24,
+    paddingTop: 16,
+  },
+  contactName: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    marginBottom: 24,
+  },
+  section: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+    marginBottom: 12,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  sectionTitleWithIcon: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+    marginLeft: 8,
+  },
+  sectionDescription: {
+    fontSize: 14,
+    color: Colors.textMuted,
+    marginBottom: 12,
+  },
+  card: {
+    backgroundColor: Colors.surface,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  cardRow: {
+    backgroundColor: Colors.surface,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  cardRowStart: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  cardContent: {
+    flex: 1,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    marginRight: 12,
+    marginTop: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.surfaceHover,
+  },
+  checkboxSelected: {
+    backgroundColor: Colors.primary,
+  },
+  checkboxSuccess: {
+    backgroundColor: Colors.success,
+  },
+  checkmark: {
+    color: Colors.textInverse,
+    fontSize: 12,
+  },
+  factRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  factLabel: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    flex: 1,
+    marginBottom: 8,
+  },
+  factValue: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: Colors.textPrimary,
+    flex: 1,
+  },
+  previousValue: {
+    fontSize: 12,
+    color: Colors.warning,
+    marginTop: 4,
+  },
+  contextText: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    marginTop: 4,
+  },
+  textInput: {
+    backgroundColor: Colors.background,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    color: Colors.textPrimary,
+    fontSize: 14,
+    marginBottom: 12,
+  },
+  textInputSmall: {
+    backgroundColor: Colors.background,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    color: Colors.textPrimary,
+    fontSize: 14,
+  },
+  textInputBold: {
+    fontWeight: '500',
+  },
+  confirmButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: Colors.primaryLight,
+    borderRadius: 8,
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+  },
+  confirmButtonText: {
+    color: Colors.primary,
+    fontWeight: '500',
+  },
+  confirmButtonSuccess: {
+    marginTop: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: `${Colors.success}20`,
+    borderRadius: 8,
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+  },
+  confirmButtonSuccessText: {
+    color: Colors.success,
+    fontSize: 14,
+  },
+  chipsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 12,
+  },
+  groupChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.primaryLight,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  groupChipText: {
+    color: Colors.primary,
+    marginRight: 4,
+  },
+  groupChipNew: {
+    color: Colors.primary,
+    opacity: 0.6,
+    fontSize: 12,
+    marginRight: 4,
+  },
+  addGroupButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  addGroupText: {
+    color: Colors.primary,
+    marginLeft: 8,
+  },
+  searchResults: {
+    marginBottom: 8,
+  },
+  searchResultItem: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: Colors.surfaceHover,
+    borderRadius: 8,
+    marginBottom: 4,
+  },
+  searchResultText: {
+    color: Colors.textPrimary,
+  },
+  createGroupButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: Colors.primaryLight,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  createGroupText: {
+    color: Colors.primary,
+  },
+  cancelButton: {
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    color: Colors.textSecondary,
+  },
+  resolvedCard: {
+    backgroundColor: `${Colors.success}10`,
+    borderWidth: 1,
+    borderColor: `${Colors.success}30`,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  resolutionContainer: {
+    marginTop: 12,
+    marginLeft: 32,
+  },
+  resolutionLabel: {
+    color: Colors.success,
+    fontSize: 12,
+    fontWeight: '500',
+    marginBottom: 4,
+  },
+  resolutionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  resolutionText: {
+    color: Colors.success,
+    fontSize: 14,
+    flex: 1,
+  },
+  orangeDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: Colors.warning,
+    marginTop: 6,
+    marginRight: 12,
+  },
+  memoryDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginTop: 6,
+    marginRight: 12,
+  },
+  blueDot: {
+    backgroundColor: '#3B82F6',
+  },
+  purpleDot: {
+    backgroundColor: '#8B5CF6',
+  },
+  memoryMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  memoryDate: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    marginRight: 8,
+  },
+  memoryType: {
+    fontSize: 12,
+    color: Colors.textMuted,
+  },
+  saveButton: {
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    backgroundColor: Colors.primary,
+  },
+  saveButtonDisabled: {
+    opacity: 0.5,
+  },
+  saveButtonText: {
+    color: Colors.textInverse,
+    fontWeight: '600',
+    fontSize: 18,
+  },
+});
