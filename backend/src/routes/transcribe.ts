@@ -1,14 +1,16 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { createClient } from '@deepgram/sdk';
 import { authMiddleware } from '../middleware/auth';
 import { auditLog } from '../lib/audit';
+import { transcribeAudio } from '../lib/speech-to-text-provider';
 
 type Bindings = {
   DATABASE_URL: string;
   BETTER_AUTH_SECRET: string;
   BETTER_AUTH_URL: string;
   DEEPGRAM_API_KEY: string;
+  GROQ_API_KEY?: string;
+  STT_PROVIDER?: 'deepgram' | 'groq-whisper-v3' | 'groq-whisper-v3-turbo';
   ANTHROPIC_API_KEY: string;
 };
 
@@ -34,8 +36,6 @@ transcribeRoutes.post('/', async (c) => {
       return c.json({ error: 'No audio file provided' }, 400);
     }
 
-    const deepgram = createClient(c.env.DEEPGRAM_API_KEY);
-
     // audioFile is Blob (File extends Blob in Workers)
     const audioBuffer = await (audioFile as Blob).arrayBuffer();
 
@@ -44,43 +44,32 @@ transcribeRoutes.post('/', async (c) => {
     const languageValidation = languageSchema.safeParse(languageParam || 'fr');
     const transcriptionLanguage = languageValidation.success ? languageValidation.data : 'fr';
 
-    const { result } = await deepgram.listen.prerecorded.transcribeFile(
-      Buffer.from(audioBuffer),
+    // Use the speech-to-text provider wrapper
+    const result = await transcribeAudio(
       {
-        model: 'nova-3',
-        language: transcriptionLanguage,
-        smart_format: true,
-        punctuate: true,
-      }
+        DEEPGRAM_API_KEY: c.env.DEEPGRAM_API_KEY,
+        GROQ_API_KEY: c.env.GROQ_API_KEY,
+        STT_PROVIDER: c.env.STT_PROVIDER,
+      },
+      audioBuffer,
+      transcriptionLanguage
     );
 
-    if (!result?.results?.channels?.[0]?.alternatives?.[0]) {
-      await auditLog(c, {
-        userId: c.get('user')?.id,
-        action: 'transcribe',
-        resource: 'transcribe',
-        success: false,
-        details: { error: 'No transcription result' },
-      });
-      return c.json({ error: 'Transcription failed - no result' }, 500);
-    }
-
-    const transcript = result.results.channels[0].alternatives[0].transcript;
-    const confidence = result.results.channels[0].alternatives[0].confidence;
+    const { transcript, confidence, duration } = result;
 
     await auditLog(c, {
       userId: c.get('user')?.id,
       action: 'transcribe',
       resource: 'transcribe',
       success: true,
-      details: { language: transcriptionLanguage, confidence, duration: result.metadata?.duration },
+      details: { language: transcriptionLanguage, confidence, duration },
     });
 
     return c.json({
       success: true,
       transcript,
       confidence,
-      duration: result.metadata?.duration,
+      duration,
     });
   } catch (error) {
     console.error('Transcription error:', error);
