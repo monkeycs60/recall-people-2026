@@ -29,6 +29,16 @@ export const getToken = async (): Promise<string | null> => {
   return await SecureStore.getItemAsync(TOKEN_KEY);
 };
 
+// Store refresh token
+export const setRefreshToken = async (token: string) => {
+  await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, token);
+};
+
+// Get refresh token
+export const getRefreshToken = async (): Promise<string | null> => {
+  return await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
+};
+
 // Store user
 export const setUser = async (user: User) => {
   await SecureStore.setItemAsync(USER_KEY, JSON.stringify(user));
@@ -43,6 +53,7 @@ export const getUser = async (): Promise<User | null> => {
 // Clear auth data
 export const clearAuth = async () => {
   await SecureStore.deleteItemAsync(TOKEN_KEY);
+  await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
   await SecureStore.deleteItemAsync(USER_KEY);
 };
 
@@ -61,6 +72,7 @@ export const register = async (email: string, password: string, name: string): P
 
   const data: AuthResponse = await response.json();
   await setToken(data.accessToken);
+  await setRefreshToken(data.refreshToken);
   await setUser(data.user);
   return data;
 };
@@ -80,6 +92,7 @@ export const login = async (email: string, password: string): Promise<AuthRespon
 
   const data: AuthResponse = await response.json();
   await setToken(data.accessToken);
+  await setRefreshToken(data.refreshToken);
   await setUser(data.user);
   return data;
 };
@@ -104,6 +117,7 @@ export const loginWithGoogle = async (idToken: string): Promise<AuthResponse> =>
 
   const data: AuthResponse = await response.json();
   await setToken(data.accessToken);
+  await setRefreshToken(data.refreshToken);
   await setUser(data.user);
   return data;
 };
@@ -139,4 +153,51 @@ export const isLoggedIn = async (): Promise<boolean> => {
 
   const user = await verifyToken();
   return !!user;
+};
+
+// Flag to prevent concurrent refresh attempts
+let isRefreshing = false;
+let refreshPromise: Promise<AuthResponse | null> | null = null;
+
+// Refresh access token using refresh token
+export const refreshAccessToken = async (): Promise<AuthResponse | null> => {
+  // If already refreshing, wait for the existing refresh to complete
+  if (isRefreshing && refreshPromise) {
+    return refreshPromise;
+  }
+
+  const refreshToken = await getRefreshToken();
+  if (!refreshToken) {
+    return null;
+  }
+
+  isRefreshing = true;
+  refreshPromise = (async () => {
+    try {
+      const response = await fetch(`${API_URL}/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      if (!response.ok) {
+        await clearAuth();
+        return null;
+      }
+
+      const data: AuthResponse = await response.json();
+      await setToken(data.accessToken);
+      await setRefreshToken(data.refreshToken);
+      await setUser(data.user);
+      return data;
+    } catch {
+      await clearAuth();
+      return null;
+    } finally {
+      isRefreshing = false;
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
 };

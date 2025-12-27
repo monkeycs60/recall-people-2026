@@ -1,5 +1,5 @@
 import * as FileSystem from 'expo-file-system/legacy';
-import { getToken } from './auth';
+import { getToken, refreshAccessToken } from './auth';
 import { ExtractionResult } from '@/types';
 import { useSettingsStore } from '@/stores/settings-store';
 import { ApiError, NetworkError, showApiError } from './error-handler';
@@ -25,7 +25,7 @@ function isNetworkError(error: unknown): boolean {
   return false;
 }
 
-const apiCall = async <T>(endpoint: string, options: ApiOptions = {}): Promise<T> => {
+const apiCall = async <T>(endpoint: string, options: ApiOptions = {}, isRetry = false): Promise<T> => {
   const { showErrorToast = true, ...fetchOptions } = options;
   const token = await getToken();
 
@@ -42,6 +42,16 @@ const apiCall = async <T>(endpoint: string, options: ApiOptions = {}): Promise<T
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+
+      // If 401 and not already a retry, try to refresh the token
+      if (response.status === 401 && !isRetry) {
+        const refreshed = await refreshAccessToken();
+        if (refreshed) {
+          // Retry the request with the new token
+          return apiCall<T>(endpoint, options, true);
+        }
+      }
+
       const apiError = new ApiError(
         errorData.error || `API Error: ${response.status}`,
         response.status,
@@ -69,8 +79,9 @@ const apiCall = async <T>(endpoint: string, options: ApiOptions = {}): Promise<T
   }
 };
 
-export const transcribeAudio = async (
-  audioUri: string
+const transcribeAudioInternal = async (
+  audioUri: string,
+  isRetry = false
 ): Promise<{
   transcript: string;
   confidence: number;
@@ -103,6 +114,15 @@ export const transcribeAudio = async (
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ error: 'Transcription failed' }));
+
+      // If 401 and not already a retry, try to refresh the token
+      if (response.status === 401 && !isRetry) {
+        const refreshed = await refreshAccessToken();
+        if (refreshed) {
+          return transcribeAudioInternal(audioUri, true);
+        }
+      }
+
       const apiError = new ApiError(
         errorData.error || 'Transcription failed',
         response.status,
@@ -125,6 +145,8 @@ export const transcribeAudio = async (
     throw error;
   }
 };
+
+export const transcribeAudio = (audioUri: string) => transcribeAudioInternal(audioUri);
 
 export const extractInfo = async (data: {
   transcription: string;
