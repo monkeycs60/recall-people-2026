@@ -17,10 +17,6 @@ npx wrangler secret put ADMIN_EMAIL
 
 ### Variables d'environnement frontend (à configurer)
 
--  [ ] Ajouter `EXPO_PUBLIC_ADMIN_EMAIL` dans `frontend/.env` (email de l'admin qui a accès au monitoring)
-
-### Sécurité - Fait ✅
-
 ---
 
 ## P0 - Avant Launch

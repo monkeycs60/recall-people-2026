@@ -187,6 +187,19 @@ extractRoutes.post('/', async (c) => {
         })
       : [];
 
+    // Filter out facts where the new value is identical to the previous value (useless updates)
+    const filteredFacts = extraction.facts.filter((fact) => {
+      if (fact.action === 'update' && fact.previousValue) {
+        const newValue = fact.factValue.toLowerCase().trim();
+        const oldValue = fact.previousValue.toLowerCase().trim();
+        // Skip if values are identical - no point showing "update vélo → vélo"
+        if (newValue === oldValue) {
+          return false;
+        }
+      }
+      return true;
+    });
+
     // For existing contacts, use their stored name instead of extracted name
     const formattedExtraction = {
       contactIdentified: {
@@ -199,7 +212,7 @@ extractRoutes.post('/', async (c) => {
         suggestedNickname,
       },
       noteTitle: extraction.noteTitle,
-      facts: extraction.facts,
+      facts: filteredFacts,
       hotTopics: extraction.hotTopics,
       resolvedTopics: extraction.resolvedTopics,
       memories: extraction.memories.map((memory) => ({
