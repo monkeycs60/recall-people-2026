@@ -1,5 +1,40 @@
 # Recall - TODO
 
+## P0 - Sécurité & Déploiement Backend
+
+### Secrets Cloudflare (à configurer une seule fois)
+
+```bash
+npx wrangler secret put DATABASE_URL
+npx wrangler secret put JWT_SECRET
+npx wrangler secret put DEEPGRAM_API_KEY
+npx wrangler secret put XAI_API_KEY
+npx wrangler secret put GOOGLE_CLIENT_ID_WEB
+npx wrangler secret put GOOGLE_CLIENT_ID_IOS
+npx wrangler secret put GOOGLE_CLIENT_ID_ANDROID
+```
+
+### Sécurité - Fait ✅
+
+- [x] Hashage mots de passe (bcrypt)
+- [x] Vérification mot de passe au login
+- [x] JWT_SECRET sécurisé (512 bits)
+- [x] Google Client IDs en variables d'environnement
+- [x] Historique git nettoyé (clés API supprimées)
+- [x] Rate limiting (KV Cloudflare)
+- [x] Protection prompt injection (sanitize + délimiteurs + instructions)
+- [x] CI/CD GitHub Actions
+
+### Sécurité - À faire
+
+- [ ] Réduire expiration JWT (30j → 1h) + refresh tokens
+- [ ] Headers de sécurité (CSP, HSTS, X-Frame-Options)
+- [ ] Validation Zod complète sur tous les endpoints
+- [ ] Audit logging (qui fait quoi, quand)
+- [ ] HTTPS enforcement en prod
+
+---
+
 ## P0 - Avant Launch
 
 ### Copywriting & Onboarding
