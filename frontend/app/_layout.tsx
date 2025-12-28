@@ -22,6 +22,8 @@ import { Colors } from '@/constants/theme';
 import Toast from 'react-native-toast-message';
 import { toastConfig } from '@/components/ui/ToastConfig';
 import { OfflineBanner } from '@/components/ui/OfflineBanner';
+import { notificationService } from '@/services/notification.service';
+import { eventService } from '@/services/event.service';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -73,6 +75,18 @@ export default function RootLayout() {
         });
     }
   }, []);
+
+  // Setup notification tap handler to navigate to contact
+  useEffect(() => {
+    const cleanup = notificationService.setupNotificationListener(async (eventId) => {
+      const event = await eventService.getById(eventId);
+      if (event) {
+        router.push(`/contact/${event.contactId}`);
+      }
+    });
+
+    return cleanup;
+  }, [router]);
 
   if (dbError) {
     return (
