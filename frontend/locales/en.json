@@ -66,8 +66,9 @@
     "home": "Home",
     "contacts": "Contacts",
     "search": "Search",
+    "explore": "AI Explore",
     "profile": "Profile",
-    "upcoming": "Upcoming"
+    "upcoming": "News"
   },
   "home": {
     "pressToRecord": "Press to record",
@@ -82,7 +83,7 @@
     "noContactsDescription": "Never be caught off guard again."
   },
   "search": {
-    "title": "Search",
+    "title": "AI Explore",
     "placeholder": "Describe what you're looking for...",
     "noResults": "No results",
     "searching": "Searching...",
@@ -225,6 +226,40 @@
       "titlePlaceholder": "E.g.: Allergy, Diet...",
       "descriptionLabel": "Description *",
       "descriptionPlaceholder": "Details..."
+    },
+    "phoneModal": {
+      "title": "Phone",
+      "placeholder": "+1 555 123 4567",
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "emailModal": {
+      "title": "Email",
+      "placeholder": "email@example.com",
+      "invalidFormat": "Invalid email format",
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "birthdayModal": {
+      "title": "Birthday",
+      "day": "Day",
+      "month": "Month",
+      "year": "Year (optional)",
+      "yearPlaceholder": "Year",
+      "months": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "contactInfoReview": {
+      "title": "Detected contact info",
+      "phone": "Phone",
+      "email": "Email",
+      "birthday": "Birthday",
+      "accept": "Accept",
+      "ignore": "Ignore"
     }
   },
   "selectContact": {
