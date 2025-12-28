@@ -1,5 +1,5 @@
 import { View, Text, TextInput, Pressable, StyleSheet, Modal, ScrollView } from 'react-native';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Trash2, ChevronDown } from 'lucide-react-native';
 import { Colors } from '@/constants/theme';
@@ -28,15 +28,6 @@ export function BirthdayEditModal({
   const [showMonthPicker, setShowMonthPicker] = useState(false);
 
   const months = t('contact.birthdayModal.months', { returnObjects: true }) as string[];
-
-  useEffect(() => {
-    if (visible) {
-      setDay(initialDay?.toString() || '');
-      setMonth(initialMonth || null);
-      setYear(initialYear?.toString() || '');
-      setShowMonthPicker(false);
-    }
-  }, [visible, initialDay, initialMonth, initialYear]);
 
   const handleSave = () => {
     const dayNum = parseInt(day, 10);

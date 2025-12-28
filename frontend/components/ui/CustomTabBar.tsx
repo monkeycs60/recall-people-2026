@@ -1,13 +1,12 @@
 import { View, Pressable, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Users, User, Mic } from 'lucide-react-native';
+import { Users, User, Mic, Calendar, Search } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '@/constants/theme';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-  withTiming,
 } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 
@@ -31,9 +30,11 @@ export function CustomTabBar({ state, navigation }: TabBarProps) {
 
   const leftTabs = [
     { name: 'contacts', icon: Users, label: t('tabs.contacts') },
+    { name: 'upcoming', icon: Calendar, label: t('tabs.upcoming') },
   ];
 
   const rightTabs = [
+    { name: 'search', icon: Search, label: t('tabs.explore') },
     { name: 'profile', icon: User, label: t('tabs.profile') },
   ];
 

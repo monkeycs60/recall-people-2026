@@ -1,5 +1,5 @@
 import { View, Text, TextInput, Pressable, StyleSheet, Modal } from 'react-native';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Trash2 } from 'lucide-react-native';
 import { Colors } from '@/constants/theme';
@@ -14,12 +14,6 @@ type PhoneEditModalProps = {
 export function PhoneEditModal({ visible, initialValue, onSave, onClose }: PhoneEditModalProps) {
   const { t } = useTranslation();
   const [value, setValue] = useState(initialValue || '');
-
-  useEffect(() => {
-    if (visible) {
-      setValue(initialValue || '');
-    }
-  }, [visible, initialValue]);
 
   const handleSave = () => {
     onSave(value.trim() || null);

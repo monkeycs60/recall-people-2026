@@ -8,6 +8,7 @@ import { auditLog } from '../lib/audit';
 import { createAIModel, getAIProviderName, getAIModel } from '../lib/ai-provider';
 import { measurePerformance } from '../lib/performance-logger';
 import { getLangfuseClient } from '../lib/telemetry';
+import { evaluateSearch } from '../lib/evaluators';
 
 type Bindings = {
 	DATABASE_URL: string;
@@ -18,6 +19,8 @@ type Bindings = {
 	AI_PROVIDER?: 'grok' | 'cerebras';
 	ENABLE_PERFORMANCE_LOGGING?: boolean;
 	ENABLE_LANGFUSE?: string;
+	ENABLE_EVALUATION?: string;
+	EVALUATION_SAMPLING_RATE?: string;
 };
 
 type FactInput = {
@@ -154,6 +157,30 @@ searchRoutes.post('/', async (c) => {
 		// Update Langfuse generation with output
 		generation?.end({ output: sortedResults });
 		trace?.update({ output: { success: true, resultsCount: sortedResults.length, processingTimeMs } });
+
+		// Run evaluation in background (non-blocking)
+		if (c.env.XAI_API_KEY && c.executionCtx) {
+			c.executionCtx.waitUntil(
+				evaluateSearch(
+					query,
+					{ facts, memories, notes },
+					sortedResults,
+					{
+						XAI_API_KEY: c.env.XAI_API_KEY,
+						enableEvaluation: c.env.ENABLE_EVALUATION === 'true',
+						samplingRate: parseFloat(c.env.EVALUATION_SAMPLING_RATE || '0.25'),
+					}
+				).then((evaluation) => {
+					if (evaluation && trace) {
+						trace.score({
+							name: 'search-quality',
+							value: evaluation.score / 10,
+							comment: evaluation.reasoning,
+						});
+					}
+				})
+			);
+		}
 
 		await auditLog(c, {
 			userId: c.get('user')?.id,

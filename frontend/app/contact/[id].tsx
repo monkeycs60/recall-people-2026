@@ -962,28 +962,34 @@ export default function ContactDetailScreen() {
         onConfirm={handleConfirmDelete}
       />
 
-      <PhoneEditModal
-        visible={showPhoneModal}
-        initialValue={contact?.phone}
-        onSave={handleSavePhone}
-        onClose={() => setShowPhoneModal(false)}
-      />
+      {showPhoneModal && (
+        <PhoneEditModal
+          visible={showPhoneModal}
+          initialValue={contact?.phone}
+          onSave={handleSavePhone}
+          onClose={() => setShowPhoneModal(false)}
+        />
+      )}
 
-      <EmailEditModal
-        visible={showEmailModal}
-        initialValue={contact?.email}
-        onSave={handleSaveEmail}
-        onClose={() => setShowEmailModal(false)}
-      />
+      {showEmailModal && (
+        <EmailEditModal
+          visible={showEmailModal}
+          initialValue={contact?.email}
+          onSave={handleSaveEmail}
+          onClose={() => setShowEmailModal(false)}
+        />
+      )}
 
-      <BirthdayEditModal
-        visible={showBirthdayModal}
-        initialDay={contact?.birthdayDay}
-        initialMonth={contact?.birthdayMonth}
-        initialYear={contact?.birthdayYear}
-        onSave={handleSaveBirthday}
-        onClose={() => setShowBirthdayModal(false)}
-      />
+      {showBirthdayModal && (
+        <BirthdayEditModal
+          visible={showBirthdayModal}
+          initialDay={contact?.birthdayDay}
+          initialMonth={contact?.birthdayMonth}
+          initialYear={contact?.birthdayYear}
+          onSave={handleSaveBirthday}
+          onClose={() => setShowBirthdayModal(false)}
+        />
+      )}
     </KeyboardAvoidingView>
   );
 }

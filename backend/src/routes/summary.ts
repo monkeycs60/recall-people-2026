@@ -11,6 +11,7 @@ import {
 } from '../lib/ai-provider';
 import { measurePerformance } from '../lib/performance-logger';
 import { getLangfuseClient } from '../lib/telemetry';
+import { evaluateSummary } from '../lib/evaluators';
 
 type Bindings = {
 	XAI_API_KEY: string;
@@ -18,6 +19,8 @@ type Bindings = {
 	AI_PROVIDER?: 'grok' | 'cerebras';
 	ENABLE_PERFORMANCE_LOGGING?: boolean;
 	ENABLE_LANGFUSE?: string;
+	ENABLE_EVALUATION?: string;
+	EVALUATION_SAMPLING_RATE?: string;
 };
 
 type SummaryRequest = {
@@ -220,6 +223,29 @@ FORMAT:
 		// Update Langfuse generation with output
 		generation?.end({ output: text.trim() });
 		trace?.update({ output: { success: true, summary: text.trim() } });
+
+		// Run evaluation in background (non-blocking)
+		if (c.env.XAI_API_KEY && c.executionCtx) {
+			c.executionCtx.waitUntil(
+				evaluateSummary(
+					{ facts, hotTopics: validation.data.hotTopics || [] },
+					text.trim(),
+					{
+						XAI_API_KEY: c.env.XAI_API_KEY,
+						enableEvaluation: c.env.ENABLE_EVALUATION === 'true',
+						samplingRate: parseFloat(c.env.EVALUATION_SAMPLING_RATE || '0.25'),
+					}
+				).then((evaluation) => {
+					if (evaluation && trace) {
+						trace.score({
+							name: 'summary-quality',
+							value: evaluation.score / 10,
+							comment: evaluation.reasoning,
+						});
+					}
+				})
+			);
+		}
 
 		await auditLog(c, {
 			userId: c.get('user')?.id,

@@ -1,5 +1,5 @@
 import { View, Text, TextInput, Pressable, StyleSheet, Modal } from 'react-native';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Trash2 } from 'lucide-react-native';
 import { Colors } from '@/constants/theme';
@@ -17,13 +17,6 @@ export function EmailEditModal({ visible, initialValue, onSave, onClose }: Email
   const { t } = useTranslation();
   const [value, setValue] = useState(initialValue || '');
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (visible) {
-      setValue(initialValue || '');
-      setError(null);
-    }
-  }, [visible, initialValue]);
 
   const handleSave = () => {
     const trimmed = value.trim();
