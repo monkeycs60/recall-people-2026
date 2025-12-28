@@ -45,6 +45,11 @@ export type Contact = {
   lastName?: string;
   nickname?: string;
   photoUri?: string;
+  phone?: string;
+  email?: string;
+  birthdayDay?: number;
+  birthdayMonth?: number;
+  birthdayYear?: number;
   highlights: string[];
   aiSummary?: string;
   iceBreakers?: string[];
