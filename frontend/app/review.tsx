@@ -86,6 +86,16 @@ export default function ReviewScreen() {
   const [isAddingGroup, setIsAddingGroup] = useState(false);
   const [newGroupSearch, setNewGroupSearch] = useState('');
 
+  const [acceptedContactInfo, setAcceptedContactInfo] = useState<{
+    phone: boolean;
+    email: boolean;
+    birthday: boolean;
+  }>({
+    phone: !!extraction.contactInfo?.phone,
+    email: !!extraction.contactInfo?.email,
+    birthday: !!extraction.contactInfo?.birthday,
+  });
+
   useEffect(() => {
     const loadHotTopics = async () => {
       if (contactId !== 'new') {
@@ -261,6 +271,34 @@ export default function ReviewScreen() {
             }
           }
           await groupService.setContactGroups(finalContactId, groupIds);
+        }
+      }
+
+      if (extraction.contactInfo) {
+        const contactInfoUpdate: Partial<{
+          phone: string;
+          email: string;
+          birthdayDay: number;
+          birthdayMonth: number;
+          birthdayYear: number;
+        }> = {};
+
+        if (acceptedContactInfo.phone && extraction.contactInfo.phone) {
+          contactInfoUpdate.phone = extraction.contactInfo.phone;
+        }
+        if (acceptedContactInfo.email && extraction.contactInfo.email) {
+          contactInfoUpdate.email = extraction.contactInfo.email;
+        }
+        if (acceptedContactInfo.birthday && extraction.contactInfo.birthday) {
+          contactInfoUpdate.birthdayDay = extraction.contactInfo.birthday.day;
+          contactInfoUpdate.birthdayMonth = extraction.contactInfo.birthday.month;
+          if (extraction.contactInfo.birthday.year) {
+            contactInfoUpdate.birthdayYear = extraction.contactInfo.birthday.year;
+          }
+        }
+
+        if (Object.keys(contactInfoUpdate).length > 0) {
+          await contactService.update(finalContactId, contactInfoUpdate);
         }
       }
 
@@ -444,6 +482,95 @@ export default function ReviewScreen() {
       <Text style={styles.subtitle}>
         {contactId === 'new' ? t('review.newContact') : t('review.update')}
       </Text>
+
+      {extraction.contactInfo && (extraction.contactInfo.phone || extraction.contactInfo.email || extraction.contactInfo.birthday) && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('contact.contactInfoReview.title')}</Text>
+
+          {extraction.contactInfo.phone && (
+            <View style={styles.contactInfoRow}>
+              <View style={styles.contactInfoContent}>
+                <Text style={styles.contactInfoLabel}>{t('contact.contactInfoReview.phone')}</Text>
+                <Text style={styles.contactInfoValue}>{extraction.contactInfo.phone}</Text>
+              </View>
+              <View style={styles.contactInfoActions}>
+                <Pressable
+                  style={[styles.actionButton, acceptedContactInfo.phone && styles.actionButtonActive]}
+                  onPress={() => setAcceptedContactInfo(prev => ({ ...prev, phone: true }))}
+                >
+                  <Text style={[styles.actionButtonText, acceptedContactInfo.phone && styles.actionButtonTextActive]}>
+                    {t('contact.contactInfoReview.accept')}
+                  </Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.actionButton, !acceptedContactInfo.phone && styles.actionButtonActive]}
+                  onPress={() => setAcceptedContactInfo(prev => ({ ...prev, phone: false }))}
+                >
+                  <Text style={[styles.actionButtonText, !acceptedContactInfo.phone && styles.actionButtonTextActive]}>
+                    {t('contact.contactInfoReview.ignore')}
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+          )}
+
+          {extraction.contactInfo.email && (
+            <View style={styles.contactInfoRow}>
+              <View style={styles.contactInfoContent}>
+                <Text style={styles.contactInfoLabel}>{t('contact.contactInfoReview.email')}</Text>
+                <Text style={styles.contactInfoValue}>{extraction.contactInfo.email}</Text>
+              </View>
+              <View style={styles.contactInfoActions}>
+                <Pressable
+                  style={[styles.actionButton, acceptedContactInfo.email && styles.actionButtonActive]}
+                  onPress={() => setAcceptedContactInfo(prev => ({ ...prev, email: true }))}
+                >
+                  <Text style={[styles.actionButtonText, acceptedContactInfo.email && styles.actionButtonTextActive]}>
+                    {t('contact.contactInfoReview.accept')}
+                  </Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.actionButton, !acceptedContactInfo.email && styles.actionButtonActive]}
+                  onPress={() => setAcceptedContactInfo(prev => ({ ...prev, email: false }))}
+                >
+                  <Text style={[styles.actionButtonText, !acceptedContactInfo.email && styles.actionButtonTextActive]}>
+                    {t('contact.contactInfoReview.ignore')}
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+          )}
+
+          {extraction.contactInfo.birthday && (
+            <View style={styles.contactInfoRow}>
+              <View style={styles.contactInfoContent}>
+                <Text style={styles.contactInfoLabel}>{t('contact.contactInfoReview.birthday')}</Text>
+                <Text style={styles.contactInfoValue}>
+                  {`${extraction.contactInfo.birthday.day}/${extraction.contactInfo.birthday.month}${extraction.contactInfo.birthday.year ? `/${extraction.contactInfo.birthday.year}` : ''}`}
+                </Text>
+              </View>
+              <View style={styles.contactInfoActions}>
+                <Pressable
+                  style={[styles.actionButton, acceptedContactInfo.birthday && styles.actionButtonActive]}
+                  onPress={() => setAcceptedContactInfo(prev => ({ ...prev, birthday: true }))}
+                >
+                  <Text style={[styles.actionButtonText, acceptedContactInfo.birthday && styles.actionButtonTextActive]}>
+                    {t('contact.contactInfoReview.accept')}
+                  </Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.actionButton, !acceptedContactInfo.birthday && styles.actionButtonActive]}
+                  onPress={() => setAcceptedContactInfo(prev => ({ ...prev, birthday: false }))}
+                >
+                  <Text style={[styles.actionButtonText, !acceptedContactInfo.birthday && styles.actionButtonTextActive]}>
+                    {t('contact.contactInfoReview.ignore')}
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+          )}
+        </View>
+      )}
 
       {editableFacts.length > 0 && (
         <View style={styles.section}>
@@ -1206,5 +1333,48 @@ const styles = StyleSheet.create({
     color: Colors.textInverse,
     fontWeight: '600',
     fontSize: 18,
+  },
+  contactInfoRow: {
+    backgroundColor: Colors.surface,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 8,
+  },
+  contactInfoContent: {
+    marginBottom: 8,
+  },
+  contactInfoLabel: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    marginBottom: 2,
+  },
+  contactInfoValue: {
+    fontSize: 15,
+    color: Colors.textPrimary,
+    fontWeight: '500',
+  },
+  contactInfoActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  actionButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    backgroundColor: Colors.background,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  actionButtonActive: {
+    backgroundColor: Colors.primaryLight,
+    borderColor: Colors.primary,
+  },
+  actionButtonText: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+  },
+  actionButtonTextActive: {
+    color: Colors.primary,
+    fontWeight: '500',
   },
 });
