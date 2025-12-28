@@ -128,6 +128,7 @@ export default function ContactDetailScreen() {
   const [isAddingFact, setIsAddingFact] = useState(false);
   const [newFactType, setNewFactType] = useState<FactType | null>(null);
   const [newFactValue, setNewFactValue] = useState('');
+  const [newFactTitle, setNewFactTitle] = useState('');
   const [showFactTypeDropdown, setShowFactTypeDropdown] = useState(false);
 
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
@@ -297,16 +298,19 @@ export default function ContactDetailScreen() {
 
   const handleAddFact = async () => {
     if (!newFactType || !newFactValue.trim()) return;
+    if (newFactType === 'other' && !newFactTitle.trim()) return;
 
     await factService.create({
       contactId,
       factType: newFactType,
       factKey: getFactTypeLabel(t, newFactType),
       factValue: newFactValue.trim(),
+      title: newFactType === 'other' ? newFactTitle.trim() : undefined,
     });
 
     setNewFactType(null);
     setNewFactValue('');
+    setNewFactTitle('');
     setIsAddingFact(false);
     invalidate();
   };
@@ -704,14 +708,33 @@ export default function ContactDetailScreen() {
                 </View>
               )}
 
+              {newFactType === 'other' && (
+                <>
+                  <Text style={styles.inputLabel}>{t('contact.otherFact.titleLabel')}</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={newFactTitle}
+                    onChangeText={setNewFactTitle}
+                    placeholder={t('contact.otherFact.titlePlaceholder')}
+                    placeholderTextColor={Colors.textMuted}
+                  />
+                </>
+              )}
+
               {newFactType && (
                 <>
-                  <Text style={styles.inputLabel}>{t('contact.fact.valueLabel')}</Text>
+                  <Text style={styles.inputLabel}>
+                    {newFactType === 'other' ? t('contact.otherFact.descriptionLabel') : t('contact.fact.valueLabel')}
+                  </Text>
                   <TextInput
                     style={styles.input}
                     value={newFactValue}
                     onChangeText={setNewFactValue}
-                    placeholder={`Ex: ${newFactType === 'work' ? 'Développeur' : newFactType === 'hobby' ? 'Guitare' : 'Valeur...'}`}
+                    placeholder={
+                      newFactType === 'other'
+                        ? t('contact.otherFact.descriptionPlaceholder')
+                        : `Ex: ${newFactType === 'work' ? 'Développeur' : newFactType === 'hobby' ? 'Guitare' : 'Valeur...'}`
+                    }
                     placeholderTextColor={Colors.textMuted}
                   />
                 </>
@@ -724,6 +747,7 @@ export default function ContactDetailScreen() {
                     setIsAddingFact(false);
                     setNewFactType(null);
                     setNewFactValue('');
+                    setNewFactTitle('');
                     setShowFactTypeDropdown(false);
                   }}
                 >
