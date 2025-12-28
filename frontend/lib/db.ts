@@ -132,6 +132,18 @@ export const initDatabase = async () => {
       FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE CASCADE
     );
 
+    -- Events (événements temporels)
+    CREATE TABLE IF NOT EXISTS events (
+      id TEXT PRIMARY KEY,
+      contact_id TEXT NOT NULL,
+      title TEXT NOT NULL,
+      event_date TEXT NOT NULL,
+      source_note_id TEXT,
+      notified_at TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE CASCADE
+    );
+
     -- Index
     CREATE INDEX IF NOT EXISTS idx_contacts_last_contact ON contacts(last_contact_at DESC);
     CREATE INDEX IF NOT EXISTS idx_facts_contact ON facts(contact_id);
@@ -144,6 +156,8 @@ export const initDatabase = async () => {
     CREATE INDEX IF NOT EXISTS idx_contact_groups_group ON contact_groups(group_id);
     CREATE INDEX IF NOT EXISTS idx_memories_contact ON memories(contact_id);
     CREATE INDEX IF NOT EXISTS idx_memories_created ON memories(created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_events_contact ON events(contact_id);
+    CREATE INDEX IF NOT EXISTS idx_events_date ON events(event_date);
   `);
 
   // Run migrations for existing databases
@@ -260,5 +274,21 @@ const runMigrations = async (database: SQLite.SQLiteDatabase) => {
     );
     CREATE INDEX IF NOT EXISTS idx_memories_contact ON memories(contact_id);
     CREATE INDEX IF NOT EXISTS idx_memories_created ON memories(created_at DESC);
+  `);
+
+  // Create events table if not exists
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS events (
+      id TEXT PRIMARY KEY,
+      contact_id TEXT NOT NULL,
+      title TEXT NOT NULL,
+      event_date TEXT NOT NULL,
+      source_note_id TEXT,
+      notified_at TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_events_contact ON events(contact_id);
+    CREATE INDEX IF NOT EXISTS idx_events_date ON events(event_date);
   `);
 };
