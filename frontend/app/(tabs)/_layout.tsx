@@ -1,5 +1,5 @@
 import { Tabs, useRouter } from 'expo-router';
-import { Users, User } from 'lucide-react-native';
+import { Users, User, Calendar } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { isLoggedIn } from '@/lib/auth';
 import { View, ActivityIndicator } from 'react-native';
@@ -55,6 +55,13 @@ export default function TabLayout() {
         options={{
           title: t('tabs.contacts'),
           tabBarIcon: ({ color, size }) => <Users color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="upcoming"
+        options={{
+          title: t('tabs.upcoming'),
+          tabBarIcon: ({ color, size }) => <Calendar color={color} size={size} />,
         }}
       />
       <Tabs.Screen
