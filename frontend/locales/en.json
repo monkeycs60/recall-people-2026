@@ -66,7 +66,8 @@
     "home": "Home",
     "contacts": "Contacts",
     "search": "Search",
-    "profile": "Profile"
+    "profile": "Profile",
+    "upcoming": "Upcoming"
   },
   "home": {
     "pressToRecord": "Press to record",
@@ -269,7 +270,23 @@
     "descriptionPlaceholder": "Description",
     "datePlaceholder": "Date (optional)",
     "previousValue": "Previous: {{value}}",
-    "new": "(new)"
+    "new": "(new)",
+    "events": "Events",
+    "eventTitlePlaceholder": "Event title",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "inDays": "In {{count}} day",
+    "inDays_plural": "In {{count}} days",
+    "inWeeks": "In {{count}} week",
+    "inWeeks_plural": "In {{count}} weeks",
+    "inMonths": "In {{count}} months"
+  },
+  "upcoming": {
+    "title": "Upcoming",
+    "past": "Past",
+    "noEvents": "No upcoming events",
+    "noPastEvents": "No past events",
+    "today": "Today"
   },
   "profile": {
     "title": "Profile",
