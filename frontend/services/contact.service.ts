@@ -11,6 +11,11 @@ export const contactService = {
       last_name: string | null;
       nickname: string | null;
       photo_uri: string | null;
+      phone: string | null;
+      email: string | null;
+      birthday_day: number | null;
+      birthday_month: number | null;
+      birthday_year: number | null;
       highlights: string | null;
       last_contact_at: string | null;
       created_at: string;
@@ -23,6 +28,11 @@ export const contactService = {
       lastName: row.last_name || undefined,
       nickname: row.nickname || undefined,
       photoUri: row.photo_uri || undefined,
+      phone: row.phone || undefined,
+      email: row.email || undefined,
+      birthdayDay: row.birthday_day || undefined,
+      birthdayMonth: row.birthday_month || undefined,
+      birthdayYear: row.birthday_year || undefined,
       highlights: JSON.parse(row.highlights || '[]'),
       lastContactAt: row.last_contact_at || undefined,
       createdAt: row.created_at,
@@ -38,6 +48,11 @@ export const contactService = {
       last_name: string | null;
       nickname: string | null;
       photo_uri: string | null;
+      phone: string | null;
+      email: string | null;
+      birthday_day: number | null;
+      birthday_month: number | null;
+      birthday_year: number | null;
       highlights: string | null;
       ai_summary: string | null;
       ice_breakers: string | null;
@@ -100,6 +115,11 @@ export const contactService = {
       lastName: contactRow.last_name || undefined,
       nickname: contactRow.nickname || undefined,
       photoUri: contactRow.photo_uri || undefined,
+      phone: contactRow.phone || undefined,
+      email: contactRow.email || undefined,
+      birthdayDay: contactRow.birthday_day || undefined,
+      birthdayMonth: contactRow.birthday_month || undefined,
+      birthdayYear: contactRow.birthday_year || undefined,
       highlights: JSON.parse(contactRow.highlights || '[]'),
       aiSummary: contactRow.ai_summary || undefined,
       iceBreakers: contactRow.ice_breakers ? JSON.parse(contactRow.ice_breakers) : undefined,
@@ -193,6 +213,11 @@ export const contactService = {
       firstName: string;
       lastName: string;
       nickname: string;
+      phone: string;
+      email: string;
+      birthdayDay: number;
+      birthdayMonth: number;
+      birthdayYear: number;
       highlights: string[];
       aiSummary: string;
       iceBreakers: string[];
@@ -201,7 +226,7 @@ export const contactService = {
   ): Promise<void> => {
     const db = await getDatabase();
     const updates: string[] = [];
-    const values: (string | null)[] = [];
+    const values: (string | number | null)[] = [];
 
     if (data.firstName) {
       updates.push('first_name = ?');
@@ -214,6 +239,26 @@ export const contactService = {
     if (data.nickname !== undefined) {
       updates.push('nickname = ?');
       values.push(data.nickname || null);
+    }
+    if (data.phone !== undefined) {
+      updates.push('phone = ?');
+      values.push(data.phone || null);
+    }
+    if (data.email !== undefined) {
+      updates.push('email = ?');
+      values.push(data.email || null);
+    }
+    if (data.birthdayDay !== undefined) {
+      updates.push('birthday_day = ?');
+      values.push(data.birthdayDay || null);
+    }
+    if (data.birthdayMonth !== undefined) {
+      updates.push('birthday_month = ?');
+      values.push(data.birthdayMonth || null);
+    }
+    if (data.birthdayYear !== undefined) {
+      updates.push('birthday_year = ?');
+      values.push(data.birthdayYear || null);
     }
     if (data.highlights !== undefined) {
       updates.push('highlights = ?');
