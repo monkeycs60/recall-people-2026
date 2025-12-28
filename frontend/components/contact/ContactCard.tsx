@@ -1,97 +1,50 @@
-import { View, Text, Pressable, StyleSheet, Linking } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Phone, Mail, Cake, ChevronDown } from 'lucide-react-native';
+import { Linking } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
-import { Fact, FactType } from '@/types';
 import { Colors } from '@/constants/theme';
 import { toast } from 'sonner-native';
 
 type ContactCardProps = {
-  facts: Fact[];
-  onAddFact: (factType: FactType) => void;
-};
-
-type ContactInfo = {
   phone?: string;
   email?: string;
-  birthday?: string;
-  birthdayFact?: Fact;
+  birthdayDay?: number;
+  birthdayMonth?: number;
+  birthdayYear?: number;
+  onEditPhone: () => void;
+  onEditEmail: () => void;
+  onEditBirthday: () => void;
 };
 
-export function ContactCard({ facts, onAddFact }: ContactCardProps) {
+export function ContactCard({
+  phone,
+  email,
+  birthdayDay,
+  birthdayMonth,
+  birthdayYear,
+  onEditPhone,
+  onEditEmail,
+  onEditBirthday,
+}: ContactCardProps) {
   const { t } = useTranslation();
   const [phoneMenuOpen, setPhoneMenuOpen] = useState(false);
   const [emailMenuOpen, setEmailMenuOpen] = useState(false);
 
-  const extractContactInfo = (): ContactInfo => {
-    const contactFacts = facts.filter((fact) => fact.factType === 'contact');
-    const birthdayFact = facts.find((fact) => fact.factType === 'birthday');
+  const months: string[] = t('contact.birthdayModal.months', { returnObjects: true });
 
-    let phone: string | undefined;
-    let email: string | undefined;
+  const formatBirthday = (): { display: string; countdown?: string } | null => {
+    if (!birthdayDay || !birthdayMonth) return null;
 
-    for (const fact of contactFacts) {
-      const value = fact.factValue.toLowerCase();
-      if (value.includes('@')) {
-        email = fact.factValue;
-      } else if (/[\d\s+()-]{6,}/.test(fact.factValue)) {
-        phone = fact.factValue;
-      }
-    }
-
-    return {
-      phone,
-      email,
-      birthday: birthdayFact?.factValue,
-      birthdayFact,
-    };
-  };
-
-  const info = extractContactInfo();
-
-  const formatBirthday = (dateString: string): { display: string; countdown?: string } => {
-    const months = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
-                    'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
-
-    let day: number | null = null;
-    let month: number | null = null;
-    let year: number | null = null;
-
-    const frenchMatch = dateString.match(/(\d{1,2})\s+(\w+)(?:\s+(\d{4}))?/i);
-    if (frenchMatch) {
-      day = parseInt(frenchMatch[1]);
-      const monthName = frenchMatch[2].toLowerCase();
-      month = months.findIndex((m) => m.startsWith(monthName));
-      year = frenchMatch[3] ? parseInt(frenchMatch[3]) : null;
-    }
-
-    const slashMatch = dateString.match(/(\d{1,2})\/(\d{1,2})(?:\/(\d{4}))?/);
-    if (slashMatch) {
-      day = parseInt(slashMatch[1]);
-      month = parseInt(slashMatch[2]) - 1;
-      year = slashMatch[3] ? parseInt(slashMatch[3]) : null;
-    }
-
-    const isoMatch = dateString.match(/(\d{4})-(\d{2})-(\d{2})/);
-    if (isoMatch) {
-      year = parseInt(isoMatch[1]);
-      month = parseInt(isoMatch[2]) - 1;
-      day = parseInt(isoMatch[3]);
-    }
-
-    if (day === null || month === null || month < 0) {
-      return { display: dateString };
-    }
-
-    const displayDate = `${day} ${months[month]}`;
+    const displayDate = `${birthdayDay} ${months[birthdayMonth - 1].toLowerCase()}`;
     let ageStr = '';
     let countdown: string | undefined;
 
-    if (year) {
+    if (birthdayYear) {
       const today = new Date();
-      const thisYearBirthday = new Date(today.getFullYear(), month, day);
-      let age = today.getFullYear() - year;
+      const thisYearBirthday = new Date(today.getFullYear(), birthdayMonth - 1, birthdayDay);
+      let age = today.getFullYear() - birthdayYear;
       if (today < thisYearBirthday) {
         age--;
       }
@@ -100,9 +53,9 @@ export function ContactCard({ facts, onAddFact }: ContactCardProps) {
 
     const today = new Date();
     const thisYear = today.getFullYear();
-    let nextBirthday = new Date(thisYear, month, day);
+    let nextBirthday = new Date(thisYear, birthdayMonth - 1, birthdayDay);
     if (nextBirthday < today) {
-      nextBirthday = new Date(thisYear + 1, month, day);
+      nextBirthday = new Date(thisYear + 1, birthdayMonth - 1, birthdayDay);
     }
     const diffTime = nextBirthday.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -118,8 +71,8 @@ export function ContactCard({ facts, onAddFact }: ContactCardProps) {
   };
 
   const handlePhoneAction = (action: 'call' | 'whatsapp' | 'sms' | 'copy') => {
-    if (!info.phone) return;
-    const cleanPhone = info.phone.replace(/\s/g, '');
+    if (!phone) return;
+    const cleanPhone = phone.replace(/\s/g, '');
 
     switch (action) {
       case 'call':
@@ -132,7 +85,7 @@ export function ContactCard({ facts, onAddFact }: ContactCardProps) {
         Linking.openURL(`sms:${cleanPhone}`);
         break;
       case 'copy':
-        Clipboard.setStringAsync(info.phone);
+        Clipboard.setStringAsync(phone);
         toast.success(t('contact.contactCard.copied'));
         break;
     }
@@ -140,33 +93,34 @@ export function ContactCard({ facts, onAddFact }: ContactCardProps) {
   };
 
   const handleEmailAction = (action: 'open' | 'copy') => {
-    if (!info.email) return;
+    if (!email) return;
 
     switch (action) {
       case 'open':
-        Linking.openURL(`mailto:${info.email}`);
+        Linking.openURL(`mailto:${email}`);
         break;
       case 'copy':
-        Clipboard.setStringAsync(info.email);
+        Clipboard.setStringAsync(email);
         toast.success(t('contact.contactCard.copied'));
         break;
     }
     setEmailMenuOpen(false);
   };
 
-  const birthdayInfo = info.birthday ? formatBirthday(info.birthday) : null;
+  const birthdayInfo = formatBirthday();
 
   return (
     <View style={styles.container}>
       <View style={styles.row}>
         <Phone size={18} color={Colors.primary} />
-        {info.phone ? (
+        {phone ? (
           <View style={styles.valueContainer}>
             <Pressable
               style={styles.valueButton}
               onPress={() => setPhoneMenuOpen(!phoneMenuOpen)}
+              onLongPress={onEditPhone}
             >
-              <Text style={styles.value}>{info.phone}</Text>
+              <Text style={styles.value}>{phone}</Text>
               <ChevronDown size={16} color={Colors.textSecondary} />
             </Pressable>
             {phoneMenuOpen && (
@@ -180,14 +134,17 @@ export function ContactCard({ facts, onAddFact }: ContactCardProps) {
                 <Pressable style={styles.menuItem} onPress={() => handlePhoneAction('sms')}>
                   <Text style={styles.menuItemText}>{t('contact.contactCard.sms')}</Text>
                 </Pressable>
-                <Pressable style={[styles.menuItem, styles.menuItemLast]} onPress={() => handlePhoneAction('copy')}>
+                <Pressable style={styles.menuItem} onPress={() => handlePhoneAction('copy')}>
                   <Text style={styles.menuItemText}>{t('contact.contactCard.copy')}</Text>
+                </Pressable>
+                <Pressable style={[styles.menuItem, styles.menuItemLast]} onPress={onEditPhone}>
+                  <Text style={styles.menuItemTextEdit}>{t('contact.menu.edit')}</Text>
                 </Pressable>
               </View>
             )}
           </View>
         ) : (
-          <Pressable style={styles.addButton} onPress={() => onAddFact('contact')}>
+          <Pressable style={styles.addButton} onPress={onEditPhone}>
             <Text style={styles.addButtonText}>{t('contact.contactCard.addPhone')}</Text>
           </Pressable>
         )}
@@ -195,13 +152,14 @@ export function ContactCard({ facts, onAddFact }: ContactCardProps) {
 
       <View style={styles.row}>
         <Mail size={18} color={Colors.primary} />
-        {info.email ? (
+        {email ? (
           <View style={styles.valueContainer}>
             <Pressable
               style={styles.valueButton}
               onPress={() => setEmailMenuOpen(!emailMenuOpen)}
+              onLongPress={onEditEmail}
             >
-              <Text style={styles.value}>{info.email}</Text>
+              <Text style={styles.value}>{email}</Text>
               <ChevronDown size={16} color={Colors.textSecondary} />
             </Pressable>
             {emailMenuOpen && (
@@ -209,14 +167,17 @@ export function ContactCard({ facts, onAddFact }: ContactCardProps) {
                 <Pressable style={styles.menuItem} onPress={() => handleEmailAction('open')}>
                   <Text style={styles.menuItemText}>{t('contact.contactCard.openMail')}</Text>
                 </Pressable>
-                <Pressable style={[styles.menuItem, styles.menuItemLast]} onPress={() => handleEmailAction('copy')}>
+                <Pressable style={styles.menuItem} onPress={() => handleEmailAction('copy')}>
                   <Text style={styles.menuItemText}>{t('contact.contactCard.copy')}</Text>
+                </Pressable>
+                <Pressable style={[styles.menuItem, styles.menuItemLast]} onPress={onEditEmail}>
+                  <Text style={styles.menuItemTextEdit}>{t('contact.menu.edit')}</Text>
                 </Pressable>
               </View>
             )}
           </View>
         ) : (
-          <Pressable style={styles.addButton} onPress={() => onAddFact('contact')}>
+          <Pressable style={styles.addButton} onPress={onEditEmail}>
             <Text style={styles.addButtonText}>{t('contact.contactCard.addEmail')}</Text>
           </Pressable>
         )}
@@ -225,14 +186,14 @@ export function ContactCard({ facts, onAddFact }: ContactCardProps) {
       <View style={styles.row}>
         <Cake size={18} color={Colors.primary} />
         {birthdayInfo ? (
-          <View style={styles.birthdayContainer}>
+          <Pressable style={styles.birthdayContainer} onPress={onEditBirthday}>
             <Text style={styles.value}>{birthdayInfo.display}</Text>
             {birthdayInfo.countdown && (
               <Text style={styles.countdown}>{birthdayInfo.countdown}</Text>
             )}
-          </View>
+          </Pressable>
         ) : (
-          <Pressable style={styles.addButton} onPress={() => onAddFact('birthday')}>
+          <Pressable style={styles.addButton} onPress={onEditBirthday}>
             <Text style={styles.addButtonText}>{t('contact.contactCard.addBirthday')}</Text>
           </Pressable>
         )}
@@ -307,5 +268,10 @@ const styles = StyleSheet.create({
   menuItemText: {
     fontSize: 15,
     color: Colors.textPrimary,
+  },
+  menuItemTextEdit: {
+    fontSize: 15,
+    color: Colors.primary,
+    fontWeight: '500',
   },
 });
