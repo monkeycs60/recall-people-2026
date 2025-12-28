@@ -12,6 +12,7 @@ import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { memoryService } from '@/services/memory.service';
 import { eventService } from '@/services/event.service';
+import { notificationService } from '@/services/notification.service';
 import { contactService } from '@/services/contact.service';
 import { groupService } from '@/services/group.service';
 import { generateSummary, generateIceBreakers } from '@/lib/api';
@@ -358,12 +359,20 @@ export default function ReviewScreen() {
           const event = editableEvents[index];
           const parsedDate = eventService.parseExtractedDate(event.eventDate);
           if (parsedDate) {
-            await eventService.create({
+            const savedEvent = await eventService.create({
               contactId: finalContactId,
               title: event.title,
               eventDate: parsedDate,
               sourceNoteId: note.id,
             });
+
+            const contactName = extraction.contactIdentified.firstName;
+            await notificationService.scheduleEventReminder(
+              savedEvent.id,
+              parsedDate,
+              event.title,
+              contactName
+            );
           }
         }
       }
