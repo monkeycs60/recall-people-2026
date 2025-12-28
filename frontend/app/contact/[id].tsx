@@ -31,6 +31,9 @@ import { TranscriptionArchive } from '@/components/contact/TranscriptionArchive'
 import { ContactAvatar } from '@/components/contact/ContactAvatar';
 import { ContactCard } from '@/components/contact/ContactCard';
 import { DeleteContactDialog } from '@/components/contact/DeleteContactDialog';
+import { PhoneEditModal } from '@/components/contact/PhoneEditModal';
+import { EmailEditModal } from '@/components/contact/EmailEditModal';
+import { BirthdayEditModal } from '@/components/contact/BirthdayEditModal';
 import { Colors } from '@/constants/theme';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { useAppStore } from '@/stores/app-store';
@@ -134,6 +137,10 @@ export default function ContactDetailScreen() {
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
+  const [showPhoneModal, setShowPhoneModal] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [showBirthdayModal, setShowBirthdayModal] = useState(false);
+
   // Sync contact data with local state
   useEffect(() => {
     if (contact) {
@@ -177,9 +184,29 @@ export default function ContactDetailScreen() {
     await handleDelete();
   };
 
-  const handleAddContactCardFact = (factType: FactType) => {
-    setNewFactType(factType);
-    setIsAddingFact(true);
+  const handleSavePhone = async (value: string | null) => {
+    await updateContactMutation.mutateAsync({
+      id: contactId,
+      data: { phone: value || undefined },
+    });
+  };
+
+  const handleSaveEmail = async (value: string | null) => {
+    await updateContactMutation.mutateAsync({
+      id: contactId,
+      data: { email: value || undefined },
+    });
+  };
+
+  const handleSaveBirthday = async (day: number | null, month: number | null, year: number | null) => {
+    await updateContactMutation.mutateAsync({
+      id: contactId,
+      data: {
+        birthdayDay: day || undefined,
+        birthdayMonth: month || undefined,
+        birthdayYear: year || undefined,
+      },
+    });
   };
 
   const handleSaveName = async () => {
@@ -318,6 +345,8 @@ export default function ContactDetailScreen() {
   const getAvailableFactTypes = (): FactType[] => {
     if (!contact) return [];
 
+    const excludedTypes: FactType[] = ['contact', 'birthday'];
+
     const existingSingularTypes = new Set(
       contact.facts
         .filter(fact => FACT_TYPE_CONFIG[fact.factType].singular)
@@ -325,7 +354,7 @@ export default function ContactDetailScreen() {
     );
 
     return (Object.keys(FACT_TYPE_CONFIG) as FactType[]).filter(
-      type => !existingSingularTypes.has(type)
+      type => !existingSingularTypes.has(type) && !excludedTypes.includes(type)
     );
   };
 
@@ -673,8 +702,14 @@ export default function ContactDetailScreen() {
 
           {/* Contact Card */}
           <ContactCard
-            facts={contact.facts}
-            onAddFact={handleAddContactCardFact}
+            phone={contact.phone}
+            email={contact.email}
+            birthdayDay={contact.birthdayDay}
+            birthdayMonth={contact.birthdayMonth}
+            birthdayYear={contact.birthdayYear}
+            onEditPhone={() => setShowPhoneModal(true)}
+            onEditEmail={() => setShowEmailModal(true)}
+            onEditBirthday={() => setShowBirthdayModal(true)}
           />
 
           {isAddingFact && (
@@ -925,6 +960,29 @@ export default function ContactDetailScreen() {
         contactLastName={contact.lastName}
         onCancel={() => setShowDeleteDialog(false)}
         onConfirm={handleConfirmDelete}
+      />
+
+      <PhoneEditModal
+        visible={showPhoneModal}
+        initialValue={contact?.phone}
+        onSave={handleSavePhone}
+        onClose={() => setShowPhoneModal(false)}
+      />
+
+      <EmailEditModal
+        visible={showEmailModal}
+        initialValue={contact?.email}
+        onSave={handleSaveEmail}
+        onClose={() => setShowEmailModal(false)}
+      />
+
+      <BirthdayEditModal
+        visible={showBirthdayModal}
+        initialDay={contact?.birthdayDay}
+        initialMonth={contact?.birthdayMonth}
+        initialYear={contact?.birthdayYear}
+        onSave={handleSaveBirthday}
+        onClose={() => setShowBirthdayModal(false)}
       />
     </KeyboardAvoidingView>
   );

@@ -59,6 +59,11 @@ export function useUpdateContact() {
         firstName: string;
         lastName: string;
         nickname: string;
+        phone: string;
+        email: string;
+        birthdayDay: number;
+        birthdayMonth: number;
+        birthdayYear: number;
         highlights: string[];
         lastContactAt: string;
       }>;
