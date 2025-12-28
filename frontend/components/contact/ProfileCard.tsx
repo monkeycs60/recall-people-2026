@@ -50,8 +50,11 @@ export function ProfileCard({ facts, onEditFact, onDeleteFact, highlightId }: Pr
     return t(`contact.factTypes.${factType}`);
   };
 
-  // Filtrer les facts avec des valeurs vides puis grouper par type
-  const validFacts = facts.filter((fact) => fact.factValue && fact.factValue.trim() !== '');
+  // Filter out facts shown in ContactCard (contact, birthday) and empty values
+  const CONTACT_CARD_TYPES: FactType[] = ['contact', 'birthday'];
+  const validFacts = facts.filter(
+    (fact) => fact.factValue && fact.factValue.trim() !== '' && !CONTACT_CARD_TYPES.includes(fact.factType)
+  );
 
   const groupedByType = validFacts.reduce<Record<FactType, Fact[]>>((acc, fact) => {
     if (!acc[fact.factType]) {
@@ -128,7 +131,42 @@ export function ProfileCard({ facts, onEditFact, onDeleteFact, highlightId }: Pr
     );
   };
 
+  const renderOtherGroup = (group: GroupedFacts) => {
+    return (
+      <View key={group.type} style={styles.otherSection}>
+        {group.facts.map((fact) => (
+          <View
+            key={fact.id}
+            style={[
+              styles.otherCard,
+              fact.id === highlightId && styles.factCardHighlighted,
+            ]}
+          >
+            <Pressable
+              style={styles.otherContent}
+              onPress={() => onEditFact(fact)}
+            >
+              <View style={styles.factTextContainer}>
+                {fact.title && (
+                  <Text style={styles.otherTitle}>{fact.title}</Text>
+                )}
+                <Text style={styles.otherDescription}>{fact.factValue}</Text>
+              </View>
+              <Pressable style={styles.deleteButton} onPress={() => onDeleteFact(fact)}>
+                <Trash2 size={16} color={Colors.error} />
+              </Pressable>
+            </Pressable>
+          </View>
+        ))}
+      </View>
+    );
+  };
+
   const renderCumulativeGroup = (group: GroupedFacts) => {
+    if (group.type === 'other') {
+      return renderOtherGroup(group);
+    }
+
     const hasHighlightedFact = group.facts.some((fact) => fact.id === highlightId);
     const isExpanded = expandedType === group.type || hasHighlightedFact;
     const values = group.facts.map((fact) => fact.factValue);
@@ -323,5 +361,30 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.textMuted,
     textAlign: 'center',
+  },
+  otherSection: {
+    gap: 8,
+  },
+  otherCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  otherContent: {
+    padding: 12,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+  },
+  otherTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+    marginBottom: 4,
+  },
+  otherDescription: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    lineHeight: 20,
   },
 });
