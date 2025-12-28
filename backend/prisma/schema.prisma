@@ -95,6 +95,7 @@ model Contact {
   facts    Fact[]
   notes    Note[]
   memories Memory[]
+  events   Event[]
 
   @@map("contacts")
 }
@@ -142,6 +143,21 @@ model Memory {
   contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
 
   @@map("memories")
+}
+
+model Event {
+  id           String    @id @default(cuid())
+  contactId    String    @map("contact_id")
+  title        String
+  eventDate    DateTime  @map("event_date")
+  sourceNoteId String?   @map("source_note_id")
+  notifiedAt   DateTime? @map("notified_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  userId       String    @map("user_id")
+
+  contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@map("events")
 }
 
 // ============================================
