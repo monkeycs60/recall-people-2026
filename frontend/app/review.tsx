@@ -191,15 +191,15 @@ export default function ReviewScreen() {
     const diffDays = Math.ceil((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
     if (diffDays < 0) return dateStr;
-    if (diffDays === 0) return "Aujourd'hui";
-    if (diffDays === 1) return 'Demain';
-    if (diffDays < 7) return `Dans ${diffDays} jours`;
+    if (diffDays === 0) return t('review.today');
+    if (diffDays === 1) return t('review.tomorrow');
+    if (diffDays < 7) return t('review.inDays', { count: diffDays });
     if (diffDays < 30) {
       const weeks = Math.floor(diffDays / 7);
-      return weeks === 1 ? 'Dans 1 semaine' : `Dans ${weeks} semaines`;
+      return t('review.inWeeks', { count: weeks });
     }
     const months = Math.floor(diffDays / 30);
-    return months === 1 ? 'Dans 1 mois' : `Dans ${months} mois`;
+    return t('review.inMonths', { count: months });
   };
 
   const toggleGroup = (group: { name: string; isNew: boolean; existingId?: string }) => {

@@ -1,4 +1,5 @@
 import * as Notifications from 'expo-notifications';
+import type { NotificationResponse } from 'expo-notifications';
 import { addDays, setHours, setMinutes, setSeconds, isBefore } from 'date-fns';
 
 Notifications.setNotificationHandler({
@@ -61,7 +62,7 @@ export const notificationService = {
   },
 
   setupNotificationListener: (onNotificationTap: (eventId: string) => void): (() => void) => {
-    const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
+    const subscription = Notifications.addNotificationResponseReceivedListener((response: NotificationResponse) => {
       const eventId = response.notification.request.content.data?.eventId as string;
       if (eventId) {
         onNotificationTap(eventId);
