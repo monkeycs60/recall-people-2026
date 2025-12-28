@@ -32,7 +32,7 @@ export function ContactCard({
   const [phoneMenuOpen, setPhoneMenuOpen] = useState(false);
   const [emailMenuOpen, setEmailMenuOpen] = useState(false);
 
-  const months: string[] = t('contact.birthdayModal.months', { returnObjects: true });
+  const months = t('contact.birthdayModal.months', { returnObjects: true }) as string[];
 
   const formatBirthday = (): { display: string; countdown?: string } | null => {
     if (!birthdayDay || !birthdayMonth) return null;

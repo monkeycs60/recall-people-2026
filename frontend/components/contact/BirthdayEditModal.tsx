@@ -27,7 +27,7 @@ export function BirthdayEditModal({
   const [year, setYear] = useState(initialYear?.toString() || '');
   const [showMonthPicker, setShowMonthPicker] = useState(false);
 
-  const months: string[] = t('contact.birthdayModal.months', { returnObjects: true });
+  const months = t('contact.birthdayModal.months', { returnObjects: true }) as string[];
 
   useEffect(() => {
     if (visible) {
