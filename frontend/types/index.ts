@@ -177,6 +177,16 @@ export type SuggestedGroup = {
   sourceFactType: FactType;
 };
 
+export type ExtractedContactInfo = {
+  phone?: string;
+  email?: string;
+  birthday?: {
+    day: number;
+    month: number;
+    year?: number;
+  };
+};
+
 export type ExtractionResult = {
   contactIdentified: {
     id: string | null;
@@ -188,6 +198,7 @@ export type ExtractionResult = {
     suggestedNickname?: string;
   };
   noteTitle: string;
+  contactInfo?: ExtractedContactInfo;
   facts: ExtractedFact[];
   hotTopics: ExtractedHotTopic[];
   resolvedTopics: ResolvedTopic[];
