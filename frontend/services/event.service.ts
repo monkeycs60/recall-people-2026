@@ -1,7 +1,7 @@
 import * as Crypto from 'expo-crypto';
 import { getDatabase } from '@/lib/db';
 import { Event } from '@/types';
-import { parseISO, startOfDay, addDays, isBefore } from 'date-fns';
+import { startOfDay, addDays, isBefore } from 'date-fns';
 
 type EventRow = {
   id: string;
@@ -24,6 +24,15 @@ const mapRowToEvent = (row: EventRow): Event => ({
 });
 
 export const eventService = {
+  getById: async (id: string): Promise<Event | null> => {
+    const db = await getDatabase();
+    const result = await db.getFirstAsync<EventRow>(
+      'SELECT * FROM events WHERE id = ?',
+      [id]
+    );
+    return result ? mapRowToEvent(result) : null;
+  },
+
   getByContact: async (contactId: string): Promise<Event[]> => {
     const db = await getDatabase();
     const result = await db.getAllAsync<EventRow>(
@@ -136,15 +145,20 @@ export const eventService = {
   },
 
   parseExtractedDate: (dateStr: string): string | null => {
-    // Parse DD/MM/YYYY format from LLM
     const match = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
     if (!match) return null;
 
-    const [, day, month, year] = match;
-    const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    const dayNum = parseInt(match[1]);
+    const monthNum = parseInt(match[2]);
+    const yearNum = parseInt(match[3]);
 
-    // Validate it's a real date and in the future
+    if (dayNum < 1 || dayNum > 31) return null;
+    if (monthNum < 1 || monthNum > 12) return null;
+
+    const date = new Date(yearNum, monthNum - 1, dayNum);
+
     if (isNaN(date.getTime())) return null;
+    if (date.getDate() !== dayNum) return null;
     if (isBefore(date, startOfDay(new Date()))) return null;
 
     return date.toISOString();
