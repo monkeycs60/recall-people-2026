@@ -21,7 +21,7 @@ import { useGroupsQuery, useGroupsForContact, useSetContactGroups, useCreateGrou
 import { Fact, FactType, SearchSourceType } from '@/types';
 import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
-import { Edit3, Mic, X, Plus, Check, Trash2 } from 'lucide-react-native';
+import { Edit3, Mic, X, Plus, Check, Trash2, MoreVertical } from 'lucide-react-native';
 import { AISummary } from '@/components/contact/AISummary';
 import { IceBreakers } from '@/components/contact/IceBreakers';
 import { ProfileCard } from '@/components/contact/ProfileCard';
@@ -29,6 +29,8 @@ import { HotTopicsList } from '@/components/contact/HotTopicsList';
 import { MemoriesList } from '@/components/contact/MemoriesList';
 import { TranscriptionArchive } from '@/components/contact/TranscriptionArchive';
 import { ContactAvatar } from '@/components/contact/ContactAvatar';
+import { ContactCard } from '@/components/contact/ContactCard';
+import { DeleteContactDialog } from '@/components/contact/DeleteContactDialog';
 import { Colors } from '@/constants/theme';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { useAppStore } from '@/stores/app-store';
@@ -128,6 +130,9 @@ export default function ContactDetailScreen() {
   const [newFactValue, setNewFactValue] = useState('');
   const [showFactTypeDropdown, setShowFactTypeDropdown] = useState(false);
 
+  const [showOptionsMenu, setShowOptionsMenu] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
   // Sync contact data with local state
   useEffect(() => {
     if (contact) {
@@ -154,24 +159,26 @@ export default function ContactDetailScreen() {
     }
   }, [highlightType, highlightId, contact, isLoading]);
 
-  const handleDelete = () => {
-    Alert.alert(
-      t('contact.deleteContact'),
-      `${t('contact.deleteContactConfirm')} ${contact?.firstName} ?`,
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: async () => {
-            if (contact) {
-              await deleteContactMutation.mutateAsync(contact.id);
-              router.replace('/(tabs)/contacts');
-            }
-          },
-        },
-      ]
-    );
+  const handleDelete = async () => {
+    if (contact) {
+      await deleteContactMutation.mutateAsync(contact.id);
+      router.replace('/(tabs)/contacts');
+    }
+  };
+
+  const handleDeletePress = () => {
+    setShowOptionsMenu(false);
+    setShowDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    setShowDeleteDialog(false);
+    await handleDelete();
+  };
+
+  const handleAddContactCardFact = (factType: FactType) => {
+    setNewFactType(factType);
+    setIsAddingFact(true);
   };
 
   const handleSaveName = async () => {
@@ -396,6 +403,26 @@ export default function ContactDetailScreen() {
       >
         {/* Hero Header with Avatar */}
         <Animated.View entering={FadeIn.duration(400)} style={styles.heroSection}>
+          {/* Options menu button */}
+          <View style={styles.menuButtonContainer}>
+            <Pressable
+              style={styles.menuButton}
+              onPress={() => setShowOptionsMenu(!showOptionsMenu)}
+            >
+              <MoreVertical size={24} color={Colors.textSecondary} />
+            </Pressable>
+            {showOptionsMenu && (
+              <View style={styles.optionsMenu}>
+                <Pressable style={styles.optionsMenuItem} onPress={handleDeletePress}>
+                  <Trash2 size={18} color={Colors.error} />
+                  <Text style={styles.optionsMenuItemTextDanger}>
+                    {t('contact.menu.delete')}
+                  </Text>
+                </Pressable>
+              </View>
+            )}
+          </View>
+
           <View style={styles.avatarContainer}>
             <ContactAvatar
               firstName={contact.firstName}
@@ -640,6 +667,12 @@ export default function ContactDetailScreen() {
             </Pressable>
           </View>
 
+          {/* Contact Card */}
+          <ContactCard
+            facts={contact.facts}
+            onAddFact={handleAddContactCardFact}
+          />
+
           {isAddingFact && (
             <View style={styles.addCard}>
               <Text style={styles.inputLabel}>{t('contact.fact.infoTypeLabel')}</Text>
@@ -859,14 +892,16 @@ export default function ContactDetailScreen() {
           />
         </Animated.View>
 
-        {/* Delete button */}
-        <Animated.View entering={FadeInDown.delay(350).duration(300)} style={styles.section}>
-          <Pressable style={styles.deleteButton} onPress={handleDelete}>
-            <Trash2 size={18} color={Colors.error} />
-            <Text style={styles.deleteButtonText}>{t('contact.deleteContact')}</Text>
-          </Pressable>
-        </Animated.View>
       </ScrollView>
+
+      <DeleteContactDialog
+        visible={showDeleteDialog}
+        contactName={`${contact.firstName} ${contact.lastName || ''}`.trim()}
+        contactFirstName={contact.firstName}
+        contactLastName={contact.lastName}
+        onCancel={() => setShowDeleteDialog(false)}
+        onConfirm={handleConfirmDelete}
+      />
     </KeyboardAvoidingView>
   );
 }
@@ -892,6 +927,42 @@ const styles = StyleSheet.create({
     paddingTop: 24,
     paddingBottom: 32,
     alignItems: 'center',
+  },
+  menuButtonContainer: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    zIndex: 10,
+  },
+  menuButton: {
+    padding: 8,
+  },
+  optionsMenu: {
+    position: 'absolute',
+    top: 40,
+    right: 0,
+    backgroundColor: Colors.surface,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    minWidth: 200,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  optionsMenuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    gap: 12,
+  },
+  optionsMenuItemTextDanger: {
+    fontSize: 15,
+    color: Colors.error,
+    fontWeight: '500',
   },
   avatarContainer: {
     marginBottom: 16,
@@ -1174,21 +1245,5 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
     textAlign: 'center',
     fontSize: 15,
-  },
-  deleteButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.error,
-    paddingVertical: 14,
-    borderRadius: 12,
-    gap: 8,
-  },
-  deleteButtonText: {
-    color: Colors.error,
-    fontSize: 16,
-    fontWeight: '600',
   },
 });
