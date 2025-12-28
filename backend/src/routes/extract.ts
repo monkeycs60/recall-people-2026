@@ -59,13 +59,22 @@ const extractionSchema = z.object({
     confidence: z.enum(['high', 'medium', 'low']),
   }),
   noteTitle: z.string().describe('Titre court de 2-4 mots résumant le contexte de la note (ex: "Café rattrapage", "Soirée Marc", "Appel pro")'),
+  contactInfo: z.object({
+    phone: z.string().nullable().describe('Numéro de téléphone si mentionné'),
+    email: z.string().nullable().describe('Adresse email si mentionnée'),
+    birthday: z.object({
+      day: z.number().describe('Jour du mois (1-31)'),
+      month: z.number().describe('Mois (1-12)'),
+      year: z.number().nullable().describe('Année si mentionnée'),
+    }).nullable().describe('Date d\'anniversaire si mentionnée'),
+  }).describe('Coordonnées de contact détectées'),
   facts: z.array(
     z.object({
       factType: z.enum([
         'work', 'company', 'education', 'location', 'origin', 'partner',
-        'children', 'hobby', 'sport', 'language', 'pet', 'birthday',
+        'children', 'hobby', 'sport', 'language', 'pet',
         'how_met', 'where_met', 'shared_ref', 'trait', 'gift_idea',
-        'gift_given', 'contact', 'relationship', 'other',
+        'gift_given', 'relationship', 'other',
       ]),
       factKey: z.string().describe('Label lisible en français'),
       factValue: z.string().describe('La valeur extraite (description pour type "other")'),
@@ -239,6 +248,15 @@ extractRoutes.post('/', async (c) => {
         suggestedNickname,
       },
       noteTitle: extraction.noteTitle,
+      contactInfo: {
+        phone: extraction.contactInfo.phone || undefined,
+        email: extraction.contactInfo.email || undefined,
+        birthday: extraction.contactInfo.birthday ? {
+          day: extraction.contactInfo.birthday.day,
+          month: extraction.contactInfo.birthday.month,
+          year: extraction.contactInfo.birthday.year || undefined,
+        } : undefined,
+      },
       facts: filteredFacts,
       hotTopics: extraction.hotTopics,
       resolvedTopics: extraction.resolvedTopics,
@@ -355,7 +373,14 @@ RÈGLES D'EXTRACTION:
    - Génère un titre court (2-4 mots) décrivant le contexte
    - Exemples: "Café rattrapage", "Après soirée Marc", "Appel pro", "Déjeuner networking"
 
-3. FACTS (Profil permanent - infos stables):
+3. COORDONNÉES (contactInfo):
+   - phone: numéro de téléphone si mentionné (format international de préférence)
+   - email: adresse email si mentionnée
+   - birthday: { day, month, year } si une date d'anniversaire est mentionnée (year peut être null)
+
+   NE PAS créer de facts pour téléphone, email ou anniversaire - utilise UNIQUEMENT contactInfo.
+
+4. FACTS (Profil permanent - infos stables):
    Catégories:
    - work: métier/poste (factKey="Métier")
    - company: entreprise (factKey="Entreprise")
@@ -368,25 +393,23 @@ RÈGLES D'EXTRACTION:
    - sport: sports (factKey="Sport")
    - language: langues (factKey="Langue")
    - pet: animaux (factKey="Animal")
-   - birthday: anniversaire (factKey="Anniversaire")
    - how_met: comment connu (factKey="Rencontre")
    - where_met: lieu de rencontre (factKey="Lieu rencontre")
    - shared_ref: références communes/inside jokes (factKey="Référence")
    - trait: signe distinctif (factKey="Trait")
    - gift_idea: idées cadeaux (factKey="Idée cadeau")
    - gift_given: cadeaux faits (factKey="Cadeau fait")
-   - contact: coordonnées (factKey="Contact")
    - other: information diverse (factKey="Autre", title=titre court obligatoire, factValue=description détaillée)
      IMPORTANT pour "other": title ET factValue sont OBLIGATOIRES
      Exemple: { factType: "other", title: "Allergie", factKey: "Autre", factValue: "Ne mange pas de fruits de mer, allergie sévère" }
 
-4. HOT TOPICS (Sujets chauds - temporaires/actionnables):
+5. HOT TOPICS (Sujets chauds - temporaires/actionnables):
    NOUVEAUX sujets à créer:
    - Projets en cours: "Cherche un appart", "Prépare un examen"
    - Événements à suivre: "Mariage prévu en juin"
    - Situations: "Problème au travail", "En recherche d'emploi"
 
-5. DÉTECTION DE RÉSOLUTION DE SUJETS EXISTANTS:
+6. DÉTECTION DE RÉSOLUTION DE SUJETS EXISTANTS:
    Si des SUJETS CHAUDS EXISTANTS (listés ci-dessus) semblent RÉSOLUS ou TERMINÉS selon la transcription:
    - Retourne leurs IDs dans resolvedTopics avec une résolution
    - La résolution décrit CE QUI S'EST PASSÉ / COMMENT ÇA S'EST TERMINÉ
@@ -400,7 +423,7 @@ RÈGLES D'EXTRACTION:
    - Ne marque comme résolu QUE si la transcription indique CLAIREMENT que c'est terminé
    - La résolution doit être COURTE (quelques mots) mais INFORMATIVE
 
-6. MEMORIES (Souvenirs / Événements ponctuels):
+7. MEMORIES (Souvenirs / Événements ponctuels):
    DISTINCTION IMPORTANTE entre hobby (fact) et memory:
    - HOBBY/SPORT (fact): activité pratiquée RÉGULIÈREMENT ou comme loisir habituel
      Ex: "Il fait du running", "Elle joue aux échecs", "Il fait de l'escalade"
@@ -416,7 +439,7 @@ RÈGLES D'EXTRACTION:
    isShared = true si TU as vécu ça AVEC la personne
    isShared = false si la personne a fait ça de son côté
 
-7. SUGGESTION DE GROUPES (uniquement si pas de currentContact fourni):
+8. SUGGESTION DE GROUPES (uniquement si pas de currentContact fourni):
    Suggère des groupes basés sur les facts de type contextuel:
    - company: nom de l'entreprise → groupe (ex: "Affilae" → groupe "Affilae")
    - how_met: contexte de rencontre → groupe (ex: "meetup React" → groupe "Meetup React")
@@ -425,7 +448,7 @@ RÈGLES D'EXTRACTION:
    - hobby: loisir → groupe (ex: "échecs" → groupe "Échecs")
    Si currentContact est fourni, retourne un tableau vide pour suggestedGroups.
 
-8. EVENTS (Événements futurs datés):
+9. EVENTS (Événements futurs datés):
    Extrais les événements futurs avec une date PRÉCISE mentionnée.
 
    RÈGLE CRITIQUE:
