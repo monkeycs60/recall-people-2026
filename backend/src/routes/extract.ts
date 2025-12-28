@@ -1,11 +1,13 @@
 import { Hono } from 'hono';
 import { generateObject } from 'ai';
 import { z } from 'zod';
+import { format } from 'date-fns';
 import { authMiddleware } from '../middleware/auth';
 import { wrapUserInput, getSecurityInstructions } from '../lib/security';
 import { createAIModel, getAIProviderName, getAIModel } from '../lib/ai-provider';
 import { measurePerformance } from '../lib/performance-logger';
 import { getLangfuseClient } from '../lib/telemetry';
+import { evaluateExtraction } from '../lib/evaluators';
 
 type Bindings = {
   DATABASE_URL: string;
@@ -17,6 +19,8 @@ type Bindings = {
   AI_PROVIDER?: 'grok' | 'cerebras';
   ENABLE_PERFORMANCE_LOGGING?: boolean;
   ENABLE_LANGFUSE?: string;
+  ENABLE_EVALUATION?: string;
+  EVALUATION_SAMPLING_RATE?: string;
 };
 
 type ExtractionRequest = {
@@ -89,6 +93,12 @@ const extractionSchema = z.object({
       isShared: z.boolean().describe('true si c\'est un moment vécu ENSEMBLE avec le contact, false si c\'est quelque chose que le contact a fait seul'),
     })
   ).describe('Événements ponctuels/souvenirs marquants (PAS des loisirs réguliers). Ex: saut à l\'élastique, voyage, sortie exceptionnelle'),
+  events: z.array(
+    z.object({
+      title: z.string().describe('Titre court de l\'événement (ex: "Part pêcher", "Exam de conduite")'),
+      eventDate: z.string().describe('Date au format DD/MM/YYYY calculée à partir de la date de référence'),
+    })
+  ).describe('Événements futurs avec une date précise mentionnée (pas les intentions vagues)'),
   suggestedGroups: z.array(
     z.object({
       name: z.string().describe('Nom du groupe suggéré'),
@@ -237,6 +247,10 @@ extractRoutes.post('/', async (c) => {
         eventDate: memory.eventDate || undefined,
         isShared: memory.isShared,
       })),
+      events: extraction.events?.map((event) => ({
+        title: event.title,
+        eventDate: event.eventDate,
+      })) || [],
       suggestedGroups: processedGroups,
       note: {
         summary: extraction.hotTopics.length > 0
@@ -249,6 +263,29 @@ extractRoutes.post('/', async (c) => {
     // Update Langfuse generation with output
     generation?.end({ output: formattedExtraction });
     trace?.update({ output: { success: true, extraction: formattedExtraction } });
+
+    // Run evaluation in background (non-blocking)
+    if (c.env.XAI_API_KEY && c.executionCtx) {
+      c.executionCtx.waitUntil(
+        evaluateExtraction(
+          transcription,
+          formattedExtraction,
+          {
+            XAI_API_KEY: c.env.XAI_API_KEY,
+            enableEvaluation: c.env.ENABLE_EVALUATION === 'true',
+            samplingRate: parseFloat(c.env.EVALUATION_SAMPLING_RATE || '0.25'),
+          }
+        ).then((evaluation) => {
+          if (evaluation && trace) {
+            trace.score({
+              name: 'extraction-quality',
+              value: evaluation.score / 10,
+              comment: evaluation.reasoning,
+            });
+          }
+        })
+      );
+    }
 
     return c.json({
       success: true,
@@ -286,7 +323,12 @@ ${currentContact.hotTopics.map((topic) => `  • [ID: ${topic.id}] "${topic.titl
     }
   }
 
+  const referenceDate = format(new Date(), 'dd/MM/yyyy');
+
   return `Tu es un assistant qui extrait des informations structurées à partir de notes vocales dans la langue : ${language}.
+
+DATE DE RÉFÉRENCE (fournie par le système, NE PAS déterminer toi-même): ${referenceDate}
+
 ${getSecurityInstructions(language)}
 ${currentContactContext}
 ${existingHotTopicsContext}
@@ -383,11 +425,39 @@ RÈGLES D'EXTRACTION:
    - hobby: loisir → groupe (ex: "échecs" → groupe "Échecs")
    Si currentContact est fourni, retourne un tableau vide pour suggestedGroups.
 
+8. EVENTS (Événements futurs datés):
+   Extrais les événements futurs avec une date PRÉCISE mentionnée.
+
+   RÈGLE CRITIQUE:
+   - Utilise UNIQUEMENT la DATE DE RÉFÉRENCE ci-dessus comme "aujourd'hui"
+   - Ne détermine JAMAIS la date actuelle toi-même
+   - Calcule la date cible à partir de cette référence
+   - Retourne la date au format DD/MM/YYYY
+
+   Expressions à convertir:
+   - "dans X jours/semaines/mois" → calcule la date exacte
+   - "la semaine prochaine" → lundi prochain
+   - "le mois prochain" → 1er du mois suivant
+   - "fin janvier" → dernier jour du mois
+   - "mi-février" → 15 du mois
+   - "le 15 janvier" → 15/01/YYYY (année en cours ou prochaine selon contexte)
+
+   Exemples (si date de référence = 27/12/2024):
+   - "Eric part pêcher dans deux semaines" → { title: "Part pêcher", eventDate: "10/01/2025" }
+   - "Marie a un exam la semaine prochaine" → { title: "Exam", eventDate: "30/12/2024" }
+   - "Il part en vacances mi-janvier" → { title: "Part en vacances", eventDate: "15/01/2025" }
+
+   NE PAS extraire:
+   - Intentions vagues sans date ("il veut partir en vacances un jour")
+   - Événements passés ("il est allé pêcher la semaine dernière" → c'est un memory)
+   - Si la date est ambiguë ou incalculable
+
 RÈGLES:
 - facts = infos PERMANENTES du profil (hobbies = activités régulières)
 - hotTopics = NOUVEAUX sujets TEMPORAIRES à suivre (pas ceux existants)
 - resolvedTopics = sujets existants TERMINÉS avec leur résolution
-- memories = événements PONCTUELS / souvenirs (PAS des hobbies réguliers)
+- memories = événements PONCTUELS / souvenirs PASSÉS (PAS des hobbies réguliers)
+- events = événements FUTURS avec une date précise calculée
 - suggestedGroups = groupes suggérés UNIQUEMENT pour nouveaux contacts
 - N'extrais QUE ce qui est EXPLICITEMENT mentionné
 - action="add" pour nouvelle info, "update" si modification d'un fact existant`;
