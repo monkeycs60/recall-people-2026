@@ -291,4 +291,22 @@ const runMigrations = async (database: SQLite.SQLiteDatabase) => {
     CREATE INDEX IF NOT EXISTS idx_events_contact ON events(contact_id);
     CREATE INDEX IF NOT EXISTS idx_events_date ON events(event_date);
   `);
+
+  // Check if phone/email/birthday columns exist on contacts
+  const hasPhone = contactsInfo.some((col) => col.name === 'phone');
+  if (!hasPhone) {
+    await database.execAsync("ALTER TABLE contacts ADD COLUMN phone TEXT");
+  }
+
+  const hasEmail = contactsInfo.some((col) => col.name === 'email');
+  if (!hasEmail) {
+    await database.execAsync("ALTER TABLE contacts ADD COLUMN email TEXT");
+  }
+
+  const hasBirthdayDay = contactsInfo.some((col) => col.name === 'birthday_day');
+  if (!hasBirthdayDay) {
+    await database.execAsync("ALTER TABLE contacts ADD COLUMN birthday_day INTEGER");
+    await database.execAsync("ALTER TABLE contacts ADD COLUMN birthday_month INTEGER");
+    await database.execAsync("ALTER TABLE contacts ADD COLUMN birthday_year INTEGER");
+  }
 };
