@@ -4,20 +4,21 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
-import { ExtractionResult, HotTopic, ResolvedTopic, ExtractedMemory } from '@/types';
+import { ExtractionResult, HotTopic, ResolvedTopic, ExtractedMemory, ExtractedEvent } from '@/types';
 import { useCreateContact, useUpdateContact } from '@/hooks/useContactsQuery';
 import { useGroupsQuery } from '@/hooks/useGroupsQuery';
 import { useNotes } from '@/hooks/useNotes';
 import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { memoryService } from '@/services/memory.service';
+import { eventService } from '@/services/event.service';
 import { contactService } from '@/services/contact.service';
 import { groupService } from '@/services/group.service';
 import { generateSummary, generateIceBreakers } from '@/lib/api';
 import { useAppStore } from '@/stores/app-store';
 import { queryKeys } from '@/lib/query-keys';
 import { Colors } from '@/constants/theme';
-import { Archive, Edit3, Plus, X } from 'lucide-react-native';
+import { Archive, Edit3, Plus, X, Calendar } from 'lucide-react-native';
 
 export default function ReviewScreen() {
   const { t } = useTranslation();
@@ -59,6 +60,14 @@ export default function ReviewScreen() {
     extraction.memories?.map((memory) => ({ ...memory })) || []
   );
   const [editingMemoryIndex, setEditingMemoryIndex] = useState<number | null>(null);
+
+  const [selectedEvents, setSelectedEvents] = useState<number[]>(
+    extraction.events?.map((_, index) => index) || []
+  );
+  const [editableEvents, setEditableEvents] = useState<ExtractedEvent[]>(
+    extraction.events?.map((event) => ({ ...event })) || []
+  );
+  const [editingEventIndex, setEditingEventIndex] = useState<number | null>(null);
 
   const [isSaving, setIsSaving] = useState(false);
   const [existingHotTopics, setExistingHotTopics] = useState<HotTopic[]>([]);
@@ -153,6 +162,43 @@ export default function ReviewScreen() {
         memoryIndex === index ? { ...memory, [field]: value } : memory
       )
     );
+  };
+
+  const toggleEvent = (index: number) => {
+    setSelectedEvents((prev) =>
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
+    );
+  };
+
+  const updateEvent = (index: number, field: 'title' | 'eventDate', value: string) => {
+    setEditableEvents((prev) =>
+      prev.map((event, eventIndex) =>
+        eventIndex === index ? { ...event, [field]: value } : event
+      )
+    );
+  };
+
+  const formatRelativeDate = (dateStr: string): string => {
+    const match = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (!match) return dateStr;
+
+    const dayNum = parseInt(match[1]);
+    const monthNum = parseInt(match[2]);
+    const yearNum = parseInt(match[3]);
+    const eventDate = new Date(yearNum, monthNum - 1, dayNum);
+    const today = new Date();
+    const diffDays = Math.ceil((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) return dateStr;
+    if (diffDays === 0) return "Aujourd'hui";
+    if (diffDays === 1) return 'Demain';
+    if (diffDays < 7) return `Dans ${diffDays} jours`;
+    if (diffDays < 30) {
+      const weeks = Math.floor(diffDays / 7);
+      return weeks === 1 ? 'Dans 1 semaine' : `Dans ${weeks} semaines`;
+    }
+    const months = Math.floor(diffDays / 30);
+    return months === 1 ? 'Dans 1 mois' : `Dans ${months} mois`;
   };
 
   const toggleGroup = (group: { name: string; isNew: boolean; existingId?: string }) => {
@@ -304,6 +350,21 @@ export default function ReviewScreen() {
             isShared: memory.isShared,
             sourceNoteId: note.id,
           });
+        }
+      }
+
+      if (editableEvents.length > 0) {
+        for (const index of selectedEvents) {
+          const event = editableEvents[index];
+          const parsedDate = eventService.parseExtractedDate(event.eventDate);
+          if (parsedDate) {
+            await eventService.create({
+              contactId: finalContactId,
+              title: event.title,
+              eventDate: parsedDate,
+              sourceNoteId: note.id,
+            });
+          }
         }
       }
 
@@ -666,6 +727,75 @@ export default function ReviewScreen() {
                   {topic.context && (
                     <Text style={styles.contextText}>{topic.context}</Text>
                   )}
+                </Pressable>
+              </View>
+            );
+          })}
+        </View>
+      )}
+
+      {editableEvents.length > 0 && (
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Calendar size={20} color={Colors.info} />
+            <Text style={styles.sectionTitleWithIcon}>{t('review.events')}</Text>
+          </View>
+
+          {editableEvents.map((event, index) => {
+            const isEditing = editingEventIndex === index;
+
+            if (isEditing) {
+              return (
+                <View key={index} style={styles.card}>
+                  <TextInput
+                    style={[styles.textInput, styles.textInputBold]}
+                    value={event.title}
+                    onChangeText={(value) => updateEvent(index, 'title', value)}
+                    placeholder={t('review.eventTitlePlaceholder')}
+                    placeholderTextColor={Colors.textMuted}
+                  />
+                  <TextInput
+                    style={styles.textInput}
+                    value={event.eventDate}
+                    onChangeText={(value) => updateEvent(index, 'eventDate', value)}
+                    placeholder="DD/MM/YYYY"
+                    placeholderTextColor={Colors.textMuted}
+                  />
+                  <Pressable
+                    style={styles.confirmButton}
+                    onPress={() => setEditingEventIndex(null)}
+                  >
+                    <Text style={styles.confirmButtonText}>{t('common.confirm')}</Text>
+                  </Pressable>
+                </View>
+              );
+            }
+
+            return (
+              <View key={index} style={styles.cardRow}>
+                <Pressable onPress={() => toggleEvent(index)}>
+                  <View
+                    style={[
+                      styles.checkbox,
+                      selectedEvents.includes(index) && styles.checkboxInfo
+                    ]}
+                  >
+                    {selectedEvents.includes(index) && (
+                      <Text style={styles.checkmark}>✓</Text>
+                    )}
+                  </View>
+                </Pressable>
+
+                <View style={styles.calendarDot} />
+
+                <Pressable style={styles.cardContent} onPress={() => setEditingEventIndex(index)}>
+                  <View style={styles.factRow}>
+                    <Text style={styles.factValue}>{event.title}</Text>
+                    <Edit3 size={14} color={Colors.textMuted} />
+                  </View>
+                  <Text style={styles.eventDate}>
+                    {event.eventDate} ({formatRelativeDate(event.eventDate)})
+                  </Text>
                 </Pressable>
               </View>
             );
@@ -1037,6 +1167,22 @@ const styles = StyleSheet.create({
   memoryType: {
     fontSize: 12,
     color: Colors.textMuted,
+  },
+  checkboxInfo: {
+    backgroundColor: Colors.info,
+  },
+  calendarDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: Colors.info,
+    marginTop: 6,
+    marginRight: 12,
+  },
+  eventDate: {
+    fontSize: 14,
+    color: Colors.info,
+    marginTop: 4,
   },
   saveButton: {
     paddingVertical: 16,
