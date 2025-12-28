@@ -113,6 +113,21 @@ export type Memory = {
   createdAt: string;
 };
 
+export type Event = {
+  id: string;
+  contactId: string;
+  title: string;
+  eventDate: string; // ISO 8601
+  sourceNoteId?: string;
+  notifiedAt?: string;
+  createdAt: string;
+};
+
+export type ExtractedEvent = {
+  title: string;
+  eventDate: string; // DD/MM/YYYY format from LLM
+};
+
 export type Group = {
   id: string;
   name: string;
@@ -172,6 +187,7 @@ export type ExtractionResult = {
   hotTopics: ExtractedHotTopic[];
   resolvedTopics: ResolvedTopic[];
   memories: ExtractedMemory[];
+  events: ExtractedEvent[];
   suggestedGroups?: SuggestedGroup[];
   note: {
     summary: string;
