@@ -5,15 +5,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { format, startOfDay, addDays, isSameDay } from 'date-fns';
 import { fr, enUS } from 'date-fns/locale';
-import { eventService } from '@/services/event.service';
+import { hotTopicService } from '@/services/hot-topic.service';
 import { contactService } from '@/services/contact.service';
-import { Event, Contact } from '@/types';
+import { HotTopic, Contact } from '@/types';
 import { Colors } from '@/constants/theme';
 import { Calendar } from 'lucide-react-native';
 
 type TimelineDay = {
   date: Date;
-  events: Array<Event & { contact: Contact }>;
+  events: Array<HotTopic & { contact: Contact }>;
   isToday: boolean;
 };
 
@@ -25,7 +25,7 @@ export default function UpcomingScreen() {
   const insets = useSafeAreaInsets();
   const [view, setView] = useState<FeedView>('upcoming');
   const [timeline, setTimeline] = useState<TimelineDay[]>([]);
-  const [pastEvents, setPastEvents] = useState<Array<Event & { contact: Contact }>>([]);
+  const [pastEvents, setPastEvents] = useState<Array<HotTopic & { contact: Contact }>>([]);
   const [loading, setLoading] = useState(true);
 
   const locale = i18n.language === 'fr' ? fr : enUS;
@@ -34,11 +34,24 @@ export default function UpcomingScreen() {
     setLoading(true);
 
     if (view === 'upcoming') {
-      const events = await eventService.getUpcoming(30);
-      const eventsWithContacts = await Promise.all(
-        events.map(async (event) => {
-          const contact = await contactService.getById(event.contactId);
-          return { ...event, contact: contact! };
+      const hotTopics = await hotTopicService.getUpcoming(30);
+
+      // Filter birthday duplicates: only show the closest upcoming birthday per contact
+      const seenBirthdayContacts = new Set<string>();
+      const filteredTopics = hotTopics.filter((topic) => {
+        if (topic.birthdayContactId) {
+          if (seenBirthdayContacts.has(topic.birthdayContactId)) {
+            return false;
+          }
+          seenBirthdayContacts.add(topic.birthdayContactId);
+        }
+        return true;
+      });
+
+      const topicsWithContacts = await Promise.all(
+        filteredTopics.map(async (topic) => {
+          const contact = await contactService.getById(topic.contactId);
+          return { ...topic, contact: contact! };
         })
       );
 
@@ -47,8 +60,8 @@ export default function UpcomingScreen() {
 
       for (let dayIndex = 0; dayIndex < 30; dayIndex++) {
         const date = addDays(today, dayIndex);
-        const dayEvents = eventsWithContacts.filter((event) =>
-          isSameDay(new Date(event.eventDate), date)
+        const dayEvents = topicsWithContacts.filter((topic) =>
+          topic.eventDate && isSameDay(new Date(topic.eventDate), date)
         );
         days.push({
           date,
@@ -59,14 +72,8 @@ export default function UpcomingScreen() {
 
       setTimeline(days);
     } else {
-      const events = await eventService.getPast(30);
-      const eventsWithContacts = await Promise.all(
-        events.map(async (event) => {
-          const contact = await contactService.getById(event.contactId);
-          return { ...event, contact: contact! };
-        })
-      );
-      setPastEvents(eventsWithContacts);
+      // Past view: hot topics don't track past events, show empty
+      setPastEvents([]);
     }
 
     setLoading(false);
@@ -162,7 +169,7 @@ export default function UpcomingScreen() {
                 <View style={styles.eventContent}>
                   <Text style={styles.pastEventTitle}>{event.title}</Text>
                   <Text style={styles.eventContact}>
-                    {event.contact.firstName} {event.contact.lastName || ''} • {format(new Date(event.eventDate), 'd MMM', { locale })}
+                    {event.contact.firstName} {event.contact.lastName || ''}{event.eventDate ? ` • ${format(new Date(event.eventDate), 'd MMM', { locale })}` : ''}
                   </Text>
                 </View>
               </Pressable>
