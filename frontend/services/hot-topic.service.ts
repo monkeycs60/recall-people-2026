@@ -4,6 +4,43 @@ import { getDatabase } from '@/lib/db';
 import { HotTopic, HotTopicStatus } from '@/types';
 
 export const hotTopicService = {
+  getById: async (id: string): Promise<HotTopic | null> => {
+    const db = await getDatabase();
+    const result = await db.getFirstAsync<{
+      id: string;
+      contact_id: string;
+      title: string;
+      context: string | null;
+      resolution: string | null;
+      status: string;
+      source_note_id: string | null;
+      event_date: string | null;
+      notified_at: string | null;
+      birthday_contact_id: string | null;
+      created_at: string;
+      updated_at: string;
+      resolved_at: string | null;
+    }>('SELECT * FROM hot_topics WHERE id = ?', [id]);
+
+    if (!result) return null;
+
+    return {
+      id: result.id,
+      contactId: result.contact_id,
+      title: result.title,
+      context: result.context || undefined,
+      resolution: result.resolution || undefined,
+      status: result.status as HotTopicStatus,
+      sourceNoteId: result.source_note_id || undefined,
+      eventDate: result.event_date || undefined,
+      notifiedAt: result.notified_at || undefined,
+      birthdayContactId: result.birthday_contact_id || undefined,
+      createdAt: result.created_at,
+      updatedAt: result.updated_at,
+      resolvedAt: result.resolved_at || undefined,
+    };
+  },
+
   getByContact: async (contactId: string, includeResolved = false): Promise<HotTopic[]> => {
     const db = await getDatabase();
     const query = includeResolved

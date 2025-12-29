@@ -23,7 +23,7 @@ import Toast from 'react-native-toast-message';
 import { toastConfig } from '@/components/ui/ToastConfig';
 import { OfflineBanner } from '@/components/ui/OfflineBanner';
 import { notificationService } from '@/services/notification.service';
-import { eventService } from '@/services/event.service';
+import { hotTopicService } from '@/services/hot-topic.service';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -63,9 +63,10 @@ export default function RootLayout() {
     if (!isDbInitialized) {
       console.log('[_layout] Starting DB initialization...');
       initDatabase()
-        .then(() => {
+        .then(async () => {
           console.log('[_layout] DB initialized successfully');
           isDbInitialized = true;
+          await hotTopicService.cleanupPastBirthdays();
           setDbReady(true);
         })
         .catch((error) => {
@@ -79,9 +80,9 @@ export default function RootLayout() {
   // Setup notification tap handler to navigate to contact
   useEffect(() => {
     const cleanup = notificationService.setupNotificationListener(async (eventId) => {
-      const event = await eventService.getById(eventId);
-      if (event) {
-        router.push(`/contact/${event.contactId}`);
+      const hotTopic = await hotTopicService.getById(eventId);
+      if (hotTopic) {
+        router.push(`/contact/${hotTopic.contactId}`);
       }
     });
 
