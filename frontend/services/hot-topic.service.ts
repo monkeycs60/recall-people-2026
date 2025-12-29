@@ -251,6 +251,50 @@ export const hotTopicService = {
     await db.runAsync('DELETE FROM hot_topics WHERE birthday_contact_id = ?', [contactId]);
   },
 
+  syncBirthdayHotTopics: async (
+    contactId: string,
+    contactFirstName: string,
+    birthdayDay: number,
+    birthdayMonth: number
+  ): Promise<void> => {
+    const db = await getDatabase();
+
+    // Delete existing birthday hot topics for this contact
+    await db.runAsync('DELETE FROM hot_topics WHERE birthday_contact_id = ?', [contactId]);
+
+    // Calculate the next 5 birthday occurrences
+    const today = new Date();
+    const dates: Date[] = [];
+
+    for (let year = today.getFullYear(); dates.length < 5; year++) {
+      const birthday = new Date(year, birthdayMonth - 1, birthdayDay);
+      if (birthday > today) {
+        dates.push(birthday);
+      }
+    }
+
+    // Create 5 hot topics for upcoming birthdays
+    const now = new Date().toISOString();
+    for (const date of dates) {
+      const id = Crypto.randomUUID();
+      await db.runAsync(
+        `INSERT INTO hot_topics (id, contact_id, title, context, status, event_date, birthday_contact_id, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          id,
+          contactId,
+          `Anniversaire de ${contactFirstName}`,
+          null,
+          'active',
+          date.toISOString(),
+          contactId,
+          now,
+          now,
+        ]
+      );
+    }
+  },
+
   cleanupPastBirthdays: async (): Promise<void> => {
     const db = await getDatabase();
     const today = startOfDay(new Date()).toISOString();
