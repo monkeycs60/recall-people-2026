@@ -1,4 +1,5 @@
 import * as Crypto from 'expo-crypto';
+import { startOfDay, addDays, isBefore } from 'date-fns';
 import { getDatabase } from '@/lib/db';
 import { HotTopic, HotTopicStatus } from '@/types';
 
@@ -18,6 +19,9 @@ export const hotTopicService = {
       resolution: string | null;
       status: string;
       source_note_id: string | null;
+      event_date: string | null;
+      notified_at: string | null;
+      birthday_contact_id: string | null;
       created_at: string;
       updated_at: string;
       resolved_at: string | null;
@@ -31,6 +35,9 @@ export const hotTopicService = {
       resolution: row.resolution || undefined,
       status: row.status as HotTopicStatus,
       sourceNoteId: row.source_note_id || undefined,
+      eventDate: row.event_date || undefined,
+      notifiedAt: row.notified_at || undefined,
+      birthdayContactId: row.birthday_contact_id || undefined,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
       resolvedAt: row.resolved_at || undefined,
@@ -41,6 +48,8 @@ export const hotTopicService = {
     contactId: string;
     title: string;
     context?: string;
+    eventDate?: string;
+    birthdayContactId?: string;
     sourceNoteId?: string;
   }): Promise<HotTopic> => {
     const db = await getDatabase();
@@ -48,9 +57,20 @@ export const hotTopicService = {
     const now = new Date().toISOString();
 
     await db.runAsync(
-      `INSERT INTO hot_topics (id, contact_id, title, context, status, source_note_id, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [id, data.contactId, data.title, data.context || null, 'active', data.sourceNoteId || null, now, now]
+      `INSERT INTO hot_topics (id, contact_id, title, context, status, event_date, birthday_contact_id, source_note_id, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        id,
+        data.contactId,
+        data.title,
+        data.context || null,
+        'active',
+        data.eventDate || null,
+        data.birthdayContactId || null,
+        data.sourceNoteId || null,
+        now,
+        now,
+      ]
     );
 
     return {
@@ -59,6 +79,8 @@ export const hotTopicService = {
       title: data.title,
       context: data.context,
       status: 'active',
+      eventDate: data.eventDate,
+      birthdayContactId: data.birthdayContactId,
       sourceNoteId: data.sourceNoteId,
       createdAt: now,
       updatedAt: now,
@@ -68,6 +90,7 @@ export const hotTopicService = {
   update: async (id: string, data: Partial<{
     title: string;
     context: string;
+    eventDate: string | null;
   }>): Promise<void> => {
     const db = await getDatabase();
     const updates: string[] = [];
@@ -80,6 +103,10 @@ export const hotTopicService = {
     if (data.context !== undefined) {
       updates.push('context = ?');
       values.push(data.context || null);
+    }
+    if (data.eventDate !== undefined) {
+      updates.push('event_date = ?');
+      values.push(data.eventDate);
     }
 
     if (updates.length === 0) return;
@@ -121,5 +148,135 @@ export const hotTopicService = {
   delete: async (id: string): Promise<void> => {
     const db = await getDatabase();
     await db.runAsync('DELETE FROM hot_topics WHERE id = ?', [id]);
+  },
+
+  getUpcoming: async (daysAhead: number = 30): Promise<HotTopic[]> => {
+    const db = await getDatabase();
+    const today = startOfDay(new Date()).toISOString();
+    const endDate = addDays(startOfDay(new Date()), daysAhead).toISOString();
+
+    const result = await db.getAllAsync<{
+      id: string;
+      contact_id: string;
+      title: string;
+      context: string | null;
+      resolution: string | null;
+      status: string;
+      source_note_id: string | null;
+      event_date: string | null;
+      notified_at: string | null;
+      birthday_contact_id: string | null;
+      created_at: string;
+      updated_at: string;
+      resolved_at: string | null;
+    }>(
+      `SELECT * FROM hot_topics
+       WHERE event_date IS NOT NULL
+       AND event_date >= ? AND event_date <= ?
+       AND status = 'active'
+       ORDER BY event_date ASC`,
+      [today, endDate]
+    );
+
+    return result.map((row) => ({
+      id: row.id,
+      contactId: row.contact_id,
+      title: row.title,
+      context: row.context || undefined,
+      resolution: row.resolution || undefined,
+      status: row.status as HotTopicStatus,
+      sourceNoteId: row.source_note_id || undefined,
+      eventDate: row.event_date || undefined,
+      notifiedAt: row.notified_at || undefined,
+      birthdayContactId: row.birthday_contact_id || undefined,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      resolvedAt: row.resolved_at || undefined,
+    }));
+  },
+
+  getPendingNotifications: async (): Promise<HotTopic[]> => {
+    const db = await getDatabase();
+    const tomorrow = addDays(startOfDay(new Date()), 1).toISOString();
+    const dayAfterTomorrow = addDays(startOfDay(new Date()), 2).toISOString();
+
+    const result = await db.getAllAsync<{
+      id: string;
+      contact_id: string;
+      title: string;
+      context: string | null;
+      resolution: string | null;
+      status: string;
+      source_note_id: string | null;
+      event_date: string | null;
+      notified_at: string | null;
+      birthday_contact_id: string | null;
+      created_at: string;
+      updated_at: string;
+      resolved_at: string | null;
+    }>(
+      `SELECT * FROM hot_topics
+       WHERE event_date >= ? AND event_date < ?
+       AND notified_at IS NULL
+       AND status = 'active'
+       ORDER BY event_date ASC`,
+      [tomorrow, dayAfterTomorrow]
+    );
+
+    return result.map((row) => ({
+      id: row.id,
+      contactId: row.contact_id,
+      title: row.title,
+      context: row.context || undefined,
+      resolution: row.resolution || undefined,
+      status: row.status as HotTopicStatus,
+      sourceNoteId: row.source_note_id || undefined,
+      eventDate: row.event_date || undefined,
+      notifiedAt: row.notified_at || undefined,
+      birthdayContactId: row.birthday_contact_id || undefined,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      resolvedAt: row.resolved_at || undefined,
+    }));
+  },
+
+  markNotified: async (id: string): Promise<void> => {
+    const db = await getDatabase();
+    const now = new Date().toISOString();
+    await db.runAsync('UPDATE hot_topics SET notified_at = ? WHERE id = ?', [now, id]);
+  },
+
+  deleteByBirthdayContact: async (contactId: string): Promise<void> => {
+    const db = await getDatabase();
+    await db.runAsync('DELETE FROM hot_topics WHERE birthday_contact_id = ?', [contactId]);
+  },
+
+  cleanupPastBirthdays: async (): Promise<void> => {
+    const db = await getDatabase();
+    const today = startOfDay(new Date()).toISOString();
+    await db.runAsync(
+      'DELETE FROM hot_topics WHERE birthday_contact_id IS NOT NULL AND event_date < ?',
+      [today]
+    );
+  },
+
+  parseExtractedDate: (dateStr: string): string | null => {
+    const match = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (!match) return null;
+
+    const dayNum = parseInt(match[1]);
+    const monthNum = parseInt(match[2]);
+    const yearNum = parseInt(match[3]);
+
+    if (dayNum < 1 || dayNum > 31) return null;
+    if (monthNum < 1 || monthNum > 12) return null;
+
+    const date = new Date(yearNum, monthNum - 1, dayNum);
+
+    if (isNaN(date.getTime())) return null;
+    if (date.getDate() !== dayNum) return null;
+    if (isBefore(date, startOfDay(new Date()))) return null;
+
+    return date.toISOString();
   },
 };
