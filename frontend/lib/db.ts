@@ -132,17 +132,8 @@ export const initDatabase = async () => {
       FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE CASCADE
     );
 
-    -- Events (événements temporels)
-    CREATE TABLE IF NOT EXISTS events (
-      id TEXT PRIMARY KEY,
-      contact_id TEXT NOT NULL,
-      title TEXT NOT NULL,
-      event_date TEXT NOT NULL,
-      source_note_id TEXT,
-      notified_at TEXT,
-      created_at TEXT DEFAULT (datetime('now')),
-      FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE CASCADE
-    );
+    -- Note: events table has been migrated to hot_topics
+    -- Events are now stored as hot_topics with event_date, notified_at, birthday_contact_id columns
 
     -- Index
     CREATE INDEX IF NOT EXISTS idx_contacts_last_contact ON contacts(last_contact_at DESC);
@@ -156,8 +147,6 @@ export const initDatabase = async () => {
     CREATE INDEX IF NOT EXISTS idx_contact_groups_group ON contact_groups(group_id);
     CREATE INDEX IF NOT EXISTS idx_memories_contact ON memories(contact_id);
     CREATE INDEX IF NOT EXISTS idx_memories_created ON memories(created_at DESC);
-    CREATE INDEX IF NOT EXISTS idx_events_contact ON events(contact_id);
-    CREATE INDEX IF NOT EXISTS idx_events_date ON events(event_date);
   `);
 
   // Run migrations for existing databases
@@ -248,6 +237,32 @@ const runMigrations = async (database: SQLite.SQLiteDatabase) => {
     await database.execAsync("CREATE INDEX IF NOT EXISTS idx_hot_topics_birthday ON hot_topics(birthday_contact_id)");
   }
 
+  // Migration: Migrate events to hot_topics (one-time)
+  const eventsTableExists = await database.getFirstAsync<{ name: string }>(
+    "SELECT name FROM sqlite_master WHERE type='table' AND name='events'"
+  );
+
+  if (eventsTableExists) {
+    // Copy events to hot_topics
+    await database.execAsync(`
+      INSERT INTO hot_topics (id, contact_id, title, context, status, event_date, source_note_id, created_at, updated_at)
+      SELECT id, contact_id, title, NULL, 'active', event_date, source_note_id, created_at, created_at
+      FROM events
+    `);
+
+    // Copy notified_at values
+    await database.execAsync(`
+      UPDATE hot_topics
+      SET notified_at = (SELECT events.notified_at FROM events WHERE events.id = hot_topics.id)
+      WHERE id IN (SELECT id FROM events)
+    `);
+
+    // Drop the events table and its indexes
+    await database.execAsync("DROP INDEX IF EXISTS idx_events_contact");
+    await database.execAsync("DROP INDEX IF EXISTS idx_events_date");
+    await database.execAsync("DROP TABLE events");
+  }
+
   // Create groups tables if not exist
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS groups (
@@ -286,21 +301,8 @@ const runMigrations = async (database: SQLite.SQLiteDatabase) => {
     CREATE INDEX IF NOT EXISTS idx_memories_created ON memories(created_at DESC);
   `);
 
-  // Create events table if not exists
-  await database.execAsync(`
-    CREATE TABLE IF NOT EXISTS events (
-      id TEXT PRIMARY KEY,
-      contact_id TEXT NOT NULL,
-      title TEXT NOT NULL,
-      event_date TEXT NOT NULL,
-      source_note_id TEXT,
-      notified_at TEXT,
-      created_at TEXT DEFAULT (datetime('now')),
-      FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE CASCADE
-    );
-    CREATE INDEX IF NOT EXISTS idx_events_contact ON events(contact_id);
-    CREATE INDEX IF NOT EXISTS idx_events_date ON events(event_date);
-  `);
+  // Note: events table has been migrated to hot_topics (see migration above)
+  // The events table is no longer created - events are now stored as hot_topics with event_date
 
   // Check if phone/email/birthday columns exist on contacts
   const hasPhone = contactsInfo.some((col) => col.name === 'phone');
