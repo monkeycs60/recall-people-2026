@@ -86,10 +86,11 @@ const extractionSchema = z.object({
   ),
   hotTopics: z.array(
     z.object({
-      title: z.string().describe('Titre court du sujet (ex: "Examen de droit", "Recherche appart")'),
+      title: z.string().describe('Titre court du sujet (ex: "Examen de droit", "Recherche appart", "Mariage")'),
       context: z.string().describe('1-2 phrases de contexte'),
+      suggestedDate: z.string().nullable().describe('Date au format DD/MM/YYYY si un événement daté est associé, sinon null'),
     })
-  ).describe('NOUVEAUX sujets temporels/actionnables mentionnés dans la note'),
+  ).describe('NOUVEAUX sujets temporels/actionnables mentionnés dans la note, avec date optionnelle'),
   resolvedTopics: z.array(
     z.object({
       id: z.string().describe('ID du sujet chaud existant'),
@@ -103,12 +104,6 @@ const extractionSchema = z.object({
       isShared: z.boolean().describe('true si c\'est un moment vécu ENSEMBLE avec le contact, false si c\'est quelque chose que le contact a fait seul'),
     })
   ).describe('Événements ponctuels/souvenirs marquants (PAS des loisirs réguliers). Ex: saut à l\'élastique, voyage, sortie exceptionnelle'),
-  events: z.array(
-    z.object({
-      title: z.string().describe('Titre court de l\'événement (ex: "Part pêcher", "Exam de conduite")'),
-      eventDate: z.string().describe('Date au format DD/MM/YYYY calculée à partir de la date de référence'),
-    })
-  ).describe('Événements futurs avec une date précise mentionnée (pas les intentions vagues)'),
   suggestedGroups: z.array(
     z.object({
       name: z.string().describe('Nom du groupe suggéré'),
@@ -334,10 +329,6 @@ extractRoutes.post('/', async (c) => {
         eventDate: memory.eventDate || undefined,
         isShared: memory.isShared,
       })),
-      events: extraction.events?.map((event) => ({
-        title: event.title,
-        eventDate: event.eventDate,
-      })) || [],
       suggestedGroups: processedGroups,
       note: {
         summary: extraction.hotTopics.length > 0
@@ -479,19 +470,54 @@ RÈGLES D'EXTRACTION:
    - Événements à suivre: "Mariage prévu en juin"
    - Situations: "Problème au travail", "En recherche d'emploi"
 
+   CHAMP suggestedDate (optionnel):
+   Si une date est mentionnée pour ce sujet, calcule-la au format DD/MM/YYYY.
+
+   RÈGLES DE CALCUL DES DATES (utilise la DATE DE RÉFÉRENCE ci-dessus):
+   - "dans X jours/semaines/mois" → date exacte calculée
+   - "la semaine prochaine" → lundi prochain
+   - "le 15 janvier" → 15/01/YYYY
+   - "mi-février" → 15/02/YYYY
+   - "fin mars" → dernier jour du mois (31/03/YYYY)
+   - "en juin" → 01/06/YYYY (1er du mois)
+   - "cet été" → 01/07/YYYY
+   - "à la rentrée" → 01/09/YYYY
+   - "pour Noël" → 25/12/YYYY
+
+   Si aucune date n'est mentionnée ou si c'est trop vague → suggestedDate = null
+
+   Exemples (si date de référence = 29/12/2024):
+   - "Eric part pêcher dans deux semaines"
+     → { title: "Part pêcher", context: "...", suggestedDate: "12/01/2025" }
+   - "Elle prépare un examen" (sans date)
+     → { title: "Examen", context: "...", suggestedDate: null }
+   - "Mariage prévu en juin"
+     → { title: "Mariage", context: "...", suggestedDate: "01/06/2025" }
+   - "Il veut faire un resto en juin"
+     → { title: "Resto", context: "...", suggestedDate: "01/06/2025" }
+
 6. DÉTECTION DE RÉSOLUTION DE SUJETS EXISTANTS:
    Si des SUJETS CHAUDS EXISTANTS (listés ci-dessus) semblent RÉSOLUS ou TERMINÉS selon la transcription:
    - Retourne leurs IDs dans resolvedTopics avec une résolution
-   - La résolution décrit CE QUI S'EST PASSÉ / COMMENT ÇA S'EST TERMINÉ
-   - Exemples:
-     • Sujet: "Semi-marathon de Niko" + Note dit "Niko a couru son semi en 1h40"
-       → { id: "...", resolution: "A couru le semi en 1h40" }
-     • Sujet: "Recherche d'emploi" + Note dit "Il a trouvé un job chez Google"
-       → { id: "...", resolution: "A trouvé un poste chez Google" }
-     • Sujet: "Examen de droit" + Note dit "Elle a eu son examen avec 15/20"
-       → { id: "...", resolution: "Réussi avec 15/20" }
+
+   RÈGLE CRITIQUE pour la résolution:
+   - Extrais TOUS les détails concrets mentionnés dans la transcription
+   - Inclus : résultats chiffrés, noms, lieux, dates, anecdotes
+   - Si aucun détail concret n'est mentionné → résolution = "Effectué" ou "Terminé"
+
+   Exemples:
+   • "Niko a couru son semi" (sans détails)
+     → { id: "...", resolution: "Effectué" }
+   • "Niko a couru son semi en 1h40, il a fêté ça au bar avec ses potes"
+     → { id: "...", resolution: "Terminé en 1h40, a fêté au bar avec ses amis" }
+   • "Elle a eu son examen"
+     → { id: "...", resolution: "Réussi" }
+   • "Elle a eu son examen avec 16/20, major de sa promo"
+     → { id: "...", resolution: "Réussi avec 16/20, major de promo" }
+   • "Il a trouvé un appart dans le 11ème, 45m²"
+     → { id: "...", resolution: "Trouvé dans le 11ème, 45m²" }
+
    - Ne marque comme résolu QUE si la transcription indique CLAIREMENT que c'est terminé
-   - La résolution doit être COURTE (quelques mots) mais INFORMATIVE
 
 7. MEMORIES (Souvenirs / Événements ponctuels):
    DISTINCTION IMPORTANTE entre hobby (fact) et memory:
@@ -518,39 +544,11 @@ RÈGLES D'EXTRACTION:
    - hobby: loisir → groupe (ex: "échecs" → groupe "Échecs")
    Si currentContact est fourni, retourne un tableau vide pour suggestedGroups.
 
-9. EVENTS (Événements futurs datés):
-   Extrais les événements futurs avec une date PRÉCISE mentionnée.
-
-   RÈGLE CRITIQUE:
-   - Utilise UNIQUEMENT la DATE DE RÉFÉRENCE ci-dessus comme "aujourd'hui"
-   - Ne détermine JAMAIS la date actuelle toi-même
-   - Calcule la date cible à partir de cette référence
-   - Retourne la date au format DD/MM/YYYY
-
-   Expressions à convertir:
-   - "dans X jours/semaines/mois" → calcule la date exacte
-   - "la semaine prochaine" → lundi prochain
-   - "le mois prochain" → 1er du mois suivant
-   - "fin janvier" → dernier jour du mois
-   - "mi-février" → 15 du mois
-   - "le 15 janvier" → 15/01/YYYY (année en cours ou prochaine selon contexte)
-
-   Exemples (si date de référence = 27/12/2024):
-   - "Eric part pêcher dans deux semaines" → { title: "Part pêcher", eventDate: "10/01/2025" }
-   - "Marie a un exam la semaine prochaine" → { title: "Exam", eventDate: "30/12/2024" }
-   - "Il part en vacances mi-janvier" → { title: "Part en vacances", eventDate: "15/01/2025" }
-
-   NE PAS extraire:
-   - Intentions vagues sans date ("il veut partir en vacances un jour")
-   - Événements passés ("il est allé pêcher la semaine dernière" → c'est un memory)
-   - Si la date est ambiguë ou incalculable
-
 RÈGLES:
 - facts = infos PERMANENTES du profil (hobbies = activités régulières)
-- hotTopics = NOUVEAUX sujets TEMPORAIRES à suivre (pas ceux existants)
-- resolvedTopics = sujets existants TERMINÉS avec leur résolution
+- hotTopics = NOUVEAUX sujets TEMPORAIRES à suivre (pas ceux existants), avec date optionnelle
+- resolvedTopics = sujets existants TERMINÉS avec leur résolution détaillée
 - memories = événements PONCTUELS / souvenirs PASSÉS (PAS des hobbies réguliers)
-- events = événements FUTURS avec une date précise calculée
 - suggestedGroups = groupes suggérés UNIQUEMENT pour nouveaux contacts
 - N'extrais QUE ce qui est EXPLICITEMENT mentionné
 - action="add" pour nouvelle info, "update" si modification d'un fact existant`;
