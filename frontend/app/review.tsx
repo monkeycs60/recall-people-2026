@@ -4,14 +4,13 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
-import { ExtractionResult, HotTopic, ResolvedTopic, ExtractedMemory, ExtractedEvent } from '@/types';
+import { ExtractionResult, HotTopic, ResolvedTopic, ExtractedMemory } from '@/types';
 import { useCreateContact, useUpdateContact } from '@/hooks/useContactsQuery';
 import { useGroupsQuery } from '@/hooks/useGroupsQuery';
 import { useNotes } from '@/hooks/useNotes';
 import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { memoryService } from '@/services/memory.service';
-import { eventService } from '@/services/event.service';
 import { notificationService } from '@/services/notification.service';
 import { contactService } from '@/services/contact.service';
 import { groupService } from '@/services/group.service';
@@ -19,7 +18,7 @@ import { generateIceBreakers } from '@/lib/api';
 import { useAppStore } from '@/stores/app-store';
 import { queryKeys } from '@/lib/query-keys';
 import { Colors } from '@/constants/theme';
-import { Archive, Edit3, Plus, X, Calendar } from 'lucide-react-native';
+import { Archive, Edit3, Plus, X } from 'lucide-react-native';
 
 export default function ReviewScreen() {
   const { t } = useTranslation();
@@ -62,13 +61,16 @@ export default function ReviewScreen() {
   );
   const [editingMemoryIndex, setEditingMemoryIndex] = useState<number | null>(null);
 
-  const [selectedEvents, setSelectedEvents] = useState<number[]>(
-    extraction.events?.map((_, index) => index) || []
-  );
-  const [editableEvents, setEditableEvents] = useState<ExtractedEvent[]>(
-    extraction.events?.map((event) => ({ ...event })) || []
-  );
-  const [editingEventIndex, setEditingEventIndex] = useState<number | null>(null);
+  const [hotTopicDates, setHotTopicDates] = useState<Record<number, { enabled: boolean; date: string }>>(() => {
+    const initial: Record<number, { enabled: boolean; date: string }> = {};
+    extraction.hotTopics?.forEach((topic, index) => {
+      initial[index] = {
+        enabled: !!topic.suggestedDate,
+        date: topic.suggestedDate || '',
+      };
+    });
+    return initial;
+  });
 
   const [isSaving, setIsSaving] = useState(false);
   const [existingHotTopics, setExistingHotTopics] = useState<HotTopic[]>([]);
@@ -175,18 +177,24 @@ export default function ReviewScreen() {
     );
   };
 
-  const toggleEvent = (index: number) => {
-    setSelectedEvents((prev) =>
-      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
-    );
+  const toggleHotTopicDate = (index: number) => {
+    setHotTopicDates((prev) => ({
+      ...prev,
+      [index]: {
+        ...prev[index],
+        enabled: !prev[index]?.enabled,
+      },
+    }));
   };
 
-  const updateEvent = (index: number, field: 'title' | 'eventDate', value: string) => {
-    setEditableEvents((prev) =>
-      prev.map((event, eventIndex) =>
-        eventIndex === index ? { ...event, [field]: value } : event
-      )
-    );
+  const updateHotTopicDate = (index: number, date: string) => {
+    setHotTopicDates((prev) => ({
+      ...prev,
+      [index]: {
+        ...prev[index],
+        date,
+      },
+    }));
   };
 
   const formatRelativeDate = (dateStr: string): string => {
@@ -364,12 +372,30 @@ export default function ReviewScreen() {
       if (editableHotTopics.length > 0) {
         for (const index of selectedHotTopics) {
           const topic = editableHotTopics[index];
-          await hotTopicService.create({
+          const dateInfo = hotTopicDates[index];
+
+          let eventDate: string | undefined;
+          if (dateInfo?.enabled && dateInfo?.date) {
+            eventDate = hotTopicService.parseExtractedDate(dateInfo.date) || undefined;
+          }
+
+          const savedHotTopic = await hotTopicService.create({
             contactId: finalContactId,
             title: topic.title,
-            context: topic.context,
+            context: topic.context || undefined,
+            eventDate,
             sourceNoteId: note.id,
           });
+
+          if (eventDate) {
+            const contactName = extraction.contactIdentified.firstName;
+            await notificationService.scheduleEventReminder(
+              savedHotTopic.id,
+              eventDate,
+              topic.title,
+              contactName
+            );
+          }
         }
       }
 
@@ -389,29 +415,6 @@ export default function ReviewScreen() {
             isShared: memory.isShared,
             sourceNoteId: note.id,
           });
-        }
-      }
-
-      if (editableEvents.length > 0) {
-        for (const index of selectedEvents) {
-          const event = editableEvents[index];
-          const parsedDate = eventService.parseExtractedDate(event.eventDate);
-          if (parsedDate) {
-            const savedEvent = await eventService.create({
-              contactId: finalContactId,
-              title: event.title,
-              eventDate: parsedDate,
-              sourceNoteId: note.id,
-            });
-
-            const contactName = extraction.contactIdentified.firstName;
-            await notificationService.scheduleEventReminder(
-              savedEvent.id,
-              parsedDate,
-              event.title,
-              contactName
-            );
-          }
         }
       }
 
@@ -601,7 +604,7 @@ export default function ReviewScreen() {
             }
 
             return (
-              <View key={index} style={styles.cardRow}>
+              <View key={index} style={styles.cardRowStandalone}>
                 <Pressable onPress={() => toggleFact(index)}>
                   <View
                     style={[
@@ -836,101 +839,72 @@ export default function ReviewScreen() {
               );
             }
 
+            const dateInfo = hotTopicDates[index];
+
             return (
-              <View key={index} style={styles.cardRow}>
-                <Pressable onPress={() => toggleHotTopic(index)}>
-                  <View
-                    style={[
-                      styles.checkbox,
-                      selectedHotTopics.includes(index) && styles.checkboxSelected
-                    ]}
-                  >
-                    {selectedHotTopics.includes(index) && (
-                      <Text style={styles.checkmark}>✓</Text>
+              <View key={index} style={styles.card}>
+                <View style={styles.cardRow}>
+                  <Pressable onPress={() => toggleHotTopic(index)}>
+                    <View
+                      style={[
+                        styles.checkbox,
+                        selectedHotTopics.includes(index) && styles.checkboxSelected
+                      ]}
+                    >
+                      {selectedHotTopics.includes(index) && (
+                        <Text style={styles.checkmark}>✓</Text>
+                      )}
+                    </View>
+                  </Pressable>
+
+                  <View style={styles.orangeDot} />
+
+                  <Pressable style={styles.cardContent} onPress={() => setEditingHotTopicIndex(index)}>
+                    <View style={styles.factRow}>
+                      <Text style={styles.factValue}>{topic.title}</Text>
+                      <Edit3 size={14} color={Colors.textMuted} />
+                    </View>
+                    {topic.context && (
+                      <Text style={styles.contextText}>{topic.context}</Text>
                     )}
-                  </View>
-                </Pressable>
-
-                <View style={styles.orangeDot} />
-
-                <Pressable style={styles.cardContent} onPress={() => setEditingHotTopicIndex(index)}>
-                  <View style={styles.factRow}>
-                    <Text style={styles.factValue}>{topic.title}</Text>
-                    <Edit3 size={14} color={Colors.textMuted} />
-                  </View>
-                  {topic.context && (
-                    <Text style={styles.contextText}>{topic.context}</Text>
-                  )}
-                </Pressable>
-              </View>
-            );
-          })}
-        </View>
-      )}
-
-      {editableEvents.length > 0 && (
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Calendar size={20} color={Colors.info} />
-            <Text style={styles.sectionTitleWithIcon}>{t('review.events')}</Text>
-          </View>
-
-          {editableEvents.map((event, index) => {
-            const isEditing = editingEventIndex === index;
-
-            if (isEditing) {
-              return (
-                <View key={index} style={styles.card}>
-                  <TextInput
-                    style={[styles.textInput, styles.textInputBold]}
-                    value={event.title}
-                    onChangeText={(value) => updateEvent(index, 'title', value)}
-                    placeholder={t('review.eventTitlePlaceholder')}
-                    placeholderTextColor={Colors.textMuted}
-                  />
-                  <TextInput
-                    style={styles.textInput}
-                    value={event.eventDate}
-                    onChangeText={(value) => updateEvent(index, 'eventDate', value)}
-                    placeholder="DD/MM/YYYY"
-                    placeholderTextColor={Colors.textMuted}
-                  />
-                  <Pressable
-                    style={styles.confirmButton}
-                    onPress={() => setEditingEventIndex(null)}
-                  >
-                    <Text style={styles.confirmButtonText}>{t('common.confirm')}</Text>
                   </Pressable>
                 </View>
-              );
-            }
 
-            return (
-              <View key={index} style={styles.cardRow}>
-                <Pressable onPress={() => toggleEvent(index)}>
-                  <View
-                    style={[
-                      styles.checkbox,
-                      selectedEvents.includes(index) && styles.checkboxInfo
-                    ]}
+                <View style={styles.reminderRow}>
+                  <Pressable
+                    style={styles.reminderCheckbox}
+                    onPress={() => toggleHotTopicDate(index)}
                   >
-                    {selectedEvents.includes(index) && (
-                      <Text style={styles.checkmark}>✓</Text>
-                    )}
-                  </View>
-                </Pressable>
+                    <View
+                      style={[
+                        styles.smallCheckbox,
+                        dateInfo?.enabled && styles.smallCheckboxSelected
+                      ]}
+                    >
+                      {dateInfo?.enabled && (
+                        <Text style={styles.smallCheckmark}>✓</Text>
+                      )}
+                    </View>
+                    <Text style={styles.reminderLabel}>{t('review.reminder')}</Text>
+                  </Pressable>
 
-                <View style={styles.calendarDot} />
-
-                <Pressable style={styles.cardContent} onPress={() => setEditingEventIndex(index)}>
-                  <View style={styles.factRow}>
-                    <Text style={styles.factValue}>{event.title}</Text>
-                    <Edit3 size={14} color={Colors.textMuted} />
-                  </View>
-                  <Text style={styles.eventDate}>
-                    {event.eventDate} ({formatRelativeDate(event.eventDate)})
-                  </Text>
-                </Pressable>
+                  {dateInfo?.enabled && (
+                    <>
+                      <TextInput
+                        style={styles.dateInput}
+                        value={dateInfo.date}
+                        onChangeText={(value) => updateHotTopicDate(index, value)}
+                        placeholder="DD/MM/YYYY"
+                        placeholderTextColor={Colors.textMuted}
+                      />
+                      {dateInfo.date && (
+                        <Text style={styles.relativeDateText}>
+                          {formatRelativeDate(dateInfo.date)}
+                        </Text>
+                      )}
+                    </>
+                  )}
+                </View>
               </View>
             );
           })}
@@ -973,7 +947,7 @@ export default function ReviewScreen() {
             }
 
             return (
-              <View key={index} style={styles.cardRow}>
+              <View key={index} style={styles.cardRowStandalone}>
                 <Pressable onPress={() => toggleMemory(index)}>
                   <View
                     style={[
@@ -1072,6 +1046,10 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   cardRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  cardRowStandalone: {
     backgroundColor: Colors.surface,
     padding: 16,
     borderRadius: 12,
@@ -1373,6 +1351,56 @@ const styles = StyleSheet.create({
   },
   actionButtonTextActive: {
     color: Colors.primary,
+    fontWeight: '500',
+  },
+  reminderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 12,
+    gap: 8,
+  },
+  reminderCheckbox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  smallCheckbox: {
+    width: 18,
+    height: 18,
+    borderRadius: 4,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  smallCheckboxSelected: {
+    backgroundColor: Colors.info,
+    borderColor: Colors.info,
+  },
+  smallCheckmark: {
+    color: Colors.textInverse,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  reminderLabel: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+  },
+  dateInput: {
+    flex: 1,
+    backgroundColor: Colors.background,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    fontSize: 14,
+    color: Colors.textPrimary,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    maxWidth: 120,
+  },
+  relativeDateText: {
+    fontSize: 12,
+    color: Colors.info,
     fontWeight: '500',
   },
 });
