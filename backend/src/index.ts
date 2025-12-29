@@ -5,7 +5,6 @@ import { authRoutes } from './routes/auth';
 import { transcribeRoutes } from './routes/transcribe';
 import { extractRoutes } from './routes/extract';
 import { similarityRoutes } from './routes/similarity';
-import { summaryRoutes } from './routes/summary';
 import { iceBreakersRoutes } from './routes/ice-breakers';
 import { searchRoutes } from './routes/search';
 import { settingsRoutes } from './routes/settings';
@@ -63,14 +62,12 @@ app.use('/api/*', rateLimiters.api);
 
 // AI-heavy routes get additional stricter limits
 app.use('/api/extract/*', rateLimiters.aiExtract);
-app.use('/api/summary/*', rateLimiters.aiExtract);
 app.use('/api/search/*', rateLimiters.aiExtract);
 
 app.route('/auth', authRoutes);
 app.route('/api/transcribe', transcribeRoutes);
 app.route('/api/extract', extractRoutes);
 app.route('/api/similarity', similarityRoutes);
-app.route('/api/summary', summaryRoutes);
 app.route('/api/ice-breakers', iceBreakersRoutes);
 app.route('/api/search', searchRoutes);
 app.route('/api/settings', settingsRoutes);
