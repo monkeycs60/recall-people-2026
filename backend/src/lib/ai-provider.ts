@@ -25,6 +25,21 @@ const PROVIDER_MODELS = {
 } as const;
 
 /**
+ * Llama 3.1 8B model for lightweight tasks like summary generation
+ */
+const LLAMA_8B_MODEL = 'llama-3.1-8b';
+
+/**
+ * Creates a Cerebras Llama 3.1 8B model for lightweight tasks
+ * @param apiKey - Cerebras API key
+ * @returns A configured Llama 3.1 8B model
+ */
+export function createLlama8BModel(apiKey: string) {
+	const cerebras = createCerebras({ apiKey });
+	return cerebras(LLAMA_8B_MODEL);
+}
+
+/**
  * Creates an AI provider instance based on environment configuration
  * @param config - Provider configuration including API keys
  * @returns An AI provider instance (xai or cerebras)
