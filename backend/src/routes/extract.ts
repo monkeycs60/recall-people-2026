@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { format } from 'date-fns';
 import { authMiddleware } from '../middleware/auth';
 import { wrapUserInput, getSecurityInstructions } from '../lib/security';
-import { createAIModel, getAIProviderName, getAIModel } from '../lib/ai-provider';
+import { createAIModel, getAIProviderName, getAIModel, createLlama8BModel } from '../lib/ai-provider';
 import { measurePerformance } from '../lib/performance-logger';
 import { getLangfuseClient } from '../lib/telemetry';
 import { evaluateExtraction } from '../lib/evaluators';
@@ -25,6 +25,7 @@ type Bindings = {
 
 type ExtractionRequest = {
   transcription: string;
+  existingSummary?: string | null;
   existingContacts: Array<{
     id: string;
     firstName: string;
@@ -118,6 +119,11 @@ const extractionSchema = z.object({
   ).describe('Groupes suggérés basés sur les facts contextuels. UNIQUEMENT pour nouveaux contacts (pas de currentContact).'),
 });
 
+const summarySchema = z.object({
+  text: z.string().describe('Le résumé mis à jour de la personne (3-4 phrases)'),
+  changed: z.boolean().describe('true si le résumé a été modifié, false sinon'),
+});
+
 const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
   fr: 'Tu DOIS répondre en français uniquement.',
   en: 'You MUST respond in English only.',
@@ -125,6 +131,53 @@ const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
   it: 'DEVI rispondere solo in italiano.',
   de: 'Du MUSST nur auf Deutsch antworten.',
 };
+
+const SUMMARY_LANGUAGE_INSTRUCTIONS: Record<string, string> = {
+  fr: 'Tu DOIS répondre en français.',
+  en: 'You MUST respond in English.',
+  es: 'DEBES responder en español.',
+  it: 'DEVI rispondere in italiano.',
+  de: 'Du MUSST auf Deutsch antworten.',
+};
+
+async function generateContactSummary(params: {
+  existingSummary: string | null;
+  transcription: string;
+  language: string;
+  cerebrasApiKey: string;
+}): Promise<{ text: string; changed: boolean }> {
+  const { existingSummary, transcription, language, cerebrasApiKey } = params;
+  const langInstruction = SUMMARY_LANGUAGE_INSTRUCTIONS[language] || SUMMARY_LANGUAGE_INSTRUCTIONS.fr;
+
+  const prompt = `Tu es un assistant qui maintient un résumé concis d'une personne.
+
+CONTEXTE :
+- Résumé actuel : ${existingSummary || 'Aucun (première note)'}
+- Nouvelle transcription : ${transcription}
+
+TÂCHE :
+
+${existingSummary ? `Analyse si la nouvelle transcription apporte des informations significatives.
+- Si oui : mets à jour le résumé en intégrant les nouvelles infos
+- Si non : retourne le résumé existant tel quel et changed=false` : `Génère un résumé à partir des informations de la transcription, même si elles sont limitées. changed=true`}
+
+RÈGLES :
+- 3-4 phrases maximum
+- Ne jamais inventer d'informations absentes de la transcription
+- Conserver les infos importantes du résumé existant
+- Ton neutre et factuel
+- ${langInstruction}`;
+
+  const model = createLlama8BModel(cerebrasApiKey);
+
+  const { object } = await generateObject({
+    model,
+    schema: summarySchema,
+    prompt,
+  });
+
+  return object;
+}
 
 export const extractRoutes = new Hono<{ Bindings: Bindings }>();
 
@@ -236,6 +289,22 @@ extractRoutes.post('/', async (c) => {
       return true;
     });
 
+    // Generate summary using Llama 3.1 8B
+    let summaryResult = { text: '', changed: false };
+    if (c.env.CEREBRAS_API_KEY) {
+      try {
+        summaryResult = await generateContactSummary({
+          existingSummary: body.existingSummary || null,
+          transcription,
+          language,
+          cerebrasApiKey: c.env.CEREBRAS_API_KEY,
+        });
+      } catch (summaryError) {
+        console.error('Summary generation failed:', summaryError);
+        // Continue without summary on error
+      }
+    }
+
     // For existing contacts, use their stored name instead of extracted name
     const formattedExtraction = {
       contactIdentified: {
@@ -276,6 +345,7 @@ extractRoutes.post('/', async (c) => {
           : 'Note vocale enregistrée.',
         keyPoints: extraction.hotTopics.map((topic) => topic.title),
       },
+      summary: summaryResult,
     };
 
     // Update Langfuse generation with output
