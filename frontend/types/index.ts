@@ -103,6 +103,10 @@ export type HotTopic = {
   resolution?: string;
   status: HotTopicStatus;
   sourceNoteId?: string;
+  // New fields for event fusion
+  eventDate?: string;        // ISO 8601, if set = reminder/notification
+  notifiedAt?: string;       // When notification was sent
+  birthdayContactId?: string; // If non-null = auto-generated birthday
   createdAt: string;
   updatedAt: string;
   resolvedAt?: string;
@@ -116,21 +120,6 @@ export type Memory = {
   isShared: boolean;
   sourceNoteId?: string;
   createdAt: string;
-};
-
-export type Event = {
-  id: string;
-  contactId: string;
-  title: string;
-  eventDate: string; // ISO 8601
-  sourceNoteId?: string;
-  notifiedAt?: string;
-  createdAt: string;
-};
-
-export type ExtractedEvent = {
-  title: string;
-  eventDate: string; // DD/MM/YYYY format from LLM
 };
 
 export type Group = {
@@ -156,6 +145,7 @@ export type ExtractedFact = {
 export type ExtractedHotTopic = {
   title: string;
   context: string;
+  suggestedDate?: string; // DD/MM/YYYY format, optional
   resolvesExisting?: string;
 };
 
@@ -203,7 +193,6 @@ export type ExtractionResult = {
   hotTopics: ExtractedHotTopic[];
   resolvedTopics: ResolvedTopic[];
   memories: ExtractedMemory[];
-  events: ExtractedEvent[];
   suggestedGroups?: SuggestedGroup[];
   note: {
     summary: string;
