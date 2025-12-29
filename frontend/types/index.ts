@@ -209,6 +209,10 @@ export type ExtractionResult = {
     summary: string;
     keyPoints: string[];
   };
+  summary?: {
+    text: string;
+    changed: boolean;
+  };
 };
 
 // ============================================

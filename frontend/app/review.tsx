@@ -15,7 +15,7 @@ import { eventService } from '@/services/event.service';
 import { notificationService } from '@/services/notification.service';
 import { contactService } from '@/services/contact.service';
 import { groupService } from '@/services/group.service';
-import { generateSummary, generateIceBreakers } from '@/lib/api';
+import { generateIceBreakers } from '@/lib/api';
 import { useAppStore } from '@/stores/app-store';
 import { queryKeys } from '@/lib/query-keys';
 import { Colors } from '@/constants/theme';
@@ -420,7 +420,10 @@ export default function ReviewScreen() {
         data: { lastContactAt: new Date().toISOString() },
       });
 
-      await contactService.update(finalContactId, { aiSummary: '', iceBreakers: [] });
+      // Save summary from extraction if changed
+      if (extraction.summary?.changed && extraction.summary.text) {
+        await contactService.update(finalContactId, { aiSummary: extraction.summary.text });
+      }
 
       queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(finalContactId) });
@@ -428,6 +431,7 @@ export default function ReviewScreen() {
       queryClient.invalidateQueries({ queryKey: queryKeys.hotTopics.byContact(finalContactId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.memories.byContact(finalContactId) });
 
+      // Generate ice breakers in background
       const contactDetails = await contactService.getById(finalContactId);
       if (contactDetails) {
         const requestData = {
@@ -448,12 +452,6 @@ export default function ReviewScreen() {
               status: topic.status,
             })),
         };
-
-        generateSummary(requestData)
-          .then(async (summary) => {
-            await contactService.update(finalContactId, { aiSummary: summary });
-          })
-          .catch(() => {});
 
         generateIceBreakers(requestData)
           .then(async (iceBreakers) => {

@@ -17,6 +17,7 @@ export const contactService = {
       birthday_month: number | null;
       birthday_year: number | null;
       highlights: string | null;
+      ai_summary: string | null;
       last_contact_at: string | null;
       created_at: string;
       updated_at: string;
@@ -34,6 +35,7 @@ export const contactService = {
       birthdayMonth: row.birthday_month || undefined,
       birthdayYear: row.birthday_year || undefined,
       highlights: JSON.parse(row.highlights || '[]'),
+      aiSummary: row.ai_summary || undefined,
       lastContactAt: row.last_contact_at || undefined,
       createdAt: row.created_at,
       updatedAt: row.updated_at,

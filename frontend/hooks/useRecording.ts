@@ -124,6 +124,7 @@ export const useRecording = () => {
 
           const { extraction } = await extractInfo({
             transcription: transcriptionResult.transcript,
+            existingSummary: preselectedContact.aiSummary || null,
             existingContacts: contactsForExtraction,
             currentContact: {
               id: preselectedContact.id,

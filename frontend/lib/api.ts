@@ -150,6 +150,7 @@ export const transcribeAudio = (audioUri: string) => transcribeAudioInternal(aud
 
 export const extractInfo = async (data: {
   transcription: string;
+  existingSummary?: string | null;
   existingContacts: Array<{
     id: string;
     firstName: string;
@@ -181,32 +182,6 @@ export const extractInfo = async (data: {
     method: 'POST',
     body: { ...data, language: getCurrentLanguage() },
   });
-};
-
-export const generateSummary = async (data: {
-  contact: {
-    firstName: string;
-    lastName?: string;
-  };
-  facts: Array<{
-    factType: string;
-    factKey: string;
-    factValue: string;
-  }>;
-  hotTopics: Array<{
-    title: string;
-    context: string;
-    status: string;
-  }>;
-}): Promise<string> => {
-  const response = await apiCall<{ success: boolean; summary: string }>(
-    '/api/summary',
-    {
-      method: 'POST',
-      body: { ...data, language: getCurrentLanguage() },
-    }
-  );
-  return response.summary;
 };
 
 export const generateIceBreakers = async (data: {

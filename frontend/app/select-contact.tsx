@@ -105,6 +105,7 @@ export default function SelectContactScreen() {
 
       const { extraction } = await extractInfo({
         transcription,
+        existingSummary: contact.aiSummary || null,
         existingContacts: contactsForExtraction,
         currentContact: {
           id: contact.id,
