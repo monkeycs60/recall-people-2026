@@ -238,6 +238,16 @@ const runMigrations = async (database: SQLite.SQLiteDatabase) => {
     await database.execAsync("ALTER TABLE hot_topics ADD COLUMN resolution TEXT");
   }
 
+  // Migration: Add event_date, notified_at, birthday_contact_id to hot_topics
+  const hasEventDate = hotTopicsInfo.some((col) => col.name === 'event_date');
+  if (!hasEventDate) {
+    await database.execAsync("ALTER TABLE hot_topics ADD COLUMN event_date TEXT");
+    await database.execAsync("ALTER TABLE hot_topics ADD COLUMN notified_at TEXT");
+    await database.execAsync("ALTER TABLE hot_topics ADD COLUMN birthday_contact_id TEXT");
+    await database.execAsync("CREATE INDEX IF NOT EXISTS idx_hot_topics_event_date ON hot_topics(event_date)");
+    await database.execAsync("CREATE INDEX IF NOT EXISTS idx_hot_topics_birthday ON hot_topics(birthday_contact_id)");
+  }
+
   // Create groups tables if not exist
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS groups (
