@@ -1,6 +1,7 @@
 import * as Crypto from 'expo-crypto';
 import { getDatabase } from '@/lib/db';
 import { Contact, ContactWithDetails, Fact, Note, Memory } from '@/types';
+import { hotTopicService } from './hot-topic.service';
 
 export const contactService = {
   getAll: async (): Promise<Contact[]> => {
@@ -288,6 +289,25 @@ export const contactService = {
       `UPDATE contacts SET ${updates.join(', ')} WHERE id = ?`,
       values
     );
+
+    if (data.birthdayDay !== undefined || data.birthdayMonth !== undefined) {
+      const contactRow = await db.getFirstAsync<{
+        first_name: string;
+        birthday_day: number | null;
+        birthday_month: number | null;
+      }>('SELECT first_name, birthday_day, birthday_month FROM contacts WHERE id = ?', [id]);
+
+      if (contactRow && contactRow.birthday_day && contactRow.birthday_month) {
+        await hotTopicService.syncBirthdayHotTopics(
+          id,
+          contactRow.first_name,
+          contactRow.birthday_day,
+          contactRow.birthday_month
+        );
+      } else if (contactRow && !contactRow.birthday_day) {
+        await hotTopicService.deleteByBirthdayContact(id);
+      }
+    }
   },
 
   delete: async (id: string): Promise<void> => {
