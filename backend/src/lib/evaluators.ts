@@ -50,10 +50,12 @@ function shouldEvaluate(samplingRate: number = 0.25): boolean {
  * Evaluate extraction quality: Does the extracted data match the transcription?
  *
  * Measures:
- * - Completeness: All mentioned contacts are extracted
- * - Accuracy: Extracted info is correct
- * - No hallucinations: Nothing invented
- * - Context preservation: Relationships and notes are preserved
+ * - Completeness: All subjects/info mentioned are extracted
+ * - Accuracy: Extracted info matches transcription
+ * - Categorization: facts vs hotTopics vs memories correctly distinguished
+ * - Dates: suggestedDate correctly calculated for hot topics
+ * - Resolutions: Resolved topics contain concrete details
+ * - No hallucinations: Nothing invented beyond what was said
  *
  * @param transcription - Original transcription
  * @param extraction - AI-generated extraction
@@ -93,17 +95,27 @@ ${transcription}
 EXTRACTION GÉNÉRÉE:
 ${JSON.stringify(extraction, null, 2)}
 
+CONTEXTE IMPORTANT:
+- Le nom du contact peut provenir de la base de données (pas une hallucination)
+- Les dates calculées (ex: "dans 2 semaines" → date précise) sont attendues et correctes
+- Les dates vagues comme "en juin" doivent être converties au 1er du mois
+
 Évalue la qualité selon ces critères:
-1. COMPLÉTUDE: Tous les contacts mentionnés sont extraits?
-2. EXACTITUDE: Les informations extraites sont correctes?
-3. PAS D'HALLUCINATIONS: Rien n'a été inventé?
-4. CONTEXTE PRÉSERVÉ: Les relations et notes sont bien capturées?
+1. COMPLÉTUDE: Tous les sujets/infos mentionnés sont-ils extraits ?
+2. EXACTITUDE: Les informations extraites correspondent-elles à la transcription ?
+3. CATÉGORISATION: facts vs hotTopics vs memories correctement distingués ?
+   - facts = infos permanentes (métier, hobby régulier, lieu de vie)
+   - hotTopics = sujets temporaires à suivre (projets, événements à venir)
+   - memories = événements passés ponctuels
+4. DATES: Si une date est mentionnée pour un hot topic, suggestedDate est-il correctement calculé ?
+5. RÉSOLUTIONS: Si un sujet existant est résolu, la résolution contient-elle les détails concrets ?
+6. PAS D'HALLUCINATION: Rien n'est inventé au-delà de ce qui est dit ?
 
 Donne un score de 0 à 10:
-- 10: Parfait, extraction fidèle à 100%
-- 7-9: Très bon, quelques détails manquants
-- 4-6: Moyen, erreurs ou omissions importantes
-- 0-3: Mauvais, hallucinations ou infos incorrectes
+- 9-10: Parfait, extraction fidèle et bien catégorisée
+- 7-8: Très bon, quelques détails manquants
+- 4-6: Moyen, erreurs de catégorisation ou omissions importantes
+- 1-3: Mauvais, hallucinations ou infos incorrectes
 
 Sois strict et objectif.`;
 
