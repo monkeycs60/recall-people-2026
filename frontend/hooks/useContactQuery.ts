@@ -22,8 +22,14 @@ export function useContactQuery(contactId: string | undefined) {
       const hasNoSummary = !contact.aiSummary;
       const hasNoIceBreakers = !contact.iceBreakers || contact.iceBreakers.length === 0;
 
-      // Poll every 1.5s if contact has data but no summary or ice breakers yet
-      if (hasData && (hasNoSummary || hasNoIceBreakers)) {
+      // Only poll if there's recent activity (note added within last 2 minutes)
+      // This prevents infinite polling for contacts where summary generation already failed/completed
+      const mostRecentNote = contact.notes[0];
+      const isRecentActivity = mostRecentNote &&
+        (Date.now() - new Date(mostRecentNote.createdAt).getTime()) < 2 * 60 * 1000;
+
+      // Poll every 1.5s if contact has recent data but no summary or ice breakers yet
+      if (hasData && isRecentActivity && (hasNoSummary || hasNoIceBreakers)) {
         return 1500;
       }
 
@@ -33,10 +39,16 @@ export function useContactQuery(contactId: string | undefined) {
 
   const hasData = query.data && (query.data.facts.length > 0 || query.data.hotTopics.length > 0);
 
-  const isWaitingForSummary = hasData && !query.data?.aiSummary;
+  // Only show loading state if there's recent activity (within 2 minutes)
+  // Otherwise show empty state for contacts where generation already failed/completed
+  const mostRecentNote = query.data?.notes[0];
+  const isRecentActivity = mostRecentNote &&
+    (Date.now() - new Date(mostRecentNote.createdAt).getTime()) < 2 * 60 * 1000;
+
+  const isWaitingForSummary = hasData && isRecentActivity && !query.data?.aiSummary;
 
   const isWaitingForIceBreakers =
-    hasData && (!query.data?.iceBreakers || query.data.iceBreakers.length === 0);
+    hasData && isRecentActivity && (!query.data?.iceBreakers || query.data.iceBreakers.length === 0);
 
   const invalidate = () => {
     if (contactId) {

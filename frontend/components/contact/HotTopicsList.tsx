@@ -34,8 +34,24 @@ export function HotTopicsList({
   const [editingResolutionId, setEditingResolutionId] = useState<string | null>(null);
   const [editResolutionText, setEditResolutionText] = useState('');
 
-  const activeTopics = hotTopics.filter((topic) => topic.status === 'active');
-  const resolvedTopics = hotTopics.filter((topic) => topic.status === 'resolved');
+  // Filter to only show the next upcoming birthday (not all 5 years)
+  const filteredHotTopics = hotTopics.filter((topic) => {
+    if (topic.birthdayContactId && topic.eventDate) {
+      // Find all birthday topics for this contact
+      const birthdayTopics = hotTopics.filter(
+        (t) => t.birthdayContactId === topic.birthdayContactId && t.eventDate
+      );
+      // Sort by event date and only keep the first one (closest)
+      const sortedBirthdays = birthdayTopics.sort(
+        (a, b) => new Date(a.eventDate!).getTime() - new Date(b.eventDate!).getTime()
+      );
+      return topic.id === sortedBirthdays[0]?.id;
+    }
+    return true;
+  });
+
+  const activeTopics = filteredHotTopics.filter((topic) => topic.status === 'active');
+  const resolvedTopics = filteredHotTopics.filter((topic) => topic.status === 'resolved');
 
   const handleStartEdit = (topic: HotTopic) => {
     setEditingId(topic.id);

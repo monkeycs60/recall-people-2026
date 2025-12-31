@@ -199,12 +199,13 @@ export default function ContactDetailScreen() {
   };
 
   const handleSaveBirthday = async (day: number | null, month: number | null, year: number | null) => {
+    // Pass null explicitly to delete birthday, or the value to update
     await updateContactMutation.mutateAsync({
       id: contactId,
       data: {
-        birthdayDay: day || undefined,
-        birthdayMonth: month || undefined,
-        birthdayYear: year || undefined,
+        birthdayDay: day,
+        birthdayMonth: month,
+        birthdayYear: year,
       },
     });
   };

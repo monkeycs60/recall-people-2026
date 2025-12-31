@@ -61,9 +61,9 @@ export function useUpdateContact() {
         nickname: string;
         phone: string;
         email: string;
-        birthdayDay: number;
-        birthdayMonth: number;
-        birthdayYear: number;
+        birthdayDay: number | null;
+        birthdayMonth: number | null;
+        birthdayYear: number | null;
         highlights: string[];
         lastContactAt: string;
       }>;

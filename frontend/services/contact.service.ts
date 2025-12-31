@@ -97,6 +97,8 @@ export const contactService = {
       resolution: string | null;
       status: string;
       source_note_id: string | null;
+      event_date: string | null;
+      birthday_contact_id: string | null;
       created_at: string;
       updated_at: string;
       resolved_at: string | null;
@@ -158,6 +160,8 @@ export const contactService = {
         resolution: row.resolution || undefined,
         status: row.status as 'active' | 'resolved',
         sourceNoteId: row.source_note_id || undefined,
+        eventDate: row.event_date || undefined,
+        birthdayContactId: row.birthday_contact_id || undefined,
         createdAt: row.created_at,
         updatedAt: row.updated_at,
         resolvedAt: row.resolved_at || undefined,
@@ -218,9 +222,9 @@ export const contactService = {
       nickname: string;
       phone: string;
       email: string;
-      birthdayDay: number;
-      birthdayMonth: number;
-      birthdayYear: number;
+      birthdayDay: number | null;
+      birthdayMonth: number | null;
+      birthdayYear: number | null;
       highlights: string[];
       aiSummary: string;
       iceBreakers: string[];
