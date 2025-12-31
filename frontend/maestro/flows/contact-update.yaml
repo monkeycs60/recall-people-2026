@@ -1,0 +1,86 @@
+# Contact Update Flow - Tests fact updates and hot topic resolution
+# Uses brenda-suite.mp3 fixture with existing Brenda contact
+# Requires: npm run e2e:android running
+
+appId: com.monkeycs60.recallpeople2026
+tags:
+  - facts
+  - update
+  - hot-topics
+---
+# App should already be running via npm run e2e:android
+# Wait for app to be ready
+- extendedWaitUntil:
+    visible: "Appuie pour enregistrer"
+    timeout: 15000
+
+# Navigate to contacts tab
+- tapOn: "Contacts"
+
+# Wait for contacts list
+- extendedWaitUntil:
+    visible: ".*Brenda.*"
+    timeout: 10000
+
+# Navigate to Brenda's profile
+- tapOn:
+    text: ".*Brenda.*"
+
+# Wait for profile to load
+- extendedWaitUntil:
+    visible: ".*L'essentiel sur.*"
+    timeout: 10000
+
+# Verify existing fact is displayed
+- assertVisible: "Startup ABC"
+
+# Verify existing hot topic is displayed (scroll if needed)
+- scrollUntilVisible:
+    element: "Recherche emploi"
+    direction: DOWN
+
+# Go back and start a new recording
+- tapOn: "Accueil"
+
+# Start recording
+- tapOn:
+    id: "record-button"
+
+# Wait for recording state
+- extendedWaitUntil:
+    visible: "Enregistrement..."
+    timeout: 5000
+
+# Stop recording
+- tapOn:
+    id: "record-button"
+
+# Wait for contact selection (processing is too transient to assert)
+- extendedWaitUntil:
+    visible: "À qui appartient cette note ?"
+    timeout: 60000
+
+# Select Brenda
+- tapOn:
+    text: ".*Brenda.*"
+    below: "Suggestion"
+
+# Wait for review screen
+- extendedWaitUntil:
+    visible: "Sauvegarder"
+    timeout: 60000
+
+# Verify we're on review screen
+- assertVisible: "Mise à jour"
+- assertVisible: ".*Brenda.*"
+
+# Check for extracted facts (content will vary based on audio)
+- assertVisible: "Ce que j'ai noté"
+
+# Save the note
+- tapOn: "Sauvegarder"
+
+# Wait for navigation to contact profile
+- extendedWaitUntil:
+    visible: ".*L'essentiel sur.*"
+    timeout: 10000

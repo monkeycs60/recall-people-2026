@@ -34,7 +34,7 @@ export default function UpcomingScreen() {
     setLoading(true);
 
     if (view === 'upcoming') {
-      const hotTopics = await hotTopicService.getUpcoming(30);
+      const hotTopics = await hotTopicService.getUpcoming(365);
 
       // Filter birthday duplicates: only show the closest upcoming birthday per contact
       const seenBirthdayContacts = new Set<string>();
@@ -55,20 +55,28 @@ export default function UpcomingScreen() {
         })
       );
 
-      const days: TimelineDay[] = [];
       const today = startOfDay(new Date());
 
-      for (let dayIndex = 0; dayIndex < 30; dayIndex++) {
-        const date = addDays(today, dayIndex);
-        const dayEvents = topicsWithContacts.filter((topic) =>
-          topic.eventDate && isSameDay(new Date(topic.eventDate), date)
-        );
-        days.push({
-          date,
-          events: dayEvents,
-          isToday: dayIndex === 0,
-        });
+      // Group events by date (only days with events)
+      const eventsByDate = new Map<string, Array<HotTopic & { contact: Contact }>>();
+
+      for (const topic of topicsWithContacts) {
+        if (topic.eventDate) {
+          const dateKey = startOfDay(new Date(topic.eventDate)).toISOString();
+          const existing = eventsByDate.get(dateKey) || [];
+          existing.push(topic);
+          eventsByDate.set(dateKey, existing);
+        }
       }
+
+      // Convert to timeline format, sorted by date
+      const days: TimelineDay[] = Array.from(eventsByDate.entries())
+        .map(([dateKey, events]) => ({
+          date: new Date(dateKey),
+          events,
+          isToday: isSameDay(new Date(dateKey), today),
+        }))
+        .sort((a, b) => a.date.getTime() - b.date.getTime());
 
       setTimeline(days);
     } else {
@@ -133,25 +141,21 @@ export default function UpcomingScreen() {
                   {formatDayHeader(day.date, day.isToday)}
                 </Text>
 
-                {day.events.length > 0 ? (
-                  day.events.map((event) => (
-                    <Pressable
-                      key={event.id}
-                      style={styles.eventCard}
-                      onPress={() => handleEventPress(event.contactId)}
-                    >
-                      <Calendar size={16} color={Colors.info} />
-                      <View style={styles.eventContent}>
-                        <Text style={styles.eventTitle}>{event.title}</Text>
-                        <Text style={styles.eventContact}>
-                          {event.contact.firstName} {event.contact.lastName || ''}
-                        </Text>
-                      </View>
-                    </Pressable>
-                  ))
-                ) : (
-                  <View style={styles.emptyDay} />
-                )}
+                {day.events.map((event) => (
+                  <Pressable
+                    key={event.id}
+                    style={styles.eventCard}
+                    onPress={() => handleEventPress(event.contactId)}
+                  >
+                    <Calendar size={16} color={Colors.info} />
+                    <View style={styles.eventContent}>
+                      <Text style={styles.eventTitle}>{event.title}</Text>
+                      <Text style={styles.eventContact}>
+                        {event.contact.firstName} {event.contact.lastName || ''}
+                      </Text>
+                    </View>
+                  </Pressable>
+                ))}
               </View>
             ))
           ) : (
@@ -255,9 +259,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.textSecondary,
     marginTop: 2,
-  },
-  emptyDay: {
-    height: 4,
   },
   pastEventCard: {
     flexDirection: 'row',

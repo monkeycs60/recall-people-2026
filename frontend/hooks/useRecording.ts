@@ -6,12 +6,39 @@ import {
   setAudioModeAsync,
 } from 'expo-audio';
 import * as Haptics from 'expo-haptics';
+import * as FileSystem from 'expo-file-system';
+import { Asset } from 'expo-asset';
 import { useRouter } from 'expo-router';
 import { useAppStore } from '@/stores/app-store';
 import { useContactsStore } from '@/stores/contacts-store';
 import { transcribeAudio, extractInfo, detectContact } from '@/lib/api';
 import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
+
+const isE2ETest = process.env.EXPO_PUBLIC_E2E_TEST === 'true';
+const e2eFixtureName = process.env.EXPO_PUBLIC_E2E_FIXTURE || 'brenda';
+
+// Map fixture names to their require paths
+const E2E_FIXTURES: Record<string, number> = {
+  brenda: require('@/assets/fixtures/brenda.mp3'),
+  'brenda-suite': require('@/assets/fixtures/brenda-suite.mp3'),
+  bucheron: require('@/assets/fixtures/bucheron.mp3'),
+  'bucheron-suite': require('@/assets/fixtures/bucheron-suite.mp3'),
+  juliana: require('@/assets/fixtures/juliana.mp3'),
+};
+
+const getE2EFixtureUri = async (): Promise<string> => {
+  const fixtureModule = E2E_FIXTURES[e2eFixtureName] || E2E_FIXTURES.brenda;
+  const asset = Asset.fromModule(fixtureModule);
+  await asset.downloadAsync();
+
+  if (!asset.localUri) {
+    throw new Error(`[E2E] Failed to load fixture: ${e2eFixtureName}`);
+  }
+
+  console.log('[E2E] Using fixture audio:', e2eFixtureName, asset.localUri);
+  return asset.localUri;
+};
 
 export const useRecording = () => {
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
@@ -42,6 +69,18 @@ export const useRecording = () => {
       // Load contacts if not initialized
       if (!isInitialized) {
         await loadContacts();
+      }
+
+      // E2E mode: skip actual recording setup, just simulate
+      if (isE2ETest) {
+        console.log('[E2E] Simulating recording start');
+        setRecordingState('recording');
+        setRecordingDuration(0);
+        durationIntervalRef.current = setInterval(() => {
+          setRecordingDuration((prev) => prev + 1);
+        }, 1000);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        return;
       }
 
       const permission = await AudioModule.requestRecordingPermissionsAsync();
@@ -77,7 +116,8 @@ export const useRecording = () => {
   };
 
   const stopRecording = async () => {
-    if (!audioRecorder.isRecording) return null;
+    // In E2E mode, we don't require actual recording
+    if (!isE2ETest && !audioRecorder.isRecording) return null;
 
     if (durationIntervalRef.current) {
       clearInterval(durationIntervalRef.current);
@@ -88,8 +128,15 @@ export const useRecording = () => {
       setRecordingState('processing');
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-      await audioRecorder.stop();
-      const uri = audioRecorder.uri;
+      let uri: string;
+
+      if (isE2ETest) {
+        // Use fixture instead of real recording
+        uri = await getE2EFixtureUri();
+      } else {
+        await audioRecorder.stop();
+        uri = audioRecorder.uri!;
+      }
 
       if (!uri) throw new Error('No audio URI');
 
@@ -207,7 +254,7 @@ export const useRecording = () => {
   };
 
   const cancelRecording = async () => {
-    if (audioRecorder.isRecording) {
+    if (!isE2ETest && audioRecorder.isRecording) {
       await audioRecorder.stop();
     }
     setRecordingState('idle');

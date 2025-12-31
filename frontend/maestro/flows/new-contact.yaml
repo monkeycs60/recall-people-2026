@@ -1,0 +1,70 @@
+# New Contact Creation Flow - Tests creating a contact from scratch
+# Uses juliana.mp3 fixture to create a new contact
+# Requires: npm run e2e:android running
+
+appId: com.monkeycs60.recallpeople2026
+tags:
+  - contacts
+  - creation
+---
+# App should already be running via npm run e2e:android
+# Wait for app to be ready
+- extendedWaitUntil:
+    visible: "Appuie pour enregistrer"
+    timeout: 15000
+
+# Start recording
+- tapOn:
+    id: "record-button"
+
+# Wait for recording state
+- extendedWaitUntil:
+    visible: "Enregistrement..."
+    timeout: 5000
+
+# Stop recording
+- tapOn:
+    id: "record-button"
+
+# Wait for contact selection screen (processing is too transient)
+- extendedWaitUntil:
+    visible: "À qui appartient cette note ?"
+    timeout: 60000
+
+# Verify new contact section is shown
+- assertVisible: "Nouveau contact"
+
+# Create new contact (the name should be detected from audio)
+- tapOn:
+    text: "Créer"
+    index: 0
+
+# Wait for review screen
+- extendedWaitUntil:
+    visible: "Sauvegarder"
+    timeout: 60000
+
+# Verify we're on review screen for new contact
+- assertVisible: "Nouveau contact"
+
+# Check for extracted facts
+- assertVisible: "Ce que j'ai noté"
+
+# Check for groups section (new contacts can have groups)
+- assertVisible: "Groupes"
+
+# Save the contact
+- tapOn: "Sauvegarder"
+
+# Wait for navigation to contact profile
+- extendedWaitUntil:
+    visible: ".*L'essentiel sur.*"
+    timeout: 10000
+
+# Go to contacts list to verify creation
+- tapOn: "Contacts"
+
+# Verify we're on contacts screen
+- extendedWaitUntil:
+    visible: "Contacts"
+    timeout: 5000

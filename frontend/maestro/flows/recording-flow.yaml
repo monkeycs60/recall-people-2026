@@ -1,0 +1,67 @@
+# Basic Recording Flow - Tests full E2E pipeline
+# Uses brenda.mp3 fixture and existing Brenda contact
+# Requires: npm run e2e:android running
+
+appId: com.monkeycs60.recallpeople2026
+tags:
+  - recording
+  - smoke
+---
+# App should already be running via npm run e2e:android
+# Wait for app to be ready
+- extendedWaitUntil:
+    visible: "Appuie pour enregistrer"
+    timeout: 15000
+
+# Start recording by tapping the mic button
+- tapOn:
+    id: "record-button"
+
+# Wait for recording state
+- extendedWaitUntil:
+    visible: "Enregistrement..."
+    timeout: 5000
+
+# Stop recording by tapping again
+- tapOn:
+    id: "record-button"
+
+# Wait for transcription and contact detection (up to 60s for LLM)
+# Note: "Traitement..." appears briefly but is too transient to assert on reliably
+- extendedWaitUntil:
+    visible: "À qui appartient cette note ?"
+    timeout: 60000
+
+# Verify contact selection screen appeared
+- assertVisible: "Suggestion"
+
+# Select Brenda contact (should be suggested based on fixture)
+- tapOn:
+    text: ".*Brenda.*"
+    below: "Suggestion"
+
+# Wait for review screen and scroll to find Sauvegarder
+- extendedWaitUntil:
+    visible: ".*Brenda.*"
+    timeout: 60000
+
+- scrollUntilVisible:
+    element: "Sauvegarder"
+    direction: DOWN
+
+# Verify we're on the review screen with Brenda
+- assertVisible: ".*Brenda.*"
+
+# Verify some extracted info is shown
+- assertVisible: "Ce que j'ai noté"
+
+# Save the note
+- tapOn: "Sauvegarder"
+
+# Wait for navigation to contact profile
+- extendedWaitUntil:
+    visible: ".*Brenda.*"
+    timeout: 10000
+
+# Verify we're on the contact profile
+- assertVisible: ".*L'essentiel sur.*"

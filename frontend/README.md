@@ -35,6 +35,51 @@ npm run reset-project
 
 This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
 
+## E2E Testing (Maestro)
+
+Tests end-to-end avec [Maestro](https://maestro.mobile.dev/).
+
+### Installation Maestro
+
+```bash
+curl -Ls "https://get.maestro.mobile.dev" | bash
+```
+
+### Lancer les tests
+
+```bash
+# 1. Lancer l'app en mode E2E (téléphone branché USB debug)
+npm run e2e:android
+
+# 2. Dans un autre terminal, lancer les tests
+npm run e2e:test          # tous les tests
+npm run e2e:test:smoke    # tests smoke uniquement
+```
+
+### Feedback visuel
+
+```bash
+# Interface web interactive (recommandé)
+npm run e2e:studio
+# Ouvre http://localhost:9999
+```
+
+### Structure
+
+```
+maestro/
+├── config.yaml              # Config globale
+└── flows/
+    ├── recording-flow.yaml  # Test enregistrement basique
+    ├── contact-update.yaml  # Mise à jour de contact
+    ├── new-contact.yaml     # Création de contact
+    └── bucheron-flow.yaml   # Test avec autre fixture
+```
+
+### Fixtures audio
+
+Les fichiers audio de test sont dans `assets/fixtures/`. La fixture par défaut est `brenda`.
+
 ## Learn more
 
 To learn more about developing your project with Expo, look at the following resources:

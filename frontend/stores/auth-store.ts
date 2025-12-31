@@ -6,6 +6,16 @@ import { useSettingsStore } from './settings-store';
 import { changeLanguage } from '@/lib/i18n';
 import { Language, SUPPORTED_LANGUAGES } from '@/types';
 
+const isE2ETest = process.env.EXPO_PUBLIC_E2E_TEST === 'true';
+
+// Mock user for E2E tests
+const E2E_MOCK_USER = {
+  id: 'e2e-test-user',
+  email: 'e2e@test.com',
+  name: 'E2E Test User',
+  provider: 'credentials' as const,
+};
+
 type User = {
   id: string;
   email: string;
@@ -41,6 +51,13 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         if (state.isInitialized || state.isLoading) return;
 
         set({ isLoading: true });
+
+        // E2E mode: bypass auth and use mock user
+        if (isE2ETest) {
+          console.log('[E2E] Using mock user, bypassing authentication');
+          set({ user: E2E_MOCK_USER, isLoading: false, isInitialized: true });
+          return;
+        }
 
         try {
           const token = await getToken();

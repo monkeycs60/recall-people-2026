@@ -77,6 +77,8 @@ export function RecordButton({ onPress, isRecording, isProcessing }: RecordButto
       />
 
       <AnimatedPressable
+        testID="record-button"
+        accessibilityLabel={isRecording ? "Arrêter l'enregistrement" : "Démarrer l'enregistrement"}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         onPress={onPress}

@@ -1,10 +1,33 @@
 import * as SQLite from 'expo-sqlite';
+import { documentDirectory, deleteAsync } from 'expo-file-system';
+import { seedE2EData } from './e2e-seed';
+
+const isE2ETest = process.env.EXPO_PUBLIC_E2E_TEST === 'true';
 
 let db: SQLite.SQLiteDatabase | null = null;
 
+const getDbName = () => (isE2ETest ? 'recall_people_test.db' : 'recall_people.db');
+
+const resetTestDatabase = async (dbName: string) => {
+  const dbPath = `${documentDirectory}SQLite/${dbName}`;
+  try {
+    await deleteAsync(dbPath, { idempotent: true });
+    console.log('[E2E] Test database reset');
+  } catch {
+    // File doesn't exist, nothing to reset
+  }
+};
+
 export const getDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
   if (!db) {
-    db = await SQLite.openDatabaseAsync('recall_people.db');
+    const dbName = getDbName();
+
+    // In E2E mode, reset database on each app launch
+    if (isE2ETest) {
+      await resetTestDatabase(dbName);
+    }
+
+    db = await SQLite.openDatabaseAsync(dbName);
 
     // Enable WAL mode for better performance
     await db.execAsync('PRAGMA journal_mode = WAL');
@@ -151,6 +174,11 @@ export const initDatabase = async () => {
 
   // Run migrations for existing databases
   await runMigrations(database);
+
+  // Seed test data in E2E mode
+  if (isE2ETest) {
+    await seedE2EData(database);
+  }
 };
 
 const runMigrations = async (database: SQLite.SQLiteDatabase) => {

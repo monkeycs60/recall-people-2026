@@ -1,0 +1,57 @@
+# Bucheron Flow - Tests recording for Pierre/Bucheron contact
+# Uses bucheron.mp3 fixture with existing Bucheron contact
+# Requires: npm run e2e:android running
+
+appId: com.monkeycs60.recallpeople2026
+tags:
+  - recording
+  - existing-contact
+---
+# App should already be running via npm run e2e:android
+# Wait for app to be ready
+- extendedWaitUntil:
+    visible: "Appuie pour enregistrer"
+    timeout: 15000
+
+# Start recording
+- tapOn:
+    id: "record-button"
+
+# Wait for recording state
+- extendedWaitUntil:
+    visible: "Enregistrement..."
+    timeout: 5000
+
+# Stop recording
+- tapOn:
+    id: "record-button"
+
+# Wait for contact selection (processing is too transient)
+- extendedWaitUntil:
+    visible: "À qui appartient cette note ?"
+    timeout: 60000
+
+# Pierre Martin (Bucheron) should be suggested or visible
+- tapOn:
+    text: ".*Pierre.*"
+    below: "Suggestion"
+
+# Wait for review screen
+- extendedWaitUntil:
+    visible: "Sauvegarder"
+    timeout: 60000
+
+# Verify we're on review screen
+- assertVisible: ".*Pierre.*"
+- assertVisible: "Ce que j'ai noté"
+
+# Save the note
+- tapOn: "Sauvegarder"
+
+# Wait for navigation to contact profile
+- extendedWaitUntil:
+    visible: ".*Pierre.*"
+    timeout: 10000
+
+# Verify we're on the contact profile
+- assertVisible: ".*L'essentiel sur.*"
