@@ -201,7 +201,9 @@ export function HotTopicsList({
             <Text style={styles.topicDate}>
               {isResolved && topic.resolvedAt
                 ? t('contact.hotTopic.resolvedAt', { date: new Date(topic.resolvedAt).toLocaleDateString() })
-                : new Date(topic.updatedAt).toLocaleDateString()}
+                : topic.eventDate
+                  ? new Date(topic.eventDate).toLocaleDateString()
+                  : new Date(topic.updatedAt).toLocaleDateString()}
             </Text>
           </View>
           <View style={styles.topicActions}>

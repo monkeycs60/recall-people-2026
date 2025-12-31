@@ -423,9 +423,14 @@ export default function ReviewScreen() {
         data: { lastContactAt: new Date().toISOString() },
       });
 
-      // Save summary from extraction if changed
-      if (extraction.summary?.changed && extraction.summary.text) {
-        await contactService.update(finalContactId, { aiSummary: extraction.summary.text });
+      // Save summary from extraction:
+      // - For new contacts: always save if summary text exists
+      // - For existing contacts: only save if marked as changed (relevant new info)
+      const isNewContact = contactId === 'new';
+      const summaryText = extraction.summary?.text;
+      const summaryChanged = extraction.summary?.changed;
+      if (summaryText && (isNewContact || summaryChanged)) {
+        await contactService.update(finalContactId, { aiSummary: summaryText });
       }
 
       queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
