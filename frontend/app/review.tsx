@@ -20,6 +20,14 @@ import { queryKeys } from '@/lib/query-keys';
 import { Colors } from '@/constants/theme';
 import { Archive, Edit3, Plus, X } from 'lucide-react-native';
 
+function formatBirthdayDisplay(day: number, month: number, monthNames: string[], year?: number): string {
+  const monthName = monthNames[month - 1] || month.toString();
+  if (year) {
+    return `${day} ${monthName} ${year}`;
+  }
+  return `${day} ${monthName}`;
+}
+
 export default function ReviewScreen() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -552,7 +560,12 @@ export default function ReviewScreen() {
               <View style={styles.contactInfoContent}>
                 <Text style={styles.contactInfoLabel}>{t('contact.contactInfoReview.birthday')}</Text>
                 <Text style={styles.contactInfoValue}>
-                  {`${extraction.contactInfo.birthday.day}/${extraction.contactInfo.birthday.month}${extraction.contactInfo.birthday.year ? `/${extraction.contactInfo.birthday.year}` : ''}`}
+                  {formatBirthdayDisplay(
+                    extraction.contactInfo.birthday.day,
+                    extraction.contactInfo.birthday.month,
+                    t('contact.birthdayModal.months', { returnObjects: true }) as string[],
+                    extraction.contactInfo.birthday.year
+                  )}
                 </Text>
               </View>
               <View style={styles.contactInfoActions}>

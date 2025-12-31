@@ -34,10 +34,21 @@ export function HotTopicsList({
   const [editingResolutionId, setEditingResolutionId] = useState<string | null>(null);
   const [editResolutionText, setEditResolutionText] = useState('');
 
-  // Filter to only show the next upcoming birthday (not all 5 years)
+  // Filter birthdays: only show if within next 2 weeks, and only the closest one
+  const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
+  const now = Date.now();
+  const twoWeeksFromNow = now + TWO_WEEKS_MS;
+
   const filteredHotTopics = hotTopics.filter((topic) => {
     if (topic.birthdayContactId && topic.eventDate) {
-      // Find all birthday topics for this contact
+      const eventTime = new Date(topic.eventDate).getTime();
+
+      // Only show if within next 2 weeks
+      if (eventTime < now || eventTime > twoWeeksFromNow) {
+        return false;
+      }
+
+      // Find all birthday topics for this contact within 2 weeks
       const birthdayTopics = hotTopics.filter(
         (t) => t.birthdayContactId === topic.birthdayContactId && t.eventDate
       );

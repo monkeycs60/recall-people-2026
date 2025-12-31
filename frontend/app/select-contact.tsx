@@ -164,21 +164,20 @@ export default function SelectContactScreen() {
         existingGroups: groupsForExtraction,
       });
 
-      if (detection) {
+      if (isEditingNewName && newContactName.trim()) {
+        // User edited the name - use their input and clear any detection values
+        const parts = newContactName.trim().split(' ');
+        extraction.contactIdentified.firstName = parts[0];
+        extraction.contactIdentified.lastName = parts.length > 1 ? parts.slice(1).join(' ') : undefined;
+        extraction.contactIdentified.suggestedNickname = undefined;
+      } else if (detection) {
+        // No edit - use detection values
         extraction.contactIdentified.firstName = detection.firstName;
         if (detection.lastName) {
           extraction.contactIdentified.lastName = detection.lastName;
         }
         if (detection.suggestedNickname) {
           extraction.contactIdentified.suggestedNickname = detection.suggestedNickname;
-        }
-      }
-
-      if (isEditingNewName && newContactName.trim()) {
-        const parts = newContactName.trim().split(' ');
-        extraction.contactIdentified.firstName = parts[0];
-        if (parts.length > 1) {
-          extraction.contactIdentified.lastName = parts.slice(1).join(' ');
         }
       }
 
@@ -319,7 +318,15 @@ export default function SelectContactScreen() {
             style={styles.editNameButton}
             onPress={() => {
               setIsEditingNewName(true);
-              setNewContactName(detection?.firstName || '');
+              // Pre-fill with full display name (firstName + lastName or nickname)
+              const fullName = detection
+                ? detection.lastName
+                  ? `${detection.firstName} ${detection.lastName}`
+                  : detection.suggestedNickname
+                    ? `${detection.firstName} ${detection.suggestedNickname}`
+                    : detection.firstName
+                : '';
+              setNewContactName(fullName);
             }}
           >
             <Edit3 size={16} color={Colors.textMuted} />
