@@ -1,4 +1,4 @@
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, Modal } from 'react-native';
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -6,6 +6,7 @@ import { X } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Colors } from '@/constants/theme';
 import { RecordButton } from '@/components/RecordButton';
+import { Paywall } from '@/components/Paywall';
 import { useRecording } from '@/hooks/useRecording';
 import { useContactsQuery } from '@/hooks/useContactsQuery';
 import { useAppStore } from '@/stores/app-store';
@@ -37,7 +38,16 @@ export default function RecordScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
-  const { toggleRecording, isRecording, isProcessing, recordingDuration } = useRecording();
+  const {
+    toggleRecording,
+    isRecording,
+    isProcessing,
+    recordingDuration,
+    maxRecordingDuration,
+    showPaywall,
+    paywallReason,
+    closePaywall,
+  } = useRecording();
   const { contacts } = useContactsQuery();
   const preselectedContactId = useAppStore((state) => state.preselectedContactId);
   const [promptIndex, setPromptIndex] = useState(0);
@@ -115,17 +125,26 @@ export default function RecordScreen() {
         </Text>
 
         {isRecording ? (
-          <Animated.View entering={FadeIn} exiting={FadeOut}>
+          <Animated.View entering={FadeIn} exiting={FadeOut} style={{ alignItems: 'center' }}>
             <Text
               style={{
                 fontFamily: 'PlayfairDisplay_500Medium',
                 fontSize: 48,
                 color: Colors.primary,
                 textAlign: 'center',
-                marginBottom: 64,
               }}
             >
               {formatDuration(recordingDuration)}
+            </Text>
+            <Text
+              style={{
+                fontSize: 14,
+                color: Colors.textMuted,
+                textAlign: 'center',
+                marginBottom: 64,
+              }}
+            >
+              {formatDuration(maxRecordingDuration - recordingDuration)} {t('record.remaining', { defaultValue: 'restant' })}
             </Text>
           </Animated.View>
         ) : isProcessing ? (
@@ -188,6 +207,10 @@ export default function RecordScreen() {
               })}
         </Text>
       </View>
+
+      <Modal visible={showPaywall} animationType="slide" presentationStyle="pageSheet">
+        <Paywall onClose={closePaywall} reason={paywallReason} />
+      </Modal>
     </View>
   );
 }
