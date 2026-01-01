@@ -1,12 +1,14 @@
-import { View, Text, KeyboardAvoidingView, Platform, StyleSheet, Pressable } from 'react-native';
+import { View, Text, KeyboardAvoidingView, Platform, StyleSheet, Pressable, Modal } from 'react-native';
 import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useContactsQuery } from '@/hooks/useContactsQuery';
 import { useSemanticSearch } from '@/hooks/useSemanticSearch';
+import { useSubscriptionStore } from '@/stores/subscription-store';
 import { SearchInput } from '@/components/search/SearchInput';
 import { SearchSkeleton } from '@/components/search/SearchSkeleton';
 import { SearchResults } from '@/components/search/SearchResults';
+import { Paywall } from '@/components/Paywall';
 import { Colors } from '@/constants/theme';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
@@ -21,10 +23,16 @@ export default function SearchScreen() {
   const insets = useSafeAreaInsets();
   useContactsQuery(); // Preload contacts data (cached by TanStack Query)
   const { results, isLoading, error, search, clearResults } = useSemanticSearch();
+  const isPremium = useSubscriptionStore((state) => state.isPremium);
   const [query, setQuery] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
 
   const handleSubmit = () => {
+    if (!isPremium) {
+      setShowPaywall(true);
+      return;
+    }
     if (query.trim()) {
       setHasSearched(true);
       search(query.trim());
@@ -106,6 +114,10 @@ export default function SearchScreen() {
           <SearchResults results={results} hasSearched={hasSearched} />
         )}
       </View>
+
+      <Modal visible={showPaywall} animationType="slide" presentationStyle="pageSheet">
+        <Paywall onClose={() => setShowPaywall(false)} reason="ai_search" />
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
