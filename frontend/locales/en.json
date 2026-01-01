@@ -427,5 +427,26 @@
       "description": "Your memories are personal. Recall People encrypts your data so you're the only one with access."
     },
     "redoTour": "Redo guided tour"
+  },
+  "paywall": {
+    "title": "Upgrade to Premium",
+    "reason": {
+      "notesLimit": "You've reached your free monthly limit of 5 notes",
+      "aiSearch": "AI Search is a premium feature",
+      "recordingDuration": "Longer recordings require premium"
+    },
+    "features": {
+      "unlimitedNotes": "Unlimited audio notes",
+      "longerRecordings": "3-minute recordings (vs 1 min)",
+      "aiSearch": "AI-powered search across all notes"
+    },
+    "monthly": "Monthly",
+    "annual": "Annual",
+    "month": "month",
+    "year": "year",
+    "bestValue": "BEST VALUE",
+    "save30": "Save 30%",
+    "subscribe": "Subscribe Now",
+    "restore": "Restore Purchases"
   }
 }

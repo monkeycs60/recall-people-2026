@@ -427,5 +427,26 @@
       "description": "Vos souvenirs sont personnels. Recall People chiffre vos données pour que vous soyez le seul à y avoir accès."
     },
     "redoTour": "Refaire le tour guidé"
+  },
+  "paywall": {
+    "title": "Passer Premium",
+    "reason": {
+      "notesLimit": "Vous avez atteint la limite de 5 notes par mois",
+      "aiSearch": "La recherche IA est une fonctionnalité premium",
+      "recordingDuration": "Les enregistrements plus longs nécessitent premium"
+    },
+    "features": {
+      "unlimitedNotes": "Notes audio illimitées",
+      "longerRecordings": "Enregistrements de 3 min (vs 1 min)",
+      "aiSearch": "Recherche IA dans toutes vos notes"
+    },
+    "monthly": "Mensuel",
+    "annual": "Annuel",
+    "month": "mois",
+    "year": "an",
+    "bestValue": "MEILLEUR PRIX",
+    "save30": "Économisez 30%",
+    "subscribe": "S'abonner",
+    "restore": "Restaurer les achats"
   }
 }
