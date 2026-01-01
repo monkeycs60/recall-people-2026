@@ -4,7 +4,7 @@ import { useSubscriptionStore } from '@/stores/subscription-store';
 
 const REVENUECAT_API_KEY_IOS = process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY || '';
 const REVENUECAT_API_KEY_ANDROID = process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY || '';
-const ENTITLEMENT_ID = 'premium';
+const ENTITLEMENT_ID = 'Recall People Pro';
 
 export const revenueCatService = {
   initialize: async (userId?: string): Promise<void> => {

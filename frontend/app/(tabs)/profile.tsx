@@ -16,7 +16,6 @@ import {
   LogOut,
   BookOpen,
   Shield,
-  Crown,
 } from 'lucide-react-native';
 import { useAuthStore } from '@/stores/auth-store';
 import { useSettingsStore } from '@/stores/settings-store';
@@ -28,9 +27,9 @@ import { LanguagePicker } from '@/components/profile/LanguagePicker';
 import { StatisticsSheet } from '@/components/profile/StatisticsSheet';
 import { ExportDataSheet } from '@/components/profile/ExportDataSheet';
 import { LegalNoticesSheet } from '@/components/profile/LegalNoticesSheet';
+import { SubscriptionCard } from '@/components/profile/SubscriptionCard';
 import { Colors } from '@/constants/theme';
 import Constants from 'expo-constants';
-import { useSubscriptionStore, FREE_NOTES_PER_MONTH } from '@/stores/subscription-store';
 import { revenueCatService } from '@/services/revenuecat.service';
 import { Paywall } from '@/components/Paywall';
 
@@ -43,8 +42,6 @@ export default function ProfileScreen() {
   const language = useSettingsStore((state) => state.language);
   const setHasSeenOnboarding = useSettingsStore((state) => state.setHasSeenOnboarding);
 
-  const isPremium = useSubscriptionStore((state) => state.isPremium);
-  const notesCreatedThisMonth = useSubscriptionStore((state) => state.notesCreatedThisMonth);
   const [showPaywall, setShowPaywall] = useState(false);
 
   const languagePickerRef = useRef<BottomSheetModal>(null);
@@ -161,23 +158,10 @@ export default function ProfileScreen() {
           />
         </SettingsSection>
 
-        <SettingsSection title={t('profile.sections.subscription')}>
-          {isPremium ? (
-            <SettingsRow
-              icon={<Crown size={20} color={Colors.primary} />}
-              label={t('profile.subscription.premium')}
-              value={t('profile.subscription.active')}
-              onPress={handleManageSubscription}
-            />
-          ) : (
-            <SettingsRow
-              icon={<Crown size={20} color={Colors.textMuted} />}
-              label={t('profile.subscription.free')}
-              value={`${notesCreatedThisMonth}/${FREE_NOTES_PER_MONTH} ${t('profile.subscription.notesUsed')}`}
-              onPress={handleUpgrade}
-            />
-          )}
-        </SettingsSection>
+        <View style={styles.subscriptionSection}>
+          <Text style={styles.sectionTitle}>{t('profile.sections.subscription')}</Text>
+          <SubscriptionCard onUpgrade={handleUpgrade} onManage={handleManageSubscription} />
+        </View>
 
         <SettingsSection title={t('profile.sections.data')}>
           <SettingsRow
@@ -265,6 +249,17 @@ const styles = StyleSheet.create({
     fontSize: 32,
     color: Colors.textPrimary,
     marginBottom: 24,
+  },
+  subscriptionSection: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: Colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 12,
   },
   logoutSection: {
     marginTop: 8,

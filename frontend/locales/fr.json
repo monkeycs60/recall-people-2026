@@ -435,6 +435,24 @@
     },
     "redoTour": "Refaire le tour guidé"
   },
+  "subscription": {
+    "freePlan": "GRATUIT",
+    "notesUsed": "notes",
+    "notesRemaining": "{{count}} notes restantes ce mois",
+    "noNotesRemaining": "Plus de notes ce mois",
+    "upgradeToPro": "Passer Pro",
+    "unlockWith": "Débloquez avec Pro :",
+    "feature1": "Notes audio illimitées",
+    "feature2": "Enregistrements de 3 min (vs 1 min)",
+    "feature3": "Recherche IA",
+    "premiumTitle": "Vous êtes Pro !",
+    "premiumSubtitle": "Merci de soutenir Recall People",
+    "unlimitedNotes": "Notes illimitées",
+    "aiSearch": "Recherche IA"
+  },
+  "record": {
+    "remaining": "restant"
+  },
   "paywall": {
     "title": "Passer Premium",
     "reason": {

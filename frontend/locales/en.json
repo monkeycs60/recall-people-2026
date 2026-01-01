@@ -435,6 +435,24 @@
     },
     "redoTour": "Redo guided tour"
   },
+  "subscription": {
+    "freePlan": "FREE",
+    "notesUsed": "notes",
+    "notesRemaining": "{{count}} notes remaining this month",
+    "noNotesRemaining": "No notes remaining this month",
+    "upgradeToPro": "Upgrade to Pro",
+    "unlockWith": "Unlock with Pro:",
+    "feature1": "Unlimited audio notes",
+    "feature2": "3-minute recordings (vs 1 min)",
+    "feature3": "AI-powered search",
+    "premiumTitle": "You're a Pro!",
+    "premiumSubtitle": "Thanks for supporting Recall People",
+    "unlimitedNotes": "Unlimited notes",
+    "aiSearch": "AI Search"
+  },
+  "record": {
+    "remaining": "remaining"
+  },
   "paywall": {
     "title": "Upgrade to Premium",
     "reason": {
