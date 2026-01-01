@@ -68,7 +68,7 @@ export default function SelectContactScreen() {
         return `${detection.firstName} ${detection.lastName}`;
       }
       if (detection.suggestedNickname) {
-        return detection.suggestedNickname;
+        return `${detection.firstName} ${detection.suggestedNickname}`;
       }
       return detection.firstName;
     }
@@ -105,7 +105,6 @@ export default function SelectContactScreen() {
 
       const { extraction } = await extractInfo({
         transcription,
-        existingSummary: contact.aiSummary || null,
         existingContacts: contactsForExtraction,
         currentContact: {
           id: contact.id,
@@ -165,20 +164,16 @@ export default function SelectContactScreen() {
       });
 
       if (isEditingNewName && newContactName.trim()) {
-        // User edited the name - use their input and clear any detection values
+        // User edited the name - use their input and clear any extraction values
         const parts = newContactName.trim().split(' ');
         extraction.contactIdentified.firstName = parts[0];
         extraction.contactIdentified.lastName = parts.length > 1 ? parts.slice(1).join(' ') : undefined;
         extraction.contactIdentified.suggestedNickname = undefined;
       } else if (detection) {
-        // No edit - use detection values
+        // No edit - use detection values and clear extraction values
         extraction.contactIdentified.firstName = detection.firstName;
-        if (detection.lastName) {
-          extraction.contactIdentified.lastName = detection.lastName;
-        }
-        if (detection.suggestedNickname) {
-          extraction.contactIdentified.suggestedNickname = detection.suggestedNickname;
-        }
+        extraction.contactIdentified.lastName = detection.lastName || undefined;
+        extraction.contactIdentified.suggestedNickname = detection.suggestedNickname || undefined;
       }
 
       setCurrentExtraction(extraction);

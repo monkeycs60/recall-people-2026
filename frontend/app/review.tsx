@@ -14,7 +14,8 @@ import { memoryService } from '@/services/memory.service';
 import { notificationService } from '@/services/notification.service';
 import { contactService } from '@/services/contact.service';
 import { groupService } from '@/services/group.service';
-import { generateIceBreakers } from '@/lib/api';
+import { generateIceBreakers, generateSummary } from '@/lib/api';
+import { noteService } from '@/services/note.service';
 import { useAppStore } from '@/stores/app-store';
 import { queryKeys } from '@/lib/query-keys';
 import { Colors } from '@/constants/theme';
@@ -104,6 +105,14 @@ export default function ReviewScreen() {
     phone: !!extraction.contactInfo?.phone,
     email: !!extraction.contactInfo?.email,
     birthday: !!extraction.contactInfo?.birthday,
+  });
+
+  // Editable contact name (for new contacts)
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState(() => {
+    const first = extraction.contactIdentified.firstName;
+    const last = extraction.contactIdentified.lastName || extraction.contactIdentified.suggestedNickname || '';
+    return last ? `${first} ${last}` : first;
   });
 
   useEffect(() => {
@@ -269,10 +278,15 @@ export default function ReviewScreen() {
       let finalContactId = contactId;
 
       if (contactId === 'new') {
+        // Parse edited name into firstName and lastName
+        const nameParts = editedName.trim().split(' ');
+        const firstName = nameParts[0];
+        const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : undefined;
+
         const newContact = await createContactMutation.mutateAsync({
-          firstName: extraction.contactIdentified.firstName,
-          lastName: extraction.contactIdentified.lastName,
-          nickname: extraction.contactIdentified.suggestedNickname,
+          firstName,
+          lastName,
+          nickname: undefined, // Nickname is included in lastName if user kept it
         });
         finalContactId = newContact.id;
 
@@ -396,7 +410,9 @@ export default function ReviewScreen() {
           });
 
           if (eventDate) {
-            const contactName = extraction.contactIdentified.firstName;
+            const contactName = contactId === 'new'
+              ? editedName.trim().split(' ')[0]
+              : extraction.contactIdentified.firstName;
             await notificationService.scheduleEventReminder(
               savedHotTopic.id,
               eventDate,
@@ -431,21 +447,39 @@ export default function ReviewScreen() {
         data: { lastContactAt: new Date().toISOString() },
       });
 
-      // Save summary from extraction:
-      // - For new contacts: always save if summary text exists
-      // - For existing contacts: only save if marked as changed (relevant new info)
-      const isNewContact = contactId === 'new';
-      const summaryText = extraction.summary?.text;
-      const summaryChanged = extraction.summary?.changed;
-      if (summaryText && (isNewContact || summaryChanged)) {
-        await contactService.update(finalContactId, { aiSummary: summaryText });
-      }
-
       queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(finalContactId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.facts.byContact(finalContactId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.hotTopics.byContact(finalContactId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.memories.byContact(finalContactId) });
+
+      // Generate summary from ALL transcriptions in background
+      const contactName = contactId === 'new'
+        ? editedName.trim()
+        : `${extraction.contactIdentified.firstName} ${extraction.contactIdentified.lastName || ''}`.trim();
+
+      noteService.getByContact(finalContactId)
+        .then((notes) => {
+          const transcriptions = notes
+            .map((noteItem) => noteItem.transcription)
+            .filter((t): t is string => !!t);
+
+          if (transcriptions.length > 0) {
+            return generateSummary({ contactName, transcriptions });
+          }
+          return null;
+        })
+        .then(async (summary) => {
+          if (summary) {
+            await contactService.update(finalContactId, { aiSummary: summary });
+            // Invalidate queries after summary is saved so UI updates
+            queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
+            queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(finalContactId) });
+          }
+        })
+        .catch((error) => {
+          console.error('Summary generation failed:', error);
+        });
 
       // Generate ice breakers in background
       const contactDetails = await contactService.getById(finalContactId);
@@ -489,9 +523,29 @@ export default function ReviewScreen() {
       style={styles.container}
       contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
     >
-      <Text style={styles.contactName}>
-        {extraction.contactIdentified.firstName} {extraction.contactIdentified.lastName || extraction.contactIdentified.suggestedNickname || ''}
-      </Text>
+      {isEditingName ? (
+        <View style={styles.editNameContainer}>
+          <TextInput
+            style={styles.editNameInput}
+            value={editedName}
+            onChangeText={setEditedName}
+            autoFocus
+            placeholder={t('review.namePlaceholder')}
+            placeholderTextColor={Colors.textMuted}
+          />
+          <Pressable style={styles.editNameConfirm} onPress={() => setIsEditingName(false)}>
+            <Text style={styles.editNameConfirmText}>OK</Text>
+          </Pressable>
+        </View>
+      ) : (
+        <Pressable
+          style={styles.contactNameRow}
+          onPress={() => contactId === 'new' && setIsEditingName(true)}
+        >
+          <Text style={styles.contactName}>{editedName}</Text>
+          {contactId === 'new' && <Edit3 size={18} color={Colors.textMuted} style={{ marginLeft: 8 }} />}
+        </Pressable>
+      )}
 
       <Text style={styles.subtitle}>
         {contactId === 'new' ? t('review.newContact') : t('review.update')}
@@ -1025,7 +1079,37 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '700',
     color: Colors.textPrimary,
+  },
+  contactNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 8,
+  },
+  editNameContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+    gap: 8,
+  },
+  editNameInput: {
+    flex: 1,
+    fontSize: 24,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+    backgroundColor: Colors.surface,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+  },
+  editNameConfirm: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: Colors.primaryLight,
+    borderRadius: 8,
+  },
+  editNameConfirmText: {
+    color: Colors.primary,
+    fontWeight: '600',
   },
   subtitle: {
     fontSize: 14,

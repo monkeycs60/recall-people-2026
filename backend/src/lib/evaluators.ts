@@ -312,6 +312,94 @@ Sois strict et objectif.`;
 }
 
 /**
+ * Evaluate summary quality: Is the summary accurate and factual?
+ *
+ * Measures:
+ * - Factual: Only mentions what's in the transcriptions
+ * - Concise: 2-3 sentences max
+ * - No hallucinations: Nothing invented
+ * - No adjectives or interpretations
+ *
+ * @param contactName - Name of the contact
+ * @param transcriptions - All transcriptions for this contact
+ * @param summary - AI-generated summary
+ * @param config - Evaluator configuration
+ * @returns Evaluation result or null if skipped
+ */
+export async function evaluateSummary(
+	contactName: string,
+	transcriptions: string[],
+	summary: string,
+	config: EvaluatorConfig
+): Promise<EvaluationResult | null> {
+	// Skip if evaluation is disabled
+	if (!config.enableEvaluation) {
+		return null;
+	}
+
+	// Apply sampling (25% by default)
+	if (!shouldEvaluate(config.samplingRate)) {
+		return null;
+	}
+
+	try {
+		const grok = createXai({
+			apiKey: config.XAI_API_KEY,
+		});
+
+		const evaluatorModel = grok('grok-4-1-fast');
+
+		const allTranscriptions = transcriptions
+			.map((t, i) => `[Note ${i + 1}]\n${t}`)
+			.join('\n\n');
+
+		const prompt = `Tu es un évaluateur de qualité pour des résumés de contacts.
+
+CONTACT: ${contactName}
+
+TRANSCRIPTIONS ORIGINALES:
+${allTranscriptions}
+
+RÉSUMÉ GÉNÉRÉ:
+"${summary}"
+
+Évalue la qualité selon ces critères STRICTS:
+
+1. FACTUEL: Le résumé ne mentionne QUE des informations présentes dans les transcriptions?
+2. PAS D'HALLUCINATIONS: Aucune information inventée ou supposée?
+3. PAS D'ADJECTIFS SUBJECTIFS: Pas de "passionné", "dynamique", "intéressant", etc.?
+4. PAS D'INTERPRÉTATIONS: Pas de conclusions tirées au-delà des faits?
+5. PAS DE DATES RELATIVES: Pas de "la semaine dernière", "le mois dernier", "hier"?
+6. CONCIS: 2-3 phrases maximum, style factuel?
+
+EXEMPLES DE PROBLÈMES:
+- "passionné de sport" alors que la note dit juste "fait du running" → HALLUCINATION
+- "personne dynamique" → ADJECTIF SUBJECTIF non demandé
+- "semble apprécier" → INTERPRÉTATION
+- "rencontré la semaine dernière" → DATE RELATIVE (utiliser "récemment" ou date exacte)
+
+Score de 0 à 10:
+- 10: Parfait, 100% factuel, aucun ajout
+- 7-9: Très bon, quelques formulations légèrement interprétatives
+- 4-6: Moyen, adjectifs ou interprétations présents
+- 0-3: Mauvais, hallucinations ou inventions
+
+Sois TRÈS strict sur les hallucinations et les adjectifs.`;
+
+		const { object: evaluation } = await generateObject({
+			model: evaluatorModel,
+			schema: evaluationSchema,
+			prompt,
+		});
+
+		return evaluation;
+	} catch (error) {
+		console.error('Summary evaluation failed:', error);
+		return null;
+	}
+}
+
+/**
  * Get evaluation statistics for monitoring
  * This can be called periodically to see average quality scores
  */

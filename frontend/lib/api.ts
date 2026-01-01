@@ -150,7 +150,6 @@ export const transcribeAudio = (audioUri: string) => transcribeAudioInternal(aud
 
 export const extractInfo = async (data: {
   transcription: string;
-  existingSummary?: string | null;
   existingContacts: Array<{
     id: string;
     firstName: string;
@@ -255,6 +254,20 @@ export const updateUserSettings = async (data: {
     method: 'PATCH',
     body: data,
   });
+};
+
+export const generateSummary = async (data: {
+  contactName: string;
+  transcriptions: string[];
+}): Promise<string> => {
+  const response = await apiCall<{ success: boolean; summary: string }>(
+    '/api/summary',
+    {
+      method: 'POST',
+      body: { ...data, language: getCurrentLanguage() },
+    }
+  );
+  return response.summary;
 };
 
 export { apiCall };
