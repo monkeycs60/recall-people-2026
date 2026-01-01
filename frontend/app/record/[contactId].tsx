@@ -1,5 +1,5 @@
-import { View, Text, Pressable, ActivityIndicator } from 'react-native';
-import { useState, useMemo } from 'react';
+import { View, Text, Pressable, ActivityIndicator, Modal } from 'react-native';
+import { useState, useMemo, useRef } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   useAudioRecorder,
@@ -9,24 +9,42 @@ import {
 } from 'expo-audio';
 import * as Haptics from 'expo-haptics';
 import { ArrowLeft } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useContactsQuery } from '@/hooks/useContactsQuery';
 import { useAppStore } from '@/stores/app-store';
+import { useSubscriptionStore } from '@/stores/subscription-store';
 import { transcribeAudio, extractInfo } from '@/lib/api';
 import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { RecordButton } from '@/components/RecordButton';
+import { Paywall } from '@/components/Paywall';
+import { Colors } from '@/constants/theme';
 
 export default function RecordForContactScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const contactId = params.contactId as string;
+  const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
 
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const { contacts } = useContactsQuery();
   const { setCurrentExtraction } = useAppStore();
 
+  const canCreateNote = useSubscriptionStore((state) => state.canCreateNote);
+  const incrementNotesCount = useSubscriptionStore((state) => state.incrementNotesCount);
+  const getMaxRecordingDuration = useSubscriptionStore((state) => state.getMaxRecordingDuration);
+  const maxDuration = getMaxRecordingDuration();
+
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [paywallReason, setPaywallReason] = useState<'notes_limit' | 'recording_duration'>('notes_limit');
+
+  const durationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const stopRecordingRef = useRef<(() => Promise<void>) | null>(null);
 
   const contact = useMemo(() => {
     const foundContact = contacts.find((c) => c.id === contactId);
@@ -40,7 +58,19 @@ export default function RecordForContactScreen() {
     return null;
   }, [contacts, contactId]);
 
+  const formatDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
   const startRecording = async () => {
+    if (!canCreateNote()) {
+      setPaywallReason('notes_limit');
+      setShowPaywall(true);
+      return;
+    }
+
     try {
       const permission = await AudioModule.requestRecordingPermissionsAsync();
       if (!permission.granted) {
@@ -56,15 +86,36 @@ export default function RecordForContactScreen() {
       await audioRecorder.record();
 
       setIsRecording(true);
+      setRecordingDuration(0);
+
+      durationIntervalRef.current = setInterval(() => {
+        setRecordingDuration((prev) => {
+          const newDuration = prev + 1;
+          if (newDuration >= maxDuration && stopRecordingRef.current) {
+            stopRecordingRef.current();
+          }
+          return newDuration;
+        });
+      }, 1000);
+
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     } catch (error) {
       console.error('[RecordForContact] Start error:', error);
       setIsRecording(false);
+      if (durationIntervalRef.current) {
+        clearInterval(durationIntervalRef.current);
+        durationIntervalRef.current = null;
+      }
     }
   };
 
   const stopRecording = async () => {
     if (!audioRecorder.isRecording) return;
+
+    if (durationIntervalRef.current) {
+      clearInterval(durationIntervalRef.current);
+      durationIntervalRef.current = null;
+    }
 
     try {
       setIsRecording(false);
@@ -134,6 +185,8 @@ export default function RecordForContactScreen() {
           extraction: JSON.stringify(extraction),
         },
       });
+
+      incrementNotesCount();
     } catch (error) {
       console.error('[RecordForContact] Stop error:', error);
       if (audioRecorder.isRecording) {
@@ -153,45 +206,131 @@ export default function RecordForContactScreen() {
     }
   };
 
+  stopRecordingRef.current = stopRecording;
+
   if (isProcessing) {
     return (
-      <View className="flex-1 bg-background items-center justify-center">
-        <ActivityIndicator size="large" color="#8B5CF6" />
-        <Text className="text-textSecondary mt-4">Analyse en cours...</Text>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: Colors.background,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <ActivityIndicator size="large" color={Colors.primary} />
+        <Text style={{ color: Colors.textSecondary, marginTop: 16 }}>
+          {t('home.transcribing', { defaultValue: 'Analyse en cours...' })}
+        </Text>
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-background">
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: Colors.background,
+        paddingTop: insets.top,
+        paddingBottom: insets.bottom,
+      }}
+    >
       {/* Header */}
-      <View className="flex-row items-center px-4 pt-14 pb-4">
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingHorizontal: 16,
+          paddingVertical: 16,
+        }}
+      >
         <Pressable
-          className="p-2 -ml-2"
+          style={{ padding: 8, marginLeft: -8 }}
           onPress={() => router.back()}
         >
-          <ArrowLeft size={24} color="#FFFFFF" />
+          <ArrowLeft size={24} color={Colors.textPrimary} />
         </Pressable>
       </View>
 
       {/* Content */}
-      <View className="flex-1 items-center justify-center px-6">
-        <Text className="text-3xl font-bold text-textPrimary mb-2 text-center">
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          paddingHorizontal: 24,
+        }}
+      >
+        <Text
+          style={{
+            fontFamily: 'PlayfairDisplay_700Bold',
+            fontSize: 28,
+            color: Colors.textPrimary,
+            marginBottom: 8,
+            textAlign: 'center',
+          }}
+        >
           {contact ? `${contact.firstName} ${contact.lastName || contact.nickname || ''}`.trim() : 'Chargement...'}
         </Text>
 
-        <Text className="text-textSecondary mb-12 text-center">
-          {isRecording
-            ? 'Appuie pour arrêter'
-            : 'Appuie pour enregistrer'}
-        </Text>
+        {isRecording ? (
+          <View style={{ alignItems: 'center' }}>
+            <Text
+              style={{
+                fontFamily: 'PlayfairDisplay_500Medium',
+                fontSize: 48,
+                color: Colors.primary,
+                textAlign: 'center',
+              }}
+            >
+              {formatDuration(recordingDuration)}
+            </Text>
+            <Text
+              style={{
+                fontSize: 14,
+                color: Colors.textMuted,
+                textAlign: 'center',
+                marginBottom: 48,
+              }}
+            >
+              {formatDuration(maxDuration - recordingDuration)} {t('record.remaining', { defaultValue: 'restant' })}
+            </Text>
+          </View>
+        ) : (
+          <Text
+            style={{
+              color: Colors.textSecondary,
+              marginBottom: 48,
+              textAlign: 'center',
+            }}
+          >
+            {t('record.tapToRecord', { defaultValue: 'Appuie pour enregistrer' })}
+          </Text>
+        )}
 
         <RecordButton
           onPress={toggleRecording}
           isRecording={isRecording}
           isProcessing={isProcessing}
         />
+
+        {isRecording && (
+          <Text
+            style={{
+              color: Colors.textMuted,
+              textAlign: 'center',
+              marginTop: 32,
+              fontSize: 14,
+            }}
+          >
+            {t('record.tapToStop', { defaultValue: 'Appuyez pour terminer' })}
+          </Text>
+        )}
       </View>
+
+      <Modal visible={showPaywall} animationType="slide" presentationStyle="pageSheet">
+        <Paywall onClose={() => setShowPaywall(false)} reason={paywallReason} />
+      </Modal>
     </View>
   );
 }
