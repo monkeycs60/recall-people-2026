@@ -511,7 +511,7 @@ export default function ReviewScreen() {
       }
 
       setRecordingState('idle');
-      router.replace(`/contact/${finalContactId}`);
+      router.dismissTo(`/contact/${finalContactId}`);
     } catch (error) {
       console.error('Failed to save:', error);
       setIsSaving(false);
