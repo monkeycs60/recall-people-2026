@@ -31,10 +31,6 @@ npx wrangler secret put ADMIN_EMAIL
 
 -  [ ] RevenueCat paywall (freemium: gratuit sans IA, premium avec IA/transcription/rappels)
 
--  Possibilité de supprimer un contact
--  Ajout du téléphone, mail, anniversaire sur la fiche d'un contact (champs spéciaux, pas dans infos, mais carrément dans le header : lien pour whats app ou répertoire)
--  La section autre doit être mieux présentée avec à chaque fois un title et description
-
 ---
 
 ## P1 - Post-Launch Prioritaire
