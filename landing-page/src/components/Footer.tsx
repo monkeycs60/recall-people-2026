@@ -7,9 +7,9 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="text-center md:text-left">
             <h3 className="text-xl font-serif font-bold text-foreground">Recall People</h3>
-            <p className="text-sm text-text-muted mt-2">© 2026 Recall People. Tous droits réservés.</p>
+            <p className="text-sm text-text-muted mt-2">&copy; 2026 Recall People. All rights reserved.</p>
           </div>
-          
+
           <div className="flex items-center space-x-6 text-sm text-text-secondary">
             <a href="#" className="hover:text-primary transition-colors">Privacy</a>
             <a href="#" className="hover:text-primary transition-colors">Terms</a>
