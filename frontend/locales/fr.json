@@ -331,8 +331,15 @@
     "connectedWith": "Connecté via {{provider}}",
     "sections": {
       "language": "Langue",
+      "subscription": "Abonnement",
       "data": "Données",
       "about": "À propos"
+    },
+    "subscription": {
+      "premium": "Premium",
+      "free": "Offre gratuite",
+      "active": "Actif",
+      "notesUsed": "notes ce mois"
     },
     "language": {
       "appLanguage": "Langue de l'app",

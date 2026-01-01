@@ -331,8 +331,15 @@
     "connectedWith": "Connected with {{provider}}",
     "sections": {
       "language": "Language",
+      "subscription": "Subscription",
       "data": "Data",
       "about": "About"
+    },
+    "subscription": {
+      "premium": "Premium",
+      "free": "Free Plan",
+      "active": "Active",
+      "notesUsed": "notes this month"
     },
     "language": {
       "appLanguage": "App language",

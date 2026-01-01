@@ -1,7 +1,7 @@
-import { View, Text, ScrollView, Alert, Linking, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, Alert, Linking, StyleSheet, Modal } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
@@ -16,6 +16,7 @@ import {
   LogOut,
   BookOpen,
   Shield,
+  Crown,
 } from 'lucide-react-native';
 import { useAuthStore } from '@/stores/auth-store';
 import { useSettingsStore } from '@/stores/settings-store';
@@ -29,6 +30,9 @@ import { ExportDataSheet } from '@/components/profile/ExportDataSheet';
 import { LegalNoticesSheet } from '@/components/profile/LegalNoticesSheet';
 import { Colors } from '@/constants/theme';
 import Constants from 'expo-constants';
+import { useSubscriptionStore, FREE_NOTES_PER_MONTH } from '@/stores/subscription-store';
+import { revenueCatService } from '@/services/revenuecat.service';
+import { Paywall } from '@/components/Paywall';
 
 export default function ProfileScreen() {
   const { t } = useTranslation();
@@ -38,6 +42,10 @@ export default function ProfileScreen() {
   const logout = useAuthStore((state) => state.logout);
   const language = useSettingsStore((state) => state.language);
   const setHasSeenOnboarding = useSettingsStore((state) => state.setHasSeenOnboarding);
+
+  const isPremium = useSubscriptionStore((state) => state.isPremium);
+  const notesCreatedThisMonth = useSubscriptionStore((state) => state.notesCreatedThisMonth);
+  const [showPaywall, setShowPaywall] = useState(false);
 
   const languagePickerRef = useRef<BottomSheetModal>(null);
   const statisticsSheetRef = useRef<BottomSheetModal>(null);
@@ -59,6 +67,17 @@ export default function ProfileScreen() {
   const handleOpenLegal = useCallback(() => {
     legalNoticesSheetRef.current?.present();
   }, []);
+
+  const handleManageSubscription = async () => {
+    const url = await revenueCatService.getManagementURL();
+    if (url) {
+      Linking.openURL(url);
+    }
+  };
+
+  const handleUpgrade = () => {
+    setShowPaywall(true);
+  };
 
   const handleClearCache = () => {
     Alert.alert(
@@ -142,6 +161,24 @@ export default function ProfileScreen() {
           />
         </SettingsSection>
 
+        <SettingsSection title={t('profile.sections.subscription')}>
+          {isPremium ? (
+            <SettingsRow
+              icon={<Crown size={20} color={Colors.primary} />}
+              label={t('profile.subscription.premium')}
+              value={t('profile.subscription.active')}
+              onPress={handleManageSubscription}
+            />
+          ) : (
+            <SettingsRow
+              icon={<Crown size={20} color={Colors.textMuted} />}
+              label={t('profile.subscription.free')}
+              value={`${notesCreatedThisMonth}/${FREE_NOTES_PER_MONTH} ${t('profile.subscription.notesUsed')}`}
+              onPress={handleUpgrade}
+            />
+          )}
+        </SettingsSection>
+
         <SettingsSection title={t('profile.sections.data')}>
           <SettingsRow
             icon={<BarChart3 size={20} color={Colors.primary} />}
@@ -210,6 +247,10 @@ export default function ProfileScreen() {
       <StatisticsSheet ref={statisticsSheetRef} />
       <ExportDataSheet ref={exportDataSheetRef} />
       <LegalNoticesSheet ref={legalNoticesSheetRef} />
+
+      <Modal visible={showPaywall} animationType="slide" presentationStyle="pageSheet">
+        <Paywall onClose={() => setShowPaywall(false)} />
+      </Modal>
     </View>
   );
 }
