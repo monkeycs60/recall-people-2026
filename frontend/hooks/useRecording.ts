@@ -11,6 +11,7 @@ import { Asset } from 'expo-asset';
 import { useRouter } from 'expo-router';
 import { useAppStore } from '@/stores/app-store';
 import { useContactsStore } from '@/stores/contacts-store';
+import { useSubscriptionStore } from '@/stores/subscription-store';
 import { transcribeAudio, extractInfo, detectContact } from '@/lib/api';
 import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
@@ -44,8 +45,11 @@ export const useRecording = () => {
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const router = useRouter();
   const { contacts, loadContacts, isInitialized } = useContactsStore();
+  const getMaxRecordingDuration = useSubscriptionStore((state) => state.getMaxRecordingDuration);
+  const maxDuration = getMaxRecordingDuration();
   const [recordingDuration, setRecordingDuration] = useState(0);
   const durationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const stopRecordingRef = useRef<(() => Promise<{ uri: string; transcription: string } | null | undefined>) | null>(null);
   const {
     recordingState,
     setRecordingState,
@@ -77,7 +81,13 @@ export const useRecording = () => {
         setRecordingState('recording');
         setRecordingDuration(0);
         durationIntervalRef.current = setInterval(() => {
-          setRecordingDuration((prev) => prev + 1);
+          setRecordingDuration((prev) => {
+            const newDuration = prev + 1;
+            if (newDuration >= maxDuration && stopRecordingRef.current) {
+              stopRecordingRef.current();
+            }
+            return newDuration;
+          });
         }, 1000);
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         return;
@@ -100,7 +110,13 @@ export const useRecording = () => {
       setRecordingDuration(0);
 
       durationIntervalRef.current = setInterval(() => {
-        setRecordingDuration((prev) => prev + 1);
+        setRecordingDuration((prev) => {
+          const newDuration = prev + 1;
+          if (newDuration >= maxDuration && stopRecordingRef.current) {
+            stopRecordingRef.current();
+          }
+          return newDuration;
+        });
       }, 1000);
 
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -259,9 +275,12 @@ export const useRecording = () => {
     setRecordingState('idle');
   };
 
+  stopRecordingRef.current = stopRecording;
+
   return {
     recordingState,
     recordingDuration,
+    maxRecordingDuration: maxDuration,
     toggleRecording,
     cancelRecording,
     isRecording: recordingState === 'recording',
