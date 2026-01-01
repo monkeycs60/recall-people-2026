@@ -19,6 +19,7 @@ No free trial. No launch discount.
 |---------|------|---------|
 | Contacts | Unlimited | Unlimited |
 | Audio notes | 5/month | Unlimited |
+| Note duration | 1 minute max | 3 minutes max |
 | Read existing notes | All | All |
 | AI Search | No | Yes |
 
@@ -27,6 +28,13 @@ No free trial. No launch discount.
 - Free users can create up to 5 audio notes per calendar month
 - Counter resets on the 1st of each month
 - Existing notes remain readable regardless of limit
+
+### Recording Duration Limit
+
+- Free users: 1 minute max per recording
+- Premium users: 3 minutes max per recording
+- Recording stops automatically when limit is reached
+- Show remaining time during recording
 
 ### Downgrade Behavior
 
@@ -95,9 +103,10 @@ interface SubscriptionState {
 - [ ] Create products in Google Play Console
 - [ ] Create RevenueCat entitlements and offerings
 - [ ] Build subscription store (Zustand)
-- [ ] Build note limit tracking logic
+- [ ] Build note limit tracking logic (5/month)
+- [ ] Add recording duration limit (1 min free / 3 min premium)
 - [ ] Create Paywall component
-- [ ] Integrate hard paywall on note creation
+- [ ] Integrate hard paywall on note creation (6th note)
 - [ ] Integrate soft paywall on AI search
 - [ ] Add subscription management to Profile screen
 - [ ] Add restore purchases functionality
