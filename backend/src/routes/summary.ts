@@ -77,10 +77,11 @@ ${langInstruction}
 RÈGLES ABSOLUES:
 - UNIQUEMENT les faits explicitement mentionnés dans les notes
 - AUCUN adjectif, AUCUNE interprétation, AUCUNE supposition
-- Style télégraphique: "Travaille chez X. Fait du Y. A un Z."
+- Style straight to the point: "Travaille chez X. Fait du Y. A un Z."
 - Ne dis PAS "selon les notes" ou "d'après"
 - JAMAIS de dates relatives ("la semaine dernière", "le mois dernier", "hier")
   → Utilise "récemment" ou la date exacte si connue
+- Si jamais tu évoques l'utilisateur (le narrateur, celui qui fait la note audio), utilise 'l'utilisateur' pour le désigner. 
 
 NOTES SUR ${contactName}:
 ${allTranscriptions}
