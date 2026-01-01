@@ -24,6 +24,8 @@ import { toastConfig } from '@/components/ui/ToastConfig';
 import { OfflineBanner } from '@/components/ui/OfflineBanner';
 import { notificationService } from '@/services/notification.service';
 import { hotTopicService } from '@/services/hot-topic.service';
+import { revenueCatService } from '@/services/revenuecat.service';
+import { useAuthStore } from '@/stores/auth-store';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -43,6 +45,7 @@ export default function RootLayout() {
   const [dbError, setDbError] = useState<string | null>(null);
   const language = useSettingsStore((state) => state.language);
   const isHydrated = useSettingsStore((state) => state.isHydrated);
+  const user = useAuthStore((state) => state.user);
 
   const [fontsLoaded] = useFonts({
     PlayfairDisplay_400Regular,
@@ -88,6 +91,13 @@ export default function RootLayout() {
 
     return cleanup;
   }, [router]);
+
+  // Initialize RevenueCat when user is authenticated
+  useEffect(() => {
+    if (user?.id) {
+      revenueCatService.initialize(user.id);
+    }
+  }, [user?.id]);
 
   if (dbError) {
     return (
