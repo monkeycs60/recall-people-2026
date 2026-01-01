@@ -67,9 +67,7 @@ summaryRoutes.post('/', async (c) => {
 		const langInstruction =
 			LANGUAGE_INSTRUCTIONS[language] || LANGUAGE_INSTRUCTIONS.fr;
 
-		const allTranscriptions = transcriptions
-			.map((t, i) => `[Note ${i + 1}]\n${t}`)
-			.join('\n\n');
+		const allTranscriptions = transcriptions.join('\n\n');
 
 		const prompt = `Résume cette personne en 2-3 phrases STRICTEMENT basées sur les notes ci-dessous.
 ${langInstruction}
@@ -81,7 +79,14 @@ RÈGLES ABSOLUES:
 - Ne dis PAS "selon les notes" ou "d'après"
 - JAMAIS de dates relatives ("la semaine dernière", "le mois dernier", "hier")
   → Utilise "récemment" ou la date exacte si connue
-- Si jamais tu évoques l'utilisateur (le narrateur, celui qui fait la note audio), utilise 'l'utilisateur' pour le désigner. 
+- Si jamais tu évoques l'utilisateur (le narrateur, celui qui fait la note audio), utilise 'l'utilisateur' pour le désigner.
+
+GESTION DE LA TEMPORALITÉ:
+- Les notes sont ordonnées de la plus ANCIENNE à la plus RÉCENTE
+- Chaque note commence par sa date entre crochets [date]
+- EN CAS DE CONTRADICTION: seule l'info la plus récente compte
+- Si une note récente annule/contredit une info ancienne, N'INCLUS PAS l'info obsolète
+- Exemple: si une note dit "lance un projet X" puis une note plus récente dit "abandonne le projet X", ne mentionne PAS le lancement du projet
 
 NOTES SUR ${contactName}:
 ${allTranscriptions}

@@ -460,9 +460,23 @@ export default function ReviewScreen() {
 
       noteService.getByContact(finalContactId)
         .then((notes) => {
-          const transcriptions = notes
-            .map((noteItem) => noteItem.transcription)
-            .filter((t): t is string => !!t);
+          const sortedNotes = [...notes]
+            .filter((noteItem) => !!noteItem.transcription)
+            .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+
+          const transcriptions = sortedNotes.map((noteItem) => {
+            const date = new Date(noteItem.createdAt);
+            const formattedDate = date.toLocaleDateString('fr-FR', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            });
+            const formattedTime = date.toLocaleTimeString('fr-FR', {
+              hour: '2-digit',
+              minute: '2-digit',
+            });
+            return `[${formattedDate} à ${formattedTime}]\n${noteItem.transcription}`;
+          });
 
           if (transcriptions.length > 0) {
             return generateSummary({ contactName, transcriptions });
