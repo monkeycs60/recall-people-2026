@@ -171,16 +171,19 @@ export const useRecording = () => {
       // Reload contacts to ensure we have the latest data
       await loadContacts();
 
+      // Get fresh contacts from store after reload (avoid stale closure)
+      const freshContacts = useContactsStore.getState().contacts;
+
       // Transcribe audio
       const transcriptionResult = await transcribeAudio(uri);
       setCurrentTranscription(transcriptionResult.transcript);
 
       // If a contact is preselected, skip selection and go directly to review
       if (preselectedContactId) {
-        const preselectedContact = contacts.find((contact) => contact.id === preselectedContactId);
+        const preselectedContact = freshContacts.find((contact) => contact.id === preselectedContactId);
 
         if (preselectedContact) {
-          const contactsForExtraction = contacts.map((contact) => ({
+          const contactsForExtraction = freshContacts.map((contact) => ({
             id: contact.id,
             firstName: contact.firstName,
             lastName: contact.lastName,
@@ -242,7 +245,7 @@ export const useRecording = () => {
       }
 
       // Detect contact using LLM
-      const contactsForDetection = contacts.map((contact) => ({
+      const contactsForDetection = freshContacts.map((contact) => ({
         id: contact.id,
         firstName: contact.firstName,
         lastName: contact.lastName,
