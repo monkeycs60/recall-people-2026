@@ -1,6 +1,7 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import { Language } from '@/types';
+import { getLocales } from 'expo-localization';
+import { Language, SUPPORTED_LANGUAGES, DEFAULT_LANGUAGE } from '@/types';
 
 import fr from '@/locales/fr.json';
 import en from '@/locales/en.json';
@@ -16,9 +17,22 @@ const resources = {
   de: { translation: de },
 };
 
+// Detect device language at startup
+const getInitialLanguage = (): Language => {
+  const locales = getLocales();
+  if (locales.length === 0) return DEFAULT_LANGUAGE;
+
+  const deviceLang = locales[0].languageCode;
+  if (deviceLang && SUPPORTED_LANGUAGES.includes(deviceLang as Language)) {
+    return deviceLang as Language;
+  }
+
+  return DEFAULT_LANGUAGE;
+};
+
 i18n.use(initReactI18next).init({
   resources,
-  lng: 'fr',
+  lng: getInitialLanguage(),
   fallbackLng: 'en',
   interpolation: {
     escapeValue: false,
