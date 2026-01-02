@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Recall People",
-    "slug": "recall-people-2026",
+    "slug": "recall-people",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -21,7 +21,11 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.monkeycs60.recallpeople2026"
+      "package": "com.monkeycs60.recallpeople2026",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
     "web": {
       "output": "static",
@@ -55,6 +59,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "005eaea1-73bc-47b0-80e8-5e15dee1c600"
+      }
+    },
+    "owner": "clement-serizay"
   }
 }
