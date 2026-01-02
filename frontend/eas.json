@@ -44,7 +44,7 @@
       },
       "channel": "production",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://api.recall-people.com"
+        "EXPO_PUBLIC_API_URL": "https://recall-people-api.clement-serizay.workers.dev"
       }
     },
     "local-android": {

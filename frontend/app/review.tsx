@@ -520,6 +520,8 @@ export default function ReviewScreen() {
         generateIceBreakers(requestData)
           .then(async (iceBreakers) => {
             await contactService.update(finalContactId, { iceBreakers });
+            queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
+            queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(finalContactId) });
           })
           .catch(() => {});
       }

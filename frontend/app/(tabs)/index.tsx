@@ -4,10 +4,17 @@ import { useTranslation } from 'react-i18next';
 import { RecordButton } from '@/components/RecordButton';
 import { useRecording } from '@/hooks/useRecording';
 import { useContactsStore } from '@/stores/contacts-store';
+import { Colors } from '@/constants/theme';
 
 export default function HomeScreen() {
   const { t } = useTranslation();
-  const { toggleRecording, isRecording, isProcessing } = useRecording();
+  const {
+    toggleRecording,
+    isRecording,
+    isProcessing,
+    recordingDuration,
+    maxRecordingDuration,
+  } = useRecording();
   const { isInitialized, loadContacts } = useContactsStore();
   const [hasLoadedContacts, setHasLoadedContacts] = useStateReact(false);
 
@@ -17,31 +24,83 @@ export default function HomeScreen() {
     setHasLoadedContacts(true);
   }
 
+  const formatDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
   return (
-    <View className="flex-1 bg-background items-center justify-center px-6">
-      <Text className="text-3xl font-bold text-textPrimary mb-4 text-center">
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: Colors.background,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 24,
+      }}
+    >
+      <Text
+        style={{
+          fontSize: 28,
+          fontWeight: 'bold',
+          color: Colors.textPrimary,
+          marginBottom: 16,
+          textAlign: 'center',
+        }}
+      >
         Recall People
       </Text>
 
-      <Text className="text-textSecondary mb-12 text-center">
-        {isRecording
-          ? t('home.recording')
-          : isProcessing
-          ? t('home.processing')
-          : t('home.pressToRecord')}
-      </Text>
+      {isRecording ? (
+        <View style={{ alignItems: 'center', marginBottom: 48 }}>
+          <Text
+            style={{
+              fontFamily: 'PlayfairDisplay_500Medium',
+              fontSize: 48,
+              color: Colors.primary,
+              textAlign: 'center',
+            }}
+          >
+            {formatDuration(recordingDuration)}
+          </Text>
+          <Text
+            style={{
+              fontSize: 14,
+              color: Colors.textMuted,
+              textAlign: 'center',
+            }}
+          >
+            {formatDuration(maxRecordingDuration - recordingDuration)} {t('record.remaining', { defaultValue: 'restant' })}
+          </Text>
+        </View>
+      ) : isProcessing ? (
+        <Text
+          style={{
+            color: Colors.textSecondary,
+            marginBottom: 48,
+            textAlign: 'center',
+          }}
+        >
+          {t('home.transcribing')}
+        </Text>
+      ) : (
+        <Text
+          style={{
+            color: Colors.textSecondary,
+            marginBottom: 48,
+            textAlign: 'center',
+          }}
+        >
+          {t('home.pressToRecord')}
+        </Text>
+      )}
 
       <RecordButton
         onPress={toggleRecording}
         isRecording={isRecording}
         isProcessing={isProcessing}
       />
-
-      {isProcessing && (
-        <Text className="text-textMuted mt-8 text-center">
-          {t('home.transcribing')}
-        </Text>
-      )}
     </View>
   );
 }
