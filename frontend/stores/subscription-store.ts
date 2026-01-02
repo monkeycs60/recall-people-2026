@@ -23,7 +23,7 @@ const getCurrentMonthKey = (): string => {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 };
 
-const FREE_NOTES_PER_MONTH = 5;
+const FREE_NOTES_PER_MONTH = 10;
 const FREE_MAX_DURATION_SECONDS = 60; // 1 minute
 const PREMIUM_MAX_DURATION_SECONDS = 180; // 3 minutes
 
