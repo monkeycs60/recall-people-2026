@@ -25,12 +25,15 @@ import {
 	Flame,
 	Sparkles,
 	Zap,
+	Plus,
+	UserPlus,
 } from 'lucide-react-native';
 import { Colors } from '@/constants/theme';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { ContactAvatar } from '@/components/contact/ContactAvatar';
 import { getContactDisplayName } from '@/utils/contactDisplayName';
 import { ContactListSkeleton } from '@/components/skeleton/ContactListSkeleton';
+import { CreateContactModal } from '@/components/contact/CreateContactModal';
 import { queryKeys } from '@/lib/query-keys';
 import { contactService } from '@/services/contact.service';
 
@@ -62,6 +65,17 @@ export default function ContactsScreen() {
 		useContactIdsForGroup(selectedGroupId);
 
 	const [searchQuery, setSearchQuery] = useState('');
+	const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
+
+	const handleCreateContact = async (firstName: string, lastName: string) => {
+		const newContact = await contactService.create({
+			firstName,
+			lastName: lastName || undefined,
+		});
+		queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
+		setIsCreateModalVisible(false);
+		router.push(`/contact/${newContact.id}`);
+	};
 
 	const viewabilityConfig = useRef({
 		itemVisiblePercentThreshold: 50,
@@ -190,12 +204,19 @@ export default function ContactsScreen() {
 			<View style={{ paddingTop: insets.top + 16, paddingHorizontal: 24 }}>
 				<View style={styles.headerRow}>
 					<Text style={styles.screenTitle}>{t('contacts.title')}</Text>
-					<Pressable
-						style={styles.aiSearchButton}
-						onPress={() => router.push('/(tabs)/search')}>
-						<Sparkles size={16} color={Colors.secondary} />
-						<Text style={styles.aiSearchButtonText}>AI</Text>
-					</Pressable>
+					<View style={styles.headerButtons}>
+						<Pressable
+							style={styles.addButton}
+							onPress={() => setIsCreateModalVisible(true)}>
+							<Plus size={18} color={Colors.textInverse} />
+						</Pressable>
+						<Pressable
+							style={styles.aiSearchButton}
+							onPress={() => router.push('/(tabs)/search')}>
+							<Sparkles size={16} color={Colors.secondary} />
+							<Text style={styles.aiSearchButtonText}>AI</Text>
+						</Pressable>
+					</View>
 				</View>
 
 				<View style={styles.searchContainer}>
@@ -270,9 +291,19 @@ export default function ContactsScreen() {
 							: t('contacts.noContacts')}
 					</Text>
 					{!searchQuery && (
-						<Text style={styles.emptyStateDescription}>
-							{t('contacts.noContactsDescription')}
-						</Text>
+						<>
+							<Text style={styles.emptyStateDescription}>
+								{t('contacts.noContactsDescription')}
+							</Text>
+							<Pressable
+								style={styles.emptyStateButton}
+								onPress={() => setIsCreateModalVisible(true)}>
+								<UserPlus size={18} color={Colors.textInverse} />
+								<Text style={styles.emptyStateButtonText}>
+									{t('contacts.addContact')}
+								</Text>
+							</Pressable>
+						</>
 					)}
 				</View>
 			) : (
@@ -295,6 +326,12 @@ export default function ContactsScreen() {
 					}
 				/>
 			)}
+
+			<CreateContactModal
+				visible={isCreateModalVisible}
+				onClose={() => setIsCreateModalVisible(false)}
+				onCreate={handleCreateContact}
+			/>
 		</View>
 	);
 }
@@ -318,6 +355,19 @@ const styles = StyleSheet.create({
 		fontFamily: 'PlayfairDisplay_700Bold',
 		fontSize: 32,
 		color: Colors.textPrimary,
+	},
+	headerButtons: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: 10,
+	},
+	addButton: {
+		width: 40,
+		height: 40,
+		borderRadius: 20,
+		backgroundColor: Colors.primary,
+		alignItems: 'center',
+		justifyContent: 'center',
 	},
 	aiSearchButton: {
 		flexDirection: 'row',
@@ -457,5 +507,20 @@ const styles = StyleSheet.create({
 		color: Colors.textSecondary,
 		textAlign: 'center',
 		lineHeight: 22,
+	},
+	emptyStateButton: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: 8,
+		marginTop: 24,
+		backgroundColor: Colors.primary,
+		paddingVertical: 14,
+		paddingHorizontal: 24,
+		borderRadius: 12,
+	},
+	emptyStateButtonText: {
+		fontSize: 16,
+		fontWeight: '600',
+		color: Colors.textInverse,
 	},
 });

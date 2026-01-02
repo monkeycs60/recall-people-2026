@@ -80,7 +80,12 @@
     "title": "Contacts",
     "searchPlaceholder": "Qui cherchez-vous ?",
     "noContacts": "Le métier de sa compagne. Le prénom de ses enfants. Ce projet dont il est si fier.",
-    "noContactsDescription": "Ne soyez plus jamais pris au dépourvu."
+    "noContactsDescription": "Ne soyez plus jamais pris au dépourvu.",
+    "addContact": "Ajouter un contact",
+    "createModal": {
+      "title": "Nouveau contact",
+      "create": "Créer"
+    }
   },
   "search": {
     "title": "Explore IA",
@@ -448,7 +453,9 @@
     "premiumTitle": "Vous êtes Pro !",
     "premiumSubtitle": "Merci de soutenir Recall People",
     "unlimitedNotes": "Notes illimitées",
-    "aiSearch": "Recherche IA"
+    "aiSearch": "Recherche IA",
+    "manageTitle": "Gérer l'abonnement",
+    "manageDescription": "Pour gérer ou résilier votre abonnement, allez dans les paramètres de votre appareil > Abonnements."
   },
   "record": {
     "remaining": "restant"

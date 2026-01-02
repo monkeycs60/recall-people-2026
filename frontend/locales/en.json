@@ -80,7 +80,12 @@
     "title": "Contacts",
     "searchPlaceholder": "Who are you looking for?",
     "noContacts": "Their partner's job. Their kids' names. That project they're so proud of.",
-    "noContactsDescription": "Never be caught off guard again."
+    "noContactsDescription": "Never be caught off guard again.",
+    "addContact": "Add a contact",
+    "createModal": {
+      "title": "New contact",
+      "create": "Create"
+    }
   },
   "search": {
     "title": "AI Explore",
@@ -448,7 +453,9 @@
     "premiumTitle": "You're a Pro!",
     "premiumSubtitle": "Thanks for supporting Recall People",
     "unlimitedNotes": "Unlimited notes",
-    "aiSearch": "AI Search"
+    "aiSearch": "AI Search",
+    "manageTitle": "Manage subscription",
+    "manageDescription": "To manage or cancel your subscription, go to your device settings > Subscriptions."
   },
   "record": {
     "remaining": "remaining"

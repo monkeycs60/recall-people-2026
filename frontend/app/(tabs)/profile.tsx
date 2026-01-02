@@ -69,6 +69,12 @@ export default function ProfileScreen() {
     const url = await revenueCatService.getManagementURL();
     if (url) {
       Linking.openURL(url);
+    } else {
+      Alert.alert(
+        t('subscription.manageTitle'),
+        t('subscription.manageDescription'),
+        [{ text: t('common.confirm') }]
+      );
     }
   };
 

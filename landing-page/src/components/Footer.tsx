@@ -11,9 +11,9 @@ export default function Footer() {
           </div>
 
           <div className="flex items-center space-x-6 text-sm text-text-secondary">
-            <a href="#" className="hover:text-primary transition-colors">Privacy</a>
-            <a href="#" className="hover:text-primary transition-colors">Terms</a>
-            <a href="#" className="hover:text-primary transition-colors">Support</a>
+            <a href="/privacy" className="hover:text-primary transition-colors">Privacy</a>
+            <a href="/terms" className="hover:text-primary transition-colors">Terms</a>
+            <a href="mailto:support@recall-people.com" className="hover:text-primary transition-colors">Support</a>
           </div>
 
           <div className="flex items-center text-sm text-text-muted">
