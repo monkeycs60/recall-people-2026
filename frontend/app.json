@@ -24,6 +24,8 @@
       "package": "com.monkeycs60.recallpeople2026",
       "permissions": [
         "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS"
       ]
     },
@@ -66,6 +68,10 @@
         "projectId": "005eaea1-73bc-47b0-80e8-5e15dee1c600"
       }
     },
-    "owner": "clement-serizay"
+    "owner": "clement-serizay",
+    "runtimeVersion": "1.0.0",
+    "updates": {
+      "url": "https://u.expo.dev/005eaea1-73bc-47b0-80e8-5e15dee1c600"
+    }
   }
 }
