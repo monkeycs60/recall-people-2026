@@ -133,6 +133,11 @@ export const verifyToken = async (): Promise<User | null> => {
     });
 
     if (!response.ok) {
+      // Token expired or invalid - try to refresh before giving up
+      const refreshResult = await refreshAccessToken();
+      if (refreshResult) {
+        return refreshResult.user;
+      }
       await clearAuth();
       return null;
     }
@@ -140,7 +145,12 @@ export const verifyToken = async (): Promise<User | null> => {
     const data = await response.json();
     await setUser(data.user);
     return data.user;
-  } catch (error) {
+  } catch {
+    // Network error - try to refresh before giving up
+    const refreshResult = await refreshAccessToken();
+    if (refreshResult) {
+      return refreshResult.user;
+    }
     await clearAuth();
     return null;
   }
