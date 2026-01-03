@@ -10,7 +10,8 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.monkeycs60.recallpeople2026"
+      "bundleIdentifier": "com.monkeycs60.recallpeople2026",
+      "buildNumber": "2"
     },
     "android": {
       "adaptiveIcon": {
