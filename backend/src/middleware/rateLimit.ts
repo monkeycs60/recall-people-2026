@@ -91,7 +91,7 @@ export const rateLimiters = {
 		keyType: 'ip',
 	}),
 	register: rateLimit({
-		limit: 5,
+		limit: 15,
 		window: 3600, // 1 hour
 		keyPrefix: 'rl:register',
 		keyType: 'ip',
