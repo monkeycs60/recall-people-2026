@@ -214,7 +214,15 @@
       "inDays_one": "In {{count}} day!",
       "inDays_other": "In {{count}} days!",
       "years_one": "{{count}} year",
-      "years_other": "{{count}} years"
+      "years_other": "{{count}} years",
+      "gender": {
+        "male": "Male",
+        "female": "Female",
+        "unknown": "Not set"
+      }
+    },
+    "genderModal": {
+      "title": "Gender"
     },
     "menu": {
       "options": "Options",

@@ -1,11 +1,12 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Phone, Mail, Cake, ChevronDown } from 'lucide-react-native';
+import { Phone, Mail, Cake, ChevronDown, User } from 'lucide-react-native';
 import { Linking } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { Colors } from '@/constants/theme';
 import { toast } from 'sonner-native';
+import { Gender } from '@/types';
 
 type ContactCardProps = {
   phone?: string;
@@ -13,9 +14,11 @@ type ContactCardProps = {
   birthdayDay?: number;
   birthdayMonth?: number;
   birthdayYear?: number;
+  gender?: Gender;
   onEditPhone: () => void;
   onEditEmail: () => void;
   onEditBirthday: () => void;
+  onEditGender: () => void;
 };
 
 export function ContactCard({
@@ -24,9 +27,11 @@ export function ContactCard({
   birthdayDay,
   birthdayMonth,
   birthdayYear,
+  gender,
   onEditPhone,
   onEditEmail,
   onEditBirthday,
+  onEditGender,
 }: ContactCardProps) {
   const { t } = useTranslation();
   const [phoneMenuOpen, setPhoneMenuOpen] = useState(false);
@@ -197,6 +202,15 @@ export function ContactCard({
             <Text style={styles.addButtonText}>{t('contact.contactCard.addBirthday')}</Text>
           </Pressable>
         )}
+      </View>
+
+      <View style={styles.row}>
+        <User size={18} color={Colors.primary} />
+        <Pressable style={styles.addButton} onPress={onEditGender}>
+          <Text style={gender && gender !== 'unknown' ? styles.value : styles.addButtonText}>
+            {t(`contact.contactCard.gender.${gender || 'unknown'}`)}
+          </Text>
+        </Pressable>
       </View>
     </View>
   );

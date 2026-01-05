@@ -34,6 +34,7 @@ import { DeleteContactDialog } from '@/components/contact/DeleteContactDialog';
 import { PhoneEditModal } from '@/components/contact/PhoneEditModal';
 import { EmailEditModal } from '@/components/contact/EmailEditModal';
 import { BirthdayEditModal } from '@/components/contact/BirthdayEditModal';
+import { GenderEditModal } from '@/components/contact/GenderEditModal';
 import { AvatarEditModal } from '@/components/contact/AvatarEditModal';
 import { Colors } from '@/constants/theme';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
@@ -141,6 +142,7 @@ export default function ContactDetailScreen() {
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showBirthdayModal, setShowBirthdayModal] = useState(false);
+  const [showGenderModal, setShowGenderModal] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
 
   // Sync contact data with local state
@@ -209,6 +211,13 @@ export default function ContactDetailScreen() {
         birthdayMonth: month,
         birthdayYear: year,
       },
+    });
+  };
+
+  const handleSaveGender = async (value: 'male' | 'female' | 'unknown') => {
+    await updateContactMutation.mutateAsync({
+      id: contactId,
+      data: { gender: value },
     });
   };
 
@@ -722,9 +731,11 @@ export default function ContactDetailScreen() {
             birthdayDay={contact.birthdayDay}
             birthdayMonth={contact.birthdayMonth}
             birthdayYear={contact.birthdayYear}
+            gender={contact.gender}
             onEditPhone={() => setShowPhoneModal(true)}
             onEditEmail={() => setShowEmailModal(true)}
             onEditBirthday={() => setShowBirthdayModal(true)}
+            onEditGender={() => setShowGenderModal(true)}
           />
 
           {isAddingFact && (
@@ -1003,6 +1014,15 @@ export default function ContactDetailScreen() {
           initialYear={contact?.birthdayYear}
           onSave={handleSaveBirthday}
           onClose={() => setShowBirthdayModal(false)}
+        />
+      )}
+
+      {showGenderModal && (
+        <GenderEditModal
+          visible={showGenderModal}
+          initialValue={contact?.gender}
+          onSave={handleSaveGender}
+          onClose={() => setShowGenderModal(false)}
         />
       )}
 
