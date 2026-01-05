@@ -38,6 +38,7 @@ const detectionSchema = z.object({
   contactId: z.string().nullable().describe('ID du contact existant si identifié, null sinon'),
   firstName: z.string().describe('Prénom du protagoniste principal'),
   lastName: z.string().nullable().describe('Nom de famille si mentionné explicitement'),
+  gender: z.enum(['male', 'female', 'unknown']).describe('Genre de la personne déduit du prénom'),
   suggestedNickname: z.string().nullable().describe('Surnom suggéré si pas de nom de famille (ex: "Paul Google", "Marie running")'),
   confidence: z.enum(['high', 'medium', 'low']).describe('Niveau de confiance dans la détection'),
   isNew: z.boolean().describe('true si le contact n\'existe pas dans la liste'),
@@ -283,6 +284,7 @@ detectContactRoutes.post('/', async (c) => {
       contactId: validatedDetection.contactId,
       firstName: validatedDetection.firstName,
       lastName: validatedDetection.lastName,
+      gender: validatedDetection.gender,
       suggestedNickname: validatedDetection.suggestedNickname,
       confidence: validatedDetection.confidence,
       isNew: validatedDetection.isNew,
@@ -379,17 +381,23 @@ RÈGLE CRITIQUE: Ne JAMAIS inventer un contactId. Si le prénom n'existe pas dan
 
 IMPORTANT: Réponds UNIQUEMENT avec un objet JSON valide, sans aucun texte avant ou après.
 
+7. DÉTECTION DU GENRE:
+   - Déduis le genre à partir du prénom (male/female/unknown)
+   - Utilise tes connaissances des prénoms français et internationaux
+   - En cas de doute ou prénom épicène (ex: Camille, Dominique, Claude) → "unknown"
+   - Le genre aide à personnaliser l'avatar du contact
+
 Exemple pour un contact existant identifié:
-{"contactId": "abc123", "firstName": "Marie", "lastName": null, "suggestedNickname": null, "confidence": "high", "isNew": false, "candidateIds": []}
+{"contactId": "abc123", "firstName": "Marie", "lastName": null, "gender": "female", "suggestedNickname": null, "confidence": "high", "isNew": false, "candidateIds": []}
 
 Exemple pour un nouveau contact sans nom de famille:
-{"contactId": null, "firstName": "Paul", "lastName": null, "suggestedNickname": "Paul Google", "confidence": "high", "isNew": true, "candidateIds": []}
+{"contactId": null, "firstName": "Paul", "lastName": null, "gender": "male", "suggestedNickname": "Paul Google", "confidence": "high", "isNew": true, "candidateIds": []}
 
 Exemple avec ambiguïté:
-{"contactId": null, "firstName": "Marie", "lastName": null, "suggestedNickname": null, "confidence": "medium", "isNew": false, "candidateIds": ["id1", "id2"]}
+{"contactId": null, "firstName": "Marie", "lastName": null, "gender": "female", "suggestedNickname": null, "confidence": "medium", "isNew": false, "candidateIds": ["id1", "id2"]}
 
 Exemple avec pronom et indice dans les sujets:
 Transcription: "Elle m'a raconté son date avec François"
 Contact Inès avec sujet "Date François"
-→ {"contactId": "ines-id", "firstName": "Inès", "lastName": null, "suggestedNickname": null, "confidence": "high", "isNew": false, "candidateIds": []}`;
+→ {"contactId": "ines-id", "firstName": "Inès", "lastName": null, "gender": "female", "suggestedNickname": null, "confidence": "high", "isNew": false, "candidateIds": []}`;
 }

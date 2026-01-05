@@ -47,6 +47,7 @@ export const initDatabase = async () => {
       last_name TEXT,
       nickname TEXT,
       photo_uri TEXT,
+      gender TEXT DEFAULT 'unknown',
       tags TEXT DEFAULT '[]',
       highlights TEXT DEFAULT '[]',
       ai_summary TEXT,
@@ -348,5 +349,17 @@ const runMigrations = async (database: SQLite.SQLiteDatabase) => {
     await database.execAsync("ALTER TABLE contacts ADD COLUMN birthday_day INTEGER");
     await database.execAsync("ALTER TABLE contacts ADD COLUMN birthday_month INTEGER");
     await database.execAsync("ALTER TABLE contacts ADD COLUMN birthday_year INTEGER");
+  }
+
+  // Check if gender column exists on contacts
+  const hasGender = contactsInfo.some((col) => col.name === 'gender');
+  if (!hasGender) {
+    await database.execAsync("ALTER TABLE contacts ADD COLUMN gender TEXT DEFAULT 'unknown'");
+  }
+
+  // Check if avatar_url column exists on contacts
+  const hasAvatarUrl = contactsInfo.some((col) => col.name === 'avatar_url');
+  if (!hasAvatarUrl) {
+    await database.execAsync("ALTER TABLE contacts ADD COLUMN avatar_url TEXT");
   }
 };

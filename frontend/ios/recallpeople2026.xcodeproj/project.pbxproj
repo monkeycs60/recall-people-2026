@@ -260,7 +260,7 @@
 					"-lc++",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.monkeycs60.recallpeople2026";
-				PRODUCT_NAME = "recallpeople2026";
+				PRODUCT_NAME = "RecallPeople";
 				SWIFT_OBJC_BRIDGING_HEADER = "recallpeople2026/recallpeople2026-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -289,7 +289,7 @@
 					"-lc++",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.monkeycs60.recallpeople2026";
-				PRODUCT_NAME = "recallpeople2026";
+				PRODUCT_NAME = "RecallPeople";
 				SWIFT_OBJC_BRIDGING_HEADER = "recallpeople2026/recallpeople2026-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";

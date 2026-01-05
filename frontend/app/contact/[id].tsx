@@ -34,6 +34,7 @@ import { DeleteContactDialog } from '@/components/contact/DeleteContactDialog';
 import { PhoneEditModal } from '@/components/contact/PhoneEditModal';
 import { EmailEditModal } from '@/components/contact/EmailEditModal';
 import { BirthdayEditModal } from '@/components/contact/BirthdayEditModal';
+import { AvatarEditModal } from '@/components/contact/AvatarEditModal';
 import { Colors } from '@/constants/theme';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { useAppStore } from '@/stores/app-store';
@@ -140,6 +141,7 @@ export default function ContactDetailScreen() {
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showBirthdayModal, setShowBirthdayModal] = useState(false);
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
 
   // Sync contact data with local state
   useEffect(() => {
@@ -293,6 +295,14 @@ export default function ContactDetailScreen() {
   const handleAddNote = () => {
     setPreselectedContactId(contactId);
     router.push('/record');
+  };
+
+  const handleEditAvatar = () => {
+    setShowAvatarModal(true);
+  };
+
+  const handleSaveAvatar = (avatarUrl: string | null) => {
+    invalidate();
   };
 
   // Add new items handlers
@@ -461,7 +471,11 @@ export default function ContactDetailScreen() {
             <ContactAvatar
               firstName={contact.firstName}
               lastName={contact.lastName}
+              gender={contact.gender}
+              avatarUrl={contact.avatarUrl}
               size="large"
+              onPress={handleEditAvatar}
+              showEditBadge
             />
           </View>
 
@@ -989,6 +1003,17 @@ export default function ContactDetailScreen() {
           initialYear={contact?.birthdayYear}
           onSave={handleSaveBirthday}
           onClose={() => setShowBirthdayModal(false)}
+        />
+      )}
+
+      {showAvatarModal && (
+        <AvatarEditModal
+          visible={showAvatarModal}
+          contactId={contactId}
+          firstName={contact?.firstName || ''}
+          currentAvatarUrl={contact?.avatarUrl}
+          onSave={handleSaveAvatar}
+          onClose={() => setShowAvatarModal(false)}
         />
       )}
     </KeyboardAvoidingView>

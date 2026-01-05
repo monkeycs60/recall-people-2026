@@ -1,9 +1,11 @@
 import { create } from 'zustand';
 import { devtools, persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { isEmailWhitelisted } from '@/config/pro-whitelist';
 
 type SubscriptionState = {
   isPremium: boolean;
+  isTestPro: boolean;
   notesCreatedThisMonth: number;
   currentMonthKey: string; // Format: "2026-01"
   isHydrated: boolean;
@@ -11,6 +13,9 @@ type SubscriptionState = {
 
 type SubscriptionActions = {
   setIsPremium: (isPremium: boolean) => void;
+  activateTestPro: () => void;
+  deactivateTestPro: () => void;
+  checkWhitelistStatus: (email: string | undefined | null) => void;
   incrementNotesCount: () => void;
   canCreateNote: () => boolean;
   getMaxRecordingDuration: () => number;
@@ -32,11 +37,22 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
     persist(
       (set, get) => ({
         isPremium: false,
+        isTestPro: false,
         notesCreatedThisMonth: 0,
         currentMonthKey: getCurrentMonthKey(),
         isHydrated: false,
 
         setIsPremium: (isPremium) => set({ isPremium }),
+
+        activateTestPro: () => set({ isTestPro: true, isPremium: true }),
+
+        deactivateTestPro: () => set({ isTestPro: false, isPremium: false }),
+
+        checkWhitelistStatus: (email) => {
+          if (isEmailWhitelisted(email)) {
+            set({ isTestPro: true, isPremium: true });
+          }
+        },
 
         incrementNotesCount: () => {
           const state = get();
@@ -46,14 +62,16 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
 
         canCreateNote: () => {
           const state = get();
-          if (state.isPremium) return true;
+          if (state.isPremium || state.isTestPro) return true;
           state.resetMonthlyCountIfNeeded();
           return get().notesCreatedThisMonth < FREE_NOTES_PER_MONTH;
         },
 
         getMaxRecordingDuration: () => {
           const state = get();
-          return state.isPremium ? PREMIUM_MAX_DURATION_SECONDS : FREE_MAX_DURATION_SECONDS;
+          return state.isPremium || state.isTestPro
+            ? PREMIUM_MAX_DURATION_SECONDS
+            : FREE_MAX_DURATION_SECONDS;
         },
 
         resetMonthlyCountIfNeeded: () => {
@@ -78,6 +96,7 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
         },
         partialize: (state) => ({
           isPremium: state.isPremium,
+          isTestPro: state.isTestPro,
           notesCreatedThisMonth: state.notesCreatedThisMonth,
           currentMonthKey: state.currentMonthKey,
         }),

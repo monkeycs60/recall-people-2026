@@ -1,8 +1,9 @@
 import { Tabs, useRouter } from 'expo-router';
 import { Users, User, Calendar, Search } from 'lucide-react-native';
-import { useEffect, useState } from 'react';
+import { useState, useCallback } from 'react';
+import { useFocusEffect } from 'expo-router';
 import { isLoggedIn } from '@/lib/auth';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useSettingsStore } from '@/stores/settings-store';
 import { Onboarding } from '@/components/Onboarding';
@@ -15,41 +16,53 @@ export default function TabLayout() {
   const { t } = useTranslation();
   const hasSeenOnboarding = useSettingsStore((state) => state.hasSeenOnboarding);
   const setHasSeenOnboarding = useSettingsStore((state) => state.setHasSeenOnboarding);
+  const [justCompletedOnboarding, setJustCompletedOnboarding] = useState(false);
 
-  useEffect(() => {
-    isLoggedIn().then((loggedIn) => {
-      if (!loggedIn) {
-        router.replace('/(auth)/login');
-      } else {
-        setChecking(false);
-      }
-    });
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      isLoggedIn().then((loggedIn) => {
+        if (!loggedIn) {
+          router.replace('/(auth)/login');
+        } else {
+          setChecking(false);
+        }
+      });
+    }, [router])
+  );
 
   const handleOnboardingComplete = () => {
     setHasSeenOnboarding(true);
+    setJustCompletedOnboarding(true);
   };
 
   if (checking) {
     return (
-      <View className="flex-1 items-center justify-center bg-background">
+      <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={Colors.primary} />
       </View>
     );
   }
 
-  // Show onboarding if user hasn't seen it yet
   if (!hasSeenOnboarding) {
     return <Onboarding onComplete={handleOnboardingComplete} />;
   }
 
+  const initialRouteName = justCompletedOnboarding ? 'index' : 'contacts';
+
   return (
     <Tabs
+      initialRouteName={initialRouteName}
       tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{
         headerShown: false,
       }}
     >
+      <Tabs.Screen
+        name="index"
+        options={{
+          href: null,
+        }}
+      />
       <Tabs.Screen
         name="contacts"
         options={{
@@ -78,12 +91,15 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => <Search color={color} size={size} />,
         }}
       />
-      <Tabs.Screen
-        name="index"
-        options={{
-          href: null,
-        }}
-      />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.background,
+  },
+});

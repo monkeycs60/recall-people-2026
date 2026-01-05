@@ -265,6 +265,35 @@
       "birthday": "Birthday",
       "accept": "Accept",
       "ignore": "Ignore"
+    },
+    "avatar": {
+      "title": "Profile Picture",
+      "fromGallery": "Choose from gallery",
+      "fromGalleryDescription": "Select a photo from your device",
+      "generateWithAI": "Generate with AI",
+      "generateWithAIDescription": "Create a unique illustrated avatar",
+      "removeAvatar": "Remove current avatar",
+      "describeAppearance": "Describe the appearance",
+      "describeHint": "Describe {{firstName}}'s physical features and accessories",
+      "promptPlaceholder": "Brown hair, blue eyes, glasses, beard...",
+      "examples": "Examples:",
+      "example1": "Short blond hair, green eyes, freckles",
+      "example2": "Long dark hair, round glasses, red scarf",
+      "generate": "Generate",
+      "uploading": "Uploading...",
+      "generating": "Generating avatar...",
+      "uploadSuccess": "Avatar updated!",
+      "uploadError": "Failed to upload avatar",
+      "generateSuccess": "Avatar generated!",
+      "generateError": "Failed to generate avatar",
+      "deleteSuccess": "Avatar removed",
+      "deleteError": "Failed to remove avatar",
+      "permissionDenied": "Photo access required",
+      "promptRequired": "Please describe the appearance"
+    },
+    "photo": {
+      "permissionTitle": "Photo Access Required",
+      "permissionMessage": "Please grant access to your photo library to select a picture."
     }
   },
   "selectContact": {
@@ -463,9 +492,17 @@
   "paywall": {
     "title": "Upgrade to Premium",
     "reason": {
-      "notesLimit": "You've reached your free monthly limit of 5 notes",
+      "notesLimit": "You've reached your free monthly limit of 10 notes",
       "aiSearch": "AI Search is a premium feature",
       "recordingDuration": "Longer recordings require premium"
+    },
+    "errors": {
+      "purchaseFailed": "Purchase failed",
+      "purchaseFailedDescription": "Unable to complete your purchase. Please try again.",
+      "restoreFailed": "Restore failed",
+      "restoreFailedDescription": "Unable to restore your purchases. Please try again.",
+      "noOfferingsAvailable": "No subscription plans available",
+      "loadingFailed": "Unable to load subscription options"
     },
     "features": {
       "unlimitedNotes": "Unlimited audio notes",
@@ -479,6 +516,26 @@
     "bestValue": "BEST VALUE",
     "save30": "Save 30%",
     "subscribe": "Subscribe Now",
-    "restore": "Restore Purchases"
+    "restore": "Restore Purchases",
+    "priceMonthly": "$6.99",
+    "priceAnnual": "$59.99"
+  },
+  "recording": {
+    "errors": {
+      "noCredits": "No credits remaining",
+      "noCreditsDescription": "You've used all your free notes this month",
+      "permissionDenied": "Microphone permission denied",
+      "permissionDeniedDescription": "Please allow microphone access to record audio",
+      "recordingFailed": "Recording failed",
+      "recordingFailedDescription": "An error occurred while recording. Please try again."
+    }
+  },
+  "testPro": {
+    "badge": "Test Mode",
+    "title": "Test Pro Access",
+    "description": "Activate Pro features for testing without a real subscription. This is only visible to authorized test accounts.",
+    "activate": "Activate Pro",
+    "deactivate": "Deactivate Pro",
+    "active": "Test Pro Active"
   }
 }

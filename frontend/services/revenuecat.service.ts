@@ -6,8 +6,11 @@ const REVENUECAT_API_KEY_IOS = process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY || '';
 const REVENUECAT_API_KEY_ANDROID = process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY || '';
 const ENTITLEMENT_ID = 'Recall People Pro';
 
-// In dev mode, preserve local premium status to avoid losing fake payments
-const isDev = __DEV__;
+const shouldPreserveDevPremiumStatus = (): boolean => {
+  if (!__DEV__) return false;
+  const store = useSubscriptionStore.getState();
+  return store.isHydrated && store.isPremium;
+};
 
 export const revenueCatService = {
   initialize: async (userId?: string): Promise<void> => {
@@ -25,7 +28,12 @@ export const revenueCatService = {
     }
 
     // Set up listener for subscription changes
+    // In dev mode, preserve local premium status to avoid losing fake payments
     Purchases.addCustomerInfoUpdateListener((customerInfo) => {
+      if (shouldPreserveDevPremiumStatus()) {
+        console.log('[RevenueCat] Dev mode: preserving local premium status in listener');
+        return;
+      }
       const isPremium = customerInfo.entitlements.active[ENTITLEMENT_ID] !== undefined;
       useSubscriptionStore.getState().setIsPremium(isPremium);
     });
@@ -38,8 +46,7 @@ export const revenueCatService = {
     try {
       // In dev mode, if user is already premium locally, don't override with RevenueCat status
       // This preserves fake payments for testing
-      const currentLocalStatus = useSubscriptionStore.getState().isPremium;
-      if (isDev && currentLocalStatus) {
+      if (shouldPreserveDevPremiumStatus()) {
         console.log('[RevenueCat] Dev mode: preserving local premium status');
         return true;
       }

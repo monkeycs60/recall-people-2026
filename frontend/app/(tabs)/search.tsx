@@ -2,6 +2,7 @@ import { View, Text, KeyboardAvoidingView, Platform, StyleSheet, Pressable, Moda
 import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import { Search } from 'lucide-react-native';
 import { useContactsQuery } from '@/hooks/useContactsQuery';
 import { useSemanticSearch } from '@/hooks/useSemanticSearch';
 import { useSubscriptionStore } from '@/stores/subscription-store';
@@ -9,8 +10,9 @@ import { SearchInput } from '@/components/search/SearchInput';
 import { SearchSkeleton } from '@/components/search/SearchSkeleton';
 import { SearchResults } from '@/components/search/SearchResults';
 import { Paywall } from '@/components/Paywall';
-import { Colors } from '@/constants/theme';
+import { Colors, BorderRadius, Spacing } from '@/constants/theme';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { showInfoToast } from '@/lib/error-handler';
 
 const SUGGESTION_CHIPS = [
   'search.example1',
@@ -30,6 +32,10 @@ export default function SearchScreen() {
 
   const handleSubmit = () => {
     if (!isPremium) {
+      showInfoToast(
+        t('paywall.reason.aiSearch'),
+        t('subscription.upgradeToPro')
+      );
       setShowPaywall(true);
       return;
     }
@@ -54,6 +60,14 @@ export default function SearchScreen() {
   };
 
   const handleSuggestionPress = (suggestionKey: string) => {
+    if (!isPremium) {
+      showInfoToast(
+        t('paywall.reason.aiSearch'),
+        t('subscription.upgradeToPro')
+      );
+      setShowPaywall(true);
+      return;
+    }
     const suggestionText = t(suggestionKey);
     setQuery(suggestionText);
     setHasSearched(true);
@@ -89,17 +103,23 @@ export default function SearchScreen() {
         {showSuggestions && (
           <Animated.View entering={FadeInDown.duration(400)}>
             <Text style={styles.descriptionText}>{t('search.description')}</Text>
-            <Text style={styles.suggestionsLabel}>{t('search.examples')} :</Text>
-            <View style={styles.suggestionsColumn}>
+            <Text style={styles.suggestionsLabel}>{t('search.examples')}</Text>
+            <View style={styles.suggestionsContainer}>
               {SUGGESTION_CHIPS.map((chipKey, index) => (
                 <Animated.View
                   key={chipKey}
-                  entering={FadeInDown.delay(index * 100).duration(300)}
+                  entering={FadeInDown.delay(index * 80).duration(300)}
                 >
                   <Pressable
-                    style={styles.suggestionChip}
+                    style={({ pressed }) => [
+                      styles.suggestionChip,
+                      pressed && styles.suggestionChipPressed,
+                    ]}
                     onPress={() => handleSuggestionPress(chipKey)}
                   >
+                    <View style={styles.suggestionIconContainer}>
+                      <Search size={14} color={Colors.textMuted} />
+                    </View>
                     <Text style={styles.suggestionChipText}>{t(chipKey)}</Text>
                   </Pressable>
                 </Animated.View>
@@ -127,13 +147,13 @@ const styles = StyleSheet.create({
     fontFamily: 'PlayfairDisplay_700Bold',
     fontSize: 32,
     color: Colors.textPrimary,
-    marginBottom: 16,
+    marginBottom: Spacing.md,
   },
   errorContainer: {
     backgroundColor: `${Colors.error}15`,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+    marginBottom: Spacing.md,
     borderWidth: 1,
     borderColor: `${Colors.error}30`,
   },
@@ -145,29 +165,52 @@ const styles = StyleSheet.create({
   descriptionText: {
     fontSize: 15,
     color: Colors.textSecondary,
-    marginBottom: 20,
+    marginBottom: Spacing.lg,
     lineHeight: 22,
   },
   suggestionsLabel: {
-    fontSize: 14,
+    fontSize: 13,
     color: Colors.textMuted,
-    marginBottom: 12,
-    fontStyle: 'italic',
+    marginBottom: Spacing.md,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    fontWeight: '500',
   },
-  suggestionsColumn: {
-    gap: 12,
+  suggestionsContainer: {
+    gap: Spacing.sm,
   },
   suggestionChip: {
-    backgroundColor: Colors.primaryLight,
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.surface,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: Colors.primary,
+    borderColor: Colors.borderLight,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  suggestionChipPressed: {
+    backgroundColor: Colors.surfaceHover,
+    borderColor: Colors.border,
+  },
+  suggestionIconContainer: {
+    width: 28,
+    height: 28,
+    borderRadius: BorderRadius.sm,
+    backgroundColor: Colors.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: Spacing.sm + 4,
   },
   suggestionChipText: {
-    color: Colors.primary,
+    color: Colors.textSecondary,
     fontSize: 15,
-    fontWeight: '500',
+    fontWeight: '400',
+    flex: 1,
   },
 });

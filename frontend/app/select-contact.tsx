@@ -169,11 +169,16 @@ export default function SelectContactScreen() {
         extraction.contactIdentified.firstName = parts[0];
         extraction.contactIdentified.lastName = parts.length > 1 ? parts.slice(1).join(' ') : undefined;
         extraction.contactIdentified.suggestedNickname = undefined;
+        // Keep the gender from detection even when name is edited
+        if (detection) {
+          extraction.contactIdentified.gender = detection.gender;
+        }
       } else if (detection) {
         // No edit - use detection values and clear extraction values
         extraction.contactIdentified.firstName = detection.firstName;
         extraction.contactIdentified.lastName = detection.lastName || undefined;
         extraction.contactIdentified.suggestedNickname = detection.suggestedNickname || undefined;
+        extraction.contactIdentified.gender = detection.gender;
       }
 
       setCurrentExtraction(extraction);

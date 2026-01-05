@@ -1,97 +1,14 @@
-# Recall - TODO
+https://docs.google.com/document/d/1wJ2i86DOkyXpNi4p9pmHPN0RL8yzm9YIAOvwwjfuY-s/edit?tab=t.0
 
-## P0 - Sécurité & Déploiement Backend
+Retours Recall People :
 
-### Secrets Cloudflare (à configurer une seule fois)
-
-```bash
-npx wrangler secret put DATABASE_URL
-npx wrangler secret put JWT_SECRET
-npx wrangler secret put DEEPGRAM_API_KEY
-npx wrangler secret put XAI_API_KEY
-npx wrangler secret put GOOGLE_CLIENT_ID_WEB
-npx wrangler secret put GOOGLE_CLIENT_ID_IOS
-npx wrangler secret put GOOGLE_CLIENT_ID_ANDROID
-npx wrangler secret put ADMIN_EMAIL
-```
-
-### Variables d'environnement frontend (à configurer)
-
----
-
-## P0 - Avant Launch
-
-### Copywriting & Onboarding
-
--  [ ] Nouvelle tagline : "Parlez. Recall se souvient." ==> corriger wording horrible et pas engageant
--  [ ] Empty states : copy émotionnel pour liste contacts vide + pas de news ==> ajouter des illustrations
--  [ ] Vocabulaire UI : remplacer termes techniques par langage relationnel
-
-### Features Core
-
--  [ ] RevenueCat paywall (freemium: gratuit sans IA, premium avec IA/transcription/rappels)
-
----
-
-## P1 - Post-Launch Prioritaire
-
-### Visuel
-
--  [ ] Icônes contextuelles Memories (trophy, baby, airplane, briefcase, heart selon type)
-
-### Features
-
--  [ ] Quick actions fiche contact : boutons appeler / SMS / WhatsApp
--  [ ] **Système de notifications intelligentes** (voir NOTIFICATION_SYSTEM_SPEC.md)
-   -  [ ] Contact Reminders : rappels personnalisés selon type de relation
-   -  [ ] Anniversaires : notifications J-7, J-1, Jour J
-   -  [ ] Google Calendar sync : rdv à venir avec contexte IA
-   -  [ ] Hot Topics en attente : rappels sujets non résolus
-   -  [ ] Ice Breakers proactifs : suggestions IA de conversation
-   -  [ ] Écran Settings > Notifications (fréquences, DND)
-   -  [ ] Paramètres custom par contact
--  [ ] Recherche IA : placeholders inspirants + meilleure explication du concept
-
-### Infra
-
--  [ ] Analytics
--  [ ] **Monitoring & Audit Logging** (voir MONITORING.md)
-   -  [x] API Admin avec endpoints de monitoring
-   -  [ ] Dashboard admin (React/Next.js) pour visualiser les métriques
-   -  [ ] Grafana + PostgreSQL pour graphiques temps réel
-   -  [ ] Alertes automatiques (Cloudflare Workers Cron + Slack/Discord)
-   -  [ ] Sentry pour error tracking
-   -  [ ] Définir les métriques clés à suivre quotidiennement
--  [ ] Landing page Astro
--  [ ] Cache navigation fiche contact (back → liste sans reload)
--  [ ] Traduction infos extraites dans la langue choisie
-
----
-
-## P2 - Améliorations
-
-### Visuel
-
--  [ ] Contraste : cards blanches sur background beige
--  [ ] Couleur secondaire (vert sauge ou bleu) pour éléments non-CTA
--  [ ] Visuels pour stores (App Store / Play Store)
--  [ ] Illustration empty state recherche IA
-
-### UX
-
--  [ ] Tabs fiche contact : Overview | News | Profile | Memories | Notes
--  [ ] Import contacts natifs (iPhone/Android) post-onboarding
--  [ ] Fichiers de traduction autres langues (hors en/fr)
-
----
-
-## P3 - Future
-
--  [ ] Widget iOS/Android quick add
--  [ ] Photos contacts et memories
--  [x] ~~Google Calendar : événements futurs dans hot topics~~ (intégré dans système de notifications)
--  [ ] Voice search dans recherche IA
--  [ ] Demo mode / fake data pour nouveaux users
--  [ ] Analytics notifications (open rate, action rate, conversion rate)
--  [ ] Background tasks (expo-background-fetch) pour refresh auto des reminders
--  [ ] Proposition post-meeting d'ajouter une note
+-  Il y a un bug quand on quitte la page de nouveau contact, ça revient sur 'transcription en cours' et on ne peut plus quitter la page. Il faudrait prévoir un reset du recording si on quitte la page (et anticiper toutes les fois où on doit reset le recording, genre on annule l'action, quitte la page de recording, etc., sans tuer le flow). La page de recording 'recall people' est un peu trop facile à quitter (genre sur iphone avec le slider vers le bas, du coup ça peut frustrer l'user). J'ai aussi remarqué qu'après l'onboarding ça doit bien mener sur cette page (recall people avec l'icone du bouton du micro) et non sur la liste des contacts.
+-  Ce serait bien quand même que l’IA identifie automatiquement le genre de la personne que l’on rentre pour notamment mettre une photo qui est cohérente. Et surtout c’est très important : modifier la photo de la personne.
+-  L’icône IA en haut à droite est vraiment très moche, je proposerai de mettre uniquement une étoile type, il y a un peu comme le fait Gemini.
+-  Dans l’onglet à venir, on aimerait pouvoir supprimer certaines notifications, notamment avec un slider vers la gauche
+-  Des fois la transcription prend du temps, même si on a pas dit grand-chose, et il faudrait peut-être un indicateur que ça fonctionne correctement (que c'est en cours), genre un loader stylisé, et un petit texte
+-  Il faut ajouter des toasts d'erreur (rien ne s'affiche si on clique sur record alors qu'on n'a plus de crédits sur notre profil) et dans la plupart des cas rien ne s'affiche sur l'ui en cas d'erreur du flow ; pas d'erreur quand on clique sur passer pro et que ça ne marche pas ; et aussi adapte les pricings : c'est 6.99€/mois et 59.99€/an. (et $ pour les non-francophones) et adapte le wording : c'est désormais 10 notes par mois et pas 5.
+-  En dev, le plan pro que j'active se reset à chaque déco/reco, il faudrait que ça soit persistant pour m'éviter de l'activer à la main à chaque fois (base sur toi la var **DEV** ?)
+-  Pour mes utilisateurs de tests, j'aimerais bien pouvoir les passer en pro à base d'une whitelist (email) ou au moins un bouton dans le profil pour passer en pro automatiquement, c'est possible ?
+-  Dans la page explore IA l'ui des suggestions de questions est un peu moche, je proposerai de mettre des bulles avec des questions type (genre "Qui aime le sport ?") et un petit icone de recherche en plus, et dans des tons plus clairs et qui tranchent moins.
+-  Il faudrait ajouter la possibilité pour l'utilisateur d'ajouter un avatar pour chacune de ses contacts (directement sur la fiche contact; depuis la gallerie de son tél) et sinon, toujours sur la fiche contact au niveau de l'avatar donner la capacité à l'utilisateur d'écrire un prompt pour générer un avatar : utilisant le modèle 'gemini-2.5-flash-image' (exactement celui-là) via vercel ai sdk et google gemini api key. Pour le style, tu peux doit contraindre le prompt pour indiquer un style prédéfini dans les tons de l'app et qui s'inspire de l'esthétique de l'app (via les fichiers que tu peux analyser dans le dossier screenshots - l'utilisateur, lui, ne doit donner pas que détails physiques + accessoires, que toi tu transcriras dans le prompt adapté à notre design system). Pour stocker les images R2 sur cloudflare comme notre back est déjà sur cloudflare : chrome sur https://dash.cloudflare.com/dcb82a4e862d0f634a8624b4acc03ef8/workers/services/view/recall-people-api/production

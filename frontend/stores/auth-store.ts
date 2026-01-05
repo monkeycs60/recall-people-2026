@@ -3,6 +3,7 @@ import { devtools } from 'zustand/middleware';
 import { getToken, getUser, verifyToken, clearAuth } from '@/lib/auth';
 import { getUserSettings } from '@/lib/api';
 import { useSettingsStore } from './settings-store';
+import { useSubscriptionStore } from './subscription-store';
 import { changeLanguage } from '@/lib/i18n';
 import { Language, SUPPORTED_LANGUAGES } from '@/types';
 
@@ -56,6 +57,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         if (isE2ETest) {
           console.log('[E2E] Using mock user, bypassing authentication');
           set({ user: E2E_MOCK_USER, isLoading: false, isInitialized: true });
+          useSubscriptionStore.getState().checkWhitelistStatus(E2E_MOCK_USER.email);
           return;
         }
 
@@ -69,6 +71,9 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
           const user = await verifyToken();
           set({ user, isLoading: false, isInitialized: true });
+
+          // Check if user is in Pro whitelist
+          useSubscriptionStore.getState().checkWhitelistStatus(user?.email);
 
           // Sync language from backend
           try {

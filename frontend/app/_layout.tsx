@@ -26,6 +26,7 @@ import { notificationService } from '@/services/notification.service';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { revenueCatService } from '@/services/revenuecat.service';
 import { useAuthStore } from '@/stores/auth-store';
+import { useSubscriptionStore } from '@/stores/subscription-store';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -46,6 +47,7 @@ export default function RootLayout() {
   const language = useSettingsStore((state) => state.language);
   const isHydrated = useSettingsStore((state) => state.isHydrated);
   const user = useAuthStore((state) => state.user);
+  const isSubscriptionHydrated = useSubscriptionStore((state) => state.isHydrated);
 
   const [fontsLoaded] = useFonts({
     PlayfairDisplay_400Regular,
@@ -92,12 +94,13 @@ export default function RootLayout() {
     return cleanup;
   }, [router]);
 
-  // Initialize RevenueCat when user is authenticated
+  // Initialize RevenueCat when user is authenticated and subscription store is hydrated
+  // In dev mode, waiting for hydration ensures local premium status is preserved
   useEffect(() => {
-    if (user?.id) {
+    if (user?.id && isSubscriptionHydrated) {
       revenueCatService.initialize(user.id);
     }
-  }, [user?.id]);
+  }, [user?.id, isSubscriptionHydrated]);
 
   if (dbError) {
     return (
@@ -191,6 +194,16 @@ export default function RootLayout() {
                 headerShown: false,
                 presentation: 'fullScreenModal',
                 animation: 'slide_from_bottom',
+                gestureEnabled: false,
+              }}
+            />
+            <Stack.Screen
+              name="record/[contactId]"
+              options={{
+                headerShown: false,
+                presentation: 'fullScreenModal',
+                animation: 'slide_from_bottom',
+                gestureEnabled: false,
               }}
             />
           </Stack>

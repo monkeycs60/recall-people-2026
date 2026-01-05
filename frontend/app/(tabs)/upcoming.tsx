@@ -3,6 +3,7 @@ import { useState, useCallback } from 'react';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { format, startOfDay, addDays, isSameDay } from 'date-fns';
 import { fr, enUS } from 'date-fns/locale';
 import { hotTopicService } from '@/services/hot-topic.service';
@@ -10,6 +11,7 @@ import { contactService } from '@/services/contact.service';
 import { HotTopic, Contact } from '@/types';
 import { Colors } from '@/constants/theme';
 import { Calendar } from 'lucide-react-native';
+import { SwipeableEventCard } from '@/components/upcoming/SwipeableEventCard';
 
 type TimelineDay = {
   date: Date;
@@ -97,6 +99,18 @@ export default function UpcomingScreen() {
     router.push(`/contact/${contactId}`);
   };
 
+  const handleDeleteEvent = useCallback(async (eventId: string) => {
+    await hotTopicService.delete(eventId);
+    setTimeline((currentTimeline) =>
+      currentTimeline
+        .map((day) => ({
+          ...day,
+          events: day.events.filter((event) => event.id !== eventId),
+        }))
+        .filter((day) => day.events.length > 0)
+    );
+  }, []);
+
   const formatDayHeader = (date: Date, dayIsToday: boolean): string => {
     if (dayIsToday) {
       return `${t('upcoming.today')} — ${format(date, 'EEE d MMM', { locale })}`;
@@ -107,7 +121,7 @@ export default function UpcomingScreen() {
   const hasAnyEvents = timeline.some((day) => day.events.length > 0);
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <GestureHandlerRootView style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.header}>
         <View style={styles.segmentedControl}>
           <Pressable
@@ -142,19 +156,12 @@ export default function UpcomingScreen() {
                 </Text>
 
                 {day.events.map((event) => (
-                  <Pressable
+                  <SwipeableEventCard
                     key={event.id}
-                    style={styles.eventCard}
-                    onPress={() => handleEventPress(event.contactId)}
-                  >
-                    <Calendar size={16} color={Colors.info} />
-                    <View style={styles.eventContent}>
-                      <Text style={styles.eventTitle}>{event.title}</Text>
-                      <Text style={styles.eventContact}>
-                        {event.contact.firstName} {event.contact.lastName || ''}
-                      </Text>
-                    </View>
-                  </Pressable>
+                    event={event}
+                    onPress={handleEventPress}
+                    onDelete={handleDeleteEvent}
+                  />
                 ))}
               </View>
             ))
@@ -183,7 +190,7 @@ export default function UpcomingScreen() {
           )
         )}
       </ScrollView>
-    </View>
+    </GestureHandlerRootView>
   );
 }
 

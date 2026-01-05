@@ -10,6 +10,12 @@ node_compat = true
 binding = "RATE_LIMIT"
 id = "14ac4ad1ebd54bf8a597a9f7e1efbfa9"
 
+# R2 bucket for avatar storage
+# Run: npx wrangler r2 bucket create recall-people-avatars
+[[r2_buckets]]
+binding = "AVATARS_BUCKET"
+bucket_name = "recall-people-avatars"
+
 [env.dev]
 vars = { BETTER_AUTH_URL = "http://localhost:8787" }
 

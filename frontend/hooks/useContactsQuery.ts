@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { contactService } from '@/services/contact.service';
 import { queryKeys } from '@/lib/query-keys';
+import { Gender } from '@/types';
 
 export function useContactsQuery() {
   const queryClient = useQueryClient();
@@ -39,6 +40,7 @@ export function useCreateContact() {
       firstName: string;
       lastName?: string;
       nickname?: string;
+      gender?: Gender;
     }) => contactService.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
@@ -59,6 +61,8 @@ export function useUpdateContact() {
         firstName: string;
         lastName: string;
         nickname: string;
+        avatarUrl: string;
+        gender: Gender;
         phone: string;
         email: string;
         birthdayDay: number | null;

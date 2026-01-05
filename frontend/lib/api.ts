@@ -213,6 +213,7 @@ export type DetectionResult = {
   contactId: string | null;
   firstName: string;
   lastName: string | null;
+  gender: 'male' | 'female' | 'unknown';
   suggestedNickname: string | null;
   confidence: 'high' | 'medium' | 'low';
   isNew: boolean;
@@ -268,6 +269,41 @@ export const generateSummary = async (data: {
     }
   );
   return response.summary;
+};
+
+export const uploadAvatar = async (data: {
+  contactId: string;
+  imageBase64: string;
+  mimeType: 'image/png' | 'image/jpeg' | 'image/webp';
+}): Promise<{ avatarUrl: string; filename: string }> => {
+  const response = await apiCall<{ success: boolean; avatarUrl: string; filename: string }>(
+    '/api/avatar/upload',
+    {
+      method: 'POST',
+      body: data,
+    }
+  );
+  return { avatarUrl: response.avatarUrl, filename: response.filename };
+};
+
+export const generateAvatar = async (data: {
+  contactId: string;
+  prompt: string;
+}): Promise<{ avatarUrl: string; filename: string }> => {
+  const response = await apiCall<{ success: boolean; avatarUrl: string; filename: string }>(
+    '/api/avatar/generate',
+    {
+      method: 'POST',
+      body: { ...data, language: getCurrentLanguage() },
+    }
+  );
+  return { avatarUrl: response.avatarUrl, filename: response.filename };
+};
+
+export const deleteAvatar = async (contactId: string): Promise<void> => {
+  await apiCall(`/api/avatar/${contactId}`, {
+    method: 'DELETE',
+  });
 };
 
 export { apiCall };

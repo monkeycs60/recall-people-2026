@@ -265,6 +265,35 @@
       "birthday": "Anniversaire",
       "accept": "Accepter",
       "ignore": "Ignorer"
+    },
+    "avatar": {
+      "title": "Photo de profil",
+      "fromGallery": "Choisir depuis la galerie",
+      "fromGalleryDescription": "Sélectionner une photo de votre appareil",
+      "generateWithAI": "Générer avec l'IA",
+      "generateWithAIDescription": "Créer un avatar illustré unique",
+      "removeAvatar": "Supprimer l'avatar actuel",
+      "describeAppearance": "Décrivez l'apparence",
+      "describeHint": "Décrivez les traits physiques et accessoires de {{firstName}}",
+      "promptPlaceholder": "Cheveux bruns, yeux bleus, lunettes, barbe...",
+      "examples": "Exemples :",
+      "example1": "Cheveux blonds courts, yeux verts, taches de rousseur",
+      "example2": "Longs cheveux noirs, lunettes rondes, écharpe rouge",
+      "generate": "Générer",
+      "uploading": "Envoi en cours...",
+      "generating": "Génération de l'avatar...",
+      "uploadSuccess": "Avatar mis à jour !",
+      "uploadError": "Échec de l'envoi de l'avatar",
+      "generateSuccess": "Avatar généré !",
+      "generateError": "Échec de la génération de l'avatar",
+      "deleteSuccess": "Avatar supprimé",
+      "deleteError": "Échec de la suppression de l'avatar",
+      "permissionDenied": "Accès aux photos requis",
+      "promptRequired": "Veuillez décrire l'apparence"
+    },
+    "photo": {
+      "permissionTitle": "Accès aux photos requis",
+      "permissionMessage": "Veuillez autoriser l'accès à votre photothèque pour sélectionner une image."
     }
   },
   "selectContact": {
@@ -463,9 +492,17 @@
   "paywall": {
     "title": "Passer Premium",
     "reason": {
-      "notesLimit": "Vous avez atteint la limite de 5 notes par mois",
+      "notesLimit": "Vous avez atteint la limite de 10 notes par mois",
       "aiSearch": "La recherche IA est une fonctionnalité premium",
       "recordingDuration": "Les enregistrements plus longs nécessitent premium"
+    },
+    "errors": {
+      "purchaseFailed": "Echec de l'achat",
+      "purchaseFailedDescription": "Impossible de finaliser votre achat. Veuillez reessayer.",
+      "restoreFailed": "Echec de la restauration",
+      "restoreFailedDescription": "Impossible de restaurer vos achats. Veuillez reessayer.",
+      "noOfferingsAvailable": "Aucune offre disponible",
+      "loadingFailed": "Impossible de charger les options d'abonnement"
     },
     "features": {
       "unlimitedNotes": "Notes audio illimitées",
@@ -479,6 +516,26 @@
     "bestValue": "MEILLEUR PRIX",
     "save30": "Économisez 30%",
     "subscribe": "S'abonner",
-    "restore": "Restaurer les achats"
+    "restore": "Restaurer les achats",
+    "priceMonthly": "6,99 €",
+    "priceAnnual": "59,99 €"
+  },
+  "recording": {
+    "errors": {
+      "noCredits": "Plus de credits",
+      "noCreditsDescription": "Vous avez utilise toutes vos notes gratuites ce mois-ci",
+      "permissionDenied": "Permission micro refusee",
+      "permissionDeniedDescription": "Veuillez autoriser l'acces au micro pour enregistrer",
+      "recordingFailed": "Echec de l'enregistrement",
+      "recordingFailedDescription": "Une erreur est survenue. Veuillez reessayer."
+    }
+  },
+  "testPro": {
+    "badge": "Mode Test",
+    "title": "Acces Pro Test",
+    "description": "Activez les fonctionnalites Pro pour tester sans abonnement reel. Visible uniquement pour les comptes de test autorises.",
+    "activate": "Activer Pro",
+    "deactivate": "Desactiver Pro",
+    "active": "Pro Test Actif"
   }
 }

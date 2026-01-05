@@ -35,6 +35,8 @@ export type Confidence = 'high' | 'medium' | 'low';
 
 export type HotTopicStatus = 'active' | 'resolved';
 
+export type Gender = 'male' | 'female' | 'unknown';
+
 // ============================================
 // Entités principales
 // ============================================
@@ -44,7 +46,8 @@ export type Contact = {
   firstName: string;
   lastName?: string;
   nickname?: string;
-  photoUri?: string;
+  avatarUrl?: string;
+  gender?: Gender;
   phone?: string;
   email?: string;
   birthdayDay?: number;
@@ -182,6 +185,7 @@ export type ExtractionResult = {
     id: string | null;
     firstName: string;
     lastName?: string;
+    gender?: Gender;
     confidence: Confidence;
     needsDisambiguation: boolean;
     suggestedMatches?: string[];

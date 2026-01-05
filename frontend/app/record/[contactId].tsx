@@ -1,6 +1,6 @@
-import { View, Text, Pressable, ActivityIndicator, Modal } from 'react-native';
-import { useState, useMemo, useRef } from 'react';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { View, Text, Pressable, ActivityIndicator, Modal, BackHandler } from 'react-native';
+import { useState, useMemo, useRef, useCallback } from 'react';
+import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import {
   useAudioRecorder,
   RecordingPresets,
@@ -19,6 +19,7 @@ import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { RecordButton } from '@/components/RecordButton';
 import { Paywall } from '@/components/Paywall';
+import { TranscriptionLoader } from '@/components/TranscriptionLoader';
 import { Colors } from '@/constants/theme';
 
 export default function RecordForContactScreen() {
@@ -30,7 +31,7 @@ export default function RecordForContactScreen() {
 
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const { contacts } = useContactsQuery();
-  const { setCurrentExtraction } = useAppStore();
+  const { setCurrentExtraction, resetRecording } = useAppStore();
 
   const canCreateNote = useSubscriptionStore((state) => state.canCreateNote);
   const incrementNotesCount = useSubscriptionStore((state) => state.incrementNotesCount);
@@ -45,9 +46,10 @@ export default function RecordForContactScreen() {
 
   const durationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const stopRecordingRef = useRef<(() => Promise<void>) | null>(null);
+  const isRecordingRef = useRef(false);
 
   const contact = useMemo(() => {
-    const foundContact = contacts.find((c) => c.id === contactId);
+    const foundContact = contacts.find((currentContact) => currentContact.id === contactId);
     if (foundContact) {
       return {
         firstName: foundContact.firstName,
@@ -57,6 +59,44 @@ export default function RecordForContactScreen() {
     }
     return null;
   }, [contacts, contactId]);
+
+  const cancelAndCleanup = useCallback(async () => {
+    if (durationIntervalRef.current) {
+      clearInterval(durationIntervalRef.current);
+      durationIntervalRef.current = null;
+    }
+    if (isRecordingRef.current && audioRecorder.isRecording) {
+      try {
+        await audioRecorder.stop();
+      } catch (stopError) {
+        console.error('[RecordForContact] Error stopping recorder:', stopError);
+      }
+    }
+    isRecordingRef.current = false;
+    setIsRecording(false);
+    resetRecording();
+  }, [audioRecorder, resetRecording]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        if (isRecording || isProcessing) {
+          return true;
+        }
+        cancelAndCleanup();
+        return false;
+      };
+
+      const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () => {
+        subscription.remove();
+        if (!isProcessing) {
+          cancelAndCleanup();
+        }
+      };
+    }, [isRecording, isProcessing, cancelAndCleanup])
+  );
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -85,6 +125,7 @@ export default function RecordForContactScreen() {
       await audioRecorder.prepareToRecordAsync();
       await audioRecorder.record();
 
+      isRecordingRef.current = true;
       setIsRecording(true);
       setRecordingDuration(0);
 
@@ -118,6 +159,7 @@ export default function RecordForContactScreen() {
     }
 
     try {
+      isRecordingRef.current = false;
       setIsRecording(false);
       setIsProcessing(true);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -208,6 +250,14 @@ export default function RecordForContactScreen() {
 
   stopRecordingRef.current = stopRecording;
 
+  const handleBack = () => {
+    if (isRecording || isProcessing) {
+      return;
+    }
+    cancelAndCleanup();
+    router.back();
+  };
+
   if (isProcessing) {
     return (
       <View
@@ -218,10 +268,7 @@ export default function RecordForContactScreen() {
           justifyContent: 'center',
         }}
       >
-        <ActivityIndicator size="large" color={Colors.primary} />
-        <Text style={{ color: Colors.textSecondary, marginTop: 16 }}>
-          {t('home.transcribing', { defaultValue: 'Analyse en cours...' })}
-        </Text>
+        <TranscriptionLoader />
       </View>
     );
   }
@@ -246,9 +293,10 @@ export default function RecordForContactScreen() {
       >
         <Pressable
           style={{ padding: 8, marginLeft: -8 }}
-          onPress={() => router.back()}
+          onPress={handleBack}
+          disabled={isRecording || isProcessing}
         >
-          <ArrowLeft size={24} color={Colors.textPrimary} />
+          <ArrowLeft size={24} color={isRecording ? Colors.textMuted : Colors.textPrimary} />
         </Pressable>
       </View>
 

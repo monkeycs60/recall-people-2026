@@ -1,6 +1,6 @@
 import * as Crypto from 'expo-crypto';
 import { getDatabase } from '@/lib/db';
-import { Contact, ContactWithDetails, Fact, Note, Memory } from '@/types';
+import { Contact, ContactWithDetails, Fact, Note, Memory, Gender } from '@/types';
 import { hotTopicService } from './hot-topic.service';
 
 export const contactService = {
@@ -12,6 +12,8 @@ export const contactService = {
       last_name: string | null;
       nickname: string | null;
       photo_uri: string | null;
+      avatar_url: string | null;
+      gender: string | null;
       phone: string | null;
       email: string | null;
       birthday_day: number | null;
@@ -29,7 +31,8 @@ export const contactService = {
       firstName: row.first_name,
       lastName: row.last_name || undefined,
       nickname: row.nickname || undefined,
-      photoUri: row.photo_uri || undefined,
+      avatarUrl: row.avatar_url || undefined,
+      gender: (row.gender as Gender) || 'unknown',
       phone: row.phone || undefined,
       email: row.email || undefined,
       birthdayDay: row.birthday_day || undefined,
@@ -51,6 +54,8 @@ export const contactService = {
       last_name: string | null;
       nickname: string | null;
       photo_uri: string | null;
+      avatar_url: string | null;
+      gender: string | null;
       phone: string | null;
       email: string | null;
       birthday_day: number | null;
@@ -119,7 +124,8 @@ export const contactService = {
       firstName: contactRow.first_name,
       lastName: contactRow.last_name || undefined,
       nickname: contactRow.nickname || undefined,
-      photoUri: contactRow.photo_uri || undefined,
+      avatarUrl: contactRow.avatar_url || undefined,
+      gender: (contactRow.gender as Gender) || 'unknown',
       phone: contactRow.phone || undefined,
       email: contactRow.email || undefined,
       birthdayDay: contactRow.birthday_day || undefined,
@@ -184,19 +190,21 @@ export const contactService = {
     firstName: string;
     lastName?: string;
     nickname?: string;
+    gender?: Gender;
   }): Promise<Contact> => {
     const db = await getDatabase();
     const id = Crypto.randomUUID();
     const now = new Date().toISOString();
 
     await db.runAsync(
-      `INSERT INTO contacts (id, first_name, last_name, nickname, highlights, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO contacts (id, first_name, last_name, nickname, gender, highlights, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         data.firstName,
         data.lastName || null,
         data.nickname || null,
+        data.gender || 'unknown',
         JSON.stringify([]),
         now,
         now,
@@ -208,6 +216,7 @@ export const contactService = {
       firstName: data.firstName,
       lastName: data.lastName,
       nickname: data.nickname,
+      gender: data.gender || 'unknown',
       highlights: [],
       createdAt: now,
       updatedAt: now,
@@ -220,6 +229,8 @@ export const contactService = {
       firstName: string;
       lastName: string;
       nickname: string;
+      avatarUrl: string;
+      gender: Gender;
       phone: string;
       email: string;
       birthdayDay: number | null;
@@ -246,6 +257,14 @@ export const contactService = {
     if (data.nickname !== undefined) {
       updates.push('nickname = ?');
       values.push(data.nickname || null);
+    }
+    if (data.avatarUrl !== undefined) {
+      updates.push('avatar_url = ?');
+      values.push(data.avatarUrl || null);
+    }
+    if (data.gender !== undefined) {
+      updates.push('gender = ?');
+      values.push(data.gender || 'unknown');
     }
     if (data.phone !== undefined) {
       updates.push('phone = ?');

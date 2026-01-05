@@ -81,3 +81,23 @@ export function showSuccessToast(message: string) {
     position: 'bottom',
   });
 }
+
+export function showErrorToast(title: string, subtitle?: string) {
+  Toast.show({
+    type: 'error',
+    text1: title,
+    text2: subtitle,
+    visibilityTime: 4000,
+    position: 'bottom',
+  });
+}
+
+export function showInfoToast(title: string, subtitle?: string) {
+  Toast.show({
+    type: 'info',
+    text1: title,
+    text2: subtitle,
+    visibilityTime: 3000,
+    position: 'bottom',
+  });
+}

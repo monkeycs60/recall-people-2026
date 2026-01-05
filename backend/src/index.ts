@@ -11,6 +11,7 @@ import { settingsRoutes } from './routes/settings';
 import { adminRoutes } from './routes/admin';
 import { detectContactRoutes } from './routes/detect-contact';
 import { summaryRoutes } from './routes/summary';
+import { avatarRoutes } from './routes/avatar';
 import { rateLimiters } from './middleware/rateLimit';
 import { securityHeaders } from './middleware/securityHeaders';
 import { httpsEnforcement } from './middleware/httpsEnforcement';
@@ -22,6 +23,9 @@ type Bindings = {
   DEEPGRAM_API_KEY: string;
   XAI_API_KEY: string;
   RATE_LIMIT: KVNamespace;
+  AVATARS_BUCKET: R2Bucket;
+  GOOGLE_GENERATIVE_AI_API_KEY?: string;
+  AVATARS_PUBLIC_URL?: string;
   LANGFUSE_SECRET_KEY?: string;
   LANGFUSE_PUBLIC_KEY?: string;
   LANGFUSE_BASE_URL?: string;
@@ -74,6 +78,7 @@ app.route('/api/search', searchRoutes);
 app.route('/api/settings', settingsRoutes);
 app.route('/api/detect-contact', detectContactRoutes);
 app.route('/api/summary', summaryRoutes);
+app.route('/api/avatar', avatarRoutes);
 app.route('/admin', adminRoutes);
 
 export default app;

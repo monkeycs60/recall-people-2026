@@ -28,10 +28,12 @@ import { StatisticsSheet } from '@/components/profile/StatisticsSheet';
 import { ExportDataSheet } from '@/components/profile/ExportDataSheet';
 import { LegalNoticesSheet } from '@/components/profile/LegalNoticesSheet';
 import { SubscriptionCard } from '@/components/profile/SubscriptionCard';
+import { TestProCard } from '@/components/profile/TestProCard';
 import { Colors } from '@/constants/theme';
 import Constants from 'expo-constants';
 import { revenueCatService } from '@/services/revenuecat.service';
 import { Paywall } from '@/components/Paywall';
+import { canActivateTestPro } from '@/config/pro-whitelist';
 
 export default function ProfileScreen() {
   const { t } = useTranslation();
@@ -130,9 +132,9 @@ export default function ProfileScreen() {
 
   const appVersion = Constants.expoConfig?.version || '1.0.0';
 
-  // Vérifier si l'utilisateur est admin (via variable d'environnement)
   const adminEmail = process.env.EXPO_PUBLIC_ADMIN_EMAIL || '';
   const isAdmin = adminEmail && user?.email === adminEmail;
+  const showTestProCard = canActivateTestPro(user?.email);
 
   const handleOpenMonitoring = () => {
     router.push('/admin/monitoring');
@@ -168,6 +170,12 @@ export default function ProfileScreen() {
           <Text style={styles.sectionTitle}>{t('profile.sections.subscription')}</Text>
           <SubscriptionCard onUpgrade={handleUpgrade} onManage={handleManageSubscription} />
         </View>
+
+        {showTestProCard && (
+          <View style={styles.testProSection}>
+            <TestProCard />
+          </View>
+        )}
 
         <SettingsSection title={t('profile.sections.data')}>
           <SettingsRow
@@ -257,6 +265,9 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   subscriptionSection: {
+    marginBottom: 24,
+  },
+  testProSection: {
     marginBottom: 24,
   },
   sectionTitle: {

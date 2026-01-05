@@ -1,21 +1,17 @@
-import { View, Text, Pressable, Modal } from 'react-native';
-import { useEffect, useState, useMemo } from 'react';
-import { useRouter } from 'expo-router';
+import { View, Text, Pressable, Modal, BackHandler } from 'react-native';
+import { useState, useMemo, useCallback, useRef } from 'react';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { X } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Colors } from '@/constants/theme';
 import { RecordButton } from '@/components/RecordButton';
 import { Paywall } from '@/components/Paywall';
+import { TranscriptionLoader } from '@/components/TranscriptionLoader';
 import { useRecording } from '@/hooks/useRecording';
 import { useContactsQuery } from '@/hooks/useContactsQuery';
 import { useAppStore } from '@/stores/app-store';
 import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-  withRepeat,
-  Easing,
   FadeIn,
   FadeOut,
 } from 'react-native-reanimated';
@@ -40,6 +36,7 @@ export default function RecordScreen() {
   const { t } = useTranslation();
   const {
     toggleRecording,
+    cancelRecording,
     isRecording,
     isProcessing,
     recordingDuration,
@@ -50,7 +47,9 @@ export default function RecordScreen() {
   } = useRecording();
   const { contacts } = useContactsQuery();
   const preselectedContactId = useAppStore((state) => state.preselectedContactId);
+  const resetRecording = useAppStore((state) => state.resetRecording);
   const [promptIndex, setPromptIndex] = useState(0);
+  const promptIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const preselectedContact = useMemo(() => {
     if (!preselectedContactId) return null;
@@ -64,14 +63,49 @@ export default function RecordScreen() {
     return HELPER_PROMPTS;
   }, [preselectedContact]);
 
-  useEffect(() => {
-    if (!isRecording) {
-      const interval = setInterval(() => {
-        setPromptIndex((prev) => (prev + 1) % currentPrompts.length);
-      }, 4000);
-      return () => clearInterval(interval);
+  const startPromptRotation = useCallback(() => {
+    if (promptIntervalRef.current) {
+      clearInterval(promptIntervalRef.current);
     }
-  }, [isRecording, currentPrompts.length]);
+    promptIntervalRef.current = setInterval(() => {
+      setPromptIndex((prev) => (prev + 1) % currentPrompts.length);
+    }, 4000);
+  }, [currentPrompts.length]);
+
+  const stopPromptRotation = useCallback(() => {
+    if (promptIntervalRef.current) {
+      clearInterval(promptIntervalRef.current);
+      promptIntervalRef.current = null;
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!isRecording && !isProcessing) {
+        startPromptRotation();
+      }
+
+      const onBackPress = () => {
+        if (isRecording || isProcessing) {
+          return true;
+        }
+        cancelRecording();
+        resetRecording();
+        return false;
+      };
+
+      const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () => {
+        stopPromptRotation();
+        subscription.remove();
+        if (!isProcessing) {
+          cancelRecording();
+          resetRecording();
+        }
+      };
+    }, [isRecording, isProcessing, startPromptRotation, stopPromptRotation, cancelRecording, resetRecording])
+  );
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -81,6 +115,8 @@ export default function RecordScreen() {
 
   const handleClose = () => {
     if (!isRecording && !isProcessing) {
+      cancelRecording();
+      resetRecording();
       router.back();
     }
   };
@@ -148,17 +184,9 @@ export default function RecordScreen() {
             </Text>
           </Animated.View>
         ) : isProcessing ? (
-          <Animated.Text
-            entering={FadeIn}
-            style={{
-              color: Colors.textSecondary,
-              textAlign: 'center',
-              marginBottom: 64,
-              fontSize: 18,
-            }}
-          >
-            {t('home.transcribing')}
-          </Animated.Text>
+          <Animated.View entering={FadeIn} style={{ marginBottom: 64 }}>
+            <TranscriptionLoader />
+          </Animated.View>
         ) : (
           <Animated.Text
             key={promptIndex}

@@ -287,6 +287,7 @@ export default function ReviewScreen() {
           firstName,
           lastName,
           nickname: undefined, // Nickname is included in lastName if user kept it
+          gender: extraction.contactIdentified.gender,
         });
         finalContactId = newContact.id;
 

@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef } from 'react';
 import {
   useAudioRecorder,
   RecordingPresets,
@@ -15,6 +15,8 @@ import { useSubscriptionStore } from '@/stores/subscription-store';
 import { transcribeAudio, extractInfo, detectContact } from '@/lib/api';
 import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
+import { showErrorToast, showInfoToast } from '@/lib/error-handler';
+import i18n from '@/lib/i18n';
 
 const isE2ETest = process.env.EXPO_PUBLIC_E2E_TEST === 'true';
 const e2eFixtureName = process.env.EXPO_PUBLIC_E2E_FIXTURE || 'brenda';
@@ -76,6 +78,10 @@ export const useRecording = () => {
     if (!canCreateNote()) {
       setPaywallReason('notes_limit');
       setShowPaywall(true);
+      showInfoToast(
+        i18n.t('recording.errors.noCredits'),
+        i18n.t('recording.errors.noCreditsDescription')
+      );
       return;
     }
 
@@ -105,7 +111,11 @@ export const useRecording = () => {
 
       const permission = await AudioModule.requestRecordingPermissionsAsync();
       if (!permission.granted) {
-        throw new Error('Permission micro refusée');
+        showErrorToast(
+          i18n.t('recording.errors.permissionDenied'),
+          i18n.t('recording.errors.permissionDeniedDescription')
+        );
+        return;
       }
 
       await setAudioModeAsync({
@@ -137,7 +147,10 @@ export const useRecording = () => {
         clearInterval(durationIntervalRef.current);
         durationIntervalRef.current = null;
       }
-      throw error;
+      showErrorToast(
+        i18n.t('recording.errors.recordingFailed'),
+        i18n.t('recording.errors.recordingFailedDescription')
+      );
     }
   };
 
@@ -286,9 +299,18 @@ export const useRecording = () => {
   };
 
   const cancelRecording = async () => {
-    if (!isE2ETest && audioRecorder.isRecording) {
-      await audioRecorder.stop();
+    if (durationIntervalRef.current) {
+      clearInterval(durationIntervalRef.current);
+      durationIntervalRef.current = null;
     }
+    if (!isE2ETest && audioRecorder.isRecording) {
+      try {
+        await audioRecorder.stop();
+      } catch (stopError) {
+        console.error('[useRecording] Cancel error:', stopError);
+      }
+    }
+    setRecordingDuration(0);
     setRecordingState('idle');
   };
 

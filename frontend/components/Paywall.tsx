@@ -6,6 +6,7 @@ import { PurchasesOffering } from 'react-native-purchases';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { revenueCatService } from '@/services/revenuecat.service';
 import { Colors } from '@/constants/theme';
+import { showErrorToast, showSuccessToast } from '@/lib/error-handler';
 
 type PaywallProps = {
   onClose: () => void;
@@ -26,9 +27,24 @@ export function Paywall({ onClose, reason = 'notes_limit' }: PaywallProps) {
 
   const loadOfferings = async () => {
     setIsLoading(true);
-    const currentOffering = await revenueCatService.getOfferings();
-    setOffering(currentOffering);
-    setIsLoading(false);
+    try {
+      const currentOffering = await revenueCatService.getOfferings();
+      if (!currentOffering) {
+        showErrorToast(
+          t('paywall.errors.noOfferingsAvailable'),
+          t('paywall.errors.loadingFailed')
+        );
+      }
+      setOffering(currentOffering);
+    } catch (error) {
+      console.error('[Paywall] Load offerings error:', error);
+      showErrorToast(
+        t('paywall.errors.noOfferingsAvailable'),
+        t('paywall.errors.loadingFailed')
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handlePurchase = async () => {
@@ -38,10 +54,20 @@ export function Paywall({ onClose, reason = 'notes_limit' }: PaywallProps) {
     try {
       const success = await revenueCatService.purchasePackage(selectedPackage);
       if (success) {
+        showSuccessToast(t('common.success'));
         onClose();
+      } else {
+        showErrorToast(
+          t('paywall.errors.purchaseFailed'),
+          t('paywall.errors.purchaseFailedDescription')
+        );
       }
     } catch (error) {
       console.error('[Paywall] Purchase error:', error);
+      showErrorToast(
+        t('paywall.errors.purchaseFailed'),
+        t('paywall.errors.purchaseFailedDescription')
+      );
     } finally {
       setIsPurchasing(false);
     }
@@ -52,10 +78,20 @@ export function Paywall({ onClose, reason = 'notes_limit' }: PaywallProps) {
     try {
       const success = await revenueCatService.restorePurchases();
       if (success) {
+        showSuccessToast(t('common.success'));
         onClose();
+      } else {
+        showErrorToast(
+          t('paywall.errors.restoreFailed'),
+          t('paywall.errors.restoreFailedDescription')
+        );
       }
     } catch (error) {
       console.error('[Paywall] Restore error:', error);
+      showErrorToast(
+        t('paywall.errors.restoreFailed'),
+        t('paywall.errors.restoreFailedDescription')
+      );
     } finally {
       setIsPurchasing(false);
     }
