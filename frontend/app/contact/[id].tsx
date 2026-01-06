@@ -485,6 +485,7 @@ export default function ContactDetailScreen() {
               size="large"
               onPress={handleEditAvatar}
               showEditBadge
+              cacheKey={contact.updatedAt}
             />
           </View>
 

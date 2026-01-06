@@ -14,6 +14,7 @@ type ContactAvatarProps = {
   size?: 'small' | 'medium' | 'large';
   onPress?: () => void;
   showEditBadge?: boolean;
+  cacheKey?: string; // Use updatedAt to force cache invalidation
 };
 
 const SIZE_MAP = {
@@ -34,15 +35,22 @@ export function ContactAvatar({
   size = 'medium',
   onPress,
   showEditBadge = false,
+  cacheKey,
 }: ContactAvatarProps) {
   const pixelSize = SIZE_MAP[size];
   const placeholderUrl = getPlaceholderUrl(gender);
   const needsBadge = showEditBadge && size === 'large';
   const badgeSize = 32;
 
+  // Add cache buster to avatar URL if cacheKey provided
+  const imageUri = avatarUrl
+    ? `${avatarUrl}${avatarUrl.includes('?') ? '&' : '?'}v=${cacheKey || ''}`
+    : placeholderUrl;
+
   const imageElement = (
     <Image
-      source={{ uri: avatarUrl || placeholderUrl }}
+      source={{ uri: imageUri }}
+      cachePolicy="memory-disk"
       style={{
         width: pixelSize,
         height: pixelSize,

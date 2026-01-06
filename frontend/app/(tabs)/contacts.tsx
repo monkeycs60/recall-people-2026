@@ -140,6 +140,7 @@ export default function ContactsScreen() {
 						gender={item.gender}
 						avatarUrl={item.avatarUrl}
 						size='medium'
+						cacheKey={item.updatedAt}
 					/>
 				</View>
 
