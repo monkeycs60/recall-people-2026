@@ -26,8 +26,8 @@ import {
 	Zap,
 	Plus,
 	UserPlus,
+	Sparkles,
 } from 'lucide-react-native';
-import { GeminiStar } from '@/components/ui/GeminiStar';
 import { Colors } from '@/constants/theme';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { ContactAvatar } from '@/components/contact/ContactAvatar';
@@ -209,14 +209,17 @@ export default function ContactsScreen() {
 					<Text style={styles.screenTitle}>{t('contacts.title')}</Text>
 					<View style={styles.headerButtons}>
 						<Pressable
+							style={styles.aiSearchButton}
+							onPress={() => router.push('/(tabs)/search')}>
+							<View style={styles.aiButtonContent}>
+								<Sparkles size={12} color={Colors.primary} />
+								<Text style={styles.aiButtonText}>IA</Text>
+							</View>
+						</Pressable>
+						<Pressable
 							style={styles.addButton}
 							onPress={() => setIsCreateModalVisible(true)}>
 							<Plus size={18} color={Colors.textInverse} />
-						</Pressable>
-						<Pressable
-							style={styles.aiSearchButton}
-							onPress={() => router.push('/(tabs)/search')}>
-							<GeminiStar size={18} color={Colors.secondary} />
 						</Pressable>
 					</View>
 				</View>
@@ -375,11 +378,21 @@ const styles = StyleSheet.create({
 		width: 40,
 		height: 40,
 		borderRadius: 20,
-		backgroundColor: Colors.secondaryLight,
+		backgroundColor: Colors.surface,
 		borderWidth: 1,
-		borderColor: Colors.secondary,
+		borderColor: Colors.primary,
 		alignItems: 'center',
 		justifyContent: 'center',
+	},
+	aiButtonContent: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: 2,
+	},
+	aiButtonText: {
+		fontSize: 12,
+		fontWeight: '700',
+		color: Colors.primary,
 	},
 	searchContainer: {
 		flexDirection: 'row',
