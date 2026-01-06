@@ -37,65 +37,62 @@ export function ContactAvatar({
 }: ContactAvatarProps) {
   const pixelSize = SIZE_MAP[size];
   const placeholderUrl = getPlaceholderUrl(gender);
+  const needsBadge = showEditBadge && size === 'large';
+  const badgeSize = 32;
 
-  const containerStyle = [
-    styles.container,
-    {
-      width: pixelSize,
-      height: pixelSize,
-      borderRadius: pixelSize / 2,
-    },
-    size === 'large' && styles.containerLarge,
-  ];
+  const imageElement = (
+    <Image
+      source={{ uri: avatarUrl || placeholderUrl }}
+      style={{
+        width: pixelSize,
+        height: pixelSize,
+        borderRadius: pixelSize / 2,
+        backgroundColor: Colors.primaryLight,
+      }}
+      contentFit="cover"
+      transition={200}
+      placeholder={{ blurhash: 'LKO2?U%2Tw=w]~RBVZRi};RPxuwH' }}
+      placeholderContentFit="cover"
+    />
+  );
 
-  const badgeSize = size === 'large' ? 32 : size === 'medium' ? 24 : 20;
+  // Simple version for list items (no badge)
+  if (!needsBadge) {
+    if (onPress) {
+      return <Pressable onPress={onPress}>{imageElement}</Pressable>;
+    }
+    return imageElement;
+  }
 
+  // Version with badge for profile header
   const content = (
-    <View style={containerStyle}>
-      <Image
-        source={{ uri: avatarUrl || placeholderUrl }}
-        style={{
-          width: pixelSize,
-          height: pixelSize,
-          borderRadius: pixelSize / 2,
-        }}
-        contentFit="cover"
-        transition={200}
-        placeholder={{ blurhash: 'LKO2?U%2Tw=w]~RBVZRi};RPxuwH' }}
-        placeholderContentFit="cover"
-      />
-      {showEditBadge && size === 'large' && (
-        <View style={[styles.editBadge, { width: badgeSize, height: badgeSize, borderRadius: badgeSize / 2 }]}>
-          <Camera size={badgeSize * 0.5} color={Colors.textInverse} />
-        </View>
-      )}
+    <View style={[styles.wrapper, { width: pixelSize, height: pixelSize }]}>
+      <View style={[styles.imageContainer, { width: pixelSize, height: pixelSize, borderRadius: pixelSize / 2 }]}>
+        {imageElement}
+      </View>
+      <View style={[styles.editBadge, { width: badgeSize, height: badgeSize, borderRadius: badgeSize / 2 }]}>
+        <Camera size={badgeSize * 0.5} color={Colors.textInverse} />
+      </View>
     </View>
   );
 
   if (onPress) {
-    return (
-      <Pressable onPress={onPress}>
-        {content}
-      </Pressable>
-    );
+    return <Pressable onPress={onPress}>{content}</Pressable>;
   }
 
   return content;
 }
 
 const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-    backgroundColor: Colors.primaryLight,
-  },
-  containerLarge: {
+  wrapper: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 6,
+  },
+  imageContainer: {
+    overflow: 'hidden',
   },
   editBadge: {
     position: 'absolute',
