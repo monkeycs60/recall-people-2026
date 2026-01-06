@@ -184,6 +184,35 @@ avatarRoutes.get('/placeholders/:filename', async (c) => {
   }
 });
 
+// Public endpoint for user avatars (no auth required for viewing)
+// Format: /api/avatar/:contactId/:filename
+avatarRoutes.get('/:contactId/:filename', async (c) => {
+  try {
+    const contactId = c.req.param('contactId');
+    const filename = c.req.param('filename');
+
+    if (!contactId || !filename) {
+      return c.json({ error: 'Missing parameters' }, 400);
+    }
+
+    const key = `${contactId}/${filename}`;
+    const object = await c.env.AVATARS_BUCKET.get(key);
+
+    if (!object) {
+      return c.json({ error: 'Avatar not found' }, 404);
+    }
+
+    const headers = new Headers();
+    headers.set('Content-Type', object.httpMetadata?.contentType || 'image/png');
+    headers.set('Cache-Control', 'public, max-age=31536000');
+
+    return new Response(object.body, { headers });
+  } catch (error) {
+    console.error('Avatar fetch error:', error);
+    return c.json({ error: 'Failed to fetch avatar' }, 500);
+  }
+});
+
 // Auth middleware for all other routes
 avatarRoutes.use('/*', authMiddleware);
 
@@ -218,13 +247,14 @@ avatarRoutes.post('/upload', async (c) => {
       },
     });
 
-    const publicUrl = c.env.AVATARS_PUBLIC_URL
-      ? `${c.env.AVATARS_PUBLIC_URL}/${filename}`
-      : filename;
+    // Build avatar URL using the API endpoint that serves from R2
+    const requestUrl = new URL(c.req.url);
+    const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
+    const avatarUrl = `${baseUrl}/api/avatar/${filename}`;
 
     return c.json({
       success: true,
-      avatarUrl: publicUrl,
+      avatarUrl,
       filename,
     });
   } catch (error) {
@@ -269,30 +299,42 @@ Generate a single portrait illustration following the design system above. The a
       },
     });
 
-    type GeneratedFileWithMime = { base64Data?: string; mimeType?: string };
+    type GeneratedFileWithMime = { base64Data?: string; mimeType?: string; data?: string };
     const imageFile = (result.files as GeneratedFileWithMime[] | undefined)?.[0];
-    if (!imageFile || !imageFile.base64Data || !imageFile.mimeType) {
+
+    if (!imageFile) {
+      console.error('Avatar generation: No image file in response');
       return c.json({ error: 'Failed to generate avatar image' }, 500);
     }
 
-    const imageBuffer = Uint8Array.from(atob(imageFile.base64Data), (char) => char.charCodeAt(0));
-    const extension = imageFile.mimeType.split('/')[1] || 'png';
+    // Handle both possible key names from Gemini API
+    const base64Data = imageFile.base64Data || imageFile.data;
+    const mimeType = imageFile.mimeType || 'image/png';
+
+    if (!base64Data) {
+      console.error('Avatar generation: No base64 data. Keys:', Object.keys(imageFile));
+      return c.json({ error: 'Failed to generate avatar image' }, 500);
+    }
+
+    const imageBuffer = Uint8Array.from(atob(base64Data), (char) => char.charCodeAt(0));
+    const extension = mimeType.split('/')[1] || 'png';
     const filename = `${contactId}/avatar-generated-${Date.now()}.${extension}`;
 
     await c.env.AVATARS_BUCKET.put(filename, imageBuffer, {
       httpMetadata: {
-        contentType: imageFile.mimeType,
+        contentType: mimeType,
         cacheControl: 'public, max-age=31536000',
       },
     });
 
-    const publicUrl = c.env.AVATARS_PUBLIC_URL
-      ? `${c.env.AVATARS_PUBLIC_URL}/${filename}`
-      : filename;
+    // Build avatar URL using the API endpoint that serves from R2
+    const requestUrl = new URL(c.req.url);
+    const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
+    const avatarUrl = `${baseUrl}/api/avatar/${filename}`;
 
     return c.json({
       success: true,
-      avatarUrl: publicUrl,
+      avatarUrl,
       filename,
     });
   } catch (error) {
@@ -322,30 +364,5 @@ avatarRoutes.delete('/:contactId', async (c) => {
   } catch (error) {
     console.error('Avatar delete error:', error);
     return c.json({ error: 'Failed to delete avatars' }, 500);
-  }
-});
-
-avatarRoutes.get('/:filename{.+}', async (c) => {
-  try {
-    const filename = c.req.param('filename');
-
-    if (!filename) {
-      return c.json({ error: 'Missing filename' }, 400);
-    }
-
-    const object = await c.env.AVATARS_BUCKET.get(filename);
-
-    if (!object) {
-      return c.json({ error: 'Avatar not found' }, 404);
-    }
-
-    const headers = new Headers();
-    headers.set('Content-Type', object.httpMetadata?.contentType || 'image/png');
-    headers.set('Cache-Control', 'public, max-age=31536000');
-
-    return new Response(object.body, { headers });
-  } catch (error) {
-    console.error('Avatar fetch error:', error);
-    return c.json({ error: 'Failed to fetch avatar' }, 500);
   }
 });

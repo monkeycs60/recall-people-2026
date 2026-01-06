@@ -9,6 +9,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from 'react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -19,7 +20,6 @@ import { Image } from 'expo-image';
 import { Colors, Spacing, BorderRadius } from '@/constants/theme';
 import { uploadAvatar, generateAvatar, deleteAvatar } from '@/lib/api';
 import { contactService } from '@/services/contact.service';
-import { toast } from 'sonner-native';
 
 type AvatarEditModalProps = {
   visible: boolean;
@@ -64,7 +64,7 @@ export function AvatarEditModal({
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permissionResult.granted) {
-      toast.error(t('contact.avatar.permissionDenied'));
+      Alert.alert(t('common.error'), t('contact.avatar.permissionDenied'));
       return;
     }
 
@@ -72,7 +72,8 @@ export function AvatarEditModal({
       mediaTypes: 'images',
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 0.8,
+      quality: 1,
+      exif: false,
     });
 
     if (result.canceled || !result.assets[0]) {
@@ -105,11 +106,10 @@ export function AvatarEditModal({
 
       await contactService.update(contactId, { avatarUrl: response.avatarUrl });
       onSave(response.avatarUrl);
-      toast.success(t('contact.avatar.uploadSuccess'));
       handleClose();
     } catch (error) {
       console.error('Upload error:', error);
-      toast.error(t('contact.avatar.uploadError'));
+      Alert.alert(t('common.error'), t('contact.avatar.uploadError'));
       setPreviewUrl(null);
     } finally {
       setIsUploading(false);
@@ -118,7 +118,7 @@ export function AvatarEditModal({
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
-      toast.error(t('contact.avatar.promptRequired'));
+      Alert.alert(t('common.error'), t('contact.avatar.promptRequired'));
       return;
     }
 
@@ -132,11 +132,10 @@ export function AvatarEditModal({
       setPreviewUrl(response.avatarUrl);
       await contactService.update(contactId, { avatarUrl: response.avatarUrl });
       onSave(response.avatarUrl);
-      toast.success(t('contact.avatar.generateSuccess'));
       handleClose();
     } catch (error) {
       console.error('Generate error:', error);
-      toast.error(t('contact.avatar.generateError'));
+      Alert.alert(t('common.error'), t('contact.avatar.generateError'));
     } finally {
       setIsGenerating(false);
     }
@@ -147,11 +146,10 @@ export function AvatarEditModal({
       await deleteAvatar(contactId);
       await contactService.update(contactId, { avatarUrl: '' });
       onSave(null);
-      toast.success(t('contact.avatar.deleteSuccess'));
       handleClose();
     } catch (error) {
       console.error('Delete error:', error);
-      toast.error(t('contact.avatar.deleteError'));
+      Alert.alert(t('common.error'), t('contact.avatar.deleteError'));
     }
   };
 
