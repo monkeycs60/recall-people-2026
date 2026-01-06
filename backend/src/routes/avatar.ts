@@ -30,6 +30,19 @@ type GenerateRequest = {
   language?: 'fr' | 'en' | 'es' | 'it' | 'de';
 };
 
+type AvatarHints = {
+  physical: string | null;
+  personality: string | null;
+  interest: string | null;
+  context: string | null;
+};
+
+type GenerateFromHintsRequest = {
+  contactId: string;
+  gender: 'male' | 'female' | 'unknown';
+  avatarHints: AvatarHints;
+};
+
 const AVATAR_STYLE_PROMPT = `You are an avatar designer for a warm, sophisticated relationship management app.
 
 DESIGN SYSTEM:
@@ -339,6 +352,127 @@ Generate a single portrait illustration following the design system above. The a
     });
   } catch (error) {
     console.error('Avatar generation error:', error);
+    return c.json({ error: 'Failed to generate avatar' }, 500);
+  }
+});
+
+// Helper function to build avatar prompt from hints
+function buildPromptFromHints(gender: 'male' | 'female' | 'unknown', hints: AvatarHints): string {
+  const parts: string[] = [];
+
+  // Base gender term
+  const genderTerm = gender === 'male' ? 'man' : gender === 'female' ? 'woman' : 'person';
+  parts.push(`A friendly ${genderTerm} in their 30s`);
+
+  // Physical description (highest priority)
+  if (hints.physical) {
+    parts.push(hints.physical);
+  }
+
+  // Personality → facial expression
+  if (hints.personality) {
+    parts.push(`with a ${hints.personality} expression`);
+  }
+
+  // Interest → subtle lifestyle hint
+  if (hints.interest) {
+    parts.push(`subtle hint of ${hints.interest} lifestyle in their appearance`);
+  }
+
+  // Context → clothing style
+  if (hints.context) {
+    parts.push(`dressed in ${hints.context}-appropriate casual style`);
+  }
+
+  // Always end with warm, approachable
+  parts.push('warm smile, approachable and friendly');
+
+  return parts.join(', ') + '.';
+}
+
+// Generate avatar from transcript hints (auto-generation)
+avatarRoutes.post('/generate-from-hints', async (c) => {
+  try {
+    const body = await c.req.json<GenerateFromHintsRequest>();
+    const { contactId, gender, avatarHints } = body;
+
+    if (!contactId || !gender) {
+      return c.json({ error: 'Missing required fields: contactId, gender' }, 400);
+    }
+
+    if (!c.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+      return c.json({ error: 'Google AI API key not configured' }, 500);
+    }
+
+    // Build prompt from hints
+    const description = buildPromptFromHints(gender, avatarHints || {
+      physical: null,
+      personality: null,
+      interest: null,
+      context: null,
+    });
+
+    console.log(`[Avatar Auto] Generating for ${contactId} with prompt: ${description}`);
+
+    const fullPrompt = `${AVATAR_STYLE_PROMPT}
+${description}
+
+Generate a single portrait illustration following the design system above. The avatar should be warm, inviting, and professional.`;
+
+    const googleAI = createGoogleGenerativeAI({
+      apiKey: c.env.GOOGLE_GENERATIVE_AI_API_KEY,
+    });
+
+    const result = await generateText({
+      model: googleAI('gemini-2.5-flash-image') as Parameters<typeof generateText>[0]['model'],
+      prompt: fullPrompt,
+      providerOptions: {
+        google: {
+          responseModalities: ['IMAGE', 'TEXT'],
+        },
+      },
+    });
+
+    type GeneratedFileWithMime = { base64Data?: string; mimeType?: string; data?: string };
+    const imageFile = (result.files as GeneratedFileWithMime[] | undefined)?.[0];
+
+    if (!imageFile) {
+      console.error('[Avatar Auto] No image file in response');
+      return c.json({ error: 'Failed to generate avatar image' }, 500);
+    }
+
+    const base64Data = imageFile.base64Data || imageFile.data;
+    const mimeType = imageFile.mimeType || 'image/png';
+
+    if (!base64Data) {
+      console.error('[Avatar Auto] No base64 data. Keys:', Object.keys(imageFile));
+      return c.json({ error: 'Failed to generate avatar image' }, 500);
+    }
+
+    const imageBuffer = Uint8Array.from(atob(base64Data), (char) => char.charCodeAt(0));
+    const extension = mimeType.split('/')[1] || 'png';
+    const filename = `${contactId}/avatar-auto-${Date.now()}.${extension}`;
+
+    await c.env.AVATARS_BUCKET.put(filename, imageBuffer, {
+      httpMetadata: {
+        contentType: mimeType,
+        cacheControl: 'public, max-age=31536000',
+      },
+    });
+
+    const requestUrl = new URL(c.req.url);
+    const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
+    const avatarUrl = `${baseUrl}/api/avatar/${filename}`;
+
+    console.log(`[Avatar Auto] Successfully generated for ${contactId}: ${avatarUrl}`);
+
+    return c.json({
+      success: true,
+      avatarUrl,
+      filename,
+    });
+  } catch (error) {
+    console.error('[Avatar Auto] Generation error:', error);
     return c.json({ error: 'Failed to generate avatar' }, 500);
   }
 });

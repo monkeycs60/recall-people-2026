@@ -34,6 +34,13 @@ type DetectContactRequest = {
   language?: 'fr' | 'en' | 'es' | 'it' | 'de';
 };
 
+const avatarHintsSchema = z.object({
+  physical: z.string().nullable().describe('Description physique si mentionnée (cheveux, yeux, corpulence, âge estimé)'),
+  personality: z.string().nullable().describe('Trait de personnalité dominant (chaleureux, dynamique, calme, drôle...)'),
+  interest: z.string().nullable().describe('Hobby ou passion principale mentionnée'),
+  context: z.string().nullable().describe('Contexte professionnel ou social (collègue, coach, voisin...)'),
+});
+
 const detectionSchema = z.object({
   contactId: z.string().nullable().describe('ID du contact existant si identifié, null sinon'),
   firstName: z.string().describe('Prénom du protagoniste principal'),
@@ -43,6 +50,7 @@ const detectionSchema = z.object({
   confidence: z.enum(['high', 'medium', 'low']).describe('Niveau de confiance dans la détection'),
   isNew: z.boolean().describe('true si le contact n\'existe pas dans la liste'),
   candidateIds: z.array(z.string()).describe('IDs des contacts candidats en cas d\'ambiguïté'),
+  avatarHints: avatarHintsSchema.optional().describe('Indices pour générer un avatar personnalisé'),
 });
 
 const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
@@ -289,6 +297,7 @@ detectContactRoutes.post('/', async (c) => {
       confidence: validatedDetection.confidence,
       isNew: validatedDetection.isNew,
       candidateIds: validatedDetection.candidateIds,
+      avatarHints: validatedDetection.avatarHints || null,
     };
 
     trace?.update({ output: { success: true, detection: result } });
@@ -387,17 +396,33 @@ IMPORTANT: Réponds UNIQUEMENT avec un objet JSON valide, sans aucun texte avant
    - En cas de doute ou prénom épicène (ex: Camille, Dominique, Claude) → "unknown"
    - Le genre aide à personnaliser l'avatar du contact
 
+8. INDICES POUR L'AVATAR (avatarHints):
+   Extrais UNIQUEMENT les informations EXPLICITEMENT mentionnées dans la transcription:
+   - physical: description physique (cheveux, yeux, corpulence, âge estimé, traits distinctifs)
+     Ex: "cheveux bruns courts", "barbe", "la trentaine", "grand et mince"
+   - personality: trait de personnalité DOMINANT qui ressort de la transcription
+     Ex: "chaleureux", "dynamique", "calme", "drôle", "sérieux", "timide"
+   - interest: hobby ou passion principale mentionnée
+     Ex: "tennis", "cuisine", "jeux vidéo", "randonnée", "musique"
+   - context: contexte professionnel ou social
+     Ex: "collègue développeur", "coach sportif", "voisin", "ami d'enfance"
+
+   RÈGLES IMPORTANTES:
+   - Si rien n'est mentionné pour un champ → null (ne PAS inventer)
+   - Privilégie les infos les plus marquantes/distinctives
+   - Formule en anglais pour le prompt de génération d'image
+
 Exemple pour un contact existant identifié:
-{"contactId": "abc123", "firstName": "Marie", "lastName": null, "gender": "female", "suggestedNickname": null, "confidence": "high", "isNew": false, "candidateIds": []}
+{"contactId": "abc123", "firstName": "Marie", "lastName": null, "gender": "female", "suggestedNickname": null, "confidence": "high", "isNew": false, "candidateIds": [], "avatarHints": {"physical": null, "personality": "warm and cheerful", "interest": "yoga", "context": "colleague at marketing team"}}
 
 Exemple pour un nouveau contact sans nom de famille:
-{"contactId": null, "firstName": "Paul", "lastName": null, "gender": "male", "suggestedNickname": "Paul Google", "confidence": "high", "isNew": true, "candidateIds": []}
+{"contactId": null, "firstName": "Paul", "lastName": null, "gender": "male", "suggestedNickname": "Paul Google", "confidence": "high", "isNew": true, "candidateIds": [], "avatarHints": {"physical": "short brown hair, beard, early 30s", "personality": "energetic", "interest": "tech and startups", "context": "software engineer"}}
 
 Exemple avec ambiguïté:
-{"contactId": null, "firstName": "Marie", "lastName": null, "gender": "female", "suggestedNickname": null, "confidence": "medium", "isNew": false, "candidateIds": ["id1", "id2"]}
+{"contactId": null, "firstName": "Marie", "lastName": null, "gender": "female", "suggestedNickname": null, "confidence": "medium", "isNew": false, "candidateIds": ["id1", "id2"], "avatarHints": {"physical": null, "personality": null, "interest": "running", "context": null}}
 
 Exemple avec pronom et indice dans les sujets:
 Transcription: "Elle m'a raconté son date avec François"
 Contact Inès avec sujet "Date François"
-→ {"contactId": "ines-id", "firstName": "Inès", "lastName": null, "gender": "female", "suggestedNickname": null, "confidence": "high", "isNew": false, "candidateIds": []}`;
+→ {"contactId": "ines-id", "firstName": "Inès", "lastName": null, "gender": "female", "suggestedNickname": null, "confidence": "high", "isNew": false, "candidateIds": [], "avatarHints": {"physical": null, "personality": null, "interest": null, "context": null}}`;
 }

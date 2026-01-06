@@ -180,6 +180,13 @@ export type ExtractedContactInfo = {
   };
 };
 
+export type AvatarHints = {
+  physical: string | null;
+  personality: string | null;
+  interest: string | null;
+  context: string | null;
+};
+
 export type ExtractionResult = {
   contactIdentified: {
     id: string | null;
@@ -190,6 +197,7 @@ export type ExtractionResult = {
     needsDisambiguation: boolean;
     suggestedMatches?: string[];
     suggestedNickname?: string;
+    avatarHints?: AvatarHints | null;
   };
   noteTitle: string;
   contactInfo?: ExtractedContactInfo;

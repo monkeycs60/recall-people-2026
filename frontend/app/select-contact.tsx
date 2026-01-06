@@ -169,9 +169,10 @@ export default function SelectContactScreen() {
         extraction.contactIdentified.firstName = parts[0];
         extraction.contactIdentified.lastName = parts.length > 1 ? parts.slice(1).join(' ') : undefined;
         extraction.contactIdentified.suggestedNickname = undefined;
-        // Keep the gender from detection even when name is edited
+        // Keep the gender and avatarHints from detection even when name is edited
         if (detection) {
           extraction.contactIdentified.gender = detection.gender;
+          extraction.contactIdentified.avatarHints = detection.avatarHints;
         }
       } else if (detection) {
         // No edit - use detection values and clear extraction values
@@ -179,6 +180,7 @@ export default function SelectContactScreen() {
         extraction.contactIdentified.lastName = detection.lastName || undefined;
         extraction.contactIdentified.suggestedNickname = detection.suggestedNickname || undefined;
         extraction.contactIdentified.gender = detection.gender;
+        extraction.contactIdentified.avatarHints = detection.avatarHints;
       }
 
       setCurrentExtraction(extraction);

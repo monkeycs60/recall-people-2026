@@ -14,7 +14,7 @@ import { memoryService } from '@/services/memory.service';
 import { notificationService } from '@/services/notification.service';
 import { contactService } from '@/services/contact.service';
 import { groupService } from '@/services/group.service';
-import { generateIceBreakers, generateSummary } from '@/lib/api';
+import { generateIceBreakers, generateSummary, generateAvatarFromHints } from '@/lib/api';
 import { noteService } from '@/services/note.service';
 import { useAppStore } from '@/stores/app-store';
 import { queryKeys } from '@/lib/query-keys';
@@ -525,6 +525,34 @@ export default function ReviewScreen() {
             queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(finalContactId) });
           })
           .catch(() => {});
+      }
+
+      // Auto-generate avatar for contacts without avatar (fire-and-forget)
+      // Works for both new contacts and existing contacts without avatar
+      const shouldGenerateAvatar = !contactDetails?.avatarUrl && extraction.contactIdentified.avatarHints;
+      if (shouldGenerateAvatar) {
+        const gender = extraction.contactIdentified.gender || 'unknown';
+        const avatarHints = extraction.contactIdentified.avatarHints || {
+          physical: null,
+          personality: null,
+          interest: null,
+          context: null,
+        };
+
+        generateAvatarFromHints({
+          contactId: finalContactId,
+          gender,
+          avatarHints,
+        })
+          .then(async (result) => {
+            await contactService.update(finalContactId, { avatarUrl: result.avatarUrl });
+            queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
+            queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(finalContactId) });
+            console.log('[Avatar Auto] Successfully generated avatar for', finalContactId);
+          })
+          .catch((error) => {
+            console.warn('[Avatar Auto] Generation failed (silent):', error);
+          });
       }
 
       setRecordingState('idle');

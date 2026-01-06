@@ -209,6 +209,13 @@ export const generateIceBreakers = async (data: {
   return response.iceBreakers;
 };
 
+export type AvatarHints = {
+  physical: string | null;
+  personality: string | null;
+  interest: string | null;
+  context: string | null;
+};
+
 export type DetectionResult = {
   contactId: string | null;
   firstName: string;
@@ -218,6 +225,7 @@ export type DetectionResult = {
   confidence: 'high' | 'medium' | 'low';
   isNew: boolean;
   candidateIds: string[];
+  avatarHints: AvatarHints | null;
 };
 
 export const detectContact = async (data: {
@@ -304,6 +312,22 @@ export const deleteAvatar = async (contactId: string): Promise<void> => {
   await apiCall(`/api/avatar/${contactId}`, {
     method: 'DELETE',
   });
+};
+
+export const generateAvatarFromHints = async (data: {
+  contactId: string;
+  gender: 'male' | 'female' | 'unknown';
+  avatarHints: AvatarHints;
+}): Promise<{ avatarUrl: string; filename: string }> => {
+  const response = await apiCall<{ success: boolean; avatarUrl: string; filename: string }>(
+    '/api/avatar/generate-from-hints',
+    {
+      method: 'POST',
+      body: data,
+      showErrorToast: false, // Silent fail for auto-generation
+    }
+  );
+  return { avatarUrl: response.avatarUrl, filename: response.filename };
 };
 
 export { apiCall };
