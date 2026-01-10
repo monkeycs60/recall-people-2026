@@ -3,8 +3,7 @@ import { getToken, refreshAccessToken } from './auth';
 import { ExtractionResult } from '@/types';
 import { useSettingsStore } from '@/stores/settings-store';
 import { ApiError, NetworkError, showApiError } from './error-handler';
-
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
+import { API_URL } from './config';
 
 const getCurrentLanguage = () => useSettingsStore.getState().language;
 

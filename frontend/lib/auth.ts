@@ -1,6 +1,5 @@
 import * as SecureStore from 'expo-secure-store';
-
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
+import { API_URL } from './config';
 const TOKEN_KEY = 'auth_token';
 const REFRESH_TOKEN_KEY = 'auth_refresh_token';
 const USER_KEY = 'auth_user';

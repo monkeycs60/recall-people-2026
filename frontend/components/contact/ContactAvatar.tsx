@@ -3,8 +3,7 @@ import { Image } from 'expo-image';
 import { Camera } from 'lucide-react-native';
 import { Colors } from '@/constants/theme';
 import { Gender } from '@/types';
-
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
+import { API_URL } from '@/lib/config';
 
 type ContactAvatarProps = {
   firstName: string;
