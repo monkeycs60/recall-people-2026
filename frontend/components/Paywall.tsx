@@ -1,5 +1,5 @@
-import { View, Text, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
-import { useState, useEffect } from 'react';
+import { View, Text, Pressable, ActivityIndicator, StyleSheet, BackHandler } from 'react-native';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Check, Crown } from 'lucide-react-native';
 import { PurchasesOffering } from 'react-native-purchases';
@@ -24,6 +24,20 @@ export function Paywall({ onClose, reason = 'notes_limit' }: PaywallProps) {
   useEffect(() => {
     loadOfferings();
   }, []);
+
+  // Handle hardware back button to close paywall
+  useEffect(() => {
+    const handleBackPress = () => {
+      if (!isPurchasing) {
+        onClose();
+        return true;
+      }
+      return true; // Block back while purchasing
+    };
+
+    const subscription = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+    return () => subscription.remove();
+  }, [isPurchasing, onClose]);
 
   const loadOfferings = async () => {
     setIsLoading(true);
@@ -119,7 +133,14 @@ export function Paywall({ onClose, reason = 'notes_limit' }: PaywallProps) {
   if (isLoading) {
     return (
       <View style={[styles.container, { paddingTop: insets.top }]}>
-        <ActivityIndicator size="large" color={Colors.primary} />
+        <View style={styles.header}>
+          <Pressable onPress={onClose} style={styles.closeButton}>
+            <X size={24} color={Colors.textSecondary} />
+          </Pressable>
+        </View>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+        </View>
       </View>
     );
   }
@@ -226,6 +247,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 20,
     backgroundColor: Colors.surfaceHover,
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   content: {
     flex: 1,

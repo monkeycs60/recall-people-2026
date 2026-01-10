@@ -39,6 +39,7 @@ export default function RecordScreen() {
     cancelRecording,
     isRecording,
     isProcessing,
+    processingStep,
     recordingDuration,
     maxRecordingDuration,
     showPaywall,
@@ -185,7 +186,7 @@ export default function RecordScreen() {
           </Animated.View>
         ) : isProcessing ? (
           <Animated.View entering={FadeIn} style={{ marginBottom: 64 }}>
-            <TranscriptionLoader />
+            <TranscriptionLoader step={processingStep} hasPreselectedContact={!!preselectedContactId} />
           </Animated.View>
         ) : (
           <Animated.Text

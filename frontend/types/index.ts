@@ -31,6 +31,8 @@ export type PendingFactStatus = 'pending' | 'applied' | 'rejected';
 
 export type RecordingState = 'idle' | 'recording' | 'processing' | 'reviewing';
 
+export type ProcessingStep = 'transcribing' | 'detecting' | 'extracting' | null;
+
 export type Confidence = 'high' | 'medium' | 'low';
 
 export type HotTopicStatus = 'active' | 'resolved';

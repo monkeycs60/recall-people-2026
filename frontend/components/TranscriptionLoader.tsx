@@ -8,8 +8,13 @@ import Animated, {
   withSequence,
   withDelay,
   Easing,
+  FadeIn,
+  FadeOut,
+  SlideInRight,
+  SlideOutLeft,
 } from 'react-native-reanimated';
 import { Colors, Spacing, BorderRadius, Typography } from '@/constants/theme';
+import { ProcessingStep } from '@/types';
 
 const DOT_COUNT = 3;
 const DOT_SIZE = 10;
@@ -56,8 +61,64 @@ function AnimatedDot({ index }: DotProps) {
   return <Animated.View style={[styles.dot, animatedStyle]} />;
 }
 
-export function TranscriptionLoader() {
+type StepIndicatorProps = {
+  step: ProcessingStep;
+  totalSteps: number;
+  currentStepIndex: number;
+};
+
+function StepIndicator({ totalSteps, currentStepIndex }: StepIndicatorProps) {
+  return (
+    <View style={styles.stepIndicator}>
+      {Array.from({ length: totalSteps }).map((_, index) => (
+        <View
+          key={index}
+          style={[
+            styles.stepDot,
+            index < currentStepIndex && styles.stepDotCompleted,
+            index === currentStepIndex && styles.stepDotActive,
+          ]}
+        />
+      ))}
+    </View>
+  );
+}
+
+type TranscriptionLoaderProps = {
+  step?: ProcessingStep;
+  hasPreselectedContact?: boolean;
+};
+
+export function TranscriptionLoader({ step = 'transcribing', hasPreselectedContact = false }: TranscriptionLoaderProps) {
   const { t } = useTranslation();
+
+  const getStepConfig = () => {
+    if (hasPreselectedContact) {
+      return {
+        totalSteps: 2,
+        currentStepIndex: step === 'transcribing' ? 0 : 1,
+      };
+    }
+    return {
+      totalSteps: 2,
+      currentStepIndex: step === 'transcribing' ? 0 : 1,
+    };
+  };
+
+  const { totalSteps, currentStepIndex } = getStepConfig();
+
+  const getStepText = () => {
+    switch (step) {
+      case 'transcribing':
+        return t('processing.transcribing');
+      case 'detecting':
+        return t('processing.detecting');
+      case 'extracting':
+        return t('processing.extracting');
+      default:
+        return t('processing.transcribing');
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -66,7 +127,25 @@ export function TranscriptionLoader() {
           <AnimatedDot key={index} index={index} />
         ))}
       </View>
-      <Text style={styles.text}>{t('home.transcribing')}</Text>
+
+      <View style={styles.textContainer}>
+        <Animated.Text
+          key={step}
+          entering={SlideInRight.duration(300).easing(Easing.out(Easing.ease))}
+          exiting={SlideOutLeft.duration(200).easing(Easing.in(Easing.ease))}
+          style={styles.text}
+        >
+          {getStepText()}
+        </Animated.Text>
+      </View>
+
+      <Animated.View entering={FadeIn.delay(200).duration(400)}>
+        <StepIndicator
+          step={step}
+          totalSteps={totalSteps}
+          currentStepIndex={currentStepIndex}
+        />
+      </Animated.View>
     </View>
   );
 }
@@ -90,9 +169,34 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
     backgroundColor: Colors.primary,
   },
+  textContainer: {
+    height: 28,
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
   text: {
     ...Typography.bodyLarge,
     color: Colors.textSecondary,
     textAlign: 'center',
+  },
+  stepIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: Spacing.xs,
+  },
+  stepDot: {
+    width: 8,
+    height: 8,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.border,
+  },
+  stepDotCompleted: {
+    backgroundColor: Colors.primary,
+  },
+  stepDotActive: {
+    backgroundColor: Colors.primary,
+    width: 24,
   },
 });

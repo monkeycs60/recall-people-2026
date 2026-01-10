@@ -15,7 +15,7 @@ import { useSubscriptionStore } from '@/stores/subscription-store';
 import { transcribeAudio, extractInfo, detectContact } from '@/lib/api';
 import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
-import { showErrorToast, showInfoToast } from '@/lib/error-handler';
+import { showErrorToast } from '@/lib/error-handler';
 import i18n from '@/lib/i18n';
 
 const isE2ETest = process.env.EXPO_PUBLIC_E2E_TEST === 'true';
@@ -58,7 +58,9 @@ export const useRecording = () => {
   const stopRecordingRef = useRef<(() => Promise<{ uri: string; transcription: string } | null | undefined>) | null>(null);
   const {
     recordingState,
+    processingStep,
     setRecordingState,
+    setProcessingStep,
     setCurrentAudioUri,
     setCurrentTranscription,
     setCurrentExtraction,
@@ -78,10 +80,6 @@ export const useRecording = () => {
     if (!canCreateNote()) {
       setPaywallReason('notes_limit');
       setShowPaywall(true);
-      showInfoToast(
-        i18n.t('recording.errors.noCredits'),
-        i18n.t('recording.errors.noCreditsDescription')
-      );
       return;
     }
 
@@ -165,6 +163,7 @@ export const useRecording = () => {
 
     try {
       setRecordingState('processing');
+      setProcessingStep('transcribing');
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
       let uri: string;
@@ -204,6 +203,7 @@ export const useRecording = () => {
           }));
 
           // Load facts and hot topics for the preselected contact
+          setProcessingStep('extracting');
           const [facts, hotTopics] = await Promise.all([
             factService.getByContact(preselectedContactId),
             hotTopicService.getByContact(preselectedContactId),
@@ -258,6 +258,7 @@ export const useRecording = () => {
       }
 
       // Detect contact using LLM
+      setProcessingStep('detecting');
       const contactsForDetection = freshContacts.map((contact) => ({
         id: contact.id,
         firstName: contact.firstName,
@@ -293,6 +294,7 @@ export const useRecording = () => {
         } catch {}
       }
       setRecordingState('idle');
+      setProcessingStep(null);
       setPreselectedContactId(null);
       throw error;
     }
@@ -312,12 +314,14 @@ export const useRecording = () => {
     }
     setRecordingDuration(0);
     setRecordingState('idle');
+    setProcessingStep(null);
   };
 
   stopRecordingRef.current = stopRecording;
 
   return {
     recordingState,
+    processingStep,
     recordingDuration,
     maxRecordingDuration: maxDuration,
     toggleRecording,

@@ -76,6 +76,11 @@
     "processing": "Processing...",
     "transcribing": "Transcribing..."
   },
+  "processing": {
+    "transcribing": "Transcribing audio...",
+    "detecting": "Identifying contact...",
+    "extracting": "Extracting information..."
+  },
   "contacts": {
     "title": "Contacts",
     "searchPlaceholder": "Who are you looking for?",

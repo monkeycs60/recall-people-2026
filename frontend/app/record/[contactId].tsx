@@ -21,6 +21,7 @@ import { RecordButton } from '@/components/RecordButton';
 import { Paywall } from '@/components/Paywall';
 import { TranscriptionLoader } from '@/components/TranscriptionLoader';
 import { Colors } from '@/constants/theme';
+import { ProcessingStep } from '@/types';
 
 export default function RecordForContactScreen() {
   const router = useRouter();
@@ -40,6 +41,7 @@ export default function RecordForContactScreen() {
 
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingStep, setProcessingStep] = useState<ProcessingStep>(null);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [showPaywall, setShowPaywall] = useState(false);
   const [paywallReason, setPaywallReason] = useState<'notes_limit' | 'recording_duration'>('notes_limit');
@@ -162,6 +164,7 @@ export default function RecordForContactScreen() {
       isRecordingRef.current = false;
       setIsRecording(false);
       setIsProcessing(true);
+      setProcessingStep('transcribing');
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
       await audioRecorder.stop();
@@ -177,6 +180,8 @@ export default function RecordForContactScreen() {
       if (!targetContact) {
         throw new Error('Contact not found');
       }
+
+      setProcessingStep('extracting');
 
       const contactsForExtraction = contacts.map((c) => ({
         id: c.id,
@@ -268,7 +273,7 @@ export default function RecordForContactScreen() {
           justifyContent: 'center',
         }}
       >
-        <TranscriptionLoader />
+        <TranscriptionLoader step={processingStep} hasPreselectedContact />
       </View>
     );
   }

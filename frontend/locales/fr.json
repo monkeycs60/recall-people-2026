@@ -76,6 +76,11 @@
     "processing": "Traitement...",
     "transcribing": "Transcription..."
   },
+  "processing": {
+    "transcribing": "Transcription en cours...",
+    "detecting": "Identification du contact...",
+    "extracting": "Extraction des informations..."
+  },
   "contacts": {
     "title": "Contacts",
     "searchPlaceholder": "Qui cherchez-vous ?",
