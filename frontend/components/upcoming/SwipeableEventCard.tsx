@@ -13,7 +13,6 @@ import { Calendar, Trash2 } from 'lucide-react-native';
 import { Colors } from '@/constants/theme';
 import { HotTopic, Contact } from '@/types';
 
-const DELETE_THRESHOLD = -80;
 const SNAP_POINT = -80;
 
 type SwipeableEventCardProps = {
@@ -34,17 +33,11 @@ export function SwipeableEventCard({ event, onPress, onDelete }: SwipeableEventC
   const panGesture = Gesture.Pan()
     .activeOffsetX([-10, 10])
     .onUpdate((gestureEvent) => {
-      const newValue = Math.min(0, gestureEvent.translationX);
+      const newValue = Math.max(SNAP_POINT, Math.min(0, gestureEvent.translationX));
       translateX.value = newValue;
     })
     .onEnd((gestureEvent) => {
-      if (gestureEvent.translationX < DELETE_THRESHOLD) {
-        translateX.value = withTiming(-300, { duration: 200 });
-        itemHeight.value = withTiming(0, { duration: 200 });
-        itemOpacity.value = withTiming(0, { duration: 200 }, () => {
-          runOnJS(handleDelete)();
-        });
-      } else if (gestureEvent.translationX < SNAP_POINT / 2) {
+      if (gestureEvent.translationX < SNAP_POINT / 2) {
         translateX.value = withTiming(SNAP_POINT, { duration: 200 });
       } else {
         translateX.value = withTiming(0, { duration: 200 });
