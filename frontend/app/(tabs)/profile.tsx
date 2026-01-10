@@ -19,6 +19,7 @@ import {
 } from 'lucide-react-native';
 import { useAuthStore } from '@/stores/auth-store';
 import { useSettingsStore } from '@/stores/settings-store';
+import { useSubscriptionStore } from '@/stores/subscription-store';
 import { LANGUAGE_NAMES } from '@/types';
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { SettingsSection } from '@/components/profile/SettingsSection';
@@ -43,6 +44,7 @@ export default function ProfileScreen() {
   const logout = useAuthStore((state) => state.logout);
   const language = useSettingsStore((state) => state.language);
   const setHasSeenOnboarding = useSettingsStore((state) => state.setHasSeenOnboarding);
+  const isTestPro = useSubscriptionStore((state) => state.isTestPro);
 
   const [showPaywall, setShowPaywall] = useState(false);
 
@@ -134,7 +136,7 @@ export default function ProfileScreen() {
 
   const adminEmail = process.env.EXPO_PUBLIC_ADMIN_EMAIL || '';
   const isAdmin = adminEmail && user?.email === adminEmail;
-  const showTestProCard = canActivateTestPro(user?.email);
+  const showTestProCard = canActivateTestPro(user?.email, isTestPro);
 
   const handleOpenMonitoring = () => {
     router.push('/admin/monitoring');

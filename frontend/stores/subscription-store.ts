@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools, persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { isEmailWhitelisted } from '@/config/pro-whitelist';
+import { checkProWhitelist } from '@/lib/api';
 
 type SubscriptionState = {
   isPremium: boolean;
@@ -15,7 +15,7 @@ type SubscriptionActions = {
   setIsPremium: (isPremium: boolean) => void;
   activateTestPro: () => void;
   deactivateTestPro: () => void;
-  checkWhitelistStatus: (email: string | undefined | null) => void;
+  checkWhitelistStatus: () => Promise<void>;
   incrementNotesCount: () => void;
   canCreateNote: () => boolean;
   getMaxRecordingDuration: () => number;
@@ -48,8 +48,9 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
 
         deactivateTestPro: () => set({ isTestPro: false, isPremium: false }),
 
-        checkWhitelistStatus: (email) => {
-          if (isEmailWhitelisted(email)) {
+        checkWhitelistStatus: async () => {
+          const isWhitelisted = await checkProWhitelist();
+          if (isWhitelisted) {
             set({ isTestPro: true, isPremium: true });
           }
         },

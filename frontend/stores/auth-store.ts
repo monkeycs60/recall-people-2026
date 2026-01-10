@@ -57,7 +57,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         if (isE2ETest) {
           console.log('[E2E] Using mock user, bypassing authentication');
           set({ user: E2E_MOCK_USER, isLoading: false, isInitialized: true });
-          useSubscriptionStore.getState().checkWhitelistStatus(E2E_MOCK_USER.email);
+          useSubscriptionStore.getState().checkWhitelistStatus();
           return;
         }
 
@@ -73,7 +73,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           set({ user, isLoading: false, isInitialized: true });
 
           // Check if user is in Pro whitelist
-          useSubscriptionStore.getState().checkWhitelistStatus(user?.email);
+          useSubscriptionStore.getState().checkWhitelistStatus();
 
           // Sync language from backend
           try {

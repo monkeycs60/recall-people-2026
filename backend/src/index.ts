@@ -12,6 +12,7 @@ import { adminRoutes } from './routes/admin';
 import { detectContactRoutes } from './routes/detect-contact';
 import { summaryRoutes } from './routes/summary';
 import { avatarRoutes } from './routes/avatar';
+import { subscriptionRoutes } from './routes/subscription';
 import { rateLimiters } from './middleware/rateLimit';
 import { securityHeaders } from './middleware/securityHeaders';
 import { httpsEnforcement } from './middleware/httpsEnforcement';
@@ -30,6 +31,7 @@ type Bindings = {
   LANGFUSE_PUBLIC_KEY?: string;
   LANGFUSE_BASE_URL?: string;
   ENABLE_LANGFUSE?: string;
+  PRO_WHITELIST?: string;
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -79,6 +81,7 @@ app.route('/api/settings', settingsRoutes);
 app.route('/api/detect-contact', detectContactRoutes);
 app.route('/api/summary', summaryRoutes);
 app.route('/api/avatar', avatarRoutes);
+app.route('/api/subscription', subscriptionRoutes);
 app.route('/admin', adminRoutes);
 
 export default app;

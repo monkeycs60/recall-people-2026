@@ -329,4 +329,16 @@ export const generateAvatarFromHints = async (data: {
   return { avatarUrl: response.avatarUrl, filename: response.filename };
 };
 
+export const checkProWhitelist = async (): Promise<boolean> => {
+  try {
+    const response = await apiCall<{ success: boolean; isWhitelisted: boolean }>(
+      '/api/subscription/check-whitelist',
+      { showErrorToast: false }
+    );
+    return response.isWhitelisted;
+  } catch {
+    return false;
+  }
+};
+
 export { apiCall };
