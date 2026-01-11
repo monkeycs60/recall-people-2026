@@ -5,6 +5,7 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
   Easing,
+  interpolateColor,
 } from 'react-native-reanimated';
 import { Colors, BorderRadius } from '@/constants/theme';
 import { InputMode } from './InputModeToggle';
@@ -17,10 +18,17 @@ interface AddNoteButtonProps {
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+const AnimatedText = Animated.createAnimatedComponent(Text);
+
+const TRANSITION_DURATION = 250;
+const TRANSITION_CONFIG = {
+  duration: TRANSITION_DURATION,
+  easing: Easing.out(Easing.quad),
+};
 
 export function AddNoteButton({ firstName, mode, onModeChange, onPress }: AddNoteButtonProps) {
   const buttonScale = useSharedValue(1);
-  const indicatorPosition = useSharedValue(mode === 'audio' ? 0 : 1);
+  const modeProgress = useSharedValue(mode === 'audio' ? 0 : 1);
 
   const handlePressIn = () => {
     buttonScale.value = withTiming(0.96, { duration: 100 });
@@ -31,10 +39,7 @@ export function AddNoteButton({ firstName, mode, onModeChange, onPress }: AddNot
   };
 
   const handleModeChange = (newMode: InputMode) => {
-    indicatorPosition.value = withTiming(newMode === 'audio' ? 0 : 1, {
-      duration: 200,
-      easing: Easing.out(Easing.quad),
-    });
+    modeProgress.value = withTiming(newMode === 'audio' ? 0 : 1, TRANSITION_CONFIG);
     onModeChange(newMode);
   };
 
@@ -43,12 +48,59 @@ export function AddNoteButton({ firstName, mode, onModeChange, onPress }: AddNot
   }));
 
   const indicatorStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: indicatorPosition.value * 80 }],
+    transform: [{ translateX: modeProgress.value * 80 }],
   }));
 
-  const buttonText = mode === 'audio'
-    ? `Quoi de neuf avec ${firstName} ?`
-    : `Écrire sur ${firstName}`;
+  const audioIconStyle = useAnimatedStyle(() => ({
+    opacity: 1 - modeProgress.value,
+    position: 'absolute' as const,
+  }));
+
+  const textIconStyle = useAnimatedStyle(() => ({
+    opacity: modeProgress.value,
+    position: 'absolute' as const,
+  }));
+
+  const audioTextStyle = useAnimatedStyle(() => ({
+    opacity: 1 - modeProgress.value,
+    position: 'absolute' as const,
+  }));
+
+  const textTextStyle = useAnimatedStyle(() => ({
+    opacity: modeProgress.value,
+  }));
+
+  const audioLabelStyle = useAnimatedStyle(() => ({
+    color: interpolateColor(
+      modeProgress.value,
+      [0, 1],
+      [Colors.textInverse, Colors.textMuted]
+    ),
+  }));
+
+  const textLabelStyle = useAnimatedStyle(() => ({
+    color: interpolateColor(
+      modeProgress.value,
+      [0, 1],
+      [Colors.textMuted, Colors.textInverse]
+    ),
+  }));
+
+  const audioSwitchIconActiveStyle = useAnimatedStyle(() => ({
+    opacity: 1 - modeProgress.value,
+  }));
+
+  const audioSwitchIconInactiveStyle = useAnimatedStyle(() => ({
+    opacity: modeProgress.value,
+  }));
+
+  const textSwitchIconActiveStyle = useAnimatedStyle(() => ({
+    opacity: modeProgress.value,
+  }));
+
+  const textSwitchIconInactiveStyle = useAnimatedStyle(() => ({
+    opacity: 1 - modeProgress.value,
+  }));
 
   return (
     <View style={styles.container}>
@@ -58,12 +110,22 @@ export function AddNoteButton({ firstName, mode, onModeChange, onPress }: AddNot
         onPressOut={handlePressOut}
         style={[styles.mainButton, buttonAnimatedStyle]}
       >
-        {mode === 'audio' ? (
-          <Mic size={20} color={Colors.textInverse} />
-        ) : (
-          <PenLine size={20} color={Colors.textInverse} />
-        )}
-        <Text style={styles.buttonText}>{buttonText}</Text>
+        <View style={styles.iconContainer}>
+          <Animated.View style={audioIconStyle}>
+            <Mic size={20} color={Colors.textInverse} />
+          </Animated.View>
+          <Animated.View style={textIconStyle}>
+            <PenLine size={20} color={Colors.textInverse} />
+          </Animated.View>
+        </View>
+        <View style={styles.textContainer}>
+          <AnimatedText style={[styles.buttonText, audioTextStyle]}>
+            {`Quoi de neuf avec ${firstName} ?`}
+          </AnimatedText>
+          <AnimatedText style={[styles.buttonText, textTextStyle]}>
+            {`Écrire sur ${firstName}`}
+          </AnimatedText>
+        </View>
       </AnimatedPressable>
 
       <View style={styles.modeSelector}>
@@ -74,10 +136,17 @@ export function AddNoteButton({ firstName, mode, onModeChange, onPress }: AddNot
           style={styles.modeOption}
           hitSlop={8}
         >
-          <Mic size={16} color={mode === 'audio' ? Colors.textInverse : Colors.textMuted} />
-          <Text style={[styles.modeLabel, mode === 'audio' && styles.modeLabelActive]}>
+          <View style={styles.switchIconContainer}>
+            <Animated.View style={[styles.switchIconAbsolute, audioSwitchIconActiveStyle]}>
+              <Mic size={16} color={Colors.textInverse} />
+            </Animated.View>
+            <Animated.View style={[styles.switchIconAbsolute, audioSwitchIconInactiveStyle]}>
+              <Mic size={16} color={Colors.textMuted} />
+            </Animated.View>
+          </View>
+          <AnimatedText style={[styles.modeLabel, audioLabelStyle]}>
             Parler
-          </Text>
+          </AnimatedText>
         </Pressable>
 
         <Pressable
@@ -85,10 +154,17 @@ export function AddNoteButton({ firstName, mode, onModeChange, onPress }: AddNot
           style={styles.modeOption}
           hitSlop={8}
         >
-          <PenLine size={16} color={mode === 'text' ? Colors.textInverse : Colors.textMuted} />
-          <Text style={[styles.modeLabel, mode === 'text' && styles.modeLabelActive]}>
+          <View style={styles.switchIconContainer}>
+            <Animated.View style={[styles.switchIconAbsolute, textSwitchIconActiveStyle]}>
+              <PenLine size={16} color={Colors.textInverse} />
+            </Animated.View>
+            <Animated.View style={[styles.switchIconAbsolute, textSwitchIconInactiveStyle]}>
+              <PenLine size={16} color={Colors.textMuted} />
+            </Animated.View>
+          </View>
+          <AnimatedText style={[styles.modeLabel, textLabelStyle]}>
             Écrire
-          </Text>
+          </AnimatedText>
         </Pressable>
       </View>
     </View>
@@ -116,6 +192,16 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
+  iconContainer: {
+    width: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  textContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   buttonText: {
     color: Colors.textInverse,
     fontSize: 16,
@@ -136,27 +222,34 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 4,
     left: 4,
-    width: 76,
-    height: 32,
+    width: 80,
+    height: 28,
     borderRadius: BorderRadius.full,
     backgroundColor: Colors.primary,
   },
   modeOption: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingVertical: 6,
-    paddingHorizontal: 14,
+    gap: 4,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
     borderRadius: BorderRadius.full,
     width: 80,
+    height: 28,
     justifyContent: 'center',
   },
   modeLabel: {
     fontSize: 13,
-    color: Colors.textMuted,
     fontWeight: '500',
   },
-  modeLabelActive: {
-    color: Colors.textInverse,
+  switchIconContainer: {
+    width: 16,
+    height: 16,
+    position: 'relative',
+  },
+  switchIconAbsolute: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
   },
 });
