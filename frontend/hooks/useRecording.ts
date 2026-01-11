@@ -156,9 +156,27 @@ export const useRecording = () => {
     // In E2E mode, we don't require actual recording
     if (!isE2ETest && !audioRecorder.isRecording) return null;
 
+    const currentDuration = recordingDuration;
+
     if (durationIntervalRef.current) {
       clearInterval(durationIntervalRef.current);
       durationIntervalRef.current = null;
+    }
+
+    // Check minimum duration (at least 1 second)
+    if (!isE2ETest && currentDuration < 1) {
+      try {
+        await audioRecorder.stop();
+      } catch {
+        // Ignore stop errors
+      }
+      setRecordingDuration(0);
+      setRecordingState('idle');
+      showErrorToast(
+        i18n.t('recording.errors.tooShort', { defaultValue: 'Recording too short' }),
+        i18n.t('recording.errors.tooShortDescription', { defaultValue: 'Please record for at least 1 second.' })
+      );
+      return null;
     }
 
     try {
@@ -288,15 +306,22 @@ export const useRecording = () => {
       return { uri, transcription: transcriptionResult.transcript };
     } catch (error) {
       console.error('[useRecording] Stop error:', error);
-      if (audioRecorder.isRecording) {
-        try {
+      try {
+        if (audioRecorder.isRecording) {
           await audioRecorder.stop();
-        } catch {}
+        }
+      } catch {
+        // Ignore errors from released recorder
       }
       setRecordingState('idle');
       setProcessingStep(null);
       setPreselectedContactId(null);
-      throw error;
+
+      // Show error toast to user instead of throwing
+      showErrorToast(
+        i18n.t('recording.errors.processingFailed', { defaultValue: 'Processing failed' }),
+        i18n.t('recording.errors.processingFailedDescription', { defaultValue: 'Please check your connection and try again.' })
+      );
     }
   };
 
@@ -305,11 +330,15 @@ export const useRecording = () => {
       clearInterval(durationIntervalRef.current);
       durationIntervalRef.current = null;
     }
-    if (!isE2ETest && audioRecorder.isRecording) {
+    if (!isE2ETest) {
       try {
-        await audioRecorder.stop();
+        // Check isRecording inside try-catch because audioRecorder may have been released
+        if (audioRecorder.isRecording) {
+          await audioRecorder.stop();
+        }
       } catch (stopError) {
-        console.error('[useRecording] Cancel error:', stopError);
+        // Ignore errors from released audio recorder
+        console.log('[useRecording] Cancel cleanup (recorder may be released):', stopError);
       }
     }
     setRecordingDuration(0);
