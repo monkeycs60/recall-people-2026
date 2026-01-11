@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: Colors.primary,
     paddingVertical: 14,
-    paddingHorizontal: 24,
+    paddingHorizontal: 32,
     borderRadius: BorderRadius.md,
     gap: 8,
     shadowColor: Colors.primary,
@@ -199,6 +199,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   textContainer: {
+    minWidth: 220,
     justifyContent: 'center',
     alignItems: 'center',
   },
