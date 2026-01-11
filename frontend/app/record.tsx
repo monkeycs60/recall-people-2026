@@ -1,10 +1,9 @@
 import { View, Text, Pressable, Modal, BackHandler } from 'react-native';
-import { useState, useMemo, useCallback, useRef } from 'react';
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { X } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import Toast from 'react-native-toast-message';
 import { Colors } from '@/constants/theme';
 import { RecordButton } from '@/components/RecordButton';
 import { Paywall } from '@/components/Paywall';
@@ -12,7 +11,6 @@ import { TranscriptionLoader } from '@/components/TranscriptionLoader';
 import { useRecording } from '@/hooks/useRecording';
 import { useContactsQuery } from '@/hooks/useContactsQuery';
 import { useAppStore } from '@/stores/app-store';
-import { toastConfig } from '@/components/ui/ToastConfig';
 import Animated, {
   FadeIn,
   FadeOut,
@@ -52,7 +50,18 @@ export default function RecordScreen() {
   const preselectedContactId = useAppStore((state) => state.preselectedContactId);
   const resetRecording = useAppStore((state) => state.resetRecording);
   const [promptIndex, setPromptIndex] = useState(0);
-  const promptIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const isRecordingRef = useRef(isRecording);
+  const isProcessingRef = useRef(isProcessing);
+  const cancelRecordingRef = useRef(cancelRecording);
+  const resetRecordingRef = useRef(resetRecording);
+
+  // Keep refs in sync with values
+  useEffect(() => {
+    isRecordingRef.current = isRecording;
+    isProcessingRef.current = isProcessing;
+    cancelRecordingRef.current = cancelRecording;
+    resetRecordingRef.current = resetRecording;
+  }, [isRecording, isProcessing, cancelRecording, resetRecording]);
 
   const preselectedContact = useMemo(() => {
     if (!preselectedContactId) return null;
@@ -66,51 +75,32 @@ export default function RecordScreen() {
     return HELPER_PROMPTS;
   }, [preselectedContact]);
 
-  const startPromptRotation = useCallback(() => {
-    if (promptIntervalRef.current) {
-      clearInterval(promptIntervalRef.current);
-    }
-    promptIntervalRef.current = setInterval(() => {
-      setPromptIndex((prev) => (prev + 1) % currentPrompts.length);
-    }, 4000);
-  }, [currentPrompts.length]);
-
-  const stopPromptRotation = useCallback(() => {
-    if (promptIntervalRef.current) {
-      clearInterval(promptIntervalRef.current);
-      promptIntervalRef.current = null;
-    }
-  }, []);
-
   useFocusEffect(
     useCallback(() => {
-      // Reset state on focus to ensure clean slate
-      // This handles cases where previous recording session left state in a bad place
-      if (!isRecording && !isProcessing) {
-        resetRecording();
-        startPromptRotation();
-      }
+      const promptInterval = setInterval(() => {
+        setPromptIndex((prev) => (prev + 1) % 4);
+      }, 4000);
 
       const onBackPress = () => {
-        if (isRecording || isProcessing) {
+        if (isRecordingRef.current || isProcessingRef.current) {
           return true;
         }
-        cancelRecording();
-        resetRecording();
+        cancelRecordingRef.current();
+        resetRecordingRef.current();
         return false;
       };
 
       const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
 
       return () => {
-        stopPromptRotation();
+        clearInterval(promptInterval);
         subscription.remove();
-        if (!isProcessing) {
-          cancelRecording();
-          resetRecording();
+        if (!isProcessingRef.current) {
+          cancelRecordingRef.current();
+          resetRecordingRef.current();
         }
       };
-    }, [isRecording, isProcessing, startPromptRotation, stopPromptRotation, cancelRecording, resetRecording])
+    }, [])
   );
 
   const formatDuration = (seconds: number) => {
@@ -245,9 +235,6 @@ export default function RecordScreen() {
       <Modal visible={showPaywall} animationType="slide" presentationStyle="pageSheet">
         <Paywall onClose={closePaywall} reason={paywallReason} />
       </Modal>
-
-      {/* Toast must be inside this modal screen to be visible */}
-      <Toast config={toastConfig} />
     </View>
   );
 }

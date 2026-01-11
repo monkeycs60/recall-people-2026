@@ -1,4 +1,4 @@
-import Toast from 'react-native-toast-message';
+import { toast } from 'sonner-native';
 import i18n from '@/lib/i18n';
 
 export type ApiErrorDetails = {
@@ -54,50 +54,35 @@ export function showApiError(error: ApiError | Error) {
   const title = apiError ? getErrorTitleByStatus(apiError.status) : i18n.t('errors.generic');
   const subtitle = apiError?.backendMessage || undefined;
 
-  Toast.show({
-    type: 'error',
-    text1: title,
-    text2: subtitle,
-    visibilityTime: 4000,
-    position: 'bottom',
+  toast.error(title, {
+    description: subtitle,
+    duration: 4000,
   });
 }
 
 export function showNetworkError() {
-  Toast.show({
-    type: 'error',
-    text1: i18n.t('errors.networkError'),
-    text2: i18n.t('errors.checkConnection'),
-    visibilityTime: 4000,
-    position: 'bottom',
+  toast.error(i18n.t('errors.networkError'), {
+    description: i18n.t('errors.checkConnection'),
+    duration: 4000,
   });
 }
 
 export function showSuccessToast(message: string) {
-  Toast.show({
-    type: 'success',
-    text1: message,
-    visibilityTime: 3000,
-    position: 'bottom',
+  toast.success(message, {
+    duration: 3000,
   });
 }
 
 export function showErrorToast(title: string, subtitle?: string) {
-  Toast.show({
-    type: 'error',
-    text1: title,
-    text2: subtitle,
-    visibilityTime: 4000,
-    position: 'bottom',
+  toast.error(title, {
+    description: subtitle,
+    duration: 4000,
   });
 }
 
 export function showInfoToast(title: string, subtitle?: string) {
-  Toast.show({
-    type: 'info',
-    text1: title,
-    text2: subtitle,
-    visibilityTime: 3000,
-    position: 'bottom',
+  toast.info(title, {
+    description: subtitle,
+    duration: 3000,
   });
 }

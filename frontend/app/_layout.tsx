@@ -19,8 +19,7 @@ import {
   PlayfairDisplay_700Bold,
 } from '@expo-google-fonts/playfair-display';
 import { Colors } from '@/constants/theme';
-import Toast from 'react-native-toast-message';
-import { toastConfig } from '@/components/ui/ToastConfig';
+import { Toaster } from 'sonner-native';
 import { OfflineBanner } from '@/components/ui/OfflineBanner';
 import { notificationService } from '@/services/notification.service';
 import { hotTopicService } from '@/services/hot-topic.service';
@@ -192,24 +191,13 @@ export default function RootLayout() {
               name="record"
               options={{
                 headerShown: false,
-                presentation: 'fullScreenModal',
                 animation: 'slide_from_bottom',
-                gestureEnabled: false,
-              }}
-            />
-            <Stack.Screen
-              name="record/[contactId]"
-              options={{
-                headerShown: false,
-                presentation: 'fullScreenModal',
-                animation: 'slide_from_bottom',
-                gestureEnabled: false,
               }}
             />
           </Stack>
         </QueryClientProvider>
       </BottomSheetModalProvider>
-      <Toast config={toastConfig} />
+      <Toaster position="bottom-center" />
     </GestureHandlerRootView>
   );
 }
