@@ -50,14 +50,15 @@ DESIGN SYSTEM:
 - Color palette: Warm terracotta (#C67C4E), soft beige (#E8D5C4), cream backgrounds (#FAF7F2)
 - Art style: Semi-realistic illustrated portrait, similar to high-quality profile illustrations
 - Mood: Approachable, professional yet warm
-- Background: Simple solid warm color (cream or light beige)
-- Composition: Head and shoulders portrait, centered
+- Background: MUST be a single flat uniform color (#FAF7F2 cream or #E8D5C4 beige). NO gradients, NO shadows, NO textures, NO variations - completely monochrome and uniform.
+- Composition: Head and shoulders portrait, perfectly centered, optimized for circular cropping. Keep the face centered with enough margin on all sides so nothing important gets cut off when displayed in a round frame.
+- Shape: The final image will be displayed as a circle, so ensure the subject is well-centered and the composition works in a circular crop.
 
 IMPORTANT RULES:
 1. Create a portrait illustration, NOT a photograph
 2. The person should look friendly and approachable
 3. Use warm, soft lighting
-4. Keep the background simple and neutral
+4. CRITICAL: The background must be perfectly uniform - one single flat color with absolutely no gradient, shadow, or texture. Pure solid color only.
 5. Focus on the face with a gentle, natural expression
 6. The style should be consistent - like illustrations from a premium lifestyle app
 
