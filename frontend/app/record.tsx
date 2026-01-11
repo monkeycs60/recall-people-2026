@@ -1,6 +1,6 @@
-import { View, Text, Pressable, Modal, BackHandler } from 'react-native';
+import { View, Text, Pressable, Modal, BackHandler, KeyboardAvoidingView, Platform } from 'react-native';
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { useRouter, useFocusEffect } from 'expo-router';
+import { useRouter, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { X } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
@@ -8,6 +8,8 @@ import { Colors } from '@/constants/theme';
 import { RecordButton } from '@/components/RecordButton';
 import { Paywall } from '@/components/Paywall';
 import { TranscriptionLoader } from '@/components/TranscriptionLoader';
+import { InputModeToggle, InputMode } from '@/components/InputModeToggle';
+import { TextInputMode } from '@/components/TextInputMode';
 import { useRecording } from '@/hooks/useRecording';
 import { useContactsQuery } from '@/hooks/useContactsQuery';
 import { useAppStore } from '@/stores/app-store';
@@ -32,11 +34,14 @@ const getContactPrompts = (firstName: string) => [
 
 export default function RecordScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const initialMode = (params.initialMode as InputMode) || 'audio';
   const {
     toggleRecording,
     cancelRecording,
+    processText,
     isRecording,
     isProcessing,
     processingStep,
@@ -50,6 +55,7 @@ export default function RecordScreen() {
   const preselectedContactId = useAppStore((state) => state.preselectedContactId);
   const resetRecording = useAppStore((state) => state.resetRecording);
   const [promptIndex, setPromptIndex] = useState(0);
+  const [inputMode, setInputMode] = useState<InputMode>(initialMode);
   const isRecordingRef = useRef(isRecording);
   const isProcessingRef = useRef(isProcessing);
   const cancelRecordingRef = useRef(cancelRecording);
@@ -117,124 +123,160 @@ export default function RecordScreen() {
     }
   };
 
+  const handleTextSubmit = (text: string) => {
+    processText(text);
+  };
+
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: Colors.background,
-        paddingTop: insets.top,
-        paddingBottom: insets.bottom,
-      }}
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={0}
     >
-      <View style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 16, paddingTop: 8 }}>
-        <Pressable
-          onPress={handleClose}
-          style={{
-            width: 40,
-            height: 40,
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: 20,
-            backgroundColor: Colors.surfaceHover,
-          }}
-          disabled={isRecording || isProcessing}
-        >
-          <X size={20} color={Colors.textSecondary} />
-        </Pressable>
-      </View>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: Colors.background,
+          paddingTop: insets.top,
+          paddingBottom: insets.bottom,
+        }}
+      >
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingTop: 8 }}>
+          <View style={{ width: 40 }} />
 
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 }}>
-        <Text
-          style={{
-            fontFamily: 'PlayfairDisplay_700Bold',
-            fontSize: 32,
-            color: Colors.textPrimary,
-            textAlign: 'center',
-            marginBottom: 8,
-          }}
-        >
-          {preselectedContact ? preselectedContact.firstName : 'Recall People'}
-        </Text>
+          <InputModeToggle
+            mode={inputMode}
+            onModeChange={setInputMode}
+            disabled={isRecording || isProcessing}
+          />
 
-        {isRecording ? (
-          <Animated.View entering={FadeIn} exiting={FadeOut} style={{ alignItems: 'center' }}>
-            <Text
-              style={{
-                fontFamily: 'PlayfairDisplay_500Medium',
-                fontSize: 48,
-                color: Colors.primary,
-                textAlign: 'center',
-              }}
-            >
-              {formatDuration(recordingDuration)}
-            </Text>
-            <Text
-              style={{
-                fontSize: 14,
-                color: Colors.textMuted,
-                textAlign: 'center',
-                marginBottom: 64,
-              }}
-            >
-              {formatDuration(maxRecordingDuration - recordingDuration)} {t('record.remaining', { defaultValue: 'restant' })}
-            </Text>
-          </Animated.View>
-        ) : isProcessing ? (
-          <Animated.View entering={FadeIn} style={{ marginBottom: 64 }}>
-            <TranscriptionLoader step={processingStep} hasPreselectedContact={!!preselectedContactId} />
-          </Animated.View>
-        ) : (
-          <Animated.Text
-            key={promptIndex}
-            entering={FadeIn.duration(500)}
-            exiting={FadeOut.duration(300)}
+          <Pressable
+            onPress={handleClose}
             style={{
-              color: Colors.textMuted,
+              width: 40,
+              height: 40,
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: 20,
+              backgroundColor: Colors.surfaceHover,
+            }}
+            disabled={isRecording || isProcessing}
+          >
+            <X size={20} color={Colors.textSecondary} />
+          </Pressable>
+        </View>
+
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: inputMode === 'text' ? 'flex-start' : 'center', paddingHorizontal: inputMode === 'text' ? 0 : 32, paddingTop: inputMode === 'text' ? 24 : 0 }}>
+          <Text
+            style={{
+              fontFamily: 'PlayfairDisplay_700Bold',
+              fontSize: 32,
+              color: Colors.textPrimary,
               textAlign: 'center',
-              marginBottom: 64,
-              fontSize: 16,
-              fontStyle: 'italic',
-              minHeight: 24,
+              marginBottom: 8,
+              paddingHorizontal: inputMode === 'text' ? 32 : 0,
             }}
           >
-            {currentPrompts[promptIndex]}
-          </Animated.Text>
+            {preselectedContact ? preselectedContact.firstName : 'Recall People'}
+          </Text>
+
+          {isProcessing ? (
+            <Animated.View entering={FadeIn} style={{ marginBottom: 64, marginTop: inputMode === 'text' ? 32 : 0 }}>
+              <TranscriptionLoader step={processingStep} hasPreselectedContact={!!preselectedContactId} />
+            </Animated.View>
+          ) : inputMode === 'audio' ? (
+            <>
+              {isRecording ? (
+                <Animated.View entering={FadeIn} exiting={FadeOut} style={{ alignItems: 'center' }}>
+                  <Text
+                    style={{
+                      fontFamily: 'PlayfairDisplay_500Medium',
+                      fontSize: 48,
+                      color: Colors.primary,
+                      textAlign: 'center',
+                    }}
+                  >
+                    {formatDuration(recordingDuration)}
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      color: Colors.textMuted,
+                      textAlign: 'center',
+                      marginBottom: 64,
+                    }}
+                  >
+                    {formatDuration(maxRecordingDuration - recordingDuration)} {t('record.remaining', { defaultValue: 'restant' })}
+                  </Text>
+                </Animated.View>
+              ) : (
+                <Animated.Text
+                  key={promptIndex}
+                  entering={FadeIn.duration(500)}
+                  exiting={FadeOut.duration(300)}
+                  style={{
+                    color: Colors.textMuted,
+                    textAlign: 'center',
+                    marginBottom: 64,
+                    fontSize: 16,
+                    fontStyle: 'italic',
+                    minHeight: 24,
+                  }}
+                >
+                  {currentPrompts[promptIndex]}
+                </Animated.Text>
+              )}
+
+              <RecordButton
+                onPress={toggleRecording}
+                isRecording={isRecording}
+                isProcessing={isProcessing}
+              />
+
+              {isRecording && (
+                <Animated.Text
+                  entering={FadeIn.delay(300)}
+                  style={{
+                    color: Colors.textMuted,
+                    textAlign: 'center',
+                    marginTop: 32,
+                    fontSize: 14,
+                  }}
+                >
+                  Appuyez pour terminer
+                </Animated.Text>
+              )}
+            </>
+          ) : (
+            <Animated.View
+              entering={FadeIn.duration(300)}
+              style={{ width: '100%', marginTop: 8 }}
+            >
+              <TextInputMode
+                onSubmit={handleTextSubmit}
+                isProcessing={isProcessing}
+                contactFirstName={preselectedContact?.firstName}
+              />
+            </Animated.View>
+          )}
+        </View>
+
+        {!isProcessing && inputMode === 'audio' && (
+          <View style={{ paddingHorizontal: 32, paddingBottom: 32 }}>
+            <Text style={{ color: Colors.textMuted, textAlign: 'center', fontSize: 12, lineHeight: 20 }}>
+              {preselectedContact
+                ? `Parlez de ${preselectedContact.firstName} : actualités, anecdotes, détails importants...`
+                : t('home.helperText', {
+                    defaultValue: 'Conseil : mentionnez le nom, le contexte de rencontre, et les details importants sur la personne.',
+                  })}
+            </Text>
+          </View>
         )}
 
-        <RecordButton
-          onPress={toggleRecording}
-          isRecording={isRecording}
-          isProcessing={isProcessing}
-        />
-
-        {isRecording && (
-          <Animated.Text
-            entering={FadeIn.delay(300)}
-            style={{
-              color: Colors.textMuted,
-              textAlign: 'center',
-              marginTop: 32,
-              fontSize: 14,
-            }}
-          >
-            Appuyez pour terminer
-          </Animated.Text>
-        )}
+        <Modal visible={showPaywall} animationType="slide" presentationStyle="pageSheet">
+          <Paywall onClose={closePaywall} reason={paywallReason} />
+        </Modal>
       </View>
-
-      <View style={{ paddingHorizontal: 32, paddingBottom: 32 }}>
-        <Text style={{ color: Colors.textMuted, textAlign: 'center', fontSize: 12, lineHeight: 20 }}>
-          {preselectedContact
-            ? `Parlez de ${preselectedContact.firstName} : actualités, anecdotes, détails importants...`
-            : t('home.helperText', {
-                defaultValue: 'Conseil : mentionnez le nom, le contexte de rencontre, et les details importants sur la personne.',
-              })}
-        </Text>
-      </View>
-
-      <Modal visible={showPaywall} animationType="slide" presentationStyle="pageSheet">
-        <Paywall onClose={closePaywall} reason={paywallReason} />
-      </Modal>
-    </View>
+    </KeyboardAvoidingView>
   );
 }

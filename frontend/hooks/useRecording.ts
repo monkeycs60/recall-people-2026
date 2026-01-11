@@ -15,7 +15,7 @@ import { useSubscriptionStore } from '@/stores/subscription-store';
 import { transcribeAudio, extractInfo, detectContact } from '@/lib/api';
 import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
-import { showErrorToast } from '@/lib/error-handler';
+import { showErrorToast, ApiError } from '@/lib/error-handler';
 import i18n from '@/lib/i18n';
 
 const isE2ETest = process.env.EXPO_PUBLIC_E2E_TEST === 'true';
@@ -239,7 +239,6 @@ export const useRecording = () => {
             id: contact.id,
             firstName: contact.firstName,
             lastName: contact.lastName,
-            tags: contact.tags,
           }));
 
           // Load facts and hot topics for the preselected contact
@@ -327,7 +326,15 @@ export const useRecording = () => {
 
       return { uri, transcription: transcriptionResult.transcript };
     } catch (error) {
-      console.error('[useRecording] Stop error:', error);
+      // Log detailed error info for debugging
+      const errorDetails = {
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        status: (error as ApiError).status,
+        backendMessage: (error as ApiError).backendMessage,
+      };
+      console.error('[useRecording] Stop error:', errorDetails);
+
       try {
         if (audioRecorder.isRecording) {
           await audioRecorder.stop();
@@ -339,10 +346,11 @@ export const useRecording = () => {
       setProcessingStep(null);
       setPreselectedContactId(null);
 
-      // Show error toast to user instead of throwing
+      // Show error toast with backend message if available
+      const backendMessage = (error as ApiError).backendMessage;
       showErrorToast(
         i18n.t('recording.errors.processingFailed', { defaultValue: 'Processing failed' }),
-        i18n.t('recording.errors.processingFailedDescription', { defaultValue: 'Please check your connection and try again.' })
+        backendMessage || i18n.t('recording.errors.processingFailedDescription', { defaultValue: 'Please check your connection and try again.' })
       );
     }
   };
@@ -370,6 +378,144 @@ export const useRecording = () => {
 
   stopRecordingRef.current = stopRecording;
 
+  const processText = async (text: string) => {
+    if (!canCreateNote()) {
+      setPaywallReason('notes_limit');
+      setShowPaywall(true);
+      return;
+    }
+
+    if (text.trim().length < 10) {
+      showErrorToast(
+        i18n.t('recording.errors.textTooShort', { defaultValue: 'Text too short' }),
+        i18n.t('recording.errors.textTooShortDescription', { defaultValue: 'Please write at least 10 characters.' })
+      );
+      return;
+    }
+
+    try {
+      // Load contacts if not initialized
+      if (!isInitialized) {
+        await loadContacts();
+      }
+
+      setRecordingState('processing');
+      setCurrentTranscription(text);
+      setCurrentAudioUri(null);
+
+      // Reload contacts to ensure we have the latest data
+      await loadContacts();
+      const freshContacts = useContactsStore.getState().contacts;
+
+      // If a contact is preselected, skip selection and go directly to review
+      if (preselectedContactId) {
+        const preselectedContact = freshContacts.find((contact) => contact.id === preselectedContactId);
+
+        if (preselectedContact) {
+          const contactsForExtraction = freshContacts.map((contact) => ({
+            id: contact.id,
+            firstName: contact.firstName,
+            lastName: contact.lastName,
+          }));
+
+          setProcessingStep('extracting');
+          const [facts, hotTopics] = await Promise.all([
+            factService.getByContact(preselectedContactId),
+            hotTopicService.getByContact(preselectedContactId),
+          ]);
+
+          const activeHotTopics = hotTopics.filter((topic) => topic.status === 'active');
+
+          const { extraction } = await extractInfo({
+            transcription: text,
+            existingContacts: contactsForExtraction,
+            currentContact: {
+              id: preselectedContact.id,
+              firstName: preselectedContact.firstName,
+              lastName: preselectedContact.lastName,
+              facts: facts.map((fact) => ({
+                factType: fact.factType,
+                factKey: fact.factKey,
+                factValue: fact.factValue,
+              })),
+              hotTopics: activeHotTopics.map((topic) => ({
+                id: topic.id,
+                title: topic.title,
+                context: topic.context,
+              })),
+            },
+          });
+
+          extraction.contactIdentified.id = preselectedContact.id;
+          extraction.contactIdentified.needsDisambiguation = false;
+
+          setCurrentExtraction(extraction);
+          setPreselectedContactId(null);
+
+          router.replace({
+            pathname: '/review',
+            params: {
+              contactId: preselectedContact.id,
+              audioUri: '',
+              transcription: text,
+              extraction: JSON.stringify(extraction),
+            },
+          });
+
+          incrementNotesCount();
+          return;
+        }
+
+        setPreselectedContactId(null);
+      }
+
+      // Detect contact using LLM
+      setProcessingStep('detecting');
+      const contactsForDetection = freshContacts.map((contact) => ({
+        id: contact.id,
+        firstName: contact.firstName,
+        lastName: contact.lastName,
+        nickname: contact.nickname,
+        aiSummary: contact.aiSummary,
+        hotTopics: [] as Array<{ title: string; context?: string }>,
+      }));
+
+      const { detection } = await detectContact({
+        transcription: text,
+        contacts: contactsForDetection,
+      });
+
+      router.push({
+        pathname: '/select-contact',
+        params: {
+          audioUri: '',
+          transcription: text,
+          detection: JSON.stringify(detection),
+        },
+      });
+
+      incrementNotesCount();
+    } catch (error) {
+      const errorDetails = {
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        status: (error as ApiError).status,
+        backendMessage: (error as ApiError).backendMessage,
+      };
+      console.error('[useRecording] Text processing error:', errorDetails);
+
+      setRecordingState('idle');
+      setProcessingStep(null);
+      setPreselectedContactId(null);
+
+      const backendMessage = (error as ApiError).backendMessage;
+      showErrorToast(
+        i18n.t('recording.errors.processingFailed', { defaultValue: 'Processing failed' }),
+        backendMessage || i18n.t('recording.errors.processingFailedDescription', { defaultValue: 'Please check your connection and try again.' })
+      );
+    }
+  };
+
   return {
     recordingState,
     processingStep,
@@ -377,6 +523,7 @@ export const useRecording = () => {
     maxRecordingDuration: maxDuration,
     toggleRecording,
     cancelRecording,
+    processText,
     isRecording: recordingState === 'recording',
     isProcessing: recordingState === 'processing',
     showPaywall,

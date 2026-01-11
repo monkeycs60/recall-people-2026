@@ -14,6 +14,7 @@ type ContactAvatarProps = {
   onPress?: () => void;
   showEditBadge?: boolean;
   cacheKey?: string; // Use updatedAt to force cache invalidation
+  recyclingKey?: string; // Use contact id to prevent FlatList recycling issues
 };
 
 const SIZE_MAP = {
@@ -35,6 +36,7 @@ export function ContactAvatar({
   onPress,
   showEditBadge = false,
   cacheKey,
+  recyclingKey,
 }: ContactAvatarProps) {
   const pixelSize = SIZE_MAP[size];
   const placeholderUrl = getPlaceholderUrl(gender);
@@ -50,6 +52,7 @@ export function ContactAvatar({
     <Image
       source={{ uri: imageUri }}
       cachePolicy="memory-disk"
+      recyclingKey={recyclingKey}
       style={{
         width: pixelSize,
         height: pixelSize,

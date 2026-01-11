@@ -141,6 +141,7 @@ export default function ContactsScreen() {
 						avatarUrl={item.avatarUrl}
 						size='medium'
 						cacheKey={item.updatedAt}
+						recyclingKey={item.id}
 					/>
 				</View>
 

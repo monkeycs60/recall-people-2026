@@ -231,32 +231,57 @@ detectContactRoutes.post('/', async (c) => {
       input: { transcription, contactsCount: contacts.length },
     });
 
-    const { text: rawResponse } = await measurePerformance(
-      () => generateText({
-        model,
-        prompt,
-        experimental_telemetry: {
-          isEnabled: c.env.ENABLE_LANGFUSE === 'true',
-          metadata: {
-            route: '/detect-contact',
-            language,
-            contactsCount: contacts.length,
+    let rawResponse: string;
+    try {
+      const result = await measurePerformance(
+        () => generateText({
+          model,
+          prompt,
+          experimental_telemetry: {
+            isEnabled: c.env.ENABLE_LANGFUSE === 'true',
+            metadata: {
+              route: '/detect-contact',
+              language,
+              contactsCount: contacts.length,
+            },
           },
-        },
-      }),
-      {
-        route: '/detect-contact',
-        provider: 'cerebras',
+        }),
+        {
+          route: '/detect-contact',
+          provider: 'cerebras',
+          model: modelName,
+          operationType: 'text-generation',
+          inputSize: new TextEncoder().encode(prompt).length,
+          metadata: { language, contactsCount: contacts.length },
+          enabled: c.env.ENABLE_PERFORMANCE_LOGGING === 'true' || c.env.ENABLE_PERFORMANCE_LOGGING === true,
+        }
+      );
+      rawResponse = result.text;
+    } catch (llmError) {
+      const errorMessage = llmError instanceof Error ? llmError.message : String(llmError);
+      console.error('[detect-contact] LLM call failed:', {
+        error: errorMessage,
         model: modelName,
-        operationType: 'text-generation',
-        inputSize: new TextEncoder().encode(prompt).length,
-        metadata: { language, contactsCount: contacts.length },
-        enabled: c.env.ENABLE_PERFORMANCE_LOGGING === 'true' || c.env.ENABLE_PERFORMANCE_LOGGING === true,
-      }
-    );
+        transcriptionLength: transcription.length,
+        contactsCount: contacts.length,
+      });
+      trace?.update({ output: { error: `LLM error: ${errorMessage}` } });
+      return c.json({ error: `LLM call failed: ${errorMessage}` }, 500);
+    }
 
     // Parse JSON from response
-    const detection = parseDetectionResponse(rawResponse);
+    let detection;
+    try {
+      detection = parseDetectionResponse(rawResponse);
+    } catch (parseError) {
+      const errorMessage = parseError instanceof Error ? parseError.message : String(parseError);
+      console.error('[detect-contact] JSON parsing failed:', {
+        error: errorMessage,
+        rawResponse: rawResponse.slice(0, 500),
+      });
+      trace?.update({ output: { error: `Parse error: ${errorMessage}`, rawResponse: rawResponse.slice(0, 500) } });
+      return c.json({ error: `Failed to parse LLM response: ${errorMessage}` }, 500);
+    }
 
     // Validate and correct hallucinated IDs
     const validatedDetection = validateDetection(detection, contacts);
@@ -307,9 +332,14 @@ detectContactRoutes.post('/', async (c) => {
       detection: result,
     });
   } catch (error) {
-    console.error('Detect contact error:', error);
-    trace?.update({ output: { error: String(error) } });
-    return c.json({ error: 'Contact detection failed' }, 500);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    console.error('[detect-contact] Unexpected error:', {
+      error: errorMessage,
+      stack: errorStack,
+    });
+    trace?.update({ output: { error: `Unexpected: ${errorMessage}` } });
+    return c.json({ error: `Contact detection failed: ${errorMessage}` }, 500);
   }
 });
 

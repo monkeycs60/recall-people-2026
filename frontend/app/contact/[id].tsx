@@ -21,8 +21,10 @@ import { useGroupsQuery, useGroupsForContact, useSetContactGroups, useCreateGrou
 import { Fact, FactType, SearchSourceType } from '@/types';
 import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
-import { Edit3, Mic, X, Plus, Check, Trash2, MoreVertical } from 'lucide-react-native';
+import { Edit3, X, Plus, Check, Trash2, MoreVertical } from 'lucide-react-native';
 import { AISummary } from '@/components/contact/AISummary';
+import { AddNoteButton } from '@/components/AddNoteButton';
+import { InputMode } from '@/components/InputModeToggle';
 import { IceBreakers } from '@/components/contact/IceBreakers';
 import { ProfileCard } from '@/components/contact/ProfileCard';
 import { HotTopicsList } from '@/components/contact/HotTopicsList';
@@ -144,6 +146,7 @@ export default function ContactDetailScreen() {
   const [showBirthdayModal, setShowBirthdayModal] = useState(false);
   const [showGenderModal, setShowGenderModal] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const [noteInputMode, setNoteInputMode] = useState<InputMode>('audio');
 
   // Sync contact data with local state
   useEffect(() => {
@@ -312,7 +315,10 @@ export default function ContactDetailScreen() {
 
   const handleAddNote = () => {
     setPreselectedContactId(contactId);
-    router.push('/record');
+    router.push({
+      pathname: '/record',
+      params: { initialMode: noteInputMode },
+    });
   };
 
   const handleEditAvatar = () => {
@@ -642,10 +648,12 @@ export default function ContactDetailScreen() {
 
           {/* Add note button */}
           {!isEditingName && (
-            <Pressable style={styles.addNoteButton} onPress={handleAddNote}>
-              <Mic size={20} color={Colors.textInverse} />
-              <Text style={styles.addNoteButtonText}>{t('contact.addNote', { firstName: contact.firstName })}</Text>
-            </Pressable>
+            <AddNoteButton
+              firstName={contact.firstName}
+              mode={noteInputMode}
+              onModeChange={setNoteInputMode}
+              onPress={handleAddNote}
+            />
           )}
         </Animated.View>
 
