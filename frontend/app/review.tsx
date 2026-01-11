@@ -448,7 +448,7 @@ export default function ReviewScreen() {
         data: { lastContactAt: new Date().toISOString() },
       });
 
-      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
+      await queryClient.refetchQueries({ queryKey: queryKeys.contacts.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(finalContactId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.facts.byContact(finalContactId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.hotTopics.byContact(finalContactId) });
