@@ -39,7 +39,7 @@ export default function ReviewScreen() {
   const updateContactMutation = useUpdateContact();
   const { groups: allGroups } = useGroupsQuery();
   const { createNote } = useNotes();
-  const { setRecordingState } = useAppStore();
+  const { setRecordingState, addPendingAvatarGeneration, removePendingAvatarGeneration } = useAppStore();
 
   const extraction: ExtractionResult = JSON.parse(params.extraction as string);
   const audioUri = params.audioUri as string;
@@ -548,6 +548,8 @@ export default function ReviewScreen() {
           context: null,
         };
 
+        addPendingAvatarGeneration(finalContactId);
+
         generateAvatarFromHints({
           contactId: finalContactId,
           gender,
@@ -555,11 +557,13 @@ export default function ReviewScreen() {
         })
           .then(async (result) => {
             await contactService.update(finalContactId, { avatarUrl: result.avatarUrl });
+            removePendingAvatarGeneration(finalContactId);
             queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
             queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(finalContactId) });
             console.log('[Avatar Auto] Successfully generated avatar for', finalContactId);
           })
           .catch((error) => {
+            removePendingAvatarGeneration(finalContactId);
             console.warn('[Avatar Auto] Generation failed (silent):', error);
           });
       }

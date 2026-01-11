@@ -85,7 +85,7 @@ export default function ContactDetailScreen() {
   const contactId = params.id as string;
   const highlightType = params.highlightType as SearchSourceType | undefined;
   const highlightId = params.highlightId as string | undefined;
-  const { setPreselectedContactId } = useAppStore();
+  const { setPreselectedContactId, isAvatarGenerating } = useAppStore();
 
   const scrollViewRef = useRef<ScrollView>(null);
   const sectionPositions = useRef<Record<string, number>>({});
@@ -507,6 +507,7 @@ export default function ContactDetailScreen() {
               onPress={handleEditAvatar}
               showEditBadge
               cacheKey={contact.updatedAt}
+              isGenerating={isAvatarGenerating(contactId)}
             />
           </View>
 
