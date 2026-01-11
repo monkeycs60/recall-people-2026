@@ -179,7 +179,7 @@ export default function RootLayout() {
                 headerShadowVisible: false,
                 headerLeft: () => (
                   <Pressable
-                    onPress={() => router.back()}
+                    onPress={() => router.dismissTo('/(tabs)')}
                     style={styles.backButton}
                   >
                     <ArrowLeft size={24} color={Colors.textPrimary} />

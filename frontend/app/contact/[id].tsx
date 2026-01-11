@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Pressable, TextInput, Alert, Platform, KeyboardAvoidingView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, Pressable, TextInput, Alert, Platform, KeyboardAvoidingView, StyleSheet, BackHandler } from 'react-native';
 import { useState, useRef, useEffect } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -170,6 +170,15 @@ export default function ContactDetailScreen() {
       return () => clearTimeout(timer);
     }
   }, [highlightType, highlightId, contact, isLoading]);
+
+  useEffect(() => {
+    const onBackPress = () => {
+      router.dismissTo('/(tabs)');
+      return true;
+    };
+    const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    return () => subscription.remove();
+  }, [router]);
 
   const handleDelete = async () => {
     if (contact) {
