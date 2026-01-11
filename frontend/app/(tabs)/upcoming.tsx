@@ -12,6 +12,7 @@ import { HotTopic, Contact } from '@/types';
 import { Colors } from '@/constants/theme';
 import { Calendar } from 'lucide-react-native';
 import { SwipeableEventCard } from '@/components/upcoming/SwipeableEventCard';
+import { EventListSkeleton } from '@/components/skeleton/EventListSkeleton';
 
 type TimelineDay = {
   date: Date;
@@ -28,13 +29,11 @@ export default function UpcomingScreen() {
   const [view, setView] = useState<FeedView>('upcoming');
   const [timeline, setTimeline] = useState<TimelineDay[]>([]);
   const [pastEvents, setPastEvents] = useState<Array<HotTopic & { contact: Contact }>>([]);
-  const [loading, setLoading] = useState(true);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   const locale = i18n.language === 'fr' ? fr : enUS;
 
   const loadEvents = useCallback(async () => {
-    setLoading(true);
-
     if (view === 'upcoming') {
       const hotTopics = await hotTopicService.getUpcoming(365);
 
@@ -86,7 +85,7 @@ export default function UpcomingScreen() {
       setPastEvents([]);
     }
 
-    setLoading(false);
+    setHasLoaded(true);
   }, [view]);
 
   useFocusEffect(
@@ -147,7 +146,9 @@ export default function UpcomingScreen() {
         style={styles.scrollView}
         contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 100 }]}
       >
-        {view === 'upcoming' ? (
+        {!hasLoaded ? (
+          <EventListSkeleton />
+        ) : view === 'upcoming' ? (
           hasAnyEvents ? (
             timeline.map((day) => (
               <View key={day.date.toISOString()} style={styles.dayContainer}>
