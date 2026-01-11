@@ -72,8 +72,19 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           const user = await verifyToken();
           set({ user, isLoading: false, isInitialized: true });
 
-          // Check if user is in Pro whitelist
-          useSubscriptionStore.getState().checkWhitelistStatus();
+          // Check if user is in Pro whitelist (wait for subscription store to be hydrated first)
+          const subscriptionStore = useSubscriptionStore.getState();
+          if (subscriptionStore.isHydrated) {
+            subscriptionStore.checkWhitelistStatus();
+          } else {
+            // Wait for hydration before checking whitelist
+            const unsubscribe = useSubscriptionStore.subscribe((state) => {
+              if (state.isHydrated) {
+                unsubscribe();
+                useSubscriptionStore.getState().checkWhitelistStatus();
+              }
+            });
+          }
 
           // Sync language from backend
           try {

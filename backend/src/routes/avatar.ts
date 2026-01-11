@@ -43,63 +43,71 @@ type GenerateFromHintsRequest = {
   avatarHints: AvatarHints;
 };
 
-const AVATAR_STYLE_PROMPT = `You are an avatar designer. Create a character avatar in a modern flat illustration style (like Notion avatars, Slack illustrations, or DiceBear Micah style).
+const AVATAR_STYLE_PROMPT = `Create a character avatar in "Happy Humans" style - like Bored Apes NFT but the OPPOSITE: friendly smiling HUMANS instead of bored apes.
 
-MANDATORY STYLE SPECIFICATIONS:
+CONCEPT: Think Bored Ape Yacht Club meets DiceBear Micah - distinctive cartoon humans who are always HAPPY and SMILING.
 
-LINE WORK:
-- Bold black outlines (2-3px thickness) defining all shapes
-- Clean, confident strokes with slight hand-drawn warmth
-- NOT realistic, NOT photographic - this is a flat vector-style illustration
+CRITICAL STYLE RULES:
 
-COLORS:
-- Flat colors only, NO gradients, NO complex shading
-- Skin tones: range from light beige to deep brown (match user description)
-- Hair: can be natural colors OR stylized (pink, mint, white/blonde) if fitting
-- Clothes: solid pleasant colors (terracotta, blue, green, cream)
-- Background: MUST be a single flat uniform color (#FAF7F2 cream or #E8D5C4 soft beige)
+BACKGROUND:
+- Solid pastel color circle behind the character (soft pink, light yellow, pale blue, lavender, peach, mint)
+- NO border, NO outline around the circle - just a filled colored circle
+- The background is simply a soft colored filled circle, nothing else
 
-FACE (CRITICAL FOR CONSISTENCY):
-- Simplified cartoon proportions
-- Large expressive eyes: simple dots or small circles for pupils
-- Small simplified nose: just a curved line or small shape
-- Expressive mouth: friendly smile, open smile, or neutral expression
+CHARACTER STYLE:
+- Simple cartoon illustration with black outlines ONLY on the character
+- Flat colors, NO gradients, NO realistic shading
+- Bold, distinctive, collectible-looking character design
+- Each character should feel unique but part of the same "collection"
+
+EXPRESSION (MOST IMPORTANT):
+- ALWAYS happy, friendly, positive expression
+- Big warm smile showing teeth, or cheerful closed-mouth smile
+- Happy eyes: can be simple dots, half-circles (happy squint), or wide open with joy
+- Overall vibe: optimistic, welcoming, joyful - the OPPOSITE of "bored"
+
+FACE:
+- Small simple eyes with happy expression
+- Minimal nose: tiny curved line or small dot
+- BIG FRIENDLY SMILE - this is the signature feature
+- Optional: rosy cheeks, freckles for character
 - Round or oval head shape
 
 HAIR:
-- Stylized geometric shapes
-- Solid color fill with minimal internal detail
-- Bold recognizable silhouette matching the description
+- Bold geometric silhouette
+- Solid flat color (natural OR fun colors like pink, mint, white, orange)
+- Simple distinctive shapes
+
+BODY:
+- Shoulders and neck visible
+- Simple clothing: shirt collar, turtleneck, crew neck, hoodie
+- Solid colors, can be bold/fun
 
 COMPOSITION:
-- Circular avatar format, character shown from shoulders up
-- Character centered, optimized for circular cropping
-- Only collar/neckline of clothing visible (turtleneck, collared shirt, crew neck, t-shirt)
+- Character slightly off-center or at a slight angle
+- Head and shoulders only
+- Character floats on the pastel circle background
 
-ACCESSORIES (if mentioned):
-- Simple geometric shapes for glasses, earrings, facial hair
-- Minimal detail, bold colors
-
-OVERALL VIBE: Friendly, approachable, modern, consistent illustration style.
+DO NOT: Add any circular border/outline around the avatar.
 
 USER'S DESCRIPTION:`;
 
 export const avatarRoutes = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
-// Placeholder prompts for default avatars (flat illustration style)
+// Placeholder prompts for default avatars (Happy Humans style)
 const PLACEHOLDER_PROMPTS = {
-  male: `A friendly man in his 30s.
-Short brown hair (geometric silhouette), clean-shaven.
-Warm open smile, simple dot eyes.
-Wearing a blue crew neck shirt.`,
-  female: `A friendly woman in her 30s.
-Shoulder-length dark hair (bold silhouette).
-Warm smile, simple expressive eyes.
-Wearing a terracotta turtleneck.`,
-  unknown: `A friendly person in their 30s.
-Short stylish hair (geometric shape), gender-neutral appearance.
-Warm welcoming smile, simple expressive eyes.
-Wearing a cream collared shirt.`,
+  male: `A happy smiling man with short dark hair.
+Big friendly smile showing teeth, joyful expression.
+Wearing a light blue collared shirt.
+Soft pink pastel circle background.`,
+  female: `A happy smiling woman with shoulder-length brown hair.
+Warm cheerful smile, bright happy eyes.
+Wearing a terracotta turtleneck.
+Soft peach pastel circle background.`,
+  unknown: `A happy smiling person with short stylish hair.
+Big warm smile, joyful expression, gender-neutral look.
+Wearing a mint green crew neck shirt.
+Soft lavender pastel circle background.`,
 };
 
 // This endpoint is placed BEFORE the auth middleware - it's a one-shot admin endpoint
@@ -380,25 +388,32 @@ Generate a single portrait illustration following the design system above. The a
   }
 });
 
-// Helper function to build avatar prompt from hints (flat illustration style)
+// Pastel background colors for Micah style avatars
+const PASTEL_BACKGROUNDS = [
+  'soft pink',
+  'light yellow',
+  'pale blue',
+  'lavender',
+  'peach',
+  'mint green',
+  'light coral',
+];
+
+// Helper function to build avatar prompt from hints (Happy Humans style)
 function buildPromptFromHints(gender: 'male' | 'female' | 'unknown', hints: AvatarHints): string {
   const parts: string[] = [];
 
-  // Base gender term
+  // Base: always happy and smiling
   const genderTerm = gender === 'male' ? 'man' : gender === 'female' ? 'woman' : 'person';
-  parts.push(`A ${genderTerm}`);
+  parts.push(`A happy smiling ${genderTerm}`);
 
   // Physical description - key for distinctive traits
   if (hints.physical) {
     parts.push(hints.physical);
   }
 
-  // Personality → facial expression (critical for flat illustration expressiveness)
-  if (hints.personality) {
-    parts.push(`${hints.personality} expression`);
-  } else {
-    parts.push('friendly smile');
-  }
+  // Always emphasize the happy expression (signature of Happy Humans)
+  parts.push('big friendly smile, joyful expression');
 
   // Context → clothing style (simple neckline only)
   if (hints.context) {
@@ -407,12 +422,17 @@ function buildPromptFromHints(gender: 'male' | 'female' | 'unknown', hints: Avat
       'sport': 'crew neck t-shirt',
       'casual': 'simple t-shirt',
       'creative': 'turtleneck',
+      'tech': 'hoodie',
     };
     const clothing = clothingMap[hints.context.toLowerCase()] || 'casual shirt';
     parts.push(`wearing a ${clothing}`);
   } else {
     parts.push('wearing a simple shirt');
   }
+
+  // Random pastel background color
+  const bgColor = PASTEL_BACKGROUNDS[Math.floor(Math.random() * PASTEL_BACKGROUNDS.length)];
+  parts.push(`${bgColor} pastel circle background`);
 
   return parts.join(', ') + '.';
 }

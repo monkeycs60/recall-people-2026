@@ -50,9 +50,20 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
 
         checkWhitelistStatus: async () => {
           const isWhitelisted = await checkProWhitelist();
+          const state = get();
+
+          if (__DEV__) {
+            console.log('[subscription] Whitelist check:', { isWhitelisted, currentIsTestPro: state.isTestPro });
+          }
+
           if (isWhitelisted) {
             set({ isTestPro: true, isPremium: true });
+          } else if (state.isTestPro) {
+            // User was whitelisted but isn't anymore - only deactivate if they were on whitelist
+            // Don't touch isPremium if they have a real RevenueCat subscription
+            set({ isTestPro: false, isPremium: false });
           }
+          // If not whitelisted and not isTestPro, do nothing (might have RevenueCat premium)
         },
 
         incrementNotesCount: () => {
