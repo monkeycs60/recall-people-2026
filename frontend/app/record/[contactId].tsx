@@ -11,6 +11,7 @@ import * as Haptics from 'expo-haptics';
 import { ArrowLeft } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import Toast from 'react-native-toast-message';
 import { useContactsQuery } from '@/hooks/useContactsQuery';
 import { useAppStore } from '@/stores/app-store';
 import { useSubscriptionStore } from '@/stores/subscription-store';
@@ -21,6 +22,7 @@ import { RecordButton } from '@/components/RecordButton';
 import { Paywall } from '@/components/Paywall';
 import { TranscriptionLoader } from '@/components/TranscriptionLoader';
 import { Colors } from '@/constants/theme';
+import { toastConfig } from '@/components/ui/ToastConfig';
 import { ProcessingStep } from '@/types';
 
 export default function RecordForContactScreen() {
@@ -384,6 +386,9 @@ export default function RecordForContactScreen() {
       <Modal visible={showPaywall} animationType="slide" presentationStyle="pageSheet">
         <Paywall onClose={() => setShowPaywall(false)} reason={paywallReason} />
       </Modal>
+
+      {/* Toast must be inside this modal screen to be visible */}
+      <Toast config={toastConfig} />
     </View>
   );
 }

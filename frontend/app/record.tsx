@@ -4,6 +4,7 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { X } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
+import Toast from 'react-native-toast-message';
 import { Colors } from '@/constants/theme';
 import { RecordButton } from '@/components/RecordButton';
 import { Paywall } from '@/components/Paywall';
@@ -11,6 +12,7 @@ import { TranscriptionLoader } from '@/components/TranscriptionLoader';
 import { useRecording } from '@/hooks/useRecording';
 import { useContactsQuery } from '@/hooks/useContactsQuery';
 import { useAppStore } from '@/stores/app-store';
+import { toastConfig } from '@/components/ui/ToastConfig';
 import Animated, {
   FadeIn,
   FadeOut,
@@ -82,7 +84,10 @@ export default function RecordScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      // Reset state on focus to ensure clean slate
+      // This handles cases where previous recording session left state in a bad place
       if (!isRecording && !isProcessing) {
+        resetRecording();
         startPromptRotation();
       }
 
@@ -240,6 +245,9 @@ export default function RecordScreen() {
       <Modal visible={showPaywall} animationType="slide" presentationStyle="pageSheet">
         <Paywall onClose={closePaywall} reason={paywallReason} />
       </Modal>
+
+      {/* Toast must be inside this modal screen to be visible */}
+      <Toast config={toastConfig} />
     </View>
   );
 }

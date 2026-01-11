@@ -73,6 +73,9 @@ export const useRecording = () => {
       await stopRecording();
     } else if (recordingState === 'idle') {
       await startRecording();
+    } else if (recordingState === 'processing') {
+      // Already processing, ignore tap
+      return;
     }
   };
 
@@ -121,6 +124,15 @@ export const useRecording = () => {
         allowsRecording: true,
       });
 
+      // Check if recorder is already recording (from a previous session that wasn't cleaned up)
+      try {
+        if (audioRecorder.isRecording) {
+          await audioRecorder.stop();
+        }
+      } catch {
+        // Ignore - recorder may have been released
+      }
+
       await audioRecorder.prepareToRecordAsync();
       await audioRecorder.record();
 
@@ -154,7 +166,17 @@ export const useRecording = () => {
 
   const stopRecording = async () => {
     // In E2E mode, we don't require actual recording
-    if (!isE2ETest && !audioRecorder.isRecording) return null;
+    if (!isE2ETest) {
+      try {
+        if (!audioRecorder.isRecording) return null;
+      } catch {
+        // audioRecorder may have been released - reset state and return
+        console.log('[useRecording] Recorder was released, resetting state');
+        setRecordingState('idle');
+        setRecordingDuration(0);
+        return null;
+      }
+    }
 
     const currentDuration = recordingDuration;
 
