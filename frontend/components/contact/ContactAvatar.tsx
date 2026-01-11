@@ -20,9 +20,9 @@ type ContactAvatarProps = {
 };
 
 const SIZE_MAP = {
-  small: 44,
-  medium: 52,
-  large: 100,
+  small: 52,
+  medium: 60,
+  large: 120,
 } as const;
 
 const getPlaceholderUrl = (gender: Gender): string => {

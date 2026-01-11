@@ -47,12 +47,14 @@ const AVATAR_STYLE_PROMPT = `Create a character avatar in "Happy Humans" style -
 
 CONCEPT: Think Bored Ape Yacht Club meets DiceBear Micah - distinctive cartoon humans who are always HAPPY and SMILING.
 
+IMAGE SIZE: Generate a SQUARE image (1:1 aspect ratio). The image must be perfectly square.
+
 CRITICAL STYLE RULES:
 
 BACKGROUND:
-- Solid pastel color circle behind the character (soft pink, light yellow, pale blue, lavender, peach, mint)
-- NO border, NO outline around the circle - just a filled colored circle
-- The background is simply a soft colored filled circle, nothing else
+- Solid pastel color filling the ENTIRE image (soft pink, light yellow, pale blue, lavender, peach, mint)
+- The pastel background must cover 100% of the image, edge to edge, no white space
+- NO border, NO outline, NO white margins anywhere
 
 CHARACTER STYLE:
 - Simple cartoon illustration with black outlines ONLY on the character
@@ -84,11 +86,14 @@ BODY:
 - Solid colors, can be bold/fun
 
 COMPOSITION:
+- SQUARE image where the pastel background fills the ENTIRE image (100%, edge to edge)
+- NO white margins, NO empty space - the pastel color covers the whole canvas
+- The background is a solid pastel color filling the entire square image
+- Character centered within this pastel background
 - Character slightly off-center or at a slight angle
 - Head and shoulders only
-- Character floats on the pastel circle background
 
-DO NOT: Add any circular border/outline around the avatar.
+DO NOT: Add any circular border/outline. DO NOT leave white margins around the background.
 
 USER'S DESCRIPTION:`;
 
@@ -99,15 +104,15 @@ const PLACEHOLDER_PROMPTS = {
   male: `A happy smiling man with short dark hair.
 Big friendly smile showing teeth, joyful expression.
 Wearing a light blue collared shirt.
-Soft pink pastel circle background.`,
+Soft pink pastel background filling entire image.`,
   female: `A happy smiling woman with shoulder-length brown hair.
 Warm cheerful smile, bright happy eyes.
 Wearing a terracotta turtleneck.
-Soft peach pastel circle background.`,
+Soft peach pastel background filling entire image.`,
   unknown: `A happy smiling person with short stylish hair.
 Big warm smile, joyful expression, gender-neutral look.
 Wearing a mint green crew neck shirt.
-Soft lavender pastel circle background.`,
+Soft lavender pastel background filling entire image.`,
 };
 
 // This endpoint is placed BEFORE the auth middleware - it's a one-shot admin endpoint
@@ -432,7 +437,7 @@ function buildPromptFromHints(gender: 'male' | 'female' | 'unknown', hints: Avat
 
   // Random pastel background color
   const bgColor = PASTEL_BACKGROUNDS[Math.floor(Math.random() * PASTEL_BACKGROUNDS.length)];
-  parts.push(`${bgColor} pastel circle background`);
+  parts.push(`${bgColor} pastel background filling entire image`);
 
   return parts.join(', ') + '.';
 }
