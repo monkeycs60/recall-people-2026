@@ -1,4 +1,4 @@
-import { View, StyleSheet, Pressable, Animated } from 'react-native';
+import { View, StyleSheet, Pressable, Animated, ActivityIndicator } from 'react-native';
 import { Image } from 'expo-image';
 import { Camera } from 'lucide-react-native';
 import { Colors } from '@/constants/theme';
@@ -87,8 +87,12 @@ export function ContactAvatar({
           borderRadius: pixelSize / 2,
           backgroundColor: Colors.primaryLight,
           opacity: pulseAnim,
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
-      />
+      >
+        <ActivityIndicator size={size === 'large' ? 'large' : 'small'} color={Colors.primary} />
+      </Animated.View>
     );
 
     if (!needsBadge) {

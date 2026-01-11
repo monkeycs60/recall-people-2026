@@ -1,4 +1,5 @@
 import { useQueries, useQueryClient } from '@tanstack/react-query';
+import { useCallback } from 'react';
 import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { queryKeys } from '@/lib/query-keys';
@@ -75,20 +76,28 @@ export function useContactPreviewsQuery(contacts: Contact[]) {
     });
   });
 
-  const invalidateForContact = (contactId: string) => {
+  const invalidateForContact = useCallback((contactId: string) => {
     queryClient.invalidateQueries({ queryKey: queryKeys.facts.byContact(contactId) });
     queryClient.invalidateQueries({ queryKey: queryKeys.hotTopics.byContact(contactId) });
-  };
+  }, [queryClient]);
 
-  const invalidateAll = () => {
+  const invalidateAll = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: queryKeys.facts.all });
     queryClient.invalidateQueries({ queryKey: queryKeys.hotTopics.all });
-  };
+  }, [queryClient]);
+
+  const refetchAll = useCallback(() => {
+    return Promise.all([
+      queryClient.refetchQueries({ queryKey: queryKeys.facts.all }),
+      queryClient.refetchQueries({ queryKey: queryKeys.hotTopics.all }),
+    ]);
+  }, [queryClient]);
 
   return {
     previews,
     isLoading,
     invalidateForContact,
     invalidateAll,
+    refetchAll,
   };
 }

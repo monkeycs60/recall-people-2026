@@ -60,7 +60,7 @@ export default function ContactsScreen() {
 		useContactsQuery();
 	const { groups } = useGroupsQuery();
 	const { selectedGroupId, setSelectedGroup } = useGroupsStore();
-	const { previews: contactPreviews, invalidateAll: invalidatePreviews } = useContactPreviewsQuery(contacts);
+	const { previews: contactPreviews, refetchAll: refetchPreviews } = useContactPreviewsQuery(contacts);
 	const { data: contactIdsByGroup = [], isFetching: isGroupFilterLoading } =
 		useContactIdsForGroup(selectedGroupId);
 
@@ -71,8 +71,8 @@ export default function ContactsScreen() {
 	useFocusEffect(
 		useCallback(() => {
 			refetch();
-			invalidatePreviews();
-		}, [refetch, invalidatePreviews])
+			refetchPreviews();
+		}, [refetch, refetchPreviews])
 	);
 
 	const handleCreateContact = async (firstName: string, lastName: string) => {
@@ -124,7 +124,7 @@ export default function ContactsScreen() {
 
 	const handleRefresh = async () => {
 		setIsPullRefreshing(true);
-		await refetch();
+		await Promise.all([refetch(), refetchPreviews()]);
 		setIsPullRefreshing(false);
 	};
 
