@@ -67,8 +67,9 @@ export default function SelectContactScreen() {
       if (detection.lastName) {
         return `${detection.firstName} ${detection.lastName}`;
       }
+      // suggestedNickname already contains the first name (e.g., "Paul Google")
       if (detection.suggestedNickname) {
-        return `${detection.firstName} ${detection.suggestedNickname}`;
+        return detection.suggestedNickname;
       }
       return detection.firstName;
     }
@@ -320,13 +321,12 @@ export default function SelectContactScreen() {
             style={styles.editNameButton}
             onPress={() => {
               setIsEditingNewName(true);
-              // Pre-fill with full display name (firstName + lastName or nickname)
+              // Pre-fill with full display name
+              // suggestedNickname already contains the first name (e.g., "Paul Google")
               const fullName = detection
                 ? detection.lastName
                   ? `${detection.firstName} ${detection.lastName}`
-                  : detection.suggestedNickname
-                    ? `${detection.firstName} ${detection.suggestedNickname}`
-                    : detection.firstName
+                  : detection.suggestedNickname || detection.firstName
                 : '';
               setNewContactName(fullName);
             }}

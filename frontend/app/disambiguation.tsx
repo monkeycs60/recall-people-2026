@@ -104,7 +104,7 @@ export default function DisambiguationScreen() {
           <View className="flex-row items-center mb-2">
             <Plus size={20} color="#8B5CF6" />
             <Text className="text-primary font-semibold ml-2">
-              Créer "{firstName} {suggestedNickname || ''}"
+              Créer "{suggestedNickname || firstName}"
             </Text>
           </View>
 

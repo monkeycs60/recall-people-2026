@@ -111,8 +111,17 @@ export default function ReviewScreen() {
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState(() => {
     const first = extraction.contactIdentified.firstName;
-    const last = extraction.contactIdentified.lastName || extraction.contactIdentified.suggestedNickname || '';
-    return last ? `${first} ${last}` : first;
+    const last = extraction.contactIdentified.lastName;
+    const nickname = extraction.contactIdentified.suggestedNickname;
+
+    if (last) {
+      return `${first} ${last}`;
+    }
+    // suggestedNickname already contains the first name (e.g., "Paul Google")
+    if (nickname) {
+      return nickname;
+    }
+    return first;
   });
 
   useEffect(() => {
