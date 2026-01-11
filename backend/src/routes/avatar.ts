@@ -43,45 +43,63 @@ type GenerateFromHintsRequest = {
   avatarHints: AvatarHints;
 };
 
-const AVATAR_STYLE_PROMPT = `You are an avatar designer creating avatars in the "Micah" illustration style from DiceBear.
+const AVATAR_STYLE_PROMPT = `You are an avatar designer. Create a character avatar in a modern flat illustration style (like Notion avatars, Slack illustrations, or DiceBear Micah style).
 
-DESIGN SYSTEM - MICAH STYLE:
-- Style: Stylized cartoon illustration with soft, rounded shapes - NOT realistic, NOT photographic
-- Art direction: Simple, friendly, approachable cartoon portraits like the Micah avatar system
-- Faces: Simplified cartoon features with expressive eyes, simple nose (often just a small shape), and expressive mouth
-- Body: Head and shoulders/upper torso visible, wearing simple casual clothing (t-shirts, sweaters, collared shirts)
-- Colors: Use warm, natural skin tones. Hair can be any color (natural or stylized like purple, blue, pink). Clothes in solid, pleasant colors.
-- Background: MUST be a single flat uniform color (#FAF7F2 cream or #E8D5C4 soft beige). NO gradients, NO shadows, NO textures - completely monochrome and uniform.
-- Composition: Head and shoulders portrait, perfectly centered, optimized for circular cropping.
+MANDATORY STYLE SPECIFICATIONS:
 
-IMPORTANT STYLE RULES:
-1. CARTOON ILLUSTRATION ONLY - stylized like DiceBear Micah avatars, NOT realistic or photographic
-2. Simplified facial features: round or oval head, simple but expressive eyes, minimal nose detail, clear mouth expression
-3. Friendly, approachable expression - can be smiling, neutral, or slightly surprised
-4. Simple but recognizable hairstyles that match the description
-5. Visible shoulders with simple clothing (solid colors, no complex patterns)
-6. The person's distinctive traits (hair color, skin tone, glasses, facial hair) should be represented in the cartoon style
-7. Clean lines, soft shading, cohesive cartoon aesthetic
-8. Match the gender and physical characteristics described by the user
+LINE WORK:
+- Bold black outlines (2-3px thickness) defining all shapes
+- Clean, confident strokes with slight hand-drawn warmth
+- NOT realistic, NOT photographic - this is a flat vector-style illustration
+
+COLORS:
+- Flat colors only, NO gradients, NO complex shading
+- Skin tones: range from light beige to deep brown (match user description)
+- Hair: can be natural colors OR stylized (pink, mint, white/blonde) if fitting
+- Clothes: solid pleasant colors (terracotta, blue, green, cream)
+- Background: MUST be a single flat uniform color (#FAF7F2 cream or #E8D5C4 soft beige)
+
+FACE (CRITICAL FOR CONSISTENCY):
+- Simplified cartoon proportions
+- Large expressive eyes: simple dots or small circles for pupils
+- Small simplified nose: just a curved line or small shape
+- Expressive mouth: friendly smile, open smile, or neutral expression
+- Round or oval head shape
+
+HAIR:
+- Stylized geometric shapes
+- Solid color fill with minimal internal detail
+- Bold recognizable silhouette matching the description
+
+COMPOSITION:
+- Circular avatar format, character shown from shoulders up
+- Character centered, optimized for circular cropping
+- Only collar/neckline of clothing visible (turtleneck, collared shirt, crew neck, t-shirt)
+
+ACCESSORIES (if mentioned):
+- Simple geometric shapes for glasses, earrings, facial hair
+- Minimal detail, bold colors
+
+OVERALL VIBE: Friendly, approachable, modern, consistent illustration style.
 
 USER'S DESCRIPTION:`;
 
 export const avatarRoutes = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
-// Placeholder prompts for default avatars (Micah style)
+// Placeholder prompts for default avatars (flat illustration style)
 const PLACEHOLDER_PROMPTS = {
-  male: `A friendly young man in his 30s in Micah cartoon style.
-Short brown hair, clean-shaven, warm friendly smile.
-Wearing a casual blue or earth-toned t-shirt.
-Simple cartoon illustration with soft rounded features.`,
-  female: `A friendly young woman in her 30s in Micah cartoon style.
-Shoulder-length dark hair, warm friendly smile.
-Wearing a casual terracotta or earth-toned top.
-Simple cartoon illustration with soft rounded features.`,
-  unknown: `A friendly person in their 30s in Micah cartoon style.
-Short stylish hair, warm welcoming smile, gender-neutral appearance.
-Wearing a casual earth-toned shirt.
-Simple cartoon illustration with soft rounded features.`,
+  male: `A friendly man in his 30s.
+Short brown hair (geometric silhouette), clean-shaven.
+Warm open smile, simple dot eyes.
+Wearing a blue crew neck shirt.`,
+  female: `A friendly woman in her 30s.
+Shoulder-length dark hair (bold silhouette).
+Warm smile, simple expressive eyes.
+Wearing a terracotta turtleneck.`,
+  unknown: `A friendly person in their 30s.
+Short stylish hair (geometric shape), gender-neutral appearance.
+Warm welcoming smile, simple expressive eyes.
+Wearing a cream collared shirt.`,
 };
 
 // This endpoint is placed BEFORE the auth middleware - it's a one-shot admin endpoint
@@ -362,36 +380,39 @@ Generate a single portrait illustration following the design system above. The a
   }
 });
 
-// Helper function to build avatar prompt from hints (Micah cartoon style)
+// Helper function to build avatar prompt from hints (flat illustration style)
 function buildPromptFromHints(gender: 'male' | 'female' | 'unknown', hints: AvatarHints): string {
   const parts: string[] = [];
 
-  // Base gender term with Micah style emphasis
+  // Base gender term
   const genderTerm = gender === 'male' ? 'man' : gender === 'female' ? 'woman' : 'person';
-  parts.push(`A ${genderTerm} in Micah cartoon illustration style`);
+  parts.push(`A ${genderTerm}`);
 
-  // Physical description - adapt to cartoon style
+  // Physical description - key for distinctive traits
   if (hints.physical) {
-    // Keep physical traits but frame them for cartoon style
-    parts.push(`with ${hints.physical}`);
+    parts.push(hints.physical);
   }
 
-  // Personality → facial expression (important for cartoon expressiveness)
+  // Personality → facial expression (critical for flat illustration expressiveness)
   if (hints.personality) {
     parts.push(`${hints.personality} expression`);
   } else {
     parts.push('friendly smile');
   }
 
-  // Context → clothing style (simplified for cartoon)
+  // Context → clothing style (simple neckline only)
   if (hints.context) {
-    parts.push(`wearing casual ${hints.context}-style clothing`);
+    const clothingMap: Record<string, string> = {
+      'professional': 'collared shirt',
+      'sport': 'crew neck t-shirt',
+      'casual': 'simple t-shirt',
+      'creative': 'turtleneck',
+    };
+    const clothing = clothingMap[hints.context.toLowerCase()] || 'casual shirt';
+    parts.push(`wearing a ${clothing}`);
   } else {
-    parts.push('wearing a simple casual shirt');
+    parts.push('wearing a simple shirt');
   }
-
-  // Always emphasize the cartoon style
-  parts.push('soft rounded cartoon features, simple and clean illustration');
 
   return parts.join(', ') + '.';
 }
