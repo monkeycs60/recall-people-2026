@@ -1,7 +1,7 @@
 import { View, Text, ScrollView, Pressable, TextInput, Alert, Platform, KeyboardAvoidingView, StyleSheet, BackHandler } from 'react-native';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import {
@@ -90,7 +90,13 @@ export default function ContactDetailScreen() {
   const scrollViewRef = useRef<ScrollView>(null);
   const sectionPositions = useRef<Record<string, number>>({});
 
-  const { contact, isLoading, isWaitingForSummary, isWaitingForIceBreakers, invalidate } = useContactQuery(contactId);
+  const { contact, isLoading, isWaitingForSummary, isWaitingForIceBreakers, invalidate, refetch } = useContactQuery(contactId);
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
 
   // TanStack Query mutations
   const updateContactMutation = useUpdateContact();

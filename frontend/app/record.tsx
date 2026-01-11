@@ -141,6 +141,7 @@ export default function RecordScreen() {
           paddingBottom: insets.bottom,
         }}
       >
+        {/* Header fixe */}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingTop: 8 }}>
           <View style={{ width: 40 }} />
 
@@ -166,28 +167,30 @@ export default function RecordScreen() {
           </Pressable>
         </View>
 
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: inputMode === 'text' ? 'flex-start' : 'center', paddingHorizontal: inputMode === 'text' ? 0 : 32, paddingTop: inputMode === 'text' ? 24 : 0 }}>
+        {/* Titre fixe */}
+        <View style={{ paddingTop: 32, paddingHorizontal: 32, alignItems: 'center' }}>
           <Text
             style={{
               fontFamily: 'PlayfairDisplay_700Bold',
               fontSize: 32,
               color: Colors.textPrimary,
               textAlign: 'center',
-              marginBottom: 8,
-              paddingHorizontal: inputMode === 'text' ? 32 : 0,
             }}
           >
             {preselectedContact ? preselectedContact.firstName : 'Recall People'}
           </Text>
+        </View>
 
+        {/* Zone de contenu centrale */}
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 }}>
           {isProcessing ? (
-            <Animated.View entering={FadeIn} style={{ marginBottom: 64, marginTop: inputMode === 'text' ? 32 : 0 }}>
+            <Animated.View entering={FadeIn}>
               <TranscriptionLoader step={processingStep} hasPreselectedContact={!!preselectedContactId} />
             </Animated.View>
           ) : inputMode === 'audio' ? (
-            <>
+            <View style={{ alignItems: 'center' }}>
               {isRecording ? (
-                <Animated.View entering={FadeIn} exiting={FadeOut} style={{ alignItems: 'center' }}>
+                <Animated.View entering={FadeIn} exiting={FadeOut} style={{ alignItems: 'center', marginBottom: 32 }}>
                   <Text
                     style={{
                       fontFamily: 'PlayfairDisplay_500Medium',
@@ -203,7 +206,6 @@ export default function RecordScreen() {
                       fontSize: 14,
                       color: Colors.textMuted,
                       textAlign: 'center',
-                      marginBottom: 64,
                     }}
                   >
                     {formatDuration(maxRecordingDuration - recordingDuration)} {t('record.remaining', { defaultValue: 'restant' })}
@@ -217,7 +219,7 @@ export default function RecordScreen() {
                   style={{
                     color: Colors.textMuted,
                     textAlign: 'center',
-                    marginBottom: 64,
+                    marginBottom: 32,
                     fontSize: 16,
                     fontStyle: 'italic',
                     minHeight: 24,
@@ -246,11 +248,11 @@ export default function RecordScreen() {
                   Appuyez pour terminer
                 </Animated.Text>
               )}
-            </>
+            </View>
           ) : (
             <Animated.View
               entering={FadeIn.duration(300)}
-              style={{ width: '100%', marginTop: 8 }}
+              style={{ width: '100%' }}
             >
               <TextInputMode
                 onSubmit={handleTextSubmit}
@@ -261,8 +263,9 @@ export default function RecordScreen() {
           )}
         </View>
 
-        {!isProcessing && inputMode === 'audio' && (
-          <View style={{ paddingHorizontal: 32, paddingBottom: 32 }}>
+        {/* Footer avec conseil */}
+        <View style={{ paddingHorizontal: 32, paddingBottom: 32, minHeight: 60 }}>
+          {!isProcessing && inputMode === 'audio' && (
             <Text style={{ color: Colors.textMuted, textAlign: 'center', fontSize: 12, lineHeight: 20 }}>
               {preselectedContact
                 ? `Parlez de ${preselectedContact.firstName} : actualités, anecdotes, détails importants...`
@@ -270,8 +273,8 @@ export default function RecordScreen() {
                     defaultValue: 'Conseil : mentionnez le nom, le contexte de rencontre, et les details importants sur la personne.',
                   })}
             </Text>
-          </View>
-        )}
+          )}
+        </View>
 
         <Modal visible={showPaywall} animationType="slide" presentationStyle="pageSheet">
           <Paywall onClose={closePaywall} reason={paywallReason} />

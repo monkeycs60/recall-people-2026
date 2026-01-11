@@ -118,7 +118,7 @@ export function TextInputMode({
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.md,
   },
   inputContainer: {
     backgroundColor: Colors.surface,
@@ -128,8 +128,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   textInput: {
-    minHeight: 160,
-    maxHeight: 280,
+    height: 220,
     padding: Spacing.md,
     paddingTop: Spacing.md,
     fontSize: 16,

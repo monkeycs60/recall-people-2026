@@ -3,9 +3,10 @@ import { Mic, PenLine } from 'lucide-react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withSpring,
+  withTiming,
+  Easing,
 } from 'react-native-reanimated';
-import { Colors, BorderRadius, Spacing } from '@/constants/theme';
+import { Colors, BorderRadius } from '@/constants/theme';
 import { InputMode } from './InputModeToggle';
 
 interface AddNoteButtonProps {
@@ -19,17 +20,30 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export function AddNoteButton({ firstName, mode, onModeChange, onPress }: AddNoteButtonProps) {
   const buttonScale = useSharedValue(1);
+  const indicatorPosition = useSharedValue(mode === 'audio' ? 0 : 1);
 
   const handlePressIn = () => {
-    buttonScale.value = withSpring(0.96, { damping: 15, stiffness: 400 });
+    buttonScale.value = withTiming(0.96, { duration: 100 });
   };
 
   const handlePressOut = () => {
-    buttonScale.value = withSpring(1, { damping: 15, stiffness: 400 });
+    buttonScale.value = withTiming(1, { duration: 100 });
+  };
+
+  const handleModeChange = (newMode: InputMode) => {
+    indicatorPosition.value = withTiming(newMode === 'audio' ? 0 : 1, {
+      duration: 200,
+      easing: Easing.out(Easing.quad),
+    });
+    onModeChange(newMode);
   };
 
   const buttonAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: buttonScale.value }],
+  }));
+
+  const indicatorStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: indicatorPosition.value * 80 }],
   }));
 
   const buttonText = mode === 'audio'
@@ -53,31 +67,25 @@ export function AddNoteButton({ firstName, mode, onModeChange, onPress }: AddNot
       </AnimatedPressable>
 
       <View style={styles.modeSelector}>
+        <Animated.View style={[styles.modeIndicator, indicatorStyle]} />
+
         <Pressable
-          onPress={() => onModeChange('audio')}
-          style={[
-            styles.modeOption,
-            mode === 'audio' && styles.modeOptionActive,
-          ]}
+          onPress={() => handleModeChange('audio')}
+          style={styles.modeOption}
           hitSlop={8}
         >
-          <Mic size={16} color={mode === 'audio' ? Colors.primary : Colors.textMuted} />
+          <Mic size={16} color={mode === 'audio' ? Colors.textInverse : Colors.textMuted} />
           <Text style={[styles.modeLabel, mode === 'audio' && styles.modeLabelActive]}>
             Parler
           </Text>
         </Pressable>
 
-        <View style={styles.modeDivider} />
-
         <Pressable
-          onPress={() => onModeChange('text')}
-          style={[
-            styles.modeOption,
-            mode === 'text' && styles.modeOptionActive,
-          ]}
+          onPress={() => handleModeChange('text')}
+          style={styles.modeOption}
           hitSlop={8}
         >
-          <PenLine size={16} color={mode === 'text' ? Colors.primary : Colors.textMuted} />
+          <PenLine size={16} color={mode === 'text' ? Colors.textInverse : Colors.textMuted} />
           <Text style={[styles.modeLabel, mode === 'text' && styles.modeLabelActive]}>
             Écrire
           </Text>
@@ -118,21 +126,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: Colors.surface,
     borderRadius: BorderRadius.full,
-    paddingVertical: 6,
+    paddingVertical: 4,
     paddingHorizontal: 4,
     borderWidth: 1,
     borderColor: Colors.border,
+    position: 'relative',
+  },
+  modeIndicator: {
+    position: 'absolute',
+    top: 4,
+    left: 4,
+    width: 76,
+    height: 32,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.primary,
   },
   modeOption: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     borderRadius: BorderRadius.full,
-  },
-  modeOptionActive: {
-    backgroundColor: Colors.primaryLight,
+    width: 80,
+    justifyContent: 'center',
   },
   modeLabel: {
     fontSize: 13,
@@ -140,12 +157,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   modeLabelActive: {
-    color: Colors.primary,
-  },
-  modeDivider: {
-    width: 1,
-    height: 20,
-    backgroundColor: Colors.border,
-    marginHorizontal: 2,
+    color: Colors.textInverse,
   },
 });
