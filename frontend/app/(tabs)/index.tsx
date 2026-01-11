@@ -26,7 +26,7 @@ import {
 	Zap,
 	Plus,
 	UserPlus,
-	Sparkles,
+	Sparkle,
 } from 'lucide-react-native';
 import { Colors } from '@/constants/theme';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -222,10 +222,7 @@ export default function ContactsScreen() {
 						<Pressable
 							style={styles.aiSearchButton}
 							onPress={() => router.push('/(tabs)/search')}>
-							<View style={styles.aiButtonContent}>
-								<Sparkles size={12} color={Colors.primary} />
-								<Text style={styles.aiButtonText}>IA</Text>
-							</View>
+							<Sparkle size={20} color={Colors.primary} />
 						</Pressable>
 						<Pressable
 							style={styles.addButton}
@@ -388,22 +385,8 @@ const styles = StyleSheet.create({
 	aiSearchButton: {
 		width: 40,
 		height: 40,
-		borderRadius: 20,
-		backgroundColor: Colors.surface,
-		borderWidth: 1,
-		borderColor: Colors.primary,
 		alignItems: 'center',
 		justifyContent: 'center',
-	},
-	aiButtonContent: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		gap: 2,
-	},
-	aiButtonText: {
-		fontSize: 12,
-		fontWeight: '700',
-		color: Colors.primary,
 	},
 	searchContainer: {
 		flexDirection: 'row',
