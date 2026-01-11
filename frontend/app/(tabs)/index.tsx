@@ -10,7 +10,7 @@ import {
 	Image,
 } from 'react-native';
 import { useState, useRef, useCallback } from 'react';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient, QueryClient } from '@tanstack/react-query';
@@ -56,7 +56,7 @@ export default function ContactsScreen() {
 	const insets = useSafeAreaInsets();
 	const queryClient = useQueryClient();
 
-	const { contacts, isLoading, isRefetching, refetch, isPlaceholderData } =
+	const { contacts, isLoading, refetch, isPlaceholderData } =
 		useContactsQuery();
 	const { groups } = useGroupsQuery();
 	const { selectedGroupId, setSelectedGroup } = useGroupsStore();
@@ -66,6 +66,13 @@ export default function ContactsScreen() {
 
 	const [searchQuery, setSearchQuery] = useState('');
 	const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
+	const [isPullRefreshing, setIsPullRefreshing] = useState(false);
+
+	useFocusEffect(
+		useCallback(() => {
+			refetch();
+		}, [refetch])
+	);
 
 	const handleCreateContact = async (firstName: string, lastName: string) => {
 		const newContact = await contactService.create({
@@ -115,7 +122,9 @@ export default function ContactsScreen() {
 	});
 
 	const handleRefresh = async () => {
+		setIsPullRefreshing(true);
 		await refetch();
+		setIsPullRefreshing(false);
 	};
 
 	const renderContact = ({
@@ -325,7 +334,7 @@ export default function ContactsScreen() {
 					viewabilityConfig={viewabilityConfig}
 					refreshControl={
 						<RefreshControl
-							refreshing={isRefetching}
+							refreshing={isPullRefreshing}
 							onRefresh={handleRefresh}
 							tintColor={Colors.primary}
 						/>

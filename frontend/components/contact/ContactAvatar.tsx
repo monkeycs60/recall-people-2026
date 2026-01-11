@@ -60,8 +60,8 @@ export function ContactAvatar({
         backgroundColor: Colors.primaryLight,
       }}
       contentFit="cover"
-      transition={200}
-      placeholder={{ blurhash: 'LKO2?U%2Tw=w]~RBVZRi};RPxuwH' }}
+      transition={recyclingKey ? 0 : 200}
+      placeholder={recyclingKey ? undefined : { blurhash: 'LKO2?U%2Tw=w]~RBVZRi};RPxuwH' }}
       placeholderContentFit="cover"
     />
   );
