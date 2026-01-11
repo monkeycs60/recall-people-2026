@@ -29,7 +29,7 @@ export function CustomTabBar({ state, navigation }: TabBarProps) {
   const fabScale = useSharedValue(1);
 
   const leftTabs = [
-    { name: 'contacts', icon: Users, label: t('tabs.contacts') },
+    { name: 'index', icon: Users, label: t('tabs.contacts') },
     { name: 'upcoming', icon: Calendar, label: t('tabs.upcoming') },
   ];
 

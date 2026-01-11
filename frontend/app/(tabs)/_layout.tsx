@@ -1,7 +1,6 @@
-import { Tabs, useRouter } from 'expo-router';
+import { Tabs, useRouter, useFocusEffect } from 'expo-router';
 import { Users, User, Calendar, Search } from 'lucide-react-native';
 import { useState, useCallback } from 'react';
-import { useFocusEffect } from 'expo-router';
 import { isLoggedIn } from '@/lib/auth';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -16,7 +15,6 @@ export default function TabLayout() {
   const { t } = useTranslation();
   const hasSeenOnboarding = useSettingsStore((state) => state.hasSeenOnboarding);
   const setHasSeenOnboarding = useSettingsStore((state) => state.setHasSeenOnboarding);
-  const [justCompletedOnboarding, setJustCompletedOnboarding] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -32,7 +30,6 @@ export default function TabLayout() {
 
   const handleOnboardingComplete = () => {
     setHasSeenOnboarding(true);
-    setJustCompletedOnboarding(true);
   };
 
   if (checking) {
@@ -47,11 +44,9 @@ export default function TabLayout() {
     return <Onboarding onComplete={handleOnboardingComplete} />;
   }
 
-  const initialRouteName = justCompletedOnboarding ? 'index' : 'contacts';
-
   return (
     <Tabs
-      initialRouteName={initialRouteName}
+      initialRouteName="index"
       tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{
         headerShown: false,
@@ -59,12 +54,6 @@ export default function TabLayout() {
     >
       <Tabs.Screen
         name="index"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="contacts"
         options={{
           title: t('tabs.contacts'),
           tabBarIcon: ({ color, size }) => <Users color={color} size={size} />,
