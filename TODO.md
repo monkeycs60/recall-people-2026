@@ -1,0 +1,3 @@
+- Changer avatar placeholder
+- Ajouter génération avatar lors du seed
+- landing page avec gif
