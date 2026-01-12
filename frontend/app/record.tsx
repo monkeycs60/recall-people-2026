@@ -184,7 +184,7 @@ export default function RecordScreen() {
         </View>
 
         {/* Zone de contenu centrale */}
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 }}>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: inputMode === 'text' ? 'flex-start' : 'center', paddingHorizontal: 24, paddingTop: inputMode === 'text' ? 24 : 0 }}>
           {isProcessing ? (
             <Animated.View entering={FadeIn}>
               <TranscriptionLoader step={processingStep} hasPreselectedContact={!!preselectedContactId} />
