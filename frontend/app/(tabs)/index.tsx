@@ -325,7 +325,7 @@ export default function ContactsScreen() {
 					renderItem={renderContact}
 					keyExtractor={(item) => item.id}
 					contentContainerStyle={{
-						paddingBottom: 100,
+						paddingBottom: 140,
 						paddingHorizontal: 24,
 					}}
 					onViewableItemsChanged={onViewableItemsChanged}
