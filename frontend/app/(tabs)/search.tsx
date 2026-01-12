@@ -10,6 +10,7 @@ import { SearchInput } from '@/components/search/SearchInput';
 import { SearchSkeleton } from '@/components/search/SearchSkeleton';
 import { SearchResults } from '@/components/search/SearchResults';
 import { Paywall } from '@/components/Paywall';
+import { TestProActivation } from '@/components/TestProActivation';
 import { Colors, BorderRadius, Spacing } from '@/constants/theme';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { showInfoToast } from '@/lib/error-handler';
@@ -29,6 +30,7 @@ export default function SearchScreen() {
   const [query, setQuery] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [showTestProFirst, setShowTestProFirst] = useState(true);
 
   const handleSubmit = () => {
     if (!isPremium) {
@@ -136,7 +138,23 @@ export default function SearchScreen() {
       </View>
 
       <Modal visible={showPaywall} animationType="slide" presentationStyle="pageSheet">
-        <Paywall onClose={() => setShowPaywall(false)} reason="ai_search" />
+        {showTestProFirst ? (
+          <TestProActivation
+            onClose={() => {
+              setShowTestProFirst(true);
+              setShowPaywall(false);
+            }}
+            onNotWhitelisted={() => setShowTestProFirst(false)}
+          />
+        ) : (
+          <Paywall
+            onClose={() => {
+              setShowTestProFirst(true);
+              setShowPaywall(false);
+            }}
+            reason="ai_search"
+          />
+        )}
       </Modal>
     </KeyboardAvoidingView>
   );

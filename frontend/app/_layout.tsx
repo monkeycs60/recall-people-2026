@@ -101,6 +101,15 @@ export default function RootLayout() {
     }
   }, [user?.id, isSubscriptionHydrated]);
 
+  // Check whitelist status on every app launch when user is authenticated
+  // This ensures whitelist changes are picked up even if user was already logged in
+  useEffect(() => {
+    if (user?.id && isSubscriptionHydrated) {
+      console.log('[_layout] Checking whitelist status for user:', user.email);
+      useSubscriptionStore.getState().checkWhitelistStatus();
+    }
+  }, [user?.id, isSubscriptionHydrated]);
+
   if (dbError) {
     return (
       <View style={styles.centerContainer}>

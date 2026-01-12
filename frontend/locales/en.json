@@ -57,6 +57,7 @@
     "edit": "Edit",
     "confirm": "Confirm",
     "back": "Back",
+    "close": "Close",
     "error": "Error",
     "success": "Success",
     "add": "Add",
@@ -545,10 +546,18 @@
   },
   "testPro": {
     "badge": "Test Mode",
-    "title": "Test Pro Access",
+    "title": "Tester Pro Access",
+    "subtitle": "You're a tester for Recall People! Activate free Pro access to test the app.",
     "description": "Activate Pro features for testing without a real subscription. This is only visible to authorized test accounts.",
     "activate": "Activate Pro",
     "deactivate": "Deactivate Pro",
-    "active": "Test Pro Active"
+    "active": "Test Pro Active",
+    "checking": "Checking tester account...",
+    "notWhitelisted": "Account not authorized",
+    "redirecting": "Redirecting to subscription options...",
+    "alreadyActive": "Pro already active!",
+    "enjoyFeatures": "Enjoy all Pro features",
+    "features": "Included features",
+    "activated": "Pro activated!"
   }
 }

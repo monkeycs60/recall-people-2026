@@ -29,11 +29,11 @@ subscriptionRoutes.use('/*', authMiddleware);
 
 subscriptionRoutes.get('/check-whitelist', async (c) => {
   const user = c.get('user');
-  const whitelist = parseWhitelist(c.env.PRO_WHITELIST);
+  const rawWhitelist = c.env.PRO_WHITELIST;
+  const whitelist = parseWhitelist(rawWhitelist);
 
-  const isWhitelisted = user.email
-    ? whitelist.has(user.email.toLowerCase().trim())
-    : false;
+  const userEmail = user.email?.toLowerCase().trim() || '';
+  const isWhitelisted = userEmail ? whitelist.has(userEmail) : false;
 
   return c.json({
     success: true,

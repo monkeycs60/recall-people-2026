@@ -331,12 +331,15 @@ export const generateAvatarFromHints = async (data: {
 
 export const checkProWhitelist = async (): Promise<boolean> => {
   try {
+    console.log('[API] Calling checkProWhitelist...');
     const response = await apiCall<{ success: boolean; isWhitelisted: boolean }>(
       '/api/subscription/check-whitelist',
       { showErrorToast: false }
     );
+    console.log('[API] checkProWhitelist response:', response);
     return response.isWhitelisted;
-  } catch {
+  } catch (error) {
+    console.error('[API] checkProWhitelist error:', error);
     return false;
   }
 };

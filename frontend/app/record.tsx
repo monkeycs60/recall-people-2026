@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { Colors } from '@/constants/theme';
 import { RecordButton } from '@/components/RecordButton';
 import { Paywall } from '@/components/Paywall';
+import { TestProActivation } from '@/components/TestProActivation';
 import { TranscriptionLoader } from '@/components/TranscriptionLoader';
 import { InputModeToggle, InputMode } from '@/components/InputModeToggle';
 import { TextInputMode } from '@/components/TextInputMode';
@@ -56,6 +57,7 @@ export default function RecordScreen() {
   const resetRecording = useAppStore((state) => state.resetRecording);
   const [promptIndex, setPromptIndex] = useState(0);
   const [inputMode, setInputMode] = useState<InputMode>(initialMode);
+  const [showTestProFirst, setShowTestProFirst] = useState(true);
   const isRecordingRef = useRef(isRecording);
   const isProcessingRef = useRef(isProcessing);
   const cancelRecordingRef = useRef(cancelRecording);
@@ -277,7 +279,23 @@ export default function RecordScreen() {
         </View>
 
         <Modal visible={showPaywall} animationType="slide" presentationStyle="pageSheet">
-          <Paywall onClose={closePaywall} reason={paywallReason} />
+          {showTestProFirst ? (
+            <TestProActivation
+              onClose={() => {
+                setShowTestProFirst(true);
+                closePaywall();
+              }}
+              onNotWhitelisted={() => setShowTestProFirst(false)}
+            />
+          ) : (
+            <Paywall
+              onClose={() => {
+                setShowTestProFirst(true);
+                closePaywall();
+              }}
+              reason={paywallReason}
+            />
+          )}
         </Modal>
       </View>
     </KeyboardAvoidingView>

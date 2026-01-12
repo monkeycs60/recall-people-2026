@@ -57,6 +57,7 @@
     "edit": "Modifier",
     "confirm": "Confirmer",
     "back": "Retour",
+    "close": "Fermer",
     "error": "Erreur",
     "success": "Succès",
     "add": "Ajouter",
@@ -545,10 +546,18 @@
   },
   "testPro": {
     "badge": "Mode Test",
-    "title": "Acces Pro Test",
-    "description": "Activez les fonctionnalites Pro pour tester sans abonnement reel. Visible uniquement pour les comptes de test autorises.",
+    "title": "Accès Pro Testeur",
+    "subtitle": "Vous êtes testeur pour Recall People ! Activez gratuitement l'accès Pro pour tester l'application.",
+    "description": "Activez les fonctionnalités Pro pour tester sans abonnement réel. Visible uniquement pour les comptes de test autorisés.",
     "activate": "Activer Pro",
-    "deactivate": "Desactiver Pro",
-    "active": "Pro Test Actif"
+    "deactivate": "Désactiver Pro",
+    "active": "Pro Test Actif",
+    "checking": "Vérification du compte testeur...",
+    "notWhitelisted": "Compte non autorisé",
+    "redirecting": "Redirection vers les options d'abonnement...",
+    "alreadyActive": "Pro déjà activé !",
+    "enjoyFeatures": "Profitez de toutes les fonctionnalités Pro",
+    "features": "Fonctionnalités incluses",
+    "activated": "Pro activé !"
   }
 }
