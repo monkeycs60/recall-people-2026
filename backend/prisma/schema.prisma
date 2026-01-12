@@ -194,3 +194,20 @@ model AuditLog {
   @@index([action])
   @@index([createdAt])
 }
+
+// ============================================
+// Subscription & Usage Tracking
+// ============================================
+
+model UserNotesUsage {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  monthKey   String   @map("month_key") // Format: "2026-01"
+  notesCount Int      @default(0) @map("notes_count")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, monthKey])
+  @@map("user_notes_usage")
+  @@index([userId])
+}

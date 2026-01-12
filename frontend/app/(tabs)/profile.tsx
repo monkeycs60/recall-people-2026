@@ -16,6 +16,7 @@ import {
   LogOut,
   BookOpen,
   Shield,
+  Users,
 } from 'lucide-react-native';
 import { useAuthStore } from '@/stores/auth-store';
 import { useSettingsStore } from '@/stores/settings-store';
@@ -142,6 +143,10 @@ export default function ProfileScreen() {
     router.push('/admin/monitoring');
   };
 
+  const handleOpenSeed = () => {
+    router.push('/admin/seed');
+  };
+
   return (
     <View className="flex-1 bg-background">
       <ScrollView
@@ -204,6 +209,11 @@ export default function ProfileScreen() {
               icon={<Shield size={20} color={Colors.primary} />}
               label="Monitoring & Logs"
               onPress={handleOpenMonitoring}
+            />
+            <SettingsRow
+              icon={<Users size={20} color={Colors.primary} />}
+              label="Seed Contacts"
+              onPress={handleOpenSeed}
             />
           </SettingsSection>
         )}

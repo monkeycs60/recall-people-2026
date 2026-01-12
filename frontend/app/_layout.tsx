@@ -101,12 +101,14 @@ export default function RootLayout() {
     }
   }, [user?.id, isSubscriptionHydrated]);
 
-  // Check whitelist status on every app launch when user is authenticated
-  // This ensures whitelist changes are picked up even if user was already logged in
+  // Check whitelist status and sync notes count on every app launch
+  // This ensures whitelist changes are picked up and notes count is accurate
   useEffect(() => {
     if (user?.id && isSubscriptionHydrated) {
       console.log('[_layout] Checking whitelist status for user:', user.email);
       useSubscriptionStore.getState().checkWhitelistStatus();
+      // Sync notes count from server (source of truth)
+      useSubscriptionStore.getState().syncNotesStatus();
     }
   }, [user?.id, isSubscriptionHydrated]);
 

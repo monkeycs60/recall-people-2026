@@ -345,6 +345,52 @@ export const checkProWhitelist = async (): Promise<boolean> => {
 };
 
 // ============================================
+// Notes Usage API (Server-side counter)
+// ============================================
+
+export type NotesStatusResponse = {
+  success: boolean;
+  used: number;
+  limit: number;
+  remaining: number;
+  canCreate: boolean;
+  monthKey: string;
+};
+
+export type IncrementNoteResponse = {
+  success: boolean;
+  used: number;
+  remaining: number;
+  canCreate: boolean;
+};
+
+export const getNotesStatus = async (): Promise<NotesStatusResponse | null> => {
+  try {
+    const response = await apiCall<NotesStatusResponse>(
+      '/api/subscription/notes-status',
+      { showErrorToast: false }
+    );
+    return response;
+  } catch (error) {
+    console.error('[API] getNotesStatus error:', error);
+    return null;
+  }
+};
+
+export const incrementNoteCount = async (): Promise<IncrementNoteResponse | null> => {
+  try {
+    const response = await apiCall<IncrementNoteResponse>(
+      '/api/subscription/increment-note',
+      { method: 'POST', showErrorToast: false }
+    );
+    return response;
+  } catch (error) {
+    console.error('[API] incrementNoteCount error:', error);
+    return null;
+  }
+};
+
+// ============================================
 // Seed / Import API
 // ============================================
 
