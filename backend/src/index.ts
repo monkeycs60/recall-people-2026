@@ -13,6 +13,7 @@ import { detectContactRoutes } from './routes/detect-contact';
 import { summaryRoutes } from './routes/summary';
 import { avatarRoutes } from './routes/avatar';
 import { subscriptionRoutes } from './routes/subscription';
+import { seedRoutes } from './routes/seed';
 import { rateLimiters } from './middleware/rateLimit';
 import { securityHeaders } from './middleware/securityHeaders';
 import { httpsEnforcement } from './middleware/httpsEnforcement';
@@ -82,6 +83,7 @@ app.route('/api/detect-contact', detectContactRoutes);
 app.route('/api/summary', summaryRoutes);
 app.route('/api/avatar', avatarRoutes);
 app.route('/api/subscription', subscriptionRoutes);
+app.route('/api/seed', seedRoutes);
 app.route('/admin', adminRoutes);
 
 export default app;

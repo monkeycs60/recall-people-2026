@@ -344,4 +344,85 @@ export const checkProWhitelist = async (): Promise<boolean> => {
   }
 };
 
+// ============================================
+// Seed / Import API
+// ============================================
+
+export type SeedContactInput = {
+  firstName: string;
+  lastName?: string;
+  nickname?: string;
+  gender?: 'male' | 'female' | 'unknown';
+  phone?: string;
+  email?: string;
+  birthdayDay?: number;
+  birthdayMonth?: number;
+  birthdayYear?: number;
+  aiSummary?: string;
+  facts?: Array<{
+    factType: string;
+    factKey: string;
+    factValue: string;
+  }>;
+  memories?: Array<{
+    description: string;
+    eventDate?: string;
+    isShared?: boolean;
+  }>;
+  hotTopics?: Array<{
+    title: string;
+    context?: string;
+    status?: 'active' | 'resolved';
+  }>;
+  groups?: string[];
+};
+
+export type SeedContact = SeedContactInput & {
+  id: string;
+  facts: Array<{
+    id: string;
+    contactId: string;
+    factType: string;
+    factKey: string;
+    factValue: string;
+  }>;
+  memories: Array<{
+    id: string;
+    contactId: string;
+    description: string;
+    eventDate?: string;
+    isShared: boolean;
+  }>;
+  hotTopics: Array<{
+    id: string;
+    contactId: string;
+    title: string;
+    context?: string;
+    status: 'active' | 'resolved';
+  }>;
+};
+
+export type SeedResponse = {
+  success: boolean;
+  contacts: SeedContact[];
+  count: number;
+};
+
+export const seedContacts = async (contacts: SeedContactInput[]): Promise<SeedResponse> => {
+  return apiCall('/api/seed', {
+    method: 'POST',
+    body: { contacts },
+  });
+};
+
+export const generateSeedContacts = async (
+  count: number = 5,
+  locale: 'en' | 'fr' = 'fr'
+): Promise<SeedResponse> => {
+  return apiCall('/api/seed/generate', {
+    method: 'POST',
+    body: { count, locale },
+  });
+};
+
 export { apiCall };
