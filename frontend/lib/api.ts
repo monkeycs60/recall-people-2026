@@ -420,6 +420,11 @@ export type SeedContactInput = {
     context?: string;
     status?: 'active' | 'resolved';
   }>;
+  notes?: Array<{
+    title?: string;
+    transcription?: string;
+    summary?: string;
+  }>;
   groups?: string[];
 };
 
@@ -446,6 +451,13 @@ export type SeedContact = SeedContactInput & {
     context?: string;
     status: 'active' | 'resolved';
   }>;
+  notes: Array<{
+    id: string;
+    contactId: string;
+    title?: string;
+    transcription?: string;
+    summary?: string;
+  }>;
 };
 
 export type SeedResponse = {
@@ -463,11 +475,12 @@ export const seedContacts = async (contacts: SeedContactInput[]): Promise<SeedRe
 
 export const generateSeedContacts = async (
   count: number = 5,
-  locale: 'en' | 'fr' = 'fr'
+  locale: 'en' | 'fr' = 'fr',
+  richness: 'minimal' | 'normal' | 'rich' = 'rich'
 ): Promise<SeedResponse> => {
   return apiCall('/api/seed/generate', {
     method: 'POST',
-    body: { count, locale },
+    body: { count, locale, richness },
   });
 };
 

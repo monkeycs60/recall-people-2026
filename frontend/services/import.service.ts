@@ -12,8 +12,12 @@ export const importService = {
   /**
    * Generate random contacts via backend and import them locally
    */
-  generateAndImport: async (count: number = 5, locale: 'en' | 'fr' = 'fr'): Promise<ImportResult> => {
-    const response = await generateSeedContacts(count, locale);
+  generateAndImport: async (
+    count: number = 5,
+    locale: 'en' | 'fr' = 'fr',
+    richness: 'minimal' | 'normal' | 'rich' = 'rich'
+  ): Promise<ImportResult> => {
+    const response = await generateSeedContacts(count, locale, richness);
     return importService.importContacts(response.contacts);
   },
 
@@ -112,6 +116,23 @@ export const importService = {
               topic.context || null,
               topic.status as HotTopicStatus,
               now,
+              now,
+            ]
+          );
+        }
+
+        // Insert notes
+        for (const note of contact.notes) {
+          await db.runAsync(
+            `INSERT OR REPLACE INTO notes (
+              id, contact_id, title, transcription, summary, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?)`,
+            [
+              note.id,
+              note.contactId,
+              note.title || null,
+              note.transcription || null,
+              note.summary || null,
               now,
             ]
           );
