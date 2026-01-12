@@ -289,6 +289,13 @@ function generateRichContact(locale: 'en' | 'fr', richness: 'minimal' | 'normal'
   const company = randomPick(data.companies);
   const city = randomPick(data.cities);
 
+  // Partner (declared early for use in notes)
+  const hasPartner = richness !== 'minimal' && Math.random() > 0.4;
+  const partnerName = hasPartner ? randomPick(data.partners[gender === 'male' ? 'female' : 'male']) : null;
+
+  // Physical trait for avatar hints
+  const physicalTrait = Math.random() > 0.5 ? randomPick(data.traits) : null;
+
   // Core facts (always present)
   facts.push({
     factType: 'work',
@@ -317,9 +324,7 @@ function generateRichContact(locale: 'en' | 'fr', richness: 'minimal' | 'normal'
       });
     }
 
-    // Partner
-    const hasPartner = Math.random() > 0.4;
-    const partnerName = hasPartner ? randomPick(data.partners[gender === 'male' ? 'female' : 'male']) : null;
+    // Partner fact
     if (partnerName) {
       facts.push({
         factType: 'partner',
@@ -391,12 +396,12 @@ function generateRichContact(locale: 'en' | 'fr', richness: 'minimal' | 'normal'
       });
     }
 
-    // Physical trait
-    if (Math.random() > 0.5) {
+    // Physical trait (use the one declared earlier for avatar hints)
+    if (physicalTrait) {
       facts.push({
         factType: 'trait',
         factKey: locale === 'fr' ? 'Signe distinctif' : 'Distinctive trait',
-        factValue: randomPick(data.traits),
+        factValue: physicalTrait,
       });
     }
 
@@ -493,6 +498,19 @@ function generateRichContact(locale: 'en' | 'fr', richness: 'minimal' | 'normal'
     summaryParts.push(`${locale === 'fr' ? 'Passionné(e) de' : 'Passionate about'} ${hobbyFacts.map(h => h.factValue.toLowerCase()).join(', ')}.`);
   }
 
+  // Build avatar hints for automatic generation
+  const hobbyForHint = hobbyFacts.length > 0 ? hobbyFacts[0].factValue : null;
+  const avatarHints = {
+    physical: physicalTrait,
+    personality: null,
+    interest: hobbyForHint,
+    context: job.toLowerCase().includes('dev') || job.toLowerCase().includes('engineer') || job.toLowerCase().includes('ingénieur') ? 'tech' :
+             job.toLowerCase().includes('design') || job.toLowerCase().includes('artist') || job.toLowerCase().includes('photo') ? 'creative' :
+             job.toLowerCase().includes('sport') || job.toLowerCase().includes('coach') ? 'sport' :
+             job.toLowerCase().includes('commercial') || job.toLowerCase().includes('sales') || job.toLowerCase().includes('avocat') || job.toLowerCase().includes('lawyer') ? 'professional' :
+             'casual',
+  };
+
   return {
     firstName,
     lastName,
@@ -504,6 +522,7 @@ function generateRichContact(locale: 'en' | 'fr', richness: 'minimal' | 'normal'
     birthdayMonth: hasBirthday ? Math.floor(1 + Math.random() * 12) : undefined,
     birthdayYear: hasBirthday ? Math.floor(1970 + Math.random() * 40) : undefined,
     aiSummary: summaryParts.join(' '),
+    avatarHints,
     facts,
     hotTopics,
     memories,

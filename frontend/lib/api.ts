@@ -430,6 +430,7 @@ export type SeedContactInput = {
 
 export type SeedContact = SeedContactInput & {
   id: string;
+  avatarHints?: AvatarHints;
   facts: Array<{
     id: string;
     contactId: string;

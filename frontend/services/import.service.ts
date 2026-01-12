@@ -1,24 +1,46 @@
 import { getDatabase } from '@/lib/db';
-import { SeedContact, SeedResponse, generateSeedContacts, seedContacts, SeedContactInput } from '@/lib/api';
-import { FactType, Gender, HotTopicStatus } from '@/types';
+import {
+  SeedContact,
+  generateSeedContacts,
+  seedContacts,
+  SeedContactInput,
+  generateAvatarFromHints,
+  AvatarHints,
+} from '@/lib/api';
+import { FactType, HotTopicStatus, Gender } from '@/types';
+import { contactService } from './contact.service';
 
 export type ImportResult = {
   success: boolean;
   importedCount: number;
   errors: string[];
+  contactsForAvatars?: Array<{
+    id: string;
+    gender: Gender;
+    avatarHints: AvatarHints;
+  }>;
 };
 
 export const importService = {
   /**
    * Generate random contacts via backend and import them locally
+   * Also triggers background avatar generation
    */
   generateAndImport: async (
     count: number = 5,
     locale: 'en' | 'fr' = 'fr',
-    richness: 'minimal' | 'normal' | 'rich' = 'rich'
+    richness: 'minimal' | 'normal' | 'rich' = 'rich',
+    generateAvatars: boolean = true
   ): Promise<ImportResult> => {
     const response = await generateSeedContacts(count, locale, richness);
-    return importService.importContacts(response.contacts);
+    const result = await importService.importContacts(response.contacts);
+
+    // Start avatar generation in background if enabled
+    if (generateAvatars && result.contactsForAvatars && result.contactsForAvatars.length > 0) {
+      importService.generateAvatarsInBackground(result.contactsForAvatars);
+    }
+
+    return result;
   },
 
   /**
@@ -30,12 +52,56 @@ export const importService = {
   },
 
   /**
+   * Generate avatars for contacts in background (fire and forget)
+   */
+  generateAvatarsInBackground: (
+    contacts: Array<{ id: string; gender: Gender; avatarHints: AvatarHints }>
+  ): void => {
+    console.log(`[Import] Starting background avatar generation for ${contacts.length} contacts`);
+
+    // Process sequentially with delay to avoid rate limits
+    const generateSequentially = async () => {
+      for (const contact of contacts) {
+        try {
+          console.log(`[Import] Generating avatar for contact ${contact.id}...`);
+
+          const result = await generateAvatarFromHints({
+            contactId: contact.id,
+            gender: contact.gender,
+            avatarHints: contact.avatarHints,
+          });
+
+          // Update contact with avatar URL
+          await contactService.update(contact.id, {
+            avatarUrl: result.avatarUrl,
+          });
+
+          console.log(`[Import] Avatar generated for ${contact.id}: ${result.avatarUrl}`);
+
+          // Small delay between requests to avoid rate limits
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        } catch (error) {
+          console.warn(`[Import] Failed to generate avatar for ${contact.id}:`, error);
+          // Continue with next contact, don't fail the whole batch
+        }
+      }
+      console.log(`[Import] Background avatar generation complete`);
+    };
+
+    // Fire and forget - don't await
+    generateSequentially().catch((error) => {
+      console.error('[Import] Background avatar generation failed:', error);
+    });
+  },
+
+  /**
    * Import contacts directly into local SQLite database
    */
   importContacts: async (contacts: SeedContact[]): Promise<ImportResult> => {
     const db = await getDatabase();
     const errors: string[] = [];
     let importedCount = 0;
+    const contactsForAvatars: Array<{ id: string; gender: Gender; avatarHints: AvatarHints }> = [];
 
     for (const contact of contacts) {
       try {
@@ -138,6 +204,15 @@ export const importService = {
           );
         }
 
+        // Collect info for avatar generation
+        if (contact.avatarHints) {
+          contactsForAvatars.push({
+            id: contact.id,
+            gender: (contact.gender || 'unknown') as Gender,
+            avatarHints: contact.avatarHints,
+          });
+        }
+
         importedCount++;
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -149,6 +224,7 @@ export const importService = {
       success: errors.length === 0,
       importedCount,
       errors,
+      contactsForAvatars,
     };
   },
 
