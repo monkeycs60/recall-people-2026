@@ -102,31 +102,30 @@ export default function RegisterScreen() {
               />
             </View>
 
-            <View style={styles.passwordRow}>
-              <View style={styles.passwordField}>
-                <Text style={styles.inputLabel}>{t('auth.register.password')}</Text>
-                <TextInput
-                  style={styles.input}
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                  editable={!isLoading}
-                  placeholderTextColor={Colors.textMuted}
-                  placeholder={t('auth.register.passwordPlaceholder')}
-                />
-              </View>
-              <View style={styles.passwordField}>
-                <Text style={styles.inputLabel}>{t('auth.register.confirmPassword')}</Text>
-                <TextInput
-                  style={styles.input}
-                  value={confirmPassword}
-                  onChangeText={setConfirmPassword}
-                  secureTextEntry
-                  editable={!isLoading}
-                  placeholderTextColor={Colors.textMuted}
-                  placeholder={t('auth.register.confirmPasswordPlaceholder')}
-                />
-              </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>{t('auth.register.password')}</Text>
+              <TextInput
+                style={styles.input}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                editable={!isLoading}
+                placeholderTextColor={Colors.textMuted}
+                placeholder={t('auth.register.passwordPlaceholder')}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>{t('auth.register.confirmPassword')}</Text>
+              <TextInput
+                style={styles.input}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry
+                editable={!isLoading}
+                placeholderTextColor={Colors.textMuted}
+                placeholder={t('auth.register.confirmPasswordPlaceholder')}
+              />
             </View>
 
             {(error || localError) && (
@@ -258,14 +257,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 15,
     color: Colors.textPrimary,
-  },
-  passwordRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 12,
-  },
-  passwordField: {
-    flex: 1,
   },
   errorText: {
     color: Colors.error,
