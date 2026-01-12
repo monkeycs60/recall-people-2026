@@ -1,3 +1,6 @@
 - Changer avatar placeholder
 - Ajouter génération avatar lors du seed
 - landing page avec gif
+- keyboard away + login improve
+- record text input bugué sur ios
+- dernier contact de la liste superposé avec fab
