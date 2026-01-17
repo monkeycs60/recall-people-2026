@@ -101,18 +101,21 @@ export const avatarRoutes = new Hono<{ Bindings: Bindings; Variables: Variables 
 
 // Placeholder prompts for default avatars (Happy Humans style)
 const PLACEHOLDER_PROMPTS = {
-  male: `A happy smiling man with short dark hair.
-Big friendly smile showing teeth, joyful expression.
-Wearing a light blue collared shirt.
-Soft pink pastel background filling entire image.`,
-  female: `A happy smiling woman with shoulder-length brown hair.
-Warm cheerful smile, bright happy eyes.
-Wearing a terracotta turtleneck.
-Soft peach pastel background filling entire image.`,
-  unknown: `A happy smiling person with short stylish hair.
-Big warm smile, joyful expression, gender-neutral look.
-Wearing a mint green crew neck shirt.
-Soft lavender pastel background filling entire image.`,
+  male: `Simple cartoon portrait of a happy young man with short dark brown hair, small friendly eyes, and a BIG warm genuine smile.
+Light blue collared shirt visible at shoulders.
+Solid soft pink pastel background (#FFD6E0) filling entire image edge to edge.
+Flat colors only, NO gradients. Black outlines on character only.
+Square 1:1 format. Minimalist illustration style like Notion avatars. Warm and approachable.`,
+  female: `Simple cartoon portrait of a happy young woman with medium-length wavy brown hair, small friendly eyes, and a BIG warm genuine smile.
+Terracotta turtleneck (#C67C4E) visible at shoulders.
+Solid soft peach pastel background (#FFECD2) filling entire image edge to edge.
+Flat colors only, NO gradients. Black outlines on character only.
+Square 1:1 format. Minimalist illustration style like Notion avatars. Warm and approachable.`,
+  unknown: `Simple cartoon portrait of a happy gender-neutral person with short tousled auburn hair, small friendly eyes, and a BIG warm genuine smile.
+Mint green crew neck sweater (#98D8C8) visible at shoulders.
+Solid soft lavender pastel background (#E8D5F0) filling entire image edge to edge.
+Flat colors only, NO gradients. Black outlines on character only.
+Square 1:1 format. Minimalist illustration style like Notion avatars. Warm and approachable.`,
 };
 
 // This endpoint is placed BEFORE the auth middleware - it's a one-shot admin endpoint

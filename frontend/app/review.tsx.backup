@@ -47,10 +47,10 @@ export default function ReviewScreen() {
   const contactId = params.contactId as string;
 
   const [selectedFacts, setSelectedFacts] = useState<number[]>(
-    extraction.facts?.map((_, index) => index) || []
+    extraction.facts.map((_, index) => index)
   );
   const [editableFacts, setEditableFacts] = useState(
-    extraction.facts?.map((fact) => ({ ...fact })) || []
+    extraction.facts.map((fact) => ({ ...fact }))
   );
   const [editingFactIndex, setEditingFactIndex] = useState<number | null>(null);
 
@@ -148,12 +148,12 @@ export default function ReviewScreen() {
 
   const toggleResolvedTopic = (topicId: string) => {
     setResolvedTopicsState((prev) => {
-      const exists = prev.some((resolved) => resolved.id === topicId || resolved.existingTopicId === topicId);
+      const exists = prev.some((resolved) => resolved.id === topicId);
       if (exists) {
-        return prev.filter((resolved) => resolved.id !== topicId && resolved.existingTopicId !== topicId);
+        return prev.filter((resolved) => resolved.id !== topicId);
       } else {
-        const originalResolution = extraction.resolvedTopics?.find((resolved) => resolved.id === topicId || resolved.existingTopicId === topicId)?.resolution || '';
-        return [...prev, { id: topicId, existingTopicId: topicId, resolution: originalResolution }];
+        const originalResolution = extraction.resolvedTopics?.find((resolved) => resolved.id === topicId)?.resolution || '';
+        return [...prev, { id: topicId, resolution: originalResolution }];
       }
     });
   };
@@ -417,7 +417,7 @@ export default function ReviewScreen() {
         title: extraction.noteTitle,
         audioUri,
         transcription: editedTranscription,
-        summary: extraction.note?.summary,
+        summary: extraction.note.summary,
       });
 
       const cumulativeTypes = [

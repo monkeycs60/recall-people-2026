@@ -423,7 +423,7 @@ function generateRichContact(locale: 'en' | 'fr', richness: 'minimal' | 'normal'
   }
 
   // Hot topics (1-3 for rich, 0-2 for normal)
-  const hotTopics = [];
+  const hotTopics: Array<{ title: string; context: string; status: "active" | "resolved" }> = [];
   const topicCount = richness === 'rich' ? Math.floor(1 + Math.random() * 3) :
                      richness === 'normal' ? Math.floor(Math.random() * 2) : 0;
   const selectedTopics = randomPickMultiple(data.hotTopics, topicCount, topicCount);
@@ -435,7 +435,7 @@ function generateRichContact(locale: 'en' | 'fr', richness: 'minimal' | 'normal'
   });
 
   // Memories (2-5 for rich, 1-2 for normal)
-  const memories = [];
+  const memories: Array<{ description: string; eventDate: string }> = [];
   const memoryCount = richness === 'rich' ? Math.floor(2 + Math.random() * 4) :
                       richness === 'normal' ? Math.floor(1 + Math.random() * 2) : 0;
   const selectedMemories = randomPickMultiple(data.memories, memoryCount, memoryCount);
@@ -447,7 +447,7 @@ function generateRichContact(locale: 'en' | 'fr', richness: 'minimal' | 'normal'
   });
 
   // Notes with transcriptions (1-3 for rich)
-  const notes = [];
+  const notes: Array<{ title: string; transcription: string; summary: string }> = [];
   if (richness === 'rich') {
     const noteCount = Math.floor(1 + Math.random() * 3);
     const selectedTranscriptions = randomPickMultiple(data.noteTranscriptions, noteCount, noteCount);

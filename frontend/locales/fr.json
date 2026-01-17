@@ -105,6 +105,19 @@
     "example2": "Qui a des enfants en bas âge ?",
     "example3": "À qui devrais-je envoyer un message aujourd'hui ?"
   },
+  "ask": {
+    "placeholder": "Demande-moi quelque chose...",
+    "title": "Demander",
+    "inputPlaceholder": "Tape ta question...",
+    "voiceButton": "Parler",
+    "sendButton": "Envoyer",
+    "suggestionsTitle": "💡 Suggestions :",
+    "suggestions": {
+      "recent": "De quoi j'ai parlé avec Marie récemment ?",
+      "birthday": "C'est quand l'anniversaire de Lucas ?",
+      "updates": "Quelles sont les actualités de Papa ?"
+    }
+  },
   "contact": {
     "title": "Contact",
     "lastContact": "Dernier contact",
@@ -267,7 +280,20 @@
       "month": "Mois",
       "year": "Année (optionnel)",
       "yearPlaceholder": "Année",
-      "months": ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"],
+      "months": [
+        "Janvier",
+        "Février",
+        "Mars",
+        "Avril",
+        "Mai",
+        "Juin",
+        "Juillet",
+        "Août",
+        "Septembre",
+        "Octobre",
+        "Novembre",
+        "Décembre"
+      ],
       "save": "Enregistrer",
       "cancel": "Annuler",
       "delete": "Supprimer"
@@ -331,6 +357,14 @@
     "title": "Vérification",
     "newContact": "Nouveau contact",
     "update": "Mise à jour",
+    "namePlaceholder": "Nom du contact",
+    "transcription": "Transcription",
+    "edit": "Éditer",
+    "done": "Terminer",
+    "transcriptionPlaceholder": "Écrivez la transcription...",
+    "transcriptionHint": "💡 Tap sur ✏️ pour corriger les erreurs de transcription",
+    "transcriptionEditWarning": "⚠️ Après modification, les actualités seront re-détectées",
+    "reExtracting": "Re-détection...",
     "extractedInfo": "Ce que j'ai noté",
     "groups": "Groupes",
     "addGroup": "Ajouter un groupe",
@@ -559,5 +593,36 @@
     "enjoyFeatures": "Profitez de toutes les fonctionnalités Pro",
     "features": "Fonctionnalités incluses",
     "activated": "Pro activé !"
+  },
+  "ask": {
+    "placeholder": "Demande-moi quelque chose...",
+    "title": "Demander",
+    "inputPlaceholder": "Tape ta question...",
+    "voiceButton": "Parler",
+    "sendButton": "Envoyer",
+    "suggestionsTitle": "💡 Suggestions :",
+    "suggestions": {
+      "recent": "De quoi j'ai parlé avec Marie récemment ?",
+      "birthday": "C'est quand l'anniversaire de Lucas ?",
+      "updates": "Quelles sont les actualités de Papa ?"
+    }
+    ,
+    "newQuestionPlaceholder": "Autre question...",
+    "result": {
+      "sourceHeader": "D'après ta note du {{date}} :",
+      "sourcesTitle": "Sources",
+      "viewContactButton": "Voir la fiche {{contactName}}"
+    },
+    "contactNotFound": {
+      "title": "Je ne trouve pas de contact correspondant",
+      "description": "Aucun contact ne correspond à ta recherche.",
+      "suggestionsTitle": "Tu voulais peut-être dire :",
+      "createButton": "Créer ce contact"
+    },
+    "noInfo": {
+      "title": "Je n'ai pas trouvé d'information",
+      "description": "Je n'ai rien trouvé sur ce sujet dans tes notes sur {{contactName}}.",
+      "addNoteButton": "Ajouter une note sur {{contactName}}"
+    }
   }
 }

@@ -14,6 +14,7 @@ import { summaryRoutes } from './routes/summary';
 import { avatarRoutes } from './routes/avatar';
 import { subscriptionRoutes } from './routes/subscription';
 import { seedRoutes } from './routes/seed';
+import { askRoutes } from './routes/ask';
 import { rateLimiters } from './middleware/rateLimit';
 import { securityHeaders } from './middleware/securityHeaders';
 import { httpsEnforcement } from './middleware/httpsEnforcement';
@@ -24,6 +25,8 @@ type Bindings = {
   JWT_SECRET: string;
   DEEPGRAM_API_KEY: string;
   XAI_API_KEY: string;
+  CEREBRAS_API_KEY?: string;
+  AI_PROVIDER?: string;
   RATE_LIMIT: KVNamespace;
   AVATARS_BUCKET: R2Bucket;
   GOOGLE_GENERATIVE_AI_API_KEY?: string;
@@ -71,6 +74,7 @@ app.use('/api/*', rateLimiters.api);
 // AI-heavy routes get additional stricter limits
 app.use('/api/extract/*', rateLimiters.aiExtract);
 app.use('/api/search/*', rateLimiters.aiExtract);
+app.use('/api/ask/*', rateLimiters.aiExtract);
 
 app.route('/auth', authRoutes);
 app.route('/api/transcribe', transcribeRoutes);
@@ -84,6 +88,7 @@ app.route('/api/summary', summaryRoutes);
 app.route('/api/avatar', avatarRoutes);
 app.route('/api/subscription', subscriptionRoutes);
 app.route('/api/seed', seedRoutes);
+app.route('/api/ask', askRoutes);
 app.route('/admin', adminRoutes);
 
 export default app;

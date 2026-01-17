@@ -25,6 +25,16 @@ export const hotTopicSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   context: z.string(),
   status: z.string(),
+  eventDate: z.string().nullable().optional(),
+  resolution: z.string().nullable().optional(),
+  resolvedAt: z.string().nullable().optional(),
+});
+
+// Note schema
+export const noteSchema = z.object({
+  title: z.string(),
+  transcription: z.string().min(1, 'Transcription is required'),
+  createdAt: z.string(),
 });
 
 // Summary request schema
@@ -40,6 +50,7 @@ export const iceBreakersRequestSchema = z.object({
   contact: contactSchema,
   facts: z.array(factSchema),
   hotTopics: z.array(hotTopicSchema),
+  recentNotes: z.array(noteSchema).optional(),
   language: languageSchema.optional(),
 });
 

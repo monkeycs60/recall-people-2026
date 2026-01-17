@@ -9,9 +9,10 @@ type Bindings = {
 	DATABASE_URL: string;
 	BETTER_AUTH_SECRET: string;
 	BETTER_AUTH_URL: string;
+	OPENAI_API_KEY?: string;
 	XAI_API_KEY: string;
 	CEREBRAS_API_KEY?: string;
-	AI_PROVIDER?: 'grok' | 'cerebras';
+	AI_PROVIDER?: 'openai' | 'grok' | 'cerebras';
 	ENABLE_EVALUATION?: string;
 	EVALUATION_SAMPLING_RATE?: string;
 };
@@ -57,40 +58,41 @@ summaryRoutes.post('/', async (c) => {
 		}
 
 		const providerConfig: AIProviderConfig = {
+			OPENAI_API_KEY: c.env.OPENAI_API_KEY,
 			XAI_API_KEY: c.env.XAI_API_KEY,
 			CEREBRAS_API_KEY: c.env.CEREBRAS_API_KEY,
 			AI_PROVIDER: c.env.AI_PROVIDER,
 		};
 
-		console.log('[Summary] Using AI provider:', c.env.AI_PROVIDER || 'grok');
+		console.log('[Summary] Using AI provider:', c.env.AI_PROVIDER || 'openai');
 
 		const langInstruction =
 			LANGUAGE_INSTRUCTIONS[language] || LANGUAGE_INSTRUCTIONS.fr;
 
 		const allTranscriptions = transcriptions.join('\n\n');
 
-		const prompt = `Résume cette personne en 2-3 phrases STRICTEMENT basées sur les notes ci-dessous.
+		const prompt = `Tu génères un résumé factuel et concis de ${contactName}.
 ${langInstruction}
 
-RÈGLES ABSOLUES:
-- UNIQUEMENT les faits explicitement mentionnés dans les notes
-- AUCUN adjectif, AUCUNE interprétation, AUCUNE supposition
-- Style straight to the point: "Travaille chez X. Fait du Y. A un Z."
-- Ne dis PAS "selon les notes" ou "d'après"
-- JAMAIS de dates relatives ("la semaine dernière", "le mois dernier", "hier")
-  → Utilise "récemment" ou la date exacte si connue
-- Si jamais tu évoques l'utilisateur (le narrateur, celui qui fait la note audio), utilise 'l'utilisateur' pour le désigner.
-
-GESTION DE LA TEMPORALITÉ:
-- Les notes sont ordonnées de la plus ANCIENNE à la plus RÉCENTE
-- Chaque note commence par sa date entre crochets [date]
-- EN CAS DE CONTRADICTION: seule l'info la plus récente compte
-- Si une note récente annule/contredit une info ancienne, N'INCLUS PAS l'info obsolète
-- Exemple: si une note dit "lance un projet X" puis une note plus récente dit "abandonne le projet X", ne mentionne PAS le lancement du projet
-
-NOTES SUR ${contactName}:
+NOTES (ordonnées chronologiquement de la plus ancienne à la plus récente):
 ${allTranscriptions}
 
+RÈGLES ABSOLUES:
+1. Résumé de 2-4 phrases maximum
+2. Utilise des DATES ABSOLUES (pas "récemment" mais "en janvier 2026", "le 25/01/2026")
+3. N'invente RIEN - base-toi uniquement sur les notes fournies
+4. Mentionne la situation actuelle (travail, projets en cours)
+5. Mentionne les événements à venir importants s'il y en a
+6. Si les notes sont contradictoires, privilégie l'info la plus récente
+7. Style factuel et concis: "Travaille chez X. Entretien prévu le DD/MM/YYYY. A un enfant qui fait Y."
+8. Ne dis PAS "selon les notes" ou "d'après les informations"
+9. Si jamais tu évoques l'utilisateur (le narrateur), utilise 'l'utilisateur' pour le désigner
+
+EXEMPLE BON:
+"Marie est consultante chez Deloitte, en recherche d'un nouveau poste (entretien chez Google le 25/01/2026). Elle déménage à Lyon en mars 2026. Mère de Lucas qui fait du foot."
+
+EXEMPLE MAUVAIS:
+"Marie est une personne dynamique qui travaille beaucoup. Elle a plein de projets passionnants récemment."
 
 Résumé:`;
 

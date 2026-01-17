@@ -7,9 +7,10 @@ import { createAIModel, getAIModel } from '../lib/ai-provider';
 import { getLangfuseClient } from '../lib/telemetry';
 
 type Bindings = {
+	OPENAI_API_KEY?: string;
 	XAI_API_KEY: string;
 	CEREBRAS_API_KEY?: string;
-	AI_PROVIDER?: 'grok' | 'cerebras';
+	AI_PROVIDER?: 'openai' | 'grok' | 'cerebras';
 	ENABLE_LANGFUSE?: string;
 };
 
@@ -27,52 +28,31 @@ type IceBreakersRequest = {
 		title: string;
 		context: string;
 		status: string;
+		eventDate?: string | null;
+		resolution?: string | null;
+		resolvedAt?: string | null;
+	}>;
+	recentNotes?: Array<{
+		title: string;
+		transcription: string;
+		createdAt: string;
 	}>;
 	language?: 'fr' | 'en' | 'es' | 'it' | 'de';
 };
 
-const LANGUAGE_INSTRUCTIONS: Record<
-	string,
-	{ instruction: string; withHotTopics: string; withoutHotTopics: string }
-> = {
-	fr: {
-		instruction: 'Réponds en français uniquement.',
-		withHotTopics:
-			'Génère 2 questions basées sur les actualités/hot topics, puis 1 question de secours basée sur ses loisirs/passions/vie personnelle.',
-		withoutHotTopics:
-			'Génère 3 questions basées sur ses loisirs, passions, enfants, ou vie personnelle.',
-	},
-	en: {
-		instruction: 'Respond in English only.',
-		withHotTopics:
-			'Generate 2 questions based on the news/hot topics, then 1 fallback question based on their hobbies/passions/personal life.',
-		withoutHotTopics:
-			'Generate 3 questions based on their hobbies, passions, children, or personal life.',
-	},
-	es: {
-		instruction: 'Responde solo en español.',
-		withHotTopics:
-			'Genera 2 preguntas basadas en las noticias/temas actuales, luego 1 pregunta de respaldo basada en sus hobbies/pasiones/vida personal.',
-		withoutHotTopics:
-			'Genera 3 preguntas basadas en sus hobbies, pasiones, hijos o vida personal.',
-	},
-	it: {
-		instruction: 'Rispondi solo in italiano.',
-		withHotTopics:
-			'Genera 2 domande basate sulle novità/argomenti attuali, poi 1 domanda di riserva basata sui suoi hobby/passioni/vita personale.',
-		withoutHotTopics:
-			'Genera 3 domande basate sui suoi hobby, passioni, figli o vita personale.',
-	},
-	de: {
-		instruction: 'Antworte nur auf Deutsch.',
-		withHotTopics:
-			'Generiere 2 Fragen basierend auf den Neuigkeiten/aktuellen Themen, dann 1 Ausweichfrage basierend auf ihren Hobbys/Leidenschaften/Privatleben.',
-		withoutHotTopics:
-			'Generiere 3 Fragen basierend auf ihren Hobbys, Leidenschaften, Kindern oder Privatleben.',
-	},
+const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
+	fr: 'Réponds en français uniquement.',
+	en: 'Respond in English only.',
+	es: 'Responde solo en español.',
+	it: 'Rispondi solo in italiano.',
+	de: 'Antworte nur auf Deutsch.',
 };
 
-export const iceBreakersRoutes = new Hono<{ Bindings: Bindings }>();
+type Variables = {
+	user: import('@prisma/client').User;
+};
+
+export const iceBreakersRoutes = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
 iceBreakersRoutes.use('/*', authMiddleware);
 
@@ -100,71 +80,90 @@ iceBreakersRoutes.post('/', async (c) => {
 			return c.json({ error: 'Invalid input', details: validation.error.issues }, 400);
 		}
 
-		const { contact, facts, hotTopics } = validation.data;
+		const { contact, facts, hotTopics, recentNotes } = validation.data;
 		const language = validation.data.language || 'fr';
-		const langConfig =
+		const langInstruction =
 			LANGUAGE_INSTRUCTIONS[language] || LANGUAGE_INSTRUCTIONS.fr;
 
 		const activeTopics = hotTopics.filter(
 			(topic) => topic.status === 'active'
 		);
 
-		const hasHotTopics = activeTopics.length > 0;
-
-		const personalTypes = [
-			'hobby',
-			'sport',
-			'children',
-			'partner',
-			'pet',
-			'origin',
-			'location',
-		];
-
-		const personalFacts = facts.filter((fact) =>
-			personalTypes.includes(fact.factType)
+		const recentlyResolvedTopics = hotTopics.filter(
+			(topic) => topic.status === 'resolved' && topic.resolvedAt
 		);
 
-		const formatFacts = (factList: typeof facts) =>
-			factList
-				.map((fact) => `- ${fact.factKey}: ${fact.factValue}`)
+		// Sort active topics by event date (closest first)
+		const sortedActiveTopics = [...activeTopics].sort((a, b) => {
+			if (!a.eventDate && !b.eventDate) return 0;
+			if (!a.eventDate) return 1;
+			if (!b.eventDate) return -1;
+			return new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime();
+		});
+
+		const formatActiveTopics = (topics: typeof activeTopics) =>
+			topics
+				.map((topic) => {
+					let line = `- ${topic.title}`;
+					if (topic.context) line += `: ${topic.context}`;
+					if (topic.eventDate) line += ` (Date: ${topic.eventDate})`;
+					return line;
+				})
 				.join('\n');
 
-		const prompt = `Tu es un assistant qui aide à relancer des conversations avec des proches. ${langConfig.instruction}
+		const formatResolvedTopics = (topics: typeof recentlyResolvedTopics) =>
+			topics
+				.map((topic) => {
+					let line = `- ${topic.title}`;
+					if (topic.resolution) line += `: ${topic.resolution}`;
+					return line;
+				})
+				.join('\n');
 
-PERSONNE: ${contact.firstName}${contact.lastName ? ` ${contact.lastName}` : ''}
+		const formatRecentNotes = (notes: typeof recentNotes) =>
+			notes
+				?.map((note) => {
+					return `[${note.createdAt}] ${note.title || 'Note'}: ${note.transcription.substring(0, 150)}...`;
+				})
+				.join('\n\n') || '';
 
-${
-	hasHotTopics
-		? `ACTUALITÉS EN COURS (sujets chauds):\n${activeTopics
-				.map(
-					(topic) =>
-						`- ${topic.title}${topic.context ? `: ${topic.context}` : ''}`
-				)
-				.join('\n')}`
-		: ''
-}
+		const prompt = `Tu génères des questions naturelles à poser à ${contact.firstName} lors de la prochaine rencontre.
+${langInstruction}
 
-${personalFacts.length > 0 ? `VIE PERSONNELLE:\n${formatFacts(personalFacts)}` : ''}
+${sortedActiveTopics.length > 0 ? `ACTUALITÉS ACTIVES:
+${formatActiveTopics(sortedActiveTopics)}
+` : ''}
+${recentNotes && recentNotes.length > 0 ? `DERNIÈRES NOTES (résumés):
+${formatRecentNotes(recentNotes)}
+` : ''}
+${recentlyResolvedTopics.length > 0 ? `ACTUALITÉS RÉCEMMENT RÉSOLUES:
+${formatResolvedTopics(recentlyResolvedTopics)}
+` : ''}
 
-OBJECTIF: ${hasHotTopics ? langConfig.withHotTopics : langConfig.withoutHotTopics}
-
-RÈGLES:
-- Chaque question doit être naturelle, comme si tu parlais à un ami
-- Utilise le tutoiement
-- Les questions doivent inviter à partager des nouvelles, pas juste "oui/non"
-- Sois chaleureux et authentique
-- Maximum 15 mots par question
+RÈGLES ABSOLUES:
+1. Base-toi UNIQUEMENT sur les informations fournies ci-dessus
+2. Priorise les actualités avec dates proches (événements à venir)
+3. Si une actualité est résolue positivement, suggère de féliciter
+4. Formulation naturelle, comme on parlerait à un ami (tutoiement)
+5. Maximum 3 questions
+6. Si pas assez d'infos pertinentes, retourne MOINS de questions (1 ou 2 seulement)
+7. N'invente JAMAIS de questions sur des sujets non mentionnés
+8. Les questions doivent inviter à partager, pas être des questions oui/non
+9. Maximum 15 mots par question
 
 FORMAT DE RÉPONSE:
-Retourne EXACTEMENT 3 questions, une par ligne, sans numérotation ni tirets.
-Exemple:
-Alors ce marathon, la préparation avance bien ?
-Et les enfants, ils s'adaptent à la nouvelle école ?
-Tu as eu le temps de reprendre la guitare récemment ?
+Retourne entre 0 et 3 questions, une par ligne, sans numérotation ni tirets.
+
+Exemples:
+Comment s'est passé ton entretien chez Google ?
+Alors le déménagement à Lyon, c'est calé pour mars ?
+Lucas aime toujours autant le foot ?
+
+Si aucune info pertinente n'est disponible, retourne une ligne vide.
 `;
 
 		const providerConfig = {
+			OPENAI_API_KEY: c.env.OPENAI_API_KEY,
 			XAI_API_KEY: c.env.XAI_API_KEY,
 			CEREBRAS_API_KEY: c.env.CEREBRAS_API_KEY,
 			AI_PROVIDER: c.env.AI_PROVIDER,
@@ -190,8 +189,8 @@ Tu as eu le temps de reprendre la guitare récemment ?
 			.trim()
 			.split('\n')
 			.map((line) => line.trim())
-			.filter((line) => line.length > 0)
-			.slice(0, 3);
+			.filter((line) => line.length > 0 && !line.match(/^[-•*\d\.]/)) // Filter out lines that start with list markers
+			.slice(0, 3); // Maximum 3 questions
 
 		// Update Langfuse generation with output
 		generation?.end({ output: iceBreakers });

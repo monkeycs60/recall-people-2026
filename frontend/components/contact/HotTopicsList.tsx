@@ -150,7 +150,8 @@ export function HotTopicsList({
     if (isResolving) {
       return (
         <View key={topic.id} style={styles.resolveCard}>
-          <Text style={styles.resolveTitle}>{topic.title}</Text>
+          <Text style={styles.resolveCardTitle}>✅ Marquer comme résolu</Text>
+          <Text style={styles.resolveTitle}>"{topic.title}"</Text>
           <Text style={styles.resolveLabel}>{t('contact.hotTopic.resolutionLabel')}</Text>
           <TextInput
             style={styles.resolveInput}
@@ -161,12 +162,13 @@ export function HotTopicsList({
             multiline
             autoFocus
           />
+          <Text style={styles.resolveHint}>💡 Cette info sera utilisée pour les prochaines suggestions</Text>
           <View style={styles.editActions}>
             <Pressable style={styles.cancelButton} onPress={() => setResolvingId(null)}>
               <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
             </Pressable>
             <Pressable style={styles.successButton} onPress={handleConfirmResolve}>
-              <Text style={styles.saveButtonText}>{t('contact.hotTopic.archive')}</Text>
+              <Text style={styles.saveButtonText}>{t('common.confirm')}</Text>
             </Pressable>
           </View>
         </View>
@@ -178,15 +180,19 @@ export function HotTopicsList({
         key={topic.id}
         style={[styles.topicCard, isResolved && styles.topicCardResolved]}
       >
-        <Pressable
-          style={styles.topicContent}
-          onPress={() => !isResolved && handleStartEdit(topic)}
-        >
+        <View style={styles.topicContent}>
           <View style={[styles.statusDot, isResolved ? styles.statusDotResolved : styles.statusDotActive]} />
           <View style={styles.topicTextContainer}>
-            <Text style={[styles.topicTitle, isResolved && styles.topicTitleResolved]}>
-              {topic.title}
-            </Text>
+            <View style={styles.topicTitleRow}>
+              <Text style={[styles.topicTitle, isResolved && styles.topicTitleResolved]}>
+                {topic.title}
+              </Text>
+              {!isResolved && (
+                <Pressable style={styles.editIconButton} onPress={() => handleStartEdit(topic)}>
+                  <Edit3 size={14} color={Colors.textMuted} />
+                </Pressable>
+              )}
+            </View>
             {topic.context && !isResolved && (
               <Text style={styles.topicContext}>{topic.context}</Text>
             )}
@@ -225,29 +231,36 @@ export function HotTopicsList({
                 </View>
               </View>
             )}
-            <Text style={styles.topicDate}>
-              {isResolved && topic.resolvedAt
-                ? t('contact.hotTopic.resolvedAt', { date: new Date(topic.resolvedAt).toLocaleDateString() })
-                : topic.eventDate
-                  ? new Date(topic.eventDate).toLocaleDateString()
-                  : new Date(topic.updatedAt).toLocaleDateString()}
-            </Text>
+            {topic.eventDate && (
+              <Text style={styles.topicDate}>
+                📅 {new Date(topic.eventDate).toLocaleDateString()}
+              </Text>
+            )}
+            {isResolved && topic.resolvedAt && (
+              <Text style={styles.topicDate}>
+                {t('contact.hotTopic.resolvedAt', { date: new Date(topic.resolvedAt).toLocaleDateString() })}
+              </Text>
+            )}
           </View>
           <View style={styles.topicActions}>
-            {isResolved ? (
+            {!isResolved && (
+              <Pressable
+                style={styles.checkButton}
+                onPress={() => handleStartResolve(topic)}
+              >
+                <Check size={18} color={Colors.success} />
+              </Pressable>
+            )}
+            {isResolved && (
               <Pressable style={styles.actionButton} onPress={() => onReopen(topic.id)}>
                 <RotateCcw size={18} color={Colors.primary} />
-              </Pressable>
-            ) : (
-              <Pressable style={styles.actionButton} onPress={() => handleStartResolve(topic)}>
-                <Check size={18} color={Colors.success} />
               </Pressable>
             )}
             <Pressable style={styles.actionButton} onPress={() => handleDelete(topic)}>
               <Trash2 size={18} color={Colors.error} />
             </Pressable>
           </View>
-        </Pressable>
+        </View>
       </View>
     );
   };
@@ -369,33 +382,56 @@ const styles = StyleSheet.create({
     color: Colors.textInverse,
   },
   resolveCard: {
-    backgroundColor: `${Colors.success}15`,
+    backgroundColor: Colors.surface,
     borderWidth: 1,
-    borderColor: `${Colors.success}40`,
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 8,
+    borderColor: Colors.border,
+    padding: 20,
+    borderRadius: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  resolveCardTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+    marginBottom: 12,
+    textAlign: 'center',
   },
   resolveTitle: {
     fontSize: 15,
     fontWeight: '500',
     color: Colors.textPrimary,
-    marginBottom: 8,
+    marginBottom: 16,
+    textAlign: 'center',
   },
   resolveLabel: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: '500',
-    color: Colors.success,
-    marginBottom: 4,
+    color: Colors.textSecondary,
+    marginBottom: 8,
   },
   resolveInput: {
     backgroundColor: Colors.background,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    fontSize: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    fontSize: 15,
     color: Colors.textPrimary,
     marginBottom: 12,
+    minHeight: 80,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    textAlignVertical: 'top',
+  },
+  resolveHint: {
+    fontSize: 13,
+    color: Colors.textMuted,
+    marginBottom: 16,
+    fontStyle: 'italic',
   },
   topicCard: {
     backgroundColor: Colors.surface,
@@ -427,10 +463,20 @@ const styles = StyleSheet.create({
   topicTextContainer: {
     flex: 1,
   },
+  topicTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
   topicTitle: {
     fontSize: 15,
     fontWeight: '500',
     color: Colors.textPrimary,
+    flex: 1,
+  },
+  editIconButton: {
+    padding: 4,
   },
   topicTitleResolved: {
     color: Colors.textMuted,
@@ -507,6 +553,11 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     padding: 8,
+  },
+  checkButton: {
+    padding: 8,
+    backgroundColor: `${Colors.success}20`,
+    borderRadius: 8,
   },
   showResolvedButton: {
     flexDirection: 'row',

@@ -40,93 +40,89 @@ export const initDatabase = async () => {
   const database = await getDatabase();
 
   await database.execAsync(`
-    -- Contacts
+    -- Contacts (V2 Schema - Simplified)
     CREATE TABLE IF NOT EXISTS contacts (
       id TEXT PRIMARY KEY,
       first_name TEXT NOT NULL,
       last_name TEXT,
       nickname TEXT,
-      photo_uri TEXT,
       gender TEXT DEFAULT 'unknown',
-      tags TEXT DEFAULT '[]',
-      highlights TEXT DEFAULT '[]',
+
+      -- Contact info
+      phone TEXT,
+      email TEXT,
+      birthday_day INTEGER,
+      birthday_month INTEGER,
+      birthday_year INTEGER,
+
+      -- Relationship
+      relationship_type TEXT DEFAULT 'connaissance',
+
+      -- Avatar
+      photo_uri TEXT,
+      avatar_url TEXT,
+
+      -- AI-generated (regenerated after each note)
       ai_summary TEXT,
-      ice_breakers TEXT,
+      suggested_questions TEXT,
+
+      -- Meta
       last_contact_at TEXT,
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now'))
     );
 
-    -- Facts
-    CREATE TABLE IF NOT EXISTS facts (
-      id TEXT PRIMARY KEY,
-      contact_id TEXT NOT NULL,
-      fact_type TEXT NOT NULL,
-      fact_key TEXT NOT NULL,
-      fact_value TEXT NOT NULL,
-      previous_values TEXT DEFAULT '[]',
-      source_note_id TEXT,
-      created_at TEXT DEFAULT (datetime('now')),
-      updated_at TEXT DEFAULT (datetime('now')),
-      FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE CASCADE
-    );
-
-    -- Notes
+    -- Notes (V2 Schema - Source of truth)
     CREATE TABLE IF NOT EXISTS notes (
       id TEXT PRIMARY KEY,
       contact_id TEXT NOT NULL,
+
+      -- Content
       title TEXT,
+      transcription TEXT NOT NULL,
+
+      -- Audio (optional)
       audio_uri TEXT,
       audio_duration_ms INTEGER,
-      transcription TEXT,
-      summary TEXT,
+
+      -- Meta
       created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now')),
+
       FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE CASCADE
     );
 
-    -- Pending facts (en attente de validation)
-    CREATE TABLE IF NOT EXISTS pending_facts (
-      id TEXT PRIMARY KEY,
-      note_id TEXT NOT NULL,
-      contact_id TEXT NOT NULL,
-      fact_type TEXT NOT NULL,
-      fact_key TEXT NOT NULL,
-      fact_value TEXT NOT NULL,
-      action TEXT NOT NULL,
-      previous_value TEXT,
-      status TEXT DEFAULT 'pending',
-      created_at TEXT DEFAULT (datetime('now')),
-      FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE,
-      FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE CASCADE
-    );
-
-    -- Similarity cache (for network graph)
-    CREATE TABLE IF NOT EXISTS similarity_cache (
-      id TEXT PRIMARY KEY,
-      fact_value_1 TEXT NOT NULL,
-      fact_value_2 TEXT NOT NULL,
-      fact_type TEXT NOT NULL,
-      similarity_score REAL NOT NULL,
-      created_at TEXT DEFAULT (datetime('now')),
-      expires_at TEXT NOT NULL
-    );
-
-    -- Hot Topics (sujets chauds)
+    -- Hot Topics (V2 Schema - Events to follow)
     CREATE TABLE IF NOT EXISTS hot_topics (
       id TEXT PRIMARY KEY,
       contact_id TEXT NOT NULL,
+
+      -- Content
       title TEXT NOT NULL,
       context TEXT,
-      resolution TEXT,
+
+      -- Event date (optional, for reminders)
+      event_date TEXT,
+
+      -- Status
       status TEXT DEFAULT 'active',
+      resolution TEXT,
+      resolved_at TEXT,
+
+      -- Meta
       source_note_id TEXT,
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now')),
-      resolved_at TEXT,
-      FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE CASCADE
+
+      -- Legacy fields for birthday events
+      notified_at TEXT,
+      birthday_contact_id TEXT,
+
+      FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE CASCADE,
+      FOREIGN KEY (source_note_id) REFERENCES notes(id) ON DELETE SET NULL
     );
 
-    -- Groups
+    -- Groups (optional, kept from V1)
     CREATE TABLE IF NOT EXISTS groups (
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL UNIQUE COLLATE NOCASE,
@@ -144,33 +140,23 @@ export const initDatabase = async () => {
       FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE
     );
 
-    -- Memories (événements ponctuels / souvenirs)
-    CREATE TABLE IF NOT EXISTS memories (
-      id TEXT PRIMARY KEY,
-      contact_id TEXT NOT NULL,
-      description TEXT NOT NULL,
-      event_date TEXT,
-      is_shared INTEGER DEFAULT 0,
-      source_note_id TEXT,
-      created_at TEXT DEFAULT (datetime('now')),
-      FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE CASCADE
+    -- Migration markers (for tracking migrations)
+    CREATE TABLE IF NOT EXISTS migration_markers (
+      key TEXT PRIMARY KEY,
+      value TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
     );
 
-    -- Note: events table has been migrated to hot_topics
-    -- Events are now stored as hot_topics with event_date, notified_at, birthday_contact_id columns
-
-    -- Index
+    -- Indexes
     CREATE INDEX IF NOT EXISTS idx_contacts_last_contact ON contacts(last_contact_at DESC);
-    CREATE INDEX IF NOT EXISTS idx_facts_contact ON facts(contact_id);
     CREATE INDEX IF NOT EXISTS idx_notes_contact ON notes(contact_id);
     CREATE INDEX IF NOT EXISTS idx_notes_created ON notes(created_at DESC);
-    CREATE INDEX IF NOT EXISTS idx_similarity_lookup ON similarity_cache(fact_type, fact_value_1, fact_value_2);
     CREATE INDEX IF NOT EXISTS idx_hot_topics_contact ON hot_topics(contact_id);
     CREATE INDEX IF NOT EXISTS idx_hot_topics_status ON hot_topics(status);
+    CREATE INDEX IF NOT EXISTS idx_hot_topics_event_date ON hot_topics(event_date);
+    CREATE INDEX IF NOT EXISTS idx_hot_topics_birthday ON hot_topics(birthday_contact_id);
     CREATE INDEX IF NOT EXISTS idx_contact_groups_contact ON contact_groups(contact_id);
     CREATE INDEX IF NOT EXISTS idx_contact_groups_group ON contact_groups(group_id);
-    CREATE INDEX IF NOT EXISTS idx_memories_contact ON memories(contact_id);
-    CREATE INDEX IF NOT EXISTS idx_memories_created ON memories(created_at DESC);
   `);
 
   // Run migrations for existing databases
@@ -183,10 +169,23 @@ export const initDatabase = async () => {
 };
 
 const runMigrations = async (database: SQLite.SQLiteDatabase) => {
-  // Check if highlights column exists on contacts
+  // Get current schema information
   const contactsInfo = await database.getAllAsync<{ name: string }>(
     "PRAGMA table_info(contacts)"
   );
+
+  // V2 Migration: Add relationship_type and suggested_questions
+  const hasRelationshipType = contactsInfo.some((col) => col.name === 'relationship_type');
+  if (!hasRelationshipType) {
+    await database.execAsync("ALTER TABLE contacts ADD COLUMN relationship_type TEXT DEFAULT 'connaissance'");
+  }
+
+  const hasSuggestedQuestions = contactsInfo.some((col) => col.name === 'suggested_questions');
+  if (!hasSuggestedQuestions) {
+    await database.execAsync("ALTER TABLE contacts ADD COLUMN suggested_questions TEXT");
+  }
+
+  // Legacy migrations
   const hasHighlights = contactsInfo.some((col) => col.name === 'highlights');
   if (!hasHighlights) {
     await database.execAsync("ALTER TABLE contacts ADD COLUMN highlights TEXT DEFAULT '[]'");
@@ -362,4 +361,200 @@ const runMigrations = async (database: SQLite.SQLiteDatabase) => {
   if (!hasAvatarUrl) {
     await database.execAsync("ALTER TABLE contacts ADD COLUMN avatar_url TEXT");
   }
+
+  // V2 Migration: Mark that we've completed V2 migration
+  await runV2Migration(database);
+};
+
+/**
+ * V2 Migration: Remove deprecated tables (facts, memories)
+ * This migration is idempotent and safe to run multiple times
+ */
+const runV2Migration = async (database: SQLite.SQLiteDatabase) => {
+  // Check if we've already run V2 migration by checking for a migration marker
+  const hasV2MigrationMarker = await database.getFirstAsync<{ value: string }>(
+    "SELECT value FROM migration_markers WHERE key = 'v2_migration_completed'"
+  ).catch(() => null);
+
+  if (hasV2MigrationMarker) {
+    return; // Migration already completed
+  }
+
+  // Create migration markers table if it doesn't exist
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS migration_markers (
+      key TEXT PRIMARY KEY,
+      value TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+  `);
+
+  // Drop deprecated tables: facts and memories
+  // These are replaced by the notes-centric approach in V2
+  const factsTableExists = await database.getFirstAsync<{ name: string }>(
+    "SELECT name FROM sqlite_master WHERE type='table' AND name='facts'"
+  );
+
+  if (factsTableExists) {
+    console.log('[Migration V2] Dropping facts table...');
+    await database.execAsync("DROP INDEX IF EXISTS idx_facts_contact");
+    await database.execAsync("DROP TABLE IF EXISTS facts");
+  }
+
+  const memoriesTableExists = await database.getFirstAsync<{ name: string }>(
+    "SELECT name FROM sqlite_master WHERE type='table' AND name='memories'"
+  );
+
+  if (memoriesTableExists) {
+    console.log('[Migration V2] Dropping memories table...');
+    await database.execAsync("DROP INDEX IF EXISTS idx_memories_contact");
+    await database.execAsync("DROP INDEX IF EXISTS idx_memories_created");
+    await database.execAsync("DROP TABLE IF EXISTS memories");
+  }
+
+  // Drop pending_facts table as well (no longer needed)
+  const pendingFactsTableExists = await database.getFirstAsync<{ name: string }>(
+    "SELECT name FROM sqlite_master WHERE type='table' AND name='pending_facts'"
+  );
+
+  if (pendingFactsTableExists) {
+    console.log('[Migration V2] Dropping pending_facts table...');
+    await database.execAsync("DROP TABLE IF EXISTS pending_facts");
+  }
+
+  // Drop similarity_cache table (no longer needed without facts)
+  const similarityCacheTableExists = await database.getFirstAsync<{ name: string }>(
+    "SELECT name FROM sqlite_master WHERE type='table' AND name='similarity_cache'"
+  );
+
+  if (similarityCacheTableExists) {
+    console.log('[Migration V2] Dropping similarity_cache table...');
+    await database.execAsync("DROP INDEX IF EXISTS idx_similarity_lookup");
+    await database.execAsync("DROP TABLE IF EXISTS similarity_cache");
+  }
+
+  // Remove deprecated columns from contacts table (tags, highlights, ice_breakers)
+  // SQLite doesn't support DROP COLUMN directly, so we need to recreate the table
+  const contactsInfo = await database.getAllAsync<{ name: string }>(
+    "PRAGMA table_info(contacts)"
+  );
+
+  const hasTags = contactsInfo.some((col) => col.name === 'tags');
+  const hasHighlights = contactsInfo.some((col) => col.name === 'highlights');
+  const hasIceBreakers = contactsInfo.some((col) => col.name === 'ice_breakers');
+
+  if (hasTags || hasHighlights || hasIceBreakers) {
+    console.log('[Migration V2] Removing deprecated columns from contacts table...');
+
+    // Create new contacts table without deprecated columns
+    await database.execAsync(`
+      CREATE TABLE contacts_v2 (
+        id TEXT PRIMARY KEY,
+        first_name TEXT NOT NULL,
+        last_name TEXT,
+        nickname TEXT,
+        gender TEXT DEFAULT 'unknown',
+        phone TEXT,
+        email TEXT,
+        birthday_day INTEGER,
+        birthday_month INTEGER,
+        birthday_year INTEGER,
+        relationship_type TEXT DEFAULT 'connaissance',
+        photo_uri TEXT,
+        avatar_url TEXT,
+        ai_summary TEXT,
+        suggested_questions TEXT,
+        last_contact_at TEXT,
+        created_at TEXT DEFAULT (datetime('now')),
+        updated_at TEXT DEFAULT (datetime('now'))
+      );
+    `);
+
+    // Copy data from old table to new table
+    await database.execAsync(`
+      INSERT INTO contacts_v2 (
+        id, first_name, last_name, nickname, gender,
+        phone, email, birthday_day, birthday_month, birthday_year,
+        relationship_type, photo_uri, avatar_url,
+        ai_summary, suggested_questions,
+        last_contact_at, created_at, updated_at
+      )
+      SELECT
+        id, first_name, last_name, nickname, gender,
+        phone, email, birthday_day, birthday_month, birthday_year,
+        relationship_type, photo_uri, avatar_url,
+        ai_summary, suggested_questions,
+        last_contact_at, created_at, updated_at
+      FROM contacts;
+    `);
+
+    // Drop old table and rename new table
+    await database.execAsync("DROP INDEX IF EXISTS idx_contacts_last_contact");
+    await database.execAsync("DROP TABLE contacts");
+    await database.execAsync("ALTER TABLE contacts_v2 RENAME TO contacts");
+    await database.execAsync("CREATE INDEX idx_contacts_last_contact ON contacts(last_contact_at DESC)");
+  }
+
+  // Remove deprecated columns from notes table (summary)
+  const notesInfo = await database.getAllAsync<{ name: string }>(
+    "PRAGMA table_info(notes)"
+  );
+
+  const hasSummary = notesInfo.some((col) => col.name === 'summary');
+
+  if (hasSummary) {
+    console.log('[Migration V2] Removing summary column from notes table...');
+
+    // Create new notes table without summary column
+    await database.execAsync(`
+      CREATE TABLE notes_v2 (
+        id TEXT PRIMARY KEY,
+        contact_id TEXT NOT NULL,
+        title TEXT,
+        transcription TEXT NOT NULL,
+        audio_uri TEXT,
+        audio_duration_ms INTEGER,
+        created_at TEXT DEFAULT (datetime('now')),
+        updated_at TEXT DEFAULT (datetime('now')),
+        FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE CASCADE
+      );
+    `);
+
+    // Copy data from old table to new table
+    await database.execAsync(`
+      INSERT INTO notes_v2 (
+        id, contact_id, title, transcription,
+        audio_uri, audio_duration_ms, created_at
+      )
+      SELECT
+        id, contact_id, title, transcription,
+        audio_uri, audio_duration_ms, created_at
+      FROM notes;
+    `);
+
+    // Drop old table and rename new table
+    await database.execAsync("DROP INDEX IF EXISTS idx_notes_contact");
+    await database.execAsync("DROP INDEX IF EXISTS idx_notes_created");
+    await database.execAsync("DROP TABLE notes");
+    await database.execAsync("ALTER TABLE notes_v2 RENAME TO notes");
+    await database.execAsync("CREATE INDEX idx_notes_contact ON notes(contact_id)");
+    await database.execAsync("CREATE INDEX idx_notes_created ON notes(created_at DESC)");
+  }
+
+  // Add updated_at column to notes if it doesn't exist
+  const notesInfoUpdated = await database.getAllAsync<{ name: string }>(
+    "PRAGMA table_info(notes)"
+  );
+  const hasUpdatedAt = notesInfoUpdated.some((col) => col.name === 'updated_at');
+  if (!hasUpdatedAt) {
+    await database.execAsync("ALTER TABLE notes ADD COLUMN updated_at TEXT DEFAULT (datetime('now'))");
+  }
+
+  // Mark V2 migration as completed
+  await database.execAsync(`
+    INSERT OR REPLACE INTO migration_markers (key, value)
+    VALUES ('v2_migration_completed', 'true');
+  `);
+
+  console.log('[Migration V2] Migration completed successfully');
 };

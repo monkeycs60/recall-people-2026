@@ -18,7 +18,11 @@ type Bindings = {
 
 const languageSchema = z.enum(['fr', 'en', 'es', 'it', 'de']);
 
-export const transcribeRoutes = new Hono<{ Bindings: Bindings }>();
+type Variables = {
+  user: import('@prisma/client').User;
+};
+
+export const transcribeRoutes = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
 transcribeRoutes.use('/*', authMiddleware);
 
@@ -64,7 +68,7 @@ transcribeRoutes.post('/', async (c) => {
         operationType: 'speech-to-text',
         inputSize: audioBuffer.byteLength,
         metadata: { language: transcriptionLanguage },
-        enabled: c.env.ENABLE_PERFORMANCE_LOGGING === 'true' || c.env.ENABLE_PERFORMANCE_LOGGING === true,
+        enabled: String(c.env.ENABLE_PERFORMANCE_LOGGING) === 'true',
       }
     );
 

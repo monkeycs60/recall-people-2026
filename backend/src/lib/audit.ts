@@ -19,10 +19,11 @@ export type AuditAction =
   | 'extract'
   | 'search'
   | 'summary'
+  | 'ask'
   | 'settings_update'
   | 'api_error';
 
-export type AuditResource = 'auth' | 'contact' | 'note' | 'transcribe' | 'extract' | 'search' | 'summary' | 'settings';
+export type AuditResource = 'auth' | 'contact' | 'note' | 'transcribe' | 'extract' | 'search' | 'summary' | 'ask' | 'settings';
 
 export interface AuditLogData {
   userId?: string;

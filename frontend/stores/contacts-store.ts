@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { contactService } from '@/services/contact.service';
-import { Contact, ContactWithDetails, Tag, Gender } from '@/types';
+import { Contact, ContactWithDetails, Gender } from '@/types';
 
 type ContactsState = {
   contacts: Contact[];
@@ -17,7 +17,6 @@ type ContactsActions = {
     lastName?: string;
     nickname?: string;
     gender?: Gender;
-    tags?: Tag[];
   }) => Promise<Contact>;
   updateContact: (
     id: string,
@@ -25,7 +24,6 @@ type ContactsActions = {
       firstName: string;
       lastName: string;
       nickname: string;
-      tags: Tag[];
       highlights: string[];
       lastContactAt: string;
     }>

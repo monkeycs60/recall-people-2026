@@ -73,15 +73,6 @@ export default function DisambiguationScreen() {
               <Text className="text-textPrimary font-semibold text-lg">
                 {contact.firstName} {contact.lastName || contact.nickname || ''}
               </Text>
-              {contact.tags && contact.tags.length > 0 && (
-                <View className="flex-row gap-2 mt-1">
-                  {contact.tags.slice(0, 2).map((tag) => (
-                    <View key={tag} className="bg-primary/20 px-2 py-0.5 rounded">
-                      <Text className="text-primary text-xs">{tag}</Text>
-                    </View>
-                  ))}
-                </View>
-              )}
               {contact.lastContactAt && (
                 <Text className="text-textMuted text-xs mt-1">
                   Dernier contact: {new Date(contact.lastContactAt).toLocaleDateString()}

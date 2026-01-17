@@ -90,8 +90,8 @@ export const contactService = {
       audio_uri: string | null;
       audio_duration_ms: number | null;
       transcription: string | null;
-      summary: string | null;
       created_at: string;
+      updated_at: string | null;
     }>('SELECT * FROM notes WHERE contact_id = ? ORDER BY created_at DESC', [id]);
 
     const hotTopicsRows = await db.getAllAsync<{
@@ -154,9 +154,9 @@ export const contactService = {
         title: row.title || undefined,
         audioUri: row.audio_uri || undefined,
         audioDurationMs: row.audio_duration_ms || undefined,
-        transcription: row.transcription || undefined,
-        summary: row.summary || undefined,
+        transcription: row.transcription || '',
         createdAt: row.created_at,
+        updatedAt: row.updated_at || row.created_at,
       })),
       hotTopics: hotTopicsRows.map((row) => ({
         id: row.id,

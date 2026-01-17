@@ -485,4 +485,47 @@ export const generateSeedContacts = async (
   });
 };
 
+// ============================================
+// Ask API
+// ============================================
+
+export type AskRequest = {
+  question: string;
+  contacts: Array<{
+    id: string;
+    firstName: string;
+    lastName?: string;
+    notes: Array<{
+      id: string;
+      title: string;
+      transcription: string;
+      createdAt: string;
+    }>;
+  }>;
+};
+
+export type AskSource = {
+  noteId: string;
+  noteTitle: string;
+  noteDate: string;
+  contactId: string;
+  contactName: string;
+  relevantExcerpt: string;
+};
+
+export type AskResponse = {
+  success: boolean;
+  answer: string;
+  sources: AskSource[];
+  relatedContactId: string | null;
+  noInfoFound: boolean;
+};
+
+export const askQuestion = async (data: AskRequest): Promise<AskResponse> => {
+  return apiCall('/api/ask', {
+    method: 'POST',
+    body: data,
+  });
+};
+
 export { apiCall };

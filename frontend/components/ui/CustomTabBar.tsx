@@ -90,14 +90,19 @@ export function CustomTabBar({ state, navigation }: TabBarProps) {
         </View>
       </View>
 
-      <AnimatedPressable
-        onPress={handleFabPress}
-        style={[styles.fab, fabAnimatedStyle]}
-      >
-        <View style={styles.fabInner}>
-          <Mic size={28} color={Colors.textInverse} strokeWidth={2.5} />
-        </View>
-      </AnimatedPressable>
+      <View style={styles.fabContainer}>
+        <AnimatedPressable
+          onPress={handleFabPress}
+          style={[styles.fab, fabAnimatedStyle]}
+        >
+          <View style={styles.fabInner}>
+            <Mic size={28} color={Colors.textInverse} strokeWidth={2.5} />
+          </View>
+        </AnimatedPressable>
+        <Animated.Text style={styles.fabLabel}>
+          Nouvelle note
+        </Animated.Text>
+      </View>
     </View>
   );
 }
@@ -137,11 +142,14 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontWeight: '500',
   },
-  fab: {
+  fabContainer: {
     position: 'absolute',
-    top: -28,
+    top: -44,
     left: '50%',
-    marginLeft: -32,
+    marginLeft: -50,
+    alignItems: 'center',
+  },
+  fab: {
     width: 64,
     height: 64,
     borderRadius: 32,
@@ -156,5 +164,11 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  fabLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: Colors.textSecondary,
+    marginTop: 6,
   },
 });

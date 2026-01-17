@@ -2,6 +2,22 @@
 // Enums et types de base
 // ============================================
 
+export type RecordingState = 'idle' | 'recording' | 'processing' | 'reviewing';
+
+export type ProcessingStep = 'transcribing' | 'detecting' | 'extracting' | null;
+
+export type Confidence = 'high' | 'medium' | 'low';
+
+export type HotTopicStatus = 'active' | 'resolved';
+
+export type Gender = 'male' | 'female' | 'unknown';
+
+export type RelationshipType = 'ami' | 'collegue' | 'famille' | 'connaissance';
+
+// ============================================
+// DEPRECATED TYPES (V1 - Will be removed)
+// ============================================
+
 export type FactType =
   | 'work'        // Métier
   | 'company'     // Entreprise
@@ -29,18 +45,8 @@ export type FactAction = 'add' | 'update';
 
 export type PendingFactStatus = 'pending' | 'applied' | 'rejected';
 
-export type RecordingState = 'idle' | 'recording' | 'processing' | 'reviewing';
-
-export type ProcessingStep = 'transcribing' | 'detecting' | 'extracting' | null;
-
-export type Confidence = 'high' | 'medium' | 'low';
-
-export type HotTopicStatus = 'active' | 'resolved';
-
-export type Gender = 'male' | 'female' | 'unknown';
-
 // ============================================
-// Entités principales
+// Entités principales (V2)
 // ============================================
 
 export type Contact = {
@@ -48,21 +54,89 @@ export type Contact = {
   firstName: string;
   lastName?: string;
   nickname?: string;
-  avatarUrl?: string;
   gender?: Gender;
+
+  // Contact info
   phone?: string;
   email?: string;
   birthdayDay?: number;
   birthdayMonth?: number;
   birthdayYear?: number;
-  highlights: string[];
+
+  // Relationship
+  relationshipType?: RelationshipType;
+
+  // Avatar
+  photoUri?: string;
+  avatarUrl?: string;
+
+  // AI-generated (regenerated after each note)
   aiSummary?: string;
-  iceBreakers?: string[];
+  suggestedQuestions?: string[]; // JSON array of max 3 questions
+  iceBreakers?: string[]; // JSON array of conversation starters
+  highlights?: string[]; // JSON array of key highlights
+
+  // Meta
   lastContactAt?: string;
   createdAt: string;
   updatedAt: string;
 };
 
+export type Note = {
+  id: string;
+  contactId: string;
+
+  // Content
+  title?: string; // 2-4 words, AI-generated
+  transcription: string; // EDITABLE by user
+
+  // Audio (optional)
+  audioUri?: string;
+  audioDurationMs?: number;
+
+  // Meta
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type HotTopic = {
+  id: string;
+  contactId: string;
+
+  // Content
+  title: string; // Short: "Google Interview", "Lyon Move"
+  context?: string; // 1-2 sentences of context
+
+  // Event date (optional, for reminders)
+  eventDate?: string; // ISO format: 2026-01-25
+
+  // Status
+  status: HotTopicStatus; // active, resolved
+  resolution?: string; // What happened (when resolved)
+  resolvedAt?: string;
+
+  // Meta
+  sourceNoteId?: string;
+  createdAt: string;
+  updatedAt: string;
+
+  // Legacy fields for birthday events
+  notifiedAt?: string;
+  birthdayContactId?: string;
+};
+
+export type Group = {
+  id: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+// ============================================
+// DEPRECATED ENTITIES (V1 - Will be removed)
+// ============================================
+
+/** @deprecated V1 - Facts are replaced by free-form notes in V2 */
 export type Fact = {
   id: string;
   contactId: string;
@@ -76,17 +150,7 @@ export type Fact = {
   updatedAt: string;
 };
 
-export type Note = {
-  id: string;
-  contactId: string;
-  title?: string;
-  audioUri?: string;
-  audioDurationMs?: number;
-  transcription?: string;
-  summary?: string;
-  createdAt: string;
-};
-
+/** @deprecated V1 - PendingFacts are no longer used in V2 */
 export type PendingFact = {
   id: string;
   noteId: string;
@@ -100,23 +164,7 @@ export type PendingFact = {
   createdAt: string;
 };
 
-export type HotTopic = {
-  id: string;
-  contactId: string;
-  title: string;
-  context?: string;
-  resolution?: string;
-  status: HotTopicStatus;
-  sourceNoteId?: string;
-  // New fields for event fusion
-  eventDate?: string;        // ISO 8601, if set = reminder/notification
-  notifiedAt?: string;       // When notification was sent
-  birthdayContactId?: string; // If non-null = auto-generated birthday
-  createdAt: string;
-  updatedAt: string;
-  resolvedAt?: string;
-};
-
+/** @deprecated V1 - Memories are replaced by notes in V2 */
 export type Memory = {
   id: string;
   contactId: string;
@@ -127,49 +175,20 @@ export type Memory = {
   createdAt: string;
 };
 
-export type Group = {
-  id: string;
-  name: string;
-  createdAt: string;
-  updatedAt: string;
-};
-
 // ============================================
-// Résultats d'extraction IA
+// Résultats d'extraction IA (V2)
 // ============================================
-
-export type ExtractedFact = {
-  factType: FactType;
-  factKey: string;
-  factValue: string;
-  title?: string;
-  action: FactAction;
-  previousValue?: string;
-};
 
 export type ExtractedHotTopic = {
-  title: string;
-  context: string;
-  suggestedDate?: string; // DD/MM/YYYY format, optional
-  resolvesExisting?: string;
+  title: string; // Short title (3-5 words)
+  context: string; // 1-2 sentences with important details
+  eventDate?: string; // ISO format: YYYY-MM-DD or null
 };
 
 export type ResolvedTopic = {
-  id: string;
-  resolution: string;
-};
-
-export type ExtractedMemory = {
-  description: string;
-  eventDate?: string;
-  isShared: boolean;
-};
-
-export type SuggestedGroup = {
-  name: string;
-  isNew: boolean;
-  existingId?: string;
-  sourceFactType: FactType;
+  existingTopicId: string;
+  id: string; // Alias for existingTopicId (used in review.tsx)
+  resolution: string; // Concrete description of what happened
 };
 
 export type ExtractedContactInfo = {
@@ -189,6 +208,10 @@ export type AvatarHints = {
   context: string | null;
 };
 
+export type ExtractedHotTopicV1 = ExtractedHotTopic & {
+  suggestedDate?: string; // V1 compatibility: date in DD/MM/YYYY format
+};
+
 export type ExtractionResult = {
   contactIdentified: {
     id: string | null;
@@ -201,32 +224,72 @@ export type ExtractionResult = {
     suggestedNickname?: string;
     avatarHints?: AvatarHints | null;
   };
-  noteTitle: string;
+  noteTitle: string; // 2-4 words summarizing the note
   contactInfo?: ExtractedContactInfo;
-  facts: ExtractedFact[];
-  hotTopics: ExtractedHotTopic[];
+  // V2 property name (matches backend)
+  newHotTopics: ExtractedHotTopic[];
+  // V1 compatibility - backend returns this name
+  hotTopics?: ExtractedHotTopicV1[];
   resolvedTopics: ResolvedTopic[];
-  memories: ExtractedMemory[];
+  // V1 compatibility properties (deprecated but used by review.tsx)
+  facts?: ExtractedFact[];
+  memories?: ExtractedMemory[];
   suggestedGroups?: SuggestedGroup[];
-  note: {
-    summary: string;
-    keyPoints: string[];
+  note?: {
+    summary?: string;
   };
 };
 
 // ============================================
-// Pour les écrans
+// DEPRECATED EXTRACTION TYPES (V1)
+// ============================================
+
+/** @deprecated V1 - Facts extraction is no longer used in V2 */
+export type ExtractedFact = {
+  factType: FactType;
+  factKey: string;
+  factValue: string;
+  title?: string;
+  action: FactAction;
+  previousValue?: string;
+};
+
+/** @deprecated V1 - Memories extraction is no longer used in V2 */
+export type ExtractedMemory = {
+  description: string;
+  eventDate?: string;
+  isShared: boolean;
+};
+
+/** @deprecated V1 - Group suggestions are no longer used in V2 */
+export type SuggestedGroup = {
+  name: string;
+  isNew: boolean;
+  existingId?: string;
+  sourceFactType?: FactType;
+};
+
+// ============================================
+// Pour les écrans (V2)
 // ============================================
 
 export type ContactWithDetails = Contact & {
-  facts: Fact[];
   notes: Note[];
   hotTopics: HotTopic[];
+  facts: Fact[];
   memories: Memory[];
 };
 
 export type ContactWithGroups = Contact & {
   groups: Group[];
+};
+
+/** @deprecated V1 - Use ContactWithDetails instead */
+export type ContactWithDetailsV1 = Contact & {
+  facts: Fact[];
+  notes: Note[];
+  hotTopics: HotTopic[];
+  memories: Memory[];
 };
 
 export type DisambiguationOption = {

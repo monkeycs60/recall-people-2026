@@ -55,7 +55,7 @@ const convertToCSV = (contacts: ContactWithDetails[], groups: Group[]): string =
       contact.memories.map((m) => m.description).join('; ')
     );
     const notesValue = escapeCSV(
-      contact.notes.map((n) => n.title || n.summary || '').filter(Boolean).join('; ')
+      contact.notes.map((note) => note.title || '').filter(Boolean).join('; ')
     );
 
     return [...baseValues, ...factValues, hotTopicsValue, memoriesValue, notesValue].join(',');

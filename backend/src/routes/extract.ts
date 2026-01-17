@@ -14,9 +14,10 @@ type Bindings = {
   BETTER_AUTH_SECRET: string;
   BETTER_AUTH_URL: string;
   DEEPGRAM_API_KEY: string;
+  OPENAI_API_KEY?: string;
   XAI_API_KEY: string;
   CEREBRAS_API_KEY?: string;
-  AI_PROVIDER?: 'grok' | 'cerebras';
+  AI_PROVIDER?: 'openai' | 'grok' | 'cerebras';
   ENABLE_PERFORMANCE_LOGGING?: boolean;
   ENABLE_LANGFUSE?: string;
   ENABLE_EVALUATION?: string;
@@ -68,49 +69,19 @@ const extractionSchema = z.object({
       year: z.number().nullable().describe('Année si mentionnée'),
     }).nullable().describe('Date d\'anniversaire si mentionnée'),
   }).describe('Coordonnées de contact détectées'),
-  facts: z.array(
-    z.object({
-      factType: z.enum([
-        'work', 'company', 'education', 'location', 'origin', 'partner',
-        'children', 'hobby', 'sport', 'language', 'pet',
-        'how_met', 'where_met', 'shared_ref', 'trait', 'gift_idea',
-        'gift_given', 'relationship', 'other',
-      ]),
-      factKey: z.string().describe('Label lisible en français'),
-      factValue: z.string().describe('La valeur extraite (description pour type "other")'),
-      title: z.string().nullable().describe('Titre court pour type "other" uniquement (ex: "Allergie", "Régime"). Null pour les autres types.'),
-      action: z.enum(['add', 'update']),
-      previousValue: z.string().nullable(),
-    })
-  ),
   hotTopics: z.array(
     z.object({
-      title: z.string().describe('Titre court du sujet (ex: "Examen de droit", "Recherche appart", "Mariage")'),
-      context: z.string().describe('1-2 phrases de contexte'),
-      suggestedDate: z.string().nullable().describe('Date au format DD/MM/YYYY si un événement daté est associé, sinon null'),
+      title: z.string().describe('Titre court du sujet (ex: "Entretien Google", "Déménagement Lyon")'),
+      context: z.string().describe('1-2 phrases de contexte avec les détails importants'),
+      eventDate: z.string().nullable().describe('Date ISO (YYYY-MM-DD) si un événement daté est mentionné, sinon null'),
     })
-  ).describe('NOUVEAUX sujets temporels/actionnables mentionnés dans la note, avec date optionnelle'),
+  ).describe('NOUVELLES actualités/sujets à suivre mentionnés dans la note (projets, événements, situations en cours)'),
   resolvedTopics: z.array(
     z.object({
-      id: z.string().describe('ID du sujet chaud existant'),
-      resolution: z.string().describe('Ce qui s\'est passé / comment ça s\'est terminé (ex: "A couru le marathon en 3h12", "A eu son examen avec mention")'),
+      existingTopicId: z.string().describe('ID du hot topic existant'),
+      resolution: z.string().describe('Description concrète de ce qui s\'est passé (ex: "Elle a été prise, commence en mars", "Trouvé 3 pièces à Belleville")'),
     })
-  ).describe('Sujets chauds existants qui semblent résolus/terminés selon la note, avec leur résolution'),
-  memories: z.array(
-    z.object({
-      description: z.string().describe('Description courte de l\'événement/souvenir (ex: "Saut à l\'élastique à Chamonix", "Week-end à la Baule ensemble")'),
-      eventDate: z.string().nullable().describe('Date approximative si mentionnée (ex: "novembre 2024", "la semaine dernière")'),
-      isShared: z.boolean().describe('true si c\'est un moment vécu ENSEMBLE avec le contact, false si c\'est quelque chose que le contact a fait seul'),
-    })
-  ).describe('Événements ponctuels/souvenirs marquants (PAS des loisirs réguliers). Ex: saut à l\'élastique, voyage, sortie exceptionnelle'),
-  suggestedGroups: z.array(
-    z.object({
-      name: z.string().describe('Nom du groupe suggéré'),
-      sourceFactType: z.enum([
-        'company', 'how_met', 'where_met', 'sport', 'hobby'
-      ]).describe('Le type de fact qui a déclenché cette suggestion'),
-    })
-  ).describe('Groupes suggérés basés sur les facts contextuels. UNIQUEMENT pour nouveaux contacts (pas de currentContact).'),
+  ).describe('Hot topics existants qui sont résolus selon cette note, avec leur résolution détaillée'),
 });
 
 const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
@@ -145,6 +116,7 @@ extractRoutes.post('/', async (c) => {
     const prompt = buildExtractionPrompt(transcription, currentContact, language);
 
     const providerConfig = {
+      OPENAI_API_KEY: c.env.OPENAI_API_KEY,
       XAI_API_KEY: c.env.XAI_API_KEY,
       CEREBRAS_API_KEY: c.env.CEREBRAS_API_KEY,
       AI_PROVIDER: c.env.AI_PROVIDER,
@@ -189,48 +161,6 @@ extractRoutes.post('/', async (c) => {
     const needsDisambiguation = matchingContacts.length > 0;
     const suggestedMatches = matchingContacts.map((contact) => contact.id);
 
-    // Generate suggested nickname based on the most distinctive fact
-    // Only for NEW contacts (no currentContact provided)
-    let suggestedNickname: string | null = null;
-    if (!currentContact && extraction.facts.length > 0) {
-      const priorityOrder = ['work', 'company', 'sport', 'hobby', 'location', 'education'];
-      const sortedFacts = [...extraction.facts].sort((factA, factB) => {
-        const indexA = priorityOrder.indexOf(factA.factType);
-        const indexB = priorityOrder.indexOf(factB.factType);
-        return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
-      });
-      const mainFact = sortedFacts[0];
-      suggestedNickname = mainFact.factValue.split(' ')[0]; // First word of the value
-    }
-
-    // Process suggested groups - match with existing or mark as new
-    const processedGroups = (!currentContact && extraction.suggestedGroups)
-      ? extraction.suggestedGroups.map((suggested) => {
-          const existingGroup = body.existingGroups?.find(
-            (group) => group.name.toLowerCase() === suggested.name.toLowerCase()
-          );
-          return {
-            name: existingGroup?.name || suggested.name,
-            isNew: !existingGroup,
-            existingId: existingGroup?.id,
-            sourceFactType: suggested.sourceFactType,
-          };
-        })
-      : [];
-
-    // Filter out facts where the new value is identical to the previous value (useless updates)
-    const filteredFacts = extraction.facts.filter((fact) => {
-      if (fact.action === 'update' && fact.previousValue) {
-        const newValue = fact.factValue.toLowerCase().trim();
-        const oldValue = fact.previousValue.toLowerCase().trim();
-        // Skip if values are identical - no point showing "update vélo → vélo"
-        if (newValue === oldValue) {
-          return false;
-        }
-      }
-      return true;
-    });
-
     // For existing contacts, use their stored name instead of extracted name
     const formattedExtraction = {
       contactIdentified: {
@@ -240,7 +170,6 @@ extractRoutes.post('/', async (c) => {
         confidence: extraction.contactIdentified.confidence,
         needsDisambiguation: currentContact ? false : needsDisambiguation,
         suggestedMatches: currentContact ? [] : suggestedMatches,
-        suggestedNickname,
       },
       noteTitle: extraction.noteTitle,
       contactInfo: {
@@ -252,21 +181,15 @@ extractRoutes.post('/', async (c) => {
           year: extraction.contactInfo.birthday.year || undefined,
         } : undefined,
       },
-      facts: filteredFacts,
-      hotTopics: extraction.hotTopics,
-      resolvedTopics: extraction.resolvedTopics,
-      memories: extraction.memories.map((memory) => ({
-        description: memory.description,
-        eventDate: memory.eventDate || undefined,
-        isShared: memory.isShared,
+      hotTopics: extraction.hotTopics.map((topic) => ({
+        title: topic.title,
+        context: topic.context,
+        eventDate: topic.eventDate || undefined,
       })),
-      suggestedGroups: processedGroups,
-      note: {
-        summary: extraction.hotTopics.length > 0
-          ? extraction.hotTopics.map((topic) => topic.context).join(' ')
-          : 'Note vocale enregistrée.',
-        keyPoints: extraction.hotTopics.map((topic) => topic.title),
-      },
+      resolvedTopics: extraction.resolvedTopics.map((topic) => ({
+        existingTopicId: topic.existingTopicId,
+        resolution: topic.resolution,
+      })),
     };
 
     // Update Langfuse generation with output
@@ -321,22 +244,20 @@ const buildExtractionPrompt = (
     currentContactContext = `
 CONTACT ACTUELLEMENT SÉLECTIONNÉ:
 - Nom: ${currentContact.firstName} ${currentContact.lastName || ''}
-- ID: ${currentContact.id}
-- Infos existantes:
-${currentContact.facts.map((fact) => `  • ${fact.factKey}: ${fact.factValue}`).join('\n')}`;
+- ID: ${currentContact.id}`;
 
     if (currentContact.hotTopics && currentContact.hotTopics.length > 0) {
       existingHotTopicsContext = `
-SUJETS CHAUDS EXISTANTS (à analyser pour détection de résolution):
+ACTUALITÉS EXISTANTES DE CE CONTACT:
 ${currentContact.hotTopics.map((topic) => `  • [ID: ${topic.id}] "${topic.title}"${topic.context ? ` - ${topic.context}` : ''}`).join('\n')}`;
     }
   }
 
-  const referenceDate = format(new Date(), 'dd/MM/yyyy');
+  const currentDate = format(new Date(), 'yyyy-MM-dd');
 
-  return `Tu es un assistant qui extrait des informations structurées à partir de notes vocales dans la langue : ${language}.
+  return `Tu es un assistant qui extrait les actualités importantes d'une note vocale.
 
-DATE DE RÉFÉRENCE (fournie par le système, NE PAS déterminer toi-même): ${referenceDate}
+DATE DE RÉFÉRENCE: ${currentDate} (pour calculer les dates mentionnées)
 
 ${getSecurityInstructions(language)}
 ${currentContactContext}
@@ -344,142 +265,95 @@ ${existingHotTopicsContext}
 
 LANGUE DE RÉPONSE:
 ${LANGUAGE_INSTRUCTIONS[language] || LANGUAGE_INSTRUCTIONS.fr}
-Tous les champs textuels (noteTitle, factValue, hotTopics, memories, etc.) doivent être dans cette langue.
 
-TRANSCRIPTION DE LA NOTE VOCALE:
+TRANSCRIPTION:
 ${wrappedTranscription}
 
-RÈGLES D'EXTRACTION:
-
-1. IDENTIFICATION DU CONTACT:
-   - Extrais le prénom de la personne dont on parle dans la note
-   - ATTENTION: Le prénom doit être un VRAI prénom français ou international (Marie, Jean, Sophie, Mohamed, etc.)
-   - NE JAMAIS extraire de mots qui ne sont pas des prénoms
-   - Les prénoms composés comptent comme UN prénom (Jean-Luc, Marie-Claire, Pierre-Antoine)
-   - Si aucun prénom clair n'est mentionné, utilise "Contact" comme placeholder
-   - Nom de famille SEULEMENT si explicitement mentionné comme tel
-   - En cas de doute entre plusieurs mots, choisis celui qui ressemble le plus à un prénom courant
-
-2. TITRE DE LA NOTE:
-   - Génère un titre court (2-4 mots) décrivant le contexte
-   - Exemples: "Café rattrapage", "Après soirée Marc", "Appel pro", "Déjeuner networking"
-
-3. COORDONNÉES (contactInfo):
-   - phone: numéro de téléphone si mentionné (format international de préférence)
-   - email: adresse email si mentionnée
-   - birthday: { day, month, year } si une date d'anniversaire est mentionnée (year peut être null)
-
-   NE PAS créer de facts pour téléphone, email ou anniversaire - utilise UNIQUEMENT contactInfo.
-
-4. FACTS (Profil permanent - infos stables):
-   Catégories:
-   - work: métier/poste (factKey="Métier")
-   - company: entreprise (factKey="Entreprise")
-   - education: formation/école (factKey="Formation")
-   - location: lieu de vie (factKey="Ville")
-   - origin: nationalité/origine (factKey="Origine")
-   - partner: conjoint (factKey="Conjoint")
-   - children: enfants avec prénoms (factKey="Enfants")
-   - hobby: loisirs (factKey="Loisir")
-   - sport: sports (factKey="Sport")
-   - language: langues (factKey="Langue")
-   - pet: animaux (factKey="Animal")
-   - how_met: comment connu (factKey="Rencontre")
-   - where_met: lieu de rencontre (factKey="Lieu rencontre")
-   - shared_ref: références communes/inside jokes (factKey="Référence")
-   - trait: signe distinctif (factKey="Trait")
-   - gift_idea: idées cadeaux (factKey="Idée cadeau")
-   - gift_given: cadeaux faits (factKey="Cadeau fait")
-   - other: information diverse (factKey="Autre", title=titre court obligatoire, factValue=description détaillée)
-     IMPORTANT pour "other": title ET factValue sont OBLIGATOIRES
-     Exemple: { factType: "other", title: "Allergie", factKey: "Autre", factValue: "Ne mange pas de fruits de mer, allergie sévère" }
-
-5. HOT TOPICS (Sujets chauds - temporaires/actionnables):
-   NOUVEAUX sujets à créer:
-   - Projets en cours: "Cherche un appart", "Prépare un examen"
-   - Événements à suivre: "Mariage prévu en juin"
-   - Situations: "Problème au travail", "En recherche d'emploi"
-
-   CHAMP suggestedDate (optionnel):
-   Si une date est mentionnée pour ce sujet, calcule-la au format DD/MM/YYYY.
-
-   RÈGLES DE CALCUL DES DATES (utilise la DATE DE RÉFÉRENCE ci-dessus):
-   - "dans X jours/semaines/mois" → date exacte calculée
-   - "la semaine prochaine" → lundi prochain
-   - "le 15 janvier" → 15/01/YYYY
-   - "mi-février" → 15/02/YYYY
-   - "fin mars" → dernier jour du mois (31/03/YYYY)
-   - "en juin" → 01/06/YYYY (1er du mois)
-   - "cet été" → 01/07/YYYY
-   - "à la rentrée" → 01/09/YYYY
-   - "pour Noël" → 25/12/YYYY
-
-   Si aucune date n'est mentionnée ou si c'est trop vague → suggestedDate = null
-
-   Exemples (si date de référence = 29/12/2024):
-   - "Eric part pêcher dans deux semaines"
-     → { title: "Part pêcher", context: "...", suggestedDate: "12/01/2025" }
-   - "Elle prépare un examen" (sans date)
-     → { title: "Examen", context: "...", suggestedDate: null }
-   - "Mariage prévu en juin"
-     → { title: "Mariage", context: "...", suggestedDate: "01/06/2025" }
-   - "Il veut faire un resto en juin"
-     → { title: "Resto", context: "...", suggestedDate: "01/06/2025" }
-
-6. DÉTECTION DE RÉSOLUTION DE SUJETS EXISTANTS:
-   Si des SUJETS CHAUDS EXISTANTS (listés ci-dessus) semblent RÉSOLUS ou TERMINÉS selon la transcription:
-   - Retourne leurs IDs dans resolvedTopics avec une résolution
-
-   RÈGLE CRITIQUE pour la résolution:
-   - Extrais TOUS les détails concrets mentionnés dans la transcription
-   - Inclus : résultats chiffrés, noms, lieux, dates, anecdotes
-   - Si aucun détail concret n'est mentionné → résolution = "Effectué" ou "Terminé"
-
-   Exemples:
-   • "Niko a couru son semi" (sans détails)
-     → { id: "...", resolution: "Effectué" }
-   • "Niko a couru son semi en 1h40, il a fêté ça au bar avec ses potes"
-     → { id: "...", resolution: "Terminé en 1h40, a fêté au bar avec ses amis" }
-   • "Elle a eu son examen"
-     → { id: "...", resolution: "Réussi" }
-   • "Elle a eu son examen avec 16/20, major de sa promo"
-     → { id: "...", resolution: "Réussi avec 16/20, major de promo" }
-   • "Il a trouvé un appart dans le 11ème, 45m²"
-     → { id: "...", resolution: "Trouvé dans le 11ème, 45m²" }
-
-   - Ne marque comme résolu QUE si la transcription indique CLAIREMENT que c'est terminé
-
-7. MEMORIES (Souvenirs / Événements ponctuels):
-   DISTINCTION IMPORTANTE entre hobby (fact) et memory:
-   - HOBBY/SPORT (fact): activité pratiquée RÉGULIÈREMENT ou comme loisir habituel
-     Ex: "Il fait du running", "Elle joue aux échecs", "Il fait de l'escalade"
-   - MEMORY: événement PONCTUEL, exceptionnel, une expérience unique
-     Ex: "Il a fait un saut à l'élastique", "On est allés à la Baule ensemble", "Elle a fait un trek au Népal"
-
-   Types de memories:
-   - Sorties exceptionnelles: restaurant spécial, concert, événement
-   - Voyages/excursions: week-end quelque part, vacances
-   - Expériences uniques: saut en parachute, baptême de plongée
-   - Moments partagés ensemble: "on a fait X ensemble"
-
-   isShared = true si TU as vécu ça AVEC la personne
-   isShared = false si la personne a fait ça de son côté
-
-8. SUGGESTION DE GROUPES (uniquement si pas de currentContact fourni):
-   Suggère des groupes basés sur les facts de type contextuel:
-   - company: nom de l'entreprise → groupe (ex: "Affilae" → groupe "Affilae")
-   - how_met: contexte de rencontre → groupe (ex: "meetup React" → groupe "Meetup React")
-   - where_met: lieu de rencontre → groupe (ex: "salle de sport" → groupe "Sport")
-   - sport: sport pratiqué → groupe (ex: "running" → groupe "Running")
-   - hobby: loisir → groupe (ex: "échecs" → groupe "Échecs")
-   Si currentContact est fourni, retourne un tableau vide pour suggestedGroups.
+TÂCHE:
+1. Extrais les NOUVELLES actualités/sujets à suivre (projets, événements, situations en cours)
+2. Détecte si des actualités existantes sont RÉSOLUES dans cette note
+3. Détecte les infos de contact (téléphone, email, anniversaire) si mentionnées
+4. Identifie le prénom de la personne dont on parle
+5. Génère un titre court pour la note (2-4 mots, ex: "Café rattrapage", "Appel pro")
 
 RÈGLES:
-- facts = infos PERMANENTES du profil (hobbies = activités régulières)
-- hotTopics = NOUVEAUX sujets TEMPORAIRES à suivre (pas ceux existants), avec date optionnelle
-- resolvedTopics = sujets existants TERMINÉS avec leur résolution détaillée
-- memories = événements PONCTUELS / souvenirs PASSÉS (PAS des hobbies réguliers)
-- suggestedGroups = groupes suggérés UNIQUEMENT pour nouveaux contacts
-- N'extrais QUE ce qui est EXPLICITEMENT mentionné
-- action="add" pour nouvelle info, "update" si modification d'un fact existant`;
+
+1. IDENTIFICATION DU CONTACT:
+   - Extrais le prénom de la personne dont on parle
+   - Le prénom doit être un VRAI prénom (Marie, Jean, Sophie, etc.)
+   - Nom de famille SEULEMENT si explicitement mentionné
+   - Si aucun prénom clair, utilise "Contact"
+
+2. HOT TOPICS = quelque chose de TEMPORAIRE qu'on voudra suivre/redemander:
+   - Projets en cours: "Cherche un appart", "Prépare un examen"
+   - Événements à suivre: "Mariage", "Entretien d'embauche"
+   - Situations temporaires: "Problème au travail", "En recherche d'emploi"
+
+   PAS un hot topic:
+   - Traits permanents: métier stable, hobbies réguliers
+   - Infos statiques: lieu de vie, formation
+   - Activités régulières: "fait du sport", "joue aux échecs"
+
+3. DATES ABSOLUES (format ISO: YYYY-MM-DD):
+   Calcule les dates à partir de ${currentDate}:
+   - "dans X jours/semaines/mois" → calculer la date exacte
+   - "la semaine prochaine" → lundi prochain
+   - "le 25 janvier" → 2026-01-25
+   - "mi-février" → 2026-02-15
+   - "fin mars" → 2026-03-31
+   - "en juin" → 2026-06-01
+   - "cet été" → 2026-07-01
+   - Si aucune date ou date vague → eventDate = null
+
+4. RÉSOLUTION D'ACTUALITÉS EXISTANTES:
+   Si une actualité existante est mentionnée avec une issue, marque-la résolue.
+
+   RÈGLE CRITIQUE:
+   - Extrais TOUS les détails concrets de la transcription
+   - Inclus: résultats chiffrés, noms, lieux, dates, anecdotes
+   - Si aucun détail → résolution = "Effectué"
+
+   Exemples:
+   • "Elle a eu son entretien chez Google" → "Effectué"
+   • "Elle a été prise chez Google, commence en mars" → "Elle a été prise, commence en mars"
+   • "Il a trouvé un appart dans le 11ème, 45m²" → "Trouvé dans le 11ème, 45m²"
+
+5. INFOS DE CONTACT:
+   - phone: numéro si mentionné
+   - email: adresse si mentionnée
+   - birthday: { day, month, year } si anniversaire mentionné (year peut être null)
+
+RÈGLES ABSOLUES:
+1. N'invente JAMAIS d'information non présente dans la transcription
+2. Utilise des dates ABSOLUES (YYYY-MM-DD), jamais relatives
+3. Si pas assez d'informations, retourne moins de résultats
+4. Ne crée un hot topic QUE si c'est temporaire/actionnable
+
+FORMAT JSON:
+{
+  "contactIdentified": {
+    "firstName": string,
+    "lastName": string | null,
+    "confidence": "high" | "medium" | "low"
+  },
+  "contactInfo": {
+    "phone": string | null,
+    "email": string | null,
+    "birthday": { "day": number, "month": number, "year": number | null } | null
+  },
+  "hotTopics": [
+    {
+      "title": "Titre court (3-5 mots)",
+      "context": "1-2 phrases de contexte avec les détails importants",
+      "eventDate": "YYYY-MM-DD" | null
+    }
+  ],
+  "resolvedTopics": [
+    {
+      "existingTopicId": "id",
+      "resolution": "Description concrète de ce qui s'est passé"
+    }
+  ],
+  "noteTitle": "2-4 mots résumant la note"
+}`;
 };

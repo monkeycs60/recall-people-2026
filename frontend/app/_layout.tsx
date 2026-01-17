@@ -205,6 +205,28 @@ export default function RootLayout() {
                 animation: 'slide_from_bottom',
               }}
             />
+            <Stack.Screen
+              name="ask"
+              options={{
+                headerShown: false,
+                animation: 'slide_from_bottom',
+              }}
+            />
+            <Stack.Screen
+              name="ask-result"
+              options={{
+                headerShown: true,
+                title: 'Demander',
+                headerLeft: () => (
+                  <Pressable
+                    onPress={() => router.back()}
+                    style={styles.backButton}
+                  >
+                    <ArrowLeft size={24} color={Colors.textPrimary} />
+                  </Pressable>
+                ),
+              }}
+            />
           </Stack>
         </QueryClientProvider>
       </BottomSheetModalProvider>

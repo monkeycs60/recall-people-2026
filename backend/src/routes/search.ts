@@ -14,9 +14,10 @@ type Bindings = {
 	DATABASE_URL: string;
 	BETTER_AUTH_SECRET: string;
 	BETTER_AUTH_URL: string;
+	OPENAI_API_KEY?: string;
 	XAI_API_KEY: string;
 	CEREBRAS_API_KEY?: string;
-	AI_PROVIDER?: 'grok' | 'cerebras';
+	AI_PROVIDER?: 'openai' | 'grok' | 'cerebras';
 	ENABLE_PERFORMANCE_LOGGING?: boolean;
 	ENABLE_LANGFUSE?: string;
 	ENABLE_EVALUATION?: string;
@@ -69,7 +70,11 @@ const searchResultSchema = z.object({
 	),
 });
 
-export const searchRoutes = new Hono<{ Bindings: Bindings }>();
+type Variables = {
+	user: import('@prisma/client').User;
+};
+
+export const searchRoutes = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
 searchRoutes.use('/*', authMiddleware);
 
@@ -114,6 +119,7 @@ searchRoutes.post('/', async (c) => {
 		const prompt = buildSearchPrompt(query, facts, memories, notes, language);
 
 		const providerConfig = {
+			OPENAI_API_KEY: c.env.OPENAI_API_KEY,
 			XAI_API_KEY: c.env.XAI_API_KEY,
 			CEREBRAS_API_KEY: c.env.CEREBRAS_API_KEY,
 			AI_PROVIDER: c.env.AI_PROVIDER,
@@ -144,7 +150,7 @@ searchRoutes.post('/', async (c) => {
 				operationType: 'object-generation',
 				inputSize: new TextEncoder().encode(prompt).length,
 				metadata: { language, query, factsCount: facts.length },
-				enabled: c.env.ENABLE_PERFORMANCE_LOGGING === 'true' || c.env.ENABLE_PERFORMANCE_LOGGING === true,
+				enabled: String(c.env.ENABLE_PERFORMANCE_LOGGING) === 'true',
 			}
 		);
 

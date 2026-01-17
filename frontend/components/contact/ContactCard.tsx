@@ -1,7 +1,7 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Phone, Mail, Cake, ChevronDown, User } from 'lucide-react-native';
+import { Phone, Mail, Cake, ChevronDown, User, Edit3 } from 'lucide-react-native';
 import { Linking } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { Colors } from '@/constants/theme';
@@ -119,14 +119,16 @@ export function ContactCard({
       <View style={styles.row}>
         <Phone size={18} color={Colors.primary} />
         {phone ? (
-          <View style={styles.valueContainer}>
+          <View style={styles.valueWithEditContainer}>
             <Pressable
               style={styles.valueButton}
               onPress={() => setPhoneMenuOpen(!phoneMenuOpen)}
-              onLongPress={onEditPhone}
             >
               <Text style={styles.value}>{phone}</Text>
               <ChevronDown size={16} color={Colors.textSecondary} />
+            </Pressable>
+            <Pressable style={styles.editIconButton} onPress={onEditPhone}>
+              <Edit3 size={16} color={Colors.textMuted} />
             </Pressable>
             {phoneMenuOpen && (
               <View style={styles.menu}>
@@ -139,11 +141,8 @@ export function ContactCard({
                 <Pressable style={styles.menuItem} onPress={() => handlePhoneAction('sms')}>
                   <Text style={styles.menuItemText}>{t('contact.contactCard.sms')}</Text>
                 </Pressable>
-                <Pressable style={styles.menuItem} onPress={() => handlePhoneAction('copy')}>
+                <Pressable style={[styles.menuItem, styles.menuItemLast]} onPress={() => handlePhoneAction('copy')}>
                   <Text style={styles.menuItemText}>{t('contact.contactCard.copy')}</Text>
-                </Pressable>
-                <Pressable style={[styles.menuItem, styles.menuItemLast]} onPress={onEditPhone}>
-                  <Text style={styles.menuItemTextEdit}>{t('contact.menu.edit')}</Text>
                 </Pressable>
               </View>
             )}
@@ -158,25 +157,24 @@ export function ContactCard({
       <View style={styles.row}>
         <Mail size={18} color={Colors.primary} />
         {email ? (
-          <View style={styles.valueContainer}>
+          <View style={styles.valueWithEditContainer}>
             <Pressable
               style={styles.valueButton}
               onPress={() => setEmailMenuOpen(!emailMenuOpen)}
-              onLongPress={onEditEmail}
             >
               <Text style={styles.value}>{email}</Text>
               <ChevronDown size={16} color={Colors.textSecondary} />
+            </Pressable>
+            <Pressable style={styles.editIconButton} onPress={onEditEmail}>
+              <Edit3 size={16} color={Colors.textMuted} />
             </Pressable>
             {emailMenuOpen && (
               <View style={styles.menu}>
                 <Pressable style={styles.menuItem} onPress={() => handleEmailAction('open')}>
                   <Text style={styles.menuItemText}>{t('contact.contactCard.openMail')}</Text>
                 </Pressable>
-                <Pressable style={styles.menuItem} onPress={() => handleEmailAction('copy')}>
+                <Pressable style={[styles.menuItem, styles.menuItemLast]} onPress={() => handleEmailAction('copy')}>
                   <Text style={styles.menuItemText}>{t('contact.contactCard.copy')}</Text>
-                </Pressable>
-                <Pressable style={[styles.menuItem, styles.menuItemLast]} onPress={onEditEmail}>
-                  <Text style={styles.menuItemTextEdit}>{t('contact.menu.edit')}</Text>
                 </Pressable>
               </View>
             )}
@@ -191,12 +189,17 @@ export function ContactCard({
       <View style={styles.row}>
         <Cake size={18} color={Colors.primary} />
         {birthdayInfo ? (
-          <Pressable style={styles.birthdayContainer} onPress={onEditBirthday}>
-            <Text style={styles.value}>{birthdayInfo.display}</Text>
-            {birthdayInfo.countdown && (
-              <Text style={styles.countdown}>{birthdayInfo.countdown}</Text>
-            )}
-          </Pressable>
+          <View style={styles.valueWithEditContainer}>
+            <View style={styles.birthdayContainer}>
+              <Text style={styles.value}>{birthdayInfo.display}</Text>
+              {birthdayInfo.countdown && (
+                <Text style={styles.countdown}>{birthdayInfo.countdown}</Text>
+              )}
+            </View>
+            <Pressable style={styles.editIconButton} onPress={onEditBirthday}>
+              <Edit3 size={16} color={Colors.textMuted} />
+            </Pressable>
+          </View>
         ) : (
           <Pressable style={styles.addButton} onPress={onEditBirthday}>
             <Text style={styles.addButtonText}>{t('contact.contactCard.addBirthday')}</Text>
@@ -234,10 +237,20 @@ const styles = StyleSheet.create({
   valueContainer: {
     flex: 1,
   },
+  valueWithEditContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   valueButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+    flex: 1,
+  },
+  editIconButton: {
+    padding: 4,
   },
   value: {
     fontSize: 15,

@@ -1,6 +1,5 @@
 import { View, Text, ScrollView, Pressable, TextInput, Alert, Platform, KeyboardAvoidingView, StyleSheet, BackHandler } from 'react-native';
 import { useState, useRef, useEffect, useCallback } from 'react';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -11,24 +10,18 @@ import {
   useDeleteHotTopic,
   useUpdateHotTopic,
   useUpdateHotTopicResolution,
-  useCreateMemory,
-  useUpdateMemory,
-  useDeleteMemory,
   useDeleteNote,
 } from '@/hooks/useContactQuery';
 import { useUpdateContact, useDeleteContact } from '@/hooks/useContactsQuery';
 import { useGroupsQuery, useGroupsForContact, useSetContactGroups, useCreateGroup } from '@/hooks/useGroupsQuery';
-import { Fact, FactType, SearchSourceType } from '@/types';
-import { factService } from '@/services/fact.service';
+import { SearchSourceType } from '@/types';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { Edit3, X, Plus, Check, Trash2, MoreVertical } from 'lucide-react-native';
 import { AISummary } from '@/components/contact/AISummary';
 import { AddNoteButton } from '@/components/AddNoteButton';
 import { InputMode } from '@/components/InputModeToggle';
 import { IceBreakers } from '@/components/contact/IceBreakers';
-import { ProfileCard } from '@/components/contact/ProfileCard';
 import { HotTopicsList } from '@/components/contact/HotTopicsList';
-import { MemoriesList } from '@/components/contact/MemoriesList';
 import { TranscriptionArchive } from '@/components/contact/TranscriptionArchive';
 import { ContactAvatar } from '@/components/contact/ContactAvatar';
 import { ContactCard } from '@/components/contact/ContactCard';
@@ -43,39 +36,6 @@ import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { useAppStore } from '@/stores/app-store';
 import { ContactDetailSkeleton } from '@/components/skeleton/ContactDetailSkeleton';
 
-type EditingFact = {
-  id: string;
-  factKey: string;
-  factValue: string;
-};
-
-const FACT_TYPE_CONFIG: Record<FactType, { singular: boolean }> = {
-  work: { singular: true },
-  company: { singular: true },
-  education: { singular: true },
-  location: { singular: true },
-  origin: { singular: true },
-  partner: { singular: true },
-  children: { singular: false },
-  hobby: { singular: false },
-  sport: { singular: false },
-  language: { singular: false },
-  pet: { singular: false },
-  birthday: { singular: true },
-  how_met: { singular: true },
-  where_met: { singular: true },
-  shared_ref: { singular: false },
-  trait: { singular: false },
-  gift_idea: { singular: false },
-  gift_given: { singular: false },
-  contact: { singular: false },
-  relationship: { singular: false },
-  other: { singular: false },
-};
-
-const getFactTypeLabel = (t: (key: string) => string, factType: FactType): string => {
-  return t(`contact.factTypes.${factType}`);
-};
 
 export default function ContactDetailScreen() {
   const { t } = useTranslation();
@@ -106,9 +66,6 @@ export default function ContactDetailScreen() {
   const deleteHotTopicMutation = useDeleteHotTopic();
   const updateHotTopicMutation = useUpdateHotTopic();
   const updateHotTopicResolutionMutation = useUpdateHotTopicResolution();
-  const createMemoryMutation = useCreateMemory();
-  const updateMemoryMutation = useUpdateMemory();
-  const deleteMemoryMutation = useDeleteMemory();
   const deleteNoteMutation = useDeleteNote();
   const setContactGroupsMutation = useSetContactGroups();
   const createGroupMutation = useCreateGroup();
@@ -120,7 +77,6 @@ export default function ContactDetailScreen() {
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedFirstName, setEditedFirstName] = useState('');
   const [editedLastName, setEditedLastName] = useState('');
-  const [editingFact, setEditingFact] = useState<EditingFact | null>(null);
 
   // Groups state
   const [isEditingGroups, setIsEditingGroups] = useState(false);
@@ -131,18 +87,6 @@ export default function ContactDetailScreen() {
   const [isAddingHotTopic, setIsAddingHotTopic] = useState(false);
   const [newHotTopicTitle, setNewHotTopicTitle] = useState('');
   const [newHotTopicContext, setNewHotTopicContext] = useState('');
-
-  const [isAddingMemory, setIsAddingMemory] = useState(false);
-  const [newMemoryDescription, setNewMemoryDescription] = useState('');
-  const [newMemoryEventDate, setNewMemoryEventDate] = useState<Date | null>(null);
-  const [showMemoryDatePicker, setShowMemoryDatePicker] = useState(false);
-  const [newMemoryIsShared, setNewMemoryIsShared] = useState(false);
-
-  const [isAddingFact, setIsAddingFact] = useState(false);
-  const [newFactType, setNewFactType] = useState<FactType | null>(null);
-  const [newFactValue, setNewFactValue] = useState('');
-  const [newFactTitle, setNewFactTitle] = useState('');
-  const [showFactTypeDropdown, setShowFactTypeDropdown] = useState(false);
 
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -251,42 +195,6 @@ export default function ContactDetailScreen() {
     setIsEditingName(false);
   };
 
-  const handleEditFact = (fact: Fact) => {
-    setEditingFact({
-      id: fact.id,
-      factKey: fact.factKey,
-      factValue: fact.factValue,
-    });
-  };
-
-  const handleSaveFact = async () => {
-    if (!editingFact) return;
-    await factService.update(editingFact.id, {
-      factKey: editingFact.factKey,
-      factValue: editingFact.factValue,
-    });
-    invalidate();
-    setEditingFact(null);
-  };
-
-  const handleDeleteFact = (fact: Fact) => {
-    Alert.alert(
-      t('contact.fact.deleteTitle'),
-      t('contact.fact.deleteConfirm', { key: fact.factKey, value: fact.factValue }),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: async () => {
-            await factService.delete(fact.id);
-            invalidate();
-          },
-        },
-      ]
-    );
-  };
-
   const handleResolveHotTopic = async (id: string, resolution?: string) => {
     await resolveHotTopicMutation.mutateAsync({ id, resolution });
   };
@@ -309,14 +217,6 @@ export default function ContactDetailScreen() {
 
   const handleDeleteNote = async (id: string) => {
     await deleteNoteMutation.mutateAsync(id);
-  };
-
-  const handleEditMemory = async (id: string, data: { description: string; eventDate?: string }) => {
-    await updateMemoryMutation.mutateAsync({ id, data });
-  };
-
-  const handleDeleteMemory = async (id: string) => {
-    await deleteMemoryMutation.mutateAsync(id);
   };
 
   const handleAddNote = () => {
@@ -347,56 +247,6 @@ export default function ContactDetailScreen() {
     setNewHotTopicContext('');
     setIsAddingHotTopic(false);
     invalidate();
-  };
-
-  const handleAddMemory = async () => {
-    if (!newMemoryDescription.trim()) return;
-    await createMemoryMutation.mutateAsync({
-      contactId,
-      description: newMemoryDescription.trim(),
-      eventDate: newMemoryEventDate ? newMemoryEventDate.toISOString().split('T')[0] : undefined,
-      isShared: newMemoryIsShared,
-    });
-    setNewMemoryDescription('');
-    setNewMemoryEventDate(null);
-    setShowMemoryDatePicker(false);
-    setNewMemoryIsShared(false);
-    setIsAddingMemory(false);
-  };
-
-  const handleAddFact = async () => {
-    if (!newFactType || !newFactValue.trim()) return;
-    if (newFactType === 'other' && !newFactTitle.trim()) return;
-
-    await factService.create({
-      contactId,
-      factType: newFactType,
-      factKey: getFactTypeLabel(t, newFactType),
-      factValue: newFactValue.trim(),
-      title: newFactType === 'other' ? newFactTitle.trim() : undefined,
-    });
-
-    setNewFactType(null);
-    setNewFactValue('');
-    setNewFactTitle('');
-    setIsAddingFact(false);
-    invalidate();
-  };
-
-  const getAvailableFactTypes = (): FactType[] => {
-    if (!contact) return [];
-
-    const excludedTypes: FactType[] = ['contact', 'birthday'];
-
-    const existingSingularTypes = new Set(
-      contact.facts
-        .filter(fact => FACT_TYPE_CONFIG[fact.factType].singular)
-        .map(fact => fact.factType)
-    );
-
-    return (Object.keys(FACT_TYPE_CONFIG) as FactType[]).filter(
-      type => !existingSingularTypes.has(type) && !excludedTypes.includes(type)
-    );
   };
 
   // Group handlers
@@ -664,17 +514,28 @@ export default function ContactDetailScreen() {
           )}
         </Animated.View>
 
-        {/* AI Summary */}
+        {/* Contact Card (Phone, Email, Birthday) */}
         <Animated.View entering={FadeInDown.delay(100).duration(300)} style={styles.section}>
-          <AISummary summary={contact.aiSummary} isLoading={isWaitingForSummary} firstName={contact.firstName} />
+          <ContactCard
+            phone={contact.phone}
+            email={contact.email}
+            birthdayDay={contact.birthdayDay}
+            birthdayMonth={contact.birthdayMonth}
+            birthdayYear={contact.birthdayYear}
+            gender={contact.gender}
+            onEditPhone={() => setShowPhoneModal(true)}
+            onEditEmail={() => setShowEmailModal(true)}
+            onEditBirthday={() => setShowBirthdayModal(true)}
+            onEditGender={() => setShowGenderModal(true)}
+          />
         </Animated.View>
 
-        {/* Ice Breakers */}
+        {/* Ice Breakers (À demander) */}
         <Animated.View entering={FadeInDown.delay(125).duration(300)} style={styles.section}>
-          <IceBreakers iceBreakers={contact.iceBreakers} isLoading={isWaitingForIceBreakers} firstName={contact.firstName} />
+          <IceBreakers iceBreakers={contact.suggestedQuestions} isLoading={isWaitingForIceBreakers} firstName={contact.firstName} />
         </Animated.View>
 
-        {/* Hot Topics Section */}
+        {/* Hot Topics Section (Actualités) */}
         <Animated.View
           entering={FadeInDown.delay(150).duration(300)}
           style={styles.section}
@@ -734,262 +595,14 @@ export default function ContactDetailScreen() {
           />
         </Animated.View>
 
-        {/* Profile Section */}
-        <Animated.View
-          entering={FadeInDown.delay(200).duration(300)}
-          style={styles.section}
-          onLayout={(e) => {
-            sectionPositions.current['fact-section'] = e.nativeEvent.layout.y;
-          }}
-        >
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{t('contact.sections.profile')}</Text>
-            <Pressable onPress={() => setIsAddingFact(true)}>
-              <Plus size={20} color={Colors.primary} />
-            </Pressable>
-          </View>
-
-          {/* Contact Card */}
-          <ContactCard
-            phone={contact.phone}
-            email={contact.email}
-            birthdayDay={contact.birthdayDay}
-            birthdayMonth={contact.birthdayMonth}
-            birthdayYear={contact.birthdayYear}
-            gender={contact.gender}
-            onEditPhone={() => setShowPhoneModal(true)}
-            onEditEmail={() => setShowEmailModal(true)}
-            onEditBirthday={() => setShowBirthdayModal(true)}
-            onEditGender={() => setShowGenderModal(true)}
-          />
-
-          {isAddingFact && (
-            <View style={styles.addCard}>
-              <Text style={styles.inputLabel}>{t('contact.fact.infoTypeLabel')}</Text>
-              <Pressable
-                style={styles.dropdown}
-                onPress={() => setShowFactTypeDropdown(!showFactTypeDropdown)}
-              >
-                <Text style={newFactType ? styles.dropdownText : styles.dropdownPlaceholder}>
-                  {newFactType ? getFactTypeLabel(t, newFactType) : t('contact.fact.selectType')}
-                </Text>
-              </Pressable>
-
-              {showFactTypeDropdown && (
-                <View style={styles.dropdownList}>
-                  <ScrollView nestedScrollEnabled showsVerticalScrollIndicator style={{ maxHeight: 200 }}>
-                    {getAvailableFactTypes().map((type) => (
-                      <Pressable
-                        key={type}
-                        style={styles.dropdownItem}
-                        onPress={() => {
-                          setNewFactType(type);
-                          setShowFactTypeDropdown(false);
-                        }}
-                      >
-                        <Text style={styles.dropdownItemText}>{getFactTypeLabel(t, type)}</Text>
-                      </Pressable>
-                    ))}
-                  </ScrollView>
-                </View>
-              )}
-
-              {newFactType === 'other' && (
-                <>
-                  <Text style={styles.inputLabel}>{t('contact.otherFact.titleLabel')}</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={newFactTitle}
-                    onChangeText={setNewFactTitle}
-                    placeholder={t('contact.otherFact.titlePlaceholder')}
-                    placeholderTextColor={Colors.textMuted}
-                  />
-                </>
-              )}
-
-              {newFactType && (
-                <>
-                  <Text style={styles.inputLabel}>
-                    {newFactType === 'other' ? t('contact.otherFact.descriptionLabel') : t('contact.fact.valueLabel')}
-                  </Text>
-                  <TextInput
-                    style={styles.input}
-                    value={newFactValue}
-                    onChangeText={setNewFactValue}
-                    placeholder={
-                      newFactType === 'other'
-                        ? t('contact.otherFact.descriptionPlaceholder')
-                        : `Ex: ${newFactType === 'work' ? 'Développeur' : newFactType === 'hobby' ? 'Guitare' : 'Valeur...'}`
-                    }
-                    placeholderTextColor={Colors.textMuted}
-                  />
-                </>
-              )}
-
-              <View style={styles.buttonRow}>
-                <Pressable
-                  style={styles.cancelButton}
-                  onPress={() => {
-                    setIsAddingFact(false);
-                    setNewFactType(null);
-                    setNewFactValue('');
-                    setNewFactTitle('');
-                    setShowFactTypeDropdown(false);
-                  }}
-                >
-                  <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
-                </Pressable>
-                <Pressable style={styles.saveButton} onPress={handleAddFact}>
-                  <Text style={styles.saveButtonText}>{t('common.add')}</Text>
-                </Pressable>
-              </View>
-            </View>
-          )}
-
-          {editingFact ? (
-            <View style={styles.addCard}>
-              <Text style={styles.inputLabel}>{editingFact.factKey}</Text>
-              <TextInput
-                style={styles.input}
-                value={editingFact.factValue}
-                onChangeText={(value) => setEditingFact({ ...editingFact, factValue: value })}
-                placeholder="Valeur"
-                placeholderTextColor={Colors.textMuted}
-              />
-              <View style={styles.buttonRow}>
-                <Pressable style={styles.cancelButton} onPress={() => setEditingFact(null)}>
-                  <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
-                </Pressable>
-                <Pressable style={styles.saveButton} onPress={handleSaveFact}>
-                  <Text style={styles.saveButtonText}>{t('common.save')}</Text>
-                </Pressable>
-              </View>
-            </View>
-          ) : (
-            <ProfileCard
-              facts={contact.facts}
-              onEditFact={handleEditFact}
-              onDeleteFact={handleDeleteFact}
-              highlightId={highlightType === 'fact' ? highlightId : undefined}
-            />
-          )}
+        {/* AI Summary (Résumé) */}
+        <Animated.View entering={FadeInDown.delay(200).duration(300)} style={styles.section}>
+          <AISummary summary={contact.aiSummary} isLoading={isWaitingForSummary} firstName={contact.firstName} />
         </Animated.View>
 
-        {/* Memories Section */}
+        {/* Transcriptions Archive (Notes) */}
         <Animated.View
           entering={FadeInDown.delay(250).duration(300)}
-          style={styles.section}
-          onLayout={(e) => {
-            sectionPositions.current['memory-section'] = e.nativeEvent.layout.y;
-          }}
-        >
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{t('contact.sections.memories')}</Text>
-            <Pressable onPress={() => setIsAddingMemory(true)}>
-              <Plus size={20} color={Colors.primary} />
-            </Pressable>
-          </View>
-
-          {isAddingMemory && (
-            <View style={styles.addCard}>
-              <Text style={styles.inputLabel}>{t('contact.memory.descriptionLabel')}</Text>
-              <TextInput
-                style={[styles.input, styles.multilineInput]}
-                value={newMemoryDescription}
-                onChangeText={setNewMemoryDescription}
-                placeholder={t('contact.memory.descriptionPlaceholder')}
-                placeholderTextColor={Colors.textMuted}
-                multiline
-                numberOfLines={2}
-              />
-              <Text style={styles.inputLabel}>{t('contact.memory.eventDateLabel')}</Text>
-              <Pressable
-                style={styles.dropdown}
-                onPress={() => setShowMemoryDatePicker(true)}
-              >
-                <Text style={newMemoryEventDate ? styles.dropdownText : styles.dropdownPlaceholder}>
-                  {newMemoryEventDate
-                    ? newMemoryEventDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
-                    : t('contact.memory.selectDate')}
-                </Text>
-              </Pressable>
-              {showMemoryDatePicker && (
-                <View style={styles.datePickerContainer}>
-                  <DateTimePicker
-                    value={newMemoryEventDate || new Date()}
-                    mode="date"
-                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                    onChange={(event, selectedDate) => {
-                      if (Platform.OS === 'android') {
-                        setShowMemoryDatePicker(false);
-                      }
-                      if (event.type === 'set' && selectedDate) {
-                        setNewMemoryEventDate(selectedDate);
-                      }
-                    }}
-                    maximumDate={new Date()}
-                    locale="fr"
-                  />
-                  {Platform.OS === 'ios' && (
-                    <Pressable
-                      style={styles.validateDateButton}
-                      onPress={() => setShowMemoryDatePicker(false)}
-                    >
-                      <Text style={styles.validateDateText}>{t('contact.memory.validate')}</Text>
-                    </Pressable>
-                  )}
-                </View>
-              )}
-              <Pressable
-                style={styles.checkboxRow}
-                onPress={() => setNewMemoryIsShared(!newMemoryIsShared)}
-              >
-                <View style={[styles.checkbox, newMemoryIsShared && styles.checkboxChecked]}>
-                  {newMemoryIsShared && <Check size={14} color={Colors.textInverse} />}
-                </View>
-                <Text style={styles.checkboxLabel}>{t('contact.memory.sharedMoment')}</Text>
-              </Pressable>
-              <View style={styles.buttonRow}>
-                <Pressable
-                  style={styles.cancelButton}
-                  onPress={() => {
-                    setIsAddingMemory(false);
-                    setNewMemoryDescription('');
-                    setNewMemoryEventDate(null);
-                    setShowMemoryDatePicker(false);
-                    setNewMemoryIsShared(false);
-                  }}
-                >
-                  <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
-                </Pressable>
-                <Pressable style={styles.saveButton} onPress={handleAddMemory}>
-                  <Text style={styles.saveButtonText}>{t('common.add')}</Text>
-                </Pressable>
-              </View>
-            </View>
-          )}
-
-          {contact.memories.length > 0 ? (
-            <MemoriesList
-              memories={contact.memories}
-              onEdit={handleEditMemory}
-              onDelete={handleDeleteMemory}
-              highlightId={highlightType === 'memory' ? highlightId : undefined}
-            />
-          ) : (
-            !isAddingMemory && (
-              <View style={styles.emptyState}>
-                <Text style={styles.emptyStateText}>
-                  {t('contact.memory.emptyState')}
-                </Text>
-              </View>
-            )
-          )}
-        </Animated.View>
-
-        {/* Transcriptions Archive */}
-        <Animated.View
-          entering={FadeInDown.delay(300).duration(300)}
           style={styles.section}
           onLayout={(e) => {
             sectionPositions.current['note-section'] = e.nativeEvent.layout.y;
@@ -1321,76 +934,6 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 16,
     marginBottom: 16,
-  },
-  dropdown: {
-    backgroundColor: Colors.background,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    marginBottom: 12,
-  },
-  dropdownText: {
-    color: Colors.textPrimary,
-    fontSize: 16,
-  },
-  dropdownPlaceholder: {
-    color: Colors.textMuted,
-    fontSize: 16,
-  },
-  dropdownList: {
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    marginBottom: 12,
-    overflow: 'hidden',
-  },
-  dropdownItem: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
-  dropdownItemText: {
-    color: Colors.textPrimary,
-    fontSize: 15,
-  },
-  datePickerContainer: {
-    marginBottom: 12,
-  },
-  validateDateButton: {
-    paddingVertical: 8,
-    alignItems: 'center',
-  },
-  validateDateText: {
-    color: Colors.primary,
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  checkboxRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-    gap: 10,
-  },
-  checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: Colors.textMuted,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkboxChecked: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
-  },
-  checkboxLabel: {
-    color: Colors.textPrimary,
-    fontSize: 15,
   },
   emptyState: {
     backgroundColor: Colors.surface,

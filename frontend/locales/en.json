@@ -331,6 +331,14 @@
     "title": "Review",
     "newContact": "New contact",
     "update": "Update",
+    "namePlaceholder": "Contact name",
+    "transcription": "Transcription",
+    "edit": "Edit",
+    "done": "Done",
+    "transcriptionPlaceholder": "Write the transcription...",
+    "transcriptionHint": "💡 Tap on ✏️ to correct transcription errors",
+    "transcriptionEditWarning": "⚠️ After editing, hot topics will be re-detected",
+    "reExtracting": "Re-detecting...",
     "extractedInfo": "What I noted",
     "groups": "Groups",
     "addGroup": "Add a group",
@@ -559,5 +567,35 @@
     "enjoyFeatures": "Enjoy all Pro features",
     "features": "Included features",
     "activated": "Pro activated!"
+  },
+  "ask": {
+    "placeholder": "Ask me something...",
+    "title": "Ask",
+    "inputPlaceholder": "Type your question...",
+    "voiceButton": "Speak",
+    "sendButton": "Send",
+    "suggestionsTitle": "💡 Suggestions:",
+    "suggestions": {
+      "recent": "What did I talk about with Marie recently?",
+      "birthday": "When is Lucas's birthday?",
+      "updates": "What are Dad's updates?"
+    },
+    "newQuestionPlaceholder": "Another question...",
+    "result": {
+      "sourceHeader": "From your note on {{date}}:",
+      "sourcesTitle": "Sources",
+      "viewContactButton": "View {{contactName}}'s profile"
+    },
+    "contactNotFound": {
+      "title": "I can't find a matching contact",
+      "description": "No contact matches your search.",
+      "suggestionsTitle": "Did you mean:",
+      "createButton": "Create this contact"
+    },
+    "noInfo": {
+      "title": "I didn't find any information",
+      "description": "I found nothing on this topic in your notes about {{contactName}}.",
+      "addNoteButton": "Add a note about {{contactName}}"
+    }
   }
 }

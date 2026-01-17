@@ -9,7 +9,6 @@ import Animated, {
   withTiming,
   withSequence,
   Easing,
-  useEffect as useReanimatedEffect,
 } from 'react-native-reanimated';
 import { useEffect } from 'react';
 
