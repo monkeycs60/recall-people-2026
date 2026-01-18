@@ -147,6 +147,16 @@
     "editGroups": "Modifier les groupes",
     "addGroup": "Ajouter un groupe",
     "addGroupPlaceholder": "Ajouter un groupe...",
+    "groupsSheet": {
+      "title": "Gérer les groupes",
+      "currentGroups": "Groupes de {{firstName}}",
+      "allGroups": "Tous les groupes",
+      "noGroups": "Aucun groupe créé",
+      "createNew": "Nouveau groupe",
+      "newGroupPlaceholder": "Nom du groupe...",
+      "deleteGroupTitle": "Supprimer ce groupe ?",
+      "deleteGroupMessage": "Le groupe \"{{name}}\" sera supprimé de tous les contacts."
+    },
     "deleteContact": "Supprimer le contact",
     "deleteContactConfirm": "Voulez-vous vraiment supprimer ce contact ?",
     "notFound": "Contact introuvable",

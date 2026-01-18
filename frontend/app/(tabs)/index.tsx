@@ -50,22 +50,26 @@ const prefetchContactDetails = (
 	});
 };
 
-function getNextUpcomingHotTopic(hotTopics: HotTopic[]): HotTopic | null {
-	if (!hotTopics || hotTopics.length === 0) return null;
+function getTopHotTopics(hotTopics: HotTopic[], maxCount: number = 2): { topics: HotTopic[]; remainingCount: number } {
+	if (!hotTopics || hotTopics.length === 0) return { topics: [], remainingCount: 0 };
 
-	const activeTopicsWithDates = hotTopics
-		.filter((topic) => topic.status === 'active' && topic.eventDate)
-		.sort((topicA, topicB) => {
-			const dateA = parseISO(topicA.eventDate!);
-			const dateB = parseISO(topicB.eventDate!);
+	const activeTopics = hotTopics.filter((topic) => topic.status === 'active');
+
+	const sortedTopics = activeTopics.sort((topicA, topicB) => {
+		if (topicA.eventDate && topicB.eventDate) {
+			const dateA = parseISO(topicA.eventDate);
+			const dateB = parseISO(topicB.eventDate);
 			return dateA.getTime() - dateB.getTime();
-		});
+		}
+		if (topicA.eventDate) return -1;
+		if (topicB.eventDate) return 1;
+		return 0;
+	});
 
-	if (activeTopicsWithDates.length > 0) {
-		return activeTopicsWithDates[0];
-	}
+	const topics = sortedTopics.slice(0, maxCount);
+	const remainingCount = Math.max(0, sortedTopics.length - maxCount);
 
-	return hotTopics.find((topic) => topic.status === 'active') || null;
+	return { topics, remainingCount };
 }
 
 function formatHotTopicDate(dateString: string): string {
@@ -193,7 +197,7 @@ export default function ContactsScreen() {
 	const renderContact = ({ item, index }: { item: Contact; index: number }) => {
 		const preview = contactPreviews.get(item.id);
 		const hotTopics = preview?.hotTopics || [];
-		const nextHotTopic = getNextUpcomingHotTopic(hotTopics);
+		const { topics: topHotTopics, remainingCount } = getTopHotTopics(hotTopics, 2);
 		const lastContactText = formatLastContactTime(item.lastContactAt);
 
 		const content = (
@@ -222,16 +226,23 @@ export default function ContactsScreen() {
 						)}
 					</View>
 
-					{nextHotTopic && (
-						<View style={styles.hotTopicRow}>
-							<Flame size={14} color={Colors.warning} />
-							<Text style={styles.hotTopicText} numberOfLines={1}>
-								{nextHotTopic.title}
-							</Text>
-							{nextHotTopic.eventDate && (
-								<Text style={styles.hotTopicDate}>
-									({formatHotTopicDate(nextHotTopic.eventDate)})
-								</Text>
+					{topHotTopics.length > 0 && (
+						<View style={styles.hotTopicsContainer}>
+							{topHotTopics.map((topic) => (
+								<View key={topic.id} style={styles.hotTopicRow}>
+									<Flame size={14} color={Colors.warning} />
+									<Text style={styles.hotTopicText} numberOfLines={1}>
+										{topic.title}
+									</Text>
+									{topic.eventDate && (
+										<Text style={styles.hotTopicDate}>
+											({formatHotTopicDate(topic.eventDate)})
+										</Text>
+									)}
+								</View>
+							))}
+							{remainingCount > 0 && (
+								<Text style={styles.hotTopicMore}>+{remainingCount} autre{remainingCount > 1 ? 's' : ''}</Text>
 							)}
 						</View>
 					)}
@@ -477,11 +488,14 @@ const styles = StyleSheet.create({
 		color: Colors.textMuted,
 		marginLeft: 8,
 	},
+	hotTopicsContainer: {
+		marginTop: 4,
+		gap: 2,
+	},
 	hotTopicRow: {
 		flexDirection: 'row',
 		alignItems: 'center',
 		gap: 6,
-		marginTop: 4,
 	},
 	hotTopicText: {
 		fontSize: 13,
@@ -493,6 +507,12 @@ const styles = StyleSheet.create({
 		fontSize: 12,
 		color: Colors.textMuted,
 		fontWeight: '400',
+	},
+	hotTopicMore: {
+		fontSize: 12,
+		color: Colors.textMuted,
+		fontWeight: '500',
+		marginLeft: 20,
 	},
 	emptyStateContainer: {
 		flex: 1,

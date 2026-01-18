@@ -13,10 +13,10 @@ import {
   useDeleteNote,
 } from '@/hooks/useContactQuery';
 import { useUpdateContact, useDeleteContact } from '@/hooks/useContactsQuery';
-import { useGroupsQuery, useGroupsForContact, useSetContactGroups, useCreateGroup } from '@/hooks/useGroupsQuery';
+import { useGroupsForContact } from '@/hooks/useGroupsQuery';
 import { SearchSourceType } from '@/types';
 import { hotTopicService } from '@/services/hot-topic.service';
-import { Edit3, X, Plus, Check, Trash2, MoreVertical, MessageCircleQuestion } from 'lucide-react-native';
+import { Edit3, Plus, Trash2, MoreVertical, MessageCircleQuestion } from 'lucide-react-native';
 import { AISummary } from '@/components/contact/AISummary';
 import { AddNoteButton } from '@/components/AddNoteButton';
 import type { InputMode } from '@/components/InputModeToggle';
@@ -31,6 +31,7 @@ import { EmailEditModal } from '@/components/contact/EmailEditModal';
 import { BirthdayEditModal } from '@/components/contact/BirthdayEditModal';
 import { GenderEditModal } from '@/components/contact/GenderEditModal';
 import { AvatarEditModal } from '@/components/contact/AvatarEditModal';
+import { GroupsManagementSheet } from '@/components/contact/GroupsManagementSheet';
 import { Colors } from '@/constants/theme';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { useAppStore } from '@/stores/app-store';
@@ -67,11 +68,8 @@ export default function ContactDetailScreen() {
   const updateHotTopicMutation = useUpdateHotTopic();
   const updateHotTopicResolutionMutation = useUpdateHotTopicResolution();
   const deleteNoteMutation = useDeleteNote();
-  const setContactGroupsMutation = useSetContactGroups();
-  const createGroupMutation = useCreateGroup();
 
   // Groups queries
-  const { groups: allGroups } = useGroupsQuery();
   const { data: contactGroups = [] } = useGroupsForContact(contactId);
 
   const [isEditingName, setIsEditingName] = useState(false);
@@ -79,9 +77,7 @@ export default function ContactDetailScreen() {
   const [editedLastName, setEditedLastName] = useState('');
 
   // Groups state
-  const [isEditingGroups, setIsEditingGroups] = useState(false);
-  const [editedGroupIds, setEditedGroupIds] = useState<string[]>([]);
-  const [groupSearchQuery, setGroupSearchQuery] = useState('');
+  const [showGroupsSheet, setShowGroupsSheet] = useState(false);
 
   // Adding new items state
   const [isAddingHotTopic, setIsAddingHotTopic] = useState(false);
@@ -104,11 +100,6 @@ export default function ContactDetailScreen() {
       setEditedLastName(contact.lastName || '');
     }
   }, [contact]);
-
-  // Sync contact groups with local state
-  useEffect(() => {
-    setEditedGroupIds(contactGroups.map((group) => group.id));
-  }, [contactGroups]);
 
   useEffect(() => {
     if (highlightType && highlightId && contact && !isLoading) {
@@ -255,58 +246,6 @@ export default function ContactDetailScreen() {
     invalidate();
   };
 
-  // Group handlers
-  const handleStartEditingGroups = () => {
-    setEditedGroupIds(contactGroups.map((group) => group.id));
-    setIsEditingGroups(true);
-  };
-
-  const handleCancelEditingGroups = () => {
-    setEditedGroupIds(contactGroups.map((group) => group.id));
-    setIsEditingGroups(false);
-    setGroupSearchQuery('');
-  };
-
-  const handleSaveGroups = async () => {
-    let finalGroupIds = editedGroupIds;
-
-    if (groupSearchQuery.trim()) {
-      const groupExists = allGroups.some(
-        (group) => group.name.toLowerCase() === groupSearchQuery.toLowerCase()
-      );
-      if (!groupExists) {
-        const newGroup = await createGroupMutation.mutateAsync(groupSearchQuery.trim());
-        finalGroupIds = [...editedGroupIds, newGroup.id];
-      }
-    }
-
-    await setContactGroupsMutation.mutateAsync({ contactId, groupIds: finalGroupIds });
-    setIsEditingGroups(false);
-    setGroupSearchQuery('');
-  };
-
-  const toggleGroupInEdit = (groupId: string) => {
-    setEditedGroupIds((prev) =>
-      prev.includes(groupId)
-        ? prev.filter((id) => id !== groupId)
-        : [...prev, groupId]
-    );
-  };
-
-  const handleCreateAndAddGroup = async (name: string) => {
-    const newGroup = await createGroupMutation.mutateAsync(name);
-    setEditedGroupIds((prev) => [...prev, newGroup.id]);
-    setGroupSearchQuery('');
-  };
-
-  const availableGroups = allGroups.filter((g) => !editedGroupIds.includes(g.id));
-
-  const filteredGroupsForSearch = groupSearchQuery.trim()
-    ? availableGroups.filter((g) =>
-        g.name.toLowerCase().includes(groupSearchQuery.toLowerCase())
-      )
-    : availableGroups.slice(0, 5);
-
   if (isLoading) {
     return <ContactDetailSkeleton />;
   }
@@ -410,96 +349,24 @@ export default function ContactDetailScreen() {
             </Pressable>
           )}
 
-          {/* Groups display/edit */}
+          {/* Groups display */}
           {!isEditingName && (
-            isEditingGroups ? (
-              <View style={styles.editGroupsCard}>
-                <Text style={styles.inputLabel}>{t('contact.editGroups')}</Text>
-
-                {/* Current groups as removable chips */}
-                <View style={styles.groupChipsContainer}>
-                  {editedGroupIds.map((groupId) => {
-                    const group = allGroups.find((g) => g.id === groupId);
-                    if (!group) return null;
-                    return (
-                      <Pressable
-                        key={groupId}
-                        style={styles.groupChipRemovable}
-                        onPress={() => toggleGroupInEdit(groupId)}
-                      >
-                        <Text style={styles.groupChipText}>{group.name}</Text>
-                        <X size={14} color={Colors.primary} />
-                      </Pressable>
-                    );
-                  })}
-                </View>
-
-                {/* Search/add input */}
-                <TextInput
-                  style={styles.input}
-                  value={groupSearchQuery}
-                  onChangeText={setGroupSearchQuery}
-                  placeholder={t('contact.addGroupPlaceholder')}
-                  placeholderTextColor={Colors.textMuted}
-                />
-
-                {/* Search results */}
-                {filteredGroupsForSearch.length > 0 && (
-                  <View style={styles.groupSearchResults}>
-                    {filteredGroupsForSearch.slice(0, 5).map((group) => (
-                      <Pressable
-                        key={group.id}
-                        style={styles.groupSearchItem}
-                        onPress={() => toggleGroupInEdit(group.id)}
-                      >
-                        <Text style={styles.groupSearchItemText}>{group.name}</Text>
-                      </Pressable>
-                    ))}
+            contactGroups.length > 0 ? (
+              <Pressable style={styles.groupChipsContainer} onPress={() => setShowGroupsSheet(true)}>
+                {contactGroups.map((group) => (
+                  <View key={group.id} style={styles.groupChip}>
+                    <Text style={styles.groupChipText}>{group.name}</Text>
                   </View>
-                )}
-
-                {/* Create new option */}
-                {groupSearchQuery.trim() && !allGroups.some(
-                  (g) => g.name.toLowerCase() === groupSearchQuery.toLowerCase()
-                ) && (
-                  <Pressable
-                    style={styles.createGroupButton}
-                    onPress={() => handleCreateAndAddGroup(groupSearchQuery.trim())}
-                  >
-                    <Text style={styles.createGroupText}>
-                      {t('contact.createGroup', { name: groupSearchQuery.trim() })}
-                    </Text>
-                  </Pressable>
-                )}
-
-                {/* Action buttons */}
-                <View style={styles.buttonRow}>
-                  <Pressable style={styles.cancelButton} onPress={handleCancelEditingGroups}>
-                    <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
-                  </Pressable>
-                  <Pressable style={styles.saveButton} onPress={handleSaveGroups}>
-                    <Text style={styles.saveButtonText}>{t('common.save')}</Text>
-                  </Pressable>
+                ))}
+                <View style={styles.editGroupsIcon}>
+                  <Edit3 size={14} color={Colors.textMuted} />
                 </View>
-              </View>
+              </Pressable>
             ) : (
-              contactGroups.length > 0 ? (
-                <Pressable style={styles.groupChipsContainer} onPress={handleStartEditingGroups}>
-                  {contactGroups.map((group) => (
-                    <View key={group.id} style={styles.groupChip}>
-                      <Text style={styles.groupChipText}>{group.name}</Text>
-                    </View>
-                  ))}
-                  <View style={styles.editGroupsIcon}>
-                    <Edit3 size={14} color={Colors.textMuted} />
-                  </View>
-                </Pressable>
-              ) : (
-                <Pressable style={styles.addGroupButton} onPress={handleStartEditingGroups}>
-                  <Plus size={16} color={Colors.primary} />
-                  <Text style={styles.addGroupText}>{t('contact.addGroup')}</Text>
-                </Pressable>
-              )
+              <Pressable style={styles.addGroupButton} onPress={() => setShowGroupsSheet(true)}>
+                <Plus size={16} color={Colors.primary} />
+                <Text style={styles.addGroupText}>{t('contact.addGroup')}</Text>
+              </Pressable>
             )
           )}
 
@@ -688,6 +555,13 @@ export default function ContactDetailScreen() {
           onClose={() => setShowAvatarModal(false)}
         />
       )}
+
+      <GroupsManagementSheet
+        visible={showGroupsSheet}
+        onClose={() => setShowGroupsSheet(false)}
+        contactId={contactId}
+        contactFirstName={contact.firstName}
+      />
     </KeyboardAvoidingView>
   );
 }
@@ -771,13 +645,6 @@ const styles = StyleSheet.create({
     width: '100%',
     marginTop: 8,
   },
-  editGroupsCard: {
-    backgroundColor: Colors.surface,
-    padding: 16,
-    borderRadius: 16,
-    width: '100%',
-    marginTop: 12,
-  },
   inputLabel: {
     fontSize: 14,
     color: Colors.textSecondary,
@@ -844,15 +711,6 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 16,
   },
-  groupChipRemovable: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.primaryLight,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    gap: 6,
-  },
   groupChipText: {
     color: Colors.primary,
     fontSize: 14,
@@ -874,32 +732,6 @@ const styles = StyleSheet.create({
   addGroupText: {
     color: Colors.primary,
     fontSize: 14,
-    fontWeight: '500',
-  },
-  groupSearchResults: {
-    marginBottom: 8,
-  },
-  groupSearchItem: {
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    backgroundColor: Colors.background,
-    borderRadius: 8,
-    marginBottom: 4,
-  },
-  groupSearchItemText: {
-    color: Colors.textPrimary,
-    fontSize: 15,
-  },
-  createGroupButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    backgroundColor: Colors.primaryLight,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  createGroupText: {
-    color: Colors.primary,
-    fontSize: 15,
     fontWeight: '500',
   },
   lastContactText: {

@@ -64,6 +64,18 @@ export function useDeleteGroup() {
   });
 }
 
+export function useUpdateGroup() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, name }: { id: string; name: string }) =>
+      groupService.update(id, name),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.groups.all });
+    },
+  });
+}
+
 export function useSetContactGroups() {
   const queryClient = useQueryClient();
 

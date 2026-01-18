@@ -134,6 +134,16 @@
     "editGroups": "Edit groups",
     "addGroup": "Add group",
     "addGroupPlaceholder": "Add a group...",
+    "groupsSheet": {
+      "title": "Manage groups",
+      "currentGroups": "{{firstName}}'s groups",
+      "allGroups": "All groups",
+      "noGroups": "No groups created",
+      "createNew": "New group",
+      "newGroupPlaceholder": "Group name...",
+      "deleteGroupTitle": "Delete this group?",
+      "deleteGroupMessage": "The group \"{{name}}\" will be removed from all contacts."
+    },
     "deleteContact": "Delete contact",
     "deleteContactConfirm": "Are you sure you want to delete this contact?",
     "notFound": "Contact not found",
