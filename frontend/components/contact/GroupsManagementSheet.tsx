@@ -1,4 +1,4 @@
-import { View, Text, Pressable, Modal, TextInput, ScrollView, Alert, StyleSheet } from 'react-native';
+import { View, Text, Pressable, Modal, TextInput, ScrollView, Alert, StyleSheet, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Check, Pencil, Trash2, Plus } from 'lucide-react-native';
@@ -29,8 +29,10 @@ export function GroupsManagementSheet({
 }: GroupsManagementSheetProps) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const { groups: allGroups } = useGroupsQuery();
-  const { data: contactGroups = [] } = useGroupsForContact(contactId);
+  const { groups: allGroups, isLoading: isLoadingGroups } = useGroupsQuery();
+  const { data: contactGroups = [], isLoading: isLoadingContactGroups } = useGroupsForContact(contactId);
+
+  const isLoading = isLoadingGroups || isLoadingContactGroups;
   const setContactGroupsMutation = useSetContactGroups();
   const createGroupMutation = useCreateGroup();
   const deleteGroupMutation = useDeleteGroup();
@@ -156,8 +158,16 @@ export function GroupsManagementSheet({
             style={styles.scrollView}
             contentContainerStyle={styles.scrollContent}
             keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={true}
+            nestedScrollEnabled={true}
           >
-            {contactGroups.length > 0 && (
+            {isLoading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={Colors.primary} />
+              </View>
+            ) : null}
+
+            {!isLoading && contactGroups.length > 0 && (
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>
                   {t('contact.groupsSheet.currentGroups', { firstName: contactFirstName })}
@@ -177,6 +187,7 @@ export function GroupsManagementSheet({
               </View>
             )}
 
+            {!isLoading && (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>
                 {t('contact.groupsSheet.allGroups')}
@@ -259,7 +270,9 @@ export function GroupsManagementSheet({
                 </View>
               )}
             </View>
+            )}
 
+            {!isLoading && (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>
                 {t('contact.groupsSheet.createNew')}
@@ -286,6 +299,7 @@ export function GroupsManagementSheet({
                 </Pressable>
               </View>
             </View>
+            )}
           </ScrollView>
         </View>
       </Pressable>
@@ -303,7 +317,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    maxHeight: '80%',
+    minHeight: 400,
+    maxHeight: '85%',
   },
   header: {
     alignItems: 'center',
@@ -339,6 +354,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 16,
     paddingBottom: 24,
+  },
+  loadingContainer: {
+    paddingVertical: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   section: {
     marginBottom: 24,

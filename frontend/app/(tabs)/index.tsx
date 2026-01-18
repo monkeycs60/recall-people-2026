@@ -21,6 +21,7 @@ import {
 	Search,
 	ChevronRight,
 	Flame,
+	Calendar,
 	Plus,
 	UserPlus,
 	Settings,
@@ -35,7 +36,7 @@ import { queryKeys } from '@/lib/query-keys';
 import { contactService } from '@/services/contact.service';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { format, parseISO, isFuture, isPast } from 'date-fns';
+import { format, parseISO, isFuture, isPast, differenceInDays } from 'date-fns';
 
 const EMPTY_CONTACTS_ILLUSTRATION = require('@/assets/ai-assets/empty-contacts.png');
 
@@ -75,14 +76,21 @@ function getTopHotTopics(hotTopics: HotTopic[], maxCount: number = 2): { topics:
 function formatHotTopicDate(dateString: string): string {
 	try {
 		const date = parseISO(dateString);
-		const now = new Date();
-
-		if (isFuture(date)) {
-			return format(date, 'd MMM', { locale: fr });
-		}
 		return format(date, 'd MMM', { locale: fr });
 	} catch {
 		return '';
+	}
+}
+
+function isWithinOneMonth(dateString: string | undefined): boolean {
+	if (!dateString) return true;
+	try {
+		const date = parseISO(dateString);
+		const now = new Date();
+		const daysUntil = differenceInDays(date, now);
+		return daysUntil <= 30;
+	} catch {
+		return true;
 	}
 }
 
@@ -228,19 +236,23 @@ export default function ContactsScreen() {
 
 					{topHotTopics.length > 0 && (
 						<View style={styles.hotTopicsContainer}>
-							{topHotTopics.map((topic) => (
-								<View key={topic.id} style={styles.hotTopicRow}>
-									<Flame size={14} color={Colors.warning} />
-									<Text style={styles.hotTopicText} numberOfLines={1}>
-										{topic.title}
-									</Text>
-									{topic.eventDate && (
-										<Text style={styles.hotTopicDate}>
-											({formatHotTopicDate(topic.eventDate)})
+							{topHotTopics.map((topic) => {
+								const isUrgent = isWithinOneMonth(topic.eventDate);
+								const IconComponent = isUrgent ? Flame : Calendar;
+								return (
+									<View key={topic.id} style={styles.hotTopicRow}>
+										<IconComponent size={14} color={Colors.warning} />
+										<Text style={styles.hotTopicText} numberOfLines={1}>
+											{topic.title}
 										</Text>
-									)}
-								</View>
-							))}
+										{topic.eventDate && (
+											<Text style={styles.hotTopicDate}>
+												({formatHotTopicDate(topic.eventDate)})
+											</Text>
+										)}
+									</View>
+								);
+							})}
 							{remainingCount > 0 && (
 								<Text style={styles.hotTopicMore}>+{remainingCount} autre{remainingCount > 1 ? 's' : ''}</Text>
 							)}
