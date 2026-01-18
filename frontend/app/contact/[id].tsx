@@ -70,8 +70,8 @@ export default function ContactDetailScreen() {
   const updateHotTopicResolutionMutation = useUpdateHotTopicResolution();
   const deleteNoteMutation = useDeleteNote();
 
-  // Groups queries - prefetch allGroups so the sheet opens instantly
-  useGroupsQuery(); // prefetch for GroupsManagementSheet
+  // Groups queries - data passed as props to sheet for instant opening
+  const { groups: allGroups } = useGroupsQuery();
   const { data: contactGroups = [] } = useGroupsForContact(contactId);
 
   const [isEditingName, setIsEditingName] = useState(false);
@@ -565,6 +565,8 @@ export default function ContactDetailScreen() {
         ref={groupsSheetRef}
         contactId={contactId}
         contactFirstName={contact.firstName}
+        allGroups={allGroups}
+        contactGroups={contactGroups}
       />
     </KeyboardAvoidingView>
   );

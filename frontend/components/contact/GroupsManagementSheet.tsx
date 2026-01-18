@@ -1,12 +1,10 @@
-import { View, Text, Pressable, TextInput, Alert, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable, TextInput, Alert, StyleSheet } from 'react-native';
 import { forwardRef, useCallback, useState } from 'react';
 import { BottomSheetModal, BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useTranslation } from 'react-i18next';
 import { Check, Pencil, Trash2, Plus, X } from 'lucide-react-native';
 import { Colors } from '@/constants/theme';
 import {
-  useGroupsQuery,
-  useGroupsForContact,
   useSetContactGroups,
   useCreateGroup,
   useDeleteGroup,
@@ -17,15 +15,13 @@ import { Group } from '@/types';
 type GroupsManagementSheetProps = {
   contactId: string;
   contactFirstName: string;
+  allGroups: Group[];
+  contactGroups: Group[];
 };
 
 export const GroupsManagementSheet = forwardRef<BottomSheetModal, GroupsManagementSheetProps>(
-  ({ contactId, contactFirstName }, ref) => {
+  ({ contactId, contactFirstName, allGroups, contactGroups }, ref) => {
     const { t } = useTranslation();
-    const { groups: allGroups, isLoading: isLoadingGroups } = useGroupsQuery();
-    const { data: contactGroups = [], isLoading: isLoadingContactGroups } = useGroupsForContact(contactId);
-
-    const isLoading = isLoadingGroups || isLoadingContactGroups;
     const setContactGroupsMutation = useSetContactGroups();
     const createGroupMutation = useCreateGroup();
     const deleteGroupMutation = useDeleteGroup();
@@ -159,18 +155,13 @@ export const GroupsManagementSheet = forwardRef<BottomSheetModal, GroupsManageme
             </View>
           </View>
 
-          {isLoading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={Colors.primary} />
-            </View>
-          ) : (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>
-                {t('contact.groupsSheet.selectGroups', { firstName: contactFirstName })}
-              </Text>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              {t('contact.groupsSheet.selectGroups', { firstName: contactFirstName })}
+            </Text>
 
-              {allGroups.length === 0 ? (
-                <Text style={styles.emptyText}>{t('contact.groupsSheet.noGroups')}</Text>
+            {allGroups.length === 0 ? (
+              <Text style={styles.emptyText}>{t('contact.groupsSheet.noGroups')}</Text>
               ) : (
                 <View style={styles.groupsList}>
                   {allGroups.map((group) => {
@@ -230,8 +221,7 @@ export const GroupsManagementSheet = forwardRef<BottomSheetModal, GroupsManageme
                   })}
                 </View>
               )}
-            </View>
-          )}
+          </View>
         </BottomSheetScrollView>
       </BottomSheetModal>
     );
@@ -288,11 +278,6 @@ const styles = StyleSheet.create({
   },
   createButtonDisabled: {
     backgroundColor: Colors.textMuted,
-  },
-  loadingContainer: {
-    paddingVertical: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   section: {
     flex: 1,
