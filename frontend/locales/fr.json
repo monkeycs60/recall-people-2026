@@ -126,6 +126,14 @@
     "title": "Contact",
     "lastContact": "Dernier contact",
     "addNote": "Quoi de neuf avec {{firstName}} ?",
+    "addNoteButton": {
+      "title": "Ajouter une note sur {{firstName}}",
+      "voiceOption": "Enregistrer une note vocale",
+      "voiceDescription": "Parler de {{firstName}} au micro",
+      "textOption": "Ecrire une note",
+      "textDescription": "Taper une note sur {{firstName}}"
+    },
+    "askAbout": "Poser une question sur {{firstName}}",
     "aiSummary": {
       "header": "L'essentiel sur {{firstName}}",
       "loading": "Préparation de l'essentiel...",
@@ -404,7 +412,8 @@
     "inDays_plural": "Dans {{count}} jours",
     "inWeeks": "Dans {{count}} semaine",
     "inWeeks_plural": "Dans {{count}} semaines",
-    "inMonths": "Dans {{count}} mois"
+    "inMonths": "Dans {{count}} mois",
+    "selectDate": "Choisir la date"
   },
   "upcoming": {
     "title": "À venir",
@@ -602,16 +611,20 @@
   "ask": {
     "placeholder": "Demande-moi quelque chose...",
     "title": "Demander",
+    "titleAbout": "Sur {{firstName}}",
     "inputPlaceholder": "Tape ta question...",
+    "inputPlaceholderAbout": "Question sur {{firstName}}...",
     "voiceButton": "Parler",
     "sendButton": "Envoyer",
     "suggestionsTitle": "💡 Suggestions :",
     "suggestions": {
       "recent": "De quoi j'ai parlé avec Marie récemment ?",
       "birthday": "C'est quand l'anniversaire de Lucas ?",
-      "updates": "Quelles sont les actualités de Papa ?"
-    }
-    ,
+      "updates": "Quelles sont les actualités de Papa ?",
+      "recentWith": "De quoi j'ai parlé avec {{firstName}} récemment ?",
+      "birthdayOf": "C'est quand l'anniversaire de {{firstName}} ?",
+      "newsOf": "Quelles sont les actualités de {{firstName}} ?"
+    },
     "newQuestionPlaceholder": "Autre question...",
     "result": {
       "sourceHeader": "D'après ta note du {{date}} :",

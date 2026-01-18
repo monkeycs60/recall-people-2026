@@ -16,13 +16,13 @@ import { useUpdateContact, useDeleteContact } from '@/hooks/useContactsQuery';
 import { useGroupsQuery, useGroupsForContact, useSetContactGroups, useCreateGroup } from '@/hooks/useGroupsQuery';
 import { SearchSourceType } from '@/types';
 import { hotTopicService } from '@/services/hot-topic.service';
-import { Edit3, X, Plus, Check, Trash2, MoreVertical } from 'lucide-react-native';
+import { Edit3, X, Plus, Check, Trash2, MoreVertical, MessageCircleQuestion } from 'lucide-react-native';
 import { AISummary } from '@/components/contact/AISummary';
 import { AddNoteButton } from '@/components/AddNoteButton';
-import { InputMode } from '@/components/InputModeToggle';
+import type { InputMode } from '@/components/InputModeToggle';
 import { SuggestedQuestions } from '@/components/contact/SuggestedQuestions';
 import { HotTopicsList } from '@/components/contact/HotTopicsList';
-import { TranscriptionArchive } from '@/components/contact/TranscriptionArchive';
+import { NotesTimeline } from '@/components/contact/NotesTimeline';
 import { ContactAvatar } from '@/components/contact/ContactAvatar';
 import { ContactCard } from '@/components/contact/ContactCard';
 import { DeleteContactDialog } from '@/components/contact/DeleteContactDialog';
@@ -96,7 +96,6 @@ export default function ContactDetailScreen() {
   const [showBirthdayModal, setShowBirthdayModal] = useState(false);
   const [showGenderModal, setShowGenderModal] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
-  const [noteInputMode, setNoteInputMode] = useState<InputMode>('audio');
 
   // Sync contact data with local state
   useEffect(() => {
@@ -219,11 +218,18 @@ export default function ContactDetailScreen() {
     await deleteNoteMutation.mutateAsync(id);
   };
 
-  const handleAddNote = () => {
+  const handleAddNote = (mode: InputMode) => {
     setPreselectedContactId(contactId);
     router.push({
       pathname: '/record',
-      params: { initialMode: noteInputMode },
+      params: { initialMode: mode },
+    });
+  };
+
+  const handleAskAboutContact = () => {
+    router.push({
+      pathname: '/ask',
+      params: { contactId },
     });
   };
 
@@ -507,35 +513,27 @@ export default function ContactDetailScreen() {
           {!isEditingName && (
             <AddNoteButton
               firstName={contact.firstName}
-              mode={noteInputMode}
-              onModeChange={setNoteInputMode}
-              onPress={handleAddNote}
+              onAddNote={handleAddNote}
             />
+          )}
+
+          {/* Ask about contact button */}
+          {!isEditingName && (
+            <Pressable style={styles.askButton} onPress={handleAskAboutContact}>
+              <MessageCircleQuestion size={18} color={Colors.primary} />
+              <Text style={styles.askButtonText}>
+                {t('contact.askAbout', { firstName: contact.firstName })}
+              </Text>
+            </Pressable>
           )}
         </Animated.View>
 
-        {/* Contact Card (Phone, Email, Birthday) */}
+        {/* AI Summary (L'essentiel) - Most important info first */}
         <Animated.View entering={FadeInDown.delay(100).duration(300)} style={styles.section}>
-          <ContactCard
-            phone={contact.phone}
-            email={contact.email}
-            birthdayDay={contact.birthdayDay}
-            birthdayMonth={contact.birthdayMonth}
-            birthdayYear={contact.birthdayYear}
-            gender={contact.gender}
-            onEditPhone={() => setShowPhoneModal(true)}
-            onEditEmail={() => setShowEmailModal(true)}
-            onEditBirthday={() => setShowBirthdayModal(true)}
-            onEditGender={() => setShowGenderModal(true)}
-          />
+          <AISummary summary={contact.aiSummary} isLoading={isWaitingForSummary} firstName={contact.firstName} />
         </Animated.View>
 
-        {/* Suggested Questions */}
-        <Animated.View entering={FadeInDown.delay(125).duration(300)} style={styles.section}>
-          <SuggestedQuestions suggestedQuestions={contact.suggestedQuestions} isLoading={isWaitingForSuggestedQuestions} firstName={contact.firstName} />
-        </Animated.View>
-
-        {/* Hot Topics Section (Actualités) */}
+        {/* Hot Topics Section (Actualités) - Things to follow up on */}
         <Animated.View
           entering={FadeInDown.delay(150).duration(300)}
           style={styles.section}
@@ -595,12 +593,12 @@ export default function ContactDetailScreen() {
           />
         </Animated.View>
 
-        {/* AI Summary (Résumé) */}
+        {/* Suggested Questions - Conversation starters / Ask AI */}
         <Animated.View entering={FadeInDown.delay(200).duration(300)} style={styles.section}>
-          <AISummary summary={contact.aiSummary} isLoading={isWaitingForSummary} firstName={contact.firstName} />
+          <SuggestedQuestions suggestedQuestions={contact.suggestedQuestions} isLoading={isWaitingForSuggestedQuestions} firstName={contact.firstName} />
         </Animated.View>
 
-        {/* Transcriptions Archive (Notes) */}
+        {/* Notes Timeline - History of interactions */}
         <Animated.View
           entering={FadeInDown.delay(250).duration(300)}
           style={styles.section}
@@ -608,10 +606,26 @@ export default function ContactDetailScreen() {
             sectionPositions.current['note-section'] = e.nativeEvent.layout.y;
           }}
         >
-          <TranscriptionArchive
+          <NotesTimeline
             notes={contact.notes}
             onDelete={handleDeleteNote}
             highlightId={highlightType === 'note' ? highlightId : undefined}
+          />
+        </Animated.View>
+
+        {/* Contact Card (Phone, Email, Birthday) - Reference info at bottom */}
+        <Animated.View entering={FadeInDown.delay(300).duration(300)} style={styles.section}>
+          <ContactCard
+            phone={contact.phone}
+            email={contact.email}
+            birthdayDay={contact.birthdayDay}
+            birthdayMonth={contact.birthdayMonth}
+            birthdayYear={contact.birthdayYear}
+            gender={contact.gender}
+            onEditPhone={() => setShowPhoneModal(true)}
+            onEditEmail={() => setShowEmailModal(true)}
+            onEditBirthday={() => setShowBirthdayModal(true)}
+            onEditGender={() => setShowGenderModal(true)}
           />
         </Animated.View>
 
@@ -892,6 +906,24 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     fontSize: 14,
     marginTop: 12,
+  },
+  askButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.surface,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    marginTop: 12,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: Colors.primary,
+  },
+  askButtonText: {
+    color: Colors.primary,
+    fontSize: 15,
+    fontWeight: '500',
   },
   addNoteButton: {
     flexDirection: 'row',

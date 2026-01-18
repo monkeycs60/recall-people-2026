@@ -35,9 +35,13 @@ export default function AskScreen() {
 	const insets = useSafeAreaInsets();
 	const params = useLocalSearchParams();
 	const isVoiceMode = params.mode === 'voice';
+	const preselectedContactId = params.contactId as string | undefined;
 	const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
 
 	const { contacts } = useContactsQuery();
+	const preselectedContact = preselectedContactId
+		? contacts.find((contact) => contact.id === preselectedContactId)
+		: null;
 	const [question, setQuestion] = useState('');
 	const [isRecording, setIsRecording] = useState(false);
 	const [isTranscribing, setIsTranscribing] = useState(false);
@@ -55,36 +59,53 @@ export default function AskScreen() {
 					clearInterval(durationIntervalRef.current);
 				}
 			};
-		}, [contacts])
+		}, [contacts, preselectedContact])
 	);
 
 	const loadSuggestions = async () => {
-		const recentContacts = contacts
-			.filter((contact) => contact.lastContactAt)
-			.sort((a, b) => {
-				const dateA = new Date(a.lastContactAt || 0).getTime();
-				const dateB = new Date(b.lastContactAt || 0).getTime();
-				return dateB - dateA;
-			})
-			.slice(0, 3);
-
 		const newSuggestions: Suggestion[] = [];
 
-		for (const contact of recentContacts) {
-			const firstName = contact.firstName;
+		if (preselectedContact) {
+			const firstName = preselectedContact.firstName;
 			const suggestionTemplates = [
-				`De quoi j'ai parlé avec ${firstName} récemment ?`,
-				`C'est quand l'anniversaire de ${firstName} ?`,
-				`Quelles sont les actualités de ${firstName} ?`,
+				t('ask.suggestions.recentWith', { firstName }),
+				t('ask.suggestions.birthdayOf', { firstName }),
+				t('ask.suggestions.newsOf', { firstName }),
 			];
 
-			const randomSuggestion =
-				suggestionTemplates[Math.floor(Math.random() * suggestionTemplates.length)];
-			newSuggestions.push({
-				id: contact.id,
-				text: randomSuggestion,
-				contactName: firstName,
+			suggestionTemplates.forEach((text, index) => {
+				newSuggestions.push({
+					id: `${preselectedContact.id}-${index}`,
+					text,
+					contactName: firstName,
+				});
 			});
+		} else {
+			const recentContacts = contacts
+				.filter((contact) => contact.lastContactAt)
+				.sort((contactA, contactB) => {
+					const dateA = new Date(contactA.lastContactAt || 0).getTime();
+					const dateB = new Date(contactB.lastContactAt || 0).getTime();
+					return dateB - dateA;
+				})
+				.slice(0, 3);
+
+			for (const contact of recentContacts) {
+				const firstName = contact.firstName;
+				const suggestionTemplates = [
+					t('ask.suggestions.recentWith', { firstName }),
+					t('ask.suggestions.birthdayOf', { firstName }),
+					t('ask.suggestions.newsOf', { firstName }),
+				];
+
+				const randomSuggestion =
+					suggestionTemplates[Math.floor(Math.random() * suggestionTemplates.length)];
+				newSuggestions.push({
+					id: contact.id,
+					text: randomSuggestion,
+					contactName: firstName,
+				});
+			}
 		}
 
 		setSuggestions(newSuggestions);
@@ -164,8 +185,12 @@ export default function AskScreen() {
 		setIsSubmitting(true);
 
 		try {
+			const contactsToQuery = preselectedContact
+				? [preselectedContact]
+				: contacts;
+
 			const allContactsWithNotes = await Promise.all(
-				contacts.map(async (contact) => {
+				contactsToQuery.map(async (contact) => {
 					const notes = await noteService.getByContact(contact.id);
 					return {
 						id: contact.id,
@@ -236,7 +261,11 @@ export default function AskScreen() {
 					<Pressable style={styles.backButton} onPress={() => router.back()}>
 						<ChevronLeft size={24} color={Colors.textPrimary} />
 					</Pressable>
-					<Text style={styles.headerTitle}>{t('ask.title', 'Demander')}</Text>
+					<Text style={styles.headerTitle}>
+						{preselectedContact
+							? t('ask.titleAbout', { firstName: preselectedContact.firstName })
+							: t('ask.title', 'Demander')}
+					</Text>
 					<View style={styles.backButton} />
 				</View>
 
@@ -248,7 +277,11 @@ export default function AskScreen() {
 						<TextInput
 							ref={inputRef}
 							style={styles.input}
-							placeholder={t('ask.inputPlaceholder', 'Pose ta question...')}
+							placeholder={
+								preselectedContact
+									? t('ask.inputPlaceholderAbout', { firstName: preselectedContact.firstName })
+									: t('ask.inputPlaceholder', 'Pose ta question...')
+							}
 							placeholderTextColor={Colors.textMuted}
 							value={question}
 							onChangeText={setQuestion}

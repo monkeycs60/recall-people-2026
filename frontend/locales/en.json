@@ -113,6 +113,14 @@
     "title": "Contact",
     "lastContact": "Last contact",
     "addNote": "What's new with {{firstName}}?",
+    "addNoteButton": {
+      "title": "Add note about {{firstName}}",
+      "voiceOption": "Record a voice note",
+      "voiceDescription": "Talk about {{firstName}} using your microphone",
+      "textOption": "Write a note",
+      "textDescription": "Type a note about {{firstName}}"
+    },
+    "askAbout": "Ask about {{firstName}}",
     "aiSummary": {
       "header": "The essentials on {{firstName}}",
       "loading": "Preparing the essentials...",
@@ -378,7 +386,8 @@
     "inDays_plural": "In {{count}} days",
     "inWeeks": "In {{count}} week",
     "inWeeks_plural": "In {{count}} weeks",
-    "inMonths": "In {{count}} months"
+    "inMonths": "In {{count}} months",
+    "selectDate": "Select date"
   },
   "upcoming": {
     "title": "Upcoming",
@@ -576,14 +585,19 @@
   "ask": {
     "placeholder": "Ask me something...",
     "title": "Ask",
+    "titleAbout": "About {{firstName}}",
     "inputPlaceholder": "Type your question...",
+    "inputPlaceholderAbout": "Ask about {{firstName}}...",
     "voiceButton": "Speak",
     "sendButton": "Send",
     "suggestionsTitle": "💡 Suggestions:",
     "suggestions": {
       "recent": "What did I talk about with Marie recently?",
       "birthday": "When is Lucas's birthday?",
-      "updates": "What are Dad's updates?"
+      "updates": "What are Dad's updates?",
+      "recentWith": "What did I talk about with {{firstName}} recently?",
+      "birthdayOf": "When is {{firstName}}'s birthday?",
+      "newsOf": "What are {{firstName}}'s news?"
     },
     "newQuestionPlaceholder": "Another question...",
     "result": {

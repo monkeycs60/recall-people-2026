@@ -73,7 +73,7 @@ const extractionSchema = z.object({
     z.object({
       title: z.string().describe('Titre court du sujet (ex: "Entretien Google", "Déménagement Lyon")'),
       context: z.string().describe('1-2 phrases de contexte avec les détails importants'),
-      eventDate: z.string().nullable().describe('Date ISO (YYYY-MM-DD) si un événement daté est mentionné, sinon null'),
+      eventDate: z.string().nullable().describe('OBLIGATOIRE si une date est mentionnée (relative ou absolue). Format: YYYY-MM-DD. Exemples: "la semaine prochaine" doit être converti en date ISO, "en juin" devient "2026-06-01". null UNIQUEMENT si aucune date mentionnée.'),
     })
   ).describe('NOUVELLES actualités/sujets à suivre mentionnés dans la note (projets, événements, situations en cours)'),
   resolvedTopics: z.array(
@@ -181,11 +181,22 @@ extractRoutes.post('/', async (c) => {
           year: extraction.contactInfo.birthday.year || undefined,
         } : undefined,
       },
-      hotTopics: extraction.hotTopics.map((topic) => ({
-        title: topic.title,
-        context: topic.context,
-        eventDate: topic.eventDate || undefined,
-      })),
+      hotTopics: extraction.hotTopics.map((topic) => {
+        // Convert ISO date (YYYY-MM-DD) to DD/MM/YYYY for V1 compatibility (suggestedDate)
+        let suggestedDate: string | undefined;
+        if (topic.eventDate) {
+          const [year, month, day] = topic.eventDate.split('-');
+          if (year && month && day) {
+            suggestedDate = `${day}/${month}/${year}`;
+          }
+        }
+        return {
+          title: topic.title,
+          context: topic.context,
+          eventDate: topic.eventDate || undefined,
+          suggestedDate, // V1 compatibility: DD/MM/YYYY format
+        };
+      }),
       resolvedTopics: extraction.resolvedTopics.map((topic) => ({
         existingTopicId: topic.existingTopicId,
         resolution: topic.resolution,
@@ -254,6 +265,8 @@ ${currentContact.hotTopics.map((topic) => `  • [ID: ${topic.id}] "${topic.titl
   }
 
   const currentDate = format(new Date(), 'yyyy-MM-dd');
+  const nextWeekDate = format(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd');
+  const twoMonthsDate = format(new Date(new Date().setMonth(new Date().getMonth() + 2)), 'yyyy-MM-dd');
 
   return `Tu es un assistant qui extrait les actualités importantes d'une note vocale.
 
@@ -294,10 +307,10 @@ RÈGLES:
    - Infos statiques: lieu de vie, formation
    - Activités régulières: "fait du sport", "joue aux échecs"
 
-3. DATES ABSOLUES (format ISO: YYYY-MM-DD):
-   Aujourd'hui c'est ${currentDate}. Calcule les dates relatives:
+3. DATES ABSOLUES (format ISO: YYYY-MM-DD) - CRITIQUE:
+   Aujourd'hui c'est ${currentDate}. Tu DOIS calculer et retourner eventDate pour TOUTE mention de date.
 
-   Calculs temporels:
+   Calculs temporels (OBLIGATOIRE - calcule la date exacte):
    - "demain" → ${currentDate} + 1 jour
    - "dans X jours" → ${currentDate} + X jours
    - "la semaine prochaine" / "next week" → ${currentDate} + 7 jours
@@ -319,8 +332,14 @@ RÈGLES:
    - "cet hiver" / "this winter" → 2026-12-01
    - "le printemps" / "spring" → 2026-03-01
 
-   IMPORTANT: Retourne toujours eventDate en format YYYY-MM-DD quand une date est mentionnée.
-   Si aucune date ou date trop vague ("un jour", "bientôt") → eventDate = null
+   RÈGLE CRITIQUE - TOUJOURS RETOURNER eventDate:
+   - Si une date quelconque est mentionnée (relative ou absolue), tu DOIS retourner eventDate en YYYY-MM-DD
+   - Exemples où eventDate est OBLIGATOIRE:
+     * "entretien la semaine prochaine" → eventDate = date calculée
+     * "déménage dans 2 mois" → eventDate = date calculée
+     * "mariage en juin" → eventDate = "2026-06-01"
+     * "examen le 15" → eventDate = "2026-XX-15" (mois actuel ou suivant)
+   - eventDate = null SEULEMENT si aucune date mentionnée OU date trop vague ("un jour", "bientôt", "peut-être")
 
 4. RÉSOLUTION D'ACTUALITÉS EXISTANTES:
    Si une actualité existante est mentionnée avec une issue, marque-la résolue.
@@ -372,5 +391,34 @@ FORMAT JSON:
     }
   ],
   "noteTitle": "2-4 mots résumant la note"
+}
+
+EXEMPLES CONCRETS DE HOT TOPICS AVEC DATES:
+
+Exemple 1 - "Marie a un entretien chez Google la semaine prochaine":
+{
+  "hotTopics": [{
+    "title": "Entretien Google",
+    "context": "Elle passe un entretien d'embauche chez Google.",
+    "eventDate": "${nextWeekDate}"
+  }]
+}
+
+Exemple 2 - "Il déménage à Lyon dans 2 mois":
+{
+  "hotTopics": [{
+    "title": "Déménagement Lyon",
+    "context": "Il prépare son déménagement pour s'installer à Lyon.",
+    "eventDate": "${twoMonthsDate}"
+  }]
+}
+
+Exemple 3 - "Elle se marie en juin":
+{
+  "hotTopics": [{
+    "title": "Mariage",
+    "context": "Elle prépare son mariage prévu pour juin.",
+    "eventDate": "2026-06-01"
+  }]
 }`;
 };

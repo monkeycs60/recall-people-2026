@@ -1,9 +1,10 @@
-import { View, Text, ScrollView, Pressable, TextInput, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, Pressable, TextInput, StyleSheet, Platform, Modal } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { ExtractionResult, HotTopic, ResolvedTopic, ExtractedMemory } from '@/types';
 import { useCreateContact, useUpdateContact } from '@/hooks/useContactsQuery';
 import { useGroupsQuery } from '@/hooks/useGroupsQuery';
@@ -17,7 +18,7 @@ import { noteService } from '@/services/note.service';
 import { useAppStore } from '@/stores/app-store';
 import { queryKeys } from '@/lib/query-keys';
 import { Colors } from '@/constants/theme';
-import { Archive, Edit3, Plus, X } from 'lucide-react-native';
+import { Archive, Calendar, Edit3, Plus, X } from 'lucide-react-native';
 
 function formatBirthdayDisplay(day: number, month: number, monthNames: string[], year?: number): string {
   const monthName = monthNames[month - 1] || month.toString();
@@ -109,6 +110,9 @@ export default function ReviewScreen() {
     email: !!extraction.contactInfo?.email,
     birthday: !!extraction.contactInfo?.birthday,
   });
+
+  const [datePickerIndex, setDatePickerIndex] = useState<number | null>(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   // Editable contact name (for new contacts)
   const [isEditingName, setIsEditingName] = useState(false);
@@ -247,6 +251,49 @@ export default function ReviewScreen() {
     }
     const months = Math.floor(diffDays / 30);
     return t('review.inMonths', { count: months });
+  };
+
+  const parseDateStringToDate = (dateStr: string): Date => {
+    const match = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (match) {
+      const dayNum = parseInt(match[1]);
+      const monthNum = parseInt(match[2]);
+      const yearNum = parseInt(match[3]);
+      return new Date(yearNum, monthNum - 1, dayNum);
+    }
+    return new Date();
+  };
+
+  const formatDateToString = (date: Date): string => {
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  const handleDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
+    if (Platform.OS === 'android') {
+      setShowDatePicker(false);
+    }
+
+    if (event.type === 'set' && selectedDate && datePickerIndex !== null) {
+      const formattedDate = formatDateToString(selectedDate);
+      updateHotTopicDate(datePickerIndex, formattedDate);
+    }
+
+    if (Platform.OS === 'android') {
+      setDatePickerIndex(null);
+    }
+  };
+
+  const openDatePicker = (index: number) => {
+    setDatePickerIndex(index);
+    setShowDatePicker(true);
+  };
+
+  const closeDatePicker = () => {
+    setShowDatePicker(false);
+    setDatePickerIndex(null);
   };
 
   const toggleGroup = (group: { name: string; isNew: boolean; existingId?: string }) => {
@@ -1088,13 +1135,15 @@ export default function ReviewScreen() {
 
                   {dateInfo?.enabled && (
                     <>
-                      <TextInput
-                        style={styles.dateInput}
-                        value={dateInfo.date}
-                        onChangeText={(value) => updateHotTopicDate(index, value)}
-                        placeholder="DD/MM/YYYY"
-                        placeholderTextColor={Colors.textMuted}
-                      />
+                      <Pressable
+                        style={styles.datePickerButton}
+                        onPress={() => openDatePicker(index)}
+                      >
+                        <Calendar size={16} color={Colors.info} />
+                        <Text style={dateInfo.date ? styles.datePickerText : styles.datePickerPlaceholder}>
+                          {dateInfo.date || t('review.selectDate')}
+                        </Text>
+                      </Pressable>
                       {dateInfo.date && (
                         <Text style={styles.relativeDateText}>
                           {formatRelativeDate(dateInfo.date)}
@@ -1190,6 +1239,54 @@ export default function ReviewScreen() {
           {isSaving ? t('review.saving') : t('review.save')}
         </Text>
       </Pressable>
+
+      {Platform.OS === 'android' && showDatePicker && datePickerIndex !== null && (
+        <DateTimePicker
+          value={hotTopicDates[datePickerIndex]?.date
+            ? parseDateStringToDate(hotTopicDates[datePickerIndex].date)
+            : new Date()
+          }
+          mode="date"
+          display="default"
+          onChange={handleDateChange}
+          minimumDate={new Date()}
+        />
+      )}
+
+      {Platform.OS === 'ios' && (
+        <Modal
+          visible={showDatePicker}
+          transparent
+          animationType="slide"
+        >
+          <View style={styles.datePickerModalOverlay}>
+            <View style={styles.datePickerModalContent}>
+              <View style={styles.datePickerModalHeader}>
+                <Pressable onPress={closeDatePicker}>
+                  <Text style={styles.datePickerModalCancel}>{t('common.cancel')}</Text>
+                </Pressable>
+                <Text style={styles.datePickerModalTitle}>{t('review.selectDate')}</Text>
+                <Pressable onPress={closeDatePicker}>
+                  <Text style={styles.datePickerModalDone}>{t('common.confirm')}</Text>
+                </Pressable>
+              </View>
+              {datePickerIndex !== null && (
+                <DateTimePicker
+                  value={hotTopicDates[datePickerIndex]?.date
+                    ? parseDateStringToDate(hotTopicDates[datePickerIndex].date)
+                    : new Date()
+                  }
+                  mode="date"
+                  display="spinner"
+                  onChange={handleDateChange}
+                  minimumDate={new Date()}
+                  style={styles.iosDatePicker}
+                />
+              )}
+            </View>
+          </View>
+        </Modal>
+      )}
     </ScrollView>
   );
 }
@@ -1733,5 +1830,61 @@ const styles = StyleSheet.create({
     color: Colors.textInverse,
     fontSize: 15,
     fontWeight: '600',
+  },
+  datePickerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.background,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: Colors.info,
+    gap: 6,
+  },
+  datePickerText: {
+    fontSize: 14,
+    color: Colors.textPrimary,
+  },
+  datePickerPlaceholder: {
+    fontSize: 14,
+    color: Colors.textMuted,
+  },
+  datePickerModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  datePickerModalContent: {
+    backgroundColor: Colors.surface,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 40,
+  },
+  datePickerModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  datePickerModalCancel: {
+    fontSize: 16,
+    color: Colors.textSecondary,
+  },
+  datePickerModalTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+  },
+  datePickerModalDone: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.primary,
+  },
+  iosDatePicker: {
+    height: 200,
   },
 });

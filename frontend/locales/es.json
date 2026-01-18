@@ -89,6 +89,13 @@
     "title": "Contacto",
     "lastContact": "Último contacto",
     "addNote": "¿Qué hay de nuevo con {{firstName}}?",
+    "addNoteButton": {
+      "title": "Añadir nota sobre {{firstName}}",
+      "voiceOption": "Grabar una nota de voz",
+      "voiceDescription": "Hablar de {{firstName}} por el micrófono",
+      "textOption": "Escribir una nota",
+      "textDescription": "Escribir una nota sobre {{firstName}}"
+    },
     "aiSummary": {
       "header": "Lo esencial sobre {{firstName}}",
       "loading": "Preparando lo esencial...",

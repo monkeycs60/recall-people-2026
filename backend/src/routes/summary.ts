@@ -79,20 +79,22 @@ ${allTranscriptions}
 
 RÈGLES ABSOLUES:
 1. Résumé de 2-4 phrases maximum
-2. Utilise des DATES ABSOLUES (pas "récemment" mais "en janvier 2026", "le 25/01/2026")
-3. N'invente RIEN - base-toi uniquement sur les notes fournies
-4. Mentionne la situation actuelle (travail, projets en cours)
-5. Mentionne les événements à venir importants s'il y en a
-6. Si les notes sont contradictoires, privilégie l'info la plus récente
-7. Style factuel et concis: "Travaille chez X. Entretien prévu le DD/MM/YYYY. A un enfant qui fait Y."
-8. Ne dis PAS "selon les notes" ou "d'après les informations"
-9. Si jamais tu évoques l'utilisateur (le narrateur), utilise 'l'utilisateur' pour le désigner
+2. Utilise des DATES ABSOLUES en texte complet (pas "récemment" mais "en janvier 2026", "le 25 janvier 2026")
+3. FORMATAGE DES DATES: Écris les dates en texte complet avec le nom du mois (ex: "25 janvier 2026", "3 mars 2026"), JAMAIS en format numérique (pas de "25/01/2026" ou "03/03/2026")
+4. N'invente RIEN - base-toi uniquement sur les notes fournies
+5. Mentionne la situation actuelle (travail, projets en cours)
+6. Mentionne les événements à venir importants s'il y en a
+7. Si les notes sont contradictoires, privilégie l'info la plus récente
+8. Style factuel et concis: "Travaille chez X. Entretien prévu le 25 janvier 2026. A un enfant qui fait Y."
+9. Ne dis PAS "selon les notes" ou "d'après les informations"
+10. Si jamais tu évoques l'utilisateur (le narrateur), utilise 'l'utilisateur' pour le désigner
 
 EXEMPLE BON:
-"Marie est consultante chez Deloitte, en recherche d'un nouveau poste (entretien chez Google le 25/01/2026). Elle déménage à Lyon en mars 2026. Mère de Lucas qui fait du foot."
+"Marie est consultante chez Deloitte, en recherche d'un nouveau poste (entretien chez Google le 25 janvier 2026). Elle déménage à Lyon en mars 2026. Mère de Lucas qui fait du foot."
 
 EXEMPLE MAUVAIS:
 "Marie est une personne dynamique qui travaille beaucoup. Elle a plein de projets passionnants récemment."
+"Marie a un entretien le 25/01/2026." (dates numériques interdites)
 
 Résumé:`;
 
