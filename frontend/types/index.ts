@@ -73,7 +73,6 @@ export type Contact = {
   // AI-generated (regenerated after each note)
   aiSummary?: string;
   suggestedQuestions?: string[]; // JSON array of max 3 questions
-  iceBreakers?: string[]; // JSON array of conversation starters
   highlights?: string[]; // JSON array of key highlights
 
   // Meta

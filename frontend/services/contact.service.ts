@@ -61,7 +61,6 @@ export const contactService = {
       birthday_year: number | null;
       ai_summary: string | null;
       suggested_questions: string | null;
-      ice_breakers: string | null;
       last_contact_at: string | null;
       created_at: string;
       updated_at: string;
@@ -109,7 +108,7 @@ export const contactService = {
       birthdayMonth: contactRow.birthday_month || undefined,
       birthdayYear: contactRow.birthday_year || undefined,
       aiSummary: contactRow.ai_summary || undefined,
-      iceBreakers: contactRow.ice_breakers ? JSON.parse(contactRow.ice_breakers) : undefined,
+      suggestedQuestions: contactRow.suggested_questions ? JSON.parse(contactRow.suggested_questions) : undefined,
       lastContactAt: contactRow.last_contact_at || undefined,
       createdAt: contactRow.created_at,
       updatedAt: contactRow.updated_at,
@@ -195,8 +194,7 @@ export const contactService = {
       birthdayMonth: number | null;
       birthdayYear: number | null;
       aiSummary: string;
-      suggestedQuestions: string;
-      iceBreakers: string[];
+      suggestedQuestions: string[];
       lastContactAt: string;
     }>
   ): Promise<void> => {
@@ -250,11 +248,7 @@ export const contactService = {
     }
     if (data.suggestedQuestions !== undefined) {
       updates.push('suggested_questions = ?');
-      values.push(data.suggestedQuestions || null);
-    }
-    if (data.iceBreakers !== undefined) {
-      updates.push('ice_breakers = ?');
-      values.push(data.iceBreakers ? JSON.stringify(data.iceBreakers) : null);
+      values.push(data.suggestedQuestions ? JSON.stringify(data.suggestedQuestions) : null);
     }
     if (data.lastContactAt) {
       updates.push('last_contact_at = ?');

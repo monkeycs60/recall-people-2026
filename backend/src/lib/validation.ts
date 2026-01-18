@@ -45,8 +45,8 @@ export const summaryRequestSchema = z.object({
   language: languageSchema.optional(),
 });
 
-// Ice breakers request schema
-export const iceBreakersRequestSchema = z.object({
+// Suggested questions request schema
+export const suggestedQuestionsRequestSchema = z.object({
   contact: contactSchema,
   facts: z.array(factSchema),
   hotTopics: z.array(hotTopicSchema),

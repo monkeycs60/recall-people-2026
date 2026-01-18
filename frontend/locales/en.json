@@ -118,7 +118,7 @@
       "loading": "Preparing the essentials...",
       "empty": "Add notes to discover the essentials on {{firstName}}"
     },
-    "iceBreakers": {
+    "suggestedQuestions": {
       "header": "Need an idea to restart the conversation?",
       "loading": "Preparing ideas...",
       "empty": "Add notes to get conversation ideas"

@@ -182,7 +182,7 @@ export const extractInfo = async (data: {
   });
 };
 
-export const generateIceBreakers = async (data: {
+export const generateSuggestedQuestions = async (data: {
   contact: {
     firstName: string;
     lastName?: string;
@@ -198,14 +198,14 @@ export const generateIceBreakers = async (data: {
     status: string;
   }>;
 }): Promise<string[]> => {
-  const response = await apiCall<{ success: boolean; iceBreakers: string[] }>(
-    '/api/ice-breakers',
+  const response = await apiCall<{ success: boolean; suggestedQuestions: string[] }>(
+    '/api/suggested-questions',
     {
       method: 'POST',
       body: { ...data, language: getCurrentLanguage() },
     }
   );
-  return response.iceBreakers;
+  return response.suggestedQuestions;
 };
 
 export type AvatarHints = {

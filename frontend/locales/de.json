@@ -94,7 +94,7 @@
       "loading": "Bereite das Wichtigste vor...",
       "empty": "Füge Notizen hinzu, um das Wichtigste über {{firstName}} zu erfahren"
     },
-    "iceBreakers": {
+    "suggestedQuestions": {
       "header": "Eine Idee, um das Gespräch wieder aufzunehmen?",
       "loading": "Bereite Ideen vor...",
       "empty": "Füge Notizen hinzu, um Gesprächsideen zu erhalten"

@@ -20,7 +20,7 @@ import { Edit3, X, Plus, Check, Trash2, MoreVertical } from 'lucide-react-native
 import { AISummary } from '@/components/contact/AISummary';
 import { AddNoteButton } from '@/components/AddNoteButton';
 import { InputMode } from '@/components/InputModeToggle';
-import { IceBreakers } from '@/components/contact/IceBreakers';
+import { SuggestedQuestions } from '@/components/contact/SuggestedQuestions';
 import { HotTopicsList } from '@/components/contact/HotTopicsList';
 import { TranscriptionArchive } from '@/components/contact/TranscriptionArchive';
 import { ContactAvatar } from '@/components/contact/ContactAvatar';
@@ -50,7 +50,7 @@ export default function ContactDetailScreen() {
   const scrollViewRef = useRef<ScrollView>(null);
   const sectionPositions = useRef<Record<string, number>>({});
 
-  const { contact, isLoading, isWaitingForSummary, isWaitingForIceBreakers, invalidate, refetch } = useContactQuery(contactId);
+  const { contact, isLoading, isWaitingForSummary, isWaitingForSuggestedQuestions, invalidate, refetch } = useContactQuery(contactId);
 
   useFocusEffect(
     useCallback(() => {
@@ -530,9 +530,9 @@ export default function ContactDetailScreen() {
           />
         </Animated.View>
 
-        {/* Ice Breakers (À demander) */}
+        {/* Suggested Questions */}
         <Animated.View entering={FadeInDown.delay(125).duration(300)} style={styles.section}>
-          <IceBreakers iceBreakers={contact.iceBreakers} isLoading={isWaitingForIceBreakers} firstName={contact.firstName} />
+          <SuggestedQuestions suggestedQuestions={contact.suggestedQuestions} isLoading={isWaitingForSuggestedQuestions} firstName={contact.firstName} />
         </Animated.View>
 
         {/* Hot Topics Section (Actualités) */}

@@ -19,7 +19,7 @@ export function useContactQuery(contactId: string | undefined) {
       const hasNotes = contact.notes.length > 0;
       const hasData = hasHotTopics || hasNotes;
       const hasNoSummary = !contact.aiSummary;
-      const hasNoIceBreakers = !contact.iceBreakers || contact.iceBreakers.length === 0;
+      const hasNoSuggestedQuestions = !contact.suggestedQuestions || contact.suggestedQuestions.length === 0;
 
       // Only poll if there's recent activity (note added within last 2 minutes)
       // This prevents infinite polling for contacts where summary generation already failed/completed
@@ -27,8 +27,8 @@ export function useContactQuery(contactId: string | undefined) {
       const isRecentActivity = mostRecentNote &&
         (Date.now() - new Date(mostRecentNote.createdAt).getTime()) < 2 * 60 * 1000;
 
-      // Poll every 1.5s if contact has recent data but no summary or ice breakers yet
-      if (hasData && isRecentActivity && (hasNoSummary || hasNoIceBreakers)) {
+      // Poll every 1.5s if contact has recent data but no summary or suggested questions yet
+      if (hasData && isRecentActivity && (hasNoSummary || hasNoSuggestedQuestions)) {
         return 1500;
       }
 
@@ -46,8 +46,8 @@ export function useContactQuery(contactId: string | undefined) {
 
   const isWaitingForSummary = hasData && isRecentActivity && !query.data?.aiSummary;
 
-  const isWaitingForIceBreakers =
-    hasData && isRecentActivity && (!query.data?.iceBreakers || query.data.iceBreakers.length === 0);
+  const isWaitingForSuggestedQuestions =
+    hasData && isRecentActivity && (!query.data?.suggestedQuestions || query.data.suggestedQuestions.length === 0);
 
   const invalidate = () => {
     if (contactId) {
@@ -61,7 +61,7 @@ export function useContactQuery(contactId: string | undefined) {
     contact: query.data ?? null,
     isLoading: query.isLoading,
     isWaitingForSummary: Boolean(isWaitingForSummary),
-    isWaitingForIceBreakers: Boolean(isWaitingForIceBreakers),
+    isWaitingForSuggestedQuestions: Boolean(isWaitingForSuggestedQuestions),
     refetch: query.refetch,
     invalidate,
   };

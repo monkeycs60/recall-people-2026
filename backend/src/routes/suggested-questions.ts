@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { generateText } from 'ai';
 import { authMiddleware } from '../middleware/auth';
-import { iceBreakersRequestSchema } from '../lib/validation';
+import { suggestedQuestionsRequestSchema } from '../lib/validation';
 import { auditLog } from '../lib/audit';
 import { createAIModel, getAIModel } from '../lib/ai-provider';
 import { getLangfuseClient } from '../lib/telemetry';
@@ -14,7 +14,7 @@ type Bindings = {
 	ENABLE_LANGFUSE?: string;
 };
 
-type IceBreakersRequest = {
+type SuggestedQuestionsRequest = {
 	contact: {
 		firstName: string;
 		lastName?: string;
@@ -52,22 +52,22 @@ type Variables = {
 	user: import('@prisma/client').User;
 };
 
-export const iceBreakersRoutes = new Hono<{ Bindings: Bindings; Variables: Variables }>();
+export const suggestedQuestionsRoutes = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
-iceBreakersRoutes.use('/*', authMiddleware);
+suggestedQuestionsRoutes.use('/*', authMiddleware);
 
-iceBreakersRoutes.post('/', async (c) => {
+suggestedQuestionsRoutes.post('/', async (c) => {
 	const langfuse = getLangfuseClient();
 	const trace = langfuse?.trace({
-		name: 'ice-breakers',
-		metadata: { route: '/api/ice-breakers' },
+		name: 'suggested-questions',
+		metadata: { route: '/api/suggested-questions' },
 	});
 
 	try {
 		const body = await c.req.json();
 
 		// Validate request body
-		const validation = iceBreakersRequestSchema.safeParse(body);
+		const validation = suggestedQuestionsRequestSchema.safeParse(body);
 		if (!validation.success) {
 			trace?.update({ output: { error: 'Validation failed', issues: validation.error.issues } });
 			await auditLog(c, {
@@ -175,7 +175,7 @@ Si aucune info pertinente n'est disponible, retourne une ligne vide.
 
 		// Create Langfuse generation span
 		const generation = trace?.generation({
-			name: 'ice-breakers-generation',
+			name: 'suggested-questions-generation',
 			model: modelName,
 			input: { contact: contact.firstName, hotTopicsCount: activeTopics.length },
 		});
@@ -185,7 +185,7 @@ Si aucune info pertinente n'est disponible, retourne une ligne vide.
 			prompt,
 		});
 
-		const iceBreakers = text
+		const suggestedQuestions = text
 			.trim()
 			.split('\n')
 			.map((line) => line.trim())
@@ -193,23 +193,23 @@ Si aucune info pertinente n'est disponible, retourne une ligne vide.
 			.slice(0, 3); // Maximum 3 questions
 
 		// Update Langfuse generation with output
-		generation?.end({ output: iceBreakers });
-		trace?.update({ output: { success: true, iceBreakers } });
+		generation?.end({ output: suggestedQuestions });
+		trace?.update({ output: { success: true, suggestedQuestions } });
 
 		await auditLog(c, {
 			userId: c.get('user')?.id,
 			action: 'extract',
 			resource: 'extract',
 			success: true,
-			details: { language, contact: contact.firstName, count: iceBreakers.length },
+			details: { language, contact: contact.firstName, count: suggestedQuestions.length },
 		});
 
 		return c.json({
 			success: true,
-			iceBreakers,
+			suggestedQuestions,
 		});
 	} catch (error) {
-		console.error('Ice breakers generation error:', error);
+		console.error('Suggested questions generation error:', error);
 		trace?.update({ output: { error: String(error) } });
 		await auditLog(c, {
 			userId: c.get('user')?.id,
@@ -218,6 +218,6 @@ Si aucune info pertinente n'est disponible, retourne une ligne vide.
 			success: false,
 			details: { error: String(error) },
 		});
-		return c.json({ error: 'Ice breakers generation failed' }, 500);
+		return c.json({ error: 'Suggested questions generation failed' }, 500);
 	}
 });

@@ -94,7 +94,7 @@
       "loading": "Preparazione dell'essenziale...",
       "empty": "Aggiungi note per scoprire l'essenziale su {{firstName}}"
     },
-    "iceBreakers": {
+    "suggestedQuestions": {
       "header": "Un'idea per riprendere la conversazione?",
       "loading": "Preparazione delle idee...",
       "empty": "Aggiungi note per ottenere idee di conversazione"

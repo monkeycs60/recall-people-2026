@@ -65,7 +65,6 @@ export const initDatabase = async () => {
       -- AI-generated (regenerated after each note)
       ai_summary TEXT,
       suggested_questions TEXT,
-      ice_breakers TEXT,
 
       -- Meta
       last_contact_at TEXT,
@@ -230,10 +229,17 @@ const runMigrations = async (database: SQLite.SQLiteDatabase) => {
     await database.execAsync("ALTER TABLE contacts ADD COLUMN ai_summary TEXT");
   }
 
-  // Check if ice_breakers column exists on contacts
+  // Migration: Copy ice_breakers data to suggested_questions and drop ice_breakers column
   const hasIceBreakers = contactsInfo.some((col) => col.name === 'ice_breakers');
-  if (!hasIceBreakers) {
-    await database.execAsync("ALTER TABLE contacts ADD COLUMN ice_breakers TEXT");
+  if (hasIceBreakers) {
+    // Copy ice_breakers to suggested_questions where suggested_questions is empty
+    await database.execAsync(`
+      UPDATE contacts
+      SET suggested_questions = ice_breakers
+      WHERE ice_breakers IS NOT NULL
+        AND ice_breakers != ''
+        AND (suggested_questions IS NULL OR suggested_questions = '')
+    `);
   }
 
   // Create hot_topics table if not exists
@@ -442,23 +448,20 @@ const runV2Migration = async (database: SQLite.SQLiteDatabase) => {
     await database.execAsync("DROP TABLE IF EXISTS similarity_cache");
   }
 
-  // Remove deprecated columns from contacts table (tags, highlights)
+  // Remove deprecated columns from contacts table (tags, highlights, ice_breakers)
   // SQLite doesn't support DROP COLUMN directly, so we need to recreate the table
-  // Note: ice_breakers is still used and should be preserved
   const contactsInfo = await database.getAllAsync<{ name: string }>(
     "PRAGMA table_info(contacts)"
   );
 
   const hasTags = contactsInfo.some((col) => col.name === 'tags');
   const hasHighlights = contactsInfo.some((col) => col.name === 'highlights');
+  const hasIceBreakersMigration = contactsInfo.some((col) => col.name === 'ice_breakers');
 
-  if (hasTags || hasHighlights) {
+  if (hasTags || hasHighlights || hasIceBreakersMigration) {
     console.log('[Migration V2] Removing deprecated columns from contacts table...');
 
-    // Check if ice_breakers exists so we can preserve its data
-    const hasIceBreakers = contactsInfo.some((col) => col.name === 'ice_breakers');
-
-    // Create new contacts table without deprecated columns (but keeping ice_breakers)
+    // Create new contacts table without deprecated columns (tags, highlights, ice_breakers)
     await database.execAsync(`
       CREATE TABLE contacts_v2 (
         id TEXT PRIMARY KEY,
@@ -476,7 +479,6 @@ const runV2Migration = async (database: SQLite.SQLiteDatabase) => {
         avatar_url TEXT,
         ai_summary TEXT,
         suggested_questions TEXT,
-        ice_breakers TEXT,
         last_contact_at TEXT,
         created_at TEXT DEFAULT (datetime('now')),
         updated_at TEXT DEFAULT (datetime('now'))
@@ -484,19 +486,25 @@ const runV2Migration = async (database: SQLite.SQLiteDatabase) => {
     `);
 
     // Copy data from old table to new table
+    // If ice_breakers exists and suggested_questions is empty, copy ice_breakers to suggested_questions
     await database.execAsync(`
       INSERT INTO contacts_v2 (
         id, first_name, last_name, nickname, gender,
         phone, email, birthday_day, birthday_month, birthday_year,
         relationship_type, photo_uri, avatar_url,
-        ai_summary, suggested_questions, ice_breakers,
+        ai_summary, suggested_questions,
         last_contact_at, created_at, updated_at
       )
       SELECT
         id, first_name, last_name, nickname, gender,
         phone, email, birthday_day, birthday_month, birthday_year,
         relationship_type, photo_uri, avatar_url,
-        ai_summary, suggested_questions, ${hasIceBreakers ? 'ice_breakers' : 'NULL'},
+        ai_summary,
+        CASE
+          WHEN (suggested_questions IS NULL OR suggested_questions = '') AND ${hasIceBreakersMigration ? 'ice_breakers IS NOT NULL' : 'FALSE'}
+          THEN ${hasIceBreakersMigration ? 'ice_breakers' : 'NULL'}
+          ELSE suggested_questions
+        END,
         last_contact_at, created_at, updated_at
       FROM contacts;
     `);

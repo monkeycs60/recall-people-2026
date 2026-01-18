@@ -12,7 +12,7 @@ import { hotTopicService } from '@/services/hot-topic.service';
 import { notificationService } from '@/services/notification.service';
 import { contactService } from '@/services/contact.service';
 import { groupService } from '@/services/group.service';
-import { generateIceBreakers, generateSummary, generateAvatarFromHints, extractInfo } from '@/lib/api';
+import { generateSuggestedQuestions, generateSummary, generateAvatarFromHints, extractInfo } from '@/lib/api';
 import { noteService } from '@/services/note.service';
 import { useAppStore } from '@/stores/app-store';
 import { queryKeys } from '@/lib/query-keys';
@@ -533,9 +533,9 @@ export default function ReviewScreen() {
             })),
         };
 
-        generateIceBreakers(requestData)
-          .then(async (iceBreakers) => {
-            await contactService.update(finalContactId, { iceBreakers });
+        generateSuggestedQuestions(requestData)
+          .then(async (suggestedQuestions) => {
+            await contactService.update(finalContactId, { suggestedQuestions });
             queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
             queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(finalContactId) });
           })

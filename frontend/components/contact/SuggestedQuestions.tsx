@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { MessageCircle } from 'lucide-react-native';
 import { Colors } from '@/constants/theme';
 
-type IceBreakersProps = {
-  iceBreakers?: string[];
+type SuggestedQuestionsProps = {
+  suggestedQuestions?: string[];
   isLoading?: boolean;
   firstName: string;
 };
@@ -12,7 +12,7 @@ type IceBreakersProps = {
 const ORANGE_ACCENT = '#E07B39';
 const ORANGE_LIGHT = '#FDF4EC';
 
-export function IceBreakers({ iceBreakers, isLoading, firstName }: IceBreakersProps) {
+export function SuggestedQuestions({ suggestedQuestions, isLoading, firstName }: SuggestedQuestionsProps) {
   const { t } = useTranslation();
 
   if (isLoading) {
@@ -20,17 +20,17 @@ export function IceBreakers({ iceBreakers, isLoading, firstName }: IceBreakersPr
       <View style={styles.loadingContainer}>
         <View style={styles.loadingContent}>
           <ActivityIndicator size="small" color={ORANGE_ACCENT} />
-          <Text style={styles.loadingText}>{t('contact.iceBreakers.loading')}</Text>
+          <Text style={styles.loadingText}>{t('contact.suggestedQuestions.loading')}</Text>
         </View>
       </View>
     );
   }
 
-  if (!iceBreakers || iceBreakers.length === 0) {
+  if (!suggestedQuestions || suggestedQuestions.length === 0) {
     return (
       <View style={styles.emptyContainer}>
         <Text style={styles.emptyText}>
-          {t('contact.iceBreakers.empty', { firstName })}
+          {t('contact.suggestedQuestions.empty', { firstName })}
         </Text>
       </View>
     );
@@ -40,10 +40,10 @@ export function IceBreakers({ iceBreakers, isLoading, firstName }: IceBreakersPr
     <View style={styles.container}>
       <View style={styles.header}>
         <MessageCircle size={16} color={ORANGE_ACCENT} />
-        <Text style={styles.headerText}>{t('contact.iceBreakers.header')}</Text>
+        <Text style={styles.headerText}>{t('contact.suggestedQuestions.header')}</Text>
       </View>
       <View style={styles.questionsContainer}>
-        {iceBreakers.map((question, index) => (
+        {suggestedQuestions.map((question, index) => (
           <View key={index} style={styles.questionItem}>
             <Text style={styles.bullet}>•</Text>
             <Text style={styles.questionText}>{question}</Text>

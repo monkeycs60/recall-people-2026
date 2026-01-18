@@ -150,7 +150,6 @@ export const checkV2Fields = async () => {
       hasSuggestedQuestions: contactsInfo.some((col) => col.name === 'suggested_questions'),
       hasTags: contactsInfo.some((col) => col.name === 'tags'),
       hasHighlights: contactsInfo.some((col) => col.name === 'highlights'),
-      hasIceBreakers: contactsInfo.some((col) => col.name === 'ice_breakers'),
     },
     notes: {
       hasTitle: notesInfo.some((col) => col.name === 'title'),
