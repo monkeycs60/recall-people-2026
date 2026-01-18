@@ -199,6 +199,7 @@ extractRoutes.post('/', async (c) => {
       }),
       resolvedTopics: extraction.resolvedTopics.map((topic) => ({
         existingTopicId: topic.existingTopicId,
+        id: topic.existingTopicId, // Alias for frontend compatibility
         resolution: topic.resolution,
       })),
     };
