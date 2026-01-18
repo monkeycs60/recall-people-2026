@@ -10,7 +10,7 @@ import { showErrorToast, showSuccessToast } from '@/lib/error-handler';
 
 type PaywallProps = {
   onClose: () => void;
-  reason?: 'notes_limit' | 'ai_search' | 'recording_duration';
+  reason?: 'notes_limit' | 'ai_search' | 'recording_duration' | 'ai_assistant';
 };
 
 export function Paywall({ onClose, reason = 'notes_limit' }: PaywallProps) {
@@ -119,6 +119,8 @@ export function Paywall({ onClose, reason = 'notes_limit' }: PaywallProps) {
         return t('paywall.reason.aiSearch');
       case 'recording_duration':
         return t('paywall.reason.recordingDuration');
+      case 'ai_assistant':
+        return t('paywall.reason.aiAssistant');
       default:
         return '';
     }

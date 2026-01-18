@@ -1,5 +1,5 @@
 import { Tabs, useRouter, useFocusEffect } from 'expo-router';
-import { Users, User, Calendar, Search } from 'lucide-react-native';
+import { Users, User, Calendar, Sparkle } from 'lucide-react-native';
 import { useState, useCallback } from 'react';
 import { isLoggedIn } from '@/lib/auth';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
@@ -76,8 +76,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="search"
         options={{
-          title: t('tabs.explore'),
-          tabBarIcon: ({ color, size }) => <Search color={color} size={size} />,
+          title: t('tabs.assistant'),
+          tabBarIcon: ({ color, size }) => <Sparkle color={color} size={size} />,
         }}
       />
     </Tabs>

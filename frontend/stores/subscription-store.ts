@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools, persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { checkProWhitelist, getNotesStatus, incrementNoteCount } from '@/lib/api';
+import { checkProWhitelist, getNotesStatus, incrementNoteCount, getTrialsStatus } from '@/lib/api';
 
 type SubscriptionState = {
   isPremium: boolean;
@@ -10,6 +10,8 @@ type SubscriptionState = {
   currentMonthKey: string; // Format: "2026-01"
   isHydrated: boolean;
   isSyncing: boolean;
+  freeNoteTrials: number;
+  freeAskTrials: number;
 };
 
 type SubscriptionActions = {
@@ -23,6 +25,10 @@ type SubscriptionActions = {
   resetMonthlyCountIfNeeded: () => void;
   setHydrated: (hydrated: boolean) => void;
   syncNotesStatus: () => Promise<void>;
+  syncTrialsStatus: () => Promise<void>;
+  setFreeNoteTrials: (count: number) => void;
+  setFreeAskTrials: (count: number) => void;
+  canUseAsk: () => boolean;
 };
 
 const getCurrentMonthKey = (): string => {
@@ -44,8 +50,12 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
         currentMonthKey: getCurrentMonthKey(),
         isHydrated: false,
         isSyncing: false,
+        freeNoteTrials: 10,
+        freeAskTrials: 10,
 
         setIsPremium: (isPremium) => set({ isPremium }),
+        setFreeNoteTrials: (count) => set({ freeNoteTrials: count }),
+        setFreeAskTrials: (count) => set({ freeAskTrials: count }),
 
         activateTestPro: () => set({ isTestPro: true, isPremium: true }),
 
@@ -128,6 +138,34 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
           return get().notesCreatedThisMonth < FREE_NOTES_PER_MONTH;
         },
 
+        canUseAsk: () => {
+          const state = get();
+          if (state.isPremium || state.isTestPro) return true;
+          return state.freeAskTrials > 0;
+        },
+
+        syncTrialsStatus: async () => {
+          try {
+            const status = await getTrialsStatus();
+            if (status) {
+              if (__DEV__) {
+                console.log('[subscription] Synced trials status from server:', status);
+              }
+              set({
+                freeNoteTrials: status.freeNoteTrials,
+                freeAskTrials: status.freeAskTrials,
+              });
+              if (status.isPremium) {
+                set({ isPremium: true, isTestPro: true });
+              }
+            }
+          } catch (error) {
+            if (__DEV__) {
+              console.error('[subscription] Failed to sync trials status:', error);
+            }
+          }
+        },
+
         getMaxRecordingDuration: () => {
           const state = get();
           return state.isPremium || state.isTestPro
@@ -160,6 +198,8 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
           isTestPro: state.isTestPro,
           notesCreatedThisMonth: state.notesCreatedThisMonth,
           currentMonthKey: state.currentMonthKey,
+          freeNoteTrials: state.freeNoteTrials,
+          freeAskTrials: state.freeAskTrials,
         }),
       }
     ),

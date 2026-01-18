@@ -1,6 +1,6 @@
 import { View, Pressable, StyleSheet, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Users, User, Mic, Calendar, Search, MessageCircleQuestion, Plus } from 'lucide-react-native';
+import { Users, User, Mic, Calendar, Sparkle, MessageCircleQuestion, Plus } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '@/constants/theme';
 import Animated, {
@@ -36,7 +36,7 @@ export function CustomTabBar({ state, navigation }: TabBarProps) {
   ];
 
   const rightTabs = [
-    { name: 'search', icon: Search, label: t('tabs.explore') },
+    { name: 'search', icon: Sparkle, label: t('tabs.assistant') },
     { name: 'profile', icon: User, label: t('tabs.profile') },
   ];
 

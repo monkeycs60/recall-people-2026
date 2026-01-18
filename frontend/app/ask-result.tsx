@@ -1,10 +1,9 @@
-import { View, Text, ScrollView, Pressable, TextInput, StyleSheet, ActivityIndicator } from 'react-native';
-import { useState } from 'react';
+import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { Colors, Typography, Spacing, BorderRadius } from '@/constants/theme';
-import { MessageCircle, FileText, Search, Mic, ChevronRight, UserCircle, Plus } from 'lucide-react-native';
+import { MessageCircle, FileText, ChevronRight, UserCircle, Plus } from 'lucide-react-native';
 
 type AskSource = {
   noteId: string;
@@ -42,19 +41,8 @@ export default function AskResultScreen() {
   const suggestedContacts = params.suggestedContacts ? JSON.parse(params.suggestedContacts) : [];
   const isGeneralQuestion = params.isGeneralQuestion === 'true';
 
-  const [newQuestion, setNewQuestion] = useState('');
-
-  const handleNewQuestion = () => {
-    if (newQuestion.trim()) {
-      // Navigate back to ask screen with the new question
-      router.back();
-      // TODO: trigger new ask with newQuestion
-    }
-  };
-
   const handleViewNote = (source: AskSource) => {
-    // TODO: Navigate to note detail screen
-    console.log('View note:', source.noteId);
+    router.push(`/contact/${source.contactId}`);
   };
 
   const handleViewContact = () => {
@@ -134,19 +122,6 @@ export default function AskResultScreen() {
             </Text>
           </Pressable>
         </View>
-
-        <View style={styles.newQuestionContainer}>
-          <TextInput
-            style={styles.newQuestionInput}
-            value={newQuestion}
-            onChangeText={setNewQuestion}
-            placeholder={t('ask.newQuestionPlaceholder')}
-            placeholderTextColor={Colors.textMuted}
-          />
-          <Pressable style={styles.micButton}>
-            <Mic size={20} color={Colors.textSecondary} />
-          </Pressable>
-        </View>
       </ScrollView>
     );
   }
@@ -182,19 +157,6 @@ export default function AskResultScreen() {
             <Text style={styles.addNoteButtonText}>
               {t('ask.noInfo.addNoteButton', { contactName: relatedContactName || '' })}
             </Text>
-          </Pressable>
-        </View>
-
-        <View style={styles.newQuestionContainer}>
-          <TextInput
-            style={styles.newQuestionInput}
-            value={newQuestion}
-            onChangeText={setNewQuestion}
-            placeholder={t('ask.newQuestionPlaceholder')}
-            placeholderTextColor={Colors.textMuted}
-          />
-          <Pressable style={styles.micButton}>
-            <Mic size={20} color={Colors.textSecondary} />
           </Pressable>
         </View>
       </ScrollView>
@@ -255,22 +217,6 @@ export default function AskResultScreen() {
           </View>
         </>
       )}
-
-      <View style={styles.divider} />
-
-      <View style={styles.newQuestionContainer}>
-        <TextInput
-          style={styles.newQuestionInput}
-          value={newQuestion}
-          onChangeText={setNewQuestion}
-          placeholder={t('ask.newQuestionPlaceholder')}
-          placeholderTextColor={Colors.textMuted}
-          onSubmitEditing={handleNewQuestion}
-        />
-        <Pressable style={styles.micButton}>
-          <Mic size={20} color={Colors.textSecondary} />
-        </Pressable>
-      </View>
 
       {relatedContactId && relatedContactName && (
         <Pressable style={styles.viewContactButton} onPress={handleViewContact}>
@@ -354,25 +300,6 @@ const styles = StyleSheet.create({
   sourceCardDate: {
     ...Typography.bodySmall,
     color: Colors.textMuted,
-  },
-  newQuestionContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.md,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    marginTop: Spacing.md,
-  },
-  newQuestionInput: {
-    flex: 1,
-    ...Typography.bodyMedium,
-    color: Colors.textPrimary,
-    paddingVertical: Spacing.sm,
-  },
-  micButton: {
-    padding: Spacing.sm,
   },
   viewContactButton: {
     alignItems: 'center',

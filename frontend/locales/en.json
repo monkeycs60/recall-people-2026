@@ -68,6 +68,7 @@
     "contacts": "Contacts",
     "search": "Search",
     "explore": "AI Explore",
+    "assistant": "Assistant",
     "profile": "Profile",
     "upcoming": "News"
   },
@@ -89,6 +90,8 @@
   "contacts": {
     "title": "Contacts",
     "searchPlaceholder": "Who are you looking for?",
+    "filterPlaceholder": "Search a contact...",
+    "askHint": "Ask the AI a question",
     "noContacts": "Their partner's job. Their kids' names. That project they're so proud of.",
     "noContactsDescription": "Never be caught off guard again.",
     "addContact": "Add a contact",
@@ -550,7 +553,8 @@
     "reason": {
       "notesLimit": "You've reached your free monthly limit of 10 notes",
       "aiSearch": "AI Search is a premium feature",
-      "recordingDuration": "Longer recordings require premium"
+      "recordingDuration": "Longer recordings require premium",
+      "aiAssistant": "AI Assistant is a premium feature"
     },
     "errors": {
       "purchaseFailed": "Purchase failed",
@@ -635,6 +639,39 @@
       "title": "I didn't find any information",
       "description": "I found nothing on this topic in your notes about {{contactName}}.",
       "addNoteButton": "Add a note about {{contactName}}"
+    }
+  },
+  "assistant": {
+    "title": "Assistant",
+    "description": "Search through all your notes to find information about one or more contacts. AI digs through your database and answers you.",
+    "inputPlaceholder": "Which of my contacts play a musical instrument?",
+    "voiceButton": "Speak",
+    "sendButton": "Send",
+    "transcribing": "Transcribing...",
+    "suggestionsTitle": "Suggestions",
+    "noSuggestions": "Record notes to see suggestions",
+    "suggestions": {
+      "recent": "What did I talk about recently with %name%?",
+      "birthday": "When is %name%'s birthday?",
+      "news": "What's new with %name%?",
+      "recentWith": "What did I talk about with {{firstName}} recently?",
+      "birthdayOf": "When is {{firstName}}'s birthday?",
+      "newsOf": "What are {{firstName}}'s news?"
+    },
+    "emptyState": {
+      "title": "Your AI assistant",
+      "description": "Ask any question about your contacts and their information."
+    },
+    "processing": "Thinking...",
+    "newQuestion": "Ask another question...",
+    "trialsRemaining": "{{count}} free trials remaining",
+    "noTrialsLeft": "Free trials exhausted",
+    "upgradeHint": "Upgrade to Premium for unlimited access",
+    "history": {
+      "title": "Question history",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "daysAgo": "{{count}} days ago"
     }
   }
 }

@@ -68,6 +68,7 @@
     "contacts": "Contacts",
     "search": "Recherche",
     "explore": "Explore IA",
+    "assistant": "Assistant",
     "profile": "Profil",
     "upcoming": "Actus"
   },
@@ -89,6 +90,8 @@
   "contacts": {
     "title": "Contacts",
     "searchPlaceholder": "Qui cherchez-vous ?",
+    "filterPlaceholder": "Rechercher un contact...",
+    "askHint": "Pose une question à l'IA",
     "noContacts": "Le métier de sa compagne. Le prénom de ses enfants. Ce projet dont il est si fier.",
     "noContactsDescription": "Ne soyez plus jamais pris au dépourvu.",
     "addContact": "Ajouter un contact",
@@ -576,7 +579,8 @@
     "reason": {
       "notesLimit": "Vous avez atteint la limite de 10 notes par mois",
       "aiSearch": "La recherche IA est une fonctionnalité premium",
-      "recordingDuration": "Les enregistrements plus longs nécessitent premium"
+      "recordingDuration": "Les enregistrements plus longs nécessitent premium",
+      "aiAssistant": "L'assistant IA est une fonctionnalité premium"
     },
     "errors": {
       "purchaseFailed": "Echec de l'achat",
@@ -661,6 +665,29 @@
       "title": "Je n'ai pas trouvé d'information",
       "description": "Je n'ai rien trouvé sur ce sujet dans tes notes sur {{contactName}}.",
       "addNoteButton": "Ajouter une note sur {{contactName}}"
+    }
+  },
+  "assistant": {
+    "title": "Assistant",
+    "description": "Interroge toutes tes notes pour retrouver des informations sur un contact ou plusieurs. L'IA fouille ta base de données et te répond.",
+    "inputPlaceholder": "Quels sont mes contacts qui jouent d'un instrument ?",
+    "voiceButton": "Parler",
+    "sendButton": "Envoyer",
+    "transcribing": "Transcription en cours...",
+    "suggestionsTitle": "Suggestions",
+    "noSuggestions": "Enregistre des notes pour voir des suggestions",
+    "trialsRemaining": "{{count}} essais gratuits restants",
+    "noTrialsLeft": "Tu as utilisé tes essais gratuits",
+    "suggestions": {
+      "recentWith": "De quoi j'ai parlé avec {{firstName}} récemment ?",
+      "birthdayOf": "C'est quand l'anniversaire de {{firstName}} ?",
+      "newsOf": "Quelles sont les actualités de {{firstName}} ?"
+    },
+    "history": {
+      "title": "Historique des questions",
+      "today": "Aujourd'hui",
+      "yesterday": "Hier",
+      "daysAgo": "Il y a {{count}} jours"
     }
   }
 }

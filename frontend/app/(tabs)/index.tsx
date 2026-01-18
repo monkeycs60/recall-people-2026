@@ -10,6 +10,7 @@ import {
 	Image,
 } from 'react-native';
 import { useState, useRef, useCallback, useMemo } from 'react';
+import { Sparkle } from 'lucide-react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -119,6 +120,7 @@ export default function ContactsScreen() {
 
 	const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
 	const [isPullRefreshing, setIsPullRefreshing] = useState(false);
+	const [filterText, setFilterText] = useState('');
 
 	useFocusEffect(
 		useCallback(() => {
@@ -169,13 +171,22 @@ export default function ContactsScreen() {
 	}, [contacts]);
 
 	const allContacts = useMemo(() => {
-		return contacts
-			.sort((contactA, contactB) => {
-				const dateA = contactA.lastContactAt ? new Date(contactA.lastContactAt).getTime() : 0;
-				const dateB = contactB.lastContactAt ? new Date(contactB.lastContactAt).getTime() : 0;
-				return dateB - dateA;
-			});
-	}, [contacts]);
+		let filteredContacts = contacts;
+
+		if (filterText.trim()) {
+			const searchTerm = filterText.toLowerCase();
+			filteredContacts = contacts.filter((contact) =>
+				contact.firstName.toLowerCase().includes(searchTerm) ||
+				(contact.lastName?.toLowerCase().includes(searchTerm))
+			);
+		}
+
+		return filteredContacts.sort((contactA, contactB) => {
+			const dateA = contactA.lastContactAt ? new Date(contactA.lastContactAt).getTime() : 0;
+			const dateB = contactB.lastContactAt ? new Date(contactB.lastContactAt).getTime() : 0;
+			return dateB - dateA;
+		});
+	}, [contacts, filterText]);
 
 	const handleRefresh = async () => {
 		setIsPullRefreshing(true);
@@ -287,15 +298,24 @@ export default function ContactsScreen() {
 					</Pressable>
 				</View>
 
-				<Pressable
-					style={styles.askBar}
-					onPress={() => router.push('/ask')}>
-					<Search size={20} color={Colors.textMuted} />
-					<Text style={styles.askBarPlaceholder}>
-						Demande-moi quelque chose...
-					</Text>
-					<Text style={styles.micEmoji}>🎤</Text>
-				</Pressable>
+				<View style={styles.filterContainer}>
+					<View style={styles.filterInputWrapper}>
+						<Search size={18} color={Colors.textMuted} />
+						<TextInput
+							style={styles.filterInput}
+							placeholder={t('contacts.filterPlaceholder')}
+							placeholderTextColor={Colors.textMuted}
+							value={filterText}
+							onChangeText={setFilterText}
+						/>
+					</View>
+					<Pressable
+						style={styles.askHint}
+						onPress={() => router.push('/(tabs)/search')}>
+						<Sparkle size={14} color={Colors.primary} />
+						<Text style={styles.askHintText}>{t('contacts.askHint')}</Text>
+					</Pressable>
+				</View>
 			</View>
 
 			{isLoading ? (
@@ -403,25 +423,36 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'center',
 	},
-	askBar: {
+	filterContainer: {
+		marginBottom: 16,
+	},
+	filterInputWrapper: {
 		flexDirection: 'row',
 		alignItems: 'center',
 		backgroundColor: Colors.surface,
-		borderRadius: 16,
-		paddingHorizontal: 16,
-		paddingVertical: 14,
-		marginBottom: 24,
+		borderRadius: 12,
+		paddingHorizontal: 14,
+		paddingVertical: 12,
 		borderWidth: 1,
 		borderColor: Colors.border,
-		gap: 12,
+		gap: 10,
 	},
-	askBarPlaceholder: {
+	filterInput: {
 		flex: 1,
 		fontSize: 16,
-		color: Colors.textMuted,
+		color: Colors.textPrimary,
 	},
-	micEmoji: {
-		fontSize: 20,
+	askHint: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: 6,
+		marginTop: 10,
+		paddingLeft: 4,
+	},
+	askHintText: {
+		fontSize: 14,
+		color: Colors.primary,
+		fontWeight: '500',
 	},
 	section: {
 		paddingHorizontal: 24,

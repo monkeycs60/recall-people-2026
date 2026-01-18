@@ -25,8 +25,10 @@ const SIZE_MAP = {
   large: 120,
 } as const;
 
+const PLACEHOLDER_VERSION = 'v2';
+
 const getPlaceholderUrl = (gender: Gender): string => {
-  return `${API_URL}/api/avatar/placeholders/avatar-${gender}.png`;
+  return `${API_URL}/api/avatar/placeholders/avatar-${gender}.png?v=${PLACEHOLDER_VERSION}`;
 };
 
 export function ContactAvatar({
