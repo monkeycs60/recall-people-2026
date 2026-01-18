@@ -1,12 +1,10 @@
 import { useQueries, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
-import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { queryKeys } from '@/lib/query-keys';
-import { Contact, Fact, HotTopic } from '@/types';
+import { Contact, HotTopic } from '@/types';
 
 type ContactPreview = {
-  facts: Fact[];
   hotTopics: HotTopic[];
 };
 
@@ -45,14 +43,6 @@ function filterHotTopicsForCard(hotTopics: HotTopic[]): HotTopic[] {
 export function useContactPreviewsQuery(contacts: Contact[]) {
   const queryClient = useQueryClient();
 
-  const factsQueries = useQueries({
-    queries: contacts.map((contact) => ({
-      queryKey: queryKeys.facts.byContact(contact.id),
-      queryFn: () => factService.getByContact(contact.id),
-      staleTime: 1000 * 60 * 5, // 5 minutes
-    })),
-  });
-
   const hotTopicsQueries = useQueries({
     queries: contacts.map((contact) => ({
       queryKey: queryKeys.hotTopics.byContact(contact.id),
@@ -61,36 +51,29 @@ export function useContactPreviewsQuery(contacts: Contact[]) {
     })),
   });
 
-  const isLoading = factsQueries.some((query) => query.isLoading) || hotTopicsQueries.some((query) => query.isLoading);
+  const isLoading = hotTopicsQueries.some((query) => query.isLoading);
 
   const previews = new Map<string, ContactPreview>();
 
   contacts.forEach((contact, index) => {
-    const facts = factsQueries[index]?.data ?? [];
     const hotTopics = hotTopicsQueries[index]?.data ?? [];
     const filteredHotTopics = filterHotTopicsForCard(hotTopics);
 
     previews.set(contact.id, {
-      facts: facts.slice(0, 2),
       hotTopics: filteredHotTopics,
     });
   });
 
   const invalidateForContact = useCallback((contactId: string) => {
-    queryClient.invalidateQueries({ queryKey: queryKeys.facts.byContact(contactId) });
     queryClient.invalidateQueries({ queryKey: queryKeys.hotTopics.byContact(contactId) });
   }, [queryClient]);
 
   const invalidateAll = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: queryKeys.facts.all });
     queryClient.invalidateQueries({ queryKey: queryKeys.hotTopics.all });
   }, [queryClient]);
 
   const refetchAll = useCallback(() => {
-    return Promise.all([
-      queryClient.refetchQueries({ queryKey: queryKeys.facts.all }),
-      queryClient.refetchQueries({ queryKey: queryKeys.hotTopics.all }),
-    ]);
+    return queryClient.refetchQueries({ queryKey: queryKeys.hotTopics.all });
   }, [queryClient]);
 
   return {

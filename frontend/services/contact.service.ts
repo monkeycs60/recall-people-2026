@@ -1,6 +1,6 @@
 import * as Crypto from 'expo-crypto';
 import { getDatabase } from '@/lib/db';
-import { Contact, ContactWithDetails, Fact, Note, Memory, Gender } from '@/types';
+import { Contact, ContactWithDetails, Note, Gender } from '@/types';
 import { hotTopicService } from './hot-topic.service';
 
 export const contactService = {
@@ -19,7 +19,6 @@ export const contactService = {
       birthday_day: number | null;
       birthday_month: number | null;
       birthday_year: number | null;
-      highlights: string | null;
       ai_summary: string | null;
       last_contact_at: string | null;
       created_at: string;
@@ -38,7 +37,6 @@ export const contactService = {
       birthdayDay: row.birthday_day || undefined,
       birthdayMonth: row.birthday_month || undefined,
       birthdayYear: row.birthday_year || undefined,
-      highlights: JSON.parse(row.highlights || '[]'),
       aiSummary: row.ai_summary || undefined,
       lastContactAt: row.last_contact_at || undefined,
       createdAt: row.created_at,
@@ -61,8 +59,8 @@ export const contactService = {
       birthday_day: number | null;
       birthday_month: number | null;
       birthday_year: number | null;
-      highlights: string | null;
       ai_summary: string | null;
+      suggested_questions: string | null;
       ice_breakers: string | null;
       last_contact_at: string | null;
       created_at: string;
@@ -71,18 +69,7 @@ export const contactService = {
 
     if (!contactRow) return null;
 
-    const factsRows = await db.getAllAsync<{
-      id: string;
-      contact_id: string;
-      fact_type: string;
-      fact_key: string;
-      fact_value: string;
-      previous_values: string | null;
-      source_note_id: string | null;
-      created_at: string;
-      updated_at: string;
-    }>('SELECT * FROM facts WHERE contact_id = ?', [id]);
-
+    // V2: Only load notes and hot_topics (facts/memories tables removed)
     const notesRows = await db.getAllAsync<{
       id: string;
       contact_id: string;
@@ -109,16 +96,6 @@ export const contactService = {
       resolved_at: string | null;
     }>('SELECT * FROM hot_topics WHERE contact_id = ? ORDER BY created_at DESC', [id]);
 
-    const memoriesRows = await db.getAllAsync<{
-      id: string;
-      contact_id: string;
-      description: string;
-      event_date: string | null;
-      is_shared: number;
-      source_note_id: string | null;
-      created_at: string;
-    }>('SELECT * FROM memories WHERE contact_id = ? ORDER BY created_at DESC', [id]);
-
     const contact: ContactWithDetails = {
       id: contactRow.id,
       firstName: contactRow.first_name,
@@ -131,23 +108,14 @@ export const contactService = {
       birthdayDay: contactRow.birthday_day || undefined,
       birthdayMonth: contactRow.birthday_month || undefined,
       birthdayYear: contactRow.birthday_year || undefined,
-      highlights: JSON.parse(contactRow.highlights || '[]'),
       aiSummary: contactRow.ai_summary || undefined,
       iceBreakers: contactRow.ice_breakers ? JSON.parse(contactRow.ice_breakers) : undefined,
       lastContactAt: contactRow.last_contact_at || undefined,
       createdAt: contactRow.created_at,
       updatedAt: contactRow.updated_at,
-      facts: factsRows.map((row) => ({
-        id: row.id,
-        contactId: row.contact_id,
-        factType: row.fact_type as Fact['factType'],
-        factKey: row.fact_key,
-        factValue: row.fact_value,
-        previousValues: JSON.parse(row.previous_values || '[]'),
-        sourceNoteId: row.source_note_id || undefined,
-        createdAt: row.created_at,
-        updatedAt: row.updated_at,
-      })),
+      // V2: facts and memories removed
+      facts: [],
+      memories: [],
       notes: notesRows.map((row) => ({
         id: row.id,
         contactId: row.contact_id,
@@ -172,15 +140,6 @@ export const contactService = {
         updatedAt: row.updated_at,
         resolvedAt: row.resolved_at || undefined,
       })),
-      memories: memoriesRows.map((row) => ({
-        id: row.id,
-        contactId: row.contact_id,
-        description: row.description,
-        eventDate: row.event_date || undefined,
-        isShared: Boolean(row.is_shared),
-        sourceNoteId: row.source_note_id || undefined,
-        createdAt: row.created_at,
-      })),
     };
 
     return contact;
@@ -197,7 +156,7 @@ export const contactService = {
     const now = new Date().toISOString();
 
     await db.runAsync(
-      `INSERT INTO contacts (id, first_name, last_name, nickname, gender, highlights, created_at, updated_at)
+      `INSERT INTO contacts (id, first_name, last_name, nickname, gender, relationship_type, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
@@ -205,7 +164,7 @@ export const contactService = {
         data.lastName || null,
         data.nickname || null,
         data.gender || 'unknown',
-        JSON.stringify([]),
+        'connaissance',
         now,
         now,
       ]
@@ -217,7 +176,6 @@ export const contactService = {
       lastName: data.lastName,
       nickname: data.nickname,
       gender: data.gender || 'unknown',
-      highlights: [],
       createdAt: now,
       updatedAt: now,
     };
@@ -236,8 +194,8 @@ export const contactService = {
       birthdayDay: number | null;
       birthdayMonth: number | null;
       birthdayYear: number | null;
-      highlights: string[];
       aiSummary: string;
+      suggestedQuestions: string;
       iceBreakers: string[];
       lastContactAt: string;
     }>
@@ -286,13 +244,13 @@ export const contactService = {
       updates.push('birthday_year = ?');
       values.push(data.birthdayYear || null);
     }
-    if (data.highlights !== undefined) {
-      updates.push('highlights = ?');
-      values.push(JSON.stringify(data.highlights));
-    }
     if (data.aiSummary !== undefined) {
       updates.push('ai_summary = ?');
       values.push(data.aiSummary || null);
+    }
+    if (data.suggestedQuestions !== undefined) {
+      updates.push('suggested_questions = ?');
+      values.push(data.suggestedQuestions || null);
     }
     if (data.iceBreakers !== undefined) {
       updates.push('ice_breakers = ?');

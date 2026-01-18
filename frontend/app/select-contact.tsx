@@ -8,7 +8,6 @@ import { useGroupsQuery } from '@/hooks/useGroupsQuery';
 import { useAppStore } from '@/stores/app-store';
 import { extractInfo, DetectionResult } from '@/lib/api';
 import { Contact } from '@/types';
-import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { User, Plus, Search, Sparkles, Edit3, CheckCircle2 } from 'lucide-react-native';
 import { Colors, Spacing, BorderRadius, Typography } from '@/constants/theme';
@@ -97,10 +96,7 @@ export default function SelectContactScreen() {
         lastName: contactItem.lastName,
       }));
 
-      const [facts, hotTopics] = await Promise.all([
-        factService.getByContact(contact.id),
-        hotTopicService.getByContact(contact.id),
-      ]);
+      const hotTopics = await hotTopicService.getByContact(contact.id);
 
       const activeHotTopics = hotTopics.filter((topic) => topic.status === 'active');
 
@@ -111,11 +107,7 @@ export default function SelectContactScreen() {
           id: contact.id,
           firstName: contact.firstName,
           lastName: contact.lastName,
-          facts: facts.map((fact) => ({
-            factType: fact.factType,
-            factKey: fact.factKey,
-            factValue: fact.factValue,
-          })),
+          facts: [],
           hotTopics: activeHotTopics.map((topic) => ({
             id: topic.id,
             title: topic.title,

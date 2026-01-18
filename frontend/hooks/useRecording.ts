@@ -13,7 +13,6 @@ import { useAppStore } from '@/stores/app-store';
 import { useContactsStore } from '@/stores/contacts-store';
 import { useSubscriptionStore } from '@/stores/subscription-store';
 import { transcribeAudio, extractInfo, detectContact } from '@/lib/api';
-import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { showErrorToast, ApiError } from '@/lib/error-handler';
 import i18n from '@/lib/i18n';
@@ -241,12 +240,9 @@ export const useRecording = () => {
             lastName: contact.lastName,
           }));
 
-          // Load facts and hot topics for the preselected contact
+          // Load hot topics for the preselected contact
           setProcessingStep('extracting');
-          const [facts, hotTopics] = await Promise.all([
-            factService.getByContact(preselectedContactId),
-            hotTopicService.getByContact(preselectedContactId),
-          ]);
+          const hotTopics = await hotTopicService.getByContact(preselectedContactId);
 
           const activeHotTopics = hotTopics.filter((topic) => topic.status === 'active');
 
@@ -257,11 +253,7 @@ export const useRecording = () => {
               id: preselectedContact.id,
               firstName: preselectedContact.firstName,
               lastName: preselectedContact.lastName,
-              facts: facts.map((fact) => ({
-                factType: fact.factType,
-                factKey: fact.factKey,
-                factValue: fact.factValue,
-              })),
+              facts: [],
               hotTopics: activeHotTopics.map((topic) => ({
                 id: topic.id,
                 title: topic.title,
@@ -419,10 +411,7 @@ export const useRecording = () => {
           }));
 
           setProcessingStep('extracting');
-          const [facts, hotTopics] = await Promise.all([
-            factService.getByContact(preselectedContactId),
-            hotTopicService.getByContact(preselectedContactId),
-          ]);
+          const hotTopics = await hotTopicService.getByContact(preselectedContactId);
 
           const activeHotTopics = hotTopics.filter((topic) => topic.status === 'active');
 
@@ -433,11 +422,7 @@ export const useRecording = () => {
               id: preselectedContact.id,
               firstName: preselectedContact.firstName,
               lastName: preselectedContact.lastName,
-              facts: facts.map((fact) => ({
-                factType: fact.factType,
-                factKey: fact.factKey,
-                factValue: fact.factValue,
-              })),
+              facts: [],
               hotTopics: activeHotTopics.map((topic) => ({
                 id: topic.id,
                 title: topic.title,

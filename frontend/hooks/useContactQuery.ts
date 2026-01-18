@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { contactService } from '@/services/contact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
-import { memoryService } from '@/services/memory.service';
 import { noteService } from '@/services/note.service';
 import { queryKeys } from '@/lib/query-keys';
 
@@ -16,9 +15,9 @@ export function useContactQuery(contactId: string | undefined) {
       const contact = query.state.data;
       if (!contact) return false;
 
-      const hasFacts = contact.facts.length > 0;
       const hasHotTopics = contact.hotTopics.length > 0;
-      const hasData = hasFacts || hasHotTopics;
+      const hasNotes = contact.notes.length > 0;
+      const hasData = hasHotTopics || hasNotes;
       const hasNoSummary = !contact.aiSummary;
       const hasNoIceBreakers = !contact.iceBreakers || contact.iceBreakers.length === 0;
 
@@ -37,7 +36,7 @@ export function useContactQuery(contactId: string | undefined) {
     },
   });
 
-  const hasData = query.data && (query.data.facts.length > 0 || query.data.hotTopics.length > 0);
+  const hasData = query.data && (query.data.hotTopics.length > 0 || query.data.notes.length > 0);
 
   // Only show loading state if there's recent activity (within 2 minutes)
   // Otherwise show empty state for contacts where generation already failed/completed
@@ -53,9 +52,7 @@ export function useContactQuery(contactId: string | undefined) {
   const invalidate = () => {
     if (contactId) {
       queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(contactId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.facts.byContact(contactId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.hotTopics.byContact(contactId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.memories.byContact(contactId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.contacts.list() });
     }
   };
@@ -133,53 +130,6 @@ export function useUpdateHotTopicResolution() {
       hotTopicService.updateResolution(id, resolution),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.hotTopics.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
-    },
-  });
-}
-
-export function useCreateMemory() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data: {
-      contactId: string;
-      description: string;
-      eventDate?: string;
-      isShared: boolean;
-    }) => memoryService.create(data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.memories.byContact(variables.contactId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(variables.contactId) });
-    },
-  });
-}
-
-export function useUpdateMemory() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({
-      id,
-      data,
-    }: {
-      id: string;
-      data: { description?: string; eventDate?: string; isShared?: boolean };
-    }) => memoryService.update(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.memories.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
-    },
-  });
-}
-
-export function useDeleteMemory() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: string) => memoryService.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.memories.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
     },
   });

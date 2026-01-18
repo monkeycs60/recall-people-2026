@@ -8,9 +8,7 @@ import { ExtractionResult, HotTopic, ResolvedTopic, ExtractedMemory } from '@/ty
 import { useCreateContact, useUpdateContact } from '@/hooks/useContactsQuery';
 import { useGroupsQuery } from '@/hooks/useGroupsQuery';
 import { useNotes } from '@/hooks/useNotes';
-import { factService } from '@/services/fact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
-import { memoryService } from '@/services/memory.service';
 import { notificationService } from '@/services/notification.service';
 import { contactService } from '@/services/contact.service';
 import { groupService } from '@/services/group.service';
@@ -417,59 +415,10 @@ export default function ReviewScreen() {
         title: extraction.noteTitle,
         audioUri,
         transcription: editedTranscription,
-        summary: extraction.note?.summary,
       });
 
-      const cumulativeTypes = [
-        'hobby', 'sport', 'children', 'language', 'pet',
-        'shared_ref', 'trait', 'gift_idea', 'gift_given'
-      ];
-
-      for (const index of selectedFacts) {
-        const fact = editableFacts[index];
-        const isCumulative = cumulativeTypes.includes(fact.factType);
-
-        if (isCumulative) {
-          const existingWithSameValue = await factService.findByTypeAndValue(
-            finalContactId,
-            fact.factType,
-            fact.factValue
-          );
-
-          if (existingWithSameValue) {
-            continue;
-          }
-
-          await factService.create({
-            contactId: finalContactId,
-            factType: fact.factType,
-            factKey: fact.factKey,
-            factValue: fact.factValue,
-            sourceNoteId: note.id,
-          });
-        } else {
-          const existingFact = await factService.findByTypeAndKey(
-            finalContactId,
-            fact.factType,
-            fact.factKey
-          );
-
-          if (existingFact) {
-            if (existingFact.factValue.toLowerCase() === fact.factValue.toLowerCase()) {
-              continue;
-            }
-            await factService.updateWithHistory(existingFact.id, fact.factValue);
-          } else {
-            await factService.create({
-              contactId: finalContactId,
-              factType: fact.factType,
-              factKey: fact.factKey,
-              factValue: fact.factValue,
-              sourceNoteId: note.id,
-            });
-          }
-        }
-      }
+      // V2: Facts are no longer stored in a separate table
+      // They are extracted on-demand from notes when needed
 
       if (editableHotTopics.length > 0) {
         for (const index of selectedHotTopics) {
@@ -509,18 +458,7 @@ export default function ReviewScreen() {
         }
       }
 
-      if (editableMemories.length > 0) {
-        for (const index of selectedMemories) {
-          const memory = editableMemories[index];
-          await memoryService.create({
-            contactId: finalContactId,
-            description: memory.description,
-            eventDate: memory.eventDate || undefined,
-            isShared: memory.isShared,
-            sourceNoteId: note.id,
-          });
-        }
-      }
+      // V2: Memories are no longer stored in a separate table
 
       await updateContactMutation.mutateAsync({
         id: finalContactId,
@@ -529,9 +467,7 @@ export default function ReviewScreen() {
 
       await queryClient.refetchQueries({ queryKey: queryKeys.contacts.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(finalContactId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.facts.byContact(finalContactId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.hotTopics.byContact(finalContactId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.memories.byContact(finalContactId) });
 
       // Generate summary from ALL transcriptions in background
       const contactName = contactId === 'new'
