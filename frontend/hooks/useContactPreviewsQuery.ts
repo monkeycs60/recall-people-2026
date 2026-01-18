@@ -37,7 +37,7 @@ function filterHotTopicsForCard(hotTopics: HotTopic[]): HotTopic[] {
     result.push(upcomingBirthday);
   }
 
-  return result.slice(0, 2);
+  return result;
 }
 
 export function useContactPreviewsQuery(contacts: Contact[]) {
