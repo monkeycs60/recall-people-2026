@@ -7,6 +7,63 @@ import { API_URL } from './config';
 
 const getCurrentLanguage = () => useSettingsStore.getState().language;
 
+// Retry configuration
+const RETRY_CONFIG = {
+  maxRetries: 2,
+  baseDelayMs: 1000,
+  maxDelayMs: 5000,
+};
+
+// Utility to delay execution
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Check if error is retryable (server errors, network errors, but not client errors like 400/401/403)
+const isRetryableError = (error: unknown): boolean => {
+  if (error instanceof NetworkError) return true;
+  if (error instanceof ApiError) {
+    // Retry on 5xx server errors, not on 4xx client errors
+    return error.status !== undefined && error.status >= 500;
+  }
+  return false;
+};
+
+// Wrapper function to add retry logic to any async function
+const withRetry = async <T>(
+  fn: () => Promise<T>,
+  config = RETRY_CONFIG
+): Promise<T> => {
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt <= config.maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+
+      // Don't retry if it's not a retryable error
+      if (!isRetryableError(error)) {
+        throw error;
+      }
+
+      // Don't retry if we've exhausted all attempts
+      if (attempt === config.maxRetries) {
+        console.log(`[API Retry] All ${config.maxRetries + 1} attempts failed`);
+        throw error;
+      }
+
+      // Calculate delay with exponential backoff
+      const delayMs = Math.min(
+        config.baseDelayMs * Math.pow(2, attempt),
+        config.maxDelayMs
+      );
+      console.log(`[API Retry] Attempt ${attempt + 1} failed, retrying in ${delayMs}ms...`);
+      await delay(delayMs);
+    }
+  }
+
+  throw lastError;
+};
+
 type ApiOptions = {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   body?: unknown;
@@ -145,7 +202,8 @@ const transcribeAudioInternal = async (
   }
 };
 
-export const transcribeAudio = (audioUri: string) => transcribeAudioInternal(audioUri);
+export const transcribeAudio = (audioUri: string) =>
+  withRetry(() => transcribeAudioInternal(audioUri));
 
 export const extractInfo = async (data: {
   transcription: string;
@@ -176,10 +234,12 @@ export const extractInfo = async (data: {
 }): Promise<{
   extraction: ExtractionResult;
 }> => {
-  return apiCall('/api/extract', {
-    method: 'POST',
-    body: { ...data, language: getCurrentLanguage() },
-  });
+  return withRetry(() =>
+    apiCall('/api/extract', {
+      method: 'POST',
+      body: { ...data, language: getCurrentLanguage() },
+    })
+  );
 };
 
 export const generateSuggestedQuestions = async (data: {
@@ -241,10 +301,12 @@ export const detectContact = async (data: {
     }>;
   }>;
 }): Promise<{ detection: DetectionResult }> => {
-  return apiCall('/api/detect-contact', {
-    method: 'POST',
-    body: { ...data, language: getCurrentLanguage() },
-  });
+  return withRetry(() =>
+    apiCall('/api/detect-contact', {
+      method: 'POST',
+      body: { ...data, language: getCurrentLanguage() },
+    })
+  );
 };
 
 export const getUserSettings = async (): Promise<{
@@ -525,6 +587,52 @@ export const askQuestion = async (data: AskRequest): Promise<AskResponse> => {
   return apiCall('/api/ask', {
     method: 'POST',
     body: data,
+  });
+};
+
+// ============================================
+// Free Trials API
+// ============================================
+
+export type TrialsStatusResponse = {
+  success: boolean;
+  freeNoteTrials: number;
+  freeAskTrials: number;
+  isPremium: boolean;
+};
+
+export type UseTrialResponse = {
+  success: boolean;
+  isPremium?: boolean;
+  remaining: number;
+  error?: string;
+  type?: 'notes' | 'ask';
+};
+
+export const getTrialsStatus = async (): Promise<TrialsStatusResponse | null> => {
+  try {
+    const response = await apiCall<TrialsStatusResponse>(
+      '/api/subscription/trials',
+      { showErrorToast: false }
+    );
+    return response;
+  } catch (error) {
+    console.error('[API] getTrialsStatus error:', error);
+    return null;
+  }
+};
+
+export const useNoteTrial = async (): Promise<UseTrialResponse> => {
+  return apiCall('/api/subscription/use-note-trial', {
+    method: 'POST',
+    showErrorToast: false,
+  });
+};
+
+export const useAskTrial = async (): Promise<UseTrialResponse> => {
+  return apiCall('/api/subscription/use-ask-trial', {
+    method: 'POST',
+    showErrorToast: false,
   });
 };
 
