@@ -32,6 +32,7 @@ import { EmailEditModal } from '@/components/contact/EmailEditModal';
 import { BirthdayEditModal } from '@/components/contact/BirthdayEditModal';
 import { GenderEditModal } from '@/components/contact/GenderEditModal';
 import { AvatarEditModal } from '@/components/contact/AvatarEditModal';
+import { NameEditModal } from '@/components/contact/NameEditModal';
 import { GroupsManagementSheet } from '@/components/contact/GroupsManagementSheet';
 import { Colors } from '@/constants/theme';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
@@ -74,9 +75,7 @@ export default function ContactDetailScreen() {
   const { groups: allGroups } = useGroupsQuery();
   const { data: contactGroups = [] } = useGroupsForContact(contactId);
 
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [editedFirstName, setEditedFirstName] = useState('');
-  const [editedLastName, setEditedLastName] = useState('');
+  const [showNameModal, setShowNameModal] = useState(false);
 
   const groupsSheetRef = useRef<BottomSheetModal>(null);
 
@@ -97,14 +96,6 @@ export default function ContactDetailScreen() {
   const [showBirthdayModal, setShowBirthdayModal] = useState(false);
   const [showGenderModal, setShowGenderModal] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
-
-  // Sync contact data with local state
-  useEffect(() => {
-    if (contact) {
-      setEditedFirstName(contact.firstName);
-      setEditedLastName(contact.lastName || '');
-    }
-  }, [contact]);
 
   useEffect(() => {
     if (highlightType && highlightId && contact && !isLoading) {
@@ -178,16 +169,15 @@ export default function ContactDetailScreen() {
     });
   };
 
-  const handleSaveName = async () => {
-    if (!contact || !editedFirstName.trim()) return;
+  const handleSaveName = async (firstName: string, lastName: string | null) => {
+    if (!contact) return;
     await updateContactMutation.mutateAsync({
       id: contact.id,
       data: {
-        firstName: editedFirstName.trim(),
-        lastName: editedLastName.trim() || undefined,
+        firstName,
+        lastName: lastName || undefined,
       },
     });
-    setIsEditingName(false);
   };
 
   const handleResolveHotTopic = async (id: string, resolution?: string) => {
@@ -311,93 +301,51 @@ export default function ContactDetailScreen() {
             />
           </View>
 
-          {isEditingName ? (
-            <View style={styles.editNameCard}>
-              <Text style={styles.inputLabel}>{t('contact.name.firstName')}</Text>
-              <TextInput
-                style={styles.input}
-                value={editedFirstName}
-                onChangeText={setEditedFirstName}
-                placeholder={t('contact.name.firstNamePlaceholder')}
-                placeholderTextColor={Colors.textMuted}
-              />
-              <Text style={styles.inputLabel}>{t('contact.name.lastName')}</Text>
-              <TextInput
-                style={styles.input}
-                value={editedLastName}
-                onChangeText={setEditedLastName}
-                placeholder={t('contact.name.lastNamePlaceholder')}
-                placeholderTextColor={Colors.textMuted}
-              />
-              <View style={styles.buttonRow}>
-                <Pressable
-                  style={styles.cancelButton}
-                  onPress={() => {
-                    setIsEditingName(false);
-                    setEditedFirstName(contact.firstName);
-                    setEditedLastName(contact.lastName || '');
-                  }}
-                >
-                  <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
-                </Pressable>
-                <Pressable style={styles.saveButton} onPress={handleSaveName}>
-                  <Text style={styles.saveButtonText}>{t('common.save')}</Text>
-                </Pressable>
+          <Pressable style={styles.nameRow} onPress={() => setShowNameModal(true)}>
+            <Text style={styles.contactName}>
+              {contact.firstName} {contact.lastName || contact.nickname || ''}
+            </Text>
+            <Edit3 size={18} color={Colors.textMuted} />
+          </Pressable>
+
+          {/* Groups display */}
+          {contactGroups.length > 0 ? (
+            <Pressable style={styles.groupChipsContainer} onPress={handleOpenGroupsSheet}>
+              {contactGroups.map((group) => (
+                <View key={group.id} style={styles.groupChip}>
+                  <Text style={styles.groupChipText}>{group.name}</Text>
+                </View>
+              ))}
+              <View style={styles.editGroupsChip}>
+                <Edit3 size={12} color={Colors.textMuted} />
               </View>
-            </View>
+            </Pressable>
           ) : (
-            <Pressable style={styles.nameRow} onPress={() => setIsEditingName(true)}>
-              <Text style={styles.contactName}>
-                {contact.firstName} {contact.lastName || contact.nickname || ''}
-              </Text>
-              <Edit3 size={18} color={Colors.textMuted} />
+            <Pressable style={styles.addGroupButton} onPress={handleOpenGroupsSheet}>
+              <Plus size={14} color={Colors.primary} />
+              <Text style={styles.addGroupText}>{t('contact.addGroup')}</Text>
             </Pressable>
           )}
 
-          {/* Groups display */}
-          {!isEditingName && (
-            contactGroups.length > 0 ? (
-              <Pressable style={styles.groupChipsContainer} onPress={handleOpenGroupsSheet}>
-                {contactGroups.map((group) => (
-                  <View key={group.id} style={styles.groupChip}>
-                    <Text style={styles.groupChipText}>{group.name}</Text>
-                  </View>
-                ))}
-                <View style={styles.editGroupsChip}>
-                  <Edit3 size={12} color={Colors.textMuted} />
-                </View>
-              </Pressable>
-            ) : (
-              <Pressable style={styles.addGroupButton} onPress={handleOpenGroupsSheet}>
-                <Plus size={14} color={Colors.primary} />
-                <Text style={styles.addGroupText}>{t('contact.addGroup')}</Text>
-              </Pressable>
-            )
-          )}
-
-          {contact.lastContactAt && !isEditingName && (
+          {contact.lastContactAt && (
             <Text style={styles.lastContactText}>
               {t('contact.lastContact')} : {new Date(contact.lastContactAt).toLocaleDateString()}
             </Text>
           )}
 
           {/* Add note button */}
-          {!isEditingName && (
-            <AddNoteButton
-              firstName={contact.firstName}
-              onAddNote={handleAddNote}
-            />
-          )}
+          <AddNoteButton
+            firstName={contact.firstName}
+            onAddNote={handleAddNote}
+          />
 
           {/* Ask about contact button */}
-          {!isEditingName && (
-            <Pressable style={styles.askButton} onPress={handleAskAboutContact}>
-              <MessageCircleQuestion size={18} color={Colors.primary} />
-              <Text style={styles.askButtonText}>
-                {t('contact.askAbout', { firstName: contact.firstName })}
-              </Text>
-            </Pressable>
-          )}
+          <Pressable style={styles.askButton} onPress={handleAskAboutContact}>
+            <MessageCircleQuestion size={18} color={Colors.primary} />
+            <Text style={styles.askButtonText}>
+              {t('contact.askAbout', { firstName: contact.firstName })}
+            </Text>
+          </Pressable>
         </Animated.View>
 
         {/* AI Summary (L'essentiel) - Most important info first */}
@@ -561,6 +509,16 @@ export default function ContactDetailScreen() {
         />
       )}
 
+      {showNameModal && (
+        <NameEditModal
+          visible={showNameModal}
+          initialFirstName={contact?.firstName || ''}
+          initialLastName={contact?.lastName}
+          onSave={handleSaveName}
+          onClose={() => setShowNameModal(false)}
+        />
+      )}
+
       <GroupsManagementSheet
         ref={groupsSheetRef}
         contactId={contactId}
@@ -643,13 +601,6 @@ const styles = StyleSheet.create({
     fontSize: 28,
     color: Colors.textPrimary,
     textAlign: 'center',
-  },
-  editNameCard: {
-    backgroundColor: Colors.surface,
-    padding: 16,
-    borderRadius: 16,
-    width: '100%',
-    marginTop: 8,
   },
   inputLabel: {
     fontSize: 14,

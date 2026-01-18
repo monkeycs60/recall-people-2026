@@ -291,8 +291,20 @@ TÂCHE:
 
 RÈGLES:
 
+0. COMPRENDRE QUI EST QUI - CRITIQUE:
+   La transcription est une note vocale enregistrée par l'UTILISATEUR DE L'APP.
+   - "je", "me", "m'", "moi", "mon", "ma", "mes" = l'UTILISATEUR qui enregistre la note (PAS le contact)
+   - Le CONTACT est la personne DONT on parle, pas celle qui parle
+
+   Exemples:
+   - "Marie m'a dit qu'elle cherche un appart" → Contact = Marie, "m'" = l'utilisateur
+   - "Il m'a invité à son mariage" → "m'" = l'utilisateur, "son mariage" = hot topic du contact
+   - "On s'est vu hier, elle m'a raconté son entretien" → "m'" = l'utilisateur, "son entretien" = hot topic du contact
+
+   DONC: Les infos après "m'a dit", "m'a raconté", "m'a parlé de" concernent le CONTACT, pas l'utilisateur.
+
 1. IDENTIFICATION DU CONTACT:
-   - Extrais le prénom de la personne dont on parle
+   - Extrais le prénom de la personne DONT on parle (le sujet de la note)
    - Le prénom doit être un VRAI prénom (Marie, Jean, Sophie, etc.)
    - Nom de famille SEULEMENT si explicitement mentionné
    - Si aucun prénom clair, utilise "Contact"

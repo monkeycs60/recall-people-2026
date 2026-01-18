@@ -284,6 +284,15 @@
       "cancel": "Cancel",
       "delete": "Delete"
     },
+    "nameModal": {
+      "title": "Edit name",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "firstNamePlaceholder": "First name",
+      "lastNamePlaceholder": "Last name (optional)",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
     "birthdayModal": {
       "title": "Birthday",
       "day": "Day",

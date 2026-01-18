@@ -297,6 +297,15 @@
       "cancel": "Annuler",
       "delete": "Supprimer"
     },
+    "nameModal": {
+      "title": "Modifier le nom",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "firstNamePlaceholder": "Prénom",
+      "lastNamePlaceholder": "Nom (optionnel)",
+      "save": "Enregistrer",
+      "cancel": "Annuler"
+    },
     "birthdayModal": {
       "title": "Anniversaire",
       "day": "Jour",
