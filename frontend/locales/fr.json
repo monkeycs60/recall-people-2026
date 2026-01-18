@@ -395,6 +395,7 @@
     "events": "Événements",
     "eventTitlePlaceholder": "Titre de l'événement",
     "reminder": "Rappel",
+    "reminderExplanation": "Les rappels vous enverront une notification pour vous inciter a reprendre contact sur ces sujets.",
     "reminderDate": "Date du rappel",
     "noDate": "Pas de date",
     "today": "Aujourd'hui",

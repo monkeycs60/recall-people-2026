@@ -72,7 +72,7 @@ export default function ReviewScreen() {
     const initial: Record<number, { enabled: boolean; date: string }> = {};
     extraction.hotTopics?.forEach((topic, index) => {
       initial[index] = {
-        enabled: !!topic.suggestedDate,
+        enabled: true,
         date: topic.suggestedDate || '',
       };
     });
@@ -321,7 +321,7 @@ export default function ReviewScreen() {
       const newHotTopicDates: Record<number, { enabled: boolean; date: string }> = {};
       newExtraction.hotTopics?.forEach((topic, index) => {
         newHotTopicDates[index] = {
-          enabled: !!topic.suggestedDate,
+          enabled: true,
           date: topic.suggestedDate || '',
         };
       });
@@ -1004,6 +1004,7 @@ export default function ReviewScreen() {
       {editableHotTopics.length > 0 && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('review.news')}</Text>
+          <Text style={styles.reminderExplanation}>{t('review.reminderExplanation')}</Text>
 
           {editableHotTopics.map((topic, index) => {
             const isEditing = editingHotTopicIndex === index;
@@ -1265,6 +1266,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.textMuted,
     marginBottom: 12,
+  },
+  reminderExplanation: {
+    fontSize: 13,
+    color: Colors.textMuted,
+    marginBottom: 12,
+    marginTop: -4,
   },
   card: {
     backgroundColor: Colors.surface,

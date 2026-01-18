@@ -295,15 +295,32 @@ RÈGLES:
    - Activités régulières: "fait du sport", "joue aux échecs"
 
 3. DATES ABSOLUES (format ISO: YYYY-MM-DD):
-   Calcule les dates à partir de ${currentDate}:
-   - "dans X jours/semaines/mois" → calculer la date exacte
-   - "la semaine prochaine" → lundi prochain
+   Aujourd'hui c'est ${currentDate}. Calcule les dates relatives:
+
+   Calculs temporels:
+   - "demain" → ${currentDate} + 1 jour
+   - "dans X jours" → ${currentDate} + X jours
+   - "la semaine prochaine" / "next week" → ${currentDate} + 7 jours
+   - "dans 2 semaines" → ${currentDate} + 14 jours
+   - "le mois prochain" / "next month" → premier jour du mois suivant
+   - "dans 3 mois" → ${currentDate} + 3 mois
+
+   Dates fixes:
    - "le 25 janvier" → 2026-01-25
+   - "le 15/02" → 2026-02-15
    - "mi-février" → 2026-02-15
    - "fin mars" → 2026-03-31
+   - "début avril" → 2026-04-01
+
+   Périodes/saisons (utilise le premier jour):
    - "en juin" → 2026-06-01
-   - "cet été" → 2026-07-01
-   - Si aucune date ou date vague → eventDate = null
+   - "cet été" / "this summer" → 2026-07-01
+   - "l'automne prochain" / "next fall" → 2026-09-01
+   - "cet hiver" / "this winter" → 2026-12-01
+   - "le printemps" / "spring" → 2026-03-01
+
+   IMPORTANT: Retourne toujours eventDate en format YYYY-MM-DD quand une date est mentionnée.
+   Si aucune date ou date trop vague ("un jour", "bientôt") → eventDate = null
 
 4. RÉSOLUTION D'ACTUALITÉS EXISTANTES:
    Si une actualité existante est mentionnée avec une issue, marque-la résolue.

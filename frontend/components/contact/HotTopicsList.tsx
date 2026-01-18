@@ -446,13 +446,13 @@ const styles = StyleSheet.create({
     padding: 16,
     flexDirection: 'row',
     alignItems: 'flex-start',
+    gap: 12,
   },
   statusDot: {
     width: 10,
     height: 10,
     borderRadius: 5,
     marginTop: 6,
-    marginRight: 12,
   },
   statusDotActive: {
     backgroundColor: Colors.warning,

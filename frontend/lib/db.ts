@@ -65,6 +65,7 @@ export const initDatabase = async () => {
       -- AI-generated (regenerated after each note)
       ai_summary TEXT,
       suggested_questions TEXT,
+      ice_breakers TEXT,
 
       -- Meta
       last_contact_at TEXT,
@@ -441,20 +442,23 @@ const runV2Migration = async (database: SQLite.SQLiteDatabase) => {
     await database.execAsync("DROP TABLE IF EXISTS similarity_cache");
   }
 
-  // Remove deprecated columns from contacts table (tags, highlights, ice_breakers)
+  // Remove deprecated columns from contacts table (tags, highlights)
   // SQLite doesn't support DROP COLUMN directly, so we need to recreate the table
+  // Note: ice_breakers is still used and should be preserved
   const contactsInfo = await database.getAllAsync<{ name: string }>(
     "PRAGMA table_info(contacts)"
   );
 
   const hasTags = contactsInfo.some((col) => col.name === 'tags');
   const hasHighlights = contactsInfo.some((col) => col.name === 'highlights');
-  const hasIceBreakers = contactsInfo.some((col) => col.name === 'ice_breakers');
 
-  if (hasTags || hasHighlights || hasIceBreakers) {
+  if (hasTags || hasHighlights) {
     console.log('[Migration V2] Removing deprecated columns from contacts table...');
 
-    // Create new contacts table without deprecated columns
+    // Check if ice_breakers exists so we can preserve its data
+    const hasIceBreakers = contactsInfo.some((col) => col.name === 'ice_breakers');
+
+    // Create new contacts table without deprecated columns (but keeping ice_breakers)
     await database.execAsync(`
       CREATE TABLE contacts_v2 (
         id TEXT PRIMARY KEY,
@@ -472,6 +476,7 @@ const runV2Migration = async (database: SQLite.SQLiteDatabase) => {
         avatar_url TEXT,
         ai_summary TEXT,
         suggested_questions TEXT,
+        ice_breakers TEXT,
         last_contact_at TEXT,
         created_at TEXT DEFAULT (datetime('now')),
         updated_at TEXT DEFAULT (datetime('now'))
@@ -484,14 +489,14 @@ const runV2Migration = async (database: SQLite.SQLiteDatabase) => {
         id, first_name, last_name, nickname, gender,
         phone, email, birthday_day, birthday_month, birthday_year,
         relationship_type, photo_uri, avatar_url,
-        ai_summary, suggested_questions,
+        ai_summary, suggested_questions, ice_breakers,
         last_contact_at, created_at, updated_at
       )
       SELECT
         id, first_name, last_name, nickname, gender,
         phone, email, birthday_day, birthday_month, birthday_year,
         relationship_type, photo_uri, avatar_url,
-        ai_summary, suggested_questions,
+        ai_summary, suggested_questions, ${hasIceBreakers ? 'ice_breakers' : 'NULL'},
         last_contact_at, created_at, updated_at
       FROM contacts;
     `);

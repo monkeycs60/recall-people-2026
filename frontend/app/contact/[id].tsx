@@ -532,7 +532,7 @@ export default function ContactDetailScreen() {
 
         {/* Ice Breakers (À demander) */}
         <Animated.View entering={FadeInDown.delay(125).duration(300)} style={styles.section}>
-          <IceBreakers iceBreakers={contact.suggestedQuestions} isLoading={isWaitingForIceBreakers} firstName={contact.firstName} />
+          <IceBreakers iceBreakers={contact.iceBreakers} isLoading={isWaitingForIceBreakers} firstName={contact.firstName} />
         </Animated.View>
 
         {/* Hot Topics Section (Actualités) */}

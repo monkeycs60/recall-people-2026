@@ -369,6 +369,7 @@
     "events": "Events",
     "eventTitlePlaceholder": "Event title",
     "reminder": "Reminder",
+    "reminderExplanation": "Reminders will send you a notification to encourage you to follow up on these topics.",
     "reminderDate": "Reminder date",
     "noDate": "No date",
     "today": "Today",
