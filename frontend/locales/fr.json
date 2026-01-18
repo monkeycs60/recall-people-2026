@@ -151,6 +151,7 @@
       "title": "Gérer les groupes",
       "currentGroups": "Groupes de {{firstName}}",
       "allGroups": "Tous les groupes",
+      "selectGroups": "Groupes de {{firstName}}",
       "noGroups": "Aucun groupe créé",
       "createNew": "Nouveau groupe",
       "newGroupPlaceholder": "Nom du groupe...",

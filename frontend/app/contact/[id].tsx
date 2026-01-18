@@ -1,6 +1,7 @@
 import { View, Text, ScrollView, Pressable, TextInput, Alert, Platform, KeyboardAvoidingView, StyleSheet, BackHandler } from 'react-native';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import {
@@ -13,7 +14,7 @@ import {
   useDeleteNote,
 } from '@/hooks/useContactQuery';
 import { useUpdateContact, useDeleteContact } from '@/hooks/useContactsQuery';
-import { useGroupsForContact } from '@/hooks/useGroupsQuery';
+import { useGroupsForContact, useGroupsQuery } from '@/hooks/useGroupsQuery';
 import { SearchSourceType } from '@/types';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { Edit3, Plus, Trash2, MoreVertical, MessageCircleQuestion } from 'lucide-react-native';
@@ -69,15 +70,19 @@ export default function ContactDetailScreen() {
   const updateHotTopicResolutionMutation = useUpdateHotTopicResolution();
   const deleteNoteMutation = useDeleteNote();
 
-  // Groups queries
+  // Groups queries - prefetch allGroups so the sheet opens instantly
+  useGroupsQuery(); // prefetch for GroupsManagementSheet
   const { data: contactGroups = [] } = useGroupsForContact(contactId);
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedFirstName, setEditedFirstName] = useState('');
   const [editedLastName, setEditedLastName] = useState('');
 
-  // Groups state
-  const [showGroupsSheet, setShowGroupsSheet] = useState(false);
+  const groupsSheetRef = useRef<BottomSheetModal>(null);
+
+  const handleOpenGroupsSheet = useCallback(() => {
+    groupsSheetRef.current?.present();
+  }, []);
 
   // Adding new items state
   const [isAddingHotTopic, setIsAddingHotTopic] = useState(false);
@@ -352,19 +357,19 @@ export default function ContactDetailScreen() {
           {/* Groups display */}
           {!isEditingName && (
             contactGroups.length > 0 ? (
-              <Pressable style={styles.groupChipsContainer} onPress={() => setShowGroupsSheet(true)}>
+              <Pressable style={styles.groupChipsContainer} onPress={handleOpenGroupsSheet}>
                 {contactGroups.map((group) => (
                   <View key={group.id} style={styles.groupChip}>
                     <Text style={styles.groupChipText}>{group.name}</Text>
                   </View>
                 ))}
-                <View style={styles.editGroupsIcon}>
-                  <Edit3 size={14} color={Colors.textMuted} />
+                <View style={styles.editGroupsChip}>
+                  <Edit3 size={12} color={Colors.textMuted} />
                 </View>
               </Pressable>
             ) : (
-              <Pressable style={styles.addGroupButton} onPress={() => setShowGroupsSheet(true)}>
-                <Plus size={16} color={Colors.primary} />
+              <Pressable style={styles.addGroupButton} onPress={handleOpenGroupsSheet}>
+                <Plus size={14} color={Colors.primary} />
                 <Text style={styles.addGroupText}>{t('contact.addGroup')}</Text>
               </Pressable>
             )
@@ -557,8 +562,7 @@ export default function ContactDetailScreen() {
       )}
 
       <GroupsManagementSheet
-        visible={showGroupsSheet}
-        onClose={() => setShowGroupsSheet(false)}
+        ref={groupsSheetRef}
         contactId={contactId}
         contactFirstName={contact.firstName}
       />
@@ -702,21 +706,23 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 8,
     marginTop: 12,
-    marginBottom: 12,
     justifyContent: 'center',
+    alignItems: 'center',
   },
   groupChip: {
-    backgroundColor: Colors.primaryLight,
-    paddingHorizontal: 14,
+    backgroundColor: Colors.surface,
+    paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 16,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   groupChipText: {
-    color: Colors.primary,
-    fontSize: 14,
+    color: Colors.textPrimary,
+    fontSize: 13,
     fontWeight: '500',
   },
-  editGroupsIcon: {
+  editGroupsChip: {
     backgroundColor: Colors.surface,
     padding: 6,
     borderRadius: 12,

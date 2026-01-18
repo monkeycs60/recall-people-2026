@@ -138,6 +138,7 @@
       "title": "Manage groups",
       "currentGroups": "{{firstName}}'s groups",
       "allGroups": "All groups",
+      "selectGroups": "{{firstName}}'s groups",
       "noGroups": "No groups created",
       "createNew": "New group",
       "newGroupPlaceholder": "Group name...",

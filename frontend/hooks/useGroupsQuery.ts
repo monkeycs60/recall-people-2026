@@ -29,7 +29,8 @@ export function useGroupsForContact(contactId: string | undefined) {
     queryKey: queryKeys.groups.forContact(contactId || ''),
     queryFn: () => groupService.getGroupsForContact(contactId!),
     enabled: !!contactId,
-    staleTime: 1000 * 60, // 1 minute
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    placeholderData: keepPreviousData,
   });
 }
 
