@@ -1,6 +1,6 @@
 import { View, Pressable, StyleSheet, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Users, User, Mic, Calendar, Search, MessageCircleQuestion, X, Plus } from 'lucide-react-native';
+import { Users, User, Mic, Calendar, Search, MessageCircleQuestion, Plus } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '@/constants/theme';
 import Animated, {
@@ -118,38 +118,48 @@ export function CustomTabBar({ state, navigation }: TabBarProps) {
           style={styles.modalOverlay}
           onPress={() => setMenuVisible(false)}
         >
-          <View style={[styles.menuContainer, { paddingBottom: insets.bottom + 80 }]}>
-            <View style={styles.menuContent}>
-              <Pressable
-                style={styles.menuOption}
-                onPress={() => handleMenuOption('/record')}
-              >
-                <View style={[styles.menuIconContainer, { backgroundColor: Colors.primary }]}>
-                  <Mic size={24} color={Colors.textInverse} strokeWidth={2} />
-                </View>
-                <Animated.Text style={styles.menuOptionText}>
-                  {t('fab.newNote')}
-                </Animated.Text>
-              </Pressable>
-
-              <Pressable
-                style={styles.menuOption}
-                onPress={() => handleMenuOption('/ask')}
-              >
-                <View style={[styles.menuIconContainer, { backgroundColor: Colors.secondary }]}>
-                  <MessageCircleQuestion size={24} color={Colors.textInverse} strokeWidth={2} />
-                </View>
-                <Animated.Text style={styles.menuOptionText}>
-                  {t('fab.askQuestion')}
-                </Animated.Text>
-              </Pressable>
+          <View
+            style={[styles.menuContainer, { paddingBottom: insets.bottom + 16 }]}
+            onStartShouldSetResponder={() => true}
+          >
+            <View style={styles.menuHeader}>
+              <View style={styles.menuHandle} />
             </View>
 
             <Pressable
-              style={styles.closeButton}
-              onPress={() => setMenuVisible(false)}
+              style={styles.menuOptionRow}
+              onPress={() => handleMenuOption('/record')}
             >
-              <X size={28} color={Colors.textSecondary} strokeWidth={2} />
+              <View style={[styles.menuIconCircle, { backgroundColor: Colors.primary }]}>
+                <Mic size={22} color={Colors.textInverse} strokeWidth={2.5} />
+              </View>
+              <View style={styles.menuOptionTextContainer}>
+                <Animated.Text style={styles.menuOptionTitle}>
+                  {t('fab.newNote')}
+                </Animated.Text>
+                <Animated.Text style={styles.menuOptionSubtitle}>
+                  Enregistrer un vocal sur un contact
+                </Animated.Text>
+              </View>
+            </Pressable>
+
+            <View style={styles.menuDivider} />
+
+            <Pressable
+              style={styles.menuOptionRow}
+              onPress={() => handleMenuOption('/ask')}
+            >
+              <View style={[styles.menuIconCircle, { backgroundColor: '#7C3AED' }]}>
+                <MessageCircleQuestion size={22} color={Colors.textInverse} strokeWidth={2.5} />
+              </View>
+              <View style={styles.menuOptionTextContainer}>
+                <Animated.Text style={styles.menuOptionTitle}>
+                  {t('fab.askQuestion')}
+                </Animated.Text>
+                <Animated.Text style={styles.menuOptionSubtitle}>
+                  Interroger ta mémoire
+                </Animated.Text>
+              </View>
             </Pressable>
           </View>
         </Pressable>
@@ -218,51 +228,54 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
     justifyContent: 'flex-end',
   },
   menuContainer: {
     backgroundColor: Colors.surface,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingTop: 24,
-    paddingHorizontal: 24,
-    alignItems: 'center',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 20,
   },
-  menuContent: {
+  menuHeader: {
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  menuHandle: {
+    width: 36,
+    height: 4,
+    backgroundColor: Colors.border,
+    borderRadius: 2,
+  },
+  menuOptionRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 32,
-    marginBottom: 24,
-  },
-  menuOption: {
     alignItems: 'center',
-    gap: 12,
+    paddingVertical: 16,
+    gap: 16,
   },
-  menuIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  menuOptionText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.text,
-  },
-  closeButton: {
+  menuIconCircle: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: Colors.backgroundSecondary,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
+  },
+  menuOptionTextContainer: {
+    flex: 1,
+  },
+  menuOptionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text,
+    marginBottom: 2,
+  },
+  menuOptionSubtitle: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+  },
+  menuDivider: {
+    height: 1,
+    backgroundColor: Colors.border,
+    marginLeft: 64,
   },
 });
