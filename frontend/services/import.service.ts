@@ -7,7 +7,7 @@ import {
   generateAvatarFromHints,
   AvatarHints,
 } from '@/lib/api';
-import { FactType, HotTopicStatus, Gender } from '@/types';
+import { HotTopicStatus, Gender } from '@/types';
 import { contactService } from './contact.service';
 
 export type ImportResult = {
@@ -96,6 +96,7 @@ export const importService = {
 
   /**
    * Import contacts directly into local SQLite database
+   * V2: Simplified schema - no facts/memories tables
    */
   importContacts: async (contacts: SeedContact[]): Promise<ImportResult> => {
     const db = await getDatabase();
@@ -107,13 +108,14 @@ export const importService = {
       try {
         const now = new Date().toISOString();
 
-        // Insert contact
+        // Insert contact (V2 schema)
         await db.runAsync(
           `INSERT OR REPLACE INTO contacts (
             id, first_name, last_name, nickname, gender,
             phone, email, birthday_day, birthday_month, birthday_year,
-            ai_summary, highlights, created_at, updated_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            relationship_type, ai_summary, suggested_questions,
+            created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             contact.id,
             contact.firstName,
@@ -125,49 +127,13 @@ export const importService = {
             contact.birthdayDay || null,
             contact.birthdayMonth || null,
             contact.birthdayYear || null,
+            'connaissance',
             contact.aiSummary || null,
-            JSON.stringify([]),
+            null,
             now,
             now,
           ]
         );
-
-        // Insert facts
-        for (const fact of contact.facts) {
-          await db.runAsync(
-            `INSERT OR REPLACE INTO facts (
-              id, contact_id, fact_type, fact_key, fact_value,
-              previous_values, created_at, updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-            [
-              fact.id,
-              fact.contactId,
-              fact.factType as FactType,
-              fact.factKey,
-              fact.factValue,
-              JSON.stringify([]),
-              now,
-              now,
-            ]
-          );
-        }
-
-        // Insert memories
-        for (const memory of contact.memories) {
-          await db.runAsync(
-            `INSERT OR REPLACE INTO memories (
-              id, contact_id, description, event_date, is_shared, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?)`,
-            [
-              memory.id,
-              memory.contactId,
-              memory.description,
-              memory.eventDate || null,
-              memory.isShared ? 1 : 0,
-              now,
-            ]
-          );
-        }
 
         // Insert hot topics
         for (const topic of contact.hotTopics) {
@@ -187,18 +153,18 @@ export const importService = {
           );
         }
 
-        // Insert notes
+        // Insert notes (V2 schema - no summary column)
         for (const note of contact.notes) {
           await db.runAsync(
             `INSERT OR REPLACE INTO notes (
-              id, contact_id, title, transcription, summary, created_at
+              id, contact_id, title, transcription, created_at, updated_at
             ) VALUES (?, ?, ?, ?, ?, ?)`,
             [
               note.id,
               note.contactId,
               note.title || null,
               note.transcription || null,
-              note.summary || null,
+              now,
               now,
             ]
           );
@@ -230,12 +196,11 @@ export const importService = {
 
   /**
    * Clear all contacts and related data (for testing)
+   * V2: Only clears tables that exist in V2 schema (facts/memories removed)
    */
   clearAllData: async (): Promise<void> => {
     const db = await getDatabase();
     await db.runAsync('DELETE FROM hot_topics');
-    await db.runAsync('DELETE FROM memories');
-    await db.runAsync('DELETE FROM facts');
     await db.runAsync('DELETE FROM notes');
     await db.runAsync('DELETE FROM contact_groups');
     await db.runAsync('DELETE FROM contacts');

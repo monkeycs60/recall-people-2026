@@ -71,6 +71,10 @@
     "profile": "Profil",
     "upcoming": "Actus"
   },
+  "fab": {
+    "newNote": "Nouvelle note",
+    "askQuestion": "Poser une question"
+  },
   "home": {
     "pressToRecord": "Appuie pour enregistrer",
     "recording": "Enregistrement...",

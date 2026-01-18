@@ -71,6 +71,10 @@
     "profile": "Profile",
     "upcoming": "News"
   },
+  "fab": {
+    "newNote": "New note",
+    "askQuestion": "Ask a question"
+  },
   "home": {
     "pressToRecord": "Press to record",
     "recording": "Recording...",

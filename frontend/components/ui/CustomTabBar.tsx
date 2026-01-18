@@ -1,6 +1,6 @@
-import { View, Pressable, StyleSheet } from 'react-native';
+import { View, Pressable, StyleSheet, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Users, User, Mic, Calendar, Search } from 'lucide-react-native';
+import { Users, User, Mic, Calendar, Search, MessageCircleQuestion, X, Plus } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '@/constants/theme';
 import Animated, {
@@ -9,6 +9,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
+import { useState } from 'react';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -27,6 +28,7 @@ export function CustomTabBar({ state, navigation }: TabBarProps) {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const fabScale = useSharedValue(1);
+  const [menuVisible, setMenuVisible] = useState(false);
 
   const leftTabs = [
     { name: 'index', icon: Users, label: t('tabs.contacts') },
@@ -42,7 +44,12 @@ export function CustomTabBar({ state, navigation }: TabBarProps) {
     fabScale.value = withSpring(0.9, { damping: 15 }, () => {
       fabScale.value = withSpring(1, { damping: 15 });
     });
-    router.push('/record');
+    setMenuVisible(true);
+  };
+
+  const handleMenuOption = (route: string) => {
+    setMenuVisible(false);
+    router.push(route as '/record' | '/ask');
   };
 
   const fabAnimatedStyle = useAnimatedStyle(() => ({
@@ -96,13 +103,57 @@ export function CustomTabBar({ state, navigation }: TabBarProps) {
           style={[styles.fab, fabAnimatedStyle]}
         >
           <View style={styles.fabInner}>
-            <Mic size={28} color={Colors.textInverse} strokeWidth={2.5} />
+            <Plus size={32} color={Colors.textInverse} strokeWidth={2.5} />
           </View>
         </AnimatedPressable>
-        <Animated.Text style={styles.fabLabel}>
-          Nouvelle note
-        </Animated.Text>
       </View>
+
+      <Modal
+        visible={menuVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setMenuVisible(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setMenuVisible(false)}
+        >
+          <View style={[styles.menuContainer, { paddingBottom: insets.bottom + 80 }]}>
+            <View style={styles.menuContent}>
+              <Pressable
+                style={styles.menuOption}
+                onPress={() => handleMenuOption('/record')}
+              >
+                <View style={[styles.menuIconContainer, { backgroundColor: Colors.primary }]}>
+                  <Mic size={24} color={Colors.textInverse} strokeWidth={2} />
+                </View>
+                <Animated.Text style={styles.menuOptionText}>
+                  {t('fab.newNote')}
+                </Animated.Text>
+              </Pressable>
+
+              <Pressable
+                style={styles.menuOption}
+                onPress={() => handleMenuOption('/ask')}
+              >
+                <View style={[styles.menuIconContainer, { backgroundColor: Colors.secondary }]}>
+                  <MessageCircleQuestion size={24} color={Colors.textInverse} strokeWidth={2} />
+                </View>
+                <Animated.Text style={styles.menuOptionText}>
+                  {t('fab.askQuestion')}
+                </Animated.Text>
+              </Pressable>
+            </View>
+
+            <Pressable
+              style={styles.closeButton}
+              onPress={() => setMenuVisible(false)}
+            >
+              <X size={28} color={Colors.textSecondary} strokeWidth={2} />
+            </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -144,9 +195,9 @@ const styles = StyleSheet.create({
   },
   fabContainer: {
     position: 'absolute',
-    top: -44,
+    top: -28,
     left: '50%',
-    marginLeft: -50,
+    marginLeft: -32,
     alignItems: 'center',
   },
   fab: {
@@ -165,10 +216,53 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  fabLabel: {
-    fontSize: 11,
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  menuContainer: {
+    backgroundColor: Colors.surface,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 24,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+  },
+  menuContent: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 32,
+    marginBottom: 24,
+  },
+  menuOption: {
+    alignItems: 'center',
+    gap: 12,
+  },
+  menuIconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  menuOptionText: {
+    fontSize: 14,
     fontWeight: '600',
-    color: Colors.textSecondary,
-    marginTop: 6,
+    color: Colors.text,
+  },
+  closeButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: Colors.backgroundSecondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
   },
 });

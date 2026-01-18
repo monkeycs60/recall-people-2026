@@ -191,19 +191,27 @@ const runMigrations = async (database: SQLite.SQLiteDatabase) => {
     await database.execAsync("ALTER TABLE contacts ADD COLUMN highlights TEXT DEFAULT '[]'");
   }
 
-  // Check if previous_values column exists on facts
-  const factsInfo = await database.getAllAsync<{ name: string }>(
-    "PRAGMA table_info(facts)"
+  // Check if facts table exists before trying to migrate it
+  // (V2 removes this table, and new installs won't have it)
+  const factsTableExists = await database.getFirstAsync<{ name: string }>(
+    "SELECT name FROM sqlite_master WHERE type='table' AND name='facts'"
   );
-  const hasPreviousValues = factsInfo.some((col) => col.name === 'previous_values');
-  if (!hasPreviousValues) {
-    await database.execAsync("ALTER TABLE facts ADD COLUMN previous_values TEXT DEFAULT '[]'");
-  }
 
-  // Check if title column exists on facts (for "other" fact types)
-  const hasFactTitle = factsInfo.some((col) => col.name === 'title');
-  if (!hasFactTitle) {
-    await database.execAsync("ALTER TABLE facts ADD COLUMN title TEXT");
+  if (factsTableExists) {
+    // Check if previous_values column exists on facts
+    const factsInfo = await database.getAllAsync<{ name: string }>(
+      "PRAGMA table_info(facts)"
+    );
+    const hasPreviousValues = factsInfo.some((col) => col.name === 'previous_values');
+    if (!hasPreviousValues) {
+      await database.execAsync("ALTER TABLE facts ADD COLUMN previous_values TEXT DEFAULT '[]'");
+    }
+
+    // Check if title column exists on facts (for "other" fact types)
+    const hasFactTitle = factsInfo.some((col) => col.name === 'title');
+    if (!hasFactTitle) {
+      await database.execAsync("ALTER TABLE facts ADD COLUMN title TEXT");
+    }
   }
 
   // Check if title column exists on notes
