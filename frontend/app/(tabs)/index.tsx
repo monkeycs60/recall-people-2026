@@ -203,7 +203,7 @@ export default function ContactsScreen() {
 				lastName={item.lastName}
 				gender={item.gender}
 				avatarUrl={item.avatarUrl}
-				size='medium'
+				size='small'
 				cacheKey={item.updatedAt}
 				recyclingKey={item.id}
 			/>
@@ -336,7 +336,7 @@ export default function ContactsScreen() {
 									style={styles.addContactCard}
 									onPress={() => setIsCreateModalVisible(true)}>
 									<View style={styles.addContactIconContainer}>
-										<Plus size={20} color={Colors.primary} />
+										<Plus size={18} color={Colors.primary} />
 									</View>
 									<Text style={styles.addContactLabel}>Ajouter</Text>
 								</Pressable>
@@ -464,29 +464,29 @@ const styles = StyleSheet.create({
 		marginBottom: 8,
 	},
 	recentContactsList: {
-		gap: 16,
+		gap: 12,
 		paddingRight: 24,
 	},
 	recentContactItem: {
 		alignItems: 'center',
-		width: 70,
+		width: 58,
 	},
 	recentContactName: {
-		fontSize: 12,
+		fontSize: 11,
 		color: Colors.textSecondary,
-		marginTop: 8,
+		marginTop: 6,
 		textAlign: 'center',
 		fontWeight: '500',
 	},
 	addContactCard: {
 		alignItems: 'center',
 		justifyContent: 'center',
-		width: 70,
+		width: 58,
 	},
 	addContactIconContainer: {
-		width: 56,
-		height: 56,
-		borderRadius: 28,
+		width: 48,
+		height: 48,
+		borderRadius: 24,
 		backgroundColor: Colors.surface,
 		borderWidth: 2,
 		borderColor: Colors.border,
