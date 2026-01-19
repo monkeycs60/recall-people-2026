@@ -297,25 +297,6 @@ export default function ContactsScreen() {
 						<Settings size={24} color={Colors.textSecondary} />
 					</Pressable>
 				</View>
-
-				<View style={styles.filterContainer}>
-					<View style={styles.filterInputWrapper}>
-						<Search size={18} color={Colors.textMuted} />
-						<TextInput
-							style={styles.filterInput}
-							placeholder={t('contacts.filterPlaceholder')}
-							placeholderTextColor={Colors.textMuted}
-							value={filterText}
-							onChangeText={setFilterText}
-						/>
-					</View>
-					<Pressable
-						style={styles.askHint}
-						onPress={() => router.push('/(tabs)/search')}>
-						<Sparkle size={14} color={Colors.primary} />
-						<Text style={styles.askHintText}>{t('contacts.askHint')}</Text>
-					</Pressable>
-				</View>
 			</View>
 
 			{isLoading ? (
@@ -351,24 +332,41 @@ export default function ContactsScreen() {
 								horizontal
 								showsHorizontalScrollIndicator={false}
 								contentContainerStyle={styles.recentContactsList}>
+								<Pressable
+									style={styles.addContactCard}
+									onPress={() => setIsCreateModalVisible(true)}>
+									<View style={styles.addContactIconContainer}>
+										<Plus size={20} color={Colors.primary} />
+									</View>
+									<Text style={styles.addContactLabel}>Ajouter</Text>
+								</Pressable>
 								{recentContacts.map((contact) => (
 									<View key={contact.id}>
 										{renderRecentContact({ item: contact })}
 									</View>
 								))}
-								<Pressable
-									style={styles.addContactCard}
-									onPress={() => setIsCreateModalVisible(true)}>
-									<View style={styles.addContactIconContainer}>
-										<Plus size={24} color={Colors.primary} />
-									</View>
-								</Pressable>
 							</ScrollView>
 						</View>
 					)}
 
-					<View style={styles.section}>
+					<View style={styles.allContactsSection}>
 						<Text style={styles.sectionTitle}>Tous les contacts</Text>
+						<View style={styles.filterInputWrapper}>
+							<Search size={16} color={Colors.textMuted} />
+							<TextInput
+								style={styles.filterInput}
+								placeholder={t('contacts.filterPlaceholder')}
+								placeholderTextColor={Colors.textMuted}
+								value={filterText}
+								onChangeText={setFilterText}
+							/>
+						</View>
+						<Pressable
+							style={styles.askHint}
+							onPress={() => router.push('/(tabs)/search')}>
+							<Sparkle size={14} color={Colors.primary} />
+							<Text style={styles.askHintText}>{t('contacts.askHint')}</Text>
+						</Pressable>
 					</View>
 
 					<FlatList
@@ -423,23 +421,20 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'center',
 	},
-	filterContainer: {
-		marginBottom: 16,
-	},
 	filterInputWrapper: {
 		flexDirection: 'row',
 		alignItems: 'center',
 		backgroundColor: Colors.surface,
-		borderRadius: 12,
-		paddingHorizontal: 14,
-		paddingVertical: 12,
+		borderRadius: 10,
+		paddingHorizontal: 12,
+		paddingVertical: 8,
 		borderWidth: 1,
 		borderColor: Colors.border,
-		gap: 10,
+		gap: 8,
 	},
 	filterInput: {
 		flex: 1,
-		fontSize: 16,
+		fontSize: 15,
 		color: Colors.textPrimary,
 	},
 	askHint: {
@@ -458,11 +453,15 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 24,
 		marginBottom: 16,
 	},
+	allContactsSection: {
+		paddingHorizontal: 24,
+		marginBottom: 10,
+	},
 	sectionTitle: {
 		fontSize: 18,
 		fontWeight: '600',
 		color: Colors.textPrimary,
-		marginBottom: 12,
+		marginBottom: 8,
 	},
 	recentContactsList: {
 		gap: 16,
@@ -494,6 +493,13 @@ const styles = StyleSheet.create({
 		borderStyle: 'dashed',
 		alignItems: 'center',
 		justifyContent: 'center',
+	},
+	addContactLabel: {
+		fontSize: 11,
+		color: Colors.textSecondary,
+		marginTop: 6,
+		textAlign: 'center',
+		fontWeight: '500',
 	},
 	contactCard: {
 		flexDirection: 'row',
