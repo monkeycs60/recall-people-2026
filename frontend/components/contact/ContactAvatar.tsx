@@ -25,7 +25,7 @@ const SIZE_MAP = {
   large: 120,
 } as const;
 
-const PLACEHOLDER_VERSION = 'v2';
+const PLACEHOLDER_VERSION = 'v100';
 
 const getPlaceholderUrl = (gender: Gender): string => {
   return `${API_URL}/api/avatar/placeholders/avatar-${gender}.png?v=${PLACEHOLDER_VERSION}`;
