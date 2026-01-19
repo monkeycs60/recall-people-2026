@@ -92,8 +92,9 @@
     "searchPlaceholder": "Qui cherchez-vous ?",
     "filterPlaceholder": "Rechercher un contact...",
     "askHint": "Pose une question à l'IA",
-    "noContacts": "Le métier de sa compagne. Le prénom de ses enfants. Ce projet dont il est si fier.",
-    "noContactsDescription": "Ne soyez plus jamais pris au dépourvu.",
+    "noContacts": "Parlez de cette personne, de votre relation, de ses projets... On s'occupe du reste.",
+    "noContactsDescription": "Créez votre première note pour commencer.",
+    "createFirstNote": "Créer votre première note",
     "addContact": "Ajouter un contact",
     "createModal": {
       "title": "Nouveau contact",

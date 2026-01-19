@@ -26,6 +26,7 @@ import {
 	Plus,
 	UserPlus,
 	Settings,
+	Mic,
 } from 'lucide-react-native';
 import { Colors } from '@/constants/theme';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -316,10 +317,10 @@ export default function ContactsScreen() {
 					</Text>
 					<Pressable
 						style={styles.emptyStateButton}
-						onPress={() => setIsCreateModalVisible(true)}>
-						<UserPlus size={18} color={Colors.textInverse} />
+						onPress={() => router.push('/record')}>
+						<Mic size={18} color={Colors.textInverse} />
 						<Text style={styles.emptyStateButtonText}>
-							{t('contacts.addContact')}
+							{t('contacts.createFirstNote')}
 						</Text>
 					</Pressable>
 				</View>
@@ -350,7 +351,19 @@ export default function ContactsScreen() {
 					)}
 
 					<View style={styles.allContactsSection}>
-						<Text style={styles.sectionTitle}>Tous les contacts</Text>
+						<View style={styles.sectionTitleRow}>
+							<Text style={styles.sectionTitle}>Tous les contacts</Text>
+							{recentContacts.length === 0 && (
+								<Pressable
+									style={styles.addContactInlineButton}
+									onPress={() => setIsCreateModalVisible(true)}>
+									<UserPlus size={16} color={Colors.primary} />
+									<Text style={styles.addContactInlineText}>
+										{t('contacts.addContact')}
+									</Text>
+								</Pressable>
+							)}
+						</View>
 						<View style={styles.filterInputWrapper}>
 							<Search size={16} color={Colors.textMuted} />
 							<TextInput
@@ -457,11 +470,30 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 24,
 		marginBottom: 10,
 	},
+	sectionTitleRow: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		marginBottom: 8,
+	},
 	sectionTitle: {
 		fontSize: 18,
 		fontWeight: '600',
 		color: Colors.textPrimary,
-		marginBottom: 8,
+	},
+	addContactInlineButton: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: 6,
+		paddingVertical: 6,
+		paddingHorizontal: 12,
+		borderRadius: 8,
+		backgroundColor: Colors.primaryLight,
+	},
+	addContactInlineText: {
+		fontSize: 14,
+		fontWeight: '500',
+		color: Colors.primary,
 	},
 	recentContactsList: {
 		gap: 12,
@@ -568,6 +600,7 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'center',
 		paddingHorizontal: 32,
+		paddingBottom: 100,
 	},
 	emptyStateIllustration: {
 		width: 180,

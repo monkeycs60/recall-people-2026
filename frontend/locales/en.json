@@ -92,8 +92,9 @@
     "searchPlaceholder": "Who are you looking for?",
     "filterPlaceholder": "Search a contact...",
     "askHint": "Ask the AI a question",
-    "noContacts": "Their partner's job. Their kids' names. That project they're so proud of.",
-    "noContactsDescription": "Never be caught off guard again.",
+    "noContacts": "Talk about this person, your relationship, their projects... We'll take care of the rest.",
+    "noContactsDescription": "Create your first note to get started.",
+    "createFirstNote": "Create your first note",
     "addContact": "Add a contact",
     "createModal": {
       "title": "New contact",
