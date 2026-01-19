@@ -323,16 +323,6 @@ export default function ContactsScreen() {
 							{t('contacts.createFirstNote')}
 						</Text>
 					</Pressable>
-					<Pressable
-						style={styles.emptyStateAddContact}
-						onPress={() => setIsCreateModalVisible(true)}>
-						<View style={styles.addContactIconContainer}>
-							<Plus size={18} color={Colors.primary} />
-						</View>
-						<Text style={styles.emptyStateAddContactText}>
-							{t('contacts.addContact')}
-						</Text>
-					</Pressable>
 				</View>
 			) : (
 				<>
@@ -645,16 +635,5 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		fontWeight: '600',
 		color: Colors.textInverse,
-	},
-	emptyStateAddContact: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		gap: 12,
-		marginTop: 20,
-	},
-	emptyStateAddContactText: {
-		fontSize: 14,
-		fontWeight: '500',
-		color: Colors.textSecondary,
 	},
 });
