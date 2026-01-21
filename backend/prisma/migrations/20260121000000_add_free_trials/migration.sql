@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "users" ADD COLUMN "free_note_trials" INTEGER NOT NULL DEFAULT 10;
+ALTER TABLE "users" ADD COLUMN "free_ask_trials" INTEGER NOT NULL DEFAULT 10;
