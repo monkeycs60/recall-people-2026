@@ -12,7 +12,36 @@
       "or": "ou",
       "google": "Continuer avec Google",
       "noAccount": "Pas de compte ?",
-      "createAccount": "Créer un compte"
+      "createAccount": "Créer un compte",
+      "forgotPassword": "Mot de passe oublié ?"
+    },
+    "forgotPassword": {
+      "title": "Mot de passe oublié",
+      "subtitle": "Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.",
+      "submit": "Envoyer le lien",
+      "emailRequired": "Veuillez entrer votre adresse email",
+      "error": "Échec de l'envoi de l'email. Veuillez réessayer.",
+      "successTitle": "Vérifiez vos emails",
+      "successDescription": "Nous avons envoyé un lien de réinitialisation à {{email}}",
+      "expiryNote": "Ce lien expirera dans 30 minutes.",
+      "resend": "Renvoyer l'email",
+      "backToLogin": "Retour à la connexion",
+      "rememberPassword": "Vous vous souvenez de votre mot de passe ?"
+    },
+    "resetPassword": {
+      "title": "Réinitialiser le mot de passe",
+      "subtitle": "Entrez votre nouveau mot de passe ci-dessous.",
+      "newPassword": "Nouveau mot de passe",
+      "confirmPassword": "Confirmer le mot de passe",
+      "submit": "Réinitialiser",
+      "error": "Échec de la réinitialisation. Veuillez réessayer.",
+      "invalidLink": "Lien invalide ou expiré",
+      "invalidLinkTitle": "Lien invalide",
+      "invalidLinkDescription": "Ce lien de réinitialisation est invalide ou a expiré. Veuillez en demander un nouveau.",
+      "requestNewLink": "Demander un nouveau lien",
+      "successTitle": "Mot de passe réinitialisé !",
+      "successDescription": "Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.",
+      "goToLogin": "Se connecter"
     },
     "register": {
       "title": "Créer un compte",

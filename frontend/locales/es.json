@@ -12,7 +12,36 @@
       "or": "o",
       "google": "Continuar con Google",
       "noAccount": "¿No tienes cuenta?",
-      "createAccount": "Crear una"
+      "createAccount": "Crear una",
+      "forgotPassword": "¿Olvidaste tu contraseña?"
+    },
+    "forgotPassword": {
+      "title": "Recuperar contraseña",
+      "subtitle": "Ingresa tu email y te enviaremos un enlace para restablecer tu contraseña.",
+      "submit": "Enviar enlace",
+      "emailRequired": "Por favor ingresa tu email",
+      "error": "Error al enviar el email. Intenta de nuevo.",
+      "successTitle": "Revisa tu email",
+      "successDescription": "Hemos enviado un enlace de recuperación a {{email}}",
+      "expiryNote": "Este enlace expirará en 30 minutos.",
+      "resend": "Reenviar email",
+      "backToLogin": "Volver al inicio",
+      "rememberPassword": "¿Recuerdas tu contraseña?"
+    },
+    "resetPassword": {
+      "title": "Nueva contraseña",
+      "subtitle": "Ingresa tu nueva contraseña.",
+      "newPassword": "Nueva contraseña",
+      "confirmPassword": "Confirmar contraseña",
+      "submit": "Restablecer",
+      "error": "Error al restablecer. Intenta de nuevo.",
+      "invalidLink": "Enlace inválido o expirado",
+      "invalidLinkTitle": "Enlace inválido",
+      "invalidLinkDescription": "Este enlace es inválido o ha expirado. Solicita uno nuevo.",
+      "requestNewLink": "Solicitar nuevo enlace",
+      "successTitle": "¡Contraseña restablecida!",
+      "successDescription": "Tu contraseña ha sido restablecida. Ya puedes iniciar sesión.",
+      "goToLogin": "Iniciar sesión"
     },
     "register": {
       "title": "Crear cuenta",

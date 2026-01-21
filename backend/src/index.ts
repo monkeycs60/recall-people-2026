@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { authRoutes } from './routes/auth';
+import { passwordResetRoutes } from './routes/password-reset';
 import { transcribeRoutes } from './routes/transcribe';
 import { extractRoutes } from './routes/extract';
 import { similarityRoutes } from './routes/similarity';
@@ -77,6 +78,7 @@ app.use('/api/search/*', rateLimiters.aiExtract);
 app.use('/api/ask/*', rateLimiters.aiExtract);
 
 app.route('/auth', authRoutes);
+app.route('/auth', passwordResetRoutes);
 app.route('/api/transcribe', transcribeRoutes);
 app.route('/api/extract', extractRoutes);
 app.route('/api/similarity', similarityRoutes);

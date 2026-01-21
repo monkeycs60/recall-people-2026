@@ -144,6 +144,42 @@ export const contactService = {
     return contact;
   },
 
+  findByName: async (firstName: string, lastName?: string): Promise<Contact | null> => {
+    const db = await getDatabase();
+    const normalizedFirstName = firstName.trim().toLowerCase();
+    const normalizedLastName = lastName?.trim().toLowerCase() || null;
+
+    const query = normalizedLastName
+      ? `SELECT * FROM contacts WHERE LOWER(TRIM(first_name)) = ? AND LOWER(TRIM(last_name)) = ? LIMIT 1`
+      : `SELECT * FROM contacts WHERE LOWER(TRIM(first_name)) = ? AND (last_name IS NULL OR TRIM(last_name) = '') LIMIT 1`;
+
+    const params = normalizedLastName
+      ? [normalizedFirstName, normalizedLastName]
+      : [normalizedFirstName];
+
+    const row = await db.getFirstAsync<{
+      id: string;
+      first_name: string;
+      last_name: string | null;
+      nickname: string | null;
+      gender: string | null;
+      created_at: string;
+      updated_at: string;
+    }>(query, params);
+
+    if (!row) return null;
+
+    return {
+      id: row.id,
+      firstName: row.first_name,
+      lastName: row.last_name || undefined,
+      nickname: row.nickname || undefined,
+      gender: (row.gender as Gender) || 'unknown',
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    };
+  },
+
   create: async (data: {
     firstName: string;
     lastName?: string;
@@ -151,6 +187,13 @@ export const contactService = {
     gender?: Gender;
   }): Promise<Contact> => {
     const db = await getDatabase();
+
+    // Check for existing contact with same name to prevent duplicates
+    const existingContact = await contactService.findByName(data.firstName, data.lastName);
+    if (existingContact) {
+      return existingContact;
+    }
+
     const id = Crypto.randomUUID();
     const now = new Date().toISOString();
 

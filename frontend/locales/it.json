@@ -12,7 +12,36 @@
       "or": "o",
       "google": "Continua con Google",
       "noAccount": "Non hai un account?",
-      "createAccount": "Creane uno"
+      "createAccount": "Creane uno",
+      "forgotPassword": "Password dimenticata?"
+    },
+    "forgotPassword": {
+      "title": "Password dimenticata",
+      "subtitle": "Inserisci la tua email e ti invieremo un link per reimpostare la password.",
+      "submit": "Invia link",
+      "emailRequired": "Inserisci la tua email",
+      "error": "Errore nell'invio dell'email. Riprova.",
+      "successTitle": "Controlla la tua email",
+      "successDescription": "Abbiamo inviato un link di reimpostazione a {{email}}",
+      "expiryNote": "Questo link scadrà tra 30 minuti.",
+      "resend": "Reinvia email",
+      "backToLogin": "Torna al login",
+      "rememberPassword": "Ricordi la tua password?"
+    },
+    "resetPassword": {
+      "title": "Reimposta password",
+      "subtitle": "Inserisci la tua nuova password.",
+      "newPassword": "Nuova password",
+      "confirmPassword": "Conferma password",
+      "submit": "Reimposta",
+      "error": "Errore nella reimpostazione. Riprova.",
+      "invalidLink": "Link non valido o scaduto",
+      "invalidLinkTitle": "Link non valido",
+      "invalidLinkDescription": "Questo link non è valido o è scaduto. Richiedine uno nuovo.",
+      "requestNewLink": "Richiedi nuovo link",
+      "successTitle": "Password reimpostata!",
+      "successDescription": "La tua password è stata reimpostata con successo. Ora puoi accedere.",
+      "goToLogin": "Vai al login"
     },
     "register": {
       "title": "Crea account",

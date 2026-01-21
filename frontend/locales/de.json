@@ -12,7 +12,36 @@
       "or": "oder",
       "google": "Mit Google fortfahren",
       "noAccount": "Kein Konto?",
-      "createAccount": "Erstelle eins"
+      "createAccount": "Erstelle eins",
+      "forgotPassword": "Passwort vergessen?"
+    },
+    "forgotPassword": {
+      "title": "Passwort vergessen",
+      "subtitle": "Gib deine E-Mail-Adresse ein und wir senden dir einen Link zum Zurücksetzen.",
+      "submit": "Link senden",
+      "emailRequired": "Bitte gib deine E-Mail-Adresse ein",
+      "error": "Fehler beim Senden der E-Mail. Bitte versuche es erneut.",
+      "successTitle": "Überprüfe deine E-Mails",
+      "successDescription": "Wir haben einen Link zum Zurücksetzen an {{email}} gesendet",
+      "expiryNote": "Dieser Link läuft in 30 Minuten ab.",
+      "resend": "E-Mail erneut senden",
+      "backToLogin": "Zurück zur Anmeldung",
+      "rememberPassword": "Erinnerst du dich an dein Passwort?"
+    },
+    "resetPassword": {
+      "title": "Passwort zurücksetzen",
+      "subtitle": "Gib dein neues Passwort ein.",
+      "newPassword": "Neues Passwort",
+      "confirmPassword": "Passwort bestätigen",
+      "submit": "Zurücksetzen",
+      "error": "Fehler beim Zurücksetzen. Bitte versuche es erneut.",
+      "invalidLink": "Ungültiger oder abgelaufener Link",
+      "invalidLinkTitle": "Ungültiger Link",
+      "invalidLinkDescription": "Dieser Link ist ungültig oder abgelaufen. Bitte fordere einen neuen an.",
+      "requestNewLink": "Neuen Link anfordern",
+      "successTitle": "Passwort zurückgesetzt!",
+      "successDescription": "Dein Passwort wurde erfolgreich zurückgesetzt. Du kannst dich jetzt anmelden.",
+      "goToLogin": "Zur Anmeldung"
     },
     "register": {
       "title": "Konto erstellen",

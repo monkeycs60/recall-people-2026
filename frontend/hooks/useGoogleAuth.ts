@@ -7,6 +7,7 @@ import {
 } from '@react-native-google-signin/google-signin';
 
 const GOOGLE_WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || '';
+const GOOGLE_IOS_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID || '';
 
 type GoogleAuthResult = {
   idToken: string;
@@ -24,6 +25,7 @@ export const useGoogleAuth = (): UseGoogleAuthReturn => {
   useEffect(() => {
     GoogleSignin.configure({
       webClientId: GOOGLE_WEB_CLIENT_ID,
+      iosClientId: GOOGLE_IOS_CLIENT_ID,
       offlineAccess: false,
     });
     setIsReady(true);

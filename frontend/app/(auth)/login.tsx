@@ -14,6 +14,7 @@ export default function LoginScreen() {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const { login, loginWithGoogle, isLoading, error, isGoogleReady } = useAuth();
   const insets = useSafeAreaInsets();
 
@@ -76,16 +77,35 @@ export default function LoginScreen() {
 
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>{t('auth.login.password')}</Text>
-              <TextInput
-                style={styles.input}
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                editable={!isLoading}
-                placeholderTextColor={Colors.textMuted}
-                placeholder={t('auth.login.passwordPlaceholder')}
-              />
+              <View style={styles.passwordInputContainer}>
+                <TextInput
+                  style={styles.passwordInput}
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                  editable={!isLoading}
+                  placeholderTextColor={Colors.textMuted}
+                  placeholder={t('auth.login.passwordPlaceholder')}
+                />
+                <Pressable
+                  style={styles.eyeButton}
+                  onPress={() => setShowPassword(!showPassword)}
+                  hitSlop={8}
+                >
+                  <Ionicons
+                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                    size={22}
+                    color={Colors.textMuted}
+                  />
+                </Pressable>
+              </View>
             </View>
+
+            <Link href="/(auth)/forgot-password" asChild>
+              <Pressable style={styles.forgotPasswordContainer}>
+                <Text style={styles.forgotPasswordText}>{t('auth.login.forgotPassword')}</Text>
+              </Pressable>
+            </Link>
 
             {error && (
               <Text style={styles.errorText}>{error}</Text>
@@ -216,6 +236,34 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     fontSize: 16,
     color: Colors.textPrimary,
+  },
+  passwordInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.background,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 12,
+  },
+  passwordInput: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    color: Colors.textPrimary,
+  },
+  eyeButton: {
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+  },
+  forgotPasswordContainer: {
+    alignSelf: 'flex-end',
+    marginBottom: 16,
+  },
+  forgotPasswordText: {
+    color: Colors.primary,
+    fontSize: 14,
+    fontWeight: '500',
   },
   errorText: {
     color: Colors.error,

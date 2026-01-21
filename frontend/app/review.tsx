@@ -1,5 +1,5 @@
 import { View, Text, ScrollView, Pressable, TextInput, StyleSheet, Platform, Modal } from 'react-native';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -81,6 +81,7 @@ export default function ReviewScreen() {
   });
 
   const [isSaving, setIsSaving] = useState(false);
+  const isSavingRef = useRef(false);
   const [existingHotTopics, setExistingHotTopics] = useState<HotTopic[]>([]);
 
   const [resolvedTopicsState, setResolvedTopicsState] = useState<ResolvedTopic[]>(
@@ -395,7 +396,9 @@ export default function ReviewScreen() {
   };
 
   const handleSave = async () => {
-    if (isSaving) return;
+    // Use ref as primary guard (synchronous) to prevent multiple rapid clicks
+    if (isSavingRef.current) return;
+    isSavingRef.current = true;
     setIsSaving(true);
 
     try {
@@ -625,6 +628,7 @@ export default function ReviewScreen() {
       router.dismissTo(`/contact/${finalContactId}`);
     } catch (error) {
       console.error('Failed to save:', error);
+      isSavingRef.current = false;
       setIsSaving(false);
     }
   };

@@ -12,7 +12,36 @@
       "or": "or",
       "google": "Continue with Google",
       "noAccount": "No account?",
-      "createAccount": "Create one"
+      "createAccount": "Create one",
+      "forgotPassword": "Forgot password?"
+    },
+    "forgotPassword": {
+      "title": "Forgot password",
+      "subtitle": "Enter your email address and we'll send you a link to reset your password.",
+      "submit": "Send reset link",
+      "emailRequired": "Please enter your email address",
+      "error": "Failed to send reset email. Please try again.",
+      "successTitle": "Check your email",
+      "successDescription": "We've sent a password reset link to {{email}}",
+      "expiryNote": "This link will expire in 30 minutes.",
+      "resend": "Resend email",
+      "backToLogin": "Back to login",
+      "rememberPassword": "Remember your password?"
+    },
+    "resetPassword": {
+      "title": "Reset password",
+      "subtitle": "Enter your new password below.",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm password",
+      "submit": "Reset password",
+      "error": "Failed to reset password. Please try again.",
+      "invalidLink": "Invalid or expired link",
+      "invalidLinkTitle": "Invalid link",
+      "invalidLinkDescription": "This password reset link is invalid or has expired. Please request a new one.",
+      "requestNewLink": "Request new link",
+      "successTitle": "Password reset!",
+      "successDescription": "Your password has been successfully reset. You can now sign in with your new password.",
+      "goToLogin": "Go to login"
     },
     "register": {
       "title": "Create account",

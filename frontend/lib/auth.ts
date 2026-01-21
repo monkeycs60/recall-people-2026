@@ -210,3 +210,37 @@ export const refreshAccessToken = async (): Promise<AuthResponse | null> => {
 
   return refreshPromise;
 };
+
+// Request password reset
+export const requestPasswordReset = async (email: string): Promise<{ message: string }> => {
+  const response = await fetch(`${API_URL}/auth/forgot-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || 'Password reset request failed');
+  }
+
+  return data;
+};
+
+// Reset password with token
+export const resetPassword = async (token: string, newPassword: string): Promise<{ message: string }> => {
+  const response = await fetch(`${API_URL}/auth/reset-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, newPassword }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || 'Password reset failed');
+  }
+
+  return data;
+};
