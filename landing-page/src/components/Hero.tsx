@@ -1,9 +1,10 @@
 import Link from 'next/link';
-import { ArrowRight, ChevronDown } from 'lucide-react';
+import Image from 'next/image';
+import PhoneMockup from './PhoneMockup';
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden pt-20 pb-16 md:pt-32 md:pb-24 min-h-[90vh] flex items-center">
+    <section className="relative overflow-hidden pt-20 pb-16 md:pt-28 md:pb-20 min-h-[90vh] flex items-center">
       {/* Background decoration */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl opacity-50 pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
@@ -11,43 +12,67 @@ export default function Hero() {
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="flex flex-col items-center text-center max-w-4xl mx-auto space-y-8">
-          <div className="inline-flex items-center space-x-2 bg-surface-hover border border-primary/20 rounded-full px-4 py-1.5 shadow-sm">
-            <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
-            <span className="text-sm font-medium text-text-secondary">Your social memory, upgraded</span>
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
+          {/* Left: Text content */}
+          <div className="text-center lg:text-left order-2 lg:order-1">
+            <div className="inline-flex items-center space-x-2 bg-surface-hover border border-primary/20 rounded-full px-4 py-1.5 shadow-sm mb-6">
+              <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
+              <span className="text-sm font-medium text-text-secondary">Voice-first. Privacy-first.</span>
+            </div>
+
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-foreground leading-[1.1] mb-6">
+              Small details make big differences.<br />
+              <span className="text-primary">Recall every one.</span>
+            </h1>
+
+            <p className="text-base md:text-lg text-text-secondary max-w-lg mx-auto lg:mx-0 leading-relaxed mb-8">
+              His kids&apos; names. Her dream trip to Japan. The side project he works on at night. Talk about the people you meet — Recall People organizes everything automatically.
+            </p>
+
+            {/* Store buttons */}
+            <div className="flex flex-col sm:flex-row items-center lg:items-start gap-4 mb-6">
+              <Link
+                href="#"
+                className="transition-transform hover:scale-105 hover:opacity-90"
+                aria-label="Download on the App Store"
+              >
+                <Image
+                  src="/images/app-store-badge.svg"
+                  alt="Download on the App Store"
+                  width={140}
+                  height={47}
+                  className="h-12 w-auto"
+                />
+              </Link>
+              <Link
+                href="#"
+                className="transition-transform hover:scale-105 hover:opacity-90"
+                aria-label="Get it on Google Play"
+              >
+                <Image
+                  src="/images/google-play-badge.svg"
+                  alt="Get it on Google Play"
+                  width={158}
+                  height={47}
+                  className="h-12 w-auto"
+                />
+              </Link>
+            </div>
+
+            <p className="text-sm text-text-muted">
+              Free to start. Works offline. Your data never leaves your device.
+            </p>
           </div>
 
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground leading-[1.1]">
-            You forget 80% of <br />
-            <span className="text-primary italic">every conversation.</span>
-          </h1>
-
-          <p className="text-xl md:text-2xl text-text-secondary max-w-2xl leading-relaxed">
-            Recall remembers everything. Just talk — AI organizes the rest.
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
-            <Link
-              href="#download"
-              className="group inline-flex items-center justify-center px-8 py-4 text-base font-semibold text-white transition-all duration-200 bg-primary rounded-full hover:bg-primary-dark shadow-lg hover:shadow-xl hover:-translate-y-0.5"
-            >
-              Get Started
-              <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-            </Link>
-            <Link
-              href="#scenario"
-              className="inline-flex items-center justify-center px-8 py-4 text-base font-medium text-foreground transition-all duration-200 bg-white border border-border rounded-full hover:bg-surface-hover hover:border-primary/30"
-            >
-              See how it works
-              <ChevronDown className="ml-2 h-5 w-5" />
-            </Link>
+          {/* Right: Phone mockup */}
+          <div className="order-1 lg:order-2 flex justify-center">
+            <PhoneMockup
+              src="/images/screenshots/contact-id-1.png"
+              alt="Recall app showing contact profile"
+              className="transform lg:translate-x-4"
+            />
           </div>
         </div>
-      </div>
-
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-        <ChevronDown className="h-6 w-6 text-text-muted" />
       </div>
     </section>
   );
