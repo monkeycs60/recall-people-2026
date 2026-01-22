@@ -248,11 +248,7 @@ export default function SelectContactScreen() {
 
         {hasSuggestions && (
           <View style={styles.suggestionSection}>
-            <View style={styles.sectionLabelContainer}>
-              <View style={styles.sectionLabelLine} />
-              <Text style={styles.sectionLabel}>{t('selectContact.suggestion')}</Text>
-              <View style={styles.sectionLabelLine} />
-            </View>
+            <Text style={styles.sectionLabelInline}>{t('selectContact.suggestion')}</Text>
 
             {suggestedContact && (
               <Pressable
@@ -262,23 +258,20 @@ export default function SelectContactScreen() {
                 ]}
                 onPress={() => handleSelectContact(suggestedContact)}
               >
-                <View style={styles.suggestedCardGlow} />
-                <View style={styles.suggestedCardContent}>
-                  <View style={styles.avatarPrimary}>
-                    <User size={26} color={Colors.textInverse} />
-                  </View>
-                  <View style={styles.contactInfo}>
-                    <Text style={styles.suggestedContactName}>
-                      {suggestedContact.firstName} {suggestedContact.lastName || suggestedContact.nickname || ''}
-                    </Text>
-                    {suggestedContact.aiSummary && (
-                      <Text style={styles.contactSummary} numberOfLines={1}>
-                        {suggestedContact.aiSummary}
-                      </Text>
-                    )}
-                  </View>
-                  <ChevronRight size={22} color={Colors.primary} />
+                <View style={styles.avatarSuggestion}>
+                  <User size={20} color={Colors.primary} />
                 </View>
+                <View style={styles.contactInfo}>
+                  <Text style={styles.suggestedContactName}>
+                    {suggestedContact.firstName} {suggestedContact.lastName || suggestedContact.nickname || ''}
+                  </Text>
+                  {suggestedContact.aiSummary && (
+                    <Text style={styles.contactSummary} numberOfLines={1}>
+                      {suggestedContact.aiSummary}
+                    </Text>
+                  )}
+                </View>
+                <ChevronRight size={18} color={Colors.textMuted} />
               </Pressable>
             )}
 
@@ -318,15 +311,10 @@ export default function SelectContactScreen() {
         )}
 
         <View style={styles.newContactSection}>
-          <View style={styles.sectionLabelContainer}>
-            <View style={styles.sectionLabelLine} />
-            <Text style={styles.sectionLabel}>{t('selectContact.newContact')}</Text>
-            <View style={styles.sectionLabelLine} />
-          </View>
+          <Text style={styles.sectionLabelInline}>{t('selectContact.newContact')}</Text>
 
           {isEditingNewName && (
             <View style={styles.editNameContainer}>
-              <Text style={styles.editNameLabel}>{t('selectContact.contactName')}</Text>
               <TextInput
                 style={styles.editNameInput}
                 placeholder={t('selectContact.firstNamePlaceholder')}
@@ -345,9 +333,7 @@ export default function SelectContactScreen() {
             ]}
             onPress={handleCreateNew}
           >
-            <View style={styles.createNewIconContainer}>
-              <UserPlus size={22} color={Colors.textInverse} />
-            </View>
+            <UserPlus size={18} color={Colors.textInverse} style={{ marginRight: Spacing.sm }} />
             <Text style={styles.createNewText}>
               {newContactDisplayName
                 ? t('selectContact.createContact', { name: newContactDisplayName })
@@ -357,7 +343,10 @@ export default function SelectContactScreen() {
 
           {!isEditingNewName && (
             <Pressable
-              style={styles.editNameButton}
+              style={({ pressed }) => [
+                styles.editNameButton,
+                pressed && styles.editNameButtonPressed,
+              ]}
               onPress={() => {
                 setIsEditingNewName(true);
                 const fullName = detection
@@ -368,7 +357,7 @@ export default function SelectContactScreen() {
                 setNewContactName(fullName);
               }}
             >
-              <Edit3 size={14} color={Colors.textMuted} />
+              <Edit3 size={14} color={Colors.primary} />
               <Text style={styles.editNameButtonText}>{t('selectContact.editName')}</Text>
             </Pressable>
           )}
@@ -493,57 +482,33 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   suggestionSection: {
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.lg,
   },
-  sectionLabelContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: Spacing.md,
-    paddingHorizontal: Spacing.xs,
-  },
-  sectionLabelLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: Colors.border,
-  },
-  sectionLabel: {
+  sectionLabelInline: {
     ...Typography.labelSmall,
     color: Colors.textMuted,
-    marginHorizontal: Spacing.md,
+    marginBottom: Spacing.sm,
+    marginLeft: Spacing.xs,
     letterSpacing: 1,
   },
   suggestedContactCard: {
     backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.xl,
-    overflow: 'hidden',
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 6,
-  },
-  suggestedCardGlow: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 4,
-    backgroundColor: Colors.primary,
-  },
-  suggestedCardContent: {
+    borderRadius: BorderRadius.lg,
     flexDirection: 'row',
     alignItems: 'center',
-    padding: Spacing.lg,
+    padding: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   cardPressed: {
-    opacity: 0.9,
-    transform: [{ scale: 0.98 }],
+    backgroundColor: Colors.surfaceHover,
+    borderColor: Colors.primary,
   },
-  avatarPrimary: {
-    width: 52,
-    height: 52,
-    backgroundColor: Colors.primary,
-    borderRadius: 26,
+  avatarSuggestion: {
+    width: 40,
+    height: 40,
+    backgroundColor: Colors.primaryLight,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: Spacing.md,
@@ -553,9 +518,8 @@ const styles = StyleSheet.create({
   },
   suggestedContactName: {
     color: Colors.textPrimary,
-    fontFamily: Fonts.serif.semibold,
-    fontSize: 20,
-    lineHeight: 26,
+    ...Typography.titleMedium,
+    fontWeight: '600',
   },
   contactSummary: {
     color: Colors.textMuted,
@@ -579,84 +543,70 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
   },
   avatarSecondary: {
-    width: 44,
-    height: 44,
+    width: 40,
+    height: 40,
     backgroundColor: Colors.primaryLight,
-    borderRadius: 22,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: Spacing.md,
   },
   candidateContactName: {
     color: Colors.textPrimary,
-    ...Typography.titleLarge,
+    ...Typography.titleMedium,
   },
   newContactSection: {
     marginBottom: Spacing.xl,
   },
   editNameContainer: {
-    backgroundColor: Colors.surface,
-    padding: Spacing.md,
-    borderRadius: BorderRadius.lg,
-    marginBottom: Spacing.md,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  editNameLabel: {
-    color: Colors.textSecondary,
-    ...Typography.labelMedium,
-    marginBottom: Spacing.xs,
+    marginBottom: Spacing.sm,
   },
   editNameInput: {
-    backgroundColor: Colors.background,
-    paddingVertical: Spacing.sm,
+    backgroundColor: Colors.surface,
+    paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.md,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     color: Colors.textPrimary,
     ...Typography.bodyLarge,
     borderWidth: 1,
     borderColor: Colors.border,
   },
   createNewButton: {
-    backgroundColor: Colors.surface,
-    paddingVertical: Spacing.lg,
+    backgroundColor: Colors.primary,
+    paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.lg,
-    borderRadius: BorderRadius.xl,
+    borderRadius: BorderRadius.lg,
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: Colors.border,
+    justifyContent: 'center',
   },
   createNewButtonPressed: {
-    backgroundColor: Colors.surfaceHover,
-    borderColor: Colors.primary,
-  },
-  createNewIconContainer: {
-    width: 44,
-    height: 44,
-    backgroundColor: Colors.primary,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: Spacing.md,
+    backgroundColor: Colors.primaryDark,
   },
   createNewText: {
-    flex: 1,
-    color: Colors.textPrimary,
+    color: Colors.textInverse,
     ...Typography.titleMedium,
+    fontWeight: '600',
   },
   editNameButton: {
-    marginTop: Spacing.sm,
-    paddingVertical: Spacing.xs,
+    marginTop: Spacing.md,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
+    backgroundColor: Colors.primaryLight,
+    borderRadius: BorderRadius.md,
+    alignSelf: 'center',
+  },
+  editNameButtonPressed: {
+    backgroundColor: Colors.border,
   },
   editNameButtonText: {
-    color: Colors.textMuted,
+    color: Colors.primary,
     marginLeft: Spacing.xs,
-    ...Typography.bodySmall,
-    textDecorationLine: 'underline',
+    ...Typography.labelMedium,
+    fontWeight: '500',
   },
   searchSection: {
     marginBottom: Spacing.lg,
