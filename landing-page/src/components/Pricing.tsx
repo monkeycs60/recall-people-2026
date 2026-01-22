@@ -39,7 +39,7 @@ export default function Pricing() {
     <section id="pricing" className="py-20 md:py-28 bg-background">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground font-serif mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
             Simple pricing
           </h2>
           <p className="text-lg text-text-secondary max-w-2xl mx-auto">
@@ -51,35 +51,35 @@ export default function Pricing() {
           {plans.map((plan) => (
             <div
               key={plan.name}
-              className={`relative rounded-3xl p-8 ${
+              className={`relative rounded-2xl border-2 border-border p-8 ${
                 plan.highlighted
-                  ? 'bg-foreground text-white shadow-2xl scale-105'
-                  : 'bg-white border border-border'
+                  ? 'bg-[#FFF0ED]'
+                  : 'bg-white'
               }`}
             >
               {plan.highlighted && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <span className="bg-primary text-white text-sm font-medium px-4 py-1 rounded-full">
-                    Most Popular
+                  <span className="bg-rose text-text-primary text-sm font-semibold px-4 py-1.5 rounded-full border-[1.5px] border-border">
+                    Popular
                   </span>
                 </div>
               )}
 
               <div className="mb-6">
-                <h3 className={`text-xl font-bold ${plan.highlighted ? 'text-white' : 'text-foreground'}`}>
+                <h3 className="text-xl font-bold text-text-primary">
                   {plan.name}
                 </h3>
-                <p className={`text-sm mt-1 ${plan.highlighted ? 'text-white/70' : 'text-text-secondary'}`}>
+                <p className="text-sm mt-1 text-text-secondary">
                   {plan.description}
                 </p>
               </div>
 
               <div className="mb-6">
-                <span className={`text-4xl font-bold ${plan.highlighted ? 'text-white' : 'text-foreground'}`}>
+                <span className="text-4xl font-bold text-text-primary">
                   ${plan.price}
                 </span>
                 {plan.period && (
-                  <span className={plan.highlighted ? 'text-white/70' : 'text-text-secondary'}>
+                  <span className="text-text-secondary">
                     {plan.period}
                   </span>
                 )}
@@ -88,10 +88,8 @@ export default function Pricing() {
               <ul className="space-y-3 mb-8">
                 {plan.features.map((feature, index) => (
                   <li key={index} className="flex items-start gap-3">
-                    <Check className={`w-5 h-5 mt-0.5 flex-shrink-0 ${
-                      plan.highlighted ? 'text-primary-light' : 'text-primary'
-                    }`} />
-                    <span className={plan.highlighted ? 'text-white/90' : 'text-text-secondary'}>
+                    <Check className="w-5 h-5 mt-0.5 flex-shrink-0 text-menthe" />
+                    <span className="text-text-secondary">
                       {feature}
                     </span>
                   </li>
@@ -100,10 +98,10 @@ export default function Pricing() {
 
               <Link
                 href="#"
-                className={`block w-full text-center py-3 px-6 rounded-full font-semibold transition-all ${
+                className={`block w-full text-center py-3 px-6 rounded-xl font-semibold border-2 border-border transition-all duration-200 hover:-translate-y-0.5 ${
                   plan.highlighted
-                    ? 'bg-primary text-white hover:bg-primary-dark'
-                    : 'bg-foreground text-white hover:bg-foreground/90'
+                    ? 'bg-primary text-white'
+                    : 'bg-white text-text-primary'
                 }`}
               >
                 {plan.cta}
