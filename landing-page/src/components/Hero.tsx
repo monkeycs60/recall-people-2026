@@ -125,53 +125,6 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* CSS for blob animations */}
-      <style jsx>{`
-        @keyframes blob-float {
-          0%, 100% {
-            transform: translate(0, 0) scale(1);
-          }
-          33% {
-            transform: translate(10px, -15px) scale(1.02);
-          }
-          66% {
-            transform: translate(-8px, 10px) scale(0.98);
-          }
-        }
-
-        @keyframes blob-float-delayed {
-          0%, 100% {
-            transform: translate(0, 0) scale(1);
-          }
-          33% {
-            transform: translate(-12px, 10px) scale(0.98);
-          }
-          66% {
-            transform: translate(8px, -12px) scale(1.03);
-          }
-        }
-
-        @keyframes blob-float-slow {
-          0%, 100% {
-            transform: translate(0, 0) scale(1);
-          }
-          50% {
-            transform: translate(5px, -8px) scale(1.01);
-          }
-        }
-
-        :global(.animate-blob-float) {
-          animation: blob-float 10s ease-in-out infinite;
-        }
-
-        :global(.animate-blob-float-delayed) {
-          animation: blob-float-delayed 12s ease-in-out infinite;
-        }
-
-        :global(.animate-blob-float-slow) {
-          animation: blob-float-slow 8s ease-in-out infinite;
-        }
-      `}</style>
     </section>
   );
 }
