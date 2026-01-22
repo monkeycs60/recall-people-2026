@@ -127,6 +127,11 @@ suggestedQuestionsRoutes.post('/', async (c) => {
 				})
 				.join('\n\n') || '';
 
+		const formatFacts = (factsArray: typeof facts) =>
+			factsArray
+				.map((fact) => `- ${fact.factKey}: ${fact.factValue}`)
+				.join('\n');
+
 		const prompt = `Tu génères des questions naturelles à poser à ${contact.firstName} lors de la prochaine rencontre.
 ${langInstruction}
 
@@ -139,25 +144,30 @@ ${formatRecentNotes(recentNotes)}
 ${recentlyResolvedTopics.length > 0 ? `ACTUALITÉS RÉCEMMENT RÉSOLUES:
 ${formatResolvedTopics(recentlyResolvedTopics)}
 ` : ''}
+${facts.length > 0 ? `INFORMATIONS SUR LE PROFIL:
+${formatFacts(facts)}
+` : ''}
 
 RÈGLES ABSOLUES:
-1. Base-toi UNIQUEMENT sur les informations fournies ci-dessus
-2. Priorise les actualités avec dates proches (événements à venir)
-3. Si une actualité est résolue positivement, suggère de féliciter
-4. Formulation naturelle, comme on parlerait à un ami (tutoiement)
-5. Maximum 3 questions
-6. Si pas assez d'infos pertinentes, retourne MOINS de questions (1 ou 2 seulement)
-7. N'invente JAMAIS de questions sur des sujets non mentionnés
-8. Les questions doivent inviter à partager, pas être des questions oui/non
-9. Maximum 15 mots par question
+1. Génère entre 1 et 3 questions MAXIMUM selon la matière disponible
+2. PRIORITÉ : les actualités actives avec dates proches
+3. Si PAS d'actualités : utilise les infos importantes du profil (travail, famille, passions)
+4. Si une actualité est résolue positivement, suggère de féliciter
+5. Formulation naturelle, comme on parlerait à un ami (tutoiement)
+6. NE BRODE PAS : si tu n'as qu'une seule info pertinente, génère UNE seule question
+7. NE RÉPÈTE PAS la même information dans plusieurs questions
+8. N'invente JAMAIS de questions sur des sujets non mentionnés
+9. Les questions doivent inviter à partager, pas être des questions oui/non
+10. Maximum 15 mots par question
+
+IMPORTANT: Mieux vaut 1 bonne question que 3 questions artificielles ou répétitives.
 
 FORMAT DE RÉPONSE:
-Retourne entre 0 et 3 questions, une par ligne, sans numérotation ni tirets.
+Retourne entre 1 et 3 questions, une par ligne, sans numérotation ni tirets.
 
 Exemples:
 Comment s'est passé ton entretien chez Google ?
 Alors le déménagement à Lyon, c'est calé pour mars ?
-Lucas aime toujours autant le foot ?
 
 Si aucune info pertinente n'est disponible, retourne une ligne vide.
 `;
