@@ -8,6 +8,7 @@ const features = [
     description: 'After a meeting, just talk. "Met Sarah at the conference, she works at Google, has two kids..." Recall captures everything.',
     screenshot: '/images/screenshots/contact-id-2.png',
     alt: 'Voice recording extraction',
+    iconBg: 'bg-rose',
   },
   {
     icon: User,
@@ -15,6 +16,7 @@ const features = [
     description: 'Names, jobs, interests, family — all organized automatically. Plus AI summaries that remind you who they really are.',
     screenshot: '/images/screenshots/contact-id-1.png',
     alt: 'Contact profile view',
+    iconBg: 'bg-menthe',
   },
   {
     icon: Search,
@@ -22,48 +24,63 @@ const features = [
     description: '"Who works in tech?" "People from last month\'s conference" — search like you think. No tags, no folders needed.',
     screenshot: '/images/screenshots/contacts-ia-search.png',
     alt: 'Semantic search',
+    iconBg: 'bg-bleu-ciel',
   },
 ];
 
+// Alternating section backgrounds for flat & bold style
+const sectionBgs = ['bg-surface', 'bg-rose/10', 'bg-menthe/10'];
+
 export default function Features() {
   return (
-    <section id="features" className="py-20 md:py-28 bg-surface">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground font-serif mb-4">
+    <section id="features" className="py-20 md:py-28">
+      {/* Section header */}
+      <div className="container mx-auto px-4 mb-16">
+        <div className="text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
             How it works
           </h2>
           <p className="text-lg text-text-secondary max-w-2xl mx-auto">
             Three steps. Zero effort. Never forget anyone again.
           </p>
         </div>
+      </div>
 
-        <div className="space-y-24 max-w-6xl mx-auto">
-          {features.map((feature, index) => (
+      {/* Feature rows with alternating backgrounds */}
+      {features.map((feature, index) => (
+        <div
+          key={index}
+          className={`py-16 md:py-20 ${sectionBgs[index % sectionBgs.length]}`}
+        >
+          <div className="container mx-auto px-4">
             <div
-              key={index}
-              className={`grid lg:grid-cols-2 gap-12 lg:gap-16 items-center ${
+              className={`grid lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto ${
                 index % 2 === 1 ? 'lg:flex-row-reverse' : ''
               }`}
             >
-              {/* Text */}
-              <div className={`space-y-6 ${index % 2 === 1 ? 'lg:order-2' : 'lg:order-1'}`}>
-                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10">
-                  <feature.icon className="w-7 h-7 text-primary" />
-                </div>
+              {/* Text content card */}
+              <div className={`${index % 2 === 1 ? 'lg:order-2' : 'lg:order-1'}`}>
+                <div className="bg-surface border-2 border-border rounded-2xl p-8 hover:bg-surface-alt transition-all duration-200">
+                  <div className="space-y-6">
+                    {/* Icon with filled pastel background */}
+                    <div className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl ${feature.iconBg} border-2 border-border`}>
+                      <feature.icon className="w-7 h-7 text-text-primary" />
+                    </div>
 
-                <div>
-                  <span className="text-sm font-medium text-primary uppercase tracking-wider">
-                    Step {index + 1}
-                  </span>
-                  <h3 className="text-2xl md:text-3xl font-bold text-foreground font-serif mt-2">
-                    {feature.title}
-                  </h3>
-                </div>
+                    <div>
+                      <span className="text-sm font-semibold text-primary uppercase tracking-wider">
+                        Step {index + 1}
+                      </span>
+                      <h3 className="text-2xl md:text-3xl font-bold text-text-primary mt-2">
+                        {feature.title}
+                      </h3>
+                    </div>
 
-                <p className="text-lg text-text-secondary leading-relaxed">
-                  {feature.description}
-                </p>
+                    <p className="text-lg text-text-secondary leading-relaxed">
+                      {feature.description}
+                    </p>
+                  </div>
+                </div>
               </div>
 
               {/* Phone mockup */}
@@ -74,9 +91,9 @@ export default function Features() {
                 />
               </div>
             </div>
-          ))}
+          </div>
         </div>
-      </div>
+      ))}
     </section>
   );
 }
