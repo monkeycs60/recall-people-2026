@@ -26,7 +26,7 @@ export default function Hero() {
             </h1>
 
             <p className="text-base md:text-lg text-text-secondary max-w-lg mx-auto lg:mx-0 leading-relaxed mb-8">
-              His kids&apos; names. Her dream trip to Japan. The side project he works on at night. Talk about the people you meet — Recall People organizes everything automatically.
+              His kids&apos; names. Her dream trip to Japan. The side project he works on at night. Talk about anyone you meet — <span className="font-semibold text-foreground">Recall People</span> organizes everything automatically.
             </p>
 
             {/* Store buttons */}
