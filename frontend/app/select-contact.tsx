@@ -1,5 +1,5 @@
-import { View, Text, ScrollView, Pressable, TextInput, ActivityIndicator, StyleSheet } from 'react-native';
-import { useState, useMemo } from 'react';
+import { View, Text, ScrollView, Pressable, TextInput, ActivityIndicator, StyleSheet, Animated } from 'react-native';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -9,8 +9,8 @@ import { useAppStore } from '@/stores/app-store';
 import { extractInfo, DetectionResult } from '@/lib/api';
 import { Contact } from '@/types';
 import { hotTopicService } from '@/services/hot-topic.service';
-import { User, Plus, Search, Sparkles, Edit3, CheckCircle2 } from 'lucide-react-native';
-import { Colors, Spacing, BorderRadius, Typography } from '@/constants/theme';
+import { User, Search, Sparkles, Edit3, ChevronRight, UserPlus } from 'lucide-react-native';
+import { Colors, Spacing, BorderRadius, Typography, Fonts } from '@/constants/theme';
 
 export default function SelectContactScreen() {
   const { t } = useTranslation();
@@ -198,11 +198,31 @@ export default function SelectContactScreen() {
     router.back();
   };
 
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(20)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [fadeAnim, slideAnim]);
+
   if (isExtracting) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={Colors.primary} />
-        <Text style={styles.loadingText}>{t('selectContact.analyzing')}</Text>
+        <View style={styles.loadingCard}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+          <Text style={styles.loadingText}>{t('selectContact.analyzing')}</Text>
+        </View>
       </View>
     );
   }
@@ -210,164 +230,197 @@ export default function SelectContactScreen() {
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
+      contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
+      showsVerticalScrollIndicator={false}
     >
-      <View style={styles.header}>
-        <Sparkles size={24} color={Colors.primary} />
-        <Text style={styles.title}>{t('selectContact.question')}</Text>
-      </View>
-
-      <Text style={styles.transcriptionPreview}>
-        "{transcription.slice(0, 100)}{transcription.length > 100 ? '...' : ''}"
-      </Text>
-
-      {hasSuggestions && (
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <CheckCircle2 size={18} color={Colors.primary} />
-            <Text style={styles.sectionTitle}>{t('selectContact.suggestion')}</Text>
+      <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
+        <View style={styles.heroSection}>
+          <View style={styles.sparklesContainer}>
+            <Sparkles size={20} color={Colors.primary} />
           </View>
+          <Text style={styles.heroTitle}>{t('selectContact.question')}</Text>
+          <View style={styles.transcriptionCard}>
+            <Text style={styles.transcriptionText} numberOfLines={2}>
+              {transcription.slice(0, 120)}{transcription.length > 120 ? '...' : ''}
+            </Text>
+          </View>
+        </View>
 
-          {suggestedContact && (
-            <Pressable
-              style={styles.suggestedContactCard}
-              onPress={() => handleSelectContact(suggestedContact)}
-            >
-              <View style={styles.avatarPrimary}>
-                <User size={24} color={Colors.primary} />
-              </View>
-              <View style={styles.contactInfo}>
-                <Text style={styles.contactName}>
-                  {suggestedContact.firstName} {suggestedContact.lastName || suggestedContact.nickname || ''}
-                </Text>
-                {suggestedContact.aiSummary && (
-                  <Text style={styles.contactSummary} numberOfLines={1}>
-                    {suggestedContact.aiSummary}
-                  </Text>
-                )}
-              </View>
-            </Pressable>
-          )}
+        {hasSuggestions && (
+          <View style={styles.suggestionSection}>
+            <View style={styles.sectionLabelContainer}>
+              <View style={styles.sectionLabelLine} />
+              <Text style={styles.sectionLabel}>{t('selectContact.suggestion')}</Text>
+              <View style={styles.sectionLabelLine} />
+            </View>
 
-          {candidateContacts.length > 0 && !suggestedContact && (
-            <>
-              <Text style={styles.disambiguationHint}>
-                {t('selectContact.multipleMatches', { name: detection?.firstName })}
-              </Text>
-              {candidateContacts.map((contact) => (
-                <Pressable
-                  key={contact.id}
-                  style={styles.candidateContactCard}
-                  onPress={() => handleSelectContact(contact)}
-                >
-                  <View style={styles.avatarSecondary}>
-                    <User size={20} color={Colors.primary} />
+            {suggestedContact && (
+              <Pressable
+                style={({ pressed }) => [
+                  styles.suggestedContactCard,
+                  pressed && styles.cardPressed,
+                ]}
+                onPress={() => handleSelectContact(suggestedContact)}
+              >
+                <View style={styles.suggestedCardGlow} />
+                <View style={styles.suggestedCardContent}>
+                  <View style={styles.avatarPrimary}>
+                    <User size={26} color={Colors.textInverse} />
                   </View>
                   <View style={styles.contactInfo}>
-                    <Text style={styles.contactName}>
-                      {contact.firstName} {contact.lastName || contact.nickname || ''}
+                    <Text style={styles.suggestedContactName}>
+                      {suggestedContact.firstName} {suggestedContact.lastName || suggestedContact.nickname || ''}
                     </Text>
-                    {contact.aiSummary && (
+                    {suggestedContact.aiSummary && (
                       <Text style={styles.contactSummary} numberOfLines={1}>
-                        {contact.aiSummary}
+                        {suggestedContact.aiSummary}
                       </Text>
                     )}
                   </View>
-                </Pressable>
-              ))}
-            </>
-          )}
-        </View>
-      )}
+                  <ChevronRight size={22} color={Colors.primary} />
+                </View>
+              </Pressable>
+            )}
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('selectContact.newContact')}</Text>
-
-        {isEditingNewName && (
-          <View style={styles.editNameContainer}>
-            <Text style={styles.editNameLabel}>{t('selectContact.contactName')}</Text>
-            <TextInput
-              style={styles.editNameInput}
-              placeholder={t('selectContact.firstNamePlaceholder')}
-              placeholderTextColor={Colors.textMuted}
-              value={newContactName}
-              onChangeText={setNewContactName}
-              autoFocus
-            />
+            {candidateContacts.length > 0 && !suggestedContact && (
+              <>
+                <Text style={styles.disambiguationHint}>
+                  {t('selectContact.multipleMatches', { name: detection?.firstName })}
+                </Text>
+                {candidateContacts.map((contact) => (
+                  <Pressable
+                    key={contact.id}
+                    style={({ pressed }) => [
+                      styles.candidateContactCard,
+                      pressed && styles.cardPressed,
+                    ]}
+                    onPress={() => handleSelectContact(contact)}
+                  >
+                    <View style={styles.avatarSecondary}>
+                      <User size={22} color={Colors.primary} />
+                    </View>
+                    <View style={styles.contactInfo}>
+                      <Text style={styles.candidateContactName}>
+                        {contact.firstName} {contact.lastName || contact.nickname || ''}
+                      </Text>
+                      {contact.aiSummary && (
+                        <Text style={styles.contactSummary} numberOfLines={1}>
+                          {contact.aiSummary}
+                        </Text>
+                      )}
+                    </View>
+                    <ChevronRight size={20} color={Colors.textMuted} />
+                  </Pressable>
+                ))}
+              </>
+            )}
           </View>
         )}
 
-        <Pressable style={styles.createNewButton} onPress={handleCreateNew}>
-          <View style={styles.createNewContent}>
-            <Plus size={20} color={Colors.primary} />
+        <View style={styles.newContactSection}>
+          <View style={styles.sectionLabelContainer}>
+            <View style={styles.sectionLabelLine} />
+            <Text style={styles.sectionLabel}>{t('selectContact.newContact')}</Text>
+            <View style={styles.sectionLabelLine} />
+          </View>
+
+          {isEditingNewName && (
+            <View style={styles.editNameContainer}>
+              <Text style={styles.editNameLabel}>{t('selectContact.contactName')}</Text>
+              <TextInput
+                style={styles.editNameInput}
+                placeholder={t('selectContact.firstNamePlaceholder')}
+                placeholderTextColor={Colors.textMuted}
+                value={newContactName}
+                onChangeText={setNewContactName}
+                autoFocus
+              />
+            </View>
+          )}
+
+          <Pressable
+            style={({ pressed }) => [
+              styles.createNewButton,
+              pressed && styles.createNewButtonPressed,
+            ]}
+            onPress={handleCreateNew}
+          >
+            <View style={styles.createNewIconContainer}>
+              <UserPlus size={22} color={Colors.textInverse} />
+            </View>
             <Text style={styles.createNewText}>
               {newContactDisplayName
                 ? t('selectContact.createContact', { name: newContactDisplayName })
                 : t('selectContact.createNewContact')}
             </Text>
-          </View>
-        </Pressable>
-
-        {!isEditingNewName && (
-          <Pressable
-            style={styles.editNameButton}
-            onPress={() => {
-              setIsEditingNewName(true);
-              // Pre-fill with full display name
-              // suggestedNickname already contains the first name (e.g., "Paul Google")
-              const fullName = detection
-                ? detection.lastName
-                  ? `${detection.firstName} ${detection.lastName}`
-                  : detection.suggestedNickname || detection.firstName
-                : '';
-              setNewContactName(fullName);
-            }}
-          >
-            <Edit3 size={16} color={Colors.textMuted} />
-            <Text style={styles.editNameButtonText}>{t('selectContact.editName')}</Text>
           </Pressable>
-        )}
-      </View>
 
-      <View style={styles.section}>
-        <View style={styles.searchContainer}>
-          <Search size={20} color={Colors.textMuted} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder={t('selectContact.searchPlaceholder')}
-            placeholderTextColor={Colors.textMuted}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-        </View>
-      </View>
-
-      {filteredContacts.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('selectContact.allContacts')}</Text>
-
-          {filteredContacts.map((contact) => (
+          {!isEditingNewName && (
             <Pressable
-              key={contact.id}
-              style={styles.contactCard}
-              onPress={() => handleSelectContact(contact)}
+              style={styles.editNameButton}
+              onPress={() => {
+                setIsEditingNewName(true);
+                const fullName = detection
+                  ? detection.lastName
+                    ? `${detection.firstName} ${detection.lastName}`
+                    : detection.suggestedNickname || detection.firstName
+                  : '';
+                setNewContactName(fullName);
+              }}
             >
-              <View style={styles.avatarSmall}>
-                <User size={20} color={Colors.textMuted} />
-              </View>
-              <View style={styles.contactInfo}>
-                <Text style={styles.contactNameSmall}>
-                  {contact.firstName} {contact.lastName || contact.nickname || ''}
-                </Text>
-              </View>
+              <Edit3 size={14} color={Colors.textMuted} />
+              <Text style={styles.editNameButtonText}>{t('selectContact.editName')}</Text>
             </Pressable>
-          ))}
+          )}
         </View>
-      )}
 
-      <Pressable style={styles.cancelButton} onPress={handleCancel}>
-        <Text style={styles.cancelText}>{t('common.cancel')}</Text>
-      </Pressable>
+        <View style={styles.searchSection}>
+          <View style={styles.searchContainer}>
+            <Search size={18} color={Colors.textMuted} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder={t('selectContact.searchPlaceholder')}
+              placeholderTextColor={Colors.textMuted}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
+        </View>
+
+        {filteredContacts.length > 0 && (
+          <View style={styles.contactsListSection}>
+            <Text style={styles.contactsListHeader}>{t('selectContact.allContacts')}</Text>
+            <View style={styles.contactsList}>
+              {filteredContacts.map((contact, index) => (
+                <Pressable
+                  key={contact.id}
+                  style={({ pressed }) => [
+                    styles.contactCard,
+                    index === 0 && styles.contactCardFirst,
+                    index === filteredContacts.length - 1 && styles.contactCardLast,
+                    pressed && styles.contactCardPressed,
+                  ]}
+                  onPress={() => handleSelectContact(contact)}
+                >
+                  <View style={styles.avatarSmall}>
+                    <Text style={styles.avatarInitial}>
+                      {contact.firstName.charAt(0).toUpperCase()}
+                    </Text>
+                  </View>
+                  <Text style={styles.contactNameSmall}>
+                    {contact.firstName} {contact.lastName || contact.nickname || ''}
+                  </Text>
+                  <ChevronRight size={18} color={Colors.border} />
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        )}
+
+        <Pressable style={styles.cancelButton} onPress={handleCancel}>
+          <Text style={styles.cancelText}>{t('common.cancel')}</Text>
+        </Pressable>
+      </Animated.View>
     </ScrollView>
   );
 }
@@ -377,132 +430,181 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
     paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.md,
   },
   loadingContainer: {
     flex: 1,
     backgroundColor: Colors.background,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: Spacing.xl,
+  },
+  loadingCard: {
+    backgroundColor: Colors.surface,
+    paddingVertical: Spacing['2xl'],
+    paddingHorizontal: Spacing.xl,
+    borderRadius: BorderRadius.xl,
+    alignItems: 'center',
+    shadowColor: Colors.textPrimary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 4,
   },
   loadingText: {
     color: Colors.textSecondary,
     marginTop: Spacing.md,
-    ...Typography.bodyMedium,
+    ...Typography.titleMedium,
   },
-  header: {
-    flexDirection: 'row',
+  heroSection: {
     alignItems: 'center',
-    marginBottom: Spacing.xs,
+    paddingTop: Spacing.xl,
+    paddingBottom: Spacing.lg,
   },
-  title: {
-    ...Typography.headlineLarge,
-    color: Colors.textPrimary,
-    marginLeft: Spacing.sm,
-  },
-  transcriptionPreview: {
-    color: Colors.textMuted,
+  sparklesContainer: {
+    width: 44,
+    height: 44,
+    backgroundColor: Colors.primaryLight,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: Spacing.md,
-    ...Typography.bodySmall,
+  },
+  heroTitle: {
+    fontFamily: Fonts.serif.semibold,
+    fontSize: 26,
+    lineHeight: 34,
+    color: Colors.textPrimary,
+    textAlign: 'center',
+    marginBottom: Spacing.md,
+  },
+  transcriptionCard: {
+    backgroundColor: Colors.surface,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+    borderLeftWidth: 3,
+    borderLeftColor: Colors.primary,
+    width: '100%',
+  },
+  transcriptionText: {
+    color: Colors.textSecondary,
+    ...Typography.bodyMedium,
     fontStyle: 'italic',
+    lineHeight: 22,
   },
-  section: {
-    marginBottom: Spacing.lg,
+  suggestionSection: {
+    marginBottom: Spacing.xl,
   },
-  sectionHeader: {
+  sectionLabelContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.md,
+    paddingHorizontal: Spacing.xs,
   },
-  sectionTitle: {
-    ...Typography.titleLarge,
+  sectionLabelLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: Colors.border,
+  },
+  sectionLabel: {
+    ...Typography.labelSmall,
+    color: Colors.textMuted,
+    marginHorizontal: Spacing.md,
+    letterSpacing: 1,
+  },
+  suggestedContactCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.xl,
+    overflow: 'hidden',
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  suggestedCardGlow: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 4,
+    backgroundColor: Colors.primary,
+  },
+  suggestedCardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: Spacing.lg,
+  },
+  cardPressed: {
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
+  },
+  avatarPrimary: {
+    width: 52,
+    height: 52,
+    backgroundColor: Colors.primary,
+    borderRadius: 26,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: Spacing.md,
+  },
+  contactInfo: {
+    flex: 1,
+  },
+  suggestedContactName: {
     color: Colors.textPrimary,
-    marginLeft: Spacing.xs,
+    fontFamily: Fonts.serif.semibold,
+    fontSize: 20,
+    lineHeight: 26,
+  },
+  contactSummary: {
+    color: Colors.textMuted,
+    ...Typography.bodySmall,
+    marginTop: 4,
   },
   disambiguationHint: {
     color: Colors.textSecondary,
     ...Typography.bodySmall,
     marginBottom: Spacing.sm,
-  },
-  suggestedContactCard: {
-    backgroundColor: Colors.primary + '15',
-    borderWidth: 1,
-    borderColor: Colors.primary + '40',
-    padding: Spacing.md,
-    borderRadius: BorderRadius.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
+    textAlign: 'center',
   },
   candidateContactCard: {
     backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.primary + '30',
     padding: Spacing.md,
     borderRadius: BorderRadius.lg,
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: Spacing.sm,
-  },
-  contactCard: {
-    backgroundColor: Colors.surface,
-    padding: Spacing.md,
-    borderRadius: BorderRadius.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: Spacing.xs,
-  },
-  avatarPrimary: {
-    width: 48,
-    height: 48,
-    backgroundColor: Colors.primary + '25',
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   avatarSecondary: {
-    width: 40,
-    height: 40,
-    backgroundColor: Colors.primary + '15',
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    backgroundColor: Colors.primaryLight,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: Spacing.md,
   },
-  avatarSmall: {
-    width: 40,
-    height: 40,
-    backgroundColor: Colors.surfaceHover,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: Spacing.sm,
-  },
-  contactInfo: {
-    flex: 1,
-  },
-  contactName: {
+  candidateContactName: {
     color: Colors.textPrimary,
     ...Typography.titleLarge,
   },
-  contactNameSmall: {
-    color: Colors.textPrimary,
-    ...Typography.titleMedium,
-  },
-  contactSummary: {
-    color: Colors.textMuted,
-    ...Typography.bodySmall,
-    marginTop: 2,
+  newContactSection: {
+    marginBottom: Spacing.xl,
   },
   editNameContainer: {
     backgroundColor: Colors.surface,
     padding: Spacing.md,
     borderRadius: BorderRadius.lg,
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   editNameLabel: {
     color: Colors.textSecondary,
-    ...Typography.bodySmall,
+    ...Typography.labelMedium,
     marginBottom: Spacing.xs,
   },
   editNameInput: {
@@ -511,37 +613,53 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     borderRadius: BorderRadius.md,
     color: Colors.textPrimary,
-    ...Typography.bodyMedium,
+    ...Typography.bodyLarge,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   createNewButton: {
-    borderWidth: 2,
-    borderStyle: 'dashed',
-    borderColor: Colors.primary + '60',
-    padding: Spacing.md,
-    borderRadius: BorderRadius.lg,
-    alignItems: 'center',
-    backgroundColor: Colors.primary + '08',
-  },
-  createNewContent: {
+    backgroundColor: Colors.surface,
+    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: BorderRadius.xl,
     flexDirection: 'row',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  createNewButtonPressed: {
+    backgroundColor: Colors.surfaceHover,
+    borderColor: Colors.primary,
+  },
+  createNewIconContainer: {
+    width: 44,
+    height: 44,
+    backgroundColor: Colors.primary,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: Spacing.md,
   },
   createNewText: {
-    color: Colors.primary,
+    flex: 1,
+    color: Colors.textPrimary,
     ...Typography.titleMedium,
-    marginLeft: Spacing.sm,
   },
   editNameButton: {
     marginTop: Spacing.sm,
-    paddingVertical: Spacing.sm,
+    paddingVertical: Spacing.xs,
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
   },
   editNameButtonText: {
     color: Colors.textMuted,
-    marginLeft: Spacing.sm,
+    marginLeft: Spacing.xs,
     ...Typography.bodySmall,
+    textDecorationLine: 'underline',
+  },
+  searchSection: {
+    marginBottom: Spacing.lg,
   },
   searchContainer: {
     backgroundColor: Colors.surface,
@@ -549,21 +667,80 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   searchInput: {
     flex: 1,
-    paddingVertical: Spacing.sm,
+    paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.sm,
     color: Colors.textPrimary,
     ...Typography.bodyMedium,
   },
-  cancelButton: {
-    paddingVertical: Spacing.sm,
-    alignItems: 'center',
+  contactsListSection: {
     marginBottom: Spacing.lg,
+  },
+  contactsListHeader: {
+    ...Typography.labelSmall,
+    color: Colors.textMuted,
+    marginBottom: Spacing.sm,
+    marginLeft: Spacing.xs,
+    letterSpacing: 1,
+  },
+  contactsList: {
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.lg,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  contactCard: {
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
+  },
+  contactCardFirst: {
+    borderTopLeftRadius: BorderRadius.lg,
+    borderTopRightRadius: BorderRadius.lg,
+  },
+  contactCardLast: {
+    borderBottomLeftRadius: BorderRadius.lg,
+    borderBottomRightRadius: BorderRadius.lg,
+    borderBottomWidth: 0,
+  },
+  contactCardPressed: {
+    backgroundColor: Colors.surfaceHover,
+  },
+  avatarSmall: {
+    width: 36,
+    height: 36,
+    backgroundColor: Colors.secondaryLight,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: Spacing.sm,
+  },
+  avatarInitial: {
+    color: Colors.secondary,
+    ...Typography.titleMedium,
+    fontWeight: '600',
+  },
+  contactNameSmall: {
+    flex: 1,
+    color: Colors.textPrimary,
+    ...Typography.bodyLarge,
+  },
+  cancelButton: {
+    paddingVertical: Spacing.md,
+    alignItems: 'center',
+    marginTop: Spacing.sm,
   },
   cancelText: {
     color: Colors.textMuted,
     ...Typography.bodyMedium,
+    textDecorationLine: 'underline',
   },
 });

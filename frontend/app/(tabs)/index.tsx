@@ -10,23 +10,24 @@ import {
 	Image,
 } from 'react-native';
 import { useState, useRef, useCallback, useMemo } from 'react';
-import { Sparkle } from 'lucide-react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient, QueryClient } from '@tanstack/react-query';
 import { useContactsQuery } from '@/hooks/useContactsQuery';
 import { useContactPreviewsQuery } from '@/hooks/useContactPreviewsQuery';
-import { Contact, HotTopic } from '@/types';
+import { useGroupsQuery, useContactIdsForGroup } from '@/hooks/useGroupsQuery';
+import { Contact, HotTopic, Group } from '@/types';
 import {
 	Search,
 	ChevronRight,
 	Flame,
 	Calendar,
 	Plus,
-	UserPlus,
 	Settings,
 	Mic,
+	X,
+	Users,
 } from 'lucide-react-native';
 import { Colors } from '@/constants/theme';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -118,10 +119,14 @@ export default function ContactsScreen() {
 
 	const { contacts, isLoading, refetch, isPlaceholderData } = useContactsQuery();
 	const { previews: contactPreviews, refetchAll: refetchPreviews } = useContactPreviewsQuery(contacts);
+	const { groups } = useGroupsQuery();
 
 	const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
 	const [isPullRefreshing, setIsPullRefreshing] = useState(false);
 	const [filterText, setFilterText] = useState('');
+	const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+
+	const { data: groupContactIds } = useContactIdsForGroup(selectedGroupId);
 
 	useFocusEffect(
 		useCallback(() => {
@@ -129,6 +134,10 @@ export default function ContactsScreen() {
 			refetchPreviews();
 		}, [refetch, refetchPreviews])
 	);
+
+	const handleGroupSelect = (groupId: string | null) => {
+		setSelectedGroupId(groupId === selectedGroupId ? null : groupId);
+	};
 
 	const handleCreateContact = async (firstName: string, lastName: string) => {
 		const newContact = await contactService.create({
@@ -160,23 +169,18 @@ export default function ContactsScreen() {
 		hasAnimatedRef.current = true;
 	}
 
-	const recentContacts = useMemo(() => {
-		return contacts
-			.filter((contact) => contact.lastContactAt)
-			.sort((contactA, contactB) => {
-				const dateA = new Date(contactA.lastContactAt!).getTime();
-				const dateB = new Date(contactB.lastContactAt!).getTime();
-				return dateB - dateA;
-			})
-			.slice(0, 6);
-	}, [contacts]);
-
 	const allContacts = useMemo(() => {
 		let filteredContacts = contacts;
 
+		if (selectedGroupId && groupContactIds) {
+			filteredContacts = filteredContacts.filter((contact) =>
+				groupContactIds.includes(contact.id)
+			);
+		}
+
 		if (filterText.trim()) {
 			const searchTerm = filterText.toLowerCase();
-			filteredContacts = contacts.filter((contact) =>
+			filteredContacts = filteredContacts.filter((contact) =>
 				contact.firstName.toLowerCase().includes(searchTerm) ||
 				(contact.lastName?.toLowerCase().includes(searchTerm))
 			);
@@ -187,7 +191,7 @@ export default function ContactsScreen() {
 			const dateB = contactB.lastContactAt ? new Date(contactB.lastContactAt).getTime() : 0;
 			return dateB - dateA;
 		});
-	}, [contacts, filterText]);
+	}, [contacts, filterText, selectedGroupId, groupContactIds]);
 
 	const handleRefresh = async () => {
 		setIsPullRefreshing(true);
@@ -195,22 +199,19 @@ export default function ContactsScreen() {
 		setIsPullRefreshing(false);
 	};
 
-	const renderRecentContact = ({ item }: { item: Contact }) => (
+	const renderGroupChip = (group: Group, isSelected: boolean) => (
 		<Pressable
-			style={styles.recentContactItem}
-			onPress={() => router.push(`/contact/${item.id}`)}>
-			<ContactAvatar
-				firstName={item.firstName}
-				lastName={item.lastName}
-				gender={item.gender}
-				avatarUrl={item.avatarUrl}
-				size='small'
-				cacheKey={item.updatedAt}
-				recyclingKey={item.id}
-			/>
-			<Text style={styles.recentContactName} numberOfLines={1}>
-				{item.firstName}
+			key={group.id}
+			style={[styles.groupChip, isSelected && styles.groupChipSelected]}
+			onPress={() => handleGroupSelect(group.id)}>
+			<Text
+				style={[styles.groupChipText, isSelected && styles.groupChipTextSelected]}
+				numberOfLines={1}>
+				{group.name}
 			</Text>
+			{isSelected && (
+				<X size={14} color={Colors.textInverse} />
+			)}
 		</Pressable>
 	);
 
@@ -326,46 +327,9 @@ export default function ContactsScreen() {
 				</View>
 			) : (
 				<>
-					{recentContacts.length > 0 && (
-						<View style={styles.section}>
-							<Text style={styles.sectionTitle}>Contacts récents</Text>
-							<ScrollView
-								horizontal
-								showsHorizontalScrollIndicator={false}
-								contentContainerStyle={styles.recentContactsList}>
-								<Pressable
-									style={styles.addContactCard}
-									onPress={() => setIsCreateModalVisible(true)}>
-									<View style={styles.addContactIconContainer}>
-										<Plus size={18} color={Colors.primary} />
-									</View>
-									<Text style={styles.addContactLabel}>Ajouter</Text>
-								</Pressable>
-								{recentContacts.map((contact) => (
-									<View key={contact.id}>
-										{renderRecentContact({ item: contact })}
-									</View>
-								))}
-							</ScrollView>
-						</View>
-					)}
-
-					<View style={styles.allContactsSection}>
-						<View style={styles.sectionTitleRow}>
-							<Text style={styles.sectionTitle}>Tous les contacts</Text>
-							{recentContacts.length === 0 && (
-								<Pressable
-									style={styles.addContactInlineButton}
-									onPress={() => setIsCreateModalVisible(true)}>
-									<UserPlus size={16} color={Colors.primary} />
-									<Text style={styles.addContactInlineText}>
-										{t('contacts.addContact')}
-									</Text>
-								</Pressable>
-							)}
-						</View>
+					<View style={styles.searchSection}>
 						<View style={styles.filterInputWrapper}>
-							<Search size={16} color={Colors.textMuted} />
+							<Search size={18} color={Colors.textMuted} style={styles.searchIcon} />
 							<TextInput
 								style={styles.filterInput}
 								placeholder={t('contacts.filterPlaceholder')}
@@ -373,33 +337,70 @@ export default function ContactsScreen() {
 								value={filterText}
 								onChangeText={setFilterText}
 							/>
+							{filterText.length > 0 && (
+								<Pressable onPress={() => setFilterText('')} hitSlop={8}>
+									<X size={18} color={Colors.textMuted} />
+								</Pressable>
+							)}
 						</View>
-						<Pressable
-							style={styles.askHint}
-							onPress={() => router.push('/(tabs)/search')}>
-							<Sparkle size={14} color={Colors.primary} />
-							<Text style={styles.askHintText}>{t('contacts.askHint')}</Text>
-						</Pressable>
+
+						{groups.length > 0 && (
+							<ScrollView
+								horizontal
+								showsHorizontalScrollIndicator={false}
+								contentContainerStyle={styles.groupChipsContainer}>
+								<View style={styles.groupsLabelContainer}>
+									<Users size={14} color={Colors.textMuted} />
+								</View>
+								{groups.map((group) =>
+									renderGroupChip(group, selectedGroupId === group.id)
+								)}
+							</ScrollView>
+						)}
 					</View>
 
-					<FlatList
-						data={allContacts}
-						renderItem={renderContact}
-						keyExtractor={(item) => item.id}
-						contentContainerStyle={{
-							paddingBottom: 140,
-							paddingHorizontal: 24,
-						}}
-						onViewableItemsChanged={onViewableItemsChanged}
-						viewabilityConfig={viewabilityConfig}
-						refreshControl={
-							<RefreshControl
-								refreshing={isPullRefreshing}
-								onRefresh={handleRefresh}
-								tintColor={Colors.primary}
-							/>
-						}
-					/>
+					<View style={styles.allContactsSection}>
+						<View style={styles.sectionTitleRow}>
+							<Text style={styles.sectionTitle}>
+								{selectedGroupId
+									? groups.find((group) => group.id === selectedGroupId)?.name || 'Contacts'
+									: 'Tous les contacts'}
+							</Text>
+							<Pressable
+								style={styles.addContactButton}
+								onPress={() => setIsCreateModalVisible(true)}>
+								<Plus size={18} color={Colors.textInverse} />
+							</Pressable>
+						</View>
+					</View>
+
+					{allContacts.length === 0 && selectedGroupId ? (
+						<View style={styles.emptyGroupContainer}>
+							<Users size={48} color={Colors.textMuted} />
+							<Text style={styles.emptyGroupText}>
+								Aucun contact dans ce groupe
+							</Text>
+						</View>
+					) : (
+						<FlatList
+							data={allContacts}
+							renderItem={renderContact}
+							keyExtractor={(item) => item.id}
+							contentContainerStyle={{
+								paddingBottom: 140,
+								paddingHorizontal: 24,
+							}}
+							onViewableItemsChanged={onViewableItemsChanged}
+							viewabilityConfig={viewabilityConfig}
+							refreshControl={
+								<RefreshControl
+									refreshing={isPullRefreshing}
+									onRefresh={handleRefresh}
+									tintColor={Colors.primary}
+								/>
+							}
+						/>
+					)}
 				</>
 			)}
 
@@ -434,104 +435,90 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'center',
 	},
+	searchSection: {
+		paddingHorizontal: 24,
+		marginBottom: 16,
+	},
 	filterInputWrapper: {
 		flexDirection: 'row',
 		alignItems: 'center',
 		backgroundColor: Colors.surface,
-		borderRadius: 10,
-		paddingHorizontal: 12,
-		paddingVertical: 8,
+		borderRadius: 12,
+		paddingHorizontal: 14,
+		height: 46,
 		borderWidth: 1,
 		borderColor: Colors.border,
-		gap: 8,
+		gap: 10,
+	},
+	searchIcon: {
+		marginTop: 1,
 	},
 	filterInput: {
 		flex: 1,
-		fontSize: 15,
+		fontSize: 16,
 		color: Colors.textPrimary,
+		height: '100%',
+		paddingVertical: 0,
 	},
-	askHint: {
+	groupChipsContainer: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: 8,
+		paddingTop: 12,
+		paddingRight: 24,
+	},
+	groupsLabelContainer: {
+		marginRight: 4,
+	},
+	groupChip: {
 		flexDirection: 'row',
 		alignItems: 'center',
 		gap: 6,
-		marginTop: 10,
-		paddingLeft: 4,
+		backgroundColor: Colors.surface,
+		borderWidth: 1,
+		borderColor: Colors.border,
+		borderRadius: 20,
+		paddingHorizontal: 14,
+		paddingVertical: 8,
 	},
-	askHintText: {
-		fontSize: 14,
-		color: Colors.primary,
+	groupChipSelected: {
+		backgroundColor: Colors.primary,
+		borderColor: Colors.primary,
+	},
+	groupChipText: {
+		fontSize: 13,
 		fontWeight: '500',
+		color: Colors.textSecondary,
 	},
-	section: {
-		paddingHorizontal: 24,
-		marginBottom: 16,
+	groupChipTextSelected: {
+		color: Colors.textInverse,
 	},
 	allContactsSection: {
 		paddingHorizontal: 24,
-		marginBottom: 10,
+		marginBottom: 12,
 	},
 	sectionTitleRow: {
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		alignItems: 'center',
-		marginBottom: 8,
 	},
 	sectionTitle: {
 		fontSize: 18,
 		fontWeight: '600',
 		color: Colors.textPrimary,
 	},
-	addContactInlineButton: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		gap: 6,
-		paddingVertical: 6,
-		paddingHorizontal: 12,
-		borderRadius: 8,
-		backgroundColor: Colors.primaryLight,
-	},
-	addContactInlineText: {
-		fontSize: 14,
-		fontWeight: '500',
-		color: Colors.primary,
-	},
-	recentContactsList: {
-		gap: 12,
-		paddingRight: 24,
-	},
-	recentContactItem: {
-		alignItems: 'center',
-		width: 58,
-	},
-	recentContactName: {
-		fontSize: 11,
-		color: Colors.textSecondary,
-		marginTop: 6,
-		textAlign: 'center',
-		fontWeight: '500',
-	},
-	addContactCard: {
+	addContactButton: {
+		width: 36,
+		height: 36,
+		borderRadius: 18,
+		backgroundColor: Colors.primary,
 		alignItems: 'center',
 		justifyContent: 'center',
-		width: 58,
-	},
-	addContactIconContainer: {
-		width: 48,
-		height: 48,
-		borderRadius: 24,
-		backgroundColor: Colors.surface,
-		borderWidth: 2,
-		borderColor: Colors.border,
-		borderStyle: 'dashed',
-		alignItems: 'center',
-		justifyContent: 'center',
-	},
-	addContactLabel: {
-		fontSize: 11,
-		color: Colors.textSecondary,
-		marginTop: 6,
-		textAlign: 'center',
-		fontWeight: '500',
+		shadowColor: Colors.primary,
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.25,
+		shadowRadius: 4,
+		elevation: 3,
 	},
 	contactCard: {
 		flexDirection: 'row',
@@ -635,5 +622,18 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		fontWeight: '600',
 		color: Colors.textInverse,
+	},
+	emptyGroupContainer: {
+		flex: 1,
+		alignItems: 'center',
+		justifyContent: 'center',
+		paddingTop: 60,
+		paddingHorizontal: 32,
+	},
+	emptyGroupText: {
+		fontSize: 15,
+		color: Colors.textMuted,
+		textAlign: 'center',
+		marginTop: 16,
 	},
 });

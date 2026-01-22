@@ -227,12 +227,6 @@ export function AvatarEditModal({
                 textAlignVertical="top"
               />
 
-              <View style={styles.examplesContainer}>
-                <Text style={styles.examplesTitle}>{t('contact.avatar.examples')}</Text>
-                <Text style={styles.exampleText}>{t('contact.avatar.example1')}</Text>
-                <Text style={styles.exampleText}>{t('contact.avatar.example2')}</Text>
-              </View>
-
               <View style={styles.generateButtonRow}>
                 <Pressable style={styles.backButton} onPress={() => setMode('choose')}>
                   <Text style={styles.backButtonText}>{t('common.back')}</Text>
@@ -376,25 +370,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
     minHeight: 100,
-    marginBottom: Spacing.md,
-  },
-  examplesContainer: {
-    backgroundColor: Colors.background,
-    borderRadius: BorderRadius.md,
-    padding: Spacing.md,
     marginBottom: Spacing.lg,
-  },
-  examplesTitle: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: Colors.textSecondary,
-    marginBottom: Spacing.xs,
-  },
-  exampleText: {
-    fontSize: 13,
-    color: Colors.textMuted,
-    fontStyle: 'italic',
-    marginBottom: 4,
   },
   generateButtonRow: {
     flexDirection: 'row',

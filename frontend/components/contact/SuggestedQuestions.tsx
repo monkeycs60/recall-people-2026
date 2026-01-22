@@ -1,18 +1,20 @@
-import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, ActivityIndicator, Pressable, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { MessageCircle } from 'lucide-react-native';
+import { MessageCircle, RefreshCw } from 'lucide-react-native';
 import { Colors } from '@/constants/theme';
 
 type SuggestedQuestionsProps = {
   suggestedQuestions?: string[];
   isLoading?: boolean;
+  isRegenerating?: boolean;
   firstName: string;
+  onRegenerate?: () => void;
 };
 
 const ORANGE_ACCENT = '#E07B39';
 const ORANGE_LIGHT = '#FDF4EC';
 
-export function SuggestedQuestions({ suggestedQuestions, isLoading, firstName }: SuggestedQuestionsProps) {
+export function SuggestedQuestions({ suggestedQuestions, isLoading, isRegenerating, firstName, onRegenerate }: SuggestedQuestionsProps) {
   const { t } = useTranslation();
 
   if (isLoading) {
@@ -39,8 +41,23 @@ export function SuggestedQuestions({ suggestedQuestions, isLoading, firstName }:
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <MessageCircle size={16} color={ORANGE_ACCENT} />
-        <Text style={styles.headerText}>{t('contact.suggestedQuestions.header')}</Text>
+        <View style={styles.headerLeft}>
+          <MessageCircle size={16} color={ORANGE_ACCENT} />
+          <Text style={styles.headerText}>{t('contact.suggestedQuestions.header')}</Text>
+        </View>
+        {onRegenerate && (
+          <Pressable
+            style={styles.regenerateButton}
+            onPress={onRegenerate}
+            disabled={isRegenerating}
+          >
+            {isRegenerating ? (
+              <ActivityIndicator size="small" color={ORANGE_ACCENT} />
+            ) : (
+              <RefreshCw size={16} color={ORANGE_ACCENT} />
+            )}
+          </Pressable>
+        )}
       </View>
       <View style={styles.questionsContainer}>
         {suggestedQuestions.map((question, index) => (
@@ -66,13 +83,21 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 12,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   headerText: {
     fontSize: 13,
     fontWeight: '600',
     color: ORANGE_ACCENT,
     marginLeft: 6,
+  },
+  regenerateButton: {
+    padding: 4,
   },
   questionsContainer: {
     gap: 8,

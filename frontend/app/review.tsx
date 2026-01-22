@@ -18,7 +18,7 @@ import { noteService } from '@/services/note.service';
 import { useAppStore } from '@/stores/app-store';
 import { queryKeys } from '@/lib/query-keys';
 import { Colors } from '@/constants/theme';
-import { Archive, Calendar, Edit3, Plus, X } from 'lucide-react-native';
+import { Archive, Calendar, Edit3, Plus, Trash2, X } from 'lucide-react-native';
 
 function formatBirthdayDisplay(day: number, month: number, monthNames: string[], year?: number): string {
   const monthName = monthNames[month - 1] || month.toString();
@@ -102,15 +102,17 @@ export default function ReviewScreen() {
   const [isAddingGroup, setIsAddingGroup] = useState(false);
   const [newGroupSearch, setNewGroupSearch] = useState('');
 
-  const [acceptedContactInfo, setAcceptedContactInfo] = useState<{
-    phone: boolean;
-    email: boolean;
-    birthday: boolean;
+  const [editableContactInfo, setEditableContactInfo] = useState<{
+    phone: string | null;
+    email: string | null;
+    birthday: { day: number; month: number; year?: number } | null;
   }>({
-    phone: !!extraction.contactInfo?.phone,
-    email: !!extraction.contactInfo?.email,
-    birthday: !!extraction.contactInfo?.birthday,
+    phone: extraction.contactInfo?.phone || null,
+    email: extraction.contactInfo?.email || null,
+    birthday: extraction.contactInfo?.birthday || null,
   });
+
+  const [editingContactInfoField, setEditingContactInfoField] = useState<'phone' | 'email' | 'birthday' | null>(null);
 
   const [datePickerIndex, setDatePickerIndex] = useState<number | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -377,10 +379,10 @@ export default function ReviewScreen() {
 
       // Update contact info if detected
       if (newExtraction.contactInfo) {
-        setAcceptedContactInfo({
-          phone: !!newExtraction.contactInfo.phone,
-          email: !!newExtraction.contactInfo.email,
-          birthday: !!newExtraction.contactInfo.birthday,
+        setEditableContactInfo({
+          phone: newExtraction.contactInfo.phone || null,
+          email: newExtraction.contactInfo.email || null,
+          birthday: newExtraction.contactInfo.birthday || null,
         });
       }
 
@@ -432,32 +434,30 @@ export default function ReviewScreen() {
         }
       }
 
-      if (extraction.contactInfo) {
-        const contactInfoUpdate: Partial<{
-          phone: string;
-          email: string;
-          birthdayDay: number;
-          birthdayMonth: number;
-          birthdayYear: number;
-        }> = {};
+      const contactInfoUpdate: Partial<{
+        phone: string;
+        email: string;
+        birthdayDay: number;
+        birthdayMonth: number;
+        birthdayYear: number;
+      }> = {};
 
-        if (acceptedContactInfo.phone && extraction.contactInfo.phone) {
-          contactInfoUpdate.phone = extraction.contactInfo.phone;
+      if (editableContactInfo.phone) {
+        contactInfoUpdate.phone = editableContactInfo.phone;
+      }
+      if (editableContactInfo.email) {
+        contactInfoUpdate.email = editableContactInfo.email;
+      }
+      if (editableContactInfo.birthday) {
+        contactInfoUpdate.birthdayDay = editableContactInfo.birthday.day;
+        contactInfoUpdate.birthdayMonth = editableContactInfo.birthday.month;
+        if (editableContactInfo.birthday.year) {
+          contactInfoUpdate.birthdayYear = editableContactInfo.birthday.year;
         }
-        if (acceptedContactInfo.email && extraction.contactInfo.email) {
-          contactInfoUpdate.email = extraction.contactInfo.email;
-        }
-        if (acceptedContactInfo.birthday && extraction.contactInfo.birthday) {
-          contactInfoUpdate.birthdayDay = extraction.contactInfo.birthday.day;
-          contactInfoUpdate.birthdayMonth = extraction.contactInfo.birthday.month;
-          if (extraction.contactInfo.birthday.year) {
-            contactInfoUpdate.birthdayYear = extraction.contactInfo.birthday.year;
-          }
-        }
+      }
 
-        if (Object.keys(contactInfoUpdate).length > 0) {
-          await contactService.update(finalContactId, contactInfoUpdate);
-        }
+      if (Object.keys(contactInfoUpdate).length > 0) {
+        await contactService.update(finalContactId, contactInfoUpdate);
       }
 
       const note = await createNote({
@@ -667,18 +667,7 @@ export default function ReviewScreen() {
       </Text>
 
       <View style={styles.section}>
-        <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionTitle}>{t('review.transcription')}</Text>
-          {!isEditingTranscription && (
-            <Pressable
-              style={styles.editTranscriptionButton}
-              onPress={() => setIsEditingTranscription(true)}
-            >
-              <Edit3 size={16} color={Colors.primary} />
-              <Text style={styles.editTranscriptionButtonText}>{t('review.edit')}</Text>
-            </Pressable>
-          )}
-        </View>
+        <Text style={styles.sectionTitle}>{t('review.transcription')}</Text>
 
         {isEditingTranscription ? (
           <View style={styles.transcriptionEditContainer}>
@@ -692,9 +681,6 @@ export default function ReviewScreen() {
               placeholderTextColor={Colors.textMuted}
               editable={!isReExtracting}
             />
-            <Text style={styles.transcriptionEditWarning}>
-              {t('review.transcriptionEditWarning')}
-            </Text>
             <View style={styles.transcriptionEditActions}>
               <Pressable
                 style={styles.transcriptionCancelButton}
@@ -718,102 +704,127 @@ export default function ReviewScreen() {
             </View>
           </View>
         ) : (
-          <View>
+          <Pressable onPress={() => setIsEditingTranscription(true)}>
             <View style={styles.transcriptionDisplayContainer}>
               <Text style={styles.transcriptionText}>{editedTranscription}</Text>
             </View>
             <Text style={styles.transcriptionHint}>{t('review.transcriptionHint')}</Text>
-          </View>
+          </Pressable>
         )}
       </View>
 
-      {extraction.contactInfo && (extraction.contactInfo.phone || extraction.contactInfo.email || extraction.contactInfo.birthday) && (
+      {(editableContactInfo.phone || editableContactInfo.email || editableContactInfo.birthday) && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('contact.contactInfoReview.title')}</Text>
 
-          {extraction.contactInfo.phone && (
+          {editableContactInfo.phone && (
             <View style={styles.contactInfoRow}>
-              <View style={styles.contactInfoContent}>
-                <Text style={styles.contactInfoLabel}>{t('contact.contactInfoReview.phone')}</Text>
-                <Text style={styles.contactInfoValue}>{extraction.contactInfo.phone}</Text>
-              </View>
-              <View style={styles.contactInfoActions}>
-                <Pressable
-                  style={[styles.actionButton, acceptedContactInfo.phone && styles.actionButtonActive]}
-                  onPress={() => setAcceptedContactInfo(prev => ({ ...prev, phone: true }))}
-                >
-                  <Text style={[styles.actionButtonText, acceptedContactInfo.phone && styles.actionButtonTextActive]}>
-                    {t('contact.contactInfoReview.accept')}
-                  </Text>
-                </Pressable>
-                <Pressable
-                  style={[styles.actionButton, !acceptedContactInfo.phone && styles.actionButtonActive]}
-                  onPress={() => setAcceptedContactInfo(prev => ({ ...prev, phone: false }))}
-                >
-                  <Text style={[styles.actionButtonText, !acceptedContactInfo.phone && styles.actionButtonTextActive]}>
-                    {t('contact.contactInfoReview.ignore')}
-                  </Text>
-                </Pressable>
-              </View>
+              {editingContactInfoField === 'phone' ? (
+                <View style={styles.contactInfoEditContainer}>
+                  <Text style={styles.contactInfoLabel}>{t('contact.contactInfoReview.phone')}</Text>
+                  <TextInput
+                    style={styles.contactInfoInput}
+                    value={editableContactInfo.phone}
+                    onChangeText={(value) => setEditableContactInfo(prev => ({ ...prev, phone: value }))}
+                    keyboardType="phone-pad"
+                    autoFocus
+                  />
+                  <Pressable
+                    style={styles.confirmButton}
+                    onPress={() => setEditingContactInfoField(null)}
+                  >
+                    <Text style={styles.confirmButtonText}>OK</Text>
+                  </Pressable>
+                </View>
+              ) : (
+                <>
+                  <View style={styles.contactInfoContent}>
+                    <Text style={styles.contactInfoLabel}>{t('contact.contactInfoReview.phone')}</Text>
+                    <Text style={styles.contactInfoValue}>{editableContactInfo.phone}</Text>
+                  </View>
+                  <View style={styles.contactInfoIconActions}>
+                    <Pressable
+                      style={styles.iconButton}
+                      onPress={() => setEditingContactInfoField('phone')}
+                    >
+                      <Edit3 size={18} color={Colors.textSecondary} />
+                    </Pressable>
+                    <Pressable
+                      style={styles.iconButton}
+                      onPress={() => setEditableContactInfo(prev => ({ ...prev, phone: null }))}
+                    >
+                      <Trash2 size={18} color={Colors.error} />
+                    </Pressable>
+                  </View>
+                </>
+              )}
             </View>
           )}
 
-          {extraction.contactInfo.email && (
+          {editableContactInfo.email && (
             <View style={styles.contactInfoRow}>
-              <View style={styles.contactInfoContent}>
-                <Text style={styles.contactInfoLabel}>{t('contact.contactInfoReview.email')}</Text>
-                <Text style={styles.contactInfoValue}>{extraction.contactInfo.email}</Text>
-              </View>
-              <View style={styles.contactInfoActions}>
-                <Pressable
-                  style={[styles.actionButton, acceptedContactInfo.email && styles.actionButtonActive]}
-                  onPress={() => setAcceptedContactInfo(prev => ({ ...prev, email: true }))}
-                >
-                  <Text style={[styles.actionButtonText, acceptedContactInfo.email && styles.actionButtonTextActive]}>
-                    {t('contact.contactInfoReview.accept')}
-                  </Text>
-                </Pressable>
-                <Pressable
-                  style={[styles.actionButton, !acceptedContactInfo.email && styles.actionButtonActive]}
-                  onPress={() => setAcceptedContactInfo(prev => ({ ...prev, email: false }))}
-                >
-                  <Text style={[styles.actionButtonText, !acceptedContactInfo.email && styles.actionButtonTextActive]}>
-                    {t('contact.contactInfoReview.ignore')}
-                  </Text>
-                </Pressable>
-              </View>
+              {editingContactInfoField === 'email' ? (
+                <View style={styles.contactInfoEditContainer}>
+                  <Text style={styles.contactInfoLabel}>{t('contact.contactInfoReview.email')}</Text>
+                  <TextInput
+                    style={styles.contactInfoInput}
+                    value={editableContactInfo.email}
+                    onChangeText={(value) => setEditableContactInfo(prev => ({ ...prev, email: value }))}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoFocus
+                  />
+                  <Pressable
+                    style={styles.confirmButton}
+                    onPress={() => setEditingContactInfoField(null)}
+                  >
+                    <Text style={styles.confirmButtonText}>OK</Text>
+                  </Pressable>
+                </View>
+              ) : (
+                <>
+                  <View style={styles.contactInfoContent}>
+                    <Text style={styles.contactInfoLabel}>{t('contact.contactInfoReview.email')}</Text>
+                    <Text style={styles.contactInfoValue}>{editableContactInfo.email}</Text>
+                  </View>
+                  <View style={styles.contactInfoIconActions}>
+                    <Pressable
+                      style={styles.iconButton}
+                      onPress={() => setEditingContactInfoField('email')}
+                    >
+                      <Edit3 size={18} color={Colors.textSecondary} />
+                    </Pressable>
+                    <Pressable
+                      style={styles.iconButton}
+                      onPress={() => setEditableContactInfo(prev => ({ ...prev, email: null }))}
+                    >
+                      <Trash2 size={18} color={Colors.error} />
+                    </Pressable>
+                  </View>
+                </>
+              )}
             </View>
           )}
 
-          {extraction.contactInfo.birthday && (
+          {editableContactInfo.birthday && (
             <View style={styles.contactInfoRow}>
               <View style={styles.contactInfoContent}>
                 <Text style={styles.contactInfoLabel}>{t('contact.contactInfoReview.birthday')}</Text>
                 <Text style={styles.contactInfoValue}>
                   {formatBirthdayDisplay(
-                    extraction.contactInfo.birthday.day,
-                    extraction.contactInfo.birthday.month,
+                    editableContactInfo.birthday.day,
+                    editableContactInfo.birthday.month,
                     t('contact.birthdayModal.months', { returnObjects: true }) as string[],
-                    extraction.contactInfo.birthday.year
+                    editableContactInfo.birthday.year
                   )}
                 </Text>
               </View>
-              <View style={styles.contactInfoActions}>
+              <View style={styles.contactInfoIconActions}>
                 <Pressable
-                  style={[styles.actionButton, acceptedContactInfo.birthday && styles.actionButtonActive]}
-                  onPress={() => setAcceptedContactInfo(prev => ({ ...prev, birthday: true }))}
+                  style={styles.iconButton}
+                  onPress={() => setEditableContactInfo(prev => ({ ...prev, birthday: null }))}
                 >
-                  <Text style={[styles.actionButtonText, acceptedContactInfo.birthday && styles.actionButtonTextActive]}>
-                    {t('contact.contactInfoReview.accept')}
-                  </Text>
-                </Pressable>
-                <Pressable
-                  style={[styles.actionButton, !acceptedContactInfo.birthday && styles.actionButtonActive]}
-                  onPress={() => setAcceptedContactInfo(prev => ({ ...prev, birthday: false }))}
-                >
-                  <Text style={[styles.actionButtonText, !acceptedContactInfo.birthday && styles.actionButtonTextActive]}>
-                    {t('contact.contactInfoReview.ignore')}
-                  </Text>
+                  <Trash2 size={18} color={Colors.error} />
                 </Pressable>
               </View>
             </View>
@@ -1650,9 +1661,12 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 12,
     marginBottom: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   contactInfoContent: {
-    marginBottom: 8,
+    flex: 1,
   },
   contactInfoLabel: {
     fontSize: 12,
@@ -1664,29 +1678,24 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     fontWeight: '500',
   },
-  contactInfoActions: {
+  contactInfoIconActions: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 12,
   },
-  actionButton: {
-    paddingVertical: 6,
+  iconButton: {
+    padding: 8,
+  },
+  contactInfoEditContainer: {
+    flex: 1,
+  },
+  contactInfoInput: {
+    backgroundColor: Colors.background,
+    paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 8,
-    backgroundColor: Colors.background,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  actionButtonActive: {
-    backgroundColor: Colors.primaryLight,
-    borderColor: Colors.primary,
-  },
-  actionButtonText: {
-    fontSize: 13,
-    color: Colors.textSecondary,
-  },
-  actionButtonTextActive: {
-    color: Colors.primary,
-    fontWeight: '500',
+    color: Colors.textPrimary,
+    fontSize: 15,
+    marginVertical: 8,
   },
   reminderRow: {
     flexDirection: 'row',
@@ -1738,26 +1747,6 @@ const styles = StyleSheet.create({
     color: Colors.info,
     fontWeight: '500',
   },
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  editTranscriptionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: Colors.primaryLight,
-    borderRadius: 8,
-  },
-  editTranscriptionButtonText: {
-    color: Colors.primary,
-    fontSize: 14,
-    fontWeight: '500',
-    marginLeft: 6,
-  },
   transcriptionDisplayContainer: {
     backgroundColor: Colors.surface,
     padding: 16,
@@ -1793,12 +1782,6 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 8,
     marginBottom: 12,
-  },
-  transcriptionEditWarning: {
-    fontSize: 13,
-    color: Colors.warning,
-    marginBottom: 12,
-    fontStyle: 'italic',
   },
   transcriptionEditActions: {
     flexDirection: 'row',

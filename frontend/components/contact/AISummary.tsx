@@ -1,15 +1,17 @@
-import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, ActivityIndicator, Pressable, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Sparkles } from 'lucide-react-native';
+import { Sparkles, RefreshCw } from 'lucide-react-native';
 import { Colors } from '@/constants/theme';
 
 type AISummaryProps = {
   summary?: string;
   isLoading?: boolean;
+  isRegenerating?: boolean;
   firstName: string;
+  onRegenerate?: () => void;
 };
 
-export function AISummary({ summary, isLoading, firstName }: AISummaryProps) {
+export function AISummary({ summary, isLoading, isRegenerating, firstName, onRegenerate }: AISummaryProps) {
   const { t } = useTranslation();
 
   if (isLoading) {
@@ -36,8 +38,23 @@ export function AISummary({ summary, isLoading, firstName }: AISummaryProps) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Sparkles size={16} color={Colors.secondary} />
-        <Text style={styles.headerText}>{t('contact.aiSummary.header', { firstName })}</Text>
+        <View style={styles.headerLeft}>
+          <Sparkles size={16} color={Colors.secondary} />
+          <Text style={styles.headerText}>{t('contact.aiSummary.header', { firstName })}</Text>
+        </View>
+        {onRegenerate && (
+          <Pressable
+            style={styles.regenerateButton}
+            onPress={onRegenerate}
+            disabled={isRegenerating}
+          >
+            {isRegenerating ? (
+              <ActivityIndicator size="small" color={Colors.secondary} />
+            ) : (
+              <RefreshCw size={16} color={Colors.secondary} />
+            )}
+          </Pressable>
+        )}
       </View>
       <Text style={styles.summaryText}>{summary}</Text>
     </View>
@@ -56,13 +73,21 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 8,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   headerText: {
     fontSize: 13,
     fontWeight: '600',
     color: Colors.secondary,
     marginLeft: 6,
+  },
+  regenerateButton: {
+    padding: 4,
   },
   contextHeader: {
     fontSize: 14,

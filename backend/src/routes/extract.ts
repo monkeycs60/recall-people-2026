@@ -59,7 +59,7 @@ const extractionSchema = z.object({
     lastName: z.string().nullable().describe('Nom de famille si mentionné'),
     confidence: z.enum(['high', 'medium', 'low']),
   }),
-  noteTitle: z.string().describe('Titre court de 2-4 mots résumant le contexte de la note (ex: "Café rattrapage", "Soirée Marc", "Appel pro")'),
+  noteTitle: z.string().describe('Titre court et SPÉCIFIQUE de 2-5 mots capturant le SUJET PRINCIPAL discuté. Privilégier: le projet/événement clé mentionné, l\'actualité importante de la personne, ou le contexte de la rencontre. Exemples: "Entretien Google réussi", "Projet déménagement Lyon", "Grossesse annoncée", "Promotion obtenue", "Café après voyage Japon". ÉVITER les titres génériques comme "Discussion", "Rattrapage", "Nouvelles".'),
   contactInfo: z.object({
     phone: z.string().nullable().describe('Numéro de téléphone si mentionné'),
     email: z.string().nullable().describe('Adresse email si mentionnée'),
@@ -288,7 +288,7 @@ TÂCHE:
 2. Détecte si des actualités existantes sont RÉSOLUES dans cette note
 3. Détecte les infos de contact (téléphone, email, anniversaire) si mentionnées
 4. Identifie le prénom de la personne dont on parle
-5. Génère un titre court pour la note (2-4 mots, ex: "Café rattrapage", "Appel pro")
+5. Génère un titre SPÉCIFIQUE pour la note (2-5 mots) capturant le sujet principal discuté
 
 RÈGLES:
 
@@ -403,13 +403,38 @@ FORMAT JSON:
       "resolution": "Description concrète de ce qui s'est passé"
     }
   ],
-  "noteTitle": "2-4 mots résumant la note"
+  "noteTitle": "Titre SPÉCIFIQUE capturant le sujet principal (2-5 mots)"
 }
+
+RÈGLES POUR noteTitle - CRITIQUE:
+Le titre doit permettre à l'utilisateur de retrouver facilement la note plus tard.
+
+BON titre (spécifique, mémorable):
+- "Entretien Google réussi" (événement clé)
+- "Grossesse annoncée" (nouvelle importante)
+- "Projet startup IA" (sujet principal)
+- "Retour voyage Japon" (contexte + lieu)
+- "Promotion directrice" (actualité majeure)
+- "Rupture avec Thomas" (situation importante)
+
+MAUVAIS titre (trop générique, inutile):
+- "Discussion" ❌
+- "Café" ❌
+- "Rattrapage" ❌
+- "Nouvelles" ❌
+- "Appel" ❌
+- "Point" ❌
+
+PRIORITÉ pour choisir le titre:
+1. L'actualité/événement MAJEUR mentionné (promotion, mariage, déménagement, etc.)
+2. Le projet/situation EN COURS discuté (recherche emploi, achat maison, etc.)
+3. Le contexte de la rencontre SI spécifique (anniversaire 30 ans, retour de voyage, etc.)
 
 EXEMPLES CONCRETS DE HOT TOPICS AVEC DATES:
 
 Exemple 1 - "Marie a un entretien chez Google la semaine prochaine":
 {
+  "noteTitle": "Entretien Google prévu",
   "hotTopics": [{
     "title": "Entretien Google",
     "context": "Elle passe un entretien d'embauche chez Google.",
@@ -417,21 +442,29 @@ Exemple 1 - "Marie a un entretien chez Google la semaine prochaine":
   }]
 }
 
-Exemple 2 - "Il déménage à Lyon dans 2 mois":
+Exemple 2 - "On s'est vu au café, il m'a dit qu'il déménage à Lyon dans 2 mois pour son nouveau boulot":
 {
+  "noteTitle": "Déménagement Lyon nouveau job",
   "hotTopics": [{
     "title": "Déménagement Lyon",
-    "context": "Il prépare son déménagement pour s'installer à Lyon.",
+    "context": "Il prépare son déménagement pour s'installer à Lyon pour un nouveau travail.",
     "eventDate": "${twoMonthsDate}"
   }]
 }
 
-Exemple 3 - "Elle se marie en juin":
+Exemple 3 - "Elle m'a annoncé qu'elle est enceinte, elle se marie en juin":
 {
+  "noteTitle": "Grossesse et mariage annoncés",
   "hotTopics": [{
     "title": "Mariage",
     "context": "Elle prépare son mariage prévu pour juin.",
     "eventDate": "2026-06-01"
   }]
+}
+
+Exemple 4 - "On a pris un café, elle m'a raconté ses vacances":
+{
+  "noteTitle": "Retour de vacances",
+  "hotTopics": []
 }`;
 };

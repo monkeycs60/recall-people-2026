@@ -12,6 +12,8 @@ import {
   useUpdateHotTopic,
   useUpdateHotTopicResolution,
   useDeleteNote,
+  useRegenerateSummary,
+  useRegenerateSuggestedQuestions,
 } from '@/hooks/useContactQuery';
 import { useUpdateContact, useDeleteContact } from '@/hooks/useContactsQuery';
 import { useGroupsForContact, useGroupsQuery } from '@/hooks/useGroupsQuery';
@@ -70,6 +72,8 @@ export default function ContactDetailScreen() {
   const updateHotTopicMutation = useUpdateHotTopic();
   const updateHotTopicResolutionMutation = useUpdateHotTopicResolution();
   const deleteNoteMutation = useDeleteNote();
+  const regenerateSummaryMutation = useRegenerateSummary();
+  const regenerateSuggestedQuestionsMutation = useRegenerateSuggestedQuestions();
 
   // Groups queries - data passed as props to sheet for instant opening
   const { groups: allGroups } = useGroupsQuery();
@@ -227,6 +231,14 @@ export default function ContactDetailScreen() {
     invalidate();
   };
 
+  const handleRegenerateSummary = () => {
+    regenerateSummaryMutation.mutate({ contactId });
+  };
+
+  const handleRegenerateSuggestedQuestions = () => {
+    regenerateSuggestedQuestionsMutation.mutate({ contactId });
+  };
+
   // Add new items handlers
   const handleAddHotTopic = async () => {
     if (!newHotTopicTitle.trim()) return;
@@ -350,7 +362,13 @@ export default function ContactDetailScreen() {
 
         {/* AI Summary (L'essentiel) - Most important info first */}
         <Animated.View entering={FadeInDown.delay(100).duration(300)} style={styles.section}>
-          <AISummary summary={contact.aiSummary} isLoading={isWaitingForSummary} firstName={contact.firstName} />
+          <AISummary
+            summary={contact.aiSummary}
+            isLoading={isWaitingForSummary}
+            isRegenerating={regenerateSummaryMutation.isPending}
+            firstName={contact.firstName}
+            onRegenerate={contact.notes.length > 0 ? handleRegenerateSummary : undefined}
+          />
         </Animated.View>
 
         {/* Hot Topics Section (Actualités) - Things to follow up on */}
@@ -415,7 +433,13 @@ export default function ContactDetailScreen() {
 
         {/* Suggested Questions - Conversation starters / Ask AI */}
         <Animated.View entering={FadeInDown.delay(200).duration(300)} style={styles.section}>
-          <SuggestedQuestions suggestedQuestions={contact.suggestedQuestions} isLoading={isWaitingForSuggestedQuestions} firstName={contact.firstName} />
+          <SuggestedQuestions
+            suggestedQuestions={contact.suggestedQuestions}
+            isLoading={isWaitingForSuggestedQuestions}
+            isRegenerating={regenerateSuggestedQuestionsMutation.isPending}
+            firstName={contact.firstName}
+            onRegenerate={contact.hotTopics.length > 0 ? handleRegenerateSuggestedQuestions : undefined}
+          />
         </Animated.View>
 
         {/* Notes Timeline - History of interactions */}

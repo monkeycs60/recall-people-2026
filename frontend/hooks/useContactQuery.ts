@@ -3,6 +3,7 @@ import { contactService } from '@/services/contact.service';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { noteService } from '@/services/note.service';
 import { queryKeys } from '@/lib/query-keys';
+import { generateSummary, generateSuggestedQuestions } from '@/lib/api';
 
 export function useContactQuery(contactId: string | undefined) {
   const queryClient = useQueryClient();
@@ -143,6 +144,73 @@ export function useDeleteNote() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.notes.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
+    },
+  });
+}
+
+export function useRegenerateSummary() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ contactId }: { contactId: string }) => {
+      const contact = await contactService.getById(contactId);
+      if (!contact) throw new Error('Contact not found');
+
+      const transcriptions = contact.notes
+        .filter((note) => note.transcription)
+        .map((note) => note.transcription);
+
+      if (transcriptions.length === 0) {
+        throw new Error('No transcriptions available');
+      }
+
+      const contactName = `${contact.firstName}${contact.lastName ? ` ${contact.lastName}` : ''}`;
+      const summary = await generateSummary({
+        contactName,
+        transcriptions,
+      });
+
+      await contactService.update(contactId, { aiSummary: summary });
+      return summary;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(variables.contactId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.list() });
+    },
+  });
+}
+
+export function useRegenerateSuggestedQuestions() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ contactId }: { contactId: string }) => {
+      const contact = await contactService.getById(contactId);
+      if (!contact) throw new Error('Contact not found');
+
+      const suggestedQuestions = await generateSuggestedQuestions({
+        contact: {
+          firstName: contact.firstName,
+          lastName: contact.lastName,
+        },
+        facts: contact.facts.map((fact) => ({
+          factType: fact.factType,
+          factKey: fact.factKey,
+          factValue: fact.factValue,
+        })),
+        hotTopics: contact.hotTopics.map((topic) => ({
+          title: topic.title,
+          context: topic.context || '',
+          status: topic.status,
+        })),
+      });
+
+      await contactService.update(contactId, { suggestedQuestions });
+      return suggestedQuestions;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(variables.contactId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.list() });
     },
   });
 }
