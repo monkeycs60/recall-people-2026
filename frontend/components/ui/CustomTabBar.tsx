@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     backgroundColor: Colors.surface,
-    borderTopWidth: 1,
+    borderTopWidth: 1.5,
     borderTopColor: Colors.border,
   },
   tabBar: {
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   tabLabel: {
-    fontSize: 11,
+    fontSize: 12,
     marginTop: 4,
     fontWeight: '500',
   },
@@ -215,11 +215,8 @@ const styles = StyleSheet.create({
     height: 64,
     borderRadius: 32,
     backgroundColor: Colors.primary,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    borderWidth: 2,
+    borderColor: Colors.border,
   },
   fabInner: {
     flex: 1,
