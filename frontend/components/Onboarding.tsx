@@ -22,6 +22,14 @@ const ILLUSTRATIONS = {
   trust: require('@/assets/ai-assets/guy-with-privacy-label.png'),
 };
 
+const SLIDE_BACKGROUNDS = [
+  Colors.rose,
+  Colors.menthe,
+  Colors.peche,
+  Colors.bleuCiel,
+  Colors.rose,
+];
+
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 type OnboardingProps = {
@@ -76,7 +84,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
   };
 
   const renderLanguageSlide = () => (
-    <View style={[styles.slideContainer, { width: SCREEN_WIDTH }]}>
+    <View style={[styles.slideContainer, { width: SCREEN_WIDTH, backgroundColor: SLIDE_BACKGROUNDS[0] }]}>
       <View style={styles.slideContent}>
         <View style={styles.iconContainer}>
           <Globe size={40} color={Colors.primary} />
@@ -113,8 +121,10 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
       return renderLanguageSlide();
     }
 
+    const backgroundColor = SLIDE_BACKGROUNDS[slide.id % SLIDE_BACKGROUNDS.length];
+
     return (
-      <View style={[styles.slideContainer, { width: SCREEN_WIDTH }]}>
+      <View style={[styles.slideContainer, { width: SCREEN_WIDTH, backgroundColor }]}>
         <View style={styles.illustrationContainer}>
           <Image
             source={slide.image}
@@ -170,16 +180,16 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
               ];
 
               const width = interpolate(scrollX.value, inputRange, [8, 24, 8], Extrapolation.CLAMP);
-              const opacity = interpolate(
+              const isActive = interpolate(
                 scrollX.value,
                 inputRange,
-                [0.3, 1, 0.3],
+                [0, 1, 0],
                 Extrapolation.CLAMP
               );
 
               return {
                 width: withSpring(width),
-                opacity: withSpring(opacity),
+                backgroundColor: isActive > 0.5 ? Colors.primary : Colors.textMuted,
               };
             });
 
@@ -310,13 +320,14 @@ const styles = StyleSheet.create({
   dot: {
     height: 8,
     borderRadius: 4,
-    backgroundColor: Colors.primary,
     marginHorizontal: 4,
   },
   nextButton: {
     backgroundColor: Colors.primary,
     paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.lg,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: Colors.border,
   },
   nextButtonPressed: {
     backgroundColor: Colors.primaryDark,
