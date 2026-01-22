@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Pressable, TextInput, Alert, Platform, KeyboardAvoidingView, StyleSheet, BackHandler } from 'react-native';
+import { View, Text, ScrollView, Pressable, TextInput, Alert, Platform, KeyboardAvoidingView, StyleSheet, BackHandler, Modal } from 'react-native';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
@@ -20,7 +20,9 @@ import { useUpdateContact, useDeleteContact } from '@/hooks/useContactsQuery';
 import { useGroupsForContact, useGroupsQuery } from '@/hooks/useGroupsQuery';
 import { SearchSourceType } from '@/types';
 import { hotTopicService } from '@/services/hot-topic.service';
-import { Edit3, Plus, Trash2, MoreVertical, MessageCircleQuestion } from 'lucide-react-native';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import { Edit3, Plus, Trash2, MoreVertical, MessageCircleQuestion, Calendar } from 'lucide-react-native';
+import { notificationService } from '@/services/notification.service';
 import { AISummary } from '@/components/contact/AISummary';
 import { AddNoteButton } from '@/components/AddNoteButton';
 import type { InputMode } from '@/components/InputModeToggle';
@@ -93,6 +95,9 @@ export default function ContactDetailScreen() {
   const [isAddingHotTopic, setIsAddingHotTopic] = useState(false);
   const [newHotTopicTitle, setNewHotTopicTitle] = useState('');
   const [newHotTopicContext, setNewHotTopicContext] = useState('');
+  const [newHotTopicReminderEnabled, setNewHotTopicReminderEnabled] = useState(false);
+  const [newHotTopicReminderDate, setNewHotTopicReminderDate] = useState<Date | null>(null);
+  const [showReminderDatePicker, setShowReminderDatePicker] = useState(false);
 
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -248,15 +253,70 @@ export default function ContactDetailScreen() {
   // Add new items handlers
   const handleAddHotTopic = async () => {
     if (!newHotTopicTitle.trim()) return;
-    await hotTopicService.create({
+
+    const eventDate = newHotTopicReminderEnabled && newHotTopicReminderDate
+      ? newHotTopicReminderDate.toISOString()
+      : undefined;
+
+    const savedHotTopic = await hotTopicService.create({
       contactId,
       title: newHotTopicTitle.trim(),
       context: newHotTopicContext.trim() || undefined,
+      eventDate,
     });
+
+    if (eventDate && contact) {
+      await notificationService.scheduleEventReminder(
+        savedHotTopic.id,
+        eventDate,
+        newHotTopicTitle.trim(),
+        contact.firstName
+      );
+    }
+
     setNewHotTopicTitle('');
     setNewHotTopicContext('');
+    setNewHotTopicReminderEnabled(false);
+    setNewHotTopicReminderDate(null);
     setIsAddingHotTopic(false);
     invalidate();
+  };
+
+  const handleReminderDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
+    if (Platform.OS === 'android') {
+      setShowReminderDatePicker(false);
+    }
+
+    if (event.type === 'set' && selectedDate) {
+      setNewHotTopicReminderDate(selectedDate);
+    }
+
+    if (Platform.OS === 'android' && event.type === 'dismissed') {
+      setShowReminderDatePicker(false);
+    }
+  };
+
+  const formatReminderDate = (date: Date): string => {
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  const formatRelativeDate = (date: Date): string => {
+    const today = new Date();
+    const diffDays = Math.ceil((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) return '';
+    if (diffDays === 0) return t('review.today');
+    if (diffDays === 1) return t('review.tomorrow');
+    if (diffDays < 7) return t('review.inDays', { count: diffDays });
+    if (diffDays < 30) {
+      const weeks = Math.floor(diffDays / 7);
+      return t('review.inWeeks', { count: weeks });
+    }
+    const months = Math.floor(diffDays / 30);
+    return t('review.inMonths', { count: months });
   };
 
   if (isLoading) {
@@ -409,6 +469,43 @@ export default function ContactDetailScreen() {
                 multiline
                 numberOfLines={3}
               />
+              <View style={styles.reminderRow}>
+                <Pressable
+                  style={styles.reminderCheckbox}
+                  onPress={() => setNewHotTopicReminderEnabled(!newHotTopicReminderEnabled)}
+                >
+                  <View
+                    style={[
+                      styles.smallCheckbox,
+                      newHotTopicReminderEnabled && styles.smallCheckboxSelected
+                    ]}
+                  >
+                    {newHotTopicReminderEnabled && (
+                      <Text style={styles.smallCheckmark}>✓</Text>
+                    )}
+                  </View>
+                  <Text style={styles.reminderLabel}>{t('review.reminder')}</Text>
+                </Pressable>
+
+                {newHotTopicReminderEnabled && (
+                  <>
+                    <Pressable
+                      style={styles.datePickerButton}
+                      onPress={() => setShowReminderDatePicker(true)}
+                    >
+                      <Calendar size={16} color={Colors.info} />
+                      <Text style={newHotTopicReminderDate ? styles.datePickerText : styles.datePickerPlaceholder}>
+                        {newHotTopicReminderDate ? formatReminderDate(newHotTopicReminderDate) : t('review.selectDate')}
+                      </Text>
+                    </Pressable>
+                    {newHotTopicReminderDate && (
+                      <Text style={styles.relativeDateText}>
+                        {formatRelativeDate(newHotTopicReminderDate)}
+                      </Text>
+                    )}
+                  </>
+                )}
+              </View>
               <View style={styles.buttonRow}>
                 <Pressable
                   style={styles.cancelButton}
@@ -416,6 +513,8 @@ export default function ContactDetailScreen() {
                     setIsAddingHotTopic(false);
                     setNewHotTopicTitle('');
                     setNewHotTopicContext('');
+                    setNewHotTopicReminderEnabled(false);
+                    setNewHotTopicReminderDate(null);
                   }}
                 >
                   <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
@@ -557,6 +656,46 @@ export default function ContactDetailScreen() {
         allGroups={allGroups}
         contactGroups={contactGroups}
       />
+
+      {Platform.OS === 'android' && showReminderDatePicker && (
+        <DateTimePicker
+          value={newHotTopicReminderDate || new Date()}
+          mode="date"
+          display="default"
+          onChange={handleReminderDateChange}
+          minimumDate={new Date()}
+        />
+      )}
+
+      {Platform.OS === 'ios' && (
+        <Modal
+          visible={showReminderDatePicker}
+          transparent
+          animationType="slide"
+        >
+          <View style={styles.datePickerModalOverlay}>
+            <View style={styles.datePickerModalContent}>
+              <View style={styles.datePickerModalHeader}>
+                <Pressable onPress={() => setShowReminderDatePicker(false)}>
+                  <Text style={styles.datePickerModalCancel}>{t('common.cancel')}</Text>
+                </Pressable>
+                <Text style={styles.datePickerModalTitle}>{t('review.selectDate')}</Text>
+                <Pressable onPress={() => setShowReminderDatePicker(false)}>
+                  <Text style={styles.datePickerModalDone}>{t('common.confirm')}</Text>
+                </Pressable>
+              </View>
+              <DateTimePicker
+                value={newHotTopicReminderDate || new Date()}
+                mode="date"
+                display="spinner"
+                onChange={handleReminderDateChange}
+                minimumDate={new Date()}
+                style={styles.iosDatePicker}
+              />
+            </View>
+          </View>
+        </Modal>
+      )}
     </KeyboardAvoidingView>
   );
 }
@@ -801,5 +940,100 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
     textAlign: 'center',
     fontSize: 15,
+  },
+  reminderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    gap: 8,
+    flexWrap: 'wrap',
+  },
+  reminderCheckbox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  smallCheckbox: {
+    width: 18,
+    height: 18,
+    borderRadius: 4,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  smallCheckboxSelected: {
+    backgroundColor: Colors.info,
+    borderColor: Colors.info,
+  },
+  smallCheckmark: {
+    color: Colors.textInverse,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  reminderLabel: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+  },
+  datePickerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.background,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: Colors.info,
+    gap: 6,
+  },
+  datePickerText: {
+    fontSize: 14,
+    color: Colors.textPrimary,
+  },
+  datePickerPlaceholder: {
+    fontSize: 14,
+    color: Colors.textMuted,
+  },
+  relativeDateText: {
+    fontSize: 12,
+    color: Colors.info,
+    fontWeight: '500',
+  },
+  datePickerModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  datePickerModalContent: {
+    backgroundColor: Colors.surface,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 40,
+  },
+  datePickerModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  datePickerModalCancel: {
+    fontSize: 16,
+    color: Colors.textSecondary,
+  },
+  datePickerModalTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+  },
+  datePickerModalDone: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.primary,
+  },
+  iosDatePicker: {
+    height: 200,
   },
 });
