@@ -1,41 +1,47 @@
 import { Platform } from 'react-native';
 
 export const Colors = {
-  // Backgrounds - Warm Light Mode
-  background: '#FAF7F2',
+  // Backgrounds - Pop Style
+  background: '#FFFFFF',
   surface: '#FFFFFF',
   surfaceElevated: '#FFFFFF',
-  surfaceHover: '#F5F0E8',
+  surfaceHover: '#FFF9F5', // crème
 
-  // Text - Warm tones
-  textPrimary: '#1A1612',
-  textSecondary: '#6B5E54',
-  textMuted: '#A69B8F',
+  // Text - Bold & Clear
+  textPrimary: '#1A1A1A',
+  textSecondary: '#6B7280',
+  textMuted: '#9CA3AF',
   textInverse: '#FFFFFF',
 
-  // Accent - Terracotta/Amber (brand principal)
-  primary: '#C67C4E',
-  primaryLight: '#E8D5C4',
-  primaryDark: '#A65D2E',
+  // Primary - Corail (brand principal)
+  primary: '#FF7F6B', // corail
+  primaryLight: '#FFDAB3', // pêche
+  primaryDark: '#E86B58', // corail hover
 
-  // Accent secondaire (bleu gris doux)
-  secondary: '#6B7D8A',
-  secondaryLight: '#E8ECEF',
+  // Pastels secondaires
+  rose: '#FFB5C5', // rose bonbon
+  menthe: '#7DDEC3', // menthe
+  bleuCiel: '#7EC8E8', // bleu ciel
+  peche: '#FFDAB3', // pêche clair
+
+  // Accent secondaire (keep for compatibility)
+  secondary: '#7EC8E8', // bleu ciel
+  secondaryLight: '#E8F4F8',
 
   // Semantic
-  success: '#5D8C5A',
-  successLight: '#E8F0E7',
-  warning: '#D4A34A',
-  error: '#C45C4A',
-  info: '#5C7A8C',
+  success: '#7DDEC3', // menthe
+  successLight: '#E5F7F2',
+  warning: '#FFDAB3', // pêche
+  error: '#E86B58', // corail dark
+  info: '#7EC8E8', // bleu ciel
 
-  // Borders
-  border: '#E8E2DB',
-  borderLight: '#F2EDE6',
+  // Borders - Flat & Bold style
+  border: '#1A1A1A', // noir pour style flat & bold
+  borderLight: '#E5E5E5',
 
   // Tab bar
-  tabIconDefault: '#A69B8F',
-  tabIconSelected: '#C67C4E',
+  tabIconDefault: '#9CA3AF',
+  tabIconSelected: '#FF7F6B', // corail
 };
 
 export const Spacing = {
@@ -57,12 +63,16 @@ export const BorderRadius = {
 };
 
 export const Fonts = {
+  // @deprecated - Playfair Display is being phased out for Pop art direction
+  // Will be replaced by Plus Jakarta Sans (requires expo font installation)
   serif: {
     regular: 'PlayfairDisplay_400Regular',
     medium: 'PlayfairDisplay_500Medium',
     semibold: 'PlayfairDisplay_600SemiBold',
     bold: 'PlayfairDisplay_700Bold',
   },
+  // TODO: Install Plus Jakarta Sans via expo-google-fonts
+  // import { useFonts, PlusJakartaSans_400Regular, PlusJakartaSans_500Medium, PlusJakartaSans_600SemiBold, PlusJakartaSans_700Bold } from '@expo-google-fonts/plus-jakarta-sans';
   sans: Platform.select({
     ios: 'System',
     android: 'Roboto',
