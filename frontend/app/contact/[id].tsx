@@ -12,6 +12,7 @@ import {
   useUpdateHotTopic,
   useUpdateHotTopicResolution,
   useDeleteNote,
+  useUpdateNote,
   useRegenerateSummary,
   useRegenerateSuggestedQuestions,
 } from '@/hooks/useContactQuery';
@@ -72,6 +73,7 @@ export default function ContactDetailScreen() {
   const updateHotTopicMutation = useUpdateHotTopic();
   const updateHotTopicResolutionMutation = useUpdateHotTopicResolution();
   const deleteNoteMutation = useDeleteNote();
+  const updateNoteMutation = useUpdateNote();
   const regenerateSummaryMutation = useRegenerateSummary();
   const regenerateSuggestedQuestionsMutation = useRegenerateSuggestedQuestions();
 
@@ -206,6 +208,10 @@ export default function ContactDetailScreen() {
 
   const handleDeleteNote = async (id: string) => {
     await deleteNoteMutation.mutateAsync(id);
+  };
+
+  const handleUpdateNote = async (id: string, data: { transcription: string }) => {
+    await updateNoteMutation.mutateAsync({ id, data });
   };
 
   const handleAddNote = (mode: InputMode) => {
@@ -453,6 +459,7 @@ export default function ContactDetailScreen() {
           <NotesTimeline
             notes={contact.notes}
             onDelete={handleDeleteNote}
+            onUpdate={handleUpdateNote}
             highlightId={highlightType === 'note' ? highlightId : undefined}
           />
         </Animated.View>

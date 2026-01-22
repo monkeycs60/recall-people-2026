@@ -70,4 +70,29 @@ export const noteService = {
     const db = await getDatabase();
     await db.runAsync('DELETE FROM notes WHERE id = ?', [id]);
   },
+
+  update: async (id: string, data: { transcription?: string; title?: string }): Promise<void> => {
+    const db = await getDatabase();
+    const now = new Date().toISOString();
+
+    const updates: string[] = ['updated_at = ?'];
+    const values: (string | null)[] = [now];
+
+    if (data.transcription !== undefined) {
+      updates.push('transcription = ?');
+      values.push(data.transcription);
+    }
+
+    if (data.title !== undefined) {
+      updates.push('title = ?');
+      values.push(data.title || null);
+    }
+
+    values.push(id);
+
+    await db.runAsync(
+      `UPDATE notes SET ${updates.join(', ')} WHERE id = ?`,
+      values
+    );
+  },
 };

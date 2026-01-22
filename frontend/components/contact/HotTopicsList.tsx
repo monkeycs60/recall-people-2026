@@ -119,7 +119,7 @@ export function HotTopicsList({
 
     if (isEditing) {
       return (
-        <View key={topic.id} style={styles.editCard}>
+        <View key={`${topic.id}-editing`} style={styles.editCard}>
           <TextInput
             style={styles.editInput}
             value={editTitle}
@@ -149,7 +149,7 @@ export function HotTopicsList({
 
     if (isResolving) {
       return (
-        <View key={topic.id} style={styles.resolveCard}>
+        <View key={`${topic.id}-resolving`} style={styles.resolveCard}>
           <Text style={styles.resolveCardTitle}>✅ Marquer comme résolu</Text>
           <Text style={styles.resolveTitle}>"{topic.title}"</Text>
           <Text style={styles.resolveLabel}>{t('contact.hotTopic.resolutionLabel')}</Text>
@@ -177,7 +177,7 @@ export function HotTopicsList({
 
     return (
       <View
-        key={topic.id}
+        key={`${topic.id}-display`}
         style={[styles.topicCard, isResolved && styles.topicCardResolved]}
       >
         <View style={styles.topicContent}>

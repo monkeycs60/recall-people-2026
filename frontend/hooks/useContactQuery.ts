@@ -148,6 +148,24 @@ export function useDeleteNote() {
   });
 }
 
+export function useUpdateNote() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: { transcription?: string; title?: string };
+    }) => noteService.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.notes.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
+    },
+  });
+}
+
 export function useRegenerateSummary() {
   const queryClient = useQueryClient();
 

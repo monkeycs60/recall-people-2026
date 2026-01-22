@@ -1,14 +1,15 @@
-import { View, Text, Pressable, Modal, ScrollView, Alert, StyleSheet } from 'react-native';
+import { View, Text, Pressable, Modal, ScrollView, Alert, StyleSheet, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { X, Trash2, ChevronDown, ChevronUp } from 'lucide-react-native';
+import { X, Trash2, ChevronDown, ChevronUp, Pencil, Check } from 'lucide-react-native';
 import { Note } from '@/types';
 import { Colors, Spacing, BorderRadius, Typography } from '@/constants/theme';
 
 type NotesTimelineProps = {
   notes: Note[];
   onDelete: (id: string) => void;
+  onUpdate: (id: string, data: { transcription: string }) => void;
   highlightId?: string;
 };
 
@@ -46,11 +47,13 @@ function truncateText(text: string, maxLength: number): string {
   return text.slice(0, maxLength).trim() + '...';
 }
 
-export function NotesTimeline({ notes, onDelete, highlightId }: NotesTimelineProps) {
+export function NotesTimeline({ notes, onDelete, onUpdate, highlightId }: NotesTimelineProps) {
   const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [expandedNotes, setExpandedNotes] = useState<Set<string>>(new Set());
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedTranscription, setEditedTranscription] = useState('');
 
   const sortedNotes = [...notes].sort(
     (noteA, noteB) => new Date(noteB.createdAt).getTime() - new Date(noteA.createdAt).getTime()
@@ -86,6 +89,59 @@ export function NotesTimeline({ notes, onDelete, highlightId }: NotesTimelinePro
     });
   };
 
+  const handleOpenNote = (note: Note) => {
+    setSelectedNote(note);
+    setEditedTranscription(note.transcription);
+    setIsEditing(false);
+  };
+
+  const handleCloseNote = () => {
+    if (isEditing && selectedNote && editedTranscription !== selectedNote.transcription) {
+      Alert.alert(
+        i18n.language.startsWith('fr') ? 'Modifications non sauvegardees' : 'Unsaved changes',
+        i18n.language.startsWith('fr')
+          ? 'Voulez-vous abandonner vos modifications ?'
+          : 'Do you want to discard your changes?',
+        [
+          { text: t('common.cancel'), style: 'cancel' },
+          {
+            text: i18n.language.startsWith('fr') ? 'Abandonner' : 'Discard',
+            style: 'destructive',
+            onPress: () => {
+              setSelectedNote(null);
+              setIsEditing(false);
+            },
+          },
+        ]
+      );
+    } else {
+      setSelectedNote(null);
+      setIsEditing(false);
+    }
+  };
+
+  const handleStartEditing = () => {
+    if (selectedNote) {
+      setEditedTranscription(selectedNote.transcription);
+      setIsEditing(true);
+    }
+  };
+
+  const handleSaveEdit = () => {
+    if (selectedNote && editedTranscription.trim() !== selectedNote.transcription) {
+      onUpdate(selectedNote.id, { transcription: editedTranscription.trim() });
+      setSelectedNote({ ...selectedNote, transcription: editedTranscription.trim() });
+    }
+    setIsEditing(false);
+  };
+
+  const handleCancelEdit = () => {
+    if (selectedNote) {
+      setEditedTranscription(selectedNote.transcription);
+    }
+    setIsEditing(false);
+  };
+
   if (notes.length === 0) {
     return null;
   }
@@ -119,7 +175,7 @@ export function NotesTimeline({ notes, onDelete, highlightId }: NotesTimelinePro
                     styles.noteCard,
                     isHighlighted && styles.noteCardHighlighted,
                   ]}
-                  onPress={() => setSelectedNote(note)}
+                  onPress={() => handleOpenNote(note)}
                 >
                   {note.title && (
                     <Text style={styles.noteTitle}>{note.title}</Text>
@@ -162,9 +218,12 @@ export function NotesTimeline({ notes, onDelete, highlightId }: NotesTimelinePro
         visible={selectedNote !== null}
         animationType="slide"
         presentationStyle="pageSheet"
-        onRequestClose={() => setSelectedNote(null)}
+        onRequestClose={handleCloseNote}
       >
-        <View style={[styles.modalContainer, { paddingTop: insets.top }]}>
+        <KeyboardAvoidingView
+          style={[styles.modalContainer, { paddingTop: insets.top }]}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
           <View style={styles.modalHeader}>
             <View style={styles.modalTitleContainer}>
               <Text style={styles.modalTitle}>
@@ -175,23 +234,76 @@ export function NotesTimeline({ notes, onDelete, highlightId }: NotesTimelinePro
               </Text>
             </View>
             <View style={styles.modalActions}>
-              <Pressable
-                style={styles.modalActionButton}
-                onPress={() => selectedNote && handleDelete(selectedNote)}
-              >
-                <Trash2 size={20} color={Colors.error} />
-              </Pressable>
-              <Pressable style={styles.modalActionButton} onPress={() => setSelectedNote(null)}>
-                <X size={24} color={Colors.textMuted} />
-              </Pressable>
+              {isEditing ? (
+                <>
+                  <Pressable style={styles.cancelEditButton} onPress={handleCancelEdit}>
+                    <Text style={styles.cancelEditButtonText}>{t('common.cancel')}</Text>
+                  </Pressable>
+                  <Pressable style={styles.saveEditButton} onPress={handleSaveEdit}>
+                    <Check size={20} color={Colors.textInverse} />
+                  </Pressable>
+                </>
+              ) : (
+                <>
+                  <Pressable
+                    style={styles.modalActionButton}
+                    onPress={handleStartEditing}
+                  >
+                    <Pencil size={18} color={Colors.textMuted} />
+                  </Pressable>
+                  <Pressable
+                    style={styles.modalActionButton}
+                    onPress={() => selectedNote && handleDelete(selectedNote)}
+                  >
+                    <Trash2 size={20} color={Colors.error} />
+                  </Pressable>
+                  <Pressable style={styles.modalActionButton} onPress={handleCloseNote}>
+                    <X size={24} color={Colors.textMuted} />
+                  </Pressable>
+                </>
+              )}
             </View>
           </View>
-          <ScrollView style={styles.modalContent}>
-            <Text style={styles.transcriptionText}>
-              {selectedNote?.transcription || ''}
-            </Text>
-          </ScrollView>
-        </View>
+          {isEditing ? (
+            <ScrollView
+              style={styles.modalContent}
+              keyboardShouldPersistTaps="handled"
+            >
+              <View style={styles.editHintContainer}>
+                <Pencil size={14} color={Colors.textMuted} />
+                <Text style={styles.editHintText}>
+                  {i18n.language.startsWith('fr')
+                    ? 'Modifiez la transcription ci-dessous'
+                    : 'Edit the transcription below'}
+                </Text>
+              </View>
+              <TextInput
+                style={styles.transcriptionInput}
+                value={editedTranscription}
+                onChangeText={setEditedTranscription}
+                multiline
+                autoFocus
+                textAlignVertical="top"
+                placeholder={i18n.language.startsWith('fr') ? 'Transcription...' : 'Transcription...'}
+                placeholderTextColor={Colors.textMuted}
+              />
+            </ScrollView>
+          ) : (
+            <ScrollView style={styles.modalContent}>
+              <Pressable onPress={handleStartEditing} style={styles.transcriptionContainer}>
+                <Text style={styles.transcriptionText}>
+                  {selectedNote?.transcription || ''}
+                </Text>
+                <View style={styles.editIndicator}>
+                  <Pencil size={14} color={Colors.textMuted} />
+                  <Text style={styles.editIndicatorText}>
+                    {i18n.language.startsWith('fr') ? 'Appuyez pour modifier' : 'Tap to edit'}
+                  </Text>
+                </View>
+              </Pressable>
+            </ScrollView>
+          )}
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );
@@ -317,5 +429,55 @@ const styles = StyleSheet.create({
     ...Typography.bodyLarge,
     color: Colors.textPrimary,
     lineHeight: 26,
+  },
+  transcriptionContainer: {
+    flex: 1,
+  },
+  editIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: Spacing.lg,
+    paddingTop: Spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
+  editIndicatorText: {
+    fontSize: 13,
+    color: Colors.textMuted,
+  },
+  editHintContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: Spacing.md,
+    paddingBottom: Spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  editHintText: {
+    fontSize: 13,
+    color: Colors.textMuted,
+  },
+  transcriptionInput: {
+    ...Typography.bodyLarge,
+    color: Colors.textPrimary,
+    lineHeight: 26,
+    minHeight: 200,
+    padding: 0,
+  },
+  cancelEditButton: {
+    paddingVertical: Spacing.xs,
+    paddingHorizontal: Spacing.md,
+  },
+  cancelEditButtonText: {
+    color: Colors.textMuted,
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  saveEditButton: {
+    backgroundColor: Colors.primary,
+    borderRadius: BorderRadius.sm,
+    padding: Spacing.sm,
   },
 });
