@@ -4,21 +4,25 @@ import { Heart } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="bg-foreground text-white py-16">
-      <div className="container mx-auto px-4">
+    <footer className="relative bg-foreground text-white py-16 overflow-hidden">
+      {/* Subtle decorative shapes */}
+      <div className="absolute top-8 left-8 w-32 h-32 bg-rose rounded-full opacity-10 blur-2xl" />
+      <div className="absolute bottom-12 right-16 w-40 h-40 bg-menthe rounded-full opacity-10 blur-2xl" />
+
+      <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-6xl mx-auto">
           {/* Top section with CTA */}
           <div className="text-center pb-12 border-b border-white/10">
-            <h2 className="text-2xl md:text-3xl font-bold font-serif mb-4">
+            <h2 className="text-2xl md:text-3xl font-bold mb-4">
               Ready to remember everyone?
             </h2>
-            <p className="text-white/70 mb-8 max-w-md mx-auto">
+            <p className="text-gray-400 mb-8 max-w-md mx-auto">
               Download Recall and never forget a conversation again.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="#"
-                className="transition-transform hover:scale-105"
+                className="transition-transform duration-200 hover:scale-105"
                 aria-label="Download on the App Store"
               >
                 <Image
@@ -31,7 +35,7 @@ export default function Footer() {
               </Link>
               <Link
                 href="#"
-                className="transition-transform hover:scale-105"
+                className="transition-transform duration-200 hover:scale-105"
                 aria-label="Get it on Google Play"
               >
                 <Image
@@ -48,25 +52,25 @@ export default function Footer() {
           {/* Bottom section */}
           <div className="pt-8 flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="text-center md:text-left">
-              <h3 className="text-xl font-serif font-bold">Recall</h3>
-              <p className="text-sm text-white/50 mt-1">
+              <h3 className="text-xl font-bold text-white">Recall</h3>
+              <p className="text-sm text-gray-500 mt-1">
                 &copy; 2026 Recall People. All rights reserved.
               </p>
             </div>
 
-            <div className="flex items-center space-x-6 text-sm text-white/70">
-              <Link href="/privacy" className="hover:text-white transition-colors">
+            <div className="flex items-center space-x-6 text-sm text-gray-400">
+              <Link href="/privacy" className="hover:text-primary transition-colors duration-200">
                 Privacy
               </Link>
-              <Link href="/terms" className="hover:text-white transition-colors">
+              <Link href="/terms" className="hover:text-primary transition-colors duration-200">
                 Terms
               </Link>
-              <a href="mailto:support@recall-people.com" className="hover:text-white transition-colors">
+              <a href="mailto:support@recall-people.com" className="hover:text-primary transition-colors duration-200">
                 Support
               </a>
             </div>
 
-            <div className="flex items-center text-sm text-white/50">
+            <div className="flex items-center text-sm text-gray-500">
               <span>Made with</span>
               <Heart className="w-4 h-4 mx-1 text-primary fill-current" />
               <span>in Paris</span>
