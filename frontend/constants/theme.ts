@@ -64,16 +64,21 @@ export const BorderRadius = {
 
 export const Fonts = {
   // @deprecated - Playfair Display is being phased out for Pop art direction
-  // Will be replaced by Plus Jakarta Sans (requires expo font installation)
   serif: {
     regular: 'PlayfairDisplay_400Regular',
     medium: 'PlayfairDisplay_500Medium',
     semibold: 'PlayfairDisplay_600SemiBold',
     bold: 'PlayfairDisplay_700Bold',
   },
-  // TODO: Install Plus Jakarta Sans via expo-google-fonts
-  // import { useFonts, PlusJakartaSans_400Regular, PlusJakartaSans_500Medium, PlusJakartaSans_600SemiBold, PlusJakartaSans_700Bold } from '@expo-google-fonts/plus-jakarta-sans';
-  sans: Platform.select({
+  // Plus Jakarta Sans - Primary font for Pop art direction
+  sans: {
+    regular: 'PlusJakartaSans_400Regular',
+    medium: 'PlusJakartaSans_500Medium',
+    semibold: 'PlusJakartaSans_600SemiBold',
+    bold: 'PlusJakartaSans_700Bold',
+  },
+  // System font fallback
+  system: Platform.select({
     ios: 'System',
     android: 'Roboto',
     default: 'System',
