@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import {
   useContactQuery,
+  useCreateHotTopic,
   useResolveHotTopic,
   useReopenHotTopic,
   useDeleteHotTopic,
@@ -19,7 +20,6 @@ import {
 import { useUpdateContact, useDeleteContact } from '@/hooks/useContactsQuery';
 import { useGroupsForContact, useGroupsQuery } from '@/hooks/useGroupsQuery';
 import { SearchSourceType } from '@/types';
-import { hotTopicService } from '@/services/hot-topic.service';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { Edit3, Plus, Trash2, MoreVertical, MessageCircleQuestion, Calendar } from 'lucide-react-native';
 import { notificationService } from '@/services/notification.service';
@@ -69,6 +69,7 @@ export default function ContactDetailScreen() {
   // TanStack Query mutations
   const updateContactMutation = useUpdateContact();
   const deleteContactMutation = useDeleteContact();
+  const createHotTopicMutation = useCreateHotTopic();
   const resolveHotTopicMutation = useResolveHotTopic();
   const reopenHotTopicMutation = useReopenHotTopic();
   const deleteHotTopicMutation = useDeleteHotTopic();
@@ -192,23 +193,23 @@ export default function ContactDetailScreen() {
   };
 
   const handleResolveHotTopic = async (id: string, resolution?: string) => {
-    await resolveHotTopicMutation.mutateAsync({ id, resolution });
+    await resolveHotTopicMutation.mutateAsync({ id, resolution, contactId });
   };
 
   const handleReopenHotTopic = async (id: string) => {
-    await reopenHotTopicMutation.mutateAsync(id);
+    await reopenHotTopicMutation.mutateAsync({ id, contactId });
   };
 
   const handleDeleteHotTopic = async (id: string) => {
-    await deleteHotTopicMutation.mutateAsync(id);
+    await deleteHotTopicMutation.mutateAsync({ id, contactId });
   };
 
   const handleEditHotTopic = async (id: string, data: { title: string; context?: string }) => {
-    await updateHotTopicMutation.mutateAsync({ id, data });
+    await updateHotTopicMutation.mutateAsync({ id, data, contactId });
   };
 
   const handleUpdateResolution = async (id: string, resolution: string) => {
-    await updateHotTopicResolutionMutation.mutateAsync({ id, resolution });
+    await updateHotTopicResolutionMutation.mutateAsync({ id, resolution, contactId });
   };
 
   const handleDeleteNote = async (id: string) => {
@@ -258,7 +259,7 @@ export default function ContactDetailScreen() {
       ? newHotTopicReminderDate.toISOString()
       : undefined;
 
-    const savedHotTopic = await hotTopicService.create({
+    const savedHotTopic = await createHotTopicMutation.mutateAsync({
       contactId,
       title: newHotTopicTitle.trim(),
       context: newHotTopicContext.trim() || undefined,
@@ -279,7 +280,6 @@ export default function ContactDetailScreen() {
     setNewHotTopicReminderEnabled(false);
     setNewHotTopicReminderDate(null);
     setIsAddingHotTopic(false);
-    invalidate();
   };
 
   const handleReminderDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {

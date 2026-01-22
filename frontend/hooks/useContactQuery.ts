@@ -68,15 +68,36 @@ export function useContactQuery(contactId: string | undefined) {
   };
 }
 
+export function useCreateHotTopic() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: {
+      contactId: string;
+      title: string;
+      context?: string;
+      eventDate?: string;
+    }) => hotTopicService.create(data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.hotTopics.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(variables.contactId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.list() });
+    },
+  });
+}
+
 export function useResolveHotTopic() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, resolution }: { id: string; resolution?: string }) =>
-      hotTopicService.resolve(id, resolution),
-    onSuccess: (_, variables) => {
+    mutationFn: async ({ id, resolution, contactId }: { id: string; resolution?: string; contactId: string }) => {
+      await hotTopicService.resolve(id, resolution);
+      return { contactId };
+    },
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.hotTopics.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(result.contactId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.list() });
     },
   });
 }
@@ -85,10 +106,14 @@ export function useReopenHotTopic() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => hotTopicService.reopen(id),
-    onSuccess: () => {
+    mutationFn: async ({ id, contactId }: { id: string; contactId: string }) => {
+      await hotTopicService.reopen(id);
+      return { contactId };
+    },
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.hotTopics.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(result.contactId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.list() });
     },
   });
 }
@@ -97,10 +122,14 @@ export function useDeleteHotTopic() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => hotTopicService.delete(id),
-    onSuccess: () => {
+    mutationFn: async ({ id, contactId }: { id: string; contactId: string }) => {
+      await hotTopicService.delete(id);
+      return { contactId };
+    },
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.hotTopics.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(result.contactId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.list() });
     },
   });
 }
@@ -109,16 +138,22 @@ export function useUpdateHotTopic() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       id,
       data,
+      contactId,
     }: {
       id: string;
       data: { title?: string; context?: string };
-    }) => hotTopicService.update(id, data),
-    onSuccess: () => {
+      contactId: string;
+    }) => {
+      await hotTopicService.update(id, data);
+      return { contactId };
+    },
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.hotTopics.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(result.contactId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.list() });
     },
   });
 }
@@ -127,11 +162,14 @@ export function useUpdateHotTopicResolution() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, resolution }: { id: string; resolution: string }) =>
-      hotTopicService.updateResolution(id, resolution),
-    onSuccess: () => {
+    mutationFn: async ({ id, resolution, contactId }: { id: string; resolution: string; contactId: string }) => {
+      await hotTopicService.updateResolution(id, resolution);
+      return { contactId };
+    },
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.hotTopics.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(result.contactId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.list() });
     },
   });
 }
