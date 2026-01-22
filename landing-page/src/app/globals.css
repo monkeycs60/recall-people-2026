@@ -2,29 +2,37 @@
 
 @theme {
   --font-sans: var(--font-sans);
-  --font-serif: var(--font-serif);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  
-  --color-primary: #C67C4E;
-  --color-primary-light: #E8D5C4;
-  --color-primary-dark: #A65D2E;
-  
+
+  /* Primary - Corail */
+  --color-primary: #FF7F6B;
+  --color-primary-hover: #E86B58;
+
+  /* Pastels */
+  --color-rose: #FFB5C5;
+  --color-menthe: #7DDEC3;
+  --color-bleu-ciel: #7EC8E8;
+  --color-peche: #FFDAB3;
+
+  /* Neutrals */
   --color-surface: #FFFFFF;
-  --color-surface-hover: #F5F0E8;
-  
-  --color-text-secondary: #6B5E54;
-  --color-text-muted: #A69B8F;
+  --color-surface-alt: #FFF9F5;
+  --color-surface-hover: #FFF9F5;
+
+  --color-text-primary: #1A1A1A;
+  --color-text-secondary: #6B7280;
   --color-text-inverse: #FFFFFF;
-  
-  --color-border: #E8E2DB;
+
+  /* Border */
+  --color-border: #1A1A1A;
 }
 
 :root {
-  /* Warm Light Mode */
-  --background: #FAF7F2;
-  --foreground: #1A1612;
+  /* Pop Light Mode */
+  --background: #FFFFFF;
+  --foreground: #1A1A1A;
 }
 
 body {
@@ -34,5 +42,5 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
 }
