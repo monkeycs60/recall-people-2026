@@ -219,17 +219,6 @@ export default function SelectContactScreen() {
     ]).start();
   }, [fadeAnim, slideAnim]);
 
-  if (isExtracting) {
-    return (
-      <View style={styles.loadingContainer}>
-        <View style={styles.loadingCard}>
-          <ActivityIndicator size="large" color={Colors.primary} />
-          <Text style={styles.loadingText}>{t('selectContact.analyzing')}</Text>
-        </View>
-      </View>
-    );
-  }
-
   return (
     <ScrollView
       style={styles.container}
@@ -249,7 +238,14 @@ export default function SelectContactScreen() {
           </View>
         </View>
 
-        {showBinaryChoice && (
+        {isExtracting ? (
+          <View style={styles.loadingSection}>
+            <ActivityIndicator size="large" color={Colors.primary} />
+            <Text style={styles.loadingText}>{t('selectContact.analyzing')}</Text>
+          </View>
+        ) : (
+          <>
+            {showBinaryChoice && (
           <View style={styles.binaryChoiceSection}>
             {suggestedContact && (
               <>
@@ -451,12 +447,14 @@ export default function SelectContactScreen() {
                 <Text style={styles.backToSuggestionText}>{t('selectContact.backToSuggestion')}</Text>
               </Pressable>
             )}
+
+            <Pressable style={styles.cancelButton} onPress={handleCancel}>
+              <Text style={styles.cancelText}>{t('common.cancel')}</Text>
+            </Pressable>
           </>
         )}
-
-        <Pressable style={styles.cancelButton} onPress={handleCancel}>
-          <Text style={styles.cancelText}>{t('common.cancel')}</Text>
-        </Pressable>
+          </>
+        )}
       </Animated.View>
     </ScrollView>
   );
@@ -468,29 +466,14 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
     paddingHorizontal: Spacing.lg,
   },
-  loadingContainer: {
-    flex: 1,
-    backgroundColor: Colors.background,
+  loadingSection: {
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.xl,
-  },
-  loadingCard: {
-    backgroundColor: Colors.surface,
     paddingVertical: Spacing['2xl'],
-    paddingHorizontal: Spacing.xl,
-    borderRadius: BorderRadius.xl,
-    alignItems: 'center',
-    shadowColor: Colors.textPrimary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 4,
   },
   loadingText: {
     color: Colors.textSecondary,
     marginTop: Spacing.md,
-    ...Typography.titleMedium,
+    ...Typography.bodyMedium,
   },
   heroSection: {
     alignItems: 'center',
