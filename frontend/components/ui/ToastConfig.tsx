@@ -1,12 +1,12 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { BaseToast, ErrorToast, ToastConfig as ToastConfigType } from 'react-native-toast-message';
-import { Colors, Spacing, BorderRadius } from '@/constants/theme';
+import { ToastConfig as ToastConfigType } from 'react-native-toast-message';
+import { Colors, Spacing } from '@/constants/theme';
 import { AlertCircle, CheckCircle, Info } from 'lucide-react-native';
 
 export const toastConfig: ToastConfigType = {
   success: (props) => (
     <View style={[styles.container, styles.successContainer]}>
-      <CheckCircle size={20} color={Colors.success} />
+      <CheckCircle size={20} color={Colors.textPrimary} />
       <View style={styles.textContainer}>
         <Text style={styles.title}>{props.text1}</Text>
         {props.text2 && <Text style={styles.subtitle}>{props.text2}</Text>}
@@ -15,7 +15,7 @@ export const toastConfig: ToastConfigType = {
   ),
   error: (props) => (
     <View style={[styles.container, styles.errorContainer]}>
-      <AlertCircle size={20} color={Colors.error} />
+      <AlertCircle size={20} color={Colors.textPrimary} />
       <View style={styles.textContainer}>
         <Text style={styles.title}>{props.text1}</Text>
         {props.text2 && <Text style={styles.subtitle}>{props.text2}</Text>}
@@ -24,7 +24,16 @@ export const toastConfig: ToastConfigType = {
   ),
   info: (props) => (
     <View style={[styles.container, styles.infoContainer]}>
-      <Info size={20} color={Colors.info} />
+      <Info size={20} color={Colors.textPrimary} />
+      <View style={styles.textContainer}>
+        <Text style={styles.title}>{props.text1}</Text>
+        {props.text2 && <Text style={styles.subtitle}>{props.text2}</Text>}
+      </View>
+    </View>
+  ),
+  warning: (props) => (
+    <View style={[styles.container, styles.warningContainer]}>
+      <AlertCircle size={20} color={Colors.textPrimary} />
       <View style={styles.textContainer}>
         <Text style={styles.title}>{props.text1}</Text>
         {props.text2 && <Text style={styles.subtitle}>{props.text2}</Text>}
@@ -40,28 +49,22 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.md,
     marginHorizontal: Spacing.md,
-    borderRadius: BorderRadius.md,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
     gap: Spacing.sm,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 4,
   },
   successContainer: {
-    backgroundColor: Colors.surface,
-    borderLeftWidth: 4,
-    borderLeftColor: Colors.success,
+    backgroundColor: Colors.menthe,
   },
   errorContainer: {
-    backgroundColor: Colors.surface,
-    borderLeftWidth: 4,
-    borderLeftColor: Colors.error,
+    backgroundColor: '#FFD4D0',
   },
   infoContainer: {
-    backgroundColor: Colors.surface,
-    borderLeftWidth: 4,
-    borderLeftColor: Colors.info,
+    backgroundColor: Colors.rose,
+  },
+  warningContainer: {
+    backgroundColor: Colors.peche,
   },
   textContainer: {
     flex: 1,
@@ -73,7 +76,8 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 12,
-    color: Colors.textSecondary,
+    color: Colors.textPrimary,
+    opacity: 0.8,
     marginTop: 2,
   },
 });
