@@ -123,11 +123,8 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     marginTop: 20,
     gap: 8,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
+    borderWidth: 2,
+    borderColor: Colors.border,
   },
   buttonText: {
     color: Colors.textInverse,
@@ -167,6 +164,8 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: Colors.border,
   },
   menuOptionTextContainer: {
     flex: 1,
