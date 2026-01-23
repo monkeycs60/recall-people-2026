@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { View, TextInput, Pressable, StyleSheet } from 'react-native';
 import { X, Sparkles, SendHorizonal } from 'lucide-react-native';
 import Animated, {
@@ -28,7 +29,9 @@ export function SearchInput({
   isLoading,
 }: SearchInputProps) {
   const { t } = useTranslation();
+  const [isFocused, setIsFocused] = useState(false);
   const borderColorProgress = useSharedValue(0);
+  const focusProgress = useSharedValue(0);
 
   useEffect(() => {
     if (isLoading) {
@@ -45,20 +48,36 @@ export function SearchInput({
     }
   }, [isLoading, borderColorProgress]);
 
-  const animatedBorderStyle = useAnimatedStyle(() => ({
-    borderColor: interpolateColor(
+  useEffect(() => {
+    focusProgress.value = withTiming(isFocused ? 1 : 0, { duration: 150 });
+  }, [isFocused, focusProgress]);
+
+  const animatedBorderStyle = useAnimatedStyle(() => {
+    const loadingBorderColor = interpolateColor(
       borderColorProgress.value,
       [0, 1],
-      [Colors.border, Colors.primary]
-    ),
-  }));
+      [Colors.borderLight, Colors.primary]
+    );
+
+    const focusBorderColor = interpolateColor(
+      focusProgress.value,
+      [0, 1],
+      [Colors.borderLight, Colors.primary]
+    );
+
+    return {
+      borderColor: isLoading ? loadingBorderColor : focusBorderColor,
+      borderWidth: withTiming(isFocused || isLoading ? 2 : 1.5, { duration: 150 }),
+    };
+  });
 
   const canSubmit = value.trim().length > 0 && !isLoading;
+  const iconColor = isFocused || isLoading ? Colors.primary : Colors.textMuted;
 
   return (
     <Animated.View style={[styles.container, animatedBorderStyle]}>
       <View style={styles.iconContainer}>
-        <Sparkles size={22} color={isLoading ? Colors.primary : Colors.textMuted} />
+        <Sparkles size={22} color={iconColor} />
       </View>
 
       <TextInput
@@ -68,6 +87,8 @@ export function SearchInput({
         value={value}
         onChangeText={onChangeText}
         onSubmitEditing={onSubmit}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
         returnKeyType="search"
         editable={!isLoading}
         autoCapitalize="none"
@@ -85,7 +106,7 @@ export function SearchInput({
         disabled={!canSubmit}
         style={[
           styles.submitButton,
-          { backgroundColor: canSubmit ? Colors.primary : Colors.border },
+          { backgroundColor: canSubmit ? Colors.primary : Colors.surfaceAlt },
         ]}
       >
         <SendHorizonal size={20} color={canSubmit ? Colors.textInverse : Colors.textMuted} />
@@ -103,12 +124,8 @@ const styles = StyleSheet.create({
     paddingLeft: 16,
     paddingRight: 8,
     height: 56,
-    borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
+    borderWidth: 1.5,
+    borderColor: Colors.borderLight,
   },
   iconContainer: {
     marginRight: 12,

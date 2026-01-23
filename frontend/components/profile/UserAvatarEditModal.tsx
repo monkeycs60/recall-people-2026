@@ -18,13 +18,12 @@ import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system/legacy';
 import { Image } from 'expo-image';
 import { Colors, Spacing, BorderRadius } from '@/constants/theme';
-import { uploadAvatar, generateAvatar, deleteAvatar } from '@/lib/api';
-import { contactService } from '@/services/contact.service';
+import { uploadUserAvatar, generateUserAvatar, deleteUserAvatar } from '@/lib/api';
+import { useAuthStore } from '@/stores/auth-store';
+import { setUser } from '@/lib/auth';
 
-type AvatarEditModalProps = {
+type UserAvatarEditModalProps = {
   visible: boolean;
-  contactId: string;
-  firstName: string;
   currentAvatarUrl?: string;
   onSave: (avatarUrl: string | null) => void;
   onClose: () => void;
@@ -32,20 +31,20 @@ type AvatarEditModalProps = {
 
 type ModeType = 'choose' | 'generate';
 
-export function AvatarEditModal({
+export function UserAvatarEditModal({
   visible,
-  contactId,
-  firstName,
   currentAvatarUrl,
   onSave,
   onClose,
-}: AvatarEditModalProps) {
+}: UserAvatarEditModalProps) {
   const { t } = useTranslation();
   const [mode, setMode] = useState<ModeType>('choose');
   const [prompt, setPrompt] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const updateUser = useAuthStore((state) => state.updateUser);
+  const user = useAuthStore((state) => state.user);
 
   const resetState = () => {
     setMode('choose');
@@ -64,7 +63,7 @@ export function AvatarEditModal({
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permissionResult.granted) {
-      Alert.alert(t('common.error'), t('contact.avatar.permissionDenied'));
+      Alert.alert(t('common.error'), t('profile.avatar.permissionDenied'));
       return;
     }
 
@@ -94,22 +93,27 @@ export function AvatarEditModal({
         encoding: FileSystem.EncodingType.Base64,
       });
 
-      const mimeType = asset.mimeType === 'image/png' ? 'image/png'
-        : asset.mimeType === 'image/webp' ? 'image/webp'
-        : 'image/jpeg';
+      const mimeType =
+        asset.mimeType === 'image/png'
+          ? 'image/png'
+          : asset.mimeType === 'image/webp'
+            ? 'image/webp'
+            : 'image/jpeg';
 
-      const response = await uploadAvatar({
-        contactId,
+      const response = await uploadUserAvatar({
         imageBase64: base64,
         mimeType: mimeType as 'image/png' | 'image/jpeg' | 'image/webp',
       });
 
-      await contactService.update(contactId, { avatarUrl: response.avatarUrl });
+      updateUser({ avatarUrl: response.avatarUrl });
+      if (user) {
+        await setUser({ ...user, avatarUrl: response.avatarUrl });
+      }
       onSave(response.avatarUrl);
       handleClose();
     } catch (error) {
       console.error('Upload error:', error);
-      Alert.alert(t('common.error'), t('contact.avatar.uploadError'));
+      Alert.alert(t('common.error'), t('profile.avatar.uploadError'));
       setPreviewUrl(null);
     } finally {
       setIsUploading(false);
@@ -124,13 +128,15 @@ export function AvatarEditModal({
 
     setIsGenerating(true);
     try {
-      const response = await generateAvatar({
-        contactId,
+      const response = await generateUserAvatar({
         prompt: prompt.trim(),
       });
 
       setPreviewUrl(response.avatarUrl);
-      await contactService.update(contactId, { avatarUrl: response.avatarUrl });
+      updateUser({ avatarUrl: response.avatarUrl });
+      if (user) {
+        await setUser({ ...user, avatarUrl: response.avatarUrl });
+      }
       onSave(response.avatarUrl);
       handleClose();
     } catch (error) {
@@ -142,14 +148,21 @@ export function AvatarEditModal({
   };
 
   const handleDelete = async () => {
+    setIsUploading(true);
     try {
-      await deleteAvatar(contactId);
-      await contactService.update(contactId, { avatarUrl: '' });
+      await deleteUserAvatar();
+      updateUser({ avatarUrl: undefined });
+      if (user) {
+        const { avatarUrl: _, ...userWithoutAvatar } = user;
+        await setUser(userWithoutAvatar as typeof user);
+      }
       onSave(null);
       handleClose();
     } catch (error) {
       console.error('Delete error:', error);
-      Alert.alert(t('common.error'), t('contact.avatar.deleteError'));
+      Alert.alert(t('common.error'), t('profile.avatar.deleteError'));
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -163,7 +176,7 @@ export function AvatarEditModal({
       >
         <View style={styles.modal}>
           <View style={styles.header}>
-            <Text style={styles.title}>{t('contact.avatar.title')}</Text>
+            <Text style={styles.title}>{t('profile.avatar.title')}</Text>
             <Pressable onPress={handleClose} style={styles.closeButton}>
               <X size={24} color={Colors.textSecondary} />
             </Pressable>
@@ -186,8 +199,10 @@ export function AvatarEditModal({
                   <ImageIcon size={24} color={Colors.primary} />
                 </View>
                 <View style={styles.optionTextContainer}>
-                  <Text style={styles.optionTitle}>{t('contact.avatar.fromGallery')}</Text>
-                  <Text style={styles.optionDescription}>{t('contact.avatar.fromGalleryDescription')}</Text>
+                  <Text style={styles.optionTitle}>{t('profile.avatar.fromGallery')}</Text>
+                  <Text style={styles.optionDescription}>
+                    {t('profile.avatar.fromGalleryDescription')}
+                  </Text>
                 </View>
               </Pressable>
 
@@ -197,14 +212,16 @@ export function AvatarEditModal({
                 </View>
                 <View style={styles.optionTextContainer}>
                   <Text style={styles.optionTitle}>{t('contact.avatar.generateWithAI')}</Text>
-                  <Text style={styles.optionDescription}>{t('contact.avatar.generateWithAIDescription')}</Text>
+                  <Text style={styles.optionDescription}>
+                    {t('contact.avatar.generateWithAIDescription')}
+                  </Text>
                 </View>
               </Pressable>
 
               {currentAvatarUrl && (
                 <Pressable style={styles.deleteOption} onPress={handleDelete}>
                   <Trash2 size={20} color={Colors.error} />
-                  <Text style={styles.deleteText}>{t('contact.avatar.removeAvatar')}</Text>
+                  <Text style={styles.deleteText}>{t('profile.avatar.removeAvatar')}</Text>
                 </Pressable>
               )}
             </View>
@@ -214,7 +231,7 @@ export function AvatarEditModal({
             <ScrollView style={styles.generateContainer} keyboardShouldPersistTaps="handled">
               <Text style={styles.generateLabel}>{t('contact.avatar.describeAppearance')}</Text>
               <Text style={styles.generateHint}>
-                {t('contact.avatar.describeHint', { firstName })}
+                {t('profile.avatar.describeHint')}
               </Text>
               <TextInput
                 style={styles.promptInput}
@@ -247,7 +264,7 @@ export function AvatarEditModal({
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color={Colors.primary} />
               <Text style={styles.loadingText}>
-                {isUploading ? t('contact.avatar.uploading') : t('contact.avatar.generating')}
+                {isUploading ? t('profile.avatar.uploading') : t('contact.avatar.generating')}
               </Text>
             </View>
           )}
@@ -304,9 +321,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: Spacing.md,
-    backgroundColor: Colors.surface,
-    borderRadius: 12,
-    borderWidth: 2,
+    backgroundColor: Colors.background,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
     borderColor: Colors.border,
     gap: Spacing.md,
   },
@@ -380,22 +397,22 @@ const styles = StyleSheet.create({
   backButton: {
     flex: 1,
     paddingVertical: Spacing.md,
-    borderRadius: 12,
-    backgroundColor: Colors.surface,
-    borderWidth: 2,
+    borderRadius: BorderRadius.md,
+    backgroundColor: Colors.background,
+    borderWidth: 1,
     borderColor: Colors.border,
     alignItems: 'center',
   },
   backButtonText: {
-    color: Colors.primary,
+    color: Colors.textSecondary,
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: '500',
   },
   generateButton: {
     flex: 2,
     flexDirection: 'row',
     paddingVertical: Spacing.md,
-    borderRadius: 12,
+    borderRadius: BorderRadius.md,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -403,7 +420,6 @@ const styles = StyleSheet.create({
   },
   generateButtonDisabled: {
     backgroundColor: Colors.textMuted,
-    opacity: 0.5,
   },
   generateButtonText: {
     color: Colors.textInverse,

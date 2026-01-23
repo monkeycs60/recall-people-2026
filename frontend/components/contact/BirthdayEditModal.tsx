@@ -2,6 +2,7 @@ import { View, Text, TextInput, Pressable, StyleSheet, Modal, ScrollView } from 
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Trash2, ChevronDown } from 'lucide-react-native';
+import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { Colors } from '@/constants/theme';
 
 type BirthdayEditModalProps = {
@@ -26,6 +27,18 @@ export function BirthdayEditModal({
   const [month, setMonth] = useState<number | null>(initialMonth || null);
   const [year, setYear] = useState(initialYear?.toString() || '');
   const [showMonthPicker, setShowMonthPicker] = useState(false);
+  const [dayFocused, setDayFocused] = useState(false);
+  const [yearFocused, setYearFocused] = useState(false);
+
+  const dayInputStyle = useAnimatedStyle(() => ({
+    borderColor: withTiming(dayFocused ? Colors.primary : Colors.borderLight, { duration: 150 }),
+    borderWidth: withTiming(dayFocused ? 2 : 1.5, { duration: 150 }),
+  }));
+
+  const yearInputStyle = useAnimatedStyle(() => ({
+    borderColor: withTiming(yearFocused ? Colors.primary : Colors.borderLight, { duration: 150 }),
+    borderWidth: withTiming(yearFocused ? 2 : 1.5, { duration: 150 }),
+  }));
 
   const months = t('contact.birthdayModal.months', { returnObjects: true }) as string[];
 
@@ -57,15 +70,19 @@ export function BirthdayEditModal({
           <View style={styles.row}>
             <View style={styles.dayContainer}>
               <Text style={styles.label}>{t('contact.birthdayModal.day')}</Text>
-              <TextInput
-                style={styles.dayInput}
-                value={day}
-                onChangeText={(text) => setDay(text.replace(/[^0-9]/g, '').slice(0, 2))}
-                placeholder="15"
-                placeholderTextColor={Colors.textMuted}
-                keyboardType="number-pad"
-                maxLength={2}
-              />
+              <Animated.View style={[styles.dayInputContainer, dayInputStyle]}>
+                <TextInput
+                  style={styles.dayInput}
+                  value={day}
+                  onChangeText={(text) => setDay(text.replace(/[^0-9]/g, '').slice(0, 2))}
+                  placeholder="15"
+                  placeholderTextColor={Colors.textMuted}
+                  keyboardType="number-pad"
+                  maxLength={2}
+                  onFocus={() => setDayFocused(true)}
+                  onBlur={() => setDayFocused(false)}
+                />
+              </Animated.View>
             </View>
 
             <View style={styles.monthContainer}>
@@ -108,15 +125,19 @@ export function BirthdayEditModal({
 
           <View style={styles.yearContainer}>
             <Text style={styles.label}>{t('contact.birthdayModal.year')}</Text>
-            <TextInput
-              style={styles.yearInput}
-              value={year}
-              onChangeText={(text) => setYear(text.replace(/[^0-9]/g, '').slice(0, 4))}
-              placeholder={t('contact.birthdayModal.yearPlaceholder')}
-              placeholderTextColor={Colors.textMuted}
-              keyboardType="number-pad"
-              maxLength={4}
-            />
+            <Animated.View style={[styles.yearInputContainer, yearInputStyle]}>
+              <TextInput
+                style={styles.yearInput}
+                value={year}
+                onChangeText={(text) => setYear(text.replace(/[^0-9]/g, '').slice(0, 4))}
+                placeholder={t('contact.birthdayModal.yearPlaceholder')}
+                placeholderTextColor={Colors.textMuted}
+                keyboardType="number-pad"
+                maxLength={4}
+                onFocus={() => setYearFocused(true)}
+                onBlur={() => setYearFocused(false)}
+              />
+            </Animated.View>
           </View>
 
           <View style={styles.buttonRow}>
@@ -178,25 +199,29 @@ const styles = StyleSheet.create({
   dayContainer: {
     width: 70,
   },
-  dayInput: {
-    backgroundColor: Colors.background,
+  dayInputContainer: {
+    backgroundColor: Colors.surface,
     borderRadius: 12,
-    padding: 14,
+    borderWidth: 1.5,
+    borderColor: Colors.borderLight,
+  },
+  dayInput: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     fontSize: 16,
     color: Colors.textPrimary,
-    borderWidth: 1,
-    borderColor: Colors.border,
     textAlign: 'center',
   },
   monthContainer: {
     flex: 1,
   },
   monthButton: {
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.surface,
     borderRadius: 12,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: Colors.border,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderWidth: 1.5,
+    borderColor: Colors.borderLight,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -211,10 +236,10 @@ const styles = StyleSheet.create({
   },
   monthPicker: {
     maxHeight: 200,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.surface,
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
+    borderWidth: 1.5,
+    borderColor: Colors.borderLight,
     marginBottom: 16,
   },
   monthOption: {
@@ -236,14 +261,17 @@ const styles = StyleSheet.create({
   yearContainer: {
     marginBottom: 20,
   },
-  yearInput: {
-    backgroundColor: Colors.background,
+  yearInputContainer: {
+    backgroundColor: Colors.surface,
     borderRadius: 12,
-    padding: 14,
+    borderWidth: 1.5,
+    borderColor: Colors.borderLight,
+  },
+  yearInput: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     fontSize: 16,
     color: Colors.textPrimary,
-    borderWidth: 1,
-    borderColor: Colors.border,
   },
   buttonRow: {
     flexDirection: 'row',
