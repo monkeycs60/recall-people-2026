@@ -9,7 +9,7 @@ const getCurrentLanguage = () => useSettingsStore.getState().language;
 
 // Retry configuration
 const RETRY_CONFIG = {
-  maxRetries: 2,
+  maxRetries: 3,
   baseDelayMs: 1000,
   maxDelayMs: 5000,
 };
@@ -184,7 +184,7 @@ const transcribeAudioInternal = async (
         response.status,
         errorData.error || errorData.message
       );
-      showApiError(apiError);
+      // Don't show toast here - withRetry wrapper handles showing toast after all retries fail
       throw apiError;
     }
 
@@ -195,7 +195,7 @@ const transcribeAudioInternal = async (
     }
     if (isNetworkError(error)) {
       const networkError = new NetworkError();
-      showApiError(networkError);
+      // Don't show toast here - withRetry wrapper handles showing toast after all retries fail
       throw networkError;
     }
     throw error;
@@ -238,6 +238,7 @@ export const extractInfo = async (data: {
     apiCall('/api/extract', {
       method: 'POST',
       body: { ...data, language: getCurrentLanguage() },
+      showErrorToast: false, // Don't show toast during retries - caller handles final error
     })
   );
 };
@@ -305,6 +306,7 @@ export const detectContact = async (data: {
     apiCall('/api/detect-contact', {
       method: 'POST',
       body: { ...data, language: getCurrentLanguage() },
+      showErrorToast: false, // Don't show toast during retries - caller handles final error
     })
   );
 };
