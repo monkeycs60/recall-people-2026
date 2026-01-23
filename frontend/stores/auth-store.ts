@@ -22,6 +22,7 @@ type User = {
   email: string;
   name: string;
   provider?: 'credentials' | 'google';
+  avatarUrl?: string;
 };
 
 type AuthState = {
@@ -32,6 +33,7 @@ type AuthState = {
 
 type AuthActions = {
   setUser: (user: User | null) => void;
+  updateUser: (updates: Partial<User>) => void;
   initialize: () => Promise<void>;
   logout: () => Promise<void>;
 };
@@ -44,6 +46,13 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       isInitialized: false,
 
       setUser: (user) => set({ user }),
+
+      updateUser: (updates) => {
+        const currentUser = get().user;
+        if (currentUser) {
+          set({ user: { ...currentUser, ...updates } });
+        }
+      },
 
       initialize: async () => {
         const state = get();

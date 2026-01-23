@@ -8,13 +8,23 @@ type ProfileHeaderProps = {
   name: string;
   email: string;
   provider?: 'credentials' | 'google';
+  avatarUrl?: string;
+  avatarCacheKey?: string;
+  onAvatarPress?: () => void;
 };
 
 const PROVIDER_DISPLAY_NAMES: Record<string, string> = {
   google: 'Google',
 };
 
-export function ProfileHeader({ name, email, provider }: ProfileHeaderProps) {
+export function ProfileHeader({
+  name,
+  email,
+  provider,
+  avatarUrl,
+  avatarCacheKey,
+  onAvatarPress,
+}: ProfileHeaderProps) {
   const { t } = useTranslation();
 
   const showProvider = provider && provider !== 'credentials';
@@ -23,7 +33,14 @@ export function ProfileHeader({ name, email, provider }: ProfileHeaderProps) {
   return (
     <View style={styles.container}>
       <View style={styles.avatarWrapper}>
-        <UserAvatar name={name} size={64} />
+        <UserAvatar
+          name={name}
+          size={64}
+          avatarUrl={avatarUrl}
+          cacheKey={avatarCacheKey}
+          onPress={onAvatarPress}
+          showEditBadge={!!onAvatarPress}
+        />
       </View>
       <View style={styles.infoContainer}>
         <Text style={styles.name}>{name}</Text>

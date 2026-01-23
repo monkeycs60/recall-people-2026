@@ -542,6 +542,7 @@
       "fromGallery": "Choisir depuis la galerie",
       "fromGalleryDescription": "Sélectionner une photo de votre appareil",
       "removeAvatar": "Supprimer la photo",
+      "describeHint": "Décrivez votre apparence physique et vos accessoires",
       "uploading": "Envoi en cours...",
       "uploadError": "Échec de l'envoi de la photo",
       "deleteError": "Échec de la suppression de la photo",

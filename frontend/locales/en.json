@@ -516,6 +516,7 @@
       "fromGallery": "Choose from gallery",
       "fromGalleryDescription": "Select a photo from your device",
       "removeAvatar": "Remove photo",
+      "describeHint": "Describe your physical appearance and accessories",
       "uploading": "Uploading...",
       "uploadError": "Failed to upload photo",
       "deleteError": "Failed to remove photo",

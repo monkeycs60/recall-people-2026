@@ -238,6 +238,35 @@ avatarRoutes.get('/placeholders/:filename', async (c) => {
 });
 
 // Public endpoint for user avatars (no auth required for viewing)
+// Format: /api/avatar/users/:userId/:filename
+avatarRoutes.get('/users/:userId/:filename', async (c) => {
+  try {
+    const userId = c.req.param('userId');
+    const filename = c.req.param('filename');
+
+    if (!userId || !filename) {
+      return c.json({ error: 'Missing parameters' }, 400);
+    }
+
+    const key = `users/${userId}/${filename}`;
+    const object = await c.env.AVATARS_BUCKET.get(key);
+
+    if (!object) {
+      return c.json({ error: 'Avatar not found' }, 404);
+    }
+
+    const headers = new Headers();
+    headers.set('Content-Type', object.httpMetadata?.contentType || 'image/png');
+    headers.set('Cache-Control', 'public, max-age=31536000');
+
+    return new Response(object.body, { headers });
+  } catch (error) {
+    console.error('User avatar fetch error:', error);
+    return c.json({ error: 'Failed to fetch avatar' }, 500);
+  }
+});
+
+// Public endpoint for contact avatars (no auth required for viewing)
 // Format: /api/avatar/:contactId/:filename
 avatarRoutes.get('/:contactId/:filename', async (c) => {
   try {
@@ -553,5 +582,170 @@ avatarRoutes.delete('/:contactId', async (c) => {
   } catch (error) {
     console.error('Avatar delete error:', error);
     return c.json({ error: 'Failed to delete avatars' }, 500);
+  }
+});
+
+// ============================================
+// User Avatar Routes (for profile pictures)
+// ============================================
+
+type UserUploadRequest = {
+  imageBase64: string;
+  mimeType: 'image/png' | 'image/jpeg' | 'image/webp';
+};
+
+type UserGenerateRequest = {
+  prompt: string;
+  language?: 'fr' | 'en' | 'es' | 'it' | 'de';
+};
+
+// Upload user avatar from gallery
+avatarRoutes.post('/user/upload', async (c) => {
+  try {
+    const user = c.get('user');
+    const body = await c.req.json<UserUploadRequest>();
+    const { imageBase64, mimeType } = body;
+
+    if (!imageBase64 || !mimeType) {
+      return c.json({ error: 'Missing required fields: imageBase64, mimeType' }, 400);
+    }
+
+    const validMimeTypes = ['image/png', 'image/jpeg', 'image/webp'];
+    if (!validMimeTypes.includes(mimeType)) {
+      return c.json({ error: 'Invalid mime type. Allowed: image/png, image/jpeg, image/webp' }, 400);
+    }
+
+    const imageBuffer = Uint8Array.from(atob(imageBase64), (char) => char.charCodeAt(0));
+
+    const maxSize = 5 * 1024 * 1024;
+    if (imageBuffer.length > maxSize) {
+      return c.json({ error: 'Image too large. Maximum size is 5MB' }, 400);
+    }
+
+    const extension = mimeType.split('/')[1];
+    const timestamp = Date.now();
+    const filename = `users/${user.id}/avatar-${timestamp}.${extension}`;
+
+    await c.env.AVATARS_BUCKET.put(filename, imageBuffer, {
+      httpMetadata: {
+        contentType: mimeType,
+        cacheControl: 'public, max-age=31536000',
+      },
+    });
+
+    const requestUrl = new URL(c.req.url);
+    const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
+    const avatarUrl = `${baseUrl}/api/avatar/users/${user.id}/avatar-${timestamp}.${extension}`;
+
+    return c.json({
+      success: true,
+      avatarUrl,
+      filename,
+    });
+  } catch (error) {
+    console.error('User avatar upload error:', error);
+    return c.json({ error: 'Failed to upload avatar' }, 500);
+  }
+});
+
+// Generate user avatar with AI
+avatarRoutes.post('/user/generate', async (c) => {
+  try {
+    const user = c.get('user');
+    const body = await c.req.json<UserGenerateRequest>();
+    const { prompt } = body;
+
+    if (!prompt) {
+      return c.json({ error: 'Missing required field: prompt' }, 400);
+    }
+
+    if (prompt.length > 500) {
+      return c.json({ error: 'Prompt too long. Maximum 500 characters' }, 400);
+    }
+
+    if (!c.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+      return c.json({ error: 'Google AI API key not configured' }, 500);
+    }
+
+    const fullPrompt = `${AVATAR_STYLE_PROMPT}
+${prompt}
+
+Generate a single portrait illustration following the design system above. The avatar should be warm, inviting, and professional.`;
+
+    const googleAI = createGoogleGenerativeAI({
+      apiKey: c.env.GOOGLE_GENERATIVE_AI_API_KEY,
+    });
+
+    const result = await generateText({
+      model: googleAI('gemini-2.5-flash-image') as Parameters<typeof generateText>[0]['model'],
+      prompt: fullPrompt,
+      providerOptions: {
+        google: {
+          responseModalities: ['IMAGE', 'TEXT'],
+        },
+      },
+    });
+
+    type GeneratedFileWithMime = { base64Data?: string; mimeType?: string; data?: string };
+    const imageFile = (result.files as GeneratedFileWithMime[] | undefined)?.[0];
+
+    if (!imageFile) {
+      console.error('User avatar generation: No image file in response');
+      return c.json({ error: 'Failed to generate avatar image' }, 500);
+    }
+
+    const base64Data = imageFile.base64Data || imageFile.data;
+    const mimeType = imageFile.mimeType || 'image/png';
+
+    if (!base64Data) {
+      console.error('User avatar generation: No base64 data. Keys:', Object.keys(imageFile));
+      return c.json({ error: 'Failed to generate avatar image' }, 500);
+    }
+
+    const imageBuffer = Uint8Array.from(atob(base64Data), (char) => char.charCodeAt(0));
+    const extension = mimeType.split('/')[1] || 'png';
+    const timestamp = Date.now();
+    const filename = `users/${user.id}/avatar-generated-${timestamp}.${extension}`;
+
+    await c.env.AVATARS_BUCKET.put(filename, imageBuffer, {
+      httpMetadata: {
+        contentType: mimeType,
+        cacheControl: 'public, max-age=31536000',
+      },
+    });
+
+    const requestUrl = new URL(c.req.url);
+    const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
+    const avatarUrl = `${baseUrl}/api/avatar/users/${user.id}/avatar-generated-${timestamp}.${extension}`;
+
+    return c.json({
+      success: true,
+      avatarUrl,
+      filename,
+    });
+  } catch (error) {
+    console.error('User avatar generation error:', error);
+    return c.json({ error: 'Failed to generate avatar' }, 500);
+  }
+});
+
+// Delete user avatar
+avatarRoutes.delete('/user', async (c) => {
+  try {
+    const user = c.get('user');
+
+    const objects = await c.env.AVATARS_BUCKET.list({ prefix: `users/${user.id}/` });
+
+    for (const object of objects.objects) {
+      await c.env.AVATARS_BUCKET.delete(object.key);
+    }
+
+    return c.json({
+      success: true,
+      deletedCount: objects.objects.length,
+    });
+  } catch (error) {
+    console.error('User avatar delete error:', error);
+    return c.json({ error: 'Failed to delete avatar' }, 500);
   }
 });

@@ -393,6 +393,39 @@ export const generateAvatarFromHints = async (data: {
   return { avatarUrl: response.avatarUrl, filename: response.filename };
 };
 
+export const uploadUserAvatar = async (data: {
+  imageBase64: string;
+  mimeType: 'image/png' | 'image/jpeg' | 'image/webp';
+}): Promise<{ avatarUrl: string; filename: string }> => {
+  const response = await apiCall<{ success: boolean; avatarUrl: string; filename: string }>(
+    '/api/avatar/user/upload',
+    {
+      method: 'POST',
+      body: data,
+    }
+  );
+  return { avatarUrl: response.avatarUrl, filename: response.filename };
+};
+
+export const generateUserAvatar = async (data: {
+  prompt: string;
+}): Promise<{ avatarUrl: string; filename: string }> => {
+  const response = await apiCall<{ success: boolean; avatarUrl: string; filename: string }>(
+    '/api/avatar/user/generate',
+    {
+      method: 'POST',
+      body: { ...data, language: getCurrentLanguage() },
+    }
+  );
+  return { avatarUrl: response.avatarUrl, filename: response.filename };
+};
+
+export const deleteUserAvatar = async (): Promise<void> => {
+  await apiCall('/api/avatar/user', {
+    method: 'DELETE',
+  });
+};
+
 export const checkProWhitelist = async (): Promise<boolean> => {
   try {
     console.log('[API] Calling checkProWhitelist...');
