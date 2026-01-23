@@ -85,6 +85,12 @@
     "search": "Suche",
     "profile": "Profil"
   },
+  "fab": {
+    "newNote": "Neue Notiz",
+    "newNoteSubtitle": "Sprachnotiz über einen Kontakt aufnehmen",
+    "askQuestion": "Assistent",
+    "askQuestionSubtitle": "Frag dein Gedächtnis"
+  },
   "home": {
     "pressToRecord": "Zum Aufnehmen drücken",
     "recording": "Aufnahme...",

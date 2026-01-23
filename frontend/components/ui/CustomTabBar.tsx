@@ -1,6 +1,6 @@
 import { View, Pressable, StyleSheet, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Users, User, Mic, Calendar, Sparkle, MessageCircleQuestion, Plus } from 'lucide-react-native';
+import { Users, User, Mic, Calendar, Sparkle, Plus } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '@/constants/theme';
 import Animated, {
@@ -138,7 +138,7 @@ export function CustomTabBar({ state, navigation }: TabBarProps) {
                   {t('fab.newNote')}
                 </Animated.Text>
                 <Animated.Text style={styles.menuOptionSubtitle}>
-                  Enregistrer un vocal sur un contact
+                  {t('fab.newNoteSubtitle')}
                 </Animated.Text>
               </View>
             </Pressable>
@@ -150,14 +150,14 @@ export function CustomTabBar({ state, navigation }: TabBarProps) {
               onPress={() => handleMenuOption('/ask')}
             >
               <View style={[styles.menuIconCircle, { backgroundColor: '#7C3AED' }]}>
-                <MessageCircleQuestion size={22} color={Colors.textInverse} strokeWidth={2.5} />
+                <Sparkle size={22} color={Colors.textInverse} strokeWidth={2.5} />
               </View>
               <View style={styles.menuOptionTextContainer}>
                 <Animated.Text style={styles.menuOptionTitle}>
                   {t('fab.askQuestion')}
                 </Animated.Text>
                 <Animated.Text style={styles.menuOptionSubtitle}>
-                  Interroger ta mémoire
+                  {t('fab.askQuestionSubtitle')}
                 </Animated.Text>
               </View>
             </Pressable>

@@ -85,6 +85,12 @@
     "search": "Cerca",
     "profile": "Profilo"
   },
+  "fab": {
+    "newNote": "Nuova nota",
+    "newNoteSubtitle": "Registra una nota vocale su un contatto",
+    "askQuestion": "Assistente",
+    "askQuestionSubtitle": "Interroga la tua memoria"
+  },
   "home": {
     "pressToRecord": "Premi per registrare",
     "recording": "Registrazione...",

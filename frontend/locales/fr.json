@@ -103,7 +103,9 @@
   },
   "fab": {
     "newNote": "Nouvelle note",
-    "askQuestion": "Poser une question"
+    "newNoteSubtitle": "Enregistrer un vocal sur un contact",
+    "askQuestion": "Assistant",
+    "askQuestionSubtitle": "Interroge ta mémoire"
   },
   "home": {
     "pressToRecord": "Appuie pour enregistrer",
@@ -534,6 +536,16 @@
     "feedback": {
       "subject": "Feedback pour Recall",
       "body": "Bonjour,\n\nJ'ai un feedback concernant Recall :\n\n"
+    },
+    "avatar": {
+      "title": "Photo de profil",
+      "fromGallery": "Choisir depuis la galerie",
+      "fromGalleryDescription": "Sélectionner une photo de votre appareil",
+      "removeAvatar": "Supprimer la photo",
+      "uploading": "Envoi en cours...",
+      "uploadError": "Échec de l'envoi de la photo",
+      "deleteError": "Échec de la suppression de la photo",
+      "permissionDenied": "Accès aux photos requis"
     },
     "legal": {
       "title": "Mentions légales",

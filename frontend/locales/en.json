@@ -103,7 +103,9 @@
   },
   "fab": {
     "newNote": "New note",
-    "askQuestion": "Ask a question"
+    "newNoteSubtitle": "Record a voice note about a contact",
+    "askQuestion": "Assistant",
+    "askQuestionSubtitle": "Query your memory"
   },
   "home": {
     "pressToRecord": "Press to record",
@@ -508,6 +510,16 @@
     "feedback": {
       "subject": "Feedback for Recall",
       "body": "Hi,\n\nI have some feedback about Recall:\n\n"
+    },
+    "avatar": {
+      "title": "Profile Picture",
+      "fromGallery": "Choose from gallery",
+      "fromGalleryDescription": "Select a photo from your device",
+      "removeAvatar": "Remove photo",
+      "uploading": "Uploading...",
+      "uploadError": "Failed to upload photo",
+      "deleteError": "Failed to remove photo",
+      "permissionDenied": "Photo access required"
     },
     "legal": {
       "title": "Legal Notices",
