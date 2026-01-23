@@ -639,7 +639,7 @@ const styles = StyleSheet.create({
 		color: Colors.textSecondary,
 	},
 	historyBadge: {
-		backgroundColor: Colors.border,
+		backgroundColor: Colors.primaryLight,
 		borderRadius: 10,
 		paddingHorizontal: Spacing.sm,
 		paddingVertical: 2,
@@ -647,7 +647,7 @@ const styles = StyleSheet.create({
 	historyBadgeText: {
 		fontSize: 12,
 		fontWeight: '600',
-		color: Colors.textSecondary,
+		color: Colors.primary,
 	},
 	historyCard: {
 		flexDirection: 'row',
