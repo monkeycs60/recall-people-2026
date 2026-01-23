@@ -94,7 +94,7 @@ export function SwipeableEventCard({ event, onPress, onDelete }: SwipeableEventC
       <GestureDetector gesture={panGesture}>
         <Animated.View style={[styles.eventCard, cardAnimatedStyle]}>
           <Pressable style={styles.cardPressable} onPress={handlePress}>
-            <Calendar size={16} color={Colors.info} />
+            <Calendar size={16} color={Colors.calendar} />
             <View style={styles.eventContent}>
               <Text style={styles.eventTitle}>{event.title}</Text>
               <Text style={styles.eventContact}>

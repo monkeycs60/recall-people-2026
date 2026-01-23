@@ -6,10 +6,18 @@
   --color-background: #F8F7F4;
   --color-foreground: var(--foreground);
 
-  /* Primary - Violet Moderne */
+  /* Primary - Violet Moderne (AI) */
   --color-primary: #8B5CF6;
   --color-primary-hover: #7C3AED;
   --color-primary-light: #EDE9FE;
+
+  /* Voice - Emerald */
+  --color-voice: #10B981;
+  --color-voice-light: #D1FAE5;
+
+  /* Calendar - Amber */
+  --color-calendar: #F59E0B;
+  --color-calendar-light: #FEF3C7;
 
   /* Pastels Avatars */
   --color-jaune: #FEF3C7;

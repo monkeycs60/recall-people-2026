@@ -74,7 +74,7 @@ export function AddNoteButton({ firstName, onAddNote }: AddNoteButtonProps) {
               style={styles.menuOptionRow}
               onPress={() => handleOptionPress('audio')}
             >
-              <View style={[styles.menuIconCircle, { backgroundColor: Colors.primary }]}>
+              <View style={[styles.menuIconCircle, { backgroundColor: Colors.voice }]}>
                 <Mic size={22} color={Colors.textInverse} strokeWidth={2.5} />
               </View>
               <View style={styles.menuOptionTextContainer}>
@@ -93,7 +93,7 @@ export function AddNoteButton({ firstName, onAddNote }: AddNoteButtonProps) {
               style={styles.menuOptionRow}
               onPress={() => handleOptionPress('text')}
             >
-              <View style={[styles.menuIconCircle, { backgroundColor: '#7C3AED' }]}>
+              <View style={[styles.menuIconCircle, { backgroundColor: Colors.ai }]}>
                 <PenLine size={22} color={Colors.textInverse} strokeWidth={2.5} />
               </View>
               <View style={styles.menuOptionTextContainer}>

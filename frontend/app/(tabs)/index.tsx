@@ -254,7 +254,7 @@ export default function ContactsScreen() {
 								const IconComponent = isUrgent ? Flame : Calendar;
 								return (
 									<View key={topic.id} style={styles.hotTopicRow}>
-										<IconComponent size={14} color={Colors.warning} />
+										<IconComponent size={14} color={Colors.calendar} />
 										<Text style={styles.hotTopicText} numberOfLines={1}>
 											{topic.title}
 										</Text>
@@ -567,7 +567,7 @@ const styles = StyleSheet.create({
 	},
 	hotTopicText: {
 		fontSize: 13,
-		color: Colors.warning,
+		color: Colors.calendar,
 		fontWeight: '500',
 		flex: 1,
 	},

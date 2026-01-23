@@ -46,10 +46,22 @@
     "register": {
       "title": "Konto erstellen",
       "subtitle": "Die Namen ihrer Kinder. Der Beruf ihres Partners. Vergiss sie nie wieder.",
-      "submit": "Registrieren",
+      "name": "Name",
+      "namePlaceholder": "Dein Name",
+      "email": "Email",
+      "emailPlaceholder": "deine@email.com",
+      "password": "Passwort",
+      "passwordPlaceholder": "Mind. 8 Zeichen",
+      "confirmPassword": "Bestätigen",
+      "confirmPasswordPlaceholder": "Wiederholen",
+      "submit": "Konto erstellen",
       "loading": "Registrierung...",
+      "or": "oder",
+      "google": "Mit Google fortfahren",
       "hasAccount": "Schon ein Konto?",
-      "signIn": "Anmelden"
+      "signIn": "Anmelden",
+      "passwordMismatch": "Passwörter stimmen nicht überein",
+      "passwordTooShort": "Passwort muss mindestens 8 Zeichen haben"
     }
   },
   "errors": {
@@ -74,6 +86,7 @@
     "edit": "Bearbeiten",
     "confirm": "Bestätigen",
     "back": "Zurück",
+    "close": "Schließen",
     "error": "Fehler",
     "success": "Erfolg",
     "add": "Hinzufügen",
@@ -83,7 +96,10 @@
     "home": "Start",
     "contacts": "Kontakte",
     "search": "Suche",
-    "profile": "Profil"
+    "explore": "KI-Suche",
+    "assistant": "Assistent",
+    "profile": "Profil",
+    "upcoming": "Aktuelles"
   },
   "fab": {
     "newNote": "Neue Notiz",
@@ -105,11 +121,19 @@
   "contacts": {
     "title": "Kontakte",
     "searchPlaceholder": "Wen suchst du?",
-    "noContacts": "Der Beruf ihres Partners. Die Namen ihrer Kinder. Das Projekt, auf das er so stolz ist.",
-    "noContactsDescription": "Werde nie wieder auf dem falschen Fuß erwischt."
+    "filterPlaceholder": "Kontakt suchen...",
+    "askHint": "Stelle der KI eine Frage",
+    "noContacts": "Erzähle über diese Person, eure Beziehung, ihre Projekte... Wir kümmern uns um den Rest.",
+    "noContactsDescription": "Erstelle deine erste Notiz, um loszulegen.",
+    "createFirstNote": "Erste Notiz erstellen",
+    "addContact": "Kontakt hinzufügen",
+    "createModal": {
+      "title": "Neuer Kontakt",
+      "create": "Erstellen"
+    }
   },
   "search": {
-    "title": "Suche",
+    "title": "KI-Suche",
     "placeholder": "Beschreibe, was du suchst...",
     "noResults": "Keine Ergebnisse",
     "searching": "Suche läuft...",
@@ -131,6 +155,7 @@
       "textOption": "Notiz schreiben",
       "textDescription": "Eine Notiz über {{firstName}} schreiben"
     },
+    "askAbout": "Frage über {{firstName}}",
     "aiSummary": {
       "header": "Das Wichtigste über {{firstName}}",
       "loading": "Bereite das Wichtigste vor...",
@@ -144,8 +169,20 @@
     "editGroups": "Gruppen bearbeiten",
     "addGroup": "Gruppe hinzufügen",
     "addGroupPlaceholder": "Gruppe hinzufügen...",
+    "groupsSheet": {
+      "title": "Gruppen verwalten",
+      "currentGroups": "Gruppen von {{firstName}}",
+      "allGroups": "Alle Gruppen",
+      "selectGroups": "Gruppen von {{firstName}}",
+      "noGroups": "Keine Gruppen erstellt",
+      "createNew": "Neue Gruppe",
+      "newGroupPlaceholder": "Gruppenname...",
+      "deleteGroupTitle": "Diese Gruppe löschen?",
+      "deleteGroupMessage": "Die Gruppe \"{{name}}\" wird von allen Kontakten entfernt."
+    },
     "deleteContact": "Kontakt löschen",
-    "deleteContactConfirm": "Möchten Sie diesen Kontakt wirklich löschen?",
+    "deleteContactConfirm": "Möchtest du diesen Kontakt wirklich löschen?",
+    "notFound": "Kontakt nicht gefunden",
     "sections": {
       "news": "Aktuelles",
       "profile": "Profil",
@@ -156,24 +193,284 @@
       "addPlaceholder": "Neues Thema...",
       "contextPlaceholder": "Kontext (optional)...",
       "emptyState": "Ihre Projekte. Ihre News. Ihre Kämpfe.",
-      "emptyStateDescription": "Eine Sprachnotiz nach deinem nächsten Gespräch, und es ist gespeichert."
+      "emptyStateDescription": "Eine Sprachnotiz nach deinem nächsten Gespräch, und es ist gespeichert.",
+      "deleteTitle": "Diese Neuigkeit löschen",
+      "deleteConfirm": "\"{{title}}\" löschen?",
+      "resolutionLabel": "Wie es ausging:",
+      "resolutionPlaceholder": "Wie ist es ausgegangen...",
+      "archive": "Archivieren",
+      "addResolution": "+ Lösung hinzufügen",
+      "resolvedAt": "Abgeschlossen am {{date}}",
+      "showResolved": "Abgeschlossene anzeigen ({{count}})",
+      "titlePlaceholder": "Thementitel",
+      "contextEditPlaceholder": "Kontext (optional)"
     },
     "fact": {
       "addPlaceholder": "Neue Information...",
-      "selectType": "Typ auswählen..."
+      "selectType": "Typ auswählen...",
+      "emptyState": "Keine Profilinformationen",
+      "deleteTitle": "Diese Information löschen",
+      "deleteConfirm": "\"{{key}}: {{value}}\" löschen?",
+      "infoTypeLabel": "Informationstyp *",
+      "valueLabel": "Wert *",
+      "previousCount_one": "{{count}} vorherige",
+      "previousCount_other": "{{count}} vorherige"
     },
     "memory": {
       "addPlaceholder": "Neue Erinnerung...",
-      "selectDate": "Datum auswählen..."
+      "selectDate": "Datum auswählen...",
+      "emptyState": "Keine Erinnerungen hinzugefügt",
+      "descriptionLabel": "Beschreibung *",
+      "descriptionPlaceholder": "Z.B.: Ski-Wochenende in Chamonix",
+      "eventDateLabel": "Ereignisdatum (optional)",
+      "sharedMoment": "Gemeinsamer Moment",
+      "validate": "Bestätigen"
+    },
+    "factTypes": {
+      "work": "Beruf",
+      "company": "Unternehmen",
+      "education": "Ausbildung",
+      "location": "Stadt",
+      "origin": "Herkunft",
+      "partner": "Partner",
+      "children": "Kinder",
+      "hobby": "Hobbys",
+      "sport": "Sport",
+      "language": "Sprachen",
+      "pet": "Haustiere",
+      "birthday": "Geburtstag",
+      "how_met": "Wie wir uns kennenlernten",
+      "where_met": "Wo wir uns trafen",
+      "shared_ref": "Referenzen",
+      "trait": "Eigenschaften",
+      "gift_idea": "Geschenkideen",
+      "gift_given": "Geschenke gegeben",
+      "contact": "Kontakt",
+      "relationship": "Beziehungen",
+      "other": "Sonstiges"
+    },
+    "name": {
+      "firstName": "Vorname",
+      "lastName": "Nachname",
+      "firstNamePlaceholder": "Vorname",
+      "lastNamePlaceholder": "Nachname (optional)"
+    },
+    "addHotTopic": {
+      "titleLabel": "Titel *",
+      "titlePlaceholder": "Z.B.: Sucht eine Wohnung",
+      "contextLabel": "Kontext (optional)",
+      "contextPlaceholder": "Weitere Details..."
+    },
+    "createGroup": "\"{{name}}\" erstellen",
+    "contactCard": {
+      "phone": "Telefon",
+      "email": "E-Mail",
+      "birthday": "Geburtstag",
+      "addPhone": "+ Telefon hinzufügen",
+      "addEmail": "+ E-Mail hinzufügen",
+      "addBirthday": "+ Geburtstag hinzufügen",
+      "call": "Anrufen",
+      "whatsapp": "WhatsApp",
+      "sms": "SMS",
+      "copy": "Kopieren",
+      "openMail": "Mail öffnen",
+      "copied": "Kopiert!",
+      "inDays_one": "In {{count}} Tag!",
+      "inDays_other": "In {{count}} Tagen!",
+      "years_one": "{{count}} Jahr",
+      "years_other": "{{count}} Jahre",
+      "gender": {
+        "male": "Männlich",
+        "female": "Weiblich",
+        "unknown": "Nicht angegeben"
+      }
+    },
+    "genderModal": {
+      "title": "Geschlecht"
+    },
+    "menu": {
+      "options": "Optionen",
+      "delete": "Kontakt löschen"
+    },
+    "deleteDialog": {
+      "title": "Diesen Kontakt löschen?",
+      "message": "Diese Aktion kann nicht rückgängig gemacht werden. Alle Notizen, Erinnerungen und Informationen über {{name}} werden gelöscht.",
+      "cancel": "Abbrechen",
+      "confirm": "Löschen"
+    },
+    "otherFact": {
+      "titleLabel": "Titel *",
+      "titlePlaceholder": "Z.B.: Allergie, Ernährung...",
+      "descriptionLabel": "Beschreibung *",
+      "descriptionPlaceholder": "Details..."
+    },
+    "phoneModal": {
+      "title": "Telefon",
+      "placeholder": "+49 176 12345678",
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "delete": "Löschen"
+    },
+    "emailModal": {
+      "title": "E-Mail",
+      "placeholder": "email@beispiel.de",
+      "invalidFormat": "Ungültiges E-Mail-Format",
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "delete": "Löschen"
+    },
+    "nameModal": {
+      "title": "Name bearbeiten",
+      "firstName": "Vorname",
+      "lastName": "Nachname",
+      "firstNamePlaceholder": "Vorname",
+      "lastNamePlaceholder": "Nachname (optional)",
+      "save": "Speichern",
+      "cancel": "Abbrechen"
+    },
+    "birthdayModal": {
+      "title": "Geburtstag",
+      "day": "Tag",
+      "month": "Monat",
+      "year": "Jahr (optional)",
+      "yearPlaceholder": "Jahr",
+      "months": ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"],
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "delete": "Löschen"
+    },
+    "contactInfoReview": {
+      "title": "Erkannte Kontaktdaten",
+      "phone": "Telefon",
+      "email": "E-Mail",
+      "birthday": "Geburtstag",
+      "accept": "Akzeptieren",
+      "ignore": "Ignorieren"
+    },
+    "avatar": {
+      "title": "Profilbild",
+      "fromGallery": "Aus Galerie wählen",
+      "fromGalleryDescription": "Ein Foto von deinem Gerät auswählen",
+      "generateWithAI": "Mit KI generieren",
+      "generateWithAIDescription": "Einen einzigartigen illustrierten Avatar erstellen",
+      "removeAvatar": "Aktuellen Avatar entfernen",
+      "describeAppearance": "Beschreibe das Aussehen",
+      "describeHint": "Beschreibe {{firstName}}s körperliche Merkmale und Accessoires",
+      "promptPlaceholder": "Braune Haare, blaue Augen, Brille, Bart, sportlich, lächelnd...",
+      "examples": "Beispiele:",
+      "example1": "Kurze blonde Haare, grüne Augen, Sommersprossen",
+      "example2": "Lange dunkle Haare, runde Brille, roter Schal",
+      "generate": "Generieren",
+      "uploading": "Hochladen...",
+      "generating": "Avatar wird generiert...",
+      "uploadSuccess": "Avatar aktualisiert!",
+      "uploadError": "Avatar konnte nicht hochgeladen werden",
+      "generateSuccess": "Avatar generiert!",
+      "generateError": "Avatar konnte nicht generiert werden",
+      "deleteSuccess": "Avatar entfernt",
+      "deleteError": "Avatar konnte nicht entfernt werden",
+      "permissionDenied": "Fotozugriff erforderlich",
+      "promptRequired": "Bitte beschreibe das Aussehen"
+    },
+    "photo": {
+      "permissionTitle": "Fotozugriff erforderlich",
+      "permissionMessage": "Bitte erlaube den Zugriff auf deine Fotobibliothek, um ein Bild auszuwählen."
     }
+  },
+  "selectContact": {
+    "title": "Kontakt auswählen",
+    "analyzing": "Analysiere...",
+    "question": "Zu wem gehört diese Notiz?",
+    "searchPlaceholder": "Kontakt suchen...",
+    "isThisContact": "Ist diese Notiz über {{name}}?",
+    "yesThisContact": "Ja",
+    "noSomeoneElse": "Nein",
+    "noneOfThese": "Keiner von diesen",
+    "or": "oder",
+    "existingContact": "Bestehender Kontakt",
+    "backToSuggestion": "Zurück zum Vorschlag",
+    "suggestion": "Vorschlag",
+    "multipleMatches": "Mehrere \"{{name}}\" gefunden",
+    "suggestedContacts": "Vorgeschlagene Kontakte ({{name}})",
+    "lastContact": "Letzter Kontakt: {{date}}",
+    "newContact": "Neuer Kontakt",
+    "contactName": "Kontaktname",
+    "firstNamePlaceholder": "Vorname (z.B.: Max)",
+    "createContact": "\"{{name}}\" erstellen",
+    "createNewContact": "Neuen Kontakt erstellen",
+    "editName": "Name bearbeiten",
+    "allContacts": "Alle Kontakte"
+  },
+  "review": {
+    "title": "Überprüfen",
+    "newContact": "Neuer Kontakt",
+    "update": "Aktualisieren",
+    "namePlaceholder": "Kontaktname",
+    "transcription": "Transkription",
+    "edit": "Bearbeiten",
+    "done": "Fertig",
+    "transcriptionPlaceholder": "Transkription eingeben...",
+    "transcriptionHint": "Tippen, um Transkriptionsfehler zu korrigieren",
+    "reExtracting": "Wird erneut erkannt...",
+    "extractedInfo": "Was ich notiert habe",
+    "groups": "Gruppen",
+    "addGroup": "Gruppe hinzufügen",
+    "groupNamePlaceholder": "Gruppenname...",
+    "createGroup": "\"{{name}}\" erstellen",
+    "topicsToArchive": "Themen zum Archivieren",
+    "topicsToArchiveDescription": "Diese Themen scheinen abgeschlossen zu sein. Entferne die Auswahl bei Themen, die noch aktiv sind.",
+    "resolutionLabel": "Lösung:",
+    "resolutionPlaceholder": "Wie ist es ausgegangen...",
+    "addResolution": "Lösung hinzufügen...",
+    "news": "Neuigkeiten",
+    "memories": "Erinnerungen",
+    "together": "Zusammen",
+    "solo": "Allein",
+    "saving": "Speichern...",
+    "save": "Speichern",
+    "valuePlaceholder": "Wert",
+    "titlePlaceholder": "Titel",
+    "contextPlaceholder": "Kontext (optional)",
+    "descriptionPlaceholder": "Beschreibung",
+    "datePlaceholder": "Datum (optional)",
+    "previousValue": "Vorherig: {{value}}",
+    "new": "(neu)",
+    "events": "Ereignisse",
+    "eventTitlePlaceholder": "Ereignistitel",
+    "reminder": "Erinnerung",
+    "reminderExplanation": "Erinnerungen senden dir eine Benachrichtigung, um dich zu ermutigen, diese Themen weiterzuverfolgen.",
+    "reminderDate": "Erinnerungsdatum",
+    "noDate": "Kein Datum",
+    "today": "Heute",
+    "tomorrow": "Morgen",
+    "inDays": "In {{count}} Tag",
+    "inDays_plural": "In {{count}} Tagen",
+    "inWeeks": "In {{count}} Woche",
+    "inWeeks_plural": "In {{count}} Wochen",
+    "inMonths": "In {{count}} Monaten",
+    "selectDate": "Datum auswählen"
+  },
+  "upcoming": {
+    "title": "Anstehend",
+    "past": "Vergangen",
+    "noEvents": "Keine anstehenden Ereignisse",
+    "noPastEvents": "Keine vergangenen Ereignisse",
+    "today": "Heute"
   },
   "profile": {
     "title": "Profil",
     "connectedWith": "Verbunden mit {{provider}}",
     "sections": {
       "language": "Sprache",
+      "subscription": "Abonnement",
       "data": "Daten",
       "about": "Über"
+    },
+    "subscription": {
+      "premium": "Premium",
+      "free": "Kostenloser Plan",
+      "active": "Aktiv",
+      "notesUsed": "Notizen diesen Monat"
     },
     "language": {
       "appLanguage": "App-Sprache",
@@ -214,6 +511,17 @@
       "subject": "Feedback für Recall",
       "body": "Hallo,\n\nIch habe Feedback zu Recall:\n\n"
     },
+    "avatar": {
+      "title": "Profilbild",
+      "fromGallery": "Aus Galerie wählen",
+      "fromGalleryDescription": "Ein Foto von deinem Gerät auswählen",
+      "removeAvatar": "Foto entfernen",
+      "describeHint": "Beschreibe dein Aussehen und deine Accessoires",
+      "uploading": "Hochladen...",
+      "uploadError": "Foto konnte nicht hochgeladen werden",
+      "deleteError": "Foto konnte nicht entfernt werden",
+      "permissionDenied": "Fotozugriff erforderlich"
+    },
     "legal": {
       "title": "Rechtliches",
       "privacyFirst": {
@@ -252,7 +560,7 @@
       "description": "Diese Sprache wird für die Oberfläche und zur Transkription deiner Sprachaufnahmen verwendet."
     },
     "problem": {
-      "title": "„Wie hieß noch mal ihre Tochter?“",
+      "title": "„Wie hieß noch mal ihre Tochter?"",
       "description": "Wir vergessen 80% der Details nach einem Gespräch. Lass peinliche Momente nicht wieder passieren."
     },
     "action": {
@@ -268,5 +576,151 @@
       "description": "Deine Erinnerungen sind persönlich. Recall People verschlüsselt deine Daten, sodass nur du Zugriff hast."
     },
     "redoTour": "Geführte Tour wiederholen"
+  },
+  "subscription": {
+    "freePlan": "KOSTENLOS",
+    "notesUsed": "Notizen",
+    "notesRemaining": "{{count}} Notizen verbleibend diesen Monat",
+    "noNotesRemaining": "Keine Notizen mehr verbleibend diesen Monat",
+    "upgradeToPro": "Auf Pro upgraden",
+    "unlockWith": "Mit Pro freischalten:",
+    "feature1": "Unbegrenzte Audionotizen",
+    "feature2": "3-Minuten-Aufnahmen (statt 1 Min.)",
+    "feature3": "KI-gestützte Suche",
+    "premiumTitle": "Du bist Pro!",
+    "premiumSubtitle": "Danke für deine Unterstützung von Recall People",
+    "unlimitedNotes": "Unbegrenzte Notizen",
+    "aiSearch": "KI-Suche",
+    "manageTitle": "Abonnement verwalten",
+    "manageDescription": "Um dein Abonnement zu verwalten oder zu kündigen, gehe zu deinen Geräteeinstellungen > Abonnements."
+  },
+  "record": {
+    "remaining": "verbleibend"
+  },
+  "paywall": {
+    "title": "Auf Premium upgraden",
+    "reason": {
+      "notesLimit": "Du hast dein kostenloses monatliches Limit von 10 Notizen erreicht",
+      "aiSearch": "KI-Suche ist eine Premium-Funktion",
+      "recordingDuration": "Längere Aufnahmen erfordern Premium",
+      "aiAssistant": "KI-Assistent ist eine Premium-Funktion"
+    },
+    "errors": {
+      "purchaseFailed": "Kauf fehlgeschlagen",
+      "purchaseFailedDescription": "Der Kauf konnte nicht abgeschlossen werden. Bitte versuche es erneut.",
+      "restoreFailed": "Wiederherstellung fehlgeschlagen",
+      "restoreFailedDescription": "Deine Käufe konnten nicht wiederhergestellt werden. Bitte versuche es erneut.",
+      "noOfferingsAvailable": "Keine Abonnementpläne verfügbar",
+      "loadingFailed": "Abonnementoptionen konnten nicht geladen werden"
+    },
+    "features": {
+      "unlimitedNotes": "Unbegrenzte Audionotizen",
+      "longerRecordings": "3-Minuten-Aufnahmen (statt 1 Min.)",
+      "aiSearch": "KI-gestützte Suche über alle Notizen"
+    },
+    "monthly": "Monatlich",
+    "annual": "Jährlich",
+    "month": "Monat",
+    "year": "Jahr",
+    "bestValue": "BESTER WERT",
+    "save30": "30% sparen",
+    "subscribe": "Jetzt abonnieren",
+    "restore": "Käufe wiederherstellen",
+    "priceMonthly": "6,99 €",
+    "priceAnnual": "59,99 €"
+  },
+  "recording": {
+    "errors": {
+      "noCredits": "Keine Guthaben mehr",
+      "noCreditsDescription": "Du hast alle deine kostenlosen Notizen diesen Monat aufgebraucht",
+      "permissionDenied": "Mikrofonberechtigung verweigert",
+      "permissionDeniedDescription": "Bitte erlaube den Mikrofonzugriff, um Audio aufzunehmen",
+      "recordingFailed": "Aufnahme fehlgeschlagen",
+      "recordingFailedDescription": "Ein Fehler ist während der Aufnahme aufgetreten. Bitte versuche es erneut."
+    }
+  },
+  "testPro": {
+    "badge": "Testmodus",
+    "title": "Tester Pro-Zugang",
+    "subtitle": "Du bist Tester für Recall People! Aktiviere den kostenlosen Pro-Zugang, um die App zu testen.",
+    "description": "Aktiviere Pro-Funktionen zum Testen ohne echtes Abonnement. Dies ist nur für autorisierte Testkonten sichtbar.",
+    "activate": "Pro aktivieren",
+    "deactivate": "Pro deaktivieren",
+    "active": "Test-Pro aktiv",
+    "checking": "Testerkonto wird überprüft...",
+    "notWhitelisted": "Konto nicht autorisiert",
+    "redirecting": "Weiterleitung zu Abonnementoptionen...",
+    "alreadyActive": "Pro bereits aktiv!",
+    "enjoyFeatures": "Genieße alle Pro-Funktionen",
+    "features": "Enthaltene Funktionen",
+    "activated": "Pro aktiviert!"
+  },
+  "ask": {
+    "placeholder": "Frag mich etwas...",
+    "title": "Fragen",
+    "titleAbout": "Über {{firstName}}",
+    "inputPlaceholder": "Gib deine Frage ein...",
+    "inputPlaceholderAbout": "Frag über {{firstName}}...",
+    "voiceButton": "Sprechen",
+    "sendButton": "Senden",
+    "suggestionsTitle": "Vorschläge:",
+    "suggestions": {
+      "recent": "Worüber habe ich kürzlich mit Marie gesprochen?",
+      "birthday": "Wann hat Lucas Geburtstag?",
+      "updates": "Was gibt es Neues bei Papa?",
+      "recentWith": "Worüber habe ich kürzlich mit {{firstName}} gesprochen?",
+      "birthdayOf": "Wann hat {{firstName}} Geburtstag?",
+      "newsOf": "Was gibt es Neues bei {{firstName}}?"
+    },
+    "newQuestionPlaceholder": "Weitere Frage...",
+    "result": {
+      "sourceHeader": "Aus deiner Notiz vom {{date}}:",
+      "sourcesTitle": "Quellen",
+      "viewContactButton": "{{contactName}}s Profil anzeigen"
+    },
+    "contactNotFound": {
+      "title": "Ich kann keinen passenden Kontakt finden",
+      "description": "Kein Kontakt entspricht deiner Suche.",
+      "suggestionsTitle": "Meintest du:",
+      "createButton": "Diesen Kontakt erstellen"
+    },
+    "noInfo": {
+      "title": "Ich habe keine Informationen gefunden",
+      "description": "Ich habe nichts zu diesem Thema in deinen Notizen über {{contactName}} gefunden.",
+      "addNoteButton": "Notiz über {{contactName}} hinzufügen"
+    }
+  },
+  "assistant": {
+    "title": "Assistent",
+    "description": "Durchsuche alle deine Notizen, um Informationen über einen oder mehrere Kontakte zu finden. Die KI durchsucht deine Datenbank und antwortet dir.",
+    "inputPlaceholder": "Welche meiner Kontakte spielen ein Musikinstrument?",
+    "voiceButton": "Sprechen",
+    "sendButton": "Senden",
+    "transcribing": "Transkribiere...",
+    "suggestionsTitle": "Vorschläge",
+    "noSuggestions": "Nimm Notizen auf, um Vorschläge zu sehen",
+    "suggestions": {
+      "recent": "Worüber habe ich kürzlich mit %name% gesprochen?",
+      "birthday": "Wann hat %name% Geburtstag?",
+      "news": "Was gibt es Neues bei %name%?",
+      "recentWith": "Worüber habe ich kürzlich mit {{firstName}} gesprochen?",
+      "birthdayOf": "Wann hat {{firstName}} Geburtstag?",
+      "newsOf": "Was gibt es Neues bei {{firstName}}?"
+    },
+    "emptyState": {
+      "title": "Dein KI-Assistent",
+      "description": "Stelle beliebige Fragen über deine Kontakte und ihre Informationen."
+    },
+    "processing": "Denke nach...",
+    "newQuestion": "Stelle eine weitere Frage...",
+    "trialsRemaining": "{{count}} kostenlose Versuche verbleibend",
+    "noTrialsLeft": "Kostenlose Versuche aufgebraucht",
+    "upgradeHint": "Upgrade auf Premium für unbegrenzten Zugang",
+    "history": {
+      "title": "Fragenverlauf",
+      "today": "Heute",
+      "yesterday": "Gestern",
+      "daysAgo": "Vor {{count}} Tagen"
+    }
   }
 }

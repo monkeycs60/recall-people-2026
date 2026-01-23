@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   segmentActive: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.calendar,
   },
   segmentText: {
     fontSize: 14,
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
     textTransform: 'capitalize',
   },
   dayHeaderToday: {
-    color: Colors.primary,
+    color: Colors.calendar,
   },
   eventCard: {
     flexDirection: 'row',

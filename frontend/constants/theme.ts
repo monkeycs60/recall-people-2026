@@ -24,16 +24,28 @@ export const Colors = {
   menthe: '#D1FAE5', // background avatar, success
   lavande: '#EDE9FE', // background avatar, tags
 
-  // Accent secondaire (keep for compatibility)
-  secondary: '#8B5CF6', // aligned with primary violet
-  secondaryLight: '#EDE9FE',
+  // Couleurs sémantiques fonctionnelles
+  // Voice/Recording - Emerald
+  voice: '#10B981', // emerald - pour micro, enregistrement, "Speak"
+  voiceLight: '#D1FAE5', // emerald light
+  voiceDark: '#059669', // emerald dark (hover)
 
-  // Semantic
+  // Calendar/Events - Amber
+  calendar: '#F59E0B', // amber - pour events, dates, "Upcoming"
+  calendarLight: '#FEF3C7', // amber light
+  calendarDark: '#D97706', // amber dark (hover)
+
+  // AI/Assistant - Violet (= primary)
+  ai: '#8B5CF6', // violet - pour Assistant, FAB, features IA
+  aiLight: '#EDE9FE',
+  aiDark: '#7C3AED',
+
+  // Semantic (états)
   success: '#10B981',
   successLight: '#D1FAE5',
   warning: '#F59E0B',
   error: '#EF4444',
-  info: '#8B5CF6', // = violet (cohérence)
+  info: '#8B5CF6', // = violet
 
   // Borders - Flat & Bold style
   border: '#1A1A1A', // noir pour style flat & bold

@@ -23,7 +23,7 @@
       "error": "Errore nell'invio dell'email. Riprova.",
       "successTitle": "Controlla la tua email",
       "successDescription": "Abbiamo inviato un link di reimpostazione a {{email}}",
-      "expiryNote": "Questo link scadrà tra 30 minuti.",
+      "expiryNote": "Questo link scadra tra 30 minuti.",
       "resend": "Reinvia email",
       "backToLogin": "Torna al login",
       "rememberPassword": "Ricordi la tua password?"
@@ -37,24 +37,36 @@
       "error": "Errore nella reimpostazione. Riprova.",
       "invalidLink": "Link non valido o scaduto",
       "invalidLinkTitle": "Link non valido",
-      "invalidLinkDescription": "Questo link non è valido o è scaduto. Richiedine uno nuovo.",
+      "invalidLinkDescription": "Questo link non e valido o e scaduto. Richiedine uno nuovo.",
       "requestNewLink": "Richiedi nuovo link",
       "successTitle": "Password reimpostata!",
-      "successDescription": "La tua password è stata reimpostata con successo. Ora puoi accedere.",
+      "successDescription": "La tua password e stata reimpostata con successo. Ora puoi accedere.",
       "goToLogin": "Vai al login"
     },
     "register": {
       "title": "Crea account",
-      "subtitle": "I nomi dei loro figli. Il lavoro del loro partner. Non dimenticarli mai più.",
-      "submit": "Registrati",
-      "loading": "Registrazione...",
-      "hasAccount": "Hai già un account?",
-      "signIn": "Accedi"
+      "subtitle": "I nomi dei loro figli. Il lavoro del loro partner. Non dimenticarli mai piu.",
+      "name": "Nome",
+      "namePlaceholder": "Il tuo nome",
+      "email": "Email",
+      "emailPlaceholder": "tua@email.com",
+      "password": "Password",
+      "passwordPlaceholder": "Min. 8 caratteri",
+      "confirmPassword": "Conferma",
+      "confirmPasswordPlaceholder": "Ripeti",
+      "submit": "Crea il mio account",
+      "loading": "Creazione...",
+      "or": "o",
+      "google": "Continua con Google",
+      "hasAccount": "Hai gia un account?",
+      "signIn": "Accedi",
+      "passwordMismatch": "Le password non corrispondono",
+      "passwordTooShort": "La password deve avere almeno 8 caratteri"
     }
   },
   "errors": {
-    "offline": "Modalità offline",
-    "offlineDescription": "La registrazione audio e alcune funzionalità richiedono una connessione internet",
+    "offline": "Modalita offline",
+    "offlineDescription": "La registrazione audio e alcune funzionalita richiedono una connessione internet",
     "networkError": "Errore di connessione",
     "checkConnection": "Controlla la tua connessione internet e riprova",
     "unauthorized": "Sessione scaduta",
@@ -63,8 +75,8 @@
     "tooManyRequests": "Troppe richieste",
     "tooManyRequestsDescription": "Attendi un momento prima di riprovare",
     "serverError": "Errore del server",
-    "serverErrorDescription": "Qualcosa è andato storto, riprova più tardi",
-    "generic": "Si è verificato un errore"
+    "serverErrorDescription": "Qualcosa e andato storto, riprova piu tardi",
+    "generic": "Si e verificato un errore"
   },
   "common": {
     "loading": "Caricamento...",
@@ -74,6 +86,7 @@
     "edit": "Modifica",
     "confirm": "Conferma",
     "back": "Indietro",
+    "close": "Chiudi",
     "error": "Errore",
     "success": "Successo",
     "add": "Aggiungi",
@@ -83,7 +96,10 @@
     "home": "Home",
     "contacts": "Contatti",
     "search": "Cerca",
-    "profile": "Profilo"
+    "explore": "Esplora IA",
+    "assistant": "Assistente",
+    "profile": "Profilo",
+    "upcoming": "Novita"
   },
   "fab": {
     "newNote": "Nuova nota",
@@ -105,11 +121,19 @@
   "contacts": {
     "title": "Contatti",
     "searchPlaceholder": "Chi stai cercando?",
-    "noContacts": "Il lavoro del suo partner. I nomi dei suoi figli. Quel progetto di cui è così fiero.",
-    "noContactsDescription": "Non farti mai più cogliere impreparato."
+    "filterPlaceholder": "Cerca un contatto...",
+    "askHint": "Fai una domanda all'IA",
+    "noContacts": "Parla di questa persona, della vostra relazione, dei suoi progetti... Ci pensiamo noi al resto.",
+    "noContactsDescription": "Crea la tua prima nota per iniziare.",
+    "createFirstNote": "Crea la tua prima nota",
+    "addContact": "Aggiungi un contatto",
+    "createModal": {
+      "title": "Nuovo contatto",
+      "create": "Crea"
+    }
   },
   "search": {
-    "title": "Cerca",
+    "title": "Esplora IA",
     "placeholder": "Descrivi cosa cerchi...",
     "noResults": "Nessun risultato",
     "searching": "Ricerca in corso...",
@@ -123,7 +147,7 @@
   "contact": {
     "title": "Contatto",
     "lastContact": "Ultimo contatto",
-    "addNote": "Novità su {{firstName}}?",
+    "addNote": "Novita su {{firstName}}?",
     "addNoteButton": {
       "title": "Aggiungi nota su {{firstName}}",
       "voiceOption": "Registra una nota vocale",
@@ -131,6 +155,7 @@
       "textOption": "Scrivi una nota",
       "textDescription": "Scrivi una nota su {{firstName}}"
     },
+    "askAbout": "Chiedi informazioni su {{firstName}}",
     "aiSummary": {
       "header": "L'essenziale su {{firstName}}",
       "loading": "Preparazione dell'essenziale...",
@@ -144,10 +169,22 @@
     "editGroups": "Modifica gruppi",
     "addGroup": "Aggiungi gruppo",
     "addGroupPlaceholder": "Aggiungi un gruppo...",
+    "groupsSheet": {
+      "title": "Gestisci gruppi",
+      "currentGroups": "Gruppi di {{firstName}}",
+      "allGroups": "Tutti i gruppi",
+      "selectGroups": "Gruppi di {{firstName}}",
+      "noGroups": "Nessun gruppo creato",
+      "createNew": "Nuovo gruppo",
+      "newGroupPlaceholder": "Nome del gruppo...",
+      "deleteGroupTitle": "Eliminare questo gruppo?",
+      "deleteGroupMessage": "Il gruppo \"{{name}}\" verra rimosso da tutti i contatti."
+    },
     "deleteContact": "Elimina contatto",
     "deleteContactConfirm": "Sei sicuro di voler eliminare questo contatto?",
+    "notFound": "Contatto non trovato",
     "sections": {
-      "news": "Novità",
+      "news": "Novita",
       "profile": "Profilo",
       "memories": "Ricordi",
       "notes": "Note"
@@ -155,25 +192,285 @@
     "hotTopic": {
       "addPlaceholder": "Nuovo argomento...",
       "contextPlaceholder": "Contesto (opzionale)...",
-      "emptyState": "I loro progetti. Le loro news. Le loro difficoltà.",
-      "emptyStateDescription": "Una nota vocale dopo la prossima chiacchierata, ed è salvato."
+      "emptyState": "I loro progetti. Le loro news. Le loro difficolta.",
+      "emptyStateDescription": "Una nota vocale dopo la prossima chiacchierata, ed e salvato.",
+      "deleteTitle": "Elimina questa novita",
+      "deleteConfirm": "Eliminare \"{{title}}\"?",
+      "resolutionLabel": "Come si e concluso:",
+      "resolutionPlaceholder": "Come si e concluso...",
+      "archive": "Archivia",
+      "addResolution": "+ Aggiungi risoluzione",
+      "resolvedAt": "Risolto il {{date}}",
+      "showResolved": "Mostra risolti ({{count}})",
+      "titlePlaceholder": "Titolo argomento",
+      "contextEditPlaceholder": "Contesto (opzionale)"
     },
     "fact": {
       "addPlaceholder": "Nuova informazione...",
-      "selectType": "Seleziona un tipo..."
+      "selectType": "Seleziona un tipo...",
+      "emptyState": "Nessuna informazione di profilo",
+      "deleteTitle": "Elimina questa informazione",
+      "deleteConfirm": "Eliminare \"{{key}}: {{value}}\"?",
+      "infoTypeLabel": "Tipo di informazione *",
+      "valueLabel": "Valore *",
+      "previousCount_one": "{{count}} precedente",
+      "previousCount_other": "{{count}} precedenti"
     },
     "memory": {
       "addPlaceholder": "Nuovo ricordo...",
-      "selectDate": "Seleziona una data..."
+      "selectDate": "Seleziona una data...",
+      "emptyState": "Nessun ricordo aggiunto",
+      "descriptionLabel": "Descrizione *",
+      "descriptionPlaceholder": "Es: Weekend sugli sci a Chamonix",
+      "eventDateLabel": "Data evento (opzionale)",
+      "sharedMoment": "Momento condiviso",
+      "validate": "Conferma"
+    },
+    "factTypes": {
+      "work": "Lavoro",
+      "company": "Azienda",
+      "education": "Formazione",
+      "location": "Citta",
+      "origin": "Origine",
+      "partner": "Partner",
+      "children": "Figli",
+      "hobby": "Hobby",
+      "sport": "Sport",
+      "language": "Lingue",
+      "pet": "Animali",
+      "birthday": "Compleanno",
+      "how_met": "Come ci siamo conosciuti",
+      "where_met": "Dove ci siamo conosciuti",
+      "shared_ref": "Riferimenti",
+      "trait": "Caratteristiche",
+      "gift_idea": "Idee regalo",
+      "gift_given": "Regali fatti",
+      "contact": "Contatto",
+      "relationship": "Relazioni",
+      "other": "Altro"
+    },
+    "name": {
+      "firstName": "Nome",
+      "lastName": "Cognome",
+      "firstNamePlaceholder": "Nome",
+      "lastNamePlaceholder": "Cognome (opzionale)"
+    },
+    "addHotTopic": {
+      "titleLabel": "Titolo *",
+      "titlePlaceholder": "Es: Ricerca appartamento",
+      "contextLabel": "Contesto (opzionale)",
+      "contextPlaceholder": "Altri dettagli..."
+    },
+    "createGroup": "Crea \"{{name}}\"",
+    "contactCard": {
+      "phone": "Telefono",
+      "email": "Email",
+      "birthday": "Compleanno",
+      "addPhone": "+ Aggiungi telefono",
+      "addEmail": "+ Aggiungi email",
+      "addBirthday": "+ Aggiungi compleanno",
+      "call": "Chiama",
+      "whatsapp": "WhatsApp",
+      "sms": "SMS",
+      "copy": "Copia",
+      "openMail": "Apri mail",
+      "copied": "Copiato!",
+      "inDays_one": "Tra {{count}} giorno!",
+      "inDays_other": "Tra {{count}} giorni!",
+      "years_one": "{{count}} anno",
+      "years_other": "{{count}} anni",
+      "gender": {
+        "male": "Maschio",
+        "female": "Femmina",
+        "unknown": "Non specificato"
+      }
+    },
+    "genderModal": {
+      "title": "Genere"
+    },
+    "menu": {
+      "options": "Opzioni",
+      "delete": "Elimina contatto"
+    },
+    "deleteDialog": {
+      "title": "Eliminare questo contatto?",
+      "message": "Questa azione non puo essere annullata. Tutte le note, i ricordi e le informazioni su {{name}} verranno eliminati.",
+      "cancel": "Annulla",
+      "confirm": "Elimina"
+    },
+    "otherFact": {
+      "titleLabel": "Titolo *",
+      "titlePlaceholder": "Es: Allergia, Dieta...",
+      "descriptionLabel": "Descrizione *",
+      "descriptionPlaceholder": "Dettagli..."
+    },
+    "phoneModal": {
+      "title": "Telefono",
+      "placeholder": "+39 333 123 4567",
+      "save": "Salva",
+      "cancel": "Annulla",
+      "delete": "Elimina"
+    },
+    "emailModal": {
+      "title": "Email",
+      "placeholder": "email@esempio.com",
+      "invalidFormat": "Formato email non valido",
+      "save": "Salva",
+      "cancel": "Annulla",
+      "delete": "Elimina"
+    },
+    "nameModal": {
+      "title": "Modifica nome",
+      "firstName": "Nome",
+      "lastName": "Cognome",
+      "firstNamePlaceholder": "Nome",
+      "lastNamePlaceholder": "Cognome (opzionale)",
+      "save": "Salva",
+      "cancel": "Annulla"
+    },
+    "birthdayModal": {
+      "title": "Compleanno",
+      "day": "Giorno",
+      "month": "Mese",
+      "year": "Anno (opzionale)",
+      "yearPlaceholder": "Anno",
+      "months": ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"],
+      "save": "Salva",
+      "cancel": "Annulla",
+      "delete": "Elimina"
+    },
+    "contactInfoReview": {
+      "title": "Informazioni di contatto rilevate",
+      "phone": "Telefono",
+      "email": "Email",
+      "birthday": "Compleanno",
+      "accept": "Accetta",
+      "ignore": "Ignora"
+    },
+    "avatar": {
+      "title": "Foto profilo",
+      "fromGallery": "Scegli dalla galleria",
+      "fromGalleryDescription": "Seleziona una foto dal tuo dispositivo",
+      "generateWithAI": "Genera con l'IA",
+      "generateWithAIDescription": "Crea un avatar illustrato unico",
+      "removeAvatar": "Rimuovi avatar attuale",
+      "describeAppearance": "Descrivi l'aspetto",
+      "describeHint": "Descrivi le caratteristiche fisiche e gli accessori di {{firstName}}",
+      "promptPlaceholder": "Capelli castani, occhi azzurri, occhiali, barba, sportivo, sorridente...",
+      "examples": "Esempi:",
+      "example1": "Capelli biondi corti, occhi verdi, lentiggini",
+      "example2": "Capelli neri lunghi, occhiali rotondi, sciarpa rossa",
+      "generate": "Genera",
+      "uploading": "Caricamento...",
+      "generating": "Generazione avatar...",
+      "uploadSuccess": "Avatar aggiornato!",
+      "uploadError": "Caricamento avatar fallito",
+      "generateSuccess": "Avatar generato!",
+      "generateError": "Generazione avatar fallita",
+      "deleteSuccess": "Avatar rimosso",
+      "deleteError": "Rimozione avatar fallita",
+      "permissionDenied": "Accesso foto richiesto",
+      "promptRequired": "Descrivi l'aspetto"
+    },
+    "photo": {
+      "permissionTitle": "Accesso foto richiesto",
+      "permissionMessage": "Consenti l'accesso alla galleria per selezionare un'immagine."
     }
+  },
+  "selectContact": {
+    "title": "Seleziona contatto",
+    "analyzing": "Analisi in corso...",
+    "question": "A chi appartiene questa nota?",
+    "searchPlaceholder": "Cerca un contatto...",
+    "isThisContact": "Questa nota riguarda {{name}}?",
+    "yesThisContact": "Si",
+    "noSomeoneElse": "No",
+    "noneOfThese": "Nessuno di questi",
+    "or": "o",
+    "existingContact": "Contatto esistente",
+    "backToSuggestion": "Torna al suggerimento",
+    "suggestion": "Suggerimento",
+    "multipleMatches": "Trovati piu \"{{name}}\"",
+    "suggestedContacts": "Contatti suggeriti ({{name}})",
+    "lastContact": "Ultimo contatto: {{date}}",
+    "newContact": "Nuovo contatto",
+    "contactName": "Nome contatto",
+    "firstNamePlaceholder": "Nome (es: Marco)",
+    "createContact": "Crea \"{{name}}\"",
+    "createNewContact": "Crea un nuovo contatto",
+    "editName": "Modifica nome",
+    "allContacts": "Tutti i contatti"
+  },
+  "review": {
+    "title": "Revisione",
+    "newContact": "Nuovo contatto",
+    "update": "Aggiornamento",
+    "namePlaceholder": "Nome contatto",
+    "transcription": "Trascrizione",
+    "edit": "Modifica",
+    "done": "Fatto",
+    "transcriptionPlaceholder": "Scrivi la trascrizione...",
+    "transcriptionHint": "Tocca per correggere gli errori di trascrizione",
+    "reExtracting": "Rilevamento...",
+    "extractedInfo": "Cio che ho annotato",
+    "groups": "Gruppi",
+    "addGroup": "Aggiungi un gruppo",
+    "groupNamePlaceholder": "Nome del gruppo...",
+    "createGroup": "Crea \"{{name}}\"",
+    "topicsToArchive": "Argomenti da archiviare",
+    "topicsToArchiveDescription": "Questi argomenti sembrano risolti. Deseleziona quelli ancora attivi.",
+    "resolutionLabel": "Risoluzione:",
+    "resolutionPlaceholder": "Come si e concluso...",
+    "addResolution": "Aggiungi una risoluzione...",
+    "news": "Novita",
+    "memories": "Ricordi",
+    "together": "Insieme",
+    "solo": "Da solo",
+    "saving": "Salvataggio...",
+    "save": "Salva",
+    "valuePlaceholder": "Valore",
+    "titlePlaceholder": "Titolo",
+    "contextPlaceholder": "Contesto (opzionale)",
+    "descriptionPlaceholder": "Descrizione",
+    "datePlaceholder": "Data (opzionale)",
+    "previousValue": "Precedente: {{value}}",
+    "new": "(nuovo)",
+    "events": "Eventi",
+    "eventTitlePlaceholder": "Titolo evento",
+    "reminder": "Promemoria",
+    "reminderExplanation": "I promemoria ti invieranno una notifica per ricordarti di ricontattare su questi argomenti.",
+    "reminderDate": "Data promemoria",
+    "noDate": "Nessuna data",
+    "today": "Oggi",
+    "tomorrow": "Domani",
+    "inDays": "Tra {{count}} giorno",
+    "inDays_plural": "Tra {{count}} giorni",
+    "inWeeks": "Tra {{count}} settimana",
+    "inWeeks_plural": "Tra {{count}} settimane",
+    "inMonths": "Tra {{count}} mesi",
+    "selectDate": "Seleziona data"
+  },
+  "upcoming": {
+    "title": "In arrivo",
+    "past": "Passati",
+    "noEvents": "Nessun evento in programma",
+    "noPastEvents": "Nessun evento passato",
+    "today": "Oggi"
   },
   "profile": {
     "title": "Profilo",
     "connectedWith": "Connesso con {{provider}}",
     "sections": {
       "language": "Lingua",
+      "subscription": "Abbonamento",
       "data": "Dati",
       "about": "Info"
+    },
+    "subscription": {
+      "premium": "Premium",
+      "free": "Piano gratuito",
+      "active": "Attivo",
+      "notesUsed": "note questo mese"
     },
     "language": {
       "appLanguage": "Lingua dell'app",
@@ -207,26 +504,37 @@
     },
     "clearCache": {
       "title": "Svuota cache",
-      "confirm": "Questo eliminerà tutti i dati locali. Sei sicuro?",
+      "confirm": "Questo eliminera tutti i dati locali. Sei sicuro?",
       "success": "Cache svuotata con successo"
     },
     "feedback": {
       "subject": "Feedback per Recall",
       "body": "Ciao,\n\nHo un feedback su Recall:\n\n"
     },
+    "avatar": {
+      "title": "Foto profilo",
+      "fromGallery": "Scegli dalla galleria",
+      "fromGalleryDescription": "Seleziona una foto dal tuo dispositivo",
+      "removeAvatar": "Rimuovi foto",
+      "describeHint": "Descrivi il tuo aspetto fisico e i tuoi accessori",
+      "uploading": "Caricamento...",
+      "uploadError": "Caricamento foto fallito",
+      "deleteError": "Rimozione foto fallita",
+      "permissionDenied": "Accesso foto richiesto"
+    },
     "legal": {
       "title": "Note legali",
       "privacyFirst": {
         "title": "Privacy prima di tutto",
-        "description": "Recall è costruito con la privacy come principio fondamentale. Crediamo che le tue relazioni personali e le informazioni che registri debbano rimanere private e sotto il tuo controllo."
+        "description": "Recall e costruito con la privacy come principio fondamentale. Crediamo che le tue relazioni personali e le informazioni che registri debbano rimanere private e sotto il tuo controllo."
       },
       "localStorage": {
         "title": "Archiviazione 100% locale",
         "description": "Tutti i tuoi dati di contatto, note, fatti e ricordi sono archiviati esclusivamente sul tuo dispositivo in un database locale sicuro. I tuoi dati non lasciano mai il tuo telefono senza la tua azione esplicita."
       },
       "dataSovereignty": {
-        "title": "Sovranità dei dati",
-        "description": "Hai la proprietà completa dei tuoi dati. Esportali in qualsiasi momento in formato JSON o CSV. Eliminali quando vuoi. Nessun cloud storage, nessun data mining, nessun accesso di terze parti."
+        "title": "Sovranita dei dati",
+        "description": "Hai la proprieta completa dei tuoi dati. Esportali in qualsiasi momento in formato JSON o CSV. Eliminali quando vuoi. Nessun cloud storage, nessun data mining, nessun accesso di terze parti."
       },
       "aiProcessing": {
         "title": "Elaborazione IA",
@@ -241,7 +549,7 @@
   },
   "languagePicker": {
     "title": "Scegli lingua",
-    "description": "Questa lingua verrà usata per l'interfaccia e la trascrizione vocale"
+    "description": "Questa lingua verra usata per l'interfaccia e la trascrizione vocale"
   },
   "onboarding": {
     "skip": "Salta",
@@ -249,24 +557,170 @@
     "getStarted": "Inizia",
     "language": {
       "title": "Scegli la tua lingua",
-      "description": "Questa lingua verrà utilizzata per l'interfaccia e per trascrivere le tue registrazioni vocali."
+      "description": "Questa lingua verra utilizzata per l'interfaccia e per trascrivere le tue registrazioni vocali."
     },
     "problem": {
-      "title": "« Come si chiamava sua figlia? »",
+      "title": "\"Come si chiamava sua figlia?\"",
       "description": "Dimentichiamo l'80% dei dettagli dopo una conversazione. Non lasciare che i momenti imbarazzanti si ripetano."
     },
     "action": {
       "title": "La tua arma segreta per le relazioni.",
-      "description": "Subito dopo un caffè o una chiamata, registra una nota vocale. L'IA estrae automaticamente le perle della conversazione."
+      "description": "Subito dopo un caffe o una chiamata, registra una nota vocale. L'IA estrae automaticamente le perle della conversazione."
     },
     "value": {
       "title": "Sii la persona che non dimentica mai.",
       "description": "Nomi dei cari, passioni, progetti in corso... Trova tutto a colpo d'occhio prima del tuo prossimo incontro."
     },
     "trust": {
-      "title": "Il tuo giardino segreto è al sicuro.",
+      "title": "Il tuo giardino segreto e al sicuro.",
       "description": "I tuoi ricordi sono personali. Recall People cripta i tuoi dati in modo che solo tu possa accedervi."
     },
     "redoTour": "Ripeti tour guidato"
+  },
+  "subscription": {
+    "freePlan": "GRATUITO",
+    "notesUsed": "note",
+    "notesRemaining": "{{count}} note rimanenti questo mese",
+    "noNotesRemaining": "Nessuna nota rimanente questo mese",
+    "upgradeToPro": "Passa a Pro",
+    "unlockWith": "Sblocca con Pro:",
+    "feature1": "Note audio illimitate",
+    "feature2": "Registrazioni di 3 min (vs 1 min)",
+    "feature3": "Ricerca IA",
+    "premiumTitle": "Sei Pro!",
+    "premiumSubtitle": "Grazie per supportare Recall People",
+    "unlimitedNotes": "Note illimitate",
+    "aiSearch": "Ricerca IA",
+    "manageTitle": "Gestisci abbonamento",
+    "manageDescription": "Per gestire o annullare il tuo abbonamento, vai nelle impostazioni del dispositivo > Abbonamenti."
+  },
+  "record": {
+    "remaining": "rimanenti"
+  },
+  "paywall": {
+    "title": "Passa a Premium",
+    "reason": {
+      "notesLimit": "Hai raggiunto il limite mensile gratuito di 10 note",
+      "aiSearch": "La ricerca IA e una funzionalita premium",
+      "recordingDuration": "Le registrazioni piu lunghe richiedono premium",
+      "aiAssistant": "L'assistente IA e una funzionalita premium"
+    },
+    "errors": {
+      "purchaseFailed": "Acquisto fallito",
+      "purchaseFailedDescription": "Impossibile completare l'acquisto. Riprova.",
+      "restoreFailed": "Ripristino fallito",
+      "restoreFailedDescription": "Impossibile ripristinare gli acquisti. Riprova.",
+      "noOfferingsAvailable": "Nessun piano di abbonamento disponibile",
+      "loadingFailed": "Impossibile caricare le opzioni di abbonamento"
+    },
+    "features": {
+      "unlimitedNotes": "Note audio illimitate",
+      "longerRecordings": "Registrazioni di 3 min (vs 1 min)",
+      "aiSearch": "Ricerca IA in tutte le tue note"
+    },
+    "monthly": "Mensile",
+    "annual": "Annuale",
+    "month": "mese",
+    "year": "anno",
+    "bestValue": "MIGLIOR PREZZO",
+    "save30": "Risparmia il 30%",
+    "subscribe": "Abbonati ora",
+    "restore": "Ripristina acquisti",
+    "priceMonthly": "6,99 EUR",
+    "priceAnnual": "59,99 EUR"
+  },
+  "recording": {
+    "errors": {
+      "noCredits": "Crediti esauriti",
+      "noCreditsDescription": "Hai usato tutte le tue note gratuite questo mese",
+      "permissionDenied": "Permesso microfono negato",
+      "permissionDeniedDescription": "Consenti l'accesso al microfono per registrare audio",
+      "recordingFailed": "Registrazione fallita",
+      "recordingFailedDescription": "Si e verificato un errore durante la registrazione. Riprova."
+    }
+  },
+  "testPro": {
+    "badge": "Modalita Test",
+    "title": "Accesso Pro Tester",
+    "subtitle": "Sei un tester di Recall People! Attiva l'accesso Pro gratuito per testare l'app.",
+    "description": "Attiva le funzionalita Pro per testare senza un abbonamento reale. Visibile solo per gli account di test autorizzati.",
+    "activate": "Attiva Pro",
+    "deactivate": "Disattiva Pro",
+    "active": "Pro Test Attivo",
+    "checking": "Verifica account tester...",
+    "notWhitelisted": "Account non autorizzato",
+    "redirecting": "Reindirizzamento alle opzioni di abbonamento...",
+    "alreadyActive": "Pro gia attivo!",
+    "enjoyFeatures": "Goditi tutte le funzionalita Pro",
+    "features": "Funzionalita incluse",
+    "activated": "Pro attivato!"
+  },
+  "ask": {
+    "placeholder": "Chiedimi qualcosa...",
+    "title": "Chiedi",
+    "titleAbout": "Su {{firstName}}",
+    "inputPlaceholder": "Scrivi la tua domanda...",
+    "inputPlaceholderAbout": "Chiedi di {{firstName}}...",
+    "voiceButton": "Parla",
+    "sendButton": "Invia",
+    "suggestionsTitle": "Suggerimenti:",
+    "suggestions": {
+      "recent": "Di cosa ho parlato con Marie di recente?",
+      "birthday": "Quand'e il compleanno di Lucas?",
+      "updates": "Quali sono le novita di Papa?",
+      "recentWith": "Di cosa ho parlato con {{firstName}} di recente?",
+      "birthdayOf": "Quand'e il compleanno di {{firstName}}?",
+      "newsOf": "Quali sono le novita di {{firstName}}?"
+    },
+    "newQuestionPlaceholder": "Altra domanda...",
+    "result": {
+      "sourceHeader": "Dalla tua nota del {{date}}:",
+      "sourcesTitle": "Fonti",
+      "viewContactButton": "Vedi il profilo di {{contactName}}"
+    },
+    "contactNotFound": {
+      "title": "Non trovo un contatto corrispondente",
+      "description": "Nessun contatto corrisponde alla tua ricerca.",
+      "suggestionsTitle": "Forse intendevi:",
+      "createButton": "Crea questo contatto"
+    },
+    "noInfo": {
+      "title": "Non ho trovato informazioni",
+      "description": "Non ho trovato nulla su questo argomento nelle tue note su {{contactName}}.",
+      "addNoteButton": "Aggiungi una nota su {{contactName}}"
+    }
+  },
+  "assistant": {
+    "title": "Assistente",
+    "description": "Cerca in tutte le tue note per trovare informazioni su uno o piu contatti. L'IA esplora il tuo database e ti risponde.",
+    "inputPlaceholder": "Quali dei miei contatti suonano uno strumento?",
+    "voiceButton": "Parla",
+    "sendButton": "Invia",
+    "transcribing": "Trascrizione in corso...",
+    "suggestionsTitle": "Suggerimenti",
+    "noSuggestions": "Registra note per vedere suggerimenti",
+    "suggestions": {
+      "recent": "Di cosa ho parlato con %name% di recente?",
+      "birthday": "Quand'e il compleanno di %name%?",
+      "news": "Quali sono le novita di %name%?",
+      "recentWith": "Di cosa ho parlato con {{firstName}} di recente?",
+      "birthdayOf": "Quand'e il compleanno di {{firstName}}?",
+      "newsOf": "Quali sono le novita di {{firstName}}?"
+    },
+    "emptyState": {
+      "title": "Il tuo assistente IA",
+      "description": "Fai qualsiasi domanda sui tuoi contatti e le loro informazioni."
+    },
+    "processing": "Sto pensando...",
+    "newQuestion": "Fai un'altra domanda...",
+    "trialsRemaining": "{{count}} prove gratuite rimanenti",
+    "noTrialsLeft": "Prove gratuite esaurite",
+    "upgradeHint": "Passa a Premium per accesso illimitato",
+    "history": {
+      "title": "Cronologia domande",
+      "today": "Oggi",
+      "yesterday": "Ieri",
+      "daysAgo": "{{count}} giorni fa"
+    }
   }
 }
