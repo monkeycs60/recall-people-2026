@@ -40,11 +40,11 @@ export const ClusterCard = ({ cluster }: ClusterCardProps) => {
             </Text>
           </View>
         </View>
-        <View style={[styles.chevronContainer, { backgroundColor: `${cluster.color}15` }]}>
+        <View style={[styles.chevronContainer, { backgroundColor: `${Colors.primary}15` }]}>
           {isExpanded ? (
-            <ChevronUp size={18} color={cluster.color} />
+            <ChevronUp size={18} color={Colors.primary} />
           ) : (
-            <ChevronDown size={18} color={cluster.color} />
+            <ChevronDown size={18} color={Colors.primary} />
           )}
         </View>
       </Pressable>
