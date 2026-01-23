@@ -440,14 +440,14 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		gap: Spacing.sm,
 		backgroundColor: Colors.surface,
-		borderWidth: 1,
-		borderColor: Colors.primary,
+		borderWidth: 2,
+		borderColor: Colors.border,
 		paddingVertical: 14,
-		borderRadius: BorderRadius.md,
+		borderRadius: 12,
 	},
 	voiceButtonActive: {
-		backgroundColor: Colors.error,
-		borderColor: Colors.error,
+		backgroundColor: '#FEE2E2',
+		borderColor: Colors.border,
 	},
 	voiceButtonText: {
 		fontSize: 16,
@@ -462,10 +462,11 @@ const styles = StyleSheet.create({
 		gap: Spacing.sm,
 		backgroundColor: Colors.primary,
 		paddingVertical: 14,
-		borderRadius: BorderRadius.md,
+		borderRadius: 12,
 	},
 	sendButtonDisabled: {
-		backgroundColor: Colors.border,
+		backgroundColor: Colors.textMuted,
+		opacity: 0.5,
 	},
 	sendButtonText: {
 		fontSize: 16,
@@ -473,7 +474,7 @@ const styles = StyleSheet.create({
 		color: Colors.textInverse,
 	},
 	sendButtonTextDisabled: {
-		color: Colors.textMuted,
+		color: Colors.textInverse,
 	},
 	recordingIndicator: {
 		flexDirection: 'row',

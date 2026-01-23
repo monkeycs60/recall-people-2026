@@ -14,6 +14,7 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
+  withTiming,
 } from 'react-native-reanimated';
 import { Colors, BorderRadius, Spacing, Fonts } from '@/constants/theme';
 
@@ -33,8 +34,10 @@ export function TextInputMode({
   contactFirstName,
 }: TextInputModeProps) {
   const [text, setText] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<TextInput>(null);
   const buttonScale = useSharedValue(1);
+  const focusProgress = useSharedValue(1);
 
   const defaultPlaceholder = contactFirstName
     ? `Écrivez ce que vous savez sur ${contactFirstName}...`
@@ -59,6 +62,11 @@ export function TextInputMode({
     transform: [{ scale: buttonScale.value }],
   }));
 
+  const containerAnimatedStyle = useAnimatedStyle(() => ({
+    borderColor: withTiming(isFocused ? Colors.primary : Colors.borderLight, { duration: 150 }),
+    borderWidth: withTiming(isFocused ? 2 : 1.5, { duration: 150 }),
+  }));
+
   const canSubmit = text.trim().length >= 10 && !isProcessing;
 
   return (
@@ -67,7 +75,7 @@ export function TextInputMode({
       exiting={FadeOut.duration(200)}
       style={styles.container}
     >
-      <View style={styles.inputContainer}>
+      <Animated.View style={[styles.inputContainer, containerAnimatedStyle]}>
         <TextInput
           ref={inputRef}
           value={text}
@@ -80,6 +88,8 @@ export function TextInputMode({
           editable={!isProcessing}
           textAlignVertical="top"
           autoFocus
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
         />
 
         <View style={styles.footer}>
@@ -104,7 +114,7 @@ export function TextInputMode({
             />
           </AnimatedPressable>
         </View>
-      </View>
+      </Animated.View>
 
       <Animated.Text style={styles.hint}>
         {text.length < 10
@@ -122,15 +132,15 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-    borderColor: Colors.border,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1.5,
+    borderColor: Colors.borderLight,
     overflow: 'hidden',
   },
   textInput: {
     height: 220,
-    padding: Spacing.md,
-    paddingTop: Spacing.md,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     fontSize: 16,
     lineHeight: 24,
     color: Colors.textPrimary,
@@ -153,8 +163,8 @@ const styles = StyleSheet.create({
   submitButton: {
     width: 44,
     height: 44,
-    borderRadius: BorderRadius.full,
-    backgroundColor: Colors.surfaceHover,
+    borderRadius: 12,
+    backgroundColor: Colors.surfaceAlt,
     alignItems: 'center',
     justifyContent: 'center',
   },

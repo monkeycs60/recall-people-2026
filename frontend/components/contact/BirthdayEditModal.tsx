@@ -260,14 +260,14 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 12,
-    backgroundColor: Colors.background,
-    borderWidth: 1,
+    backgroundColor: Colors.surface,
+    borderWidth: 2,
     borderColor: Colors.border,
   },
   cancelButtonText: {
-    color: Colors.textSecondary,
+    color: Colors.primary,
     fontSize: 15,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   saveButton: {
     paddingVertical: 12,

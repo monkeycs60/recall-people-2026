@@ -271,13 +271,14 @@ const styles = StyleSheet.create({
   createButton: {
     width: 44,
     height: 44,
-    borderRadius: 10,
+    borderRadius: 12,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   createButtonDisabled: {
     backgroundColor: Colors.textMuted,
+    opacity: 0.5,
   },
   section: {
     flex: 1,

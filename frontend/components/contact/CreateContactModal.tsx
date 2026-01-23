@@ -1,6 +1,7 @@
 import { View, Text, TextInput, Pressable, StyleSheet, Modal } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { Colors } from '@/constants/theme';
 
 type CreateContactModalProps = {
@@ -13,6 +14,18 @@ export function CreateContactModal({ visible, onClose, onCreate }: CreateContact
   const { t } = useTranslation();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [firstNameFocused, setFirstNameFocused] = useState(false);
+  const [lastNameFocused, setLastNameFocused] = useState(false);
+
+  const firstNameInputStyle = useAnimatedStyle(() => ({
+    borderColor: withTiming(firstNameFocused ? Colors.primary : Colors.borderLight, { duration: 150 }),
+    borderWidth: withTiming(firstNameFocused ? 2 : 1.5, { duration: 150 }),
+  }));
+
+  const lastNameInputStyle = useAnimatedStyle(() => ({
+    borderColor: withTiming(lastNameFocused ? Colors.primary : Colors.borderLight, { duration: 150 }),
+    borderWidth: withTiming(lastNameFocused ? 2 : 1.5, { duration: 150 }),
+  }));
 
   useEffect(() => {
     if (visible) {
@@ -35,26 +48,34 @@ export function CreateContactModal({ visible, onClose, onCreate }: CreateContact
           <Text style={styles.title}>{t('contacts.createModal.title')}</Text>
 
           <Text style={styles.label}>{t('contact.name.firstName')} *</Text>
-          <TextInput
-            style={styles.input}
-            value={firstName}
-            onChangeText={setFirstName}
-            placeholder={t('contact.name.firstNamePlaceholder')}
-            placeholderTextColor={Colors.textMuted}
-            autoFocus
-            returnKeyType="next"
-          />
+          <Animated.View style={[styles.inputContainer, firstNameInputStyle]}>
+            <TextInput
+              style={styles.input}
+              value={firstName}
+              onChangeText={setFirstName}
+              placeholder={t('contact.name.firstNamePlaceholder')}
+              placeholderTextColor={Colors.textMuted}
+              autoFocus
+              returnKeyType="next"
+              onFocus={() => setFirstNameFocused(true)}
+              onBlur={() => setFirstNameFocused(false)}
+            />
+          </Animated.View>
 
           <Text style={styles.label}>{t('contact.name.lastName')}</Text>
-          <TextInput
-            style={styles.input}
-            value={lastName}
-            onChangeText={setLastName}
-            placeholder={t('contact.name.lastNamePlaceholder')}
-            placeholderTextColor={Colors.textMuted}
-            returnKeyType="done"
-            onSubmitEditing={handleCreate}
-          />
+          <Animated.View style={[styles.inputContainer, lastNameInputStyle]}>
+            <TextInput
+              style={styles.input}
+              value={lastName}
+              onChangeText={setLastName}
+              placeholder={t('contact.name.lastNamePlaceholder')}
+              placeholderTextColor={Colors.textMuted}
+              returnKeyType="done"
+              onSubmitEditing={handleCreate}
+              onFocus={() => setLastNameFocused(true)}
+              onBlur={() => setLastNameFocused(false)}
+            />
+          </Animated.View>
 
           <View style={styles.buttonRow}>
             <Pressable style={styles.cancelButton} onPress={onClose}>
@@ -104,15 +125,18 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     marginBottom: 8,
   },
-  input: {
-    backgroundColor: Colors.background,
+  inputContainer: {
+    backgroundColor: Colors.surface,
     borderRadius: 12,
-    padding: 14,
+    borderWidth: 1.5,
+    borderColor: Colors.borderLight,
+    marginBottom: 16,
+  },
+  input: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     fontSize: 16,
     color: Colors.textPrimary,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    marginBottom: 16,
   },
   buttonRow: {
     flexDirection: 'row',
@@ -124,14 +148,14 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 12,
-    backgroundColor: Colors.background,
-    borderWidth: 1,
+    backgroundColor: Colors.surface,
+    borderWidth: 2,
     borderColor: Colors.border,
   },
   cancelButtonText: {
-    color: Colors.textSecondary,
+    color: Colors.primary,
     fontSize: 15,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   createButton: {
     paddingVertical: 12,
@@ -140,7 +164,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
   },
   createButtonDisabled: {
-    backgroundColor: Colors.border,
+    backgroundColor: Colors.textMuted,
+    opacity: 0.5,
   },
   createButtonText: {
     color: Colors.textInverse,
@@ -148,6 +173,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   createButtonTextDisabled: {
-    color: Colors.textMuted,
+    color: Colors.textInverse,
   },
 });

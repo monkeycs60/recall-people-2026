@@ -120,11 +120,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     paddingVertical: 14,
     paddingHorizontal: 24,
-    borderRadius: BorderRadius.md,
+    borderRadius: 12,
     marginTop: 20,
     gap: 8,
-    borderWidth: 2,
-    borderColor: Colors.border,
   },
   buttonText: {
     color: Colors.textInverse,

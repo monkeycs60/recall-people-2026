@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
   packageCard: {
     flex: 1,
     backgroundColor: Colors.surface,
-    borderRadius: 16,
+    borderRadius: 12,
     padding: 16,
     alignItems: 'center',
     borderWidth: 2,
@@ -347,10 +347,10 @@ const styles = StyleSheet.create({
   purchaseButtonText: {
     color: Colors.textInverse,
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   restoreText: {
-    color: Colors.textMuted,
+    color: Colors.textSecondary,
     fontSize: 14,
   },
 });

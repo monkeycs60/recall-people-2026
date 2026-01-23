@@ -1342,11 +1342,11 @@ const styles = StyleSheet.create({
   editNameConfirm: {
     paddingVertical: 8,
     paddingHorizontal: 16,
-    backgroundColor: Colors.primaryLight,
-    borderRadius: 8,
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
   },
   editNameConfirmText: {
-    color: Colors.primary,
+    color: Colors.textInverse,
     fontWeight: '600',
   },
   subtitle: {
@@ -1479,27 +1479,28 @@ const styles = StyleSheet.create({
   confirmButton: {
     paddingVertical: 8,
     paddingHorizontal: 16,
-    backgroundColor: Colors.primaryLight,
-    borderRadius: 8,
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
     alignItems: 'center',
     alignSelf: 'flex-start',
   },
   confirmButtonText: {
-    color: Colors.primary,
-    fontWeight: '500',
+    color: Colors.textInverse,
+    fontWeight: '600',
   },
   confirmButtonSuccess: {
     marginTop: 8,
     paddingVertical: 6,
     paddingHorizontal: 12,
-    backgroundColor: `${Colors.success}20`,
-    borderRadius: 8,
+    backgroundColor: Colors.success,
+    borderRadius: 12,
     alignItems: 'center',
     alignSelf: 'flex-start',
   },
   confirmButtonSuccessText: {
-    color: Colors.success,
+    color: Colors.textInverse,
     fontSize: 14,
+    fontWeight: '600',
   },
   chipsRow: {
     flexDirection: 'row',
@@ -1510,20 +1511,23 @@ const styles = StyleSheet.create({
   groupChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.primaryLight,
+    backgroundColor: Colors.surface,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 20,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: Colors.border,
   },
   groupChipText: {
-    color: Colors.primary,
+    color: Colors.textPrimary,
     marginRight: 4,
+    fontWeight: '600',
   },
   groupChipNew: {
     color: Colors.primary,
-    opacity: 0.6,
     fontSize: 12,
     marginRight: 4,
+    fontWeight: '600',
   },
   addGroupButton: {
     flexDirection: 'row',
@@ -1550,12 +1554,13 @@ const styles = StyleSheet.create({
   createGroupButton: {
     paddingVertical: 8,
     paddingHorizontal: 12,
-    backgroundColor: Colors.primaryLight,
-    borderRadius: 8,
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
     marginBottom: 8,
   },
   createGroupText: {
-    color: Colors.primary,
+    color: Colors.textInverse,
+    fontWeight: '600',
   },
   cancelButton: {
     paddingVertical: 8,
@@ -1563,6 +1568,7 @@ const styles = StyleSheet.create({
   },
   cancelButtonText: {
     color: Colors.textSecondary,
+    fontWeight: '600',
   },
   resolvedCard: {
     backgroundColor: `${Colors.success}10`,
@@ -1791,23 +1797,23 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    backgroundColor: Colors.background,
-    borderRadius: 8,
+    backgroundColor: Colors.surface,
+    borderRadius: 12,
     alignItems: 'center',
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: Colors.border,
   },
   transcriptionCancelButtonText: {
-    color: Colors.textSecondary,
+    color: Colors.primary,
     fontSize: 15,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   transcriptionConfirmButton: {
     flex: 1,
     paddingVertical: 12,
     paddingHorizontal: 16,
     backgroundColor: Colors.primary,
-    borderRadius: 8,
+    borderRadius: 12,
     alignItems: 'center',
   },
   transcriptionConfirmButtonDisabled: {

@@ -315,11 +315,6 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: 'center',
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 4,
   },
   primaryButtonText: {
     color: Colors.textInverse,
@@ -345,8 +340,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 12,
   },
   googleButton: {
-    backgroundColor: Colors.background,
-    borderWidth: 1,
+    backgroundColor: Colors.surface,
+    borderWidth: 2,
     borderColor: Colors.border,
     paddingVertical: 12,
     borderRadius: 12,
