@@ -31,6 +31,7 @@ import { ExportDataSheet } from '@/components/profile/ExportDataSheet';
 import { LegalNoticesSheet } from '@/components/profile/LegalNoticesSheet';
 import { SubscriptionCard } from '@/components/profile/SubscriptionCard';
 import { TestProCard } from '@/components/profile/TestProCard';
+import { UserAvatarEditModal } from '@/components/profile/UserAvatarEditModal';
 import { Colors } from '@/constants/theme';
 import Constants from 'expo-constants';
 import { revenueCatService } from '@/services/revenuecat.service';
@@ -48,6 +49,8 @@ export default function ProfileScreen() {
   const isTestPro = useSubscriptionStore((state) => state.isTestPro);
 
   const [showPaywall, setShowPaywall] = useState(false);
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const [avatarCacheKey, setAvatarCacheKey] = useState(Date.now().toString());
 
   const languagePickerRef = useRef<BottomSheetModal>(null);
   const statisticsSheetRef = useRef<BottomSheetModal>(null);
@@ -68,6 +71,14 @@ export default function ProfileScreen() {
 
   const handleOpenLegal = useCallback(() => {
     legalNoticesSheetRef.current?.present();
+  }, []);
+
+  const handleEditAvatar = useCallback(() => {
+    setShowAvatarModal(true);
+  }, []);
+
+  const handleSaveAvatar = useCallback(() => {
+    setAvatarCacheKey(Date.now().toString());
   }, []);
 
   const handleManageSubscription = async () => {
@@ -148,10 +159,9 @@ export default function ProfileScreen() {
   };
 
   return (
-    <View className="flex-1 bg-background">
+    <View style={styles.container}>
       <ScrollView
-        className="flex-1"
-        style={{ paddingTop: insets.top + 16 }}
+        style={[styles.scrollView, { paddingTop: insets.top + 16 }]}
         contentContainerStyle={styles.scrollContent}
       >
         <Text style={styles.screenTitle}>{t('profile.title')}</Text>
@@ -161,6 +171,9 @@ export default function ProfileScreen() {
             name={user.name}
             email={user.email}
             provider={user.provider}
+            avatarUrl={user.avatarUrl}
+            avatarCacheKey={avatarCacheKey}
+            onAvatarPress={handleEditAvatar}
           />
         )}
 
@@ -261,11 +274,27 @@ export default function ProfileScreen() {
       <Modal visible={showPaywall} animationType="slide" presentationStyle="pageSheet">
         <Paywall onClose={() => setShowPaywall(false)} />
       </Modal>
+
+      {user && (
+        <UserAvatarEditModal
+          visible={showAvatarModal}
+          currentAvatarUrl={user.avatarUrl}
+          onSave={handleSaveAvatar}
+          onClose={() => setShowAvatarModal(false)}
+        />
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
     paddingHorizontal: 24,
     paddingBottom: 180,
