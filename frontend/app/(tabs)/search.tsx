@@ -565,7 +565,8 @@ const styles = StyleSheet.create({
 		borderRadius: BorderRadius.md,
 	},
 	sendButtonDisabled: {
-		backgroundColor: Colors.border,
+		backgroundColor: Colors.borderLight,
+		opacity: 0.6,
 	},
 	sendButtonText: {
 		fontSize: 16,
