@@ -4,9 +4,9 @@ import PhoneMockup from './PhoneMockup';
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden pt-20 pb-16 md:pt-28 md:pb-20 min-h-[90vh] flex items-center bg-background">
+    <section className="relative pt-20 pb-16 md:pt-28 md:pb-20 min-h-screen flex items-center bg-background">
       {/* Decorative glow shapes */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none">
         {/* Large violet glow - top left */}
         <div
           className="absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full glow-violet opacity-30 animate-glow-breathe"
@@ -15,7 +15,7 @@ export default function Hero() {
 
         {/* Amber glow - bottom right */}
         <div
-          className="absolute -bottom-40 -right-20 w-[400px] h-[400px] rounded-full glow-amber opacity-25 animate-glow-breathe"
+          className="absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full glow-amber opacity-25 animate-glow-breathe translate-x-1/3 translate-y-1/3"
           style={{ animationDelay: '2s' }}
         />
 

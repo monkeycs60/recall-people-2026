@@ -54,13 +54,23 @@ export function useCreateGroup() {
   });
 }
 
+export function invalidateAllGroupContactIds(queryClient: ReturnType<typeof useQueryClient>) {
+  queryClient.invalidateQueries({
+    predicate: (query) =>
+      query.queryKey[0] === 'groups' && query.queryKey[1] === 'contactIds',
+  });
+}
+
 export function useDeleteGroup() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (id: string) => groupService.delete(id),
-    onSuccess: () => {
+    onSuccess: (_, deletedGroupId) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.groups.all });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.groups.contactIds(deletedGroupId),
+      });
     },
   });
 }
@@ -96,6 +106,7 @@ export function useSetContactGroups() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.contacts.detail(variables.contactId),
       });
+      invalidateAllGroupContactIds(queryClient);
     },
   });
 }

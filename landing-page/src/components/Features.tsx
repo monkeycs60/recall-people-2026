@@ -33,11 +33,11 @@ const sectionBgs = ['bg-background', 'bg-primary-light/10', 'bg-calendar-light/1
 
 export default function Features() {
   return (
-    <section id="features" className="py-20 md:py-28">
+    <section id="features" className="py-12 md:py-16">
       {/* Section header */}
-      <div className="container mx-auto px-4 mb-16">
+      <div className="container mx-auto px-4 mb-10">
         <div className="text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-3">
             How it works
           </h2>
           <p className="text-lg text-text-secondary max-w-2xl mx-auto">
@@ -50,11 +50,11 @@ export default function Features() {
       {features.map((feature, index) => (
         <div
           key={index}
-          className={`py-16 md:py-20 ${sectionBgs[index % sectionBgs.length]}`}
+          className={`py-10 md:py-12 ${sectionBgs[index % sectionBgs.length]}`}
         >
           <div className="container mx-auto px-4">
             <div
-              className={`grid lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto ${
+              className={`grid lg:grid-cols-2 gap-8 lg:gap-12 items-center max-w-5xl mx-auto ${
                 index % 2 === 1 ? 'lg:flex-row-reverse' : ''
               }`}
             >

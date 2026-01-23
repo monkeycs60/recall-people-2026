@@ -9,7 +9,8 @@ import {
 	StyleSheet,
 	Image,
 } from 'react-native';
-import { useState, useRef, useCallback, useMemo } from 'react';
+import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -35,6 +36,7 @@ import { ContactAvatar } from '@/components/contact/ContactAvatar';
 import { getContactDisplayName } from '@/utils/contactDisplayName';
 import { ContactListSkeleton } from '@/components/skeleton/ContactListSkeleton';
 import { CreateContactModal } from '@/components/contact/CreateContactModal';
+import { GlobalGroupsManagementSheet } from '@/components/contact/GlobalGroupsManagementSheet';
 import { queryKeys } from '@/lib/query-keys';
 import { contactService } from '@/services/contact.service';
 import { formatDistanceToNow } from 'date-fns';
@@ -125,6 +127,12 @@ export default function ContactsScreen() {
 	const [isPullRefreshing, setIsPullRefreshing] = useState(false);
 	const [filterText, setFilterText] = useState('');
 	const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+
+	const groupsSheetRef = useRef<BottomSheetModal>(null);
+
+	const handleOpenGroupsSheet = () => {
+		groupsSheetRef.current?.present();
+	};
 
 	const { data: groupContactIds } = useContactIdsForGroup(selectedGroupId);
 
@@ -344,19 +352,19 @@ export default function ContactsScreen() {
 							)}
 						</View>
 
-						{groups.length > 0 && (
-							<ScrollView
-								horizontal
-								showsHorizontalScrollIndicator={false}
-								contentContainerStyle={styles.groupChipsContainer}>
-								<View style={styles.groupsLabelContainer}>
-									<Users size={14} color={Colors.textMuted} />
-								</View>
-								{groups.map((group) =>
-									renderGroupChip(group, selectedGroupId === group.id)
-								)}
-							</ScrollView>
-						)}
+						<ScrollView
+							horizontal
+							showsHorizontalScrollIndicator={false}
+							contentContainerStyle={styles.groupChipsContainer}>
+							<Pressable
+								style={styles.groupsManageButton}
+								onPress={handleOpenGroupsSheet}>
+								<Users size={14} color={Colors.textSecondary} />
+							</Pressable>
+							{groups.map((group) =>
+								renderGroupChip(group, selectedGroupId === group.id)
+							)}
+						</ScrollView>
 					</View>
 
 					<View style={styles.allContactsSection}>
@@ -409,6 +417,8 @@ export default function ContactsScreen() {
 				onClose={() => setIsCreateModalVisible(false)}
 				onCreate={handleCreateContact}
 			/>
+
+			<GlobalGroupsManagementSheet ref={groupsSheetRef} />
 		</View>
 	);
 }
@@ -467,8 +477,15 @@ const styles = StyleSheet.create({
 		paddingTop: 12,
 		paddingRight: 24,
 	},
-	groupsLabelContainer: {
-		marginRight: 4,
+	groupsManageButton: {
+		width: 32,
+		height: 32,
+		borderRadius: 16,
+		backgroundColor: Colors.surface,
+		borderWidth: 1,
+		borderColor: Colors.border,
+		alignItems: 'center',
+		justifyContent: 'center',
 	},
 	groupChip: {
 		flexDirection: 'row',
