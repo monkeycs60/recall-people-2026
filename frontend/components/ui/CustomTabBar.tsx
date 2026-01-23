@@ -149,7 +149,7 @@ export function CustomTabBar({ state, navigation }: TabBarProps) {
               style={styles.menuOptionRow}
               onPress={() => handleMenuOption('/ask')}
             >
-              <View style={[styles.menuIconCircle, { backgroundColor: '#7C3AED' }]}>
+              <View style={[styles.menuIconCircle, { backgroundColor: Colors.calendar }]}>
                 <Sparkle size={22} color={Colors.textInverse} strokeWidth={2.5} />
               </View>
               <View style={styles.menuOptionTextContainer}>

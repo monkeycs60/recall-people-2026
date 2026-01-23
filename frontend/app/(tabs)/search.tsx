@@ -327,7 +327,7 @@ export default function AssistantScreen() {
 								</Animated.View>
 							) : (
 								<>
-									<Mic size={20} color={Colors.voice} />
+									<Mic size={20} color={Colors.primary} />
 									<Text style={styles.voiceButtonText}>
 										{t('assistant.voiceButton')}
 									</Text>
@@ -535,8 +535,8 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		gap: Spacing.sm,
 		backgroundColor: Colors.surface,
-		borderWidth: 1,
-		borderColor: Colors.voice,
+		borderWidth: 2,
+		borderColor: Colors.primary,
 		paddingVertical: 14,
 		borderRadius: BorderRadius.md,
 	},
@@ -547,7 +547,7 @@ const styles = StyleSheet.create({
 	voiceButtonText: {
 		fontSize: 16,
 		fontWeight: '600',
-		color: Colors.voice,
+		color: Colors.primary,
 	},
 	voiceButtonTextActive: {
 		fontSize: 16,

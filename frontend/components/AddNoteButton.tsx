@@ -74,7 +74,7 @@ export function AddNoteButton({ firstName, onAddNote }: AddNoteButtonProps) {
               style={styles.menuOptionRow}
               onPress={() => handleOptionPress('audio')}
             >
-              <View style={[styles.menuIconCircle, { backgroundColor: Colors.voice }]}>
+              <View style={[styles.menuIconCircle, { backgroundColor: Colors.primary }]}>
                 <Mic size={22} color={Colors.textInverse} strokeWidth={2.5} />
               </View>
               <View style={styles.menuOptionTextContainer}>
