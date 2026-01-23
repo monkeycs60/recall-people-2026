@@ -1,47 +1,47 @@
 import { Platform } from 'react-native';
 
 export const Colors = {
-  // Backgrounds - Pop Style
-  background: '#FFFFFF',
-  surface: '#FFFFFF',
+  // Backgrounds - Pop Friendly
+  background: '#F8F7F4', // crème chaud
+  surface: '#FFFFFF', // cards, modals
   surfaceElevated: '#FFFFFF',
-  surfaceHover: '#FFF9F5', // crème
+  surfaceAlt: '#F1F0ED', // zones secondaires, séparateurs
 
   // Text - Bold & Clear
   textPrimary: '#1A1A1A',
-  textSecondary: '#6B7280',
-  textMuted: '#9CA3AF',
+  textSecondary: '#57534E',
+  textMuted: '#A8A29E',
   textInverse: '#FFFFFF',
 
-  // Primary - Corail (brand principal)
-  primary: '#FF7F6B', // corail
-  primaryLight: '#FFDAB3', // pêche
-  primaryDark: '#E86B58', // corail hover
+  // Primary - Teal (brand principal)
+  primary: '#14B8A6', // teal
+  primaryLight: '#CCFBF1', // teal light
+  primaryDark: '#0D9488', // teal dark (hover)
 
-  // Pastels secondaires
-  rose: '#FFB5C5', // rose bonbon
-  menthe: '#7DDEC3', // menthe
-  bleuCiel: '#7EC8E8', // bleu ciel
-  peche: '#FFDAB3', // pêche clair
+  // Pastels Avatars
+  jaune: '#FEF3C7', // background avatar, tags
+  peche: '#FFEDD5', // background avatar, tags
+  menthe: '#D1FAE5', // background avatar, success
+  lavande: '#EDE9FE', // background avatar, tags
 
   // Accent secondaire (keep for compatibility)
-  secondary: '#7EC8E8', // bleu ciel
-  secondaryLight: '#E8F4F8',
+  secondary: '#14B8A6', // aligned with primary teal
+  secondaryLight: '#CCFBF1',
 
   // Semantic
-  success: '#7DDEC3', // menthe
-  successLight: '#E5F7F2',
-  warning: '#FFDAB3', // pêche
-  error: '#E86B58', // corail dark
-  info: '#7EC8E8', // bleu ciel
+  success: '#10B981',
+  successLight: '#D1FAE5',
+  warning: '#F59E0B',
+  error: '#EF4444',
+  info: '#14B8A6', // = teal (cohérence)
 
   // Borders - Flat & Bold style
   border: '#1A1A1A', // noir pour style flat & bold
-  borderLight: '#E5E5E5',
+  borderLight: '#E7E5E4',
 
   // Tab bar
-  tabIconDefault: '#9CA3AF',
-  tabIconSelected: '#FF7F6B', // corail
+  tabIconDefault: '#A8A29E',
+  tabIconSelected: '#14B8A6', // teal
 };
 
 export const Spacing = {
