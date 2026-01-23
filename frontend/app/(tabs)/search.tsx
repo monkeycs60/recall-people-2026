@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { Mic, Send, Sparkle, History, ChevronDown, ChevronUp, Trash2, User } from 'lucide-react-native';
 import { Colors, Spacing, BorderRadius } from '@/constants/theme';
+import { DecoCircle } from '@/components/ui/DecoCircle';
 import { useContactsQuery } from '@/hooks/useContactsQuery';
 import { noteService } from '@/services/note.service';
 import { transcribeAudio, askQuestion, useAskTrial } from '@/lib/api';
@@ -277,6 +278,12 @@ export default function AssistantScreen() {
 			behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
 			keyboardVerticalOffset={0}>
 			<View style={styles.container}>
+				<DecoCircle
+					color={Colors.primaryLight}
+					opacity={0.15}
+					size={280}
+					position={{ top: -100, right: -80 }}
+				/>
 				<View style={[styles.header, { paddingTop: insets.top + Spacing.md }]}>
 					<View style={styles.titleRow}>
 						<Sparkle size={24} color={Colors.primary} />
