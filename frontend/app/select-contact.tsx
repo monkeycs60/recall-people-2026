@@ -65,6 +65,10 @@ export default function SelectContactScreen() {
     if (isEditingNewName && newContactName.trim()) {
       return newContactName.trim();
     }
+    // If user rejected the suggestion, don't show the detected name
+    if (rejectedSuggestion) {
+      return '';
+    }
     if (detection) {
       if (detection.lastName) {
         return `${detection.firstName} ${detection.lastName}`;
@@ -76,7 +80,7 @@ export default function SelectContactScreen() {
       return detection.firstName;
     }
     return '';
-  }, [detection, isEditingNewName, newContactName]);
+  }, [detection, isEditingNewName, newContactName, rejectedSuggestion]);
 
   const filteredContacts = useMemo(() => {
     const filtered = searchQuery
