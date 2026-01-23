@@ -53,13 +53,13 @@ export default function Pricing() {
               key={plan.name}
               className={`relative rounded-2xl border-2 border-border p-8 ${
                 plan.highlighted
-                  ? 'bg-[#FFF0ED]'
+                  ? 'bg-primary-light'
                   : 'bg-white'
               }`}
             >
               {plan.highlighted && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <span className="bg-rose text-text-primary text-sm font-semibold px-4 py-1.5 rounded-full border-[1.5px] border-border">
+                  <span className="bg-primary text-white text-sm font-semibold px-4 py-1.5 rounded-full border-[1.5px] border-border">
                     Popular
                   </span>
                 </div>
@@ -88,7 +88,7 @@ export default function Pricing() {
               <ul className="space-y-3 mb-8">
                 {plan.features.map((feature, index) => (
                   <li key={index} className="flex items-start gap-3">
-                    <Check className="w-5 h-5 mt-0.5 flex-shrink-0 text-menthe" />
+                    <Check className="w-5 h-5 mt-0.5 flex-shrink-0 text-primary" />
                     <span className="text-text-secondary">
                       {feature}
                     </span>
