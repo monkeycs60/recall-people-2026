@@ -175,8 +175,8 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     backgroundColor: Colors.surface,
-    borderTopWidth: 1.5,
-    borderTopColor: Colors.border,
+    borderTopWidth: 1,
+    borderTopColor: Colors.borderLight,
   },
   tabBar: {
     flexDirection: 'row',
@@ -215,8 +215,6 @@ const styles = StyleSheet.create({
     height: 64,
     borderRadius: 32,
     backgroundColor: Colors.primary,
-    borderWidth: 2,
-    borderColor: Colors.border,
   },
   fabInner: {
     flex: 1,
