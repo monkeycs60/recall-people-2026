@@ -6,8 +6,8 @@ export default function Footer() {
   return (
     <footer className="relative bg-foreground text-white py-16 overflow-hidden">
       {/* Subtle decorative shapes */}
-      <div className="absolute top-8 left-8 w-32 h-32 bg-rose rounded-full opacity-10 blur-2xl" />
-      <div className="absolute bottom-12 right-16 w-40 h-40 bg-menthe rounded-full opacity-10 blur-2xl" />
+      <div className="absolute top-8 left-8 w-32 h-32 bg-primary rounded-full opacity-10 blur-2xl" />
+      <div className="absolute bottom-12 right-16 w-40 h-40 bg-calendar rounded-full opacity-10 blur-2xl" />
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-6xl mx-auto">

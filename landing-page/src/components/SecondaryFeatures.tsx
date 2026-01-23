@@ -5,7 +5,7 @@ const features = [
     icon: Lock,
     title: 'Your data stays yours',
     description: 'Everything is stored locally on your phone. No cloud. No access for anyone but you.',
-    iconBg: 'bg-menthe',
+    iconBg: 'bg-calendar-light',
   },
   {
     icon: Globe2,

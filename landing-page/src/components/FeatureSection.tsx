@@ -7,7 +7,7 @@ interface FeatureSectionProps {
   demoCaption: string;
   fallbackImage?: string;
   reverse?: boolean;
-  bgColor?: 'surface' | 'surface-alt' | 'rose' | 'menthe' | 'bleu-ciel';
+  bgColor?: 'surface' | 'surface-alt' | 'primary' | 'calendar' | 'bleu-ciel';
 }
 
 export default function FeatureSection({
@@ -23,8 +23,8 @@ export default function FeatureSection({
   const bgClasses: Record<string, string> = {
     'surface': 'bg-surface',
     'surface-alt': 'bg-surface-alt',
-    'rose': 'bg-rose/10',
-    'menthe': 'bg-menthe/10',
+    'primary': 'bg-primary-light/10',
+    'calendar': 'bg-calendar-light/10',
     'bleu-ciel': 'bg-bleu-ciel/10',
   };
   const bgClass = bgClasses[bgColor] || 'bg-surface';

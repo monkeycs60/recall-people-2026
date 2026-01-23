@@ -8,7 +8,7 @@ const features = [
     description: 'After a meeting, just talk. "Met Sarah at the conference, she works at Google, has two kids..." Recall captures everything.',
     screenshot: '/images/screenshots/contact-id-2.png',
     alt: 'Voice recording extraction',
-    iconBg: 'bg-rose',
+    iconBg: 'bg-primary-light',
   },
   {
     icon: User,
@@ -16,7 +16,7 @@ const features = [
     description: 'Names, jobs, interests, family — all organized automatically. Plus AI summaries that remind you who they really are.',
     screenshot: '/images/screenshots/contact-id-1.png',
     alt: 'Contact profile view',
-    iconBg: 'bg-menthe',
+    iconBg: 'bg-calendar-light',
   },
   {
     icon: Search,
@@ -29,7 +29,7 @@ const features = [
 ];
 
 // Alternating section backgrounds for flat & bold style
-const sectionBgs = ['bg-surface', 'bg-rose/10', 'bg-menthe/10'];
+const sectionBgs = ['bg-background', 'bg-primary-light/10', 'bg-calendar-light/10'];
 
 export default function Features() {
   return (

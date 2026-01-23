@@ -5,8 +5,8 @@ export default function FinalCTA() {
   return (
     <section id="download" className="relative py-24 md:py-32 bg-primary overflow-hidden">
       {/* Decorative shapes */}
-      <div className="absolute top-8 left-8 w-16 h-16 bg-rose/40 rounded-full" />
-      <div className="absolute top-1/4 right-12 w-12 h-12 bg-menthe/40 rounded-full" />
+      <div className="absolute top-8 left-8 w-16 h-16 bg-primary-light/40 rounded-full" />
+      <div className="absolute top-1/4 right-12 w-12 h-12 bg-calendar-light/40 rounded-full" />
       <div className="absolute bottom-12 left-1/4 w-10 h-10 bg-peche/50 rounded-full" />
       <div className="absolute bottom-1/3 right-1/4 w-8 h-8 bg-bleu-ciel/40 rounded-full" />
 
