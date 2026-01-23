@@ -12,7 +12,7 @@ export const canActivateTestPro = (
 	if (__DEV__) return true;
 
 	const adminEmail =
-		process.env.EXPO_PUBLIC_ADMIN_EMAIL || 'marc@mail.com' || '';
+		process.env.EXPO_PUBLIC_ADMIN_EMAIL || 'lucien@mail.com' || '';
 	if (
 		email &&
 		adminEmail &&

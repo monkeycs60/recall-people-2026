@@ -1,12 +1,13 @@
 import Image from 'next/image';
 
 interface PhoneMockupProps {
-  src: string;
+  src?: string;
+  videoSrc?: string;
   alt: string;
   className?: string;
 }
 
-export default function PhoneMockup({ src, alt, className = '' }: PhoneMockupProps) {
+export default function PhoneMockup({ src, videoSrc, alt, className = '' }: PhoneMockupProps) {
   return (
     <div className={`relative ${className}`}>
       {/* iPhone frame - responsive width */}
@@ -20,13 +21,25 @@ export default function PhoneMockup({ src, alt, className = '' }: PhoneMockupPro
 
             {/* Screen content */}
             <div className="relative aspect-[9/19.5] overflow-hidden rounded-[2.5rem]">
-              <Image
-                src={src}
-                alt={alt}
-                fill
-                className="object-cover object-top"
-                priority
-              />
+              {videoSrc ? (
+                <video
+                  src={videoSrc}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="absolute inset-0 w-full h-full object-cover object-top"
+                  aria-label={alt}
+                />
+              ) : src ? (
+                <Image
+                  src={src}
+                  alt={alt}
+                  fill
+                  className="object-cover object-top"
+                  priority
+                />
+              ) : null}
             </div>
           </div>
         </div>

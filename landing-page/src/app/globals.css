@@ -6,10 +6,10 @@
   --color-background: #F8F7F4;
   --color-foreground: var(--foreground);
 
-  /* Primary - Teal */
-  --color-primary: #14B8A6;
-  --color-primary-hover: #0D9488;
-  --color-primary-light: #CCFBF1;
+  /* Primary - Violet Moderne */
+  --color-primary: #8B5CF6;
+  --color-primary-hover: #7C3AED;
+  --color-primary-light: #EDE9FE;
 
   /* Pastels Avatars */
   --color-jaune: #FEF3C7;
@@ -38,7 +38,7 @@
   --color-success: #10B981;
   --color-warning: #F59E0B;
   --color-error: #EF4444;
-  --color-info: #14B8A6;
+  --color-info: #8B5CF6;
 }
 
 :root {

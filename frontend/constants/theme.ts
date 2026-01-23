@@ -13,10 +13,10 @@ export const Colors = {
   textMuted: '#A8A29E',
   textInverse: '#FFFFFF',
 
-  // Primary - Teal (brand principal)
-  primary: '#14B8A6', // teal
-  primaryLight: '#CCFBF1', // teal light
-  primaryDark: '#0D9488', // teal dark (hover)
+  // Primary - Violet Moderne (brand principal)
+  primary: '#8B5CF6', // violet vibrant
+  primaryLight: '#EDE9FE', // lavande pastel
+  primaryDark: '#7C3AED', // violet dark (hover)
 
   // Pastels Avatars
   jaune: '#FEF3C7', // background avatar, tags
@@ -25,15 +25,15 @@ export const Colors = {
   lavande: '#EDE9FE', // background avatar, tags
 
   // Accent secondaire (keep for compatibility)
-  secondary: '#14B8A6', // aligned with primary teal
-  secondaryLight: '#CCFBF1',
+  secondary: '#8B5CF6', // aligned with primary violet
+  secondaryLight: '#EDE9FE',
 
   // Semantic
   success: '#10B981',
   successLight: '#D1FAE5',
   warning: '#F59E0B',
   error: '#EF4444',
-  info: '#14B8A6', // = teal (cohérence)
+  info: '#8B5CF6', // = violet (cohérence)
 
   // Borders - Flat & Bold style
   border: '#1A1A1A', // noir pour style flat & bold
@@ -41,7 +41,7 @@ export const Colors = {
 
   // Tab bar
   tabIconDefault: '#A8A29E',
-  tabIconSelected: '#14B8A6', // teal
+  tabIconSelected: '#8B5CF6', // violet
 };
 
 export const Spacing = {
