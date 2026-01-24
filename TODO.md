@@ -1,2 +1,0 @@
-- Changer avatar placeholder
-- landing page avec gif
