@@ -633,6 +633,7 @@ export type TrialsStatusResponse = {
   success: boolean;
   freeNoteTrials: number;
   freeAskTrials: number;
+  freeAvatarTrials: number;
   isPremium: boolean;
 };
 
@@ -641,7 +642,7 @@ export type UseTrialResponse = {
   isPremium?: boolean;
   remaining: number;
   error?: string;
-  type?: 'notes' | 'ask';
+  type?: 'notes' | 'ask' | 'avatar';
 };
 
 export const getTrialsStatus = async (): Promise<TrialsStatusResponse | null> => {
@@ -666,6 +667,13 @@ export const useNoteTrial = async (): Promise<UseTrialResponse> => {
 
 export const useAskTrial = async (): Promise<UseTrialResponse> => {
   return apiCall('/api/subscription/use-ask-trial', {
+    method: 'POST',
+    showErrorToast: false,
+  });
+};
+
+export const useAvatarTrial = async (): Promise<UseTrialResponse> => {
+  return apiCall('/api/subscription/use-avatar-trial', {
     method: 'POST',
     showErrorToast: false,
   });

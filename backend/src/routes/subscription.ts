@@ -118,7 +118,7 @@ subscriptionRoutes.get('/trials', async (c) => {
 
   const userData = await prisma.user.findUnique({
     where: { id: user.id },
-    select: { freeNoteTrials: true, freeAskTrials: true },
+    select: { freeNoteTrials: true, freeAskTrials: true, freeAvatarTrials: true },
   });
 
   const rawWhitelist = c.env.PRO_WHITELIST;
@@ -130,6 +130,7 @@ subscriptionRoutes.get('/trials', async (c) => {
     success: true,
     freeNoteTrials: userData?.freeNoteTrials ?? 10,
     freeAskTrials: userData?.freeAskTrials ?? 10,
+    freeAvatarTrials: userData?.freeAvatarTrials ?? 5,
     isPremium,
   });
 });
@@ -213,5 +214,46 @@ subscriptionRoutes.post('/use-ask-trial', async (c) => {
     success: true,
     isPremium: false,
     remaining: updated.freeAskTrials,
+  });
+});
+
+// Check and decrement avatar trial (for non-Premium users)
+subscriptionRoutes.post('/use-avatar-trial', async (c) => {
+  const user = c.get('user');
+  const prisma = getPrisma(c.env.DATABASE_URL);
+
+  const rawWhitelist = c.env.PRO_WHITELIST;
+  const whitelist = parseWhitelist(rawWhitelist);
+  const userEmail = user.email?.toLowerCase().trim() || '';
+  const isPremium = userEmail ? whitelist.has(userEmail) : false;
+
+  if (isPremium) {
+    return c.json({ success: true, isPremium: true, remaining: -1 });
+  }
+
+  const userData = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { freeAvatarTrials: true },
+  });
+
+  const currentTrials = userData?.freeAvatarTrials ?? 5;
+
+  if (currentTrials <= 0) {
+    return c.json(
+      { success: false, error: 'no_trials_left', type: 'avatar', remaining: 0 },
+      403
+    );
+  }
+
+  const updated = await prisma.user.update({
+    where: { id: user.id },
+    data: { freeAvatarTrials: { decrement: 1 } },
+    select: { freeAvatarTrials: true },
+  });
+
+  return c.json({
+    success: true,
+    isPremium: false,
+    remaining: updated.freeAvatarTrials,
   });
 });

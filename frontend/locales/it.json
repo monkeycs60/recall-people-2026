@@ -377,7 +377,9 @@
       "deleteSuccess": "Avatar rimosso",
       "deleteError": "Rimozione avatar fallita",
       "permissionDenied": "Accesso foto richiesto",
-      "promptRequired": "Descrivi l'aspetto"
+      "promptRequired": "Descrivi l'aspetto",
+      "trialsRemaining": "{{count}} generazione/i gratuita/e rimanente/i",
+      "noTrialsLeft": "Generazioni gratuite esaurite"
     },
     "photo": {
       "permissionTitle": "Accesso foto richiesto",
@@ -611,7 +613,8 @@
       "notesLimit": "Hai raggiunto il limite mensile gratuito di 10 note",
       "aiSearch": "La ricerca IA e una funzionalita premium",
       "recordingDuration": "Le registrazioni piu lunghe richiedono premium",
-      "aiAssistant": "L'assistente IA e una funzionalita premium"
+      "aiAssistant": "L'assistente IA e una funzionalita premium",
+      "avatarGeneration": "Hai usato le tue 5 generazioni gratuite di avatar IA"
     },
     "errors": {
       "purchaseFailed": "Acquisto fallito",

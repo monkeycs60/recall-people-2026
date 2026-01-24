@@ -377,7 +377,9 @@
       "deleteSuccess": "Avatar removed",
       "deleteError": "Failed to remove avatar",
       "permissionDenied": "Photo access required",
-      "promptRequired": "Please describe the appearance"
+      "promptRequired": "Please describe the appearance",
+      "trialsRemaining": "{{count}} free generations remaining",
+      "noTrialsLeft": "Free generations exhausted"
     },
     "photo": {
       "permissionTitle": "Photo Access Required",
@@ -611,7 +613,8 @@
       "notesLimit": "You've reached your free monthly limit of 10 notes",
       "aiSearch": "AI Search is a premium feature",
       "recordingDuration": "Longer recordings require premium",
-      "aiAssistant": "AI Assistant is a premium feature"
+      "aiAssistant": "AI Assistant is a premium feature",
+      "avatarGeneration": "You've used all 5 free AI avatar generations"
     },
     "errors": {
       "purchaseFailed": "Purchase failed",

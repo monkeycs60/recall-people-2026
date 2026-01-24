@@ -13,13 +13,15 @@ import {
 } from 'react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image as ImageIcon, Sparkles, Trash2, X } from 'lucide-react-native';
+import { Image as ImageIcon, Sparkles, Trash2, X, Lock } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system/legacy';
 import { Image } from 'expo-image';
 import { Colors, Spacing, BorderRadius } from '@/constants/theme';
-import { uploadAvatar, generateAvatar, deleteAvatar } from '@/lib/api';
+import { uploadAvatar, generateAvatar, deleteAvatar, useAvatarTrial } from '@/lib/api';
 import { contactService } from '@/services/contact.service';
+import { useSubscriptionStore } from '@/stores/subscription-store';
+import { Paywall } from '@/components/Paywall';
 
 type AvatarEditModalProps = {
   visible: boolean;
@@ -46,6 +48,12 @@ export function AvatarEditModal({
   const [isUploading, setIsUploading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [showPaywall, setShowPaywall] = useState(false);
+
+  const canGenerateAvatar = useSubscriptionStore((state) => state.canGenerateAvatar);
+  const freeAvatarTrials = useSubscriptionStore((state) => state.freeAvatarTrials);
+  const setFreeAvatarTrials = useSubscriptionStore((state) => state.setFreeAvatarTrials);
+  const isPremium = useSubscriptionStore((state) => state.isPremium);
 
   const resetState = () => {
     setMode('choose');
@@ -53,11 +61,20 @@ export function AvatarEditModal({
     setPreviewUrl(null);
     setIsUploading(false);
     setIsGenerating(false);
+    setShowPaywall(false);
   };
 
   const handleClose = () => {
     resetState();
     onClose();
+  };
+
+  const handleGeneratePress = () => {
+    if (!canGenerateAvatar()) {
+      setShowPaywall(true);
+      return;
+    }
+    setMode('generate');
   };
 
   const handlePickImage = async () => {
@@ -122,8 +139,26 @@ export function AvatarEditModal({
       return;
     }
 
+    if (!canGenerateAvatar()) {
+      setShowPaywall(true);
+      return;
+    }
+
     setIsGenerating(true);
     try {
+      // Decrement trial before generating
+      const trialResult = await useAvatarTrial();
+      if (!trialResult.success && trialResult.error === 'no_trials_left') {
+        setShowPaywall(true);
+        setIsGenerating(false);
+        return;
+      }
+
+      // Update local state with remaining trials
+      if (trialResult.remaining >= 0) {
+        setFreeAvatarTrials(trialResult.remaining);
+      }
+
       const response = await generateAvatar({
         contactId,
         prompt: prompt.trim(),
@@ -154,6 +189,14 @@ export function AvatarEditModal({
   };
 
   const isLoading = isUploading || isGenerating;
+
+  if (showPaywall) {
+    return (
+      <Modal visible={visible} animationType="slide" onRequestClose={() => setShowPaywall(false)}>
+        <Paywall onClose={() => setShowPaywall(false)} reason="avatar_generation" />
+      </Modal>
+    );
+  }
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
@@ -191,13 +234,23 @@ export function AvatarEditModal({
                 </View>
               </Pressable>
 
-              <Pressable style={styles.optionButton} onPress={() => setMode('generate')}>
+              <Pressable style={styles.optionButton} onPress={handleGeneratePress}>
                 <View style={[styles.optionIconContainer, styles.optionIconGenerate]}>
-                  <Sparkles size={24} color={Colors.primary} />
+                  {canGenerateAvatar() ? (
+                    <Sparkles size={24} color={Colors.primary} />
+                  ) : (
+                    <Lock size={24} color={Colors.textMuted} />
+                  )}
                 </View>
                 <View style={styles.optionTextContainer}>
                   <Text style={styles.optionTitle}>{t('contact.avatar.generateWithAI')}</Text>
-                  <Text style={styles.optionDescription}>{t('contact.avatar.generateWithAIDescription')}</Text>
+                  <Text style={styles.optionDescription}>
+                    {canGenerateAvatar()
+                      ? isPremium
+                        ? t('contact.avatar.generateWithAIDescription')
+                        : t('contact.avatar.trialsRemaining', { count: freeAvatarTrials })
+                      : t('contact.avatar.noTrialsLeft')}
+                  </Text>
                 </View>
               </Pressable>
 

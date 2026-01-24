@@ -377,7 +377,9 @@
       "deleteSuccess": "Avatar entfernt",
       "deleteError": "Avatar konnte nicht entfernt werden",
       "permissionDenied": "Fotozugriff erforderlich",
-      "promptRequired": "Bitte beschreibe das Aussehen"
+      "promptRequired": "Bitte beschreibe das Aussehen",
+      "trialsRemaining": "{{count}} kostenlose Generierung(en) übrig",
+      "noTrialsLeft": "Kostenlose Generierungen aufgebraucht"
     },
     "photo": {
       "permissionTitle": "Fotozugriff erforderlich",
@@ -611,7 +613,8 @@
       "notesLimit": "Du hast dein kostenloses monatliches Limit von 10 Notizen erreicht",
       "aiSearch": "KI-Suche ist eine Premium-Funktion",
       "recordingDuration": "Längere Aufnahmen erfordern Premium",
-      "aiAssistant": "KI-Assistent ist eine Premium-Funktion"
+      "aiAssistant": "KI-Assistent ist eine Premium-Funktion",
+      "avatarGeneration": "Du hast deine 5 kostenlosen KI-Avatar-Generierungen verbraucht"
     },
     "errors": {
       "purchaseFailed": "Kauf fehlgeschlagen",

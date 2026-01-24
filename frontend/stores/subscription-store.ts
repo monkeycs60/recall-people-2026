@@ -12,6 +12,7 @@ type SubscriptionState = {
   isSyncing: boolean;
   freeNoteTrials: number;
   freeAskTrials: number;
+  freeAvatarTrials: number;
 };
 
 type SubscriptionActions = {
@@ -28,7 +29,9 @@ type SubscriptionActions = {
   syncTrialsStatus: () => Promise<void>;
   setFreeNoteTrials: (count: number) => void;
   setFreeAskTrials: (count: number) => void;
+  setFreeAvatarTrials: (count: number) => void;
   canUseAsk: () => boolean;
+  canGenerateAvatar: () => boolean;
 };
 
 const getCurrentMonthKey = (): string => {
@@ -52,10 +55,12 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
         isSyncing: false,
         freeNoteTrials: 10,
         freeAskTrials: 10,
+        freeAvatarTrials: 5,
 
         setIsPremium: (isPremium) => set({ isPremium }),
         setFreeNoteTrials: (count) => set({ freeNoteTrials: count }),
         setFreeAskTrials: (count) => set({ freeAskTrials: count }),
+        setFreeAvatarTrials: (count) => set({ freeAvatarTrials: count }),
 
         activateTestPro: () => set({ isTestPro: true, isPremium: true }),
 
@@ -144,6 +149,12 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
           return state.freeAskTrials > 0;
         },
 
+        canGenerateAvatar: () => {
+          const state = get();
+          if (state.isPremium || state.isTestPro) return true;
+          return state.freeAvatarTrials > 0;
+        },
+
         syncTrialsStatus: async () => {
           try {
             const status = await getTrialsStatus();
@@ -154,6 +165,7 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
               set({
                 freeNoteTrials: status.freeNoteTrials,
                 freeAskTrials: status.freeAskTrials,
+                freeAvatarTrials: status.freeAvatarTrials,
               });
               if (status.isPremium) {
                 set({ isPremium: true, isTestPro: true });
@@ -200,6 +212,7 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
           currentMonthKey: state.currentMonthKey,
           freeNoteTrials: state.freeNoteTrials,
           freeAskTrials: state.freeAskTrials,
+          freeAvatarTrials: state.freeAvatarTrials,
         }),
       }
     ),

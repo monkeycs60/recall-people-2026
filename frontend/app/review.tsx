@@ -13,9 +13,10 @@ import { hotTopicService } from '@/services/hot-topic.service';
 import { notificationService } from '@/services/notification.service';
 import { contactService } from '@/services/contact.service';
 import { groupService } from '@/services/group.service';
-import { generateSuggestedQuestions, generateSummary, generateAvatarFromHints, extractInfo } from '@/lib/api';
+import { generateSuggestedQuestions, generateSummary, generateAvatarFromHints, extractInfo, useAvatarTrial } from '@/lib/api';
 import { noteService } from '@/services/note.service';
 import { useAppStore } from '@/stores/app-store';
+import { useSubscriptionStore } from '@/stores/subscription-store';
 import { queryKeys } from '@/lib/query-keys';
 import { Colors } from '@/constants/theme';
 import { Archive, Calendar, Edit3, Plus, Trash2, X } from 'lucide-react-native';
@@ -594,7 +595,9 @@ export default function ReviewScreen() {
 
       // Auto-generate avatar for contacts without avatar (fire-and-forget)
       // Works for both new contacts and existing contacts without avatar
-      const shouldGenerateAvatar = !contactDetails?.avatarUrl && extraction.contactIdentified.avatarHints;
+      // Only generate if user has avatar trials remaining (free tier: 5 max)
+      const canGenerateAvatar = useSubscriptionStore.getState().canGenerateAvatar();
+      const shouldGenerateAvatar = !contactDetails?.avatarUrl && extraction.contactIdentified.avatarHints && canGenerateAvatar;
       if (shouldGenerateAvatar) {
         const gender = extraction.contactIdentified.gender || 'unknown';
         const avatarHints = extraction.contactIdentified.avatarHints || {
@@ -606,12 +609,27 @@ export default function ReviewScreen() {
 
         addPendingAvatarGeneration(finalContactId);
 
-        generateAvatarFromHints({
-          contactId: finalContactId,
-          gender,
-          avatarHints,
-        })
-          .then(async (result) => {
+        // Use avatar trial first
+        useAvatarTrial()
+          .then(async (trialResult) => {
+            if (!trialResult.success && trialResult.error === 'no_trials_left') {
+              removePendingAvatarGeneration(finalContactId);
+              console.log('[Avatar Auto] No trials left, skipping avatar generation');
+              return;
+            }
+
+            // Update local state with remaining trials
+            if (trialResult.remaining >= 0) {
+              useSubscriptionStore.getState().setFreeAvatarTrials(trialResult.remaining);
+            }
+
+            // Generate the avatar
+            const result = await generateAvatarFromHints({
+              contactId: finalContactId,
+              gender,
+              avatarHints,
+            });
+
             await contactService.update(finalContactId, { avatarUrl: result.avatarUrl });
             removePendingAvatarGeneration(finalContactId);
             queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });

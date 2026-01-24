@@ -403,7 +403,9 @@
       "deleteSuccess": "Avatar supprimé",
       "deleteError": "Échec de la suppression de l'avatar",
       "permissionDenied": "Accès aux photos requis",
-      "promptRequired": "Veuillez décrire l'apparence"
+      "promptRequired": "Veuillez décrire l'apparence",
+      "trialsRemaining": "{{count}} génération(s) gratuite(s) restante(s)",
+      "noTrialsLeft": "Générations gratuites épuisées"
     },
     "photo": {
       "permissionTitle": "Accès aux photos requis",
@@ -637,7 +639,8 @@
       "notesLimit": "Vous avez atteint la limite de 10 notes par mois",
       "aiSearch": "La recherche IA est une fonctionnalité premium",
       "recordingDuration": "Les enregistrements plus longs nécessitent premium",
-      "aiAssistant": "L'assistant IA est une fonctionnalité premium"
+      "aiAssistant": "L'assistant IA est une fonctionnalité premium",
+      "avatarGeneration": "Vous avez utilisé vos 5 générations d'avatar IA gratuites"
     },
     "errors": {
       "purchaseFailed": "Echec de l'achat",
