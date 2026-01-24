@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -22,9 +23,15 @@ type SwipeableEventCardProps = {
 };
 
 export function SwipeableEventCard({ event, onPress, onDelete }: SwipeableEventCardProps) {
+  const { t } = useTranslation();
   const translateX = useSharedValue(0);
   const itemHeight = useSharedValue(60);
   const itemOpacity = useSharedValue(1);
+
+  // For birthday events, use translated title instead of stored one
+  const displayTitle = event.birthdayContactId
+    ? t('upcoming.birthdayTitle', { firstName: event.contact.firstName })
+    : event.title;
 
   const handleDelete = useCallback(() => {
     onDelete(event.id);
@@ -96,7 +103,7 @@ export function SwipeableEventCard({ event, onPress, onDelete }: SwipeableEventC
           <Pressable style={styles.cardPressable} onPress={handlePress}>
             <Calendar size={16} color={Colors.calendar} />
             <View style={styles.eventContent}>
-              <Text style={styles.eventTitle}>{event.title}</Text>
+              <Text style={styles.eventTitle}>{displayTitle}</Text>
               <Text style={styles.eventContact}>
                 {event.contact.firstName} {event.contact.lastName || ''}
               </Text>
