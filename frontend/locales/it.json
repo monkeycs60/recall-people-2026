@@ -462,7 +462,8 @@
     "past": "Passati",
     "noEvents": "Nessun evento in programma",
     "noPastEvents": "Nessun evento passato",
-    "today": "Oggi"
+    "today": "Oggi",
+    "birthdayTitle": "Compleanno di {{firstName}}"
   },
   "profile": {
     "title": "Profilo",

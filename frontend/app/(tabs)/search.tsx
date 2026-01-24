@@ -340,7 +340,7 @@ export default function AssistantScreen() {
 							onPress={handleSubmit}
 							disabled={!canSubmit}>
 							{isSubmitting ? (
-								<ActivityIndicator size="small" color={Colors.textInverse} />
+								<ActivityIndicator size="small" color={Colors.primary} />
 							) : (
 								<>
 									<Text

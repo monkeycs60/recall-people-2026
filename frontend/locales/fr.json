@@ -488,7 +488,8 @@
     "past": "Passés",
     "noEvents": "Aucun événement prévu",
     "noPastEvents": "Aucun événement passé",
-    "today": "Aujourd'hui"
+    "today": "Aujourd'hui",
+    "birthdayTitle": "Anniversaire de {{firstName}}"
   },
   "profile": {
     "title": "Profil",

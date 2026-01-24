@@ -2,6 +2,7 @@ import * as Crypto from 'expo-crypto';
 import { startOfDay, addDays, isBefore } from 'date-fns';
 import { getDatabase } from '@/lib/db';
 import { HotTopic, HotTopicStatus } from '@/types';
+import i18n from '@/lib/i18n';
 
 export const hotTopicService = {
   getById: async (id: string): Promise<HotTopic | null> => {
@@ -320,7 +321,7 @@ export const hotTopicService = {
         [
           id,
           contactId,
-          `Anniversaire de ${contactFirstName}`,
+          i18n.t('upcoming.birthdayTitle', { firstName: contactFirstName }),
           null,
           'active',
           date.toISOString(),

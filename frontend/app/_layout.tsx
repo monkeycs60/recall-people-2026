@@ -1,5 +1,6 @@
 import { Stack, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import '../global.css';
 import '@/lib/i18n';
 import { initDatabase } from '@/lib/db';
@@ -47,6 +48,7 @@ let isDbInitialized = false;
 
 export default function RootLayout() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [dbReady, setDbReady] = useState(isDbInitialized);
   const [dbError, setDbError] = useState<string | null>(null);
   const language = useSettingsStore((state) => state.language);
@@ -226,7 +228,7 @@ export default function RootLayout() {
               name="ask-result"
               options={{
                 headerShown: true,
-                title: 'Demander',
+                title: t('ask.title'),
                 headerLeft: () => (
                   <Pressable
                     onPress={() => router.back()}

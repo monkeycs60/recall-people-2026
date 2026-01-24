@@ -375,7 +375,7 @@ export default function ContactsScreen() {
 							<Text style={styles.sectionTitle}>
 								{selectedGroupId
 									? groups.find((group) => group.id === selectedGroupId)?.name || 'Contacts'
-									: 'Tous les contacts'}
+									: t('selectContact.allContacts')}
 							</Text>
 							<Pressable
 								style={styles.addContactButton}

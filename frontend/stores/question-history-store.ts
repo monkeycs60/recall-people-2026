@@ -29,11 +29,6 @@ const generateId = (): string => {
 	return `qh_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 };
 
-const truncateAnswer = (answer: string, maxLength = 150): string => {
-	if (answer.length <= maxLength) return answer;
-	return answer.substring(0, maxLength).trim() + '...';
-};
-
 export const useQuestionHistoryStore = create<QuestionHistoryState & QuestionHistoryActions>()(
 	devtools(
 		persist(
@@ -46,7 +41,7 @@ export const useQuestionHistoryStore = create<QuestionHistoryState & QuestionHis
 						const newEntry: QuestionHistoryEntry = {
 							id: generateId(),
 							question: entry.question,
-							answerSummary: truncateAnswer(entry.answerSummary),
+							answerSummary: entry.answerSummary,
 							date: new Date().toISOString(),
 							relatedContactId: entry.relatedContactId,
 							relatedContactName: entry.relatedContactName,

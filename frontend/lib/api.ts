@@ -621,7 +621,7 @@ export type AskResponse = {
 export const askQuestion = async (data: AskRequest): Promise<AskResponse> => {
   return apiCall('/api/ask', {
     method: 'POST',
-    body: data,
+    body: { ...data, language: getCurrentLanguage() },
   });
 };
 

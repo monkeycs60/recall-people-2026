@@ -264,7 +264,7 @@ export default function AskScreen() {
 					<Text style={styles.headerTitle}>
 						{preselectedContact
 							? t('ask.titleAbout', { firstName: preselectedContact.firstName })
-							: t('ask.title', 'Demander')}
+							: t('ask.title')}
 					</Text>
 					<View style={styles.backButton} />
 				</View>
@@ -280,7 +280,7 @@ export default function AskScreen() {
 							placeholder={
 								preselectedContact
 									? t('ask.inputPlaceholderAbout', { firstName: preselectedContact.firstName })
-									: t('ask.inputPlaceholder', 'Pose ta question...')
+									: t('ask.inputPlaceholder')
 							}
 							placeholderTextColor={Colors.textMuted}
 							value={question}
