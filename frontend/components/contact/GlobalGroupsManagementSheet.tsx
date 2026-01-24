@@ -1,6 +1,6 @@
-import { View, Text, Pressable, TextInput, Alert, StyleSheet } from 'react-native';
+import { View, Text, Pressable, Alert, StyleSheet } from 'react-native';
 import { forwardRef, useCallback, useState } from 'react';
-import { BottomSheetModal, BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import { BottomSheetModal, BottomSheetBackdrop, BottomSheetScrollView, BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import { useTranslation } from 'react-i18next';
 import { Pencil, Trash2, Plus, X, Check, Users } from 'lucide-react-native';
 import { Colors } from '@/constants/theme';
@@ -15,7 +15,7 @@ import { Group } from '@/types';
 export const GlobalGroupsManagementSheet = forwardRef<BottomSheetModal>(
   (_, ref) => {
     const { t } = useTranslation();
-    const { groups: allGroups } = useGroupsQuery();
+    const { groups: allGroups, refetch: refetchGroups } = useGroupsQuery();
     const createGroupMutation = useCreateGroup();
     const deleteGroupMutation = useDeleteGroup();
     const updateGroupMutation = useUpdateGroup();
@@ -25,10 +25,11 @@ export const GlobalGroupsManagementSheet = forwardRef<BottomSheetModal>(
     const [editingGroupName, setEditingGroupName] = useState('');
 
     const handleCreateGroup = async () => {
-      if (!newGroupName.trim()) return;
+      const trimmedName = newGroupName.trim();
+      if (!trimmedName) return;
 
       const existingGroup = allGroups.find(
-        (group) => group.name.toLowerCase() === newGroupName.trim().toLowerCase()
+        (group) => group.name.toLowerCase() === trimmedName.toLowerCase()
       );
 
       if (existingGroup) {
@@ -39,8 +40,14 @@ export const GlobalGroupsManagementSheet = forwardRef<BottomSheetModal>(
         return;
       }
 
-      await createGroupMutation.mutateAsync(newGroupName.trim());
-      setNewGroupName('');
+      try {
+        await createGroupMutation.mutateAsync(trimmedName);
+        setNewGroupName('');
+        await refetchGroups();
+      } catch (error) {
+        console.error('Error creating group:', error);
+        Alert.alert(t('common.error'), String(error));
+      }
     };
 
     const handleStartEditGroup = (group: Group) => {
@@ -58,6 +65,7 @@ export const GlobalGroupsManagementSheet = forwardRef<BottomSheetModal>(
 
       setEditingGroupId(null);
       setEditingGroupName('');
+      await refetchGroups();
     };
 
     const handleCancelEditGroup = () => {
@@ -76,6 +84,7 @@ export const GlobalGroupsManagementSheet = forwardRef<BottomSheetModal>(
             style: 'destructive',
             onPress: async () => {
               await deleteGroupMutation.mutateAsync(group.id);
+              await refetchGroups();
             },
           },
         ]
@@ -94,6 +103,9 @@ export const GlobalGroupsManagementSheet = forwardRef<BottomSheetModal>(
         ref={ref}
         snapPoints={['60%']}
         enableDynamicSizing={false}
+        keyboardBehavior="interactive"
+        keyboardBlurBehavior="restore"
+        android_keyboardInputMode="adjustResize"
         backdropComponent={renderBackdrop}
         backgroundStyle={{ backgroundColor: Colors.surface }}
         handleIndicatorStyle={{ backgroundColor: Colors.border }}
@@ -108,7 +120,7 @@ export const GlobalGroupsManagementSheet = forwardRef<BottomSheetModal>(
         >
           <View style={styles.createSection}>
             <View style={styles.createRow}>
-              <TextInput
+              <BottomSheetTextInput
                 style={styles.createInput}
                 value={newGroupName}
                 onChangeText={setNewGroupName}
@@ -146,7 +158,7 @@ export const GlobalGroupsManagementSheet = forwardRef<BottomSheetModal>(
                   if (isEditing) {
                     return (
                       <View key={group.id} style={styles.groupRowEditing}>
-                        <TextInput
+                        <BottomSheetTextInput
                           style={styles.editInput}
                           value={editingGroupName}
                           onChangeText={setEditingGroupName}

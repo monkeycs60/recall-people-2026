@@ -2,6 +2,7 @@
 
 This is an EXPO application, developping a mobile app in React Native.
 
+- ALWAYS translate all strings in the codebase using all five languages (FR, EN, ES, IT, DE)
 - NEVER TOUCH llm model name: I have determined the best model for the job, don't change it.
 
 ### Prohibited Practices

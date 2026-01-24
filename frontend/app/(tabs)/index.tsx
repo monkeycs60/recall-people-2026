@@ -9,7 +9,7 @@ import {
 	StyleSheet,
 	Image,
 } from 'react-native';
-import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -360,6 +360,9 @@ export default function ContactsScreen() {
 								style={styles.groupsManageButton}
 								onPress={handleOpenGroupsSheet}>
 								<Users size={14} color={Colors.textSecondary} />
+								<Text style={styles.groupsManageButtonText}>
+									{t('profile.statistics.groups')}
+								</Text>
 							</Pressable>
 							{groups.map((group) =>
 								renderGroupChip(group, selectedGroupId === group.id)
@@ -386,7 +389,7 @@ export default function ContactsScreen() {
 						<View style={styles.emptyGroupContainer}>
 							<Users size={48} color={Colors.textMuted} />
 							<Text style={styles.emptyGroupText}>
-								Aucun contact dans ce groupe
+								{t('contacts.noContactsInGroup')}
 							</Text>
 						</View>
 					) : (
@@ -478,14 +481,20 @@ const styles = StyleSheet.create({
 		paddingRight: 24,
 	},
 	groupsManageButton: {
-		width: 32,
-		height: 32,
-		borderRadius: 16,
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: 6,
 		backgroundColor: Colors.surface,
 		borderWidth: 1,
 		borderColor: Colors.border,
-		alignItems: 'center',
-		justifyContent: 'center',
+		borderRadius: 20,
+		paddingHorizontal: 12,
+		paddingVertical: 8,
+	},
+	groupsManageButtonText: {
+		fontSize: 13,
+		fontWeight: '500',
+		color: Colors.textSecondary,
 	},
 	groupChip: {
 		flexDirection: 'row',
