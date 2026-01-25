@@ -570,8 +570,11 @@
       "description": "Diese Sprache wird für die Oberfläche und zur Transkription deiner Sprachaufnahmen verwendet."
     },
     "solution": {
-      "title": "Vergisst du wichtige Details?",
-      "description": "Recall People verwandelt deine Sprachnotizen in intelligente Kontaktkarten. Sprich einfach, wir kümmern uns um den Rest."
+      "title": "Verwandle deine Stimme in intelligente Kontaktkarten",
+      "feature1": "Kategorisiert deine Infos automatisch",
+      "feature2": "KI-Zusammenfassung mit jeder Notiz aktualisiert",
+      "feature3": "Eisbrecher-Fragen automatisch generiert",
+      "feature4": "Alle Aufnahmen transkribiert und geordnet"
     },
     "demo": {
       "title": "So funktioniert es",

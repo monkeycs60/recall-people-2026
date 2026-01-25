@@ -570,8 +570,11 @@
       "description": "Este idioma se usará para la interfaz y para transcribir tus grabaciones de voz."
     },
     "solution": {
-      "title": "¿Olvidas detalles importantes?",
-      "description": "Recall People convierte tus notas de voz en fichas de contacto inteligentes. Solo habla, nosotros nos encargamos del resto."
+      "title": "Convierte tu voz en fichas de contacto inteligentes",
+      "feature1": "Categoriza automáticamente tu información",
+      "feature2": "Resumen IA actualizado con cada nota",
+      "feature3": "Preguntas rompe-hielo generadas automáticamente",
+      "feature4": "Todas las grabaciones transcritas y ordenadas"
     },
     "demo": {
       "title": "Así es como funciona",

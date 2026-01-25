@@ -5,7 +5,6 @@ import {
   Dimensions,
   ScrollView,
   StyleSheet,
-  Image,
 } from 'react-native';
 import { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -17,17 +16,12 @@ import Animated, {
   interpolate,
   Extrapolation,
 } from 'react-native-reanimated';
-import { Globe, Check, Mic, Shield, Sparkles, Search } from 'lucide-react-native';
+import { Globe, Check, Mic, Shield, Search, FolderOpen, Sparkles, MessageCircleQuestion, FileText } from 'lucide-react-native';
 import { Video, ResizeMode } from 'expo-av';
 import { useSettingsStore } from '@/stores/settings-store';
 import { changeLanguage } from '@/lib/i18n';
 import { Language, SUPPORTED_LANGUAGES, LANGUAGE_NAMES, LANGUAGE_FLAGS } from '@/types';
 import { Colors, Spacing, BorderRadius } from '@/constants/theme';
-
-const ILLUSTRATIONS = {
-  solution: require('@/assets/ai-assets/guy-talking-to-his-phone.png'),
-  privacy: require('@/assets/ai-assets/guy-with-privacy-label.png'),
-};
 
 const DEMO_VIDEO = require('@/assets/video/onboarding-demo.webm');
 
@@ -118,40 +112,58 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
     </View>
   );
 
+  const solutionFeatures = [
+    {
+      key: 'feature1',
+      icon: FolderOpen,
+      color: Colors.calendar,
+      bgColor: Colors.calendarLight,
+    },
+    {
+      key: 'feature2',
+      icon: Sparkles,
+      color: Colors.primary,
+      bgColor: Colors.primaryLight,
+    },
+    {
+      key: 'feature3',
+      icon: MessageCircleQuestion,
+      color: Colors.voice,
+      bgColor: Colors.voiceLight,
+    },
+    {
+      key: 'feature4',
+      icon: FileText,
+      color: Colors.calendar,
+      bgColor: Colors.peche,
+    },
+  ];
+
   const renderSolutionSlide = () => (
     <View
       style={[styles.slideContainer, { width: SCREEN_WIDTH, backgroundColor: ONBOARDING_BACKGROUND }]}
     >
-      <View style={styles.illustrationContainer}>
-        <Image source={ILLUSTRATIONS.solution} style={styles.illustration} resizeMode="contain" />
-      </View>
-      <View style={styles.textContent}>
-        <Text style={styles.title}>{t('onboarding.solution.title')}</Text>
-        <Text style={styles.description}>{t('onboarding.solution.description')}</Text>
-      </View>
+      <View style={styles.solutionContent}>
+        <View style={styles.solutionIconContainer}>
+          <Mic size={32} color={Colors.primary} />
+        </View>
 
-      {/* Visual flow: Mic → Sparkles → Card */}
-      <View style={styles.flowContainer}>
-        <View style={styles.flowStep}>
-          <View style={[styles.flowIcon, { backgroundColor: Colors.primaryLight }]}>
-            <Mic size={24} color={Colors.primary} />
-          </View>
-        </View>
-        <View style={styles.flowArrow}>
-          <Text style={styles.flowArrowText}>→</Text>
-        </View>
-        <View style={styles.flowStep}>
-          <View style={[styles.flowIcon, { backgroundColor: Colors.primaryLight }]}>
-            <Sparkles size={24} color={Colors.primary} />
-          </View>
-        </View>
-        <View style={styles.flowArrow}>
-          <Text style={styles.flowArrowText}>→</Text>
-        </View>
-        <View style={styles.flowStep}>
-          <View style={[styles.flowIcon, { backgroundColor: Colors.primaryLight }]}>
-            <Text style={styles.flowCardIcon}>📇</Text>
-          </View>
+        <Text style={styles.title}>{t('onboarding.solution.title')}</Text>
+
+        <View style={styles.featuresList}>
+          {solutionFeatures.map((feature) => {
+            const IconComponent = feature.icon;
+            return (
+              <View key={feature.key} style={styles.featureCard}>
+                <View style={[styles.featureIconBox, { backgroundColor: feature.bgColor }]}>
+                  <IconComponent size={18} color={feature.color} />
+                </View>
+                <Text style={styles.featureText}>
+                  {t(`onboarding.solution.${feature.key}`)}
+                </Text>
+              </View>
+            );
+          })}
         </View>
       </View>
     </View>
@@ -354,21 +366,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: Spacing.xl,
   },
-  illustrationContainer: {
-    flex: 0.5,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingTop: Spacing.xl,
-  },
-  illustration: {
-    width: SCREEN_WIDTH * 0.6,
-    height: SCREEN_WIDTH * 0.6,
-    maxHeight: 220,
-  },
-  textContent: {
-    paddingBottom: Spacing.md,
-    alignItems: 'center',
-  },
   iconContainer: {
     backgroundColor: Colors.primaryLight,
     padding: Spacing.lg,
@@ -449,33 +446,49 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: '600',
   },
-  // Flow visualization
-  flowContainer: {
+  // Solution slide
+  solutionContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  solutionIconContainer: {
+    backgroundColor: Colors.primaryLight,
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.full,
+    marginBottom: Spacing.xl,
+  },
+  featuresList: {
+    marginTop: Spacing.xl,
+    width: '100%',
+    gap: Spacing.sm,
+  },
+  featureCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: Spacing.lg,
-    paddingHorizontal: Spacing.lg,
-  },
-  flowStep: {
-    alignItems: 'center',
-  },
-  flowIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: BorderRadius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  flowCardIcon: {
-    fontSize: 24,
-  },
-  flowArrow: {
+    backgroundColor: Colors.surface,
+    paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  flowArrowText: {
-    fontSize: 24,
-    color: Colors.textMuted,
+  featureIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: BorderRadius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: Spacing.md,
+  },
+  featureText: {
+    color: Colors.textPrimary,
+    fontSize: 14,
+    flex: 1,
+    fontWeight: '500',
   },
   // Demo slide
   demoContent: {

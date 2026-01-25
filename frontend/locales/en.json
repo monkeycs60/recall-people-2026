@@ -570,8 +570,11 @@
       "description": "This language will be used for the interface and to transcribe your voice recordings."
     },
     "solution": {
-      "title": "Forgetting important details?",
-      "description": "Recall People turns your voice notes into smart contact cards. Just talk, we handle the rest."
+      "title": "Turn your voice into smart contact cards",
+      "feature1": "Auto-categorizes your information",
+      "feature2": "AI summary refreshed with every note",
+      "feature3": "Ice-breaker questions generated automatically",
+      "feature4": "All recordings transcribed and organized"
     },
     "demo": {
       "title": "Here's how it works",

@@ -596,8 +596,11 @@
       "description": "Cette langue sera utilisée pour l'interface et pour transcrire vos enregistrements vocaux."
     },
     "solution": {
-      "title": "Vous oubliez des détails importants ?",
-      "description": "Recall People transforme vos notes vocales en fiches contacts intelligentes. Parlez, on s'occupe du reste."
+      "title": "Transformez votre voix en fiches contact intelligentes",
+      "feature1": "Catégorise automatiquement vos informations",
+      "feature2": "Résumé IA actualisé à chaque nouvelle note",
+      "feature3": "Questions brise-glace générées automatiquement",
+      "feature4": "Tous vos enregistrements transcrits et ordonnés"
     },
     "demo": {
       "title": "Voici comment ça marche",
