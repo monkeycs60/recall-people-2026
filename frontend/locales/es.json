@@ -582,7 +582,7 @@
       "description": "El asistente IA busca en todas tus notas para encontrar cualquier información.",
       "example1": "\"¿Quién trabaja en tecnología?\"",
       "example2": "\"¿Quién tiene hijos pequeños?\"",
-      "example3": "\"¿De qué hablé con María?\""
+      "example3": "\"¿Dónde estudia Sarah?\""
     },
     "privacy": {
       "title": "Tus datos se quedan en tu teléfono",

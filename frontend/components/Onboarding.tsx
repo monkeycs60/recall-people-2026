@@ -192,19 +192,27 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
       style={[styles.slideContainer, { width: SCREEN_WIDTH, backgroundColor: ONBOARDING_BACKGROUND }]}
     >
       <View style={styles.assistantContent}>
-        <View style={styles.assistantIconContainer}>
-          <Search size={48} color={Colors.primary} />
+        {/* Search icon with floating question chips around it */}
+        <View style={styles.searchVisualization}>
+          {/* Floating chips positioned around the icon */}
+          <View style={[styles.floatingChip, styles.chipPosition1]}>
+            <Text style={styles.floatingChipText}>{assistantExamples[0]}</Text>
+          </View>
+          <View style={[styles.floatingChip, styles.chipPosition2]}>
+            <Text style={styles.floatingChipText}>{assistantExamples[1]}</Text>
+          </View>
+          <View style={[styles.floatingChip, styles.chipPosition3]}>
+            <Text style={styles.floatingChipText}>{assistantExamples[2]}</Text>
+          </View>
+
+          {/* Central search icon */}
+          <View style={styles.assistantIconContainer}>
+            <Search size={40} color={Colors.primary} />
+          </View>
         </View>
+
         <Text style={styles.title}>{t('onboarding.assistant.title')}</Text>
         <Text style={styles.description}>{t('onboarding.assistant.description')}</Text>
-
-        <View style={styles.examplesContainer}>
-          {assistantExamples.map((example, index) => (
-            <View key={index} style={styles.exampleBubble}>
-              <Text style={styles.exampleText}>{example}</Text>
-            </View>
-          ))}
-        </View>
       </View>
     </View>
   );
@@ -506,30 +514,50 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  searchVisualization: {
+    width: SCREEN_WIDTH * 0.9,
+    height: 260,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.md,
+  },
   assistantIconContainer: {
     backgroundColor: Colors.primaryLight,
-    padding: Spacing.xl,
+    padding: Spacing.lg,
     borderRadius: BorderRadius.full,
-    marginBottom: Spacing.lg,
   },
-  examplesContainer: {
-    marginTop: Spacing.xl,
-    width: '100%',
-    gap: Spacing.sm,
-  },
-  exampleBubble: {
+  floatingChip: {
+    position: 'absolute',
     backgroundColor: Colors.surface,
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.lg,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-    borderColor: Colors.border,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.full,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+    maxWidth: SCREEN_WIDTH * 0.6,
   },
-  exampleText: {
-    color: Colors.textPrimary,
-    fontSize: 15,
-    fontStyle: 'italic',
-    textAlign: 'center',
+  floatingChipText: {
+    color: Colors.textSecondary,
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  chipPosition1: {
+    top: 20,
+    left: 10,
+    transform: [{ rotate: '-3deg' }],
+  },
+  chipPosition2: {
+    top: 40,
+    right: 5,
+    transform: [{ rotate: '2deg' }],
+  },
+  chipPosition3: {
+    bottom: 30,
+    left: SCREEN_WIDTH * 0.15,
+    transform: [{ rotate: '-1deg' }],
   },
   // Privacy slide
   privacyContent: {

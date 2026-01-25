@@ -582,7 +582,7 @@
       "description": "The AI assistant searches through all your notes to find any information.",
       "example1": "\"Who works in tech?\"",
       "example2": "\"Who has young kids?\"",
-      "example3": "\"What did I talk about with Sarah?\""
+      "example3": "\"Where does Sarah study?\""
     },
     "privacy": {
       "title": "Your data stays on your phone",

@@ -608,7 +608,7 @@
       "description": "L'assistant IA fouille dans toutes vos notes pour retrouver n'importe quelle information.",
       "example1": "« Qui travaille dans la tech ? »",
       "example2": "« Qui a des enfants en bas âge ? »",
-      "example3": "« De quoi j'ai parlé avec Marie ? »"
+      "example3": "« Où étudie Sarah ? »"
     },
     "privacy": {
       "title": "Vos données restent sur votre téléphone",
