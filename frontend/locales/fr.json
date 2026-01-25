@@ -600,7 +600,8 @@
       "feature1": "Catégorise automatiquement vos informations",
       "feature2": "Résumé IA actualisé à chaque nouvelle note",
       "feature3": "Questions brise-glace pour votre prochaine rencontre",
-      "feature4": "Tous vos enregistrements transcrits et ordonnés"
+      "feature4": "Tous vos enregistrements transcrits et ordonnés",
+      "feature5": "Notifications pour les événements de vos contacts"
     },
     "demo": {
       "title": "Voici comment ça marche",

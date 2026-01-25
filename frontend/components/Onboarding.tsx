@@ -152,6 +152,13 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
               <Text style={styles.featureCellText}>{t('onboarding.solution.feature4')}</Text>
             </View>
           </View>
+          {/* Row 3 - centered */}
+          <View style={styles.featuresRow}>
+            <View style={[styles.featureCell, styles.featureCellWide, { backgroundColor: Colors.lavande }]}>
+              <Text style={styles.featureEmoji}>🔔</Text>
+              <Text style={styles.featureCellText}>{t('onboarding.solution.feature5')}</Text>
+            </View>
+          </View>
         </View>
       </View>
     </View>
@@ -487,6 +494,9 @@ const styles = StyleSheet.create({
   },
   featureCellOffset: {
     marginTop: Spacing.sm,
+  },
+  featureCellWide: {
+    width: (SCREEN_WIDTH - Spacing.xl * 2) / 1.5,
   },
   featureEmoji: {
     fontSize: 20,
