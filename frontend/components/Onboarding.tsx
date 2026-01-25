@@ -31,13 +31,7 @@ const ILLUSTRATIONS = {
 
 const DEMO_VIDEO = require('@/assets/video/onboarding-demo.webm');
 
-const SLIDE_BACKGROUNDS = [
-  Colors.rose,
-  Colors.menthe,
-  Colors.bleuCiel,
-  Colors.peche,
-  Colors.rose,
-];
+const ONBOARDING_BACKGROUND = Colors.background;
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -94,7 +88,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
 
   const renderLanguageSlide = () => (
     <View
-      style={[styles.slideContainer, { width: SCREEN_WIDTH, backgroundColor: SLIDE_BACKGROUNDS[0] }]}
+      style={[styles.slideContainer, { width: SCREEN_WIDTH, backgroundColor: ONBOARDING_BACKGROUND }]}
     >
       <View style={styles.slideContent}>
         <View style={styles.iconContainer}>
@@ -126,7 +120,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
 
   const renderSolutionSlide = () => (
     <View
-      style={[styles.slideContainer, { width: SCREEN_WIDTH, backgroundColor: SLIDE_BACKGROUNDS[1] }]}
+      style={[styles.slideContainer, { width: SCREEN_WIDTH, backgroundColor: ONBOARDING_BACKGROUND }]}
     >
       <View style={styles.illustrationContainer}>
         <Image source={ILLUSTRATIONS.solution} style={styles.illustration} resizeMode="contain" />
@@ -165,7 +159,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
 
   const renderDemoSlide = () => (
     <View
-      style={[styles.slideContainer, { width: SCREEN_WIDTH, backgroundColor: SLIDE_BACKGROUNDS[2] }]}
+      style={[styles.slideContainer, { width: SCREEN_WIDTH, backgroundColor: ONBOARDING_BACKGROUND }]}
     >
       <View style={styles.demoContent}>
         <Text style={styles.title}>{t('onboarding.demo.title')}</Text>
@@ -195,7 +189,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
 
   const renderAssistantSlide = () => (
     <View
-      style={[styles.slideContainer, { width: SCREEN_WIDTH, backgroundColor: SLIDE_BACKGROUNDS[3] }]}
+      style={[styles.slideContainer, { width: SCREEN_WIDTH, backgroundColor: ONBOARDING_BACKGROUND }]}
     >
       <View style={styles.assistantContent}>
         <View style={styles.assistantIconContainer}>
@@ -217,7 +211,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
 
   const renderPrivacySlide = () => (
     <View
-      style={[styles.slideContainer, { width: SCREEN_WIDTH, backgroundColor: SLIDE_BACKGROUNDS[4] }]}
+      style={[styles.slideContainer, { width: SCREEN_WIDTH, backgroundColor: ONBOARDING_BACKGROUND }]}
     >
       <View style={styles.privacyContent}>
         <View style={styles.privacyIconContainer}>
@@ -251,7 +245,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: ONBOARDING_BACKGROUND }]}>
       {currentSlide < slides.length - 1 && (
         <Pressable
           onPress={handleSkip}
@@ -279,7 +273,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
         ))}
       </ScrollView>
 
-      <View style={[styles.bottomSection, { paddingBottom: Math.max(insets.bottom, Spacing.lg) }]}>
+      <View style={[styles.bottomSection, { paddingBottom: Math.max(insets.bottom, Spacing.lg), backgroundColor: ONBOARDING_BACKGROUND }]}>
         <View style={styles.pagination}>
           {slides.map((_, index) => {
             const dotStyle = useAnimatedStyle(() => {
@@ -323,7 +317,6 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   skipButton: {
     position: 'absolute',
