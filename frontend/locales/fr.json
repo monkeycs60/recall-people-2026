@@ -595,21 +595,25 @@
       "title": "Choisissez votre langue",
       "description": "Cette langue sera utilisée pour l'interface et pour transcrire vos enregistrements vocaux."
     },
-    "problem": {
-      "title": "« Comment s'appelait sa fille, déjà ? »",
-      "description": "On oublie 80% des détails après une discussion. Ne laissez plus la gêne s'installer."
+    "solution": {
+      "title": "Vous oubliez des détails importants ?",
+      "description": "Recall People transforme vos notes vocales en fiches contacts intelligentes. Parlez, on s'occupe du reste."
     },
-    "action": {
-      "title": "Votre arme secrète pour les relations.",
-      "description": "Juste après un café ou un appel, enregistrez un vocal. L'IA extrait automatiquement les pépites de la conversation."
+    "demo": {
+      "title": "Voici comment ça marche",
+      "description": "Parlez après une rencontre. L'IA extrait automatiquement les infos clés et crée la fiche contact."
     },
-    "value": {
-      "title": "Soyez la personne qui n'oublie jamais.",
-      "description": "Prénoms des proches, passions, projets en cours... Retrouvez tout en un coup d'œil avant votre prochaine rencontre."
+    "assistant": {
+      "title": "Posez n'importe quelle question",
+      "description": "L'assistant IA fouille dans toutes vos notes pour retrouver n'importe quelle information.",
+      "example1": "« Qui travaille dans la tech ? »",
+      "example2": "« Qui a des enfants en bas âge ? »",
+      "example3": "« De quoi j'ai parlé avec Marie ? »"
     },
-    "trust": {
-      "title": "Votre jardin secret est bien gardé.",
-      "description": "Vos souvenirs sont personnels. Recall People chiffre vos données pour que vous soyez le seul à y avoir accès."
+    "privacy": {
+      "title": "Vos données restent sur votre téléphone",
+      "description": "Rien n'est stocké sur nos serveurs. Vos notes sont privées, toujours.",
+      "local": "local"
     },
     "redoTour": "Refaire le tour guidé"
   },

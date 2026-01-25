@@ -569,21 +569,25 @@
       "title": "Elige tu idioma",
       "description": "Este idioma se usará para la interfaz y para transcribir tus grabaciones de voz."
     },
-    "problem": {
-      "title": "« ¿Cómo se llamaba su hija? »",
-      "description": "Olvidamos el 80% de los detalles después de una conversación. No dejes que los momentos incómodos vuelvan a pasar."
+    "solution": {
+      "title": "¿Olvidas detalles importantes?",
+      "description": "Recall People convierte tus notas de voz en fichas de contacto inteligentes. Solo habla, nosotros nos encargamos del resto."
     },
-    "action": {
-      "title": "Tu arma secreta para las relaciones.",
-      "description": "Justo después de un café o una llamada, graba una nota de voz. La IA extrae automáticamente las joyas de la conversación."
+    "demo": {
+      "title": "Así es como funciona",
+      "description": "Habla después de conocer a alguien. La IA extrae automáticamente la información clave y crea la ficha de contacto."
     },
-    "value": {
-      "title": "Sé la persona que nunca olvida.",
-      "description": "Nombres de seres queridos, pasiones, proyectos en curso... Encuentra todo de un vistazo antes de tu próximo encuentro."
+    "assistant": {
+      "title": "Haz cualquier pregunta",
+      "description": "El asistente IA busca en todas tus notas para encontrar cualquier información.",
+      "example1": "\"¿Quién trabaja en tecnología?\"",
+      "example2": "\"¿Quién tiene hijos pequeños?\"",
+      "example3": "\"¿De qué hablé con María?\""
     },
-    "trust": {
-      "title": "Tu jardín secreto está a salvo.",
-      "description": "Tus recuerdos son personales. Recall People cifra tus datos para que solo tú tengas acceso."
+    "privacy": {
+      "title": "Tus datos se quedan en tu teléfono",
+      "description": "Nada se guarda en nuestros servidores. Tus notas son privadas, siempre.",
+      "local": "local"
     },
     "redoTour": "Repetir tour guiado"
   },

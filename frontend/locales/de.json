@@ -569,21 +569,25 @@
       "title": "Wähle deine Sprache",
       "description": "Diese Sprache wird für die Oberfläche und zur Transkription deiner Sprachaufnahmen verwendet."
     },
-    "problem": {
-      "title": "„Wie hieß noch mal ihre Tochter?”",
-      "description": "Wir vergessen 80% der Details nach einem Gespräch. Lass peinliche Momente nicht wieder passieren."
+    "solution": {
+      "title": "Vergisst du wichtige Details?",
+      "description": "Recall People verwandelt deine Sprachnotizen in intelligente Kontaktkarten. Sprich einfach, wir kümmern uns um den Rest."
     },
-    "action": {
-      "title": "Deine Geheimwaffe für Beziehungen.",
-      "description": "Gleich nach einem Kaffee oder Anruf, nimm eine Sprachnotiz auf. Die KI extrahiert automatisch die Perlen des Gesprächs."
+    "demo": {
+      "title": "So funktioniert es",
+      "description": "Sprich nach einem Treffen. Die KI extrahiert automatisch wichtige Infos und erstellt die Kontaktkarte."
     },
-    "value": {
-      "title": "Sei die Person, die nie vergisst.",
-      "description": "Namen der Liebsten, Leidenschaften, laufende Projekte... Finde alles auf einen Blick vor deinem nächsten Treffen."
+    "assistant": {
+      "title": "Stelle jede Frage",
+      "description": "Der KI-Assistent durchsucht alle deine Notizen, um jede Information zu finden.",
+      "example1": "«Wer arbeitet im Tech-Bereich?»",
+      "example2": "«Wer hat kleine Kinder?»",
+      "example3": "«Worüber habe ich mit Maria gesprochen?»"
     },
-    "trust": {
-      "title": "Dein geheimer Garten ist sicher.",
-      "description": "Deine Erinnerungen sind persönlich. Recall People verschlüsselt deine Daten, sodass nur du Zugriff hast."
+    "privacy": {
+      "title": "Deine Daten bleiben auf deinem Handy",
+      "description": "Nichts wird auf unseren Servern gespeichert. Deine Notizen sind privat, immer.",
+      "local": "lokal"
     },
     "redoTour": "Geführte Tour wiederholen"
   },

@@ -567,23 +567,27 @@
     "getStarted": "Inizia",
     "language": {
       "title": "Scegli la tua lingua",
-      "description": "Questa lingua verra utilizzata per l'interfaccia e per trascrivere le tue registrazioni vocali."
+      "description": "Questa lingua verrà utilizzata per l'interfaccia e per trascrivere le tue registrazioni vocali."
     },
-    "problem": {
-      "title": "\"Come si chiamava sua figlia?\"",
-      "description": "Dimentichiamo l'80% dei dettagli dopo una conversazione. Non lasciare che i momenti imbarazzanti si ripetano."
+    "solution": {
+      "title": "Dimentichi dettagli importanti?",
+      "description": "Recall People trasforma le tue note vocali in schede contatto intelligenti. Parla e basta, al resto pensiamo noi."
     },
-    "action": {
-      "title": "La tua arma segreta per le relazioni.",
-      "description": "Subito dopo un caffe o una chiamata, registra una nota vocale. L'IA estrae automaticamente le perle della conversazione."
+    "demo": {
+      "title": "Ecco come funziona",
+      "description": "Parla dopo aver incontrato qualcuno. L'IA estrae automaticamente le informazioni chiave e crea la scheda contatto."
     },
-    "value": {
-      "title": "Sii la persona che non dimentica mai.",
-      "description": "Nomi dei cari, passioni, progetti in corso... Trova tutto a colpo d'occhio prima del tuo prossimo incontro."
+    "assistant": {
+      "title": "Fai qualsiasi domanda",
+      "description": "L'assistente IA cerca in tutte le tue note per trovare qualsiasi informazione.",
+      "example1": "\"Chi lavora nel tech?\"",
+      "example2": "\"Chi ha bambini piccoli?\"",
+      "example3": "\"Di cosa ho parlato con Maria?\""
     },
-    "trust": {
-      "title": "Il tuo giardino segreto e al sicuro.",
-      "description": "I tuoi ricordi sono personali. Recall People cripta i tuoi dati in modo che solo tu possa accedervi."
+    "privacy": {
+      "title": "I tuoi dati restano sul tuo telefono",
+      "description": "Nulla viene salvato sui nostri server. Le tue note sono private, sempre.",
+      "local": "locale"
     },
     "redoTour": "Ripeti tour guidato"
   },

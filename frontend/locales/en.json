@@ -569,21 +569,25 @@
       "title": "Choose your language",
       "description": "This language will be used for the interface and to transcribe your voice recordings."
     },
-    "problem": {
-      "title": "\"What was her daughter's name again?\"",
-      "description": "We forget 80% of details after a conversation. Don't let awkward moments happen again."
+    "solution": {
+      "title": "Forgetting important details?",
+      "description": "Recall People turns your voice notes into smart contact cards. Just talk, we handle the rest."
     },
-    "action": {
-      "title": "Your secret weapon for relationships.",
-      "description": "Right after a coffee or a call, record a voice note. AI automatically extracts the gems from your conversation."
+    "demo": {
+      "title": "Here's how it works",
+      "description": "Speak after meeting someone. AI automatically extracts key info and builds the contact card."
     },
-    "value": {
-      "title": "Be the one who never forgets.",
-      "description": "Names of loved ones, passions, ongoing projects... Find everything at a glance before your next meeting."
+    "assistant": {
+      "title": "Ask any question",
+      "description": "The AI assistant searches through all your notes to find any information.",
+      "example1": "\"Who works in tech?\"",
+      "example2": "\"Who has young kids?\"",
+      "example3": "\"What did I talk about with Sarah?\""
     },
-    "trust": {
-      "title": "Your secret garden is safe.",
-      "description": "Your memories are personal. Recall People encrypts your data so you're the only one with access."
+    "privacy": {
+      "title": "Your data stays on your phone",
+      "description": "Nothing is stored on our servers. Your notes are private, always.",
+      "local": "local"
     },
     "redoTour": "Redo guided tour"
   },
