@@ -588,6 +588,11 @@
       "example2": "\"Who has young kids?\"",
       "example3": "\"Where does Sarah study?\""
     },
+    "typing": {
+      "title": "Not a fan of voice notes?",
+      "description": "Type your notes manually by tapping the pencil icon.",
+      "or": "or"
+    },
     "privacy": {
       "title": "Your data stays on your phone",
       "description": "Nothing is stored on our servers. Your notes are private, always.",

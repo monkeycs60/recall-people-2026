@@ -17,7 +17,7 @@ import Animated, {
   interpolate,
   Extrapolation,
 } from 'react-native-reanimated';
-import { Globe, Check, Shield, Search } from 'lucide-react-native';
+import { Globe, Check, Shield, Search, Mic, PenLine } from 'lucide-react-native';
 import { Video, ResizeMode } from 'expo-av';
 import { useSettingsStore } from '@/stores/settings-store';
 import { changeLanguage } from '@/lib/i18n';
@@ -55,7 +55,8 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
     { id: 1, key: 'solution', type: 'solution' as const },
     { id: 2, key: 'demo', type: 'demo' as const },
     { id: 3, key: 'assistant', type: 'assistant' as const },
-    { id: 4, key: 'privacy', type: 'privacy' as const },
+    { id: 4, key: 'typing', type: 'typing' as const },
+    { id: 5, key: 'privacy', type: 'privacy' as const },
   ];
 
   const handleNext = () => {
@@ -224,6 +225,26 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
     </View>
   );
 
+  const renderTypingSlide = () => (
+    <View
+      style={[styles.slideContainer, { width: SCREEN_WIDTH, backgroundColor: ONBOARDING_BACKGROUND }]}
+    >
+      <View style={styles.typingContent}>
+        <View style={styles.typingIcons}>
+          <View style={[styles.typingIconCircle, { backgroundColor: Colors.primaryLight }]}>
+            <Mic size={28} color={Colors.primary} />
+          </View>
+          <Text style={styles.typingOr}>{t('onboarding.typing.or')}</Text>
+          <View style={[styles.typingIconCircle, { backgroundColor: Colors.surfaceAlt }]}>
+            <PenLine size={28} color={Colors.textSecondary} />
+          </View>
+        </View>
+        <Text style={styles.title}>{t('onboarding.typing.title')}</Text>
+        <Text style={styles.description}>{t('onboarding.typing.description')}</Text>
+      </View>
+    </View>
+  );
+
   const renderPrivacySlide = () => (
     <View
       style={[styles.slideContainer, { width: SCREEN_WIDTH, backgroundColor: ONBOARDING_BACKGROUND }]}
@@ -252,6 +273,8 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
         return renderDemoSlide();
       case 'assistant':
         return renderAssistantSlide();
+      case 'typing':
+        return renderTypingSlide();
       case 'privacy':
         return renderPrivacySlide();
       default:
@@ -590,6 +613,30 @@ const styles = StyleSheet.create({
     bottom: 30,
     left: SCREEN_WIDTH * 0.15,
     transform: [{ rotate: '-1deg' }],
+  },
+  // Typing slide
+  typingContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  typingIcons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Spacing.xl,
+    gap: Spacing.md,
+  },
+  typingIconCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: BorderRadius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  typingOr: {
+    color: Colors.textMuted,
+    fontSize: 14,
+    fontWeight: '500',
   },
   // Privacy slide
   privacyContent: {

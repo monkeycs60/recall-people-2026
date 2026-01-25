@@ -614,6 +614,11 @@
       "example2": "« Qui a des enfants en bas âge ? »",
       "example3": "« Où étudie Sarah ? »"
     },
+    "typing": {
+      "title": "Pas fan du vocal ?",
+      "description": "Tapez vos notes à la main en appuyant sur le crayon.",
+      "or": "ou"
+    },
     "privacy": {
       "title": "Vos données restent sur votre téléphone",
       "description": "Rien n'est stocké sur nos serveurs. Vos notes sont privées, toujours.",

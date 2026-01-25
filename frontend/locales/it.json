@@ -588,6 +588,11 @@
       "example2": "\"Chi ha bambini piccoli?\"",
       "example3": "\"Dove studia Sarah?\""
     },
+    "typing": {
+      "title": "Non ami i vocali?",
+      "description": "Scrivi le tue note manualmente toccando l'icona della matita.",
+      "or": "o"
+    },
     "privacy": {
       "title": "I tuoi dati restano sul tuo telefono",
       "description": "Nulla viene salvato sui nostri server. Le tue note sono private, sempre.",

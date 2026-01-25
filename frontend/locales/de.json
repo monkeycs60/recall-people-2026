@@ -588,6 +588,11 @@
       "example2": "«Wer hat kleine Kinder?»",
       "example3": "«Wo studiert Sarah?»"
     },
+    "typing": {
+      "title": "Kein Fan von Sprachnotizen?",
+      "description": "Tippe deine Notizen manuell, indem du auf das Stift-Symbol tippst.",
+      "or": "oder"
+    },
     "privacy": {
       "title": "Deine Daten bleiben auf deinem Handy",
       "description": "Nichts wird auf unseren Servern gespeichert. Deine Notizen sind privat, immer.",
