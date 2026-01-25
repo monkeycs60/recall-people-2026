@@ -5,6 +5,7 @@ import {
   Dimensions,
   ScrollView,
   StyleSheet,
+  Image,
 } from 'react-native';
 import { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -16,7 +17,7 @@ import Animated, {
   interpolate,
   Extrapolation,
 } from 'react-native-reanimated';
-import { Globe, Check, Mic, Shield, Search, FolderOpen, Sparkles, MessageCircleQuestion, FileText } from 'lucide-react-native';
+import { Globe, Check, Shield, Search } from 'lucide-react-native';
 import { Video, ResizeMode } from 'expo-av';
 import { useSettingsStore } from '@/stores/settings-store';
 import { changeLanguage } from '@/lib/i18n';
@@ -24,6 +25,7 @@ import { Language, SUPPORTED_LANGUAGES, LANGUAGE_NAMES, LANGUAGE_FLAGS } from '@
 import { Colors, Spacing, BorderRadius } from '@/constants/theme';
 
 const DEMO_VIDEO = require('@/assets/video/onboarding-demo.webm');
+const SOLUTION_ILLUSTRATION = require('@/assets/ai-assets/voice-to-contact-cards.png');
 
 const ONBOARDING_BACKGROUND = Colors.background;
 
@@ -112,58 +114,44 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
     </View>
   );
 
-  const solutionFeatures = [
-    {
-      key: 'feature1',
-      icon: FolderOpen,
-      color: Colors.calendar,
-      bgColor: Colors.calendarLight,
-    },
-    {
-      key: 'feature2',
-      icon: Sparkles,
-      color: Colors.primary,
-      bgColor: Colors.primaryLight,
-    },
-    {
-      key: 'feature3',
-      icon: MessageCircleQuestion,
-      color: Colors.voice,
-      bgColor: Colors.voiceLight,
-    },
-    {
-      key: 'feature4',
-      icon: FileText,
-      color: Colors.calendar,
-      bgColor: Colors.peche,
-    },
-  ];
-
   const renderSolutionSlide = () => (
     <View
       style={[styles.slideContainer, { width: SCREEN_WIDTH, backgroundColor: ONBOARDING_BACKGROUND }]}
     >
       <View style={styles.solutionContent}>
-        <View style={styles.solutionIconContainer}>
-          <Mic size={32} color={Colors.primary} />
+        <View style={styles.illustrationWrapper}>
+          <Image
+            source={SOLUTION_ILLUSTRATION}
+            style={styles.solutionIllustration}
+            resizeMode="cover"
+          />
         </View>
 
-        <Text style={styles.title}>{t('onboarding.solution.title')}</Text>
+        <Text style={styles.solutionTitle}>{t('onboarding.solution.title')}</Text>
 
-        <View style={styles.featuresList}>
-          {solutionFeatures.map((feature) => {
-            const IconComponent = feature.icon;
-            return (
-              <View key={feature.key} style={styles.featureCard}>
-                <View style={[styles.featureIconBox, { backgroundColor: feature.bgColor }]}>
-                  <IconComponent size={18} color={feature.color} />
-                </View>
-                <Text style={styles.featureText}>
-                  {t(`onboarding.solution.${feature.key}`)}
-                </Text>
-              </View>
-            );
-          })}
+        <View style={styles.featuresGrid}>
+          {/* Row 1 */}
+          <View style={styles.featuresRow}>
+            <View style={[styles.featureCell, { backgroundColor: Colors.calendarLight }]}>
+              <Text style={styles.featureEmoji}>📂</Text>
+              <Text style={styles.featureCellText}>{t('onboarding.solution.feature1')}</Text>
+            </View>
+            <View style={[styles.featureCell, styles.featureCellOffset, { backgroundColor: Colors.primaryLight }]}>
+              <Text style={styles.featureEmoji}>✨</Text>
+              <Text style={styles.featureCellText}>{t('onboarding.solution.feature2')}</Text>
+            </View>
+          </View>
+          {/* Row 2 - offset left */}
+          <View style={[styles.featuresRow, styles.featuresRowOffset]}>
+            <View style={[styles.featureCell, styles.featureCellOffset, { backgroundColor: Colors.voiceLight }]}>
+              <Text style={styles.featureEmoji}>💬</Text>
+              <Text style={styles.featureCellText}>{t('onboarding.solution.feature3')}</Text>
+            </View>
+            <View style={[styles.featureCell, { backgroundColor: Colors.peche }]}>
+              <Text style={styles.featureEmoji}>📝</Text>
+              <Text style={styles.featureCellText}>{t('onboarding.solution.feature4')}</Text>
+            </View>
+          </View>
         </View>
       </View>
     </View>
@@ -451,44 +439,65 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingTop: Spacing.xl,
   },
-  solutionIconContainer: {
-    backgroundColor: Colors.primaryLight,
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.full,
-    marginBottom: Spacing.xl,
+  illustrationWrapper: {
+    width: SCREEN_WIDTH * 0.45,
+    height: SCREEN_WIDTH * 0.45,
+    borderRadius: BorderRadius.xl,
+    overflow: 'hidden',
+    backgroundColor: Colors.surface,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 6,
   },
-  featuresList: {
-    marginTop: Spacing.xl,
+  solutionIllustration: {
     width: '100%',
+    height: '100%',
+  },
+  solutionTitle: {
+    color: Colors.textPrimary,
+    fontSize: 22,
+    fontWeight: '700',
+    textAlign: 'center',
+    marginTop: Spacing.xl,
+    marginBottom: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+  },
+  featuresGrid: {
+    marginTop: Spacing.md,
     gap: Spacing.sm,
   },
-  featureCard: {
+  featuresRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.surface,
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.md,
-    borderRadius: BorderRadius.lg,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  featureIconBox: {
-    width: 36,
-    height: 36,
-    borderRadius: BorderRadius.md,
-    alignItems: 'center',
     justifyContent: 'center',
-    marginRight: Spacing.md,
+    gap: Spacing.sm,
   },
-  featureText: {
+  featuresRowOffset: {
+    marginLeft: -Spacing.lg,
+  },
+  featureCell: {
+    width: (SCREEN_WIDTH - Spacing.xl * 2) / 2.2,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.sm,
+    borderRadius: BorderRadius.lg,
+    alignItems: 'center',
+  },
+  featureCellOffset: {
+    marginTop: Spacing.sm,
+  },
+  featureEmoji: {
+    fontSize: 20,
+    marginBottom: 2,
+  },
+  featureCellText: {
     color: Colors.textPrimary,
-    fontSize: 14,
-    flex: 1,
+    fontSize: 11,
     fontWeight: '500',
+    textAlign: 'center',
+    lineHeight: 14,
   },
   // Demo slide
   demoContent: {
