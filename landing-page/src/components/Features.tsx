@@ -1,99 +1,123 @@
-import { Mic, User, Search } from 'lucide-react';
-import PhoneMockup from './PhoneMockup';
+'use client';
+
+import { Player } from '@remotion/player';
+import { Mic, Sparkles, FolderOpen, Bell, Search } from 'lucide-react';
+import { FeatureAnimation } from '../remotion/FeatureAnimation';
 
 const features = [
   {
     icon: Mic,
-    title: 'Talk, don\'t type.',
-    description: 'After a meeting, just talk. "Met Sarah at the conference, she works at Google, has two kids..." Recall captures everything.',
-    screenshot: '/images/screenshots/contact-id-2.png',
-    alt: 'Voice recording extraction',
+    title: 'Voice & Typing',
+    description: 'Just talk after a meeting, or type if you prefer. Recall captures everything naturally.',
     iconBg: 'bg-primary-light',
+    iconColor: 'text-primary',
   },
   {
-    icon: User,
-    title: 'Profiles build themselves.',
-    description: 'Names, jobs, interests, family — all organized automatically. Plus AI summaries that remind you who they really are.',
-    screenshot: '/images/screenshots/contact-id-1.png',
-    alt: 'Contact profile view',
+    icon: Sparkles,
+    title: 'AI Summaries',
+    description: 'Get smart summaries that remind you who people really are. No more forgetting details.',
+    iconBg: 'bg-peche',
+    iconColor: 'text-calendar',
+  },
+  {
+    icon: FolderOpen,
+    title: 'Auto-Organized',
+    description: 'Names, jobs, interests, family — everything sorted automatically. Zero effort.',
     iconBg: 'bg-calendar-light',
+    iconColor: 'text-calendar',
+  },
+  {
+    icon: Bell,
+    title: 'Event Reminders',
+    description: 'Get notified before meetings with who you\'re about to see and what you know about them.',
+    iconBg: 'bg-lavande',
+    iconColor: 'text-primary',
   },
   {
     icon: Search,
-    title: 'Find anyone instantly.',
-    description: '"Who works in tech?" "People from last month\'s conference" — search like you think. No tags, no folders needed.',
-    screenshot: '/images/screenshots/contacts-ia-search.png',
-    alt: 'Semantic search',
+    title: 'Smart Search',
+    description: '"Who works in tech?" Search like you think. No tags, no folders needed.',
     iconBg: 'bg-bleu-ciel',
+    iconColor: 'text-info',
   },
 ];
 
-// Alternating section backgrounds for flat & bold style
-const sectionBgs = ['bg-background', 'bg-primary-light/10', 'bg-calendar-light/10'];
-
 export default function Features() {
   return (
-    <section id="features" className="py-12 md:py-16">
-      {/* Section header */}
-      <div className="container mx-auto px-4 mb-10">
-        <div className="text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-3">
+    <section id="features" className="py-20 md:py-28 bg-background">
+      <div className="container mx-auto px-4">
+        {/* Section header */}
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
             How it works
           </h2>
           <p className="text-lg text-text-secondary max-w-2xl mx-auto">
-            Three steps. Zero effort. Never forget anyone again.
+            From voice to organized contacts in seconds. Zero friction.
           </p>
         </div>
-      </div>
 
-      {/* Feature rows with alternating backgrounds */}
-      {features.map((feature, index) => (
-        <div
-          key={index}
-          className={`py-10 md:py-12 ${sectionBgs[index % sectionBgs.length]}`}
-        >
-          <div className="container mx-auto px-4">
-            <div
-              className={`grid lg:grid-cols-2 gap-8 lg:gap-12 items-center max-w-5xl mx-auto ${
-                index % 2 === 1 ? 'lg:flex-row-reverse' : ''
-              }`}
-            >
-              {/* Text content card */}
-              <div className={`${index % 2 === 1 ? 'lg:order-2' : 'lg:order-1'}`}>
-                <div className="bg-surface border-2 border-border rounded-2xl p-8 hover:bg-surface-alt transition-all duration-200">
-                  <div className="space-y-6">
-                    {/* Icon with filled pastel background */}
-                    <div className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl ${feature.iconBg} border-2 border-border`}>
-                      <feature.icon className="w-7 h-7 text-text-primary" />
-                    </div>
+        {/* Main content: Animation + Features grid */}
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
+          {/* Left: Remotion Player */}
+          <div className="order-2 lg:order-1 flex justify-center">
+            <div className="relative">
+              {/* Decorative background glow - violet/amber */}
+              <div className="absolute inset-0 -m-8 bg-gradient-to-br from-primary-light/50 via-calendar-light/40 to-primary-light/50 rounded-[3rem] blur-2xl" />
 
-                    <div>
-                      <span className="text-sm font-semibold text-primary uppercase tracking-wider">
-                        Step {index + 1}
-                      </span>
-                      <h3 className="text-2xl md:text-3xl font-bold text-text-primary mt-2">
-                        {feature.title}
-                      </h3>
-                    </div>
-
-                    <p className="text-lg text-text-secondary leading-relaxed">
-                      {feature.description}
-                    </p>
-                  </div>
-                </div>
+              {/* Player container */}
+              <div className="relative bg-surface border-2 border-border rounded-3xl overflow-hidden shadow-lg">
+                <Player
+                  component={FeatureAnimation}
+                  durationInFrames={720}
+                  compositionWidth={340}
+                  compositionHeight={400}
+                  fps={30}
+                  loop
+                  autoPlay
+                  acknowledgeRemotionLicense
+                  style={{
+                    width: 340,
+                    height: 400,
+                  }}
+                />
               </div>
 
-              {/* Phone mockup */}
-              <div className={`flex justify-center ${index % 2 === 1 ? 'lg:order-1' : 'lg:order-2'}`}>
-                <PhoneMockup
-                  src={feature.screenshot}
-                  alt={feature.alt}
-                />
+              {/* Floating decorative elements */}
+              <div className="absolute -top-4 -right-4 w-12 h-12 bg-primary-light border-2 border-border rounded-xl flex items-center justify-center text-xl animate-bounce">
+                ✨
+              </div>
+              <div className="absolute -bottom-3 -left-3 w-10 h-10 bg-primary-light border-2 border-border rounded-lg flex items-center justify-center text-lg">
+                🎤
               </div>
             </div>
           </div>
+
+          {/* Right: Feature list */}
+          <div className="order-1 lg:order-2 space-y-4">
+            {features.map((feature, index) => (
+              <div
+                key={index}
+                className="group flex items-start gap-4 p-4 rounded-2xl bg-surface border-2 border-border hover:bg-surface-alt transition-all duration-200 hover:translate-x-1"
+              >
+                {/* Icon */}
+                <div className={`flex-shrink-0 w-12 h-12 rounded-xl ${feature.iconBg} border-2 border-border flex items-center justify-center`}>
+                  <feature.icon className={`w-6 h-6 ${feature.iconColor}`} />
+                </div>
+
+                {/* Content */}
+                <div>
+                  <h3 className="font-semibold text-text-primary mb-1">
+                    {feature.title}
+                  </h3>
+                  <p className="text-sm text-text-secondary leading-relaxed">
+                    {feature.description}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      ))}
+      </div>
     </section>
   );
 }
