@@ -210,7 +210,7 @@ const ProfileScene: React.FC = () => {
         {/* Résumé */}
         <div style={sectionStyles(sectionDelay(2))}>
           <div style={{ fontSize: 11, fontWeight: 600, color: COLORS.textMuted, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-            📝 Résumé
+            📝 AI Summary
           </div>
           <div style={{ fontSize: 12, color: COLORS.textSecondary, lineHeight: 1.4, marginBottom: 10 }}>
             Met at AI Summit, works in AI/ML
