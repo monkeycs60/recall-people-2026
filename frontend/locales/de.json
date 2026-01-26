@@ -76,7 +76,8 @@
     "tooManyRequestsDescription": "Warte einen Moment, bevor du es erneut versuchst",
     "serverError": "Serverfehler",
     "serverErrorDescription": "Etwas ist schiefgelaufen, versuche es später erneut",
-    "generic": "Ein Fehler ist aufgetreten"
+    "generic": "Ein Fehler ist aufgetreten",
+    "askQuestionFailed": "Deine Frage konnte nicht beantwortet werden. Überprüfe deine Verbindung."
   },
   "common": {
     "loading": "Laden...",
@@ -90,7 +91,21 @@
     "error": "Fehler",
     "success": "Erfolg",
     "add": "Hinzufügen",
-    "all": "Alle"
+    "all": "Alle",
+    "untitledNote": "Notiz ohne Titel",
+    "tapToEdit": "Zum Bearbeiten tippen",
+    "today": "Heute",
+    "yesterday": "Gestern",
+    "daysAgo": "Vor {{count}} Tagen",
+    "weeksAgo": "Vor {{count}} Wochen",
+    "monthsAgo": "Vor {{count}} Monaten",
+    "unsavedChanges": "Nicht gespeicherte Änderungen",
+    "discardChangesQuestion": "Möchtest du deine Änderungen verwerfen?",
+    "discard": "Verwerfen",
+    "seeLess": "Weniger anzeigen",
+    "seeMore": "Mehr anzeigen",
+    "editTranscriptionHint": "Bearbeite die Transkription unten",
+    "transcriptionPlaceholder": "Transkription..."
   },
   "tabs": {
     "home": "Start",
@@ -618,7 +633,28 @@
     "manageDescription": "Um dein Abonnement zu verwalten oder zu kündigen, gehe zu deinen Geräteeinstellungen > Abonnements."
   },
   "record": {
-    "remaining": "verbleibend"
+    "remaining": "verbleibend",
+    "helperPrompts": {
+      "citeName": "Nenne den Namen der Person...",
+      "talkAbout": "Erzähle von eurem Treffen...",
+      "mentionDetails": "Erwähne persönliche Details...",
+      "shareKnowledge": "Teile, was du gelernt hast..."
+    },
+    "contactPrompts": {
+      "whatsNew": "Was gibt es Neues bei {{firstName}}?",
+      "shareNews": "Teile deine neuesten Neuigkeiten...",
+      "howIs": "Wie geht es {{firstName}}?",
+      "whatLearned": "Was hast du über {{firstName}} gelernt?"
+    },
+    "pressToFinish": "Drücken zum Beenden",
+    "helperText": "Tipp: Nenne den Namen, den Kontext des Treffens und wichtige Details über die Person.",
+    "helperTextWithContact": "Erzähle über {{firstName}}: Neuigkeiten, Geschichten, wichtige Details..."
+  },
+  "textInput": {
+    "placeholder": "Beschreibe die Person, die du getroffen hast, den Kontext, wichtige Details...",
+    "placeholderWithContact": "Schreibe, was du über {{firstName}} weißt...",
+    "minCharacters": "Mindestens 10 Zeichen ({{count}} verbleibend)",
+    "pressToSend": "Drücke Senden zum Analysieren"
   },
   "paywall": {
     "title": "Auf Premium upgraden",

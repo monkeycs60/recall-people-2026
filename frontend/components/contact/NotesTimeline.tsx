@@ -13,22 +13,24 @@ type NotesTimelineProps = {
   highlightId?: string;
 };
 
-function formatRelativeDate(dateString: string, locale: string): string {
+function formatRelativeDate(
+  dateString: string,
+  locale: string,
+  t: (key: string, options?: Record<string, unknown>) => string
+): string {
   const date = new Date(dateString);
   const now = new Date();
   const diffInMs = now.getTime() - date.getTime();
   const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
 
-  const isFrench = locale.startsWith('fr');
-
   if (diffInDays === 0) {
-    return isFrench ? "Aujourd'hui" : 'Today';
+    return t('common.today');
   }
   if (diffInDays === 1) {
-    return isFrench ? 'Hier' : 'Yesterday';
+    return t('common.yesterday');
   }
   if (diffInDays < 7) {
-    return isFrench ? `Il y a ${diffInDays} jours` : `${diffInDays} days ago`;
+    return t('common.daysAgo', { count: diffInDays });
   }
 
   const options: Intl.DateTimeFormatOptions = {
@@ -98,14 +100,12 @@ export function NotesTimeline({ notes, onDelete, onUpdate, highlightId }: NotesT
   const handleCloseNote = () => {
     if (isEditing && selectedNote && editedTranscription !== selectedNote.transcription) {
       Alert.alert(
-        i18n.language.startsWith('fr') ? 'Modifications non sauvegardees' : 'Unsaved changes',
-        i18n.language.startsWith('fr')
-          ? 'Voulez-vous abandonner vos modifications ?'
-          : 'Do you want to discard your changes?',
+        t('common.unsavedChanges'),
+        t('common.discardChangesQuestion'),
         [
           { text: t('common.cancel'), style: 'cancel' },
           {
-            text: i18n.language.startsWith('fr') ? 'Abandonner' : 'Discard',
+            text: t('common.discard'),
             style: 'destructive',
             onPress: () => {
               setSelectedNote(null);
@@ -167,7 +167,7 @@ export function NotesTimeline({ notes, onDelete, onUpdate, highlightId }: NotesT
 
               <View style={styles.timelineContent}>
                 <Text style={styles.dateText}>
-                  {formatRelativeDate(note.createdAt, i18n.language)}
+                  {formatRelativeDate(note.createdAt, i18n.language, t)}
                 </Text>
 
                 <Pressable
@@ -196,9 +196,7 @@ export function NotesTimeline({ notes, onDelete, onUpdate, highlightId }: NotesT
                       }}
                     >
                       <Text style={styles.expandButtonText}>
-                        {isExpanded
-                          ? (i18n.language.startsWith('fr') ? 'Voir moins' : 'See less')
-                          : (i18n.language.startsWith('fr') ? 'Voir plus' : 'See more')}
+                        {isExpanded ? t('common.seeLess') : t('common.seeMore')}
                       </Text>
                       {isExpanded ? (
                         <ChevronUp size={14} color={Colors.primary} />
@@ -230,7 +228,7 @@ export function NotesTimeline({ notes, onDelete, onUpdate, highlightId }: NotesT
                 {selectedNote?.title || t('contact.sections.notes')}
               </Text>
               <Text style={styles.modalDate}>
-                {selectedNote && formatRelativeDate(selectedNote.createdAt, i18n.language)}
+                {selectedNote && formatRelativeDate(selectedNote.createdAt, i18n.language, t)}
               </Text>
             </View>
             <View style={styles.modalActions}>
@@ -272,9 +270,7 @@ export function NotesTimeline({ notes, onDelete, onUpdate, highlightId }: NotesT
               <View style={styles.editHintContainer}>
                 <Pencil size={14} color={Colors.textMuted} />
                 <Text style={styles.editHintText}>
-                  {i18n.language.startsWith('fr')
-                    ? 'Modifiez la transcription ci-dessous'
-                    : 'Edit the transcription below'}
+                  {t('common.editTranscriptionHint')}
                 </Text>
               </View>
               <TextInput
@@ -284,7 +280,7 @@ export function NotesTimeline({ notes, onDelete, onUpdate, highlightId }: NotesT
                 multiline
                 autoFocus
                 textAlignVertical="top"
-                placeholder={i18n.language.startsWith('fr') ? 'Transcription...' : 'Transcription...'}
+                placeholder={t('common.transcriptionPlaceholder')}
                 placeholderTextColor={Colors.textMuted}
               />
             </ScrollView>
@@ -297,7 +293,7 @@ export function NotesTimeline({ notes, onDelete, onUpdate, highlightId }: NotesT
                 <View style={styles.editIndicator}>
                   <Pencil size={14} color={Colors.textMuted} />
                   <Text style={styles.editIndicatorText}>
-                    {i18n.language.startsWith('fr') ? 'Appuyez pour modifier' : 'Tap to edit'}
+                    {t('common.tapToEdit')}
                   </Text>
                 </View>
               </Pressable>

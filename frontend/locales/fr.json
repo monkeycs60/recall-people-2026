@@ -76,7 +76,8 @@
     "tooManyRequestsDescription": "Attends un moment avant de réessayer",
     "serverError": "Erreur serveur",
     "serverErrorDescription": "Un problème est survenu, réessaie plus tard",
-    "generic": "Une erreur est survenue"
+    "generic": "Une erreur est survenue",
+    "askQuestionFailed": "Impossible de répondre à votre question. Vérifiez votre connexion."
   },
   "common": {
     "loading": "Chargement...",
@@ -90,7 +91,21 @@
     "error": "Erreur",
     "success": "Succès",
     "add": "Ajouter",
-    "all": "Tous"
+    "all": "Tous",
+    "untitledNote": "Note sans titre",
+    "tapToEdit": "Appuyez pour modifier",
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "daysAgo": "Il y a {{count}} jours",
+    "weeksAgo": "Il y a {{count}} semaines",
+    "monthsAgo": "Il y a {{count}} mois",
+    "unsavedChanges": "Modifications non sauvegardées",
+    "discardChangesQuestion": "Voulez-vous abandonner vos modifications ?",
+    "discard": "Abandonner",
+    "seeLess": "Voir moins",
+    "seeMore": "Voir plus",
+    "editTranscriptionHint": "Modifiez la transcription ci-dessous",
+    "transcriptionPlaceholder": "Transcription..."
   },
   "tabs": {
     "home": "Accueil",
@@ -644,7 +659,28 @@
     "manageDescription": "Pour gérer ou résilier votre abonnement, allez dans les paramètres de votre appareil > Abonnements."
   },
   "record": {
-    "remaining": "restant"
+    "remaining": "restant",
+    "helperPrompts": {
+      "citeName": "Citez le nom de la personne...",
+      "talkAbout": "Parlez de votre rencontre...",
+      "mentionDetails": "Mentionnez des détails personnels...",
+      "shareKnowledge": "Partagez ce que vous avez appris..."
+    },
+    "contactPrompts": {
+      "whatsNew": "Quoi de neuf avec {{firstName}} ?",
+      "shareNews": "Partagez vos dernières nouvelles...",
+      "howIs": "Comment va {{firstName}} ?",
+      "whatLearned": "Qu'avez-vous appris sur {{firstName}} ?"
+    },
+    "pressToFinish": "Appuyez pour terminer",
+    "helperText": "Conseil : mentionnez le nom, le contexte de rencontre, et les détails importants sur la personne.",
+    "helperTextWithContact": "Parlez de {{firstName}} : actualités, anecdotes, détails importants..."
+  },
+  "textInput": {
+    "placeholder": "Décrivez la personne rencontrée, le contexte, les détails importants...",
+    "placeholderWithContact": "Écrivez ce que vous savez sur {{firstName}}...",
+    "minCharacters": "Minimum 10 caractères ({{count}} restants)",
+    "pressToSend": "Appuyez sur envoyer pour analyser"
   },
   "paywall": {
     "title": "Passer Premium",

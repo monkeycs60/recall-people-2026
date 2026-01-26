@@ -198,7 +198,7 @@ export default function AskScreen() {
 						lastName: contact.lastName,
 						notes: notes.map((note) => ({
 							id: note.id,
-							title: note.title || 'Note sans titre',
+							title: note.title || t('common.untitledNote'),
 							transcription: note.transcription || '',
 							createdAt: note.createdAt,
 						})),
@@ -231,8 +231,8 @@ export default function AskScreen() {
 		} catch (error) {
 			console.error('[Ask] Submit error:', error);
 			showErrorToast(
-				'Erreur',
-				"Impossible de répondre à votre question. Vérifiez votre connexion."
+				t('common.error'),
+				t('errors.askQuestionFailed')
 			);
 		} finally {
 			setIsSubmitting(false);

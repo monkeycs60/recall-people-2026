@@ -76,7 +76,8 @@
     "tooManyRequestsDescription": "Attendi un momento prima di riprovare",
     "serverError": "Errore del server",
     "serverErrorDescription": "Qualcosa e andato storto, riprova piu tardi",
-    "generic": "Si e verificato un errore"
+    "generic": "Si e verificato un errore",
+    "askQuestionFailed": "Impossibile rispondere alla tua domanda. Verifica la connessione."
   },
   "common": {
     "loading": "Caricamento...",
@@ -90,7 +91,21 @@
     "error": "Errore",
     "success": "Successo",
     "add": "Aggiungi",
-    "all": "Tutti"
+    "all": "Tutti",
+    "untitledNote": "Nota senza titolo",
+    "tapToEdit": "Tocca per modificare",
+    "today": "Oggi",
+    "yesterday": "Ieri",
+    "daysAgo": "{{count}} giorni fa",
+    "weeksAgo": "{{count}} settimane fa",
+    "monthsAgo": "{{count}} mesi fa",
+    "unsavedChanges": "Modifiche non salvate",
+    "discardChangesQuestion": "Vuoi abbandonare le modifiche?",
+    "discard": "Abbandona",
+    "seeLess": "Vedi meno",
+    "seeMore": "Vedi di più",
+    "editTranscriptionHint": "Modifica la trascrizione qui sotto",
+    "transcriptionPlaceholder": "Trascrizione..."
   },
   "tabs": {
     "home": "Home",
@@ -618,7 +633,28 @@
     "manageDescription": "Per gestire o annullare il tuo abbonamento, vai nelle impostazioni del dispositivo > Abbonamenti."
   },
   "record": {
-    "remaining": "rimanenti"
+    "remaining": "rimanenti",
+    "helperPrompts": {
+      "citeName": "Cita il nome della persona...",
+      "talkAbout": "Parla del vostro incontro...",
+      "mentionDetails": "Menziona dettagli personali...",
+      "shareKnowledge": "Condividi ciò che hai imparato..."
+    },
+    "contactPrompts": {
+      "whatsNew": "Cosa c'è di nuovo con {{firstName}}?",
+      "shareNews": "Condividi le tue ultime notizie...",
+      "howIs": "Come sta {{firstName}}?",
+      "whatLearned": "Cosa hai imparato su {{firstName}}?"
+    },
+    "pressToFinish": "Premi per terminare",
+    "helperText": "Consiglio: menziona il nome, il contesto dell'incontro e i dettagli importanti sulla persona.",
+    "helperTextWithContact": "Parla di {{firstName}}: novità, aneddoti, dettagli importanti..."
+  },
+  "textInput": {
+    "placeholder": "Descrivi la persona che hai incontrato, il contesto, i dettagli importanti...",
+    "placeholderWithContact": "Scrivi ciò che sai su {{firstName}}...",
+    "minCharacters": "Minimo 10 caratteri ({{count}} rimanenti)",
+    "pressToSend": "Premi invia per analizzare"
   },
   "paywall": {
     "title": "Passa a Premium",

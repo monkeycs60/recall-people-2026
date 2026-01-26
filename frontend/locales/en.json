@@ -76,7 +76,8 @@
     "tooManyRequestsDescription": "Please wait a moment before trying again",
     "serverError": "Server error",
     "serverErrorDescription": "Something went wrong, please try again later",
-    "generic": "An error occurred"
+    "generic": "An error occurred",
+    "askQuestionFailed": "Unable to answer your question. Check your connection."
   },
   "common": {
     "loading": "Loading...",
@@ -90,7 +91,21 @@
     "error": "Error",
     "success": "Success",
     "add": "Add",
-    "all": "All"
+    "all": "All",
+    "untitledNote": "Untitled note",
+    "tapToEdit": "Tap to edit",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "daysAgo": "{{count}} days ago",
+    "weeksAgo": "{{count}} weeks ago",
+    "monthsAgo": "{{count}} months ago",
+    "unsavedChanges": "Unsaved changes",
+    "discardChangesQuestion": "Do you want to discard your changes?",
+    "discard": "Discard",
+    "seeLess": "See less",
+    "seeMore": "See more",
+    "editTranscriptionHint": "Edit the transcription below",
+    "transcriptionPlaceholder": "Transcription..."
   },
   "tabs": {
     "home": "Home",
@@ -618,7 +633,28 @@
     "manageDescription": "To manage or cancel your subscription, go to your device settings > Subscriptions."
   },
   "record": {
-    "remaining": "remaining"
+    "remaining": "remaining",
+    "helperPrompts": {
+      "citeName": "Say the person's name...",
+      "talkAbout": "Talk about your meeting...",
+      "mentionDetails": "Mention personal details...",
+      "shareKnowledge": "Share what you learned..."
+    },
+    "contactPrompts": {
+      "whatsNew": "What's new with {{firstName}}?",
+      "shareNews": "Share your latest news...",
+      "howIs": "How is {{firstName}}?",
+      "whatLearned": "What did you learn about {{firstName}}?"
+    },
+    "pressToFinish": "Press to finish",
+    "helperText": "Tip: mention the name, meeting context, and important details about the person.",
+    "helperTextWithContact": "Talk about {{firstName}}: news, stories, important details..."
+  },
+  "textInput": {
+    "placeholder": "Describe the person you met, the context, important details...",
+    "placeholderWithContact": "Write what you know about {{firstName}}...",
+    "minCharacters": "Minimum 10 characters ({{count}} remaining)",
+    "pressToSend": "Press send to analyze"
   },
   "paywall": {
     "title": "Upgrade to Premium",

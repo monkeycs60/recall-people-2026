@@ -8,6 +8,7 @@ import {
   Platform,
 } from 'react-native';
 import { Send } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import Animated, {
   FadeIn,
   FadeOut,
@@ -33,6 +34,7 @@ export function TextInputMode({
   placeholder,
   contactFirstName,
 }: TextInputModeProps) {
+  const { t } = useTranslation();
   const [text, setText] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<TextInput>(null);
@@ -40,8 +42,8 @@ export function TextInputMode({
   const focusProgress = useSharedValue(1);
 
   const defaultPlaceholder = contactFirstName
-    ? `Écrivez ce que vous savez sur ${contactFirstName}...`
-    : 'Décrivez la personne rencontrée, le contexte, les détails importants...';
+    ? t('textInput.placeholderWithContact', { firstName: contactFirstName })
+    : t('textInput.placeholder');
 
   const handleSubmit = () => {
     if (text.trim().length < 10 || isProcessing) return;
@@ -118,8 +120,8 @@ export function TextInputMode({
 
       <Animated.Text style={styles.hint}>
         {text.length < 10
-          ? `Minimum 10 caractères (${10 - text.length} restants)`
-          : 'Appuyez sur envoyer pour analyser'}
+          ? t('textInput.minCharacters', { count: 10 - text.length })
+          : t('textInput.pressToSend')}
       </Animated.Text>
     </Animated.View>
   );

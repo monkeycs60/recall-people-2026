@@ -19,18 +19,18 @@ import Animated, {
   FadeOut,
 } from 'react-native-reanimated';
 
-const HELPER_PROMPTS = [
-  'Citez le nom de la personne...',
-  'Parlez de votre rencontre...',
-  'Mentionnez des details personnels...',
-  'Partagez ce que vous avez appris...',
+const getHelperPrompts = (t: (key: string) => string) => [
+  t('record.helperPrompts.citeName'),
+  t('record.helperPrompts.talkAbout'),
+  t('record.helperPrompts.mentionDetails'),
+  t('record.helperPrompts.shareKnowledge'),
 ];
 
-const getContactPrompts = (firstName: string) => [
-  `Quoi de neuf avec ${firstName} ?`,
-  `Partagez vos dernières nouvelles...`,
-  `Comment va ${firstName} ?`,
-  `Qu'avez-vous appris sur ${firstName} ?`,
+const getContactPrompts = (t: (key: string, options?: Record<string, string>) => string, firstName: string) => [
+  t('record.contactPrompts.whatsNew', { firstName }),
+  t('record.contactPrompts.shareNews'),
+  t('record.contactPrompts.howIs', { firstName }),
+  t('record.contactPrompts.whatLearned', { firstName }),
 ];
 
 export default function RecordScreen() {
@@ -78,10 +78,10 @@ export default function RecordScreen() {
 
   const currentPrompts = useMemo(() => {
     if (preselectedContact) {
-      return getContactPrompts(preselectedContact.firstName);
+      return getContactPrompts(t, preselectedContact.firstName);
     }
-    return HELPER_PROMPTS;
-  }, [preselectedContact]);
+    return getHelperPrompts(t);
+  }, [preselectedContact, t]);
 
   useFocusEffect(
     useCallback(() => {
@@ -247,7 +247,7 @@ export default function RecordScreen() {
                     fontSize: 14,
                   }}
                 >
-                  Appuyez pour terminer
+                  {t('record.pressToFinish')}
                 </Animated.Text>
               )}
             </View>
@@ -270,10 +270,8 @@ export default function RecordScreen() {
           {!isProcessing && inputMode === 'audio' && (
             <Text style={{ color: Colors.textMuted, textAlign: 'center', fontSize: 12, lineHeight: 20 }}>
               {preselectedContact
-                ? `Parlez de ${preselectedContact.firstName} : actualités, anecdotes, détails importants...`
-                : t('home.helperText', {
-                    defaultValue: 'Conseil : mentionnez le nom, le contexte de rencontre, et les details importants sur la personne.',
-                  })}
+                ? t('record.helperTextWithContact', { firstName: preselectedContact.firstName })
+                : t('record.helperText')}
             </Text>
           )}
         </View>

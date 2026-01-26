@@ -161,7 +161,7 @@ export default function RootLayout() {
               name="select-contact"
               options={{
                 headerShown: true,
-                title: 'Sélectionner le contact',
+                title: t('selectContact.title'),
                 headerLeft: () => (
                   <Pressable
                     onPress={() => {
@@ -179,7 +179,7 @@ export default function RootLayout() {
               name="review"
               options={{
                 headerShown: true,
-                title: 'Vérification',
+                title: t('review.title'),
                 headerLeft: () => (
                   <Pressable
                     onPress={() => {
@@ -193,12 +193,12 @@ export default function RootLayout() {
                 ),
               }}
             />
-            <Stack.Screen name="disambiguation" options={{ headerShown: true, title: 'Sélectionner le contact' }} />
+            <Stack.Screen name="disambiguation" options={{ headerShown: true, title: t('selectContact.title') }} />
             <Stack.Screen
               name="contact/[id]"
               options={{
                 headerShown: true,
-                title: 'Contacts',
+                title: t('contacts.title'),
                 headerShadowVisible: false,
                 headerLeft: () => (
                   <Pressable
