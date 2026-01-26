@@ -103,10 +103,12 @@ export default function FAQ() {
       <div className="container mx-auto px-4">
         {/* Section header */}
         <div className="max-w-3xl mx-auto mb-12">
-          <p className="text-sm font-medium text-primary mb-3 tracking-wide">FAQ</p>
-          <h2 className="text-3xl md:text-4xl font-bold text-text-primary">
+          <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
             Questions & Answers
           </h2>
+          <p className="text-lg text-text-secondary">
+            Everything you need to know about Recall People.
+          </p>
         </div>
 
         {/* FAQ items */}
