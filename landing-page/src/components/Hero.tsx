@@ -94,7 +94,7 @@ export default function Hero() {
           {/* Right: Phone mockup */}
           <div className="order-1 lg:order-2 flex justify-center">
             <PhoneMockup
-              videoSrc="/video_app.webm"
+              videoSrc="/app-tour.webm"
               alt="Recall app demo video"
               className="transform lg:translate-x-4"
             />

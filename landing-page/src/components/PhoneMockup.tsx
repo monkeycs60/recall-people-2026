@@ -15,10 +15,7 @@ export default function PhoneMockup({ src, videoSrc, alt, className = '' }: Phon
         {/* Phone body */}
         <div className="relative bg-[#1a1a1a] rounded-[3rem] p-2 shadow-2xl">
           {/* Screen bezel */}
-          <div className="relative bg-black rounded-[2.5rem] overflow-hidden">
-            {/* Dynamic Island */}
-            <div className="absolute top-3 left-1/2 -translate-x-1/2 w-24 h-7 bg-black rounded-full z-20" />
-
+          <div className="relative rounded-[2.5rem] overflow-hidden">
             {/* Screen content */}
             <div className="relative aspect-[9/19.5] overflow-hidden rounded-[2.5rem]">
               {videoSrc ? (
