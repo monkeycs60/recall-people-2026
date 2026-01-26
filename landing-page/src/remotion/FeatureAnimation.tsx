@@ -174,7 +174,6 @@ const ProfileScene: React.FC = () => {
           </div>
           <div>
             <div style={{ fontWeight: 600, fontSize: 16, color: COLORS.text }}>Sarah Chen</div>
-            <div style={{ fontSize: 12, color: COLORS.textSecondary }}>AI/ML Engineer</div>
           </div>
         </div>
 
@@ -571,7 +570,6 @@ const AssistantScene: React.FC = () => {
             </div>
             <div>
               <div style={{ fontWeight: 600, fontSize: 14, color: COLORS.text }}>Sarah Chen</div>
-              <div style={{ fontSize: 11, color: COLORS.textSecondary }}>AI/ML Engineer</div>
             </div>
           </div>
 

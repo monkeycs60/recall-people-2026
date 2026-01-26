@@ -8,7 +8,7 @@ const features = [
   {
     icon: Mic,
     title: 'Voice & Typing',
-    description: 'Just talk after a meeting, or type if you prefer. Recall captures everything naturally.',
+    description: 'Just talk after a meeting, or type if you prefer. Recall People captures everything naturally.',
     iconBg: 'bg-primary-light',
     iconColor: 'text-primary',
   },

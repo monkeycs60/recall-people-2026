@@ -17,7 +17,7 @@ export default function Footer() {
               Ready to remember everyone?
             </h2>
             <p className="text-gray-400 mb-8 max-w-md mx-auto">
-              Download Recall and never forget a conversation again.
+              Download Recall People and never forget a conversation again.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
@@ -52,7 +52,7 @@ export default function Footer() {
           {/* Bottom section */}
           <div className="pt-8 flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="text-center md:text-left">
-              <h3 className="text-xl font-bold text-white">Recall</h3>
+              <h3 className="text-xl font-bold text-white">Recall People</h3>
               <p className="text-sm text-gray-500 mt-1">
                 &copy; 2026 Recall People. All rights reserved.
               </p>

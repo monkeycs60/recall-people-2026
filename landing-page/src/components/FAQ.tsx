@@ -30,9 +30,14 @@ const faqs = [
       "Yes! Every note — voice transcription or typed — is saved on each contact's profile. You can read and edit everything anytime, even after the fact. This is also what powers the Assistant: it searches through all your notes to give you accurate, personalized answers.",
   },
   {
+    question: 'Can I use it offline?',
+    answer:
+      "Yes! You can browse all your contacts, notes, and information offline. However, recording new notes or asking the AI assistant requires an internet connection. Your data is always accessible on your device.",
+  },
+  {
     question: 'Where is my data stored?',
     answer:
-      "All your data stays on your phone — we don't store anything. Data is sent to our AI only when you record or ask a question, but nothing is kept. Be careful: if you delete the app, your data is gone. Cloud sync coming soon.",
+      "All your data stays on your phone — we don't store anything. Data is sent to our AI only when you record or ask a question, but nothing is kept. You can export your data anytime (JSON or CSV). Be careful: if you delete the app, your data is gone. Cloud sync coming soon.",
   },
   {
     question: 'Is my data used to train AI models?',
