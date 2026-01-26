@@ -46,6 +46,13 @@ export default function PhoneMockup({ src, videoSrc, alt, className = '' }: Phon
         <div className="absolute left-0 top-36 w-1 h-12 bg-[#2a2a2a] rounded-l-sm" />
         <div className="absolute left-0 top-52 w-1 h-12 bg-[#2a2a2a] rounded-l-sm" />
         <div className="absolute right-0 top-32 w-1 h-16 bg-[#2a2a2a] rounded-r-sm" />
+
+        {/* "App tour" label below phone */}
+        <div className="absolute -bottom-10 left-1/2 -translate-x-1/2">
+          <span className="text-xs font-medium tracking-widest uppercase text-text-muted">
+            App tour
+          </span>
+        </div>
       </div>
     </div>
   );

@@ -48,12 +48,12 @@ export default function Hero() {
             </div>
 
             <h1 className="text-[1.75rem] md:text-4xl lg:text-[3.25rem] font-bold tracking-tight text-text-primary leading-[1.1] mb-6">
-              Small details make big differences.<br />
+              <span className="bg-primary-light px-1 -mx-1 rounded">Small details</span> make<br /><span className="bg-primary-light px-1 -mx-1 rounded">big differences</span>.<br />
               <span className="text-primary">Recall every one.</span>
             </h1>
 
             <p className="text-base md:text-lg text-text-secondary max-w-lg mx-auto lg:mx-0 leading-relaxed mb-8">
-              His kids&apos; names. Her dream trip to Japan. The side project he works on at night. Talk about anyone you meet — <span className="font-semibold text-text-primary">Recall People</span> organizes everything automatically.
+              His kids&apos; names. Her dream trip to Japan. The side project he works on at night. Never forget what matters with <span className="font-semibold text-text-primary">Recall People</span>.
             </p>
 
             {/* Store buttons with flat & bold style */}
