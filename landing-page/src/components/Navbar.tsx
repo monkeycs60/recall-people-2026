@@ -27,26 +27,26 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-out ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out ${
         isScrolled
-          ? 'bg-background/95 backdrop-blur-md border-b border-border-light shadow-sm py-2'
-          : 'bg-transparent py-4'
+          ? 'bg-background/90 backdrop-blur-lg shadow-[0_2px_20px_-2px_rgba(0,0,0,0.08)] py-3'
+          : 'bg-transparent py-5'
       }`}
     >
       <div className="container mx-auto px-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className={`transition-all duration-300 ${isScrolled ? 'w-8 h-8' : 'w-9 h-9'}`}>
+            <div className={`transition-all duration-500 ${isScrolled ? 'w-9 h-9' : 'w-10 h-10'}`}>
               <Image
                 src="/logo.png"
                 alt="Recall People"
-                width={36}
-                height={36}
+                width={40}
+                height={40}
                 className="w-full h-full object-contain"
               />
             </div>
-            <span className={`font-bold text-text-primary transition-all duration-300 ${
+            <span className={`font-bold text-text-primary transition-all duration-500 ${
               isScrolled ? 'text-lg' : 'text-xl'
             }`}>
               Recall People

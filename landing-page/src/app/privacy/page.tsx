@@ -206,9 +206,12 @@ export default function PrivacyPage() {
             <div className="mt-12 pt-8 border-t border-border-light">
               <Link
                 href="/"
-                className="text-primary hover:underline font-medium"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-light hover:bg-primary text-primary hover:text-white font-medium rounded-full transition-all duration-200 hover:-translate-y-0.5"
               >
-                &larr; Back to Home
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to Home
               </Link>
             </div>
           </div>

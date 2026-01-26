@@ -17,7 +17,7 @@ const plans = [
   },
   {
     name: 'Pro',
-    price: '6.99',
+    price: '5.99',
     period: '/month',
     description: 'Unlimited power for networkers',
     features: [
