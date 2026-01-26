@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing } from '@/constants/theme';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
-const LOGIN_ILLUSTRATION = require('@/assets/ai-assets/two-guys-chatting-coffee.png');
+const LOGO = require('@/assets/images/logo.png');
 
 export default function LoginScreen() {
   const { t } = useTranslation();
@@ -46,11 +46,10 @@ export default function LoginScreen() {
           showsVerticalScrollIndicator={false}
         >
           <Animated.View entering={FadeIn.duration(600)} style={styles.headerSection}>
-            <View style={styles.illustrationContainer}>
-              <View style={styles.illustrationBackground} />
+            <View style={styles.logoContainer}>
               <Image
-                source={LOGIN_ILLUSTRATION}
-                style={styles.illustration}
+                source={LOGO}
+                style={styles.logo}
                 resizeMode="contain"
               />
             </View>
@@ -167,24 +166,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 32,
   },
-  illustrationContainer: {
-    position: 'relative',
-    width: 200,
-    height: 160,
-    marginBottom: 20,
+  logoContainer: {
+    width: 120,
+    height: 120,
+    marginBottom: 16,
   },
-  illustrationBackground: {
-    position: 'absolute',
-    bottom: 0,
-    left: '50%',
-    marginLeft: -70,
-    width: 140,
-    height: 110,
-    backgroundColor: Colors.primaryLight,
-    borderRadius: 70,
-    transform: [{ scaleX: 1.2 }],
-  },
-  illustration: {
+  logo: {
     width: '100%',
     height: '100%',
   },

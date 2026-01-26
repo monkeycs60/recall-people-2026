@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing } from '@/constants/theme';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
-const REGISTER_ILLUSTRATION = require('@/assets/ai-assets/guy-entring-app.png');
+const LOGO = require('@/assets/images/logo.png');
 
 export default function RegisterScreen() {
   const { t } = useTranslation();
@@ -62,11 +62,10 @@ export default function RegisterScreen() {
           showsVerticalScrollIndicator={false}
         >
           <Animated.View entering={FadeIn.duration(600)} style={styles.headerSection}>
-            <View style={styles.illustrationContainer}>
-              <View style={styles.illustrationBackground} />
+            <View style={styles.logoContainer}>
               <Image
-                source={REGISTER_ILLUSTRATION}
-                style={styles.illustration}
+                source={LOGO}
+                style={styles.logo}
                 resizeMode="contain"
               />
             </View>
@@ -216,24 +215,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 24,
   },
-  illustrationContainer: {
-    position: 'relative',
-    width: 160,
-    height: 140,
-    marginBottom: 16,
-  },
-  illustrationBackground: {
-    position: 'absolute',
-    bottom: 0,
-    left: '50%',
-    marginLeft: -60,
-    width: 120,
+  logoContainer: {
+    width: 100,
     height: 100,
-    backgroundColor: Colors.primaryLight,
-    borderRadius: 60,
-    transform: [{ scaleX: 1.2 }],
+    marginBottom: 12,
   },
-  illustration: {
+  logo: {
     width: '100%',
     height: '100%',
   },
