@@ -16,8 +16,8 @@ const features = [
     icon: Sparkles,
     title: 'AI Summaries',
     description: 'Get smart summaries and ice breaker questions to reconnect naturally. No more awkward moments.',
-    iconBg: 'bg-peche',
-    iconColor: 'text-calendar',
+    iconBg: 'bg-menthe',
+    iconColor: 'text-voice',
   },
   {
     icon: FolderOpen,
@@ -30,15 +30,15 @@ const features = [
     icon: Bell,
     title: 'Event Reminders',
     description: 'Get notified before meetings with who you\'re about to see and what you know about them.',
-    iconBg: 'bg-lavande',
-    iconColor: 'text-primary',
+    iconBg: 'bg-rose',
+    iconColor: 'text-error',
   },
   {
     icon: Search,
     title: 'Smart Search',
     description: '"Who works in tech?" Search like you think. No tags, no folders needed.',
     iconBg: 'bg-bleu-ciel',
-    iconColor: 'text-info',
+    iconColor: 'text-primary',
   },
 ];
 
