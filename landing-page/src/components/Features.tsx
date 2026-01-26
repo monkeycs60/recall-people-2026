@@ -15,14 +15,14 @@ const features = [
   {
     icon: Sparkles,
     title: 'AI Summaries',
-    description: 'Get smart summaries that remind you who people really are. No more forgetting details.',
+    description: 'Get smart summaries and ice breaker questions to reconnect naturally. No more awkward moments.',
     iconBg: 'bg-peche',
     iconColor: 'text-calendar',
   },
   {
     icon: FolderOpen,
     title: 'Auto-Organized',
-    description: 'Names, jobs, interests, family — everything sorted automatically. Zero effort.',
+    description: 'Contact info, upcoming events, and all your notes — structured automatically. Zero effort.',
     iconBg: 'bg-calendar-light',
     iconColor: 'text-calendar',
   },
