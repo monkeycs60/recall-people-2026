@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing } from '@/constants/theme';
+import { Colors } from '@/constants/theme';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
 const LOGO = require('@/assets/images/logo.png');
@@ -37,7 +37,7 @@ export default function RegisterScreen() {
 
     try {
       await register(email, password, name);
-    } catch (err) {
+    } catch (registerError) {
       // Error is already handled in useAuth
     }
   };
@@ -45,7 +45,7 @@ export default function RegisterScreen() {
   const handleGoogleRegister = async () => {
     try {
       await loginWithGoogle();
-    } catch (err) {
+    } catch (googleError) {
       // Error is already handled in useAuth
     }
   };
@@ -57,7 +57,7 @@ export default function RegisterScreen() {
         style={styles.keyboardView}
       >
         <ScrollView
-          contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 24 }]}
+          contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
@@ -73,9 +73,16 @@ export default function RegisterScreen() {
             <Text style={styles.tagline}>{t('auth.register.subtitle')}</Text>
           </Animated.View>
 
-          <Animated.View entering={FadeInDown.duration(500).delay(200)} style={styles.formCard}>
-            <Text style={styles.formTitle}>{t('auth.register.title')}</Text>
+          <Animated.View entering={FadeInDown.duration(500).delay(100)} style={styles.switchAuthTop}>
+            <Text style={styles.switchAuthText}>{t('auth.register.hasAccount')}</Text>
+            <Link href="/(auth)/login" asChild>
+              <Pressable style={styles.switchAuthButton}>
+                <Text style={styles.switchAuthButtonText}>{t('auth.register.signIn')}</Text>
+              </Pressable>
+            </Link>
+          </Animated.View>
 
+          <Animated.View entering={FadeInDown.duration(500).delay(200)} style={styles.formSection}>
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>{t('auth.register.name')}</Text>
               <TextInput
@@ -103,55 +110,57 @@ export default function RegisterScreen() {
               />
             </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>{t('auth.register.password')}</Text>
-              <View style={styles.passwordInputContainer}>
-                <TextInput
-                  style={styles.passwordInput}
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry={!showPassword}
-                  editable={!isLoading}
-                  placeholderTextColor={Colors.textMuted}
-                  placeholder={t('auth.register.passwordPlaceholder')}
-                />
-                <Pressable
-                  style={styles.eyeButton}
-                  onPress={() => setShowPassword(!showPassword)}
-                  hitSlop={8}
-                >
-                  <Ionicons
-                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                    size={22}
-                    color={Colors.textMuted}
+            <View style={styles.passwordRow}>
+              <View style={styles.passwordColumn}>
+                <Text style={styles.inputLabel}>{t('auth.register.password')}</Text>
+                <View style={styles.passwordInputContainer}>
+                  <TextInput
+                    style={styles.passwordInput}
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry={!showPassword}
+                    editable={!isLoading}
+                    placeholderTextColor={Colors.textMuted}
+                    placeholder={t('auth.register.passwordPlaceholder')}
                   />
-                </Pressable>
+                  <Pressable
+                    style={styles.eyeButton}
+                    onPress={() => setShowPassword(!showPassword)}
+                    hitSlop={8}
+                  >
+                    <Ionicons
+                      name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                      size={20}
+                      color={Colors.textMuted}
+                    />
+                  </Pressable>
+                </View>
               </View>
-            </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>{t('auth.register.confirmPassword')}</Text>
-              <View style={styles.passwordInputContainer}>
-                <TextInput
-                  style={styles.passwordInput}
-                  value={confirmPassword}
-                  onChangeText={setConfirmPassword}
-                  secureTextEntry={!showConfirmPassword}
-                  editable={!isLoading}
-                  placeholderTextColor={Colors.textMuted}
-                  placeholder={t('auth.register.confirmPasswordPlaceholder')}
-                />
-                <Pressable
-                  style={styles.eyeButton}
-                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                  hitSlop={8}
-                >
-                  <Ionicons
-                    name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
-                    size={22}
-                    color={Colors.textMuted}
+              <View style={styles.passwordColumn}>
+                <Text style={styles.inputLabel}>{t('auth.register.confirmPassword')}</Text>
+                <View style={styles.passwordInputContainer}>
+                  <TextInput
+                    style={styles.passwordInput}
+                    value={confirmPassword}
+                    onChangeText={setConfirmPassword}
+                    secureTextEntry={!showConfirmPassword}
+                    editable={!isLoading}
+                    placeholderTextColor={Colors.textMuted}
+                    placeholder={t('auth.register.confirmPasswordPlaceholder')}
                   />
-                </Pressable>
+                  <Pressable
+                    style={styles.eyeButton}
+                    onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                    hitSlop={8}
+                  >
+                    <Ionicons
+                      name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
+                      size={20}
+                      color={Colors.textMuted}
+                    />
+                  </Pressable>
+                </View>
               </View>
             </View>
 
@@ -184,15 +193,6 @@ export default function RegisterScreen() {
               <Text style={styles.googleButtonText}>{t('auth.register.google')}</Text>
             </Pressable>
           </Animated.View>
-
-          <Link href="/(auth)/login" asChild>
-            <Pressable style={styles.switchAuthContainer}>
-              <Text style={styles.switchAuthText}>
-                {t('auth.register.hasAccount')}{' '}
-                <Text style={styles.switchAuthLink}>{t('auth.register.signIn')}</Text>
-              </Text>
-            </Pressable>
-          </Link>
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
@@ -209,16 +209,16 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 32,
   },
   headerSection: {
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 20,
   },
   logoContainer: {
-    width: 100,
-    height: 100,
-    marginBottom: 12,
+    width: 72,
+    height: 72,
+    marginBottom: 10,
   },
   logo: {
     width: '100%',
@@ -226,82 +226,102 @@ const styles = StyleSheet.create({
   },
   brandTitle: {
     fontFamily: 'PlayfairDisplay_700Bold',
-    fontSize: 28,
+    fontSize: 26,
     color: Colors.textPrimary,
     textAlign: 'center',
   },
   tagline: {
-    fontFamily: 'PlayfairDisplay_400Regular',
     fontSize: 14,
     color: Colors.textSecondary,
     textAlign: 'center',
-    fontStyle: 'italic',
-    marginTop: 4,
+    marginTop: 6,
+    lineHeight: 20,
+    paddingHorizontal: 16,
   },
-  formCard: {
-    backgroundColor: Colors.surface,
-    borderRadius: 20,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 3,
+  switchAuthTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginBottom: 24,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    backgroundColor: Colors.primaryLight,
+    borderRadius: 12,
   },
-  formTitle: {
-    fontFamily: 'PlayfairDisplay_600SemiBold',
-    fontSize: 22,
-    color: Colors.textPrimary,
-    marginBottom: 16,
+  switchAuthText: {
+    color: Colors.textSecondary,
+    fontSize: 14,
+  },
+  switchAuthButton: {
+    paddingVertical: 4,
+    paddingHorizontal: 2,
+  },
+  switchAuthButtonText: {
+    color: Colors.primary,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  formSection: {
+    flex: 1,
   },
   inputGroup: {
-    marginBottom: 12,
+    marginBottom: 16,
   },
   inputLabel: {
-    color: Colors.textSecondary,
-    fontSize: 13,
-    fontWeight: '500',
-    marginBottom: 6,
+    color: Colors.textPrimary,
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 8,
   },
   input: {
-    backgroundColor: Colors.background,
-    borderWidth: 1,
-    borderColor: Colors.border,
+    backgroundColor: Colors.surface,
+    borderWidth: 1.5,
+    borderColor: Colors.borderLight,
     borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 15,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
     color: Colors.textPrimary,
+  },
+  passwordRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 16,
+  },
+  passwordColumn: {
+    flex: 1,
   },
   passwordInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.background,
-    borderWidth: 1,
-    borderColor: Colors.border,
+    backgroundColor: Colors.surface,
+    borderWidth: 1.5,
+    borderColor: Colors.borderLight,
     borderRadius: 12,
   },
   passwordInput: {
     flex: 1,
     paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingVertical: 14,
     fontSize: 15,
     color: Colors.textPrimary,
   },
   eyeButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 14,
   },
   errorText: {
     color: Colors.error,
-    fontSize: 13,
+    fontSize: 14,
     marginBottom: 12,
   },
   primaryButton: {
     backgroundColor: Colors.primary,
-    paddingVertical: 14,
+    paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
+    marginTop: 4,
   },
   primaryButtonText: {
     color: Colors.textInverse,
@@ -314,47 +334,34 @@ const styles = StyleSheet.create({
   dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 16,
+    marginVertical: 20,
   },
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: Colors.border,
+    backgroundColor: Colors.borderLight,
   },
   dividerText: {
     color: Colors.textMuted,
     fontSize: 13,
-    marginHorizontal: 12,
+    marginHorizontal: 16,
   },
   googleButton: {
     backgroundColor: Colors.surface,
-    borderWidth: 2,
-    borderColor: Colors.border,
-    paddingVertical: 12,
+    borderWidth: 1.5,
+    borderColor: Colors.borderLight,
+    paddingVertical: 14,
     borderRadius: 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
   googleIcon: {
-    marginRight: 10,
+    marginRight: 12,
   },
   googleButtonText: {
     color: Colors.textPrimary,
     fontSize: 15,
-    fontWeight: '600',
-  },
-  switchAuthContainer: {
-    marginTop: 20,
-    paddingVertical: 8,
-  },
-  switchAuthText: {
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    fontSize: 14,
-  },
-  switchAuthLink: {
-    color: Colors.primary,
     fontWeight: '600',
   },
 });

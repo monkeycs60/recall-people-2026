@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing } from '@/constants/theme';
+import { Colors } from '@/constants/theme';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
 const LOGO = require('@/assets/images/logo.png');
@@ -21,7 +21,7 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     try {
       await login(email, password);
-    } catch (err) {
+    } catch (loginError) {
       // Error is already handled in useAuth
     }
   };
@@ -29,7 +29,7 @@ export default function LoginScreen() {
   const handleGoogleLogin = async () => {
     try {
       await loginWithGoogle();
-    } catch (err) {
+    } catch (googleError) {
       // Error is already handled in useAuth
     }
   };
@@ -41,7 +41,7 @@ export default function LoginScreen() {
         style={styles.keyboardView}
       >
         <ScrollView
-          contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}
+          contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 24 }]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
@@ -57,9 +57,16 @@ export default function LoginScreen() {
             <Text style={styles.tagline}>{t('auth.tagline')}</Text>
           </Animated.View>
 
-          <Animated.View entering={FadeInDown.duration(500).delay(200)} style={styles.formCard}>
-            <Text style={styles.formTitle}>{t('auth.login.title')}</Text>
+          <Animated.View entering={FadeInDown.duration(500).delay(100)} style={styles.switchAuthTop}>
+            <Text style={styles.switchAuthText}>{t('auth.login.noAccount')}</Text>
+            <Link href="/(auth)/register" asChild>
+              <Pressable style={styles.switchAuthButton}>
+                <Text style={styles.switchAuthButtonText}>{t('auth.login.createAccount')}</Text>
+              </Pressable>
+            </Link>
+          </Animated.View>
 
+          <Animated.View entering={FadeInDown.duration(500).delay(200)} style={styles.formSection}>
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>{t('auth.login.email')}</Text>
               <TextInput
@@ -75,7 +82,14 @@ export default function LoginScreen() {
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>{t('auth.login.password')}</Text>
+              <View style={styles.passwordHeader}>
+                <Text style={styles.inputLabel}>{t('auth.login.password')}</Text>
+                <Link href="/(auth)/forgot-password" asChild>
+                  <Pressable hitSlop={8}>
+                    <Text style={styles.forgotPasswordText}>{t('auth.login.forgotPassword')}</Text>
+                  </Pressable>
+                </Link>
+              </View>
               <View style={styles.passwordInputContainer}>
                 <TextInput
                   style={styles.passwordInput}
@@ -99,12 +113,6 @@ export default function LoginScreen() {
                 </Pressable>
               </View>
             </View>
-
-            <Link href="/(auth)/forgot-password" asChild>
-              <Pressable style={styles.forgotPasswordContainer}>
-                <Text style={styles.forgotPasswordText}>{t('auth.login.forgotPassword')}</Text>
-              </Pressable>
-            </Link>
 
             {error && (
               <Text style={styles.errorText}>{error}</Text>
@@ -135,15 +143,6 @@ export default function LoginScreen() {
               <Text style={styles.googleButtonText}>{t('auth.login.google')}</Text>
             </Pressable>
           </Animated.View>
-
-          <Link href="/(auth)/register" asChild>
-            <Pressable style={styles.switchAuthContainer}>
-              <Text style={styles.switchAuthText}>
-                {t('auth.login.noAccount')}{' '}
-                <Text style={styles.switchAuthLink}>{t('auth.login.createAccount')}</Text>
-              </Text>
-            </Pressable>
-          </Link>
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
@@ -160,16 +159,16 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 32,
   },
   headerSection: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 24,
   },
   logoContainer: {
-    width: 120,
-    height: 120,
-    marginBottom: 16,
+    width: 80,
+    height: 80,
+    marginBottom: 12,
   },
   logo: {
     width: '100%',
@@ -177,47 +176,68 @@ const styles = StyleSheet.create({
   },
   brandTitle: {
     fontFamily: 'PlayfairDisplay_700Bold',
-    fontSize: 32,
+    fontSize: 28,
     color: Colors.textPrimary,
     textAlign: 'center',
   },
   tagline: {
-    fontFamily: 'PlayfairDisplay_400Regular',
     fontSize: 15,
     color: Colors.textSecondary,
     textAlign: 'center',
-    fontStyle: 'italic',
-    marginTop: 6,
+    marginTop: 8,
+    fontWeight: '500',
   },
-  formCard: {
-    backgroundColor: Colors.surface,
-    borderRadius: 20,
-    padding: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 3,
+  switchAuthTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginBottom: 32,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    backgroundColor: Colors.primaryLight,
+    borderRadius: 12,
   },
-  formTitle: {
-    fontFamily: 'PlayfairDisplay_600SemiBold',
-    fontSize: 24,
-    color: Colors.textPrimary,
-    marginBottom: 20,
-  },
-  inputGroup: {
-    marginBottom: 16,
-  },
-  inputLabel: {
+  switchAuthText: {
     color: Colors.textSecondary,
     fontSize: 14,
-    fontWeight: '500',
+  },
+  switchAuthButton: {
+    paddingVertical: 4,
+    paddingHorizontal: 2,
+  },
+  switchAuthButtonText: {
+    color: Colors.primary,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  formSection: {
+    flex: 1,
+  },
+  inputGroup: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    color: Colors.textPrimary,
+    fontSize: 14,
+    fontWeight: '600',
     marginBottom: 8,
   },
+  passwordHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  forgotPasswordText: {
+    color: Colors.primary,
+    fontSize: 13,
+    fontWeight: '500',
+  },
   input: {
-    backgroundColor: Colors.background,
-    borderWidth: 1,
-    borderColor: Colors.border,
+    backgroundColor: Colors.surface,
+    borderWidth: 1.5,
+    borderColor: Colors.borderLight,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -227,9 +247,9 @@ const styles = StyleSheet.create({
   passwordInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.background,
-    borderWidth: 1,
-    borderColor: Colors.border,
+    backgroundColor: Colors.surface,
+    borderWidth: 1.5,
+    borderColor: Colors.borderLight,
     borderRadius: 12,
   },
   passwordInput: {
@@ -243,15 +263,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 14,
   },
-  forgotPasswordContainer: {
-    alignSelf: 'flex-end',
-    marginBottom: 16,
-  },
-  forgotPasswordText: {
-    color: Colors.primary,
-    fontSize: 14,
-    fontWeight: '500',
-  },
   errorText: {
     color: Colors.error,
     fontSize: 14,
@@ -262,10 +273,11 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
+    marginTop: 8,
   },
   primaryButtonText: {
     color: Colors.textInverse,
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '600',
   },
   buttonDisabled: {
@@ -274,22 +286,22 @@ const styles = StyleSheet.create({
   dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 20,
+    marginVertical: 24,
   },
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: Colors.border,
+    backgroundColor: Colors.borderLight,
   },
   dividerText: {
     color: Colors.textMuted,
-    fontSize: 14,
+    fontSize: 13,
     marginHorizontal: 16,
   },
   googleButton: {
     backgroundColor: Colors.surface,
-    borderWidth: 2,
-    borderColor: Colors.border,
+    borderWidth: 1.5,
+    borderColor: Colors.borderLight,
     paddingVertical: 14,
     borderRadius: 12,
     flexDirection: 'row',
@@ -301,20 +313,7 @@ const styles = StyleSheet.create({
   },
   googleButtonText: {
     color: Colors.textPrimary,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  switchAuthContainer: {
-    marginTop: 24,
-    paddingVertical: 8,
-  },
-  switchAuthText: {
-    color: Colors.textSecondary,
-    textAlign: 'center',
     fontSize: 15,
-  },
-  switchAuthLink: {
-    color: Colors.primary,
     fontWeight: '600',
   },
 });
