@@ -6,9 +6,9 @@ import Image from 'next/image';
 import { Menu, X } from 'lucide-react';
 
 const navLinks = [
-  { label: 'Features', href: '#features' },
-  { label: 'Pricing', href: '#pricing' },
-  { label: 'FAQ', href: '#faq' },
+  { label: 'Features', href: '/#features' },
+  { label: 'Pricing', href: '/#pricing' },
+  { label: 'FAQ', href: '/#faq' },
   { label: 'Privacy', href: '/privacy' },
 ];
 
@@ -36,7 +36,7 @@ export default function Navbar() {
       <div className="container mx-auto px-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group">
+          <Link href="/" className="flex items-center gap-0 group">
             <div className={`transition-all duration-500 ${isScrolled ? 'w-9 h-9' : 'w-10 h-10'}`}>
               <Image
                 src="/logo.png"
@@ -46,10 +46,10 @@ export default function Navbar() {
                 className="w-full h-full object-contain"
               />
             </div>
-            <span className={`font-bold text-text-primary transition-all duration-500 ${
+            <span className={`font-bold text-text-primary transition-all duration-500 -ml-0.5 ${
               isScrolled ? 'text-lg' : 'text-xl'
             }`}>
-              Recall People
+              ecall People
             </span>
           </Link>
 

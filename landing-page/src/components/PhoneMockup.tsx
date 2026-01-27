@@ -10,8 +10,8 @@ interface PhoneMockupProps {
 export default function PhoneMockup({ src, videoSrc, alt, className = '' }: PhoneMockupProps) {
   return (
     <div className={`relative ${className}`}>
-      {/* iPhone frame - responsive width */}
-      <div className="relative mx-auto w-[240px] sm:w-[280px]">
+      {/* iPhone frame - responsive width, slightly smaller on desktop */}
+      <div className="relative mx-auto w-[240px] sm:w-[280px] lg:w-[260px]">
         {/* Phone body */}
         <div className="relative bg-[#1a1a1a] rounded-[3rem] p-2 shadow-2xl">
           {/* Screen bezel */}
