@@ -73,7 +73,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="antialiased font-sans bg-background text-foreground overflow-x-hidden">
+      <body className="antialiased font-sans bg-background text-foreground">
         <Navbar />
         {children}
       </body>

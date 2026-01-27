@@ -1,15 +1,10 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Heart } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="relative bg-foreground text-white py-16 overflow-hidden">
-      {/* Subtle decorative shapes */}
-      <div className="absolute top-8 left-8 w-32 h-32 bg-primary rounded-full opacity-10 blur-2xl" />
-      <div className="absolute bottom-12 right-16 w-40 h-40 bg-calendar rounded-full opacity-10 blur-2xl" />
-
-      <div className="container mx-auto px-4 relative z-10">
+    <footer className="bg-foreground text-white py-16">
+      <div className="container mx-auto px-4">
         <div className="max-w-6xl mx-auto">
           {/* Top section with CTA */}
           <div className="text-center pb-12 border-b border-white/10">
@@ -68,12 +63,6 @@ export default function Footer() {
               <a href="mailto:support@recall-people.com" className="hover:text-primary transition-colors duration-200">
                 Support
               </a>
-            </div>
-
-            <div className="flex items-center text-sm text-gray-500">
-              <span>Made with</span>
-              <Heart className="w-4 h-4 mx-1 text-primary fill-current" />
-              <span>in Paris</span>
             </div>
           </div>
         </div>
