@@ -46,7 +46,7 @@ export default function Navbar() {
                 className="w-full h-full object-contain"
               />
             </div>
-            <span className={`font-bold text-text-primary transition-all duration-500 -ml-0.5 ${
+            <span className={`font-bold text-text-primary transition-all duration-500 -ml-1 ${
               isScrolled ? 'text-lg' : 'text-xl'
             }`}>
               ecall People
