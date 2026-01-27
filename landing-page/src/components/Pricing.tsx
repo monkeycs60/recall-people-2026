@@ -11,6 +11,7 @@ const plans = [
       '10 assistant questions',
       '5 AI avatars',
       'Export your data (JSON, CSV)',
+      'View contacts & notes forever',
     ],
     cta: 'Start Free',
     highlighted: false,
