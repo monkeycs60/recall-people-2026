@@ -8,14 +8,14 @@ export default function ScrollGlows() {
   // Violet glow: starts at top (5%), moves down to 65% as you scroll
   const violetY = useTransform(scrollYProgress, [0, 1], ['5%', '65%']);
 
-  // Amber glow: starts at bottom (-10%), moves up to 60% from bottom as you scroll
-  const amberBottom = useTransform(scrollYProgress, [0, 1], ['-10%', '50%']);
+  // Amber glow: starts visible (15% from bottom), moves up to 75% from bottom as you scroll
+  const amberBottom = useTransform(scrollYProgress, [0, 1], ['15%', '75%']);
 
   // Small violet accent: moves down slightly
   const violetAccentY = useTransform(scrollYProgress, [0, 1], ['20%', '50%']);
 
   // Small amber accent: moves up (using bottom positioning)
-  const amberAccentBottom = useTransform(scrollYProgress, [0, 1], ['20%', '55%']);
+  const amberAccentBottom = useTransform(scrollYProgress, [0, 1], ['25%', '70%']);
 
   return (
     <div className="fixed inset-0 pointer-events-none z-[1] hidden md:block overflow-hidden">
