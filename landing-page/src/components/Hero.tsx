@@ -4,9 +4,9 @@ import PhoneMockup from './PhoneMockup';
 
 export default function Hero() {
   return (
-    <section className="relative pt-20 pb-16 md:pt-28 md:pb-20 min-h-screen flex items-center bg-background">
+    <section className="relative pt-20 pb-16 md:pt-28 md:pb-20 min-h-screen flex items-center bg-background overflow-hidden">
       {/* Decorative glow shapes */}
-      <div className="absolute inset-0 pointer-events-none">
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {/* Large violet glow - top left */}
         <div
           className="absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full glow-violet opacity-30 animate-glow-breathe"
@@ -40,7 +40,7 @@ export default function Hero() {
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
           {/* Left: Text content */}
-          <div className="text-center lg:text-left order-2 lg:order-1">
+          <div className="text-center lg:text-left">
             {/* Badge with flat & bold style */}
             <div className="inline-flex items-center space-x-2 bg-primary-light/50 border-2 border-border rounded-full px-4 py-1.5 mb-6">
               <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
@@ -92,7 +92,7 @@ export default function Hero() {
           </div>
 
           {/* Right: Phone mockup */}
-          <div className="order-1 lg:order-2 flex justify-center">
+          <div className="flex justify-center">
             <PhoneMockup
               videoSrc="/app-tour.webm"
               alt="Recall app demo video"
