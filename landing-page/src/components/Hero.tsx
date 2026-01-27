@@ -40,55 +40,64 @@ export default function Hero() {
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid lg:grid-cols-2 gap-10 md:gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
           {/* Left: Text content */}
-          <div className="text-center lg:text-left min-h-[85vh] md:min-h-0 flex flex-col justify-center">
-            {/* Badge with flat & bold style */}
-            <div className="inline-flex items-center space-x-2 bg-primary-light/50 border-2 border-border rounded-full px-4 py-1.5 mb-6 md:mb-6 self-center lg:self-start">
-              <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
-              <span className="text-sm font-semibold text-text-primary">Voice-first. Privacy-first.</span>
+          <div className="text-center lg:text-left min-h-[80svh] md:min-h-0 flex flex-col justify-between py-4 md:py-0 md:justify-start md:gap-6">
+            {/* Top spacer on mobile */}
+            <div className="md:hidden" />
+
+            {/* Main content */}
+            <div>
+              {/* Badge with flat & bold style */}
+              <div className="inline-flex items-center space-x-2 bg-primary-light/50 border-2 border-border rounded-full px-4 py-1.5 mb-5">
+                <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
+                <span className="text-sm font-semibold text-text-primary">Voice-first. Privacy-first.</span>
+              </div>
+
+              <h1 className="text-[1.75rem] md:text-4xl lg:text-[3.25rem] font-bold tracking-tight text-text-primary leading-[1.15] mb-5">
+                <span className="bg-primary-light px-1 -mx-1 rounded">Small details</span> make<br /><span className="bg-primary-light px-1 -mx-1 rounded">big differences</span>.<br />
+                <span className="text-primary">Recall every one.</span>
+              </h1>
+
+              <p className="text-sm md:text-lg text-text-secondary max-w-lg mx-auto lg:mx-0 leading-relaxed mb-6">
+                His kids&apos; names. Her dream trip to Japan. The side project he works on at night. Never forget what matters with <span className="font-semibold text-text-primary">Recall People</span>.
+              </p>
             </div>
 
-            <h1 className="text-[1.75rem] md:text-4xl lg:text-[3.25rem] font-bold tracking-tight text-text-primary leading-[1.15] mb-6 md:mb-6">
-              <span className="bg-primary-light px-1 -mx-1 rounded">Small details</span> make<br /><span className="bg-primary-light px-1 -mx-1 rounded">big differences</span>.<br />
-              <span className="text-primary">Recall every one.</span>
-            </h1>
+            {/* Bottom section with buttons */}
+            <div>
+              {/* Store buttons - same height, full width on mobile */}
+              <div className="flex flex-row items-stretch justify-center lg:justify-start gap-3 mb-4">
+                <Link
+                  href="#"
+                  className="group transition-all duration-200 ease-out hover:-translate-y-0.5 flex-1 max-w-[160px]"
+                  aria-label="Download on the App Store"
+                >
+                  <Image
+                    src="/images/app-store-badge.svg"
+                    alt="Download on the App Store"
+                    width={160}
+                    height={48}
+                    className="h-[48px] w-full object-contain"
+                  />
+                </Link>
+                <Link
+                  href="#"
+                  className="group transition-all duration-200 ease-out hover:-translate-y-0.5 flex-1 max-w-[160px]"
+                  aria-label="Get it on Google Play"
+                >
+                  <Image
+                    src="/images/google-play-badge.svg"
+                    alt="Get it on Google Play"
+                    width={160}
+                    height={48}
+                    className="h-[48px] w-full object-contain"
+                  />
+                </Link>
+              </div>
 
-            <p className="text-sm md:text-lg text-text-secondary max-w-lg mx-auto lg:mx-0 leading-relaxed mb-8 md:mb-8">
-              His kids&apos; names. Her dream trip to Japan. The side project he works on at night. Never forget what matters with <span className="font-semibold text-text-primary">Recall People</span>.
-            </p>
-
-            {/* Store buttons with flat & bold style */}
-            <div className="flex flex-row items-center justify-center lg:justify-start gap-3 mb-6 md:mb-6">
-              <Link
-                href="#"
-                className="group transition-all duration-200 ease-out hover:-translate-y-0.5"
-                aria-label="Download on the App Store"
-              >
-                <Image
-                  src="/images/app-store-badge.svg"
-                  alt="Download on the App Store"
-                  width={140}
-                  height={47}
-                  className="h-12 md:h-12 w-auto"
-                />
-              </Link>
-              <Link
-                href="#"
-                className="group transition-all duration-200 ease-out hover:-translate-y-0.5"
-                aria-label="Get it on Google Play"
-              >
-                <Image
-                  src="/images/google-play-badge.svg"
-                  alt="Get it on Google Play"
-                  width={158}
-                  height={47}
-                  className="h-12 md:h-12 w-auto"
-                />
-              </Link>
+              <p className="text-xs md:text-sm text-text-secondary">
+                Free to start. Works offline. Your data never leaves your device.
+              </p>
             </div>
-
-            <p className="text-sm text-text-secondary">
-              Free to start. Works offline. Your data never leaves your device.
-            </p>
           </div>
 
           {/* Right: Phone mockup */}
