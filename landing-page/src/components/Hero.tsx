@@ -4,9 +4,9 @@ import PhoneMockup from './PhoneMockup';
 
 export default function Hero() {
   return (
-    <section className="relative pt-20 pb-16 md:pt-28 md:pb-20 min-h-screen flex items-center bg-background overflow-hidden">
-      {/* Decorative glow shapes */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+    <section className="relative pt-24 pb-12 md:pt-28 md:pb-20 min-h-screen flex items-center bg-background overflow-hidden">
+      {/* Decorative glow shapes - hidden on mobile for cleaner look */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden hidden md:block">
         {/* Large violet glow - top left */}
         <div
           className="absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full glow-violet opacity-30 animate-glow-breathe"
@@ -38,26 +38,26 @@ export default function Hero() {
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
+        <div className="grid lg:grid-cols-2 gap-10 md:gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
           {/* Left: Text content */}
           <div className="text-center lg:text-left">
             {/* Badge with flat & bold style */}
-            <div className="inline-flex items-center space-x-2 bg-primary-light/50 border-2 border-border rounded-full px-4 py-1.5 mb-6">
+            <div className="inline-flex items-center space-x-2 bg-primary-light/50 border-2 border-border rounded-full px-4 py-1.5 mb-6 md:mb-6">
               <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
               <span className="text-sm font-semibold text-text-primary">Voice-first. Privacy-first.</span>
             </div>
 
-            <h1 className="text-[1.75rem] md:text-4xl lg:text-[3.25rem] font-bold tracking-tight text-text-primary leading-[1.1] mb-6">
+            <h1 className="text-[1.75rem] md:text-4xl lg:text-[3.25rem] font-bold tracking-tight text-text-primary leading-[1.15] mb-6 md:mb-6">
               <span className="bg-primary-light px-1 -mx-1 rounded">Small details</span> make<br /><span className="bg-primary-light px-1 -mx-1 rounded">big differences</span>.<br />
               <span className="text-primary">Recall every one.</span>
             </h1>
 
-            <p className="text-base md:text-lg text-text-secondary max-w-lg mx-auto lg:mx-0 leading-relaxed mb-8">
+            <p className="text-sm md:text-lg text-text-secondary max-w-lg mx-auto lg:mx-0 leading-relaxed mb-8 md:mb-8">
               His kids&apos; names. Her dream trip to Japan. The side project he works on at night. Never forget what matters with <span className="font-semibold text-text-primary">Recall People</span>.
             </p>
 
             {/* Store buttons with flat & bold style */}
-            <div className="flex flex-col sm:flex-row items-center lg:items-start gap-4 mb-6">
+            <div className="flex flex-row items-center justify-center lg:justify-start gap-3 mb-6 md:mb-6">
               <Link
                 href="#"
                 className="group transition-all duration-200 ease-out hover:-translate-y-0.5"
@@ -68,7 +68,7 @@ export default function Hero() {
                   alt="Download on the App Store"
                   width={140}
                   height={47}
-                  className="h-12 w-auto"
+                  className="h-10 md:h-12 w-auto"
                 />
               </Link>
               <Link
@@ -81,7 +81,7 @@ export default function Hero() {
                   alt="Get it on Google Play"
                   width={158}
                   height={47}
-                  className="h-12 w-auto"
+                  className="h-10 md:h-12 w-auto"
                 />
               </Link>
             </div>

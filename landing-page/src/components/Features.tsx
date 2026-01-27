@@ -59,10 +59,10 @@ export default function Features() {
         {/* Main content: Animation + Features grid */}
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
           {/* Left: Remotion Player */}
-          <div className="order-2 lg:order-1 flex justify-center">
-            <div className="relative w-full max-w-[340px]">
-              {/* Decorative background glow - violet/amber */}
-              <div className="absolute inset-0 -m-4 md:-m-8 bg-gradient-to-br from-primary-light/50 via-calendar-light/40 to-primary-light/50 rounded-[2rem] md:rounded-[3rem] blur-2xl" />
+          <div className="order-2 lg:order-1 flex justify-center w-full">
+            <div className="relative w-full lg:max-w-[340px]">
+              {/* Decorative background glow - hidden on mobile */}
+              <div className="hidden md:block absolute inset-0 -m-8 bg-gradient-to-br from-primary-light/50 via-calendar-light/40 to-primary-light/50 rounded-[3rem] blur-2xl" />
 
               {/* Player container */}
               <div className="relative bg-surface border-2 border-border rounded-2xl md:rounded-3xl overflow-hidden shadow-lg">
@@ -83,11 +83,11 @@ export default function Features() {
                 />
               </div>
 
-              {/* Floating decorative elements - hidden on very small screens */}
-              <div className="hidden sm:flex absolute -top-4 -right-4 w-12 h-12 bg-primary-light border-2 border-border rounded-xl items-center justify-center text-xl animate-bounce">
+              {/* Floating decorative elements - hidden on mobile */}
+              <div className="hidden lg:flex absolute -top-4 -right-4 w-12 h-12 bg-primary-light border-2 border-border rounded-xl items-center justify-center text-xl animate-bounce">
                 ✨
               </div>
-              <div className="hidden sm:flex absolute -bottom-3 -left-3 w-10 h-10 bg-primary-light border-2 border-border rounded-lg items-center justify-center text-lg">
+              <div className="hidden lg:flex absolute -bottom-3 -left-3 w-10 h-10 bg-primary-light border-2 border-border rounded-lg items-center justify-center text-lg">
                 🎤
               </div>
             </div>
