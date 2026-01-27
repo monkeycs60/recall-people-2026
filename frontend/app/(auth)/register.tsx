@@ -110,57 +110,55 @@ export default function RegisterScreen() {
               />
             </View>
 
-            <View style={styles.passwordRow}>
-              <View style={styles.passwordColumn}>
-                <Text style={styles.inputLabel}>{t('auth.register.password')}</Text>
-                <View style={styles.passwordInputContainer}>
-                  <TextInput
-                    style={styles.passwordInput}
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry={!showPassword}
-                    editable={!isLoading}
-                    placeholderTextColor={Colors.textMuted}
-                    placeholder={t('auth.register.passwordPlaceholder')}
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>{t('auth.register.password')}</Text>
+              <View style={styles.passwordInputContainer}>
+                <TextInput
+                  style={styles.passwordInput}
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                  editable={!isLoading}
+                  placeholderTextColor={Colors.textMuted}
+                  placeholder={t('auth.register.passwordPlaceholder')}
+                />
+                <Pressable
+                  style={styles.eyeButton}
+                  onPress={() => setShowPassword(!showPassword)}
+                  hitSlop={8}
+                >
+                  <Ionicons
+                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                    size={22}
+                    color={Colors.textMuted}
                   />
-                  <Pressable
-                    style={styles.eyeButton}
-                    onPress={() => setShowPassword(!showPassword)}
-                    hitSlop={8}
-                  >
-                    <Ionicons
-                      name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                      size={20}
-                      color={Colors.textMuted}
-                    />
-                  </Pressable>
-                </View>
+                </Pressable>
               </View>
+            </View>
 
-              <View style={styles.passwordColumn}>
-                <Text style={styles.inputLabel}>{t('auth.register.confirmPassword')}</Text>
-                <View style={styles.passwordInputContainer}>
-                  <TextInput
-                    style={styles.passwordInput}
-                    value={confirmPassword}
-                    onChangeText={setConfirmPassword}
-                    secureTextEntry={!showConfirmPassword}
-                    editable={!isLoading}
-                    placeholderTextColor={Colors.textMuted}
-                    placeholder={t('auth.register.confirmPasswordPlaceholder')}
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>{t('auth.register.confirmPassword')}</Text>
+              <View style={styles.passwordInputContainer}>
+                <TextInput
+                  style={styles.passwordInput}
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  secureTextEntry={!showConfirmPassword}
+                  editable={!isLoading}
+                  placeholderTextColor={Colors.textMuted}
+                  placeholder={t('auth.register.confirmPasswordPlaceholder')}
+                />
+                <Pressable
+                  style={styles.eyeButton}
+                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                  hitSlop={8}
+                >
+                  <Ionicons
+                    name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
+                    size={22}
+                    color={Colors.textMuted}
                   />
-                  <Pressable
-                    style={styles.eyeButton}
-                    onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                    hitSlop={8}
-                  >
-                    <Ionicons
-                      name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
-                      size={20}
-                      color={Colors.textMuted}
-                    />
-                  </Pressable>
-                </View>
+                </Pressable>
               </View>
             </View>
 
@@ -216,9 +214,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   logoContainer: {
-    width: 72,
-    height: 72,
-    marginBottom: 10,
+    width: 88,
+    height: 88,
+    marginBottom: 12,
   },
   logo: {
     width: '100%',
@@ -284,14 +282,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.textPrimary,
   },
-  passwordRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 16,
-  },
-  passwordColumn: {
-    flex: 1,
-  },
   passwordInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -302,13 +292,13 @@ const styles = StyleSheet.create({
   },
   passwordInput: {
     flex: 1,
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     paddingVertical: 14,
-    fontSize: 15,
+    fontSize: 16,
     color: Colors.textPrimary,
   },
   eyeButton: {
-    paddingHorizontal: 10,
+    paddingHorizontal: 14,
     paddingVertical: 14,
   },
   errorText: {
