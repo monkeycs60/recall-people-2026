@@ -45,7 +45,7 @@
     },
     "register": {
       "title": "Créer un compte",
-      "subtitle": "Le prénom de ses enfants. Le métier de sa compagne. Ne les oubliez plus.",
+      "subtitle": "Le prénom de ses enfants. Le métier de sa compagne.\nNe les oubliez plus.",
       "name": "Nom",
       "namePlaceholder": "Votre nom",
       "email": "Email",

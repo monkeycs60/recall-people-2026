@@ -45,7 +45,7 @@
     },
     "register": {
       "title": "Crear cuenta",
-      "subtitle": "Los nombres de sus hijos. El trabajo de su pareja. No los olvides nunca más.",
+      "subtitle": "Los nombres de sus hijos. El trabajo de su pareja.\nNo los olvides nunca más.",
       "name": "Nombre",
       "namePlaceholder": "Tu nombre",
       "email": "Email",

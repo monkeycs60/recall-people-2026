@@ -45,7 +45,7 @@
     },
     "register": {
       "title": "Konto erstellen",
-      "subtitle": "Die Namen ihrer Kinder. Der Beruf ihres Partners. Vergiss sie nie wieder.",
+      "subtitle": "Die Namen ihrer Kinder. Der Beruf ihres Partners.\nVergiss sie nie wieder.",
       "name": "Name",
       "namePlaceholder": "Dein Name",
       "email": "Email",
