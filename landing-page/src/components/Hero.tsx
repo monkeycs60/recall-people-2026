@@ -4,7 +4,7 @@ import PhoneMockup from './PhoneMockup';
 
 export default function Hero() {
   return (
-    <section className="relative pt-24 pb-12 md:pt-28 md:pb-20 min-h-screen flex items-center bg-background overflow-hidden">
+    <section className="relative pt-20 pb-8 md:pt-28 md:pb-20 md:min-h-screen flex items-center bg-background overflow-hidden">
       {/* Decorative glow shapes - hidden on mobile for cleaner look */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden hidden md:block">
         {/* Large violet glow - top left */}
@@ -40,9 +40,9 @@ export default function Hero() {
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid lg:grid-cols-2 gap-10 md:gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
           {/* Left: Text content */}
-          <div className="text-center lg:text-left">
+          <div className="text-center lg:text-left min-h-[85vh] md:min-h-0 flex flex-col justify-center">
             {/* Badge with flat & bold style */}
-            <div className="inline-flex items-center space-x-2 bg-primary-light/50 border-2 border-border rounded-full px-4 py-1.5 mb-6 md:mb-6">
+            <div className="inline-flex items-center space-x-2 bg-primary-light/50 border-2 border-border rounded-full px-4 py-1.5 mb-6 md:mb-6 self-center lg:self-start">
               <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
               <span className="text-sm font-semibold text-text-primary">Voice-first. Privacy-first.</span>
             </div>
@@ -68,7 +68,7 @@ export default function Hero() {
                   alt="Download on the App Store"
                   width={140}
                   height={47}
-                  className="h-10 md:h-12 w-auto"
+                  className="h-12 md:h-12 w-auto"
                 />
               </Link>
               <Link
@@ -81,7 +81,7 @@ export default function Hero() {
                   alt="Get it on Google Play"
                   width={158}
                   height={47}
-                  className="h-10 md:h-12 w-auto"
+                  className="h-12 md:h-12 w-auto"
                 />
               </Link>
             </div>
