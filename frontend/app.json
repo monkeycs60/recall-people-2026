@@ -2,7 +2,7 @@
   "expo": {
     "name": "Recall People",
     "slug": "recall-people",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "recall-people",
@@ -11,7 +11,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.monkeycs60.recallpeople2026",
-      "buildNumber": "11"
+      "buildNumber": "13"
     },
     "android": {
       "adaptiveIcon": {
@@ -77,7 +77,7 @@
       }
     },
     "owner": "clement-serizay",
-    "runtimeVersion": "1.0.0",
+    "runtimeVersion": "1.0.1",
     "updates": {
       "url": "https://u.expo.dev/005eaea1-73bc-47b0-80e8-5e15dee1c600"
     }
