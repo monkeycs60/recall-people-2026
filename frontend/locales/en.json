@@ -356,7 +356,20 @@
       "month": "Month",
       "year": "Year (optional)",
       "yearPlaceholder": "Year",
-      "months": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+      "months": [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December"
+      ],
       "save": "Save",
       "cancel": "Cancel",
       "delete": "Delete"
@@ -782,5 +795,15 @@
       "yesterday": "Yesterday",
       "daysAgo": "{{count}} days ago"
     }
+  },
+  "disambiguation": {
+    "title": "Who is \"{{firstName}}\"?",
+    "subtitle_one": "You already have a contact named \"{{firstName}}\"",
+    "subtitle_other": "You already have contacts named \"{{firstName}}\"",
+    "existingContacts": "Existing contacts",
+    "newContact": "New contact",
+    "createNew": "Create \"{{name}}\"",
+    "suggestedNickname": "Suggested nickname based on: {{nickname}}",
+    "lastContact": "Last contact: {{date}}"
   }
 }

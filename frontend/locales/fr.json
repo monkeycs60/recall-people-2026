@@ -163,14 +163,36 @@
   "ask": {
     "placeholder": "Demande-moi quelque chose...",
     "title": "Demander",
+    "titleAbout": "Sur {{firstName}}",
     "inputPlaceholder": "Tape ta question...",
+    "inputPlaceholderAbout": "Question sur {{firstName}}...",
     "voiceButton": "Parler",
     "sendButton": "Envoyer",
     "suggestionsTitle": "💡 Suggestions :",
     "suggestions": {
       "recent": "De quoi j'ai parlé avec Marie récemment ?",
       "birthday": "C'est quand l'anniversaire de Lucas ?",
-      "updates": "Quelles sont les actualités de Papa ?"
+      "updates": "Quelles sont les actualités de Papa ?",
+      "recentWith": "De quoi j'ai parlé avec {{firstName}} récemment ?",
+      "birthdayOf": "C'est quand l'anniversaire de {{firstName}} ?",
+      "newsOf": "Quelles sont les actualités de {{firstName}} ?"
+    },
+    "newQuestionPlaceholder": "Autre question...",
+    "result": {
+      "sourceHeader": "D'après ta note du {{date}} :",
+      "sourcesTitle": "Sources",
+      "viewContactButton": "Voir la fiche {{contactName}}"
+    },
+    "contactNotFound": {
+      "title": "Je ne trouve pas de contact correspondant",
+      "description": "Aucun contact ne correspond à ta recherche.",
+      "suggestionsTitle": "Tu voulais peut-être dire :",
+      "createButton": "Créer ce contact"
+    },
+    "noInfo": {
+      "title": "Je n'ai pas trouvé d'information",
+      "description": "Je n'ai rien trouvé sur ce sujet dans tes notes sur {{contactName}}.",
+      "addNoteButton": "Ajouter une note sur {{contactName}}"
     }
   },
   "contact": {
@@ -741,41 +763,6 @@
     "features": "Fonctionnalités incluses",
     "activated": "Pro activé !"
   },
-  "ask": {
-    "placeholder": "Demande-moi quelque chose...",
-    "title": "Demander",
-    "titleAbout": "Sur {{firstName}}",
-    "inputPlaceholder": "Tape ta question...",
-    "inputPlaceholderAbout": "Question sur {{firstName}}...",
-    "voiceButton": "Parler",
-    "sendButton": "Envoyer",
-    "suggestionsTitle": "💡 Suggestions :",
-    "suggestions": {
-      "recent": "De quoi j'ai parlé avec Marie récemment ?",
-      "birthday": "C'est quand l'anniversaire de Lucas ?",
-      "updates": "Quelles sont les actualités de Papa ?",
-      "recentWith": "De quoi j'ai parlé avec {{firstName}} récemment ?",
-      "birthdayOf": "C'est quand l'anniversaire de {{firstName}} ?",
-      "newsOf": "Quelles sont les actualités de {{firstName}} ?"
-    },
-    "newQuestionPlaceholder": "Autre question...",
-    "result": {
-      "sourceHeader": "D'après ta note du {{date}} :",
-      "sourcesTitle": "Sources",
-      "viewContactButton": "Voir la fiche {{contactName}}"
-    },
-    "contactNotFound": {
-      "title": "Je ne trouve pas de contact correspondant",
-      "description": "Aucun contact ne correspond à ta recherche.",
-      "suggestionsTitle": "Tu voulais peut-être dire :",
-      "createButton": "Créer ce contact"
-    },
-    "noInfo": {
-      "title": "Je n'ai pas trouvé d'information",
-      "description": "Je n'ai rien trouvé sur ce sujet dans tes notes sur {{contactName}}.",
-      "addNoteButton": "Ajouter une note sur {{contactName}}"
-    }
-  },
   "assistant": {
     "title": "Assistant",
     "description": "Interroge toutes tes notes pour retrouver des informations sur un contact ou plusieurs. L'IA fouille ta base de données et te répond.",
@@ -798,5 +785,15 @@
       "yesterday": "Hier",
       "daysAgo": "Il y a {{count}} jours"
     }
+  },
+  "disambiguation": {
+    "title": "Qui est « {{firstName}} » ?",
+    "subtitle_one": "Tu as déjà un contact nommé « {{firstName}} »",
+    "subtitle_other": "Tu as déjà des contacts nommés « {{firstName}} »",
+    "existingContacts": "Contacts existants",
+    "newContact": "Nouveau contact",
+    "createNew": "Créer « {{name}} »",
+    "suggestedNickname": "Surnom suggéré : {{nickname}}",
+    "lastContact": "Dernier contact : {{date}}"
   }
 }

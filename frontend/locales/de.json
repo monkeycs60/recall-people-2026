@@ -1,4 +1,4 @@
-  {
+{
   "auth": {
     "tagline": "Kleine Details machen große Unterschiede.",
     "login": {
@@ -356,7 +356,20 @@
       "month": "Monat",
       "year": "Jahr (optional)",
       "yearPlaceholder": "Jahr",
-      "months": ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"],
+      "months": [
+        "Januar",
+        "Februar",
+        "März",
+        "April",
+        "Mai",
+        "Juni",
+        "Juli",
+        "August",
+        "September",
+        "Oktober",
+        "November",
+        "Dezember"
+      ],
       "save": "Speichern",
       "cancel": "Abbrechen",
       "delete": "Löschen"
@@ -782,5 +795,15 @@
       "yesterday": "Gestern",
       "daysAgo": "Vor {{count}} Tagen"
     }
+  },
+  "disambiguation": {
+    "title": "Wer ist \"{{firstName}}\"?",
+    "subtitle_one": "Du hast bereits einen Kontakt namens \"{{firstName}}\"",
+    "subtitle_other": "Du hast bereits Kontakte namens \"{{firstName}}\"",
+    "existingContacts": "Bestehende Kontakte",
+    "newContact": "Neuer Kontakt",
+    "createNew": "\"{{name}}\" erstellen",
+    "suggestedNickname": "Vorgeschlagener Spitzname: {{nickname}}",
+    "lastContact": "Letzter Kontakt: {{date}}"
   }
 }

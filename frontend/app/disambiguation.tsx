@@ -1,10 +1,12 @@
 import { View, Text, ScrollView, Pressable } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { Contact, ExtractionResult } from '@/types';
 import { Plus, User } from 'lucide-react-native';
 
 export default function DisambiguationScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const params = useLocalSearchParams();
   const insets = useSafeAreaInsets();
@@ -47,16 +49,16 @@ export default function DisambiguationScreen() {
       contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
     >
       <Text className="text-2xl font-bold text-textPrimary mb-2">
-        Qui est "{firstName}" ?
+        {t('disambiguation.title', { firstName })}
       </Text>
 
       <Text className="text-textSecondary mb-6">
-        Tu as déjà {possibleContacts.length > 1 ? 'des contacts' : 'un contact'} nommé "{firstName}"
+        {t('disambiguation.subtitle', { firstName, count: possibleContacts.length })}
       </Text>
 
       <View className="mb-4">
         <Text className="text-lg font-semibold text-textPrimary mb-3">
-          Contacts existants
+          {t('disambiguation.existingContacts')}
         </Text>
 
         {possibleContacts.map((contact) => (
@@ -75,7 +77,9 @@ export default function DisambiguationScreen() {
               </Text>
               {contact.lastContactAt && (
                 <Text className="text-textMuted text-xs mt-1">
-                  Dernier contact: {new Date(contact.lastContactAt).toLocaleDateString()}
+                  {t('disambiguation.lastContact', { 
+                    date: new Date(contact.lastContactAt).toLocaleDateString() 
+                  })}
                 </Text>
               )}
             </View>
@@ -85,7 +89,7 @@ export default function DisambiguationScreen() {
 
       <View className="mb-6">
         <Text className="text-lg font-semibold text-textPrimary mb-3">
-          Nouveau contact
+          {t('disambiguation.newContact')}
         </Text>
 
         <Pressable
@@ -95,13 +99,13 @@ export default function DisambiguationScreen() {
           <View className="flex-row items-center mb-2">
             <Plus size={20} color="#8B5CF6" />
             <Text className="text-primary font-semibold ml-2">
-              Créer "{suggestedNickname || firstName}"
+              {t('disambiguation.createNew', { name: suggestedNickname || firstName })}
             </Text>
           </View>
 
           {suggestedNickname && (
             <Text className="text-textMuted text-sm text-center">
-              Surnom suggéré basé sur : {suggestedNickname}
+              {t('disambiguation.suggestedNickname', { nickname: suggestedNickname })}
             </Text>
           )}
         </Pressable>

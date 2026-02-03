@@ -356,7 +356,20 @@
       "month": "Mese",
       "year": "Anno (opzionale)",
       "yearPlaceholder": "Anno",
-      "months": ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"],
+      "months": [
+        "Gennaio",
+        "Febbraio",
+        "Marzo",
+        "Aprile",
+        "Maggio",
+        "Giugno",
+        "Luglio",
+        "Agosto",
+        "Settembre",
+        "Ottobre",
+        "Novembre",
+        "Dicembre"
+      ],
       "save": "Salva",
       "cancel": "Annulla",
       "delete": "Elimina"
@@ -782,5 +795,15 @@
       "yesterday": "Ieri",
       "daysAgo": "{{count}} giorni fa"
     }
+  },
+  "disambiguation": {
+    "title": "Chi è \"{{firstName}}\"?",
+    "subtitle_one": "Hai già un contatto chiamato \"{{firstName}}\"",
+    "subtitle_other": "Hai già dei contatti chiamati \"{{firstName}}\"",
+    "existingContacts": "Contatti esistenti",
+    "newContact": "Nuovo contatto",
+    "createNew": "Crea \"{{name}}\"",
+    "suggestedNickname": "Soprannome suggerito: {{nickname}}",
+    "lastContact": "Ultimo contatto: {{date}}"
   }
 }
