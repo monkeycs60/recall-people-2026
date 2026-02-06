@@ -4,9 +4,9 @@
     "login": {
       "title": "Connexion",
       "email": "Email",
-      "emailPlaceholder": "votre@email.com",
+      "emailPlaceholder": "ton@email.com",
       "password": "Mot de passe",
-      "passwordPlaceholder": "Votre mot de passe",
+      "passwordPlaceholder": "Ton mot de passe",
       "submit": "Se connecter",
       "loading": "Connexion...",
       "or": "ou",
@@ -17,39 +17,39 @@
     },
     "forgotPassword": {
       "title": "Mot de passe oublié",
-      "subtitle": "Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.",
+      "subtitle": "Entre ton adresse email et on t'enverra un lien pour réinitialiser ton mot de passe.",
       "submit": "Envoyer le lien",
-      "emailRequired": "Veuillez entrer votre adresse email",
-      "error": "Échec de l'envoi de l'email. Veuillez réessayer.",
-      "successTitle": "Vérifiez vos emails",
+      "emailRequired": "Entre ton adresse email",
+      "error": "Échec de l'envoi de l'email. Réessaie.",
+      "successTitle": "Vérifie tes emails",
       "successDescription": "Nous avons envoyé un lien de réinitialisation à {{email}}",
       "expiryNote": "Ce lien expirera dans 30 minutes.",
       "resend": "Renvoyer l'email",
       "backToLogin": "Retour à la connexion",
-      "rememberPassword": "Vous vous souvenez de votre mot de passe ?"
+      "rememberPassword": "Tu te souviens de ton mot de passe ?"
     },
     "resetPassword": {
       "title": "Réinitialiser le mot de passe",
-      "subtitle": "Entrez votre nouveau mot de passe ci-dessous.",
+      "subtitle": "Entre ton nouveau mot de passe ci-dessous.",
       "newPassword": "Nouveau mot de passe",
       "confirmPassword": "Confirmer le mot de passe",
       "submit": "Réinitialiser",
-      "error": "Échec de la réinitialisation. Veuillez réessayer.",
+      "error": "Échec de la réinitialisation. Réessaie.",
       "invalidLink": "Lien invalide ou expiré",
       "invalidLinkTitle": "Lien invalide",
-      "invalidLinkDescription": "Ce lien de réinitialisation est invalide ou a expiré. Veuillez en demander un nouveau.",
+      "invalidLinkDescription": "Ce lien de réinitialisation est invalide ou a expiré. Demande-en un nouveau.",
       "requestNewLink": "Demander un nouveau lien",
       "successTitle": "Mot de passe réinitialisé !",
-      "successDescription": "Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.",
+      "successDescription": "Ton mot de passe a été réinitialisé avec succès. Tu peux maintenant te connecter avec ton nouveau mot de passe.",
       "goToLogin": "Se connecter"
     },
     "register": {
       "title": "Créer un compte",
-      "subtitle": "Le prénom de ses enfants. Le métier de sa compagne.\nNe les oubliez plus.",
+      "subtitle": "Le prénom de ses enfants. Le métier de sa compagne.\nNe les oublie plus.",
       "name": "Nom",
-      "namePlaceholder": "Votre nom",
+      "namePlaceholder": "Ton nom",
       "email": "Email",
-      "emailPlaceholder": "votre@email.com",
+      "emailPlaceholder": "ton@email.com",
       "password": "Mot de passe",
       "passwordPlaceholder": "8 car. min.",
       "confirmPassword": "Confirmer",
@@ -77,7 +77,7 @@
     "serverError": "Erreur serveur",
     "serverErrorDescription": "Un problème est survenu, réessaie plus tard",
     "generic": "Une erreur est survenue",
-    "askQuestionFailed": "Impossible de répondre à votre question. Vérifiez votre connexion."
+    "askQuestionFailed": "Impossible de répondre à ta question. Vérifie ta connexion."
   },
   "common": {
     "loading": "Chargement...",
@@ -93,18 +93,18 @@
     "add": "Ajouter",
     "all": "Tous",
     "untitledNote": "Note sans titre",
-    "tapToEdit": "Appuyez pour modifier",
+    "tapToEdit": "Appuie pour modifier",
     "today": "Aujourd'hui",
     "yesterday": "Hier",
     "daysAgo": "Il y a {{count}} jours",
     "weeksAgo": "Il y a {{count}} semaines",
     "monthsAgo": "Il y a {{count}} mois",
     "unsavedChanges": "Modifications non sauvegardées",
-    "discardChangesQuestion": "Voulez-vous abandonner vos modifications ?",
+    "discardChangesQuestion": "Tu veux abandonner tes modifications ?",
     "discard": "Abandonner",
     "seeLess": "Voir moins",
     "seeMore": "Voir plus",
-    "editTranscriptionHint": "Modifiez la transcription ci-dessous",
+    "editTranscriptionHint": "Modifie la transcription ci-dessous",
     "transcriptionPlaceholder": "Transcription..."
   },
   "tabs": {
@@ -126,7 +126,12 @@
     "pressToRecord": "Appuie pour enregistrer",
     "recording": "Enregistrement...",
     "processing": "Traitement...",
-    "transcribing": "Transcription..."
+    "transcribing": "Transcription...",
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "timeAgo": "Il y a {{distance}}",
+    "moreContacts_one": "{{count}} autre",
+    "moreContacts_other": "{{count}} autres"
   },
   "processing": {
     "transcribing": "Transcription en cours...",
@@ -135,13 +140,14 @@
   },
   "contacts": {
     "title": "Contacts",
-    "searchPlaceholder": "Qui cherchez-vous ?",
+    "searchPlaceholder": "Qui cherches-tu ?",
     "filterPlaceholder": "Rechercher un contact...",
     "askHint": "Pose une question à l'IA",
-    "noContacts": "Parlez de cette personne, de votre relation, de ses projets... On s'occupe du reste.",
-    "noContactsDescription": "Créez votre première note pour commencer.",
-    "createFirstNote": "Créer votre première note",
+    "noContacts": "Parle de cette personne, de ta relation, de ses projets... On s'occupe du reste.",
+    "noContactsDescription": "Crée ta première note pour commencer.",
+    "createFirstNote": "Créer ta première note",
     "noContactsInGroup": "Aucun contact dans ce groupe",
+    "noContactsInGroupHint": "Ajoute des contacts à ce groupe depuis leur fiche.",
     "addContact": "Ajouter un contact",
     "createModal": {
       "title": "Nouveau contact",
@@ -150,11 +156,11 @@
   },
   "search": {
     "title": "Explore IA",
-    "placeholder": "Décrivez ce que vous cherchez...",
+    "placeholder": "Décris ce que tu cherches...",
     "noResults": "Aucun résultat",
     "searching": "Recherche en cours...",
-    "emptyStateTitle": "Posez une question à votre mémoire",
-    "description": "Pas besoin d'un terme exact. Notre IA fouille dans vos souvenirs et retrouve l'information.",
+    "emptyStateTitle": "Pose une question à ta mémoire",
+    "description": "Pas besoin d'un terme exact. Notre IA fouille dans tes souvenirs et retrouve l'information.",
     "examples": "Par exemple",
     "example1": "Qui travaille dans la tech à Bordeaux ?",
     "example2": "Qui a des enfants en bas âge ?",
@@ -177,6 +183,7 @@
       "birthdayOf": "C'est quand l'anniversaire de {{firstName}} ?",
       "newsOf": "Quelles sont les actualités de {{firstName}} ?"
     },
+    "noSuggestionsText": "Enregistre des notes pour voir des suggestions",
     "newQuestionPlaceholder": "Autre question...",
     "result": {
       "sourceHeader": "D'après ta note du {{date}} :",
@@ -210,12 +217,12 @@
     "aiSummary": {
       "header": "L'essentiel sur {{firstName}}",
       "loading": "Préparation de l'essentiel...",
-      "empty": "Ajoutez des notes pour découvrir l'essentiel sur {{firstName}}"
+      "empty": "Ajoute des notes pour découvrir l'essentiel sur {{firstName}}"
     },
     "suggestedQuestions": {
       "header": "Une idée pour relancer la conversation ?",
       "loading": "Préparation des idées...",
-      "empty": "Ajoutez des notes pour obtenir des idées de conversation"
+      "empty": "Ajoute des notes pour obtenir des idées de conversation"
     },
     "editGroups": "Modifier les groupes",
     "addGroup": "Ajouter un groupe",
@@ -229,7 +236,7 @@
       "selectGroups": "Groupes de {{firstName}}",
       "noGroups": "Aucun groupe créé",
       "noGroupsYet": "Aucun groupe créé",
-      "createFirstGroup": "Créez votre premier groupe ci-dessus",
+      "createFirstGroup": "Crée ton premier groupe ci-dessus",
       "groupExists": "Groupe existant",
       "groupExistsMessage": "Un groupe \"{{name}}\" existe déjà",
       "createNew": "Nouveau groupe",
@@ -238,7 +245,7 @@
       "deleteGroupMessage": "Le groupe \"{{name}}\" sera supprimé de tous les contacts."
     },
     "deleteContact": "Supprimer le contact",
-    "deleteContactConfirm": "Voulez-vous vraiment supprimer ce contact ?",
+    "deleteContactConfirm": "Tu veux vraiment supprimer ce contact ?",
     "notFound": "Contact introuvable",
     "sections": {
       "news": "Actualité",
@@ -250,7 +257,7 @@
       "addPlaceholder": "Nouveau sujet...",
       "contextPlaceholder": "Contexte (optionnel)...",
       "emptyState": "Ses projets. Ses news. Ses galères.",
-      "emptyStateDescription": "Un vocal après votre prochain échange, et c'est noté.",
+      "emptyStateDescription": "Un vocal après ton prochain échange, et c'est noté.",
       "deleteTitle": "Supprimer cette actualité",
       "deleteConfirm": "Supprimer \"{{title}}\" ?",
       "resolutionLabel": "Comment ça s'est terminé :",
@@ -420,12 +427,12 @@
     "avatar": {
       "title": "Photo de profil",
       "fromGallery": "Choisir depuis la galerie",
-      "fromGalleryDescription": "Sélectionner une photo de votre appareil",
+      "fromGalleryDescription": "Sélectionner une photo de ton appareil",
       "generateWithAI": "Générer avec l'IA",
       "generateWithAIDescription": "Créer un avatar illustré unique",
       "removeAvatar": "Supprimer l'avatar actuel",
-      "describeAppearance": "Décrivez l'apparence",
-      "describeHint": "Décrivez les traits physiques et accessoires de {{firstName}}",
+      "describeAppearance": "Décris l'apparence",
+      "describeHint": "Décris les traits physiques et accessoires de {{firstName}}",
       "promptPlaceholder": "Cheveux bruns, yeux bleus, lunettes, barbe, sportif, souriant...",
       "examples": "Exemples :",
       "example1": "Cheveux blonds courts, yeux verts, taches de rousseur",
@@ -440,13 +447,13 @@
       "deleteSuccess": "Avatar supprimé",
       "deleteError": "Échec de la suppression de l'avatar",
       "permissionDenied": "Accès aux photos requis",
-      "promptRequired": "Veuillez décrire l'apparence",
+      "promptRequired": "Décris l'apparence",
       "trialsRemaining": "{{count}} génération(s) gratuite(s) restante(s)",
       "noTrialsLeft": "Générations gratuites épuisées"
     },
     "photo": {
       "permissionTitle": "Accès aux photos requis",
-      "permissionMessage": "Veuillez autoriser l'accès à votre photothèque pour sélectionner une image."
+      "permissionMessage": "Autorise l'accès à ta photothèque pour sélectionner une image."
     }
   },
   "selectContact": {
@@ -481,8 +488,8 @@
     "transcription": "Transcription",
     "edit": "Éditer",
     "done": "Terminer",
-    "transcriptionPlaceholder": "Écrivez la transcription...",
-    "transcriptionHint": "Appuyez pour corriger les erreurs de transcription",
+    "transcriptionPlaceholder": "Écris la transcription...",
+    "transcriptionHint": "Appuie pour corriger les erreurs de transcription",
     "reExtracting": "Re-détection...",
     "extractedInfo": "Ce que j'ai noté",
     "groups": "Groupes",
@@ -490,7 +497,7 @@
     "groupNamePlaceholder": "Nom du groupe...",
     "createGroup": "Créer \"{{name}}\"",
     "topicsToArchive": "Sujets à archiver",
-    "topicsToArchiveDescription": "Ces sujets semblent résolus. Décochez ceux qui sont encore actifs.",
+    "topicsToArchiveDescription": "Ces sujets semblent résolus. Décoche ceux qui sont encore actifs.",
     "resolutionLabel": "Résolution :",
     "resolutionPlaceholder": "Comment ça s'est terminé...",
     "addResolution": "Ajouter une résolution...",
@@ -509,8 +516,19 @@
     "new": "(nouveau)",
     "events": "Événements",
     "eventTitlePlaceholder": "Titre de l'événement",
+    "newItems_one": "{{count}} nouvel élément",
+    "newItems_other": "{{count}} nouveaux éléments",
+    "toConfirm_one": "{{count}} à confirmer",
+    "toConfirm_other": "{{count}} à confirmer",
+    "sectionTranscription": "Transcription",
+    "sectionContactInfo": "Coordonnées",
+    "sectionFacts": "Profil",
+    "sectionGroups": "Groupes",
+    "sectionResolvedTopics": "Sujets résolus",
+    "sectionHotTopics": "Actualité",
+    "sectionMemories": "Souvenirs",
     "reminder": "Rappel",
-    "reminderExplanation": "Les rappels vous enverront une notification pour vous inciter a reprendre contact sur ces sujets.",
+    "reminderExplanation": "Tu recevras un rappel pour reprendre contact au bon moment.",
     "reminderDate": "Date du rappel",
     "noDate": "Pas de date",
     "today": "Aujourd'hui",
@@ -528,7 +546,10 @@
     "noEvents": "Aucun événement prévu",
     "noPastEvents": "Aucun événement passé",
     "today": "Aujourd'hui",
-    "birthdayTitle": "Anniversaire de {{firstName}}"
+    "birthdayTitle": "Anniversaire de {{firstName}}",
+    "emptyDescription": "Les événements et anniversaires de tes contacts apparaîtront ici.",
+    "emptyPastDescription": "Les événements passés de tes contacts apparaîtront ici.",
+    "recordNote": "Enregistrer une note"
   },
   "profile": {
     "title": "Profil",
@@ -560,7 +581,7 @@
       "legal": "Mentions légales"
     },
     "logout": "Se déconnecter",
-    "logoutConfirm": "Voulez-vous vraiment vous déconnecter ?",
+    "logoutConfirm": "Tu veux vraiment te déconnecter ?",
     "statistics": {
       "title": "Statistiques",
       "contacts": "Contacts",
@@ -577,7 +598,7 @@
     },
     "clearCache": {
       "title": "Vider le cache",
-      "confirm": "Cela supprimera toutes les données locales. Êtes-vous sûr ?",
+      "confirm": "Cela supprimera toutes les données locales. Tu es sûr ?",
       "success": "Cache vidé avec succès"
     },
     "feedback": {
@@ -587,9 +608,9 @@
     "avatar": {
       "title": "Photo de profil",
       "fromGallery": "Choisir depuis la galerie",
-      "fromGalleryDescription": "Sélectionner une photo de votre appareil",
+      "fromGalleryDescription": "Sélectionner une photo de ton appareil",
       "removeAvatar": "Supprimer la photo",
-      "describeHint": "Décrivez votre apparence physique et vos accessoires",
+      "describeHint": "Décris ton apparence physique et tes accessoires",
       "uploading": "Envoi en cours...",
       "uploadError": "Échec de l'envoi de la photo",
       "deleteError": "Échec de la suppression de la photo",
@@ -599,15 +620,15 @@
       "title": "Mentions légales",
       "privacyFirst": {
         "title": "Vie privée avant tout",
-        "description": "Recall est conçu avec la vie privée comme principe fondamental. Nous croyons que vos relations personnelles et les informations que vous enregistrez doivent rester privées et sous votre contrôle."
+        "description": "Recall est conçu avec la vie privée comme principe fondamental. Nous croyons que tes relations personnelles et les informations que tu enregistres doivent rester privées et sous ton contrôle."
       },
       "localStorage": {
         "title": "Stockage 100% local",
-        "description": "Toutes vos données de contacts, notes, faits et souvenirs sont stockées exclusivement sur votre appareil dans une base de données locale sécurisée. Vos données ne quittent jamais votre téléphone sans votre action explicite."
+        "description": "Toutes tes données de contacts, notes, faits et souvenirs sont stockées exclusivement sur ton appareil dans une base de données locale sécurisée. Tes données ne quittent jamais ton téléphone sans ton action explicite."
       },
       "dataSovereignty": {
         "title": "Souveraineté des données",
-        "description": "Vous avez la propriété complète de vos données. Exportez-les à tout moment en JSON ou CSV. Supprimez-les quand vous voulez. Pas de cloud, pas de data mining, pas d'accès tiers."
+        "description": "Tu as la propriété complète de tes données. Exporte-les à tout moment en JSON ou CSV. Supprime-les quand tu veux. Pas de cloud, pas de data mining, pas d'accès tiers."
       },
       "aiProcessing": {
         "title": "Traitement IA",
@@ -615,7 +636,7 @@
       },
       "contact": {
         "title": "Nous contacter",
-        "description": "Des questions sur votre vie privée ou vos données ? Nous sommes là pour vous aider."
+        "description": "Des questions sur ta vie privée ou tes données ? On est là pour t'aider."
       },
       "lastUpdated": "Dernière mise à jour : Décembre 2024"
     }
@@ -629,36 +650,36 @@
     "next": "Suivant",
     "getStarted": "Commencer",
     "language": {
-      "title": "Choisissez votre langue",
-      "description": "Cette langue sera utilisée pour l'interface et pour transcrire vos enregistrements vocaux."
+      "title": "Choisis ta langue",
+      "description": "Cette langue sera utilisée pour l'interface et pour transcrire tes enregistrements vocaux."
     },
     "solution": {
-      "title": "Transformez votre voix en fiches contact intelligentes",
-      "feature1": "Catégorise automatiquement vos informations",
+      "title": "Transforme ta voix en fiches contact intelligentes",
+      "feature1": "Catégorise automatiquement tes informations",
       "feature2": "Résumé IA actualisé à chaque nouvelle note",
-      "feature3": "Questions brise-glace pour votre prochaine rencontre",
-      "feature4": "Tous vos enregistrements transcrits et ordonnés",
-      "feature5": "Notifications pour les événements de vos contacts"
+      "feature3": "Questions brise-glace pour ta prochaine rencontre",
+      "feature4": "Tous tes enregistrements transcrits et ordonnés",
+      "feature5": "Notifications pour les événements de tes contacts"
     },
     "demo": {
       "title": "Voici comment ça marche",
-      "description": "Parlez après une rencontre. L'IA extrait automatiquement les infos clés et crée la fiche contact."
+      "description": "Parle après une rencontre. L'IA extrait automatiquement les infos clés et crée la fiche contact."
     },
     "assistant": {
-      "title": "Posez n'importe quelle question",
-      "description": "L'assistant IA fouille dans toutes vos notes pour retrouver n'importe quelle information.",
+      "title": "Pose n'importe quelle question",
+      "description": "L'assistant IA fouille dans toutes tes notes pour retrouver n'importe quelle information.",
       "example1": "« Qui travaille dans la tech ? »",
       "example2": "« Qui a des enfants en bas âge ? »",
       "example3": "« Où étudie Sarah ? »"
     },
     "typing": {
       "title": "Pas fan du vocal ?",
-      "description": "Tapez vos notes à la main en appuyant sur le crayon.",
+      "description": "Tape tes notes à la main en appuyant sur le crayon.",
       "or": "ou"
     },
     "privacy": {
-      "title": "Vos données restent sur votre téléphone",
-      "description": "Rien n'est stocké sur nos serveurs. Vos notes sont privées, toujours.",
+      "title": "Tes données restent sur ton téléphone",
+      "description": "Rien n'est stocké sur nos serveurs. Tes notes sont privées, toujours.",
       "local": "local"
     },
     "redoTour": "Refaire le tour guidé"
@@ -669,69 +690,69 @@
     "notesRemaining": "{{count}} notes restantes ce mois",
     "noNotesRemaining": "Plus de notes ce mois",
     "upgradeToPro": "Passer Pro",
-    "unlockWith": "Débloquez avec Pro :",
+    "unlockWith": "Débloque avec Pro :",
     "feature1": "Notes audio illimitées",
     "feature2": "Enregistrements de 3 min (vs 1 min)",
     "feature3": "Recherche IA",
-    "premiumTitle": "Vous êtes Pro !",
+    "premiumTitle": "Tu es Pro !",
     "premiumSubtitle": "Merci de soutenir Recall People",
     "unlimitedNotes": "Notes illimitées",
     "aiSearch": "Recherche IA",
     "manageTitle": "Gérer l'abonnement",
-    "manageDescription": "Pour gérer ou résilier votre abonnement, allez dans les paramètres de votre appareil > Abonnements."
+    "manageDescription": "Pour gérer ou résilier ton abonnement, va dans les paramètres de ton appareil > Abonnements."
   },
   "record": {
     "remaining": "restant",
     "helperPrompts": {
-      "citeName": "Citez le nom de la personne...",
-      "talkAbout": "Parlez de votre rencontre...",
-      "mentionDetails": "Mentionnez des détails personnels...",
-      "shareKnowledge": "Partagez ce que vous avez appris..."
+      "citeName": "Cite le nom de la personne...",
+      "talkAbout": "Parle de ta rencontre...",
+      "mentionDetails": "Mentionne des détails personnels...",
+      "shareKnowledge": "Partage ce que tu as appris..."
     },
     "contactPrompts": {
       "whatsNew": "Quoi de neuf avec {{firstName}} ?",
-      "shareNews": "Partagez vos dernières nouvelles...",
+      "shareNews": "Partage tes dernières nouvelles...",
       "howIs": "Comment va {{firstName}} ?",
-      "whatLearned": "Qu'avez-vous appris sur {{firstName}} ?"
+      "whatLearned": "Qu'as-tu appris sur {{firstName}} ?"
     },
-    "pressToFinish": "Appuyez pour terminer",
-    "helperText": "Conseil : mentionnez le nom, le contexte de rencontre, et les détails importants sur la personne.",
-    "helperTextWithContact": "Parlez de {{firstName}} : actualités, anecdotes, détails importants..."
+    "pressToFinish": "Appuie pour terminer",
+    "helperText": "Conseil : mentionne le nom, le contexte de rencontre, et les détails importants sur la personne.",
+    "helperTextWithContact": "Parle de {{firstName}} : actualités, anecdotes, détails importants..."
   },
   "textInput": {
-    "placeholder": "Décrivez la personne rencontrée, le contexte, les détails importants...",
-    "placeholderWithContact": "Écrivez ce que vous savez sur {{firstName}}...",
+    "placeholder": "Décris la personne rencontrée, le contexte, les détails importants...",
+    "placeholderWithContact": "Écris ce que tu sais sur {{firstName}}...",
     "minCharacters": "Minimum 10 caractères ({{count}} restants)",
-    "pressToSend": "Appuyez sur envoyer pour analyser"
+    "pressToSend": "Appuie sur envoyer pour analyser"
   },
   "paywall": {
     "title": "Passer Premium",
     "reason": {
-      "notesLimit": "Vous avez atteint la limite de 10 notes par mois",
+      "notesLimit": "Tu as atteint la limite de 10 notes par mois",
       "aiSearch": "La recherche IA est une fonctionnalité premium",
       "recordingDuration": "Les enregistrements plus longs nécessitent premium",
       "aiAssistant": "L'assistant IA est une fonctionnalité premium",
-      "avatarGeneration": "Vous avez utilisé vos 5 générations d'avatar IA gratuites"
+      "avatarGeneration": "Tu as utilisé tes 5 générations d'avatar IA gratuites"
     },
     "errors": {
       "purchaseFailed": "Echec de l'achat",
-      "purchaseFailedDescription": "Impossible de finaliser votre achat. Veuillez reessayer.",
+      "purchaseFailedDescription": "Impossible de finaliser ton achat. Réessaie.",
       "restoreFailed": "Echec de la restauration",
-      "restoreFailedDescription": "Impossible de restaurer vos achats. Veuillez reessayer.",
+      "restoreFailedDescription": "Impossible de restaurer tes achats. Réessaie.",
       "noOfferingsAvailable": "Aucune offre disponible",
       "loadingFailed": "Impossible de charger les options d'abonnement"
     },
     "features": {
       "unlimitedNotes": "Notes audio illimitées",
       "longerRecordings": "Enregistrements de 3 min (vs 1 min)",
-      "aiSearch": "Recherche IA dans toutes vos notes"
+      "aiSearch": "Recherche IA dans toutes tes notes"
     },
     "monthly": "Mensuel",
     "annual": "Annuel",
     "month": "mois",
     "year": "an",
     "bestValue": "MEILLEUR PRIX",
-    "save30": "Économisez 30%",
+    "save30": "Économise 30%",
     "subscribe": "S'abonner",
     "restore": "Restaurer les achats",
     "priceMonthly": "5,99 €",
@@ -739,19 +760,19 @@
   },
   "recording": {
     "errors": {
-      "noCredits": "Plus de credits",
-      "noCreditsDescription": "Vous avez utilise toutes vos notes gratuites ce mois-ci",
-      "permissionDenied": "Permission micro refusee",
-      "permissionDeniedDescription": "Veuillez autoriser l'acces au micro pour enregistrer",
-      "recordingFailed": "Echec de l'enregistrement",
-      "recordingFailedDescription": "Une erreur est survenue. Veuillez reessayer."
+      "noCredits": "Plus de crédits",
+      "noCreditsDescription": "Tu as utilisé toutes tes notes gratuites ce mois-ci",
+      "permissionDenied": "Permission micro refusée",
+      "permissionDeniedDescription": "Autorise l'accès au micro pour enregistrer",
+      "recordingFailed": "Échec de l'enregistrement",
+      "recordingFailedDescription": "Une erreur est survenue. Réessaie."
     }
   },
   "testPro": {
     "badge": "Mode Test",
     "title": "Accès Pro Testeur",
-    "subtitle": "Vous êtes testeur pour Recall People ! Activez gratuitement l'accès Pro pour tester l'application.",
-    "description": "Activez les fonctionnalités Pro pour tester sans abonnement réel. Visible uniquement pour les comptes de test autorisés.",
+    "subtitle": "Tu es testeur pour Recall People ! Active gratuitement l'accès Pro pour tester l'application.",
+    "description": "Active les fonctionnalités Pro pour tester sans abonnement réel. Visible uniquement pour les comptes de test autorisés.",
     "activate": "Activer Pro",
     "deactivate": "Désactiver Pro",
     "active": "Pro Test Actif",
@@ -759,7 +780,7 @@
     "notWhitelisted": "Compte non autorisé",
     "redirecting": "Redirection vers les options d'abonnement...",
     "alreadyActive": "Pro déjà activé !",
-    "enjoyFeatures": "Profitez de toutes les fonctionnalités Pro",
+    "enjoyFeatures": "Profite de toutes les fonctionnalités Pro",
     "features": "Fonctionnalités incluses",
     "activated": "Pro activé !"
   },
@@ -794,6 +815,11 @@
     "newContact": "Nouveau contact",
     "createNew": "Créer « {{name}} »",
     "suggestedNickname": "Surnom suggéré : {{nickname}}",
-    "lastContact": "Dernier contact : {{date}}"
+    "lastContact": "Dernier contact : {{date}}",
+    "contextLabel": "Contexte",
+    "contextFacts": "{{count}} infos",
+    "contextTopics": "{{count}} sujets actifs",
+    "dontKnow": "Je ne sais pas",
+    "noActiveTopics": "Aucun sujet actif"
   }
 }

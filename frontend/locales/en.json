@@ -126,7 +126,12 @@
     "pressToRecord": "Press to record",
     "recording": "Recording...",
     "processing": "Processing...",
-    "transcribing": "Transcribing..."
+    "transcribing": "Transcribing...",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "timeAgo": "{{distance}} ago",
+    "moreContacts_one": "{{count}} more",
+    "moreContacts_other": "{{count}} more"
   },
   "processing": {
     "transcribing": "Transcribing audio...",
@@ -142,6 +147,7 @@
     "noContactsDescription": "Create your first note to get started.",
     "createFirstNote": "Create your first note",
     "noContactsInGroup": "No contacts in this group",
+    "noContactsInGroupHint": "Add contacts to this group from their profile page.",
     "addContact": "Add a contact",
     "createModal": {
       "title": "New contact",
@@ -475,6 +481,17 @@
     "events": "Events",
     "eventTitlePlaceholder": "Event title",
     "reminder": "Reminder",
+    "newItems_one": "{{count}} new item",
+    "newItems_other": "{{count}} new items",
+    "toConfirm_one": "{{count}} to confirm",
+    "toConfirm_other": "{{count}} to confirm",
+    "sectionTranscription": "Transcription",
+    "sectionContactInfo": "Contact info",
+    "sectionFacts": "Profile",
+    "sectionGroups": "Groups",
+    "sectionResolvedTopics": "Resolved topics",
+    "sectionHotTopics": "News",
+    "sectionMemories": "Memories",
     "reminderExplanation": "Reminders will send you a notification to encourage you to follow up on these topics.",
     "reminderDate": "Reminder date",
     "noDate": "No date",
@@ -493,7 +510,10 @@
     "noEvents": "No upcoming events",
     "noPastEvents": "No past events",
     "today": "Today",
-    "birthdayTitle": "{{firstName}}'s birthday"
+    "birthdayTitle": "{{firstName}}'s birthday",
+    "emptyDescription": "Events and birthdays from your contacts will appear here.",
+    "emptyPastDescription": "Past events from your contacts will appear here.",
+    "recordNote": "Record a note"
   },
   "profile": {
     "title": "Profile",
@@ -745,6 +765,7 @@
       "birthdayOf": "When is {{firstName}}'s birthday?",
       "newsOf": "What are {{firstName}}'s news?"
     },
+    "noSuggestionsText": "Record notes to see suggestions",
     "newQuestionPlaceholder": "Another question...",
     "result": {
       "sourceHeader": "From your note on {{date}}:",
@@ -804,6 +825,11 @@
     "newContact": "New contact",
     "createNew": "Create \"{{name}}\"",
     "suggestedNickname": "Suggested nickname based on: {{nickname}}",
-    "lastContact": "Last contact: {{date}}"
+    "lastContact": "Last contact: {{date}}",
+    "contextLabel": "Context",
+    "contextFacts": "{{count}} facts",
+    "contextTopics": "{{count}} active topics",
+    "dontKnow": "I don't know",
+    "noActiveTopics": "No active topics"
   }
 }

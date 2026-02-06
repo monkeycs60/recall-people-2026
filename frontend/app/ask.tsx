@@ -13,7 +13,7 @@ import { useState, useRef, useCallback } from 'react';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeft, Mic, Send } from 'lucide-react-native';
+import { ChevronLeft, Mic, Send, Sparkles } from 'lucide-react-native';
 import { Colors, Spacing, BorderRadius } from '@/constants/theme';
 import { useContactsQuery } from '@/hooks/useContactsQuery';
 import { noteService } from '@/services/note.service';
@@ -311,7 +311,7 @@ export default function AskScreen() {
 								<>
 									<Mic size={20} color={Colors.primary} />
 									<Text style={styles.voiceButtonText}>
-										{t('ask.voiceButton', 'Parler')}
+										{t('ask.voiceButton')}
 									</Text>
 								</>
 							)}
@@ -330,7 +330,7 @@ export default function AskScreen() {
 											styles.sendButtonText,
 											!canSubmit && styles.sendButtonTextDisabled,
 										]}>
-										{t('ask.sendButton', 'Envoyer')}
+										{t('ask.sendButton')}
 									</Text>
 									<Send
 										size={16}
@@ -348,7 +348,7 @@ export default function AskScreen() {
 							style={styles.transcribingContainer}>
 							<ActivityIndicator size="small" color={Colors.primary} />
 							<Text style={styles.transcribingText}>
-								Transcription en cours...
+								{t('assistant.transcribing')}
 							</Text>
 						</Animated.View>
 					)}
@@ -357,7 +357,7 @@ export default function AskScreen() {
 
 					<View style={styles.suggestionsContainer}>
 						<Text style={styles.suggestionsTitle}>
-							{t('ask.suggestionsTitle', '💡 Suggestions :')}
+							{t('ask.suggestionsTitle')}
 						</Text>
 
 						{suggestions.length > 0 ? (
@@ -370,9 +370,12 @@ export default function AskScreen() {
 								</Pressable>
 							))
 						) : (
-							<Text style={styles.noSuggestionsText}>
-								Enregistre des notes pour voir des suggestions
-							</Text>
+							<View style={styles.noSuggestionsContainer}>
+								<Sparkles size={24} color={Colors.textMuted} />
+								<Text style={styles.noSuggestionsText}>
+									{t('ask.noSuggestionsText')}
+								</Text>
+							</View>
 						)}
 					</View>
 				</ScrollView>
@@ -500,12 +503,16 @@ const styles = StyleSheet.create({
 		color: Colors.textSecondary,
 		fontStyle: 'italic',
 	},
+	noSuggestionsContainer: {
+		alignItems: 'center',
+		gap: Spacing.md,
+		paddingVertical: Spacing.xl,
+	},
 	noSuggestionsText: {
 		fontSize: 14,
 		color: Colors.textMuted,
 		fontStyle: 'italic',
 		textAlign: 'center',
-		paddingVertical: Spacing.xl,
 	},
 	divider: {
 		height: 1,

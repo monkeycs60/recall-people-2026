@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { format, startOfDay, addDays, isSameDay } from 'date-fns';
-import { fr, enUS } from 'date-fns/locale';
+import { getDateLocale } from '@/utils/dateLocale';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { contactService } from '@/services/contact.service';
 import { HotTopic, Contact } from '@/types';
@@ -13,6 +13,7 @@ import { Colors } from '@/constants/theme';
 import { Calendar } from 'lucide-react-native';
 import { SwipeableEventCard } from '@/components/upcoming/SwipeableEventCard';
 import { EventListSkeleton } from '@/components/skeleton/EventListSkeleton';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 type TimelineDay = {
   date: Date;
@@ -23,7 +24,7 @@ type TimelineDay = {
 type FeedView = 'upcoming' | 'past';
 
 export default function UpcomingScreen() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [view, setView] = useState<FeedView>('upcoming');
@@ -31,7 +32,7 @@ export default function UpcomingScreen() {
   const [pastEvents, setPastEvents] = useState<Array<HotTopic & { contact: Contact }>>([]);
   const [hasLoaded, setHasLoaded] = useState(false);
 
-  const locale = i18n.language === 'fr' ? fr : enUS;
+  const locale = getDateLocale();
 
   const loadEvents = useCallback(async () => {
     if (view === 'upcoming') {
@@ -167,7 +168,13 @@ export default function UpcomingScreen() {
               </View>
             ))
           ) : (
-            <Text style={styles.emptyText}>{t('upcoming.noEvents')}</Text>
+            <EmptyState
+              icon={<Calendar size={48} color={Colors.calendarLight} />}
+              title={t('upcoming.noEvents')}
+              description={t('upcoming.emptyDescription')}
+              ctaLabel={t('upcoming.recordNote')}
+              onCtaPress={() => router.push('/record')}
+            />
           )
         ) : (
           pastEvents.length > 0 ? (
@@ -187,7 +194,11 @@ export default function UpcomingScreen() {
               </Pressable>
             ))
           ) : (
-            <Text style={styles.emptyText}>{t('upcoming.noPastEvents')}</Text>
+            <EmptyState
+              icon={<Calendar size={48} color={Colors.textMuted} />}
+              title={t('upcoming.noPastEvents')}
+              description={t('upcoming.emptyPastDescription')}
+            />
           )
         )}
       </ScrollView>

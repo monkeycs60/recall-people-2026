@@ -126,7 +126,12 @@
     "pressToRecord": "Pulsa para grabar",
     "recording": "Grabando...",
     "processing": "Procesando...",
-    "transcribing": "Transcribiendo..."
+    "transcribing": "Transcribiendo...",
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "timeAgo": "Hace {{distance}}",
+    "moreContacts_one": "{{count}} más",
+    "moreContacts_other": "{{count}} más"
   },
   "processing": {
     "transcribing": "Transcribiendo audio...",
@@ -142,6 +147,7 @@
     "noContactsDescription": "Crea tu primera nota para empezar.",
     "createFirstNote": "Crear tu primera nota",
     "noContactsInGroup": "No hay contactos en este grupo",
+    "noContactsInGroupHint": "Añade contactos a este grupo desde su perfil.",
     "addContact": "Añadir un contacto",
     "createModal": {
       "title": "Nuevo contacto",
@@ -474,6 +480,17 @@
     "new": "(nuevo)",
     "events": "Eventos",
     "eventTitlePlaceholder": "Título del evento",
+    "newItems_one": "{{count}} nuevo elemento",
+    "newItems_other": "{{count}} nuevos elementos",
+    "toConfirm_one": "{{count}} por confirmar",
+    "toConfirm_other": "{{count}} por confirmar",
+    "sectionTranscription": "Transcripción",
+    "sectionContactInfo": "Datos de contacto",
+    "sectionFacts": "Perfil",
+    "sectionGroups": "Grupos",
+    "sectionResolvedTopics": "Temas resueltos",
+    "sectionHotTopics": "Novedades",
+    "sectionMemories": "Recuerdos",
     "reminder": "Recordatorio",
     "reminderExplanation": "Los recordatorios te enviarán una notificación para animarte a hacer seguimiento de estos temas.",
     "reminderDate": "Fecha del recordatorio",
@@ -493,7 +510,10 @@
     "noEvents": "Sin eventos próximos",
     "noPastEvents": "Sin eventos pasados",
     "today": "Hoy",
-    "birthdayTitle": "Cumpleaños de {{firstName}}"
+    "birthdayTitle": "Cumpleaños de {{firstName}}",
+    "emptyDescription": "Los eventos y cumpleaños de tus contactos aparecerán aquí.",
+    "emptyPastDescription": "Los eventos pasados de tus contactos aparecerán aquí.",
+    "recordNote": "Grabar una nota"
   },
   "profile": {
     "title": "Perfil",
@@ -745,6 +765,7 @@
       "birthdayOf": "¿Cuándo es el cumpleaños de {{firstName}}?",
       "newsOf": "¿Cuáles son las novedades de {{firstName}}?"
     },
+    "noSuggestionsText": "Graba notas para ver sugerencias",
     "newQuestionPlaceholder": "Otra pregunta...",
     "result": {
       "sourceHeader": "De tu nota del {{date}}:",
@@ -804,6 +825,11 @@
     "newContact": "Nuevo contacto",
     "createNew": "Crear \"{{name}}\"",
     "suggestedNickname": "Apodo sugerido: {{nickname}}",
-    "lastContact": "Último contacto: {{date}}"
+    "lastContact": "Último contacto: {{date}}",
+    "contextLabel": "Contexto",
+    "contextFacts": "{{count}} datos",
+    "contextTopics": "{{count}} temas activos",
+    "dontKnow": "No lo sé",
+    "noActiveTopics": "Sin temas activos"
   }
 }

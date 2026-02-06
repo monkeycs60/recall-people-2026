@@ -19,15 +19,16 @@ import { useAppStore } from '@/stores/app-store';
 import { useSubscriptionStore } from '@/stores/subscription-store';
 import { queryKeys } from '@/lib/query-keys';
 import { Colors } from '@/constants/theme';
-import { Archive, Calendar, Edit3, Plus, Trash2, X } from 'lucide-react-native';
-
-function formatBirthdayDisplay(day: number, month: number, monthNames: string[], year?: number): string {
-  const monthName = monthNames[month - 1] || month.toString();
-  if (year) {
-    return `${day} ${monthName} ${year}`;
-  }
-  return `${day} ${monthName}`;
-}
+import { Archive, Edit3, FileText, Info, Lightbulb, Phone, Users, Zap } from 'lucide-react-native';
+import { CollapsibleSection } from '@/components/ui/CollapsibleSection';
+import { TranscriptionSection } from '@/components/review/TranscriptionSection';
+import { ContactInfoSection } from '@/components/review/ContactInfoSection';
+import { FactsSection } from '@/components/review/FactsSection';
+import { HotTopicsSection } from '@/components/review/HotTopicsSection';
+import { MemoriesSection } from '@/components/review/MemoriesSection';
+import { ResolvedTopicsSection } from '@/components/review/ResolvedTopicsSection';
+import { GroupsSection } from '@/components/review/GroupsSection';
+import { getLocaleDateStringLocale } from '@/utils/dateLocale';
 
 export default function ReviewScreen() {
   const { t } = useTranslation();
@@ -90,7 +91,6 @@ export default function ReviewScreen() {
   );
   const [editingResolutionId, setEditingResolutionId] = useState<string | null>(null);
 
-  // Transcription editing state
   const [isEditingTranscription, setIsEditingTranscription] = useState(false);
   const [editedTranscription, setEditedTranscription] = useState(transcription);
   const [isReExtracting, setIsReExtracting] = useState(false);
@@ -118,7 +118,6 @@ export default function ReviewScreen() {
   const [datePickerIndex, setDatePickerIndex] = useState<number | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-  // Editable contact name (for new contacts)
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState(() => {
     const first = extraction.contactIdentified.firstName;
@@ -128,7 +127,6 @@ export default function ReviewScreen() {
     if (last) {
       return `${first} ${last}`;
     }
-    // suggestedNickname already contains the first name (e.g., "Paul Google")
     if (nickname) {
       return nickname;
     }
@@ -151,6 +149,10 @@ export default function ReviewScreen() {
       ...topic,
       proposedResolution: resolvedTopicsState.find((resolved) => resolved.id === topic.id)?.resolution || '',
     }));
+
+  const hasContactInfo = !!(editableContactInfo.phone || editableContactInfo.email || editableContactInfo.birthday);
+  const contactInfoCount = [editableContactInfo.phone, editableContactInfo.email, editableContactInfo.birthday].filter(Boolean).length;
+  const hasResolvedTopics = resolvedTopicsWithData.length > 0 || (extraction.resolvedTopics?.length ?? 0) > 0;
 
   const toggleResolvedTopic = (topicId: string) => {
     setResolvedTopicsState((prev) => {
@@ -360,15 +362,13 @@ export default function ReviewScreen() {
 
       const { extraction: newExtraction } = await extractInfo({
         transcription: editedTranscription,
-        existingContacts: [], // Not needed for re-extraction
+        existingContacts: [],
         currentContact: currentContactData,
       });
 
-      // Update hot topics with new extraction
       setEditableHotTopics(newExtraction.hotTopics?.map((topic) => ({ ...topic })) || []);
       setSelectedHotTopics(newExtraction.hotTopics?.map((_, index) => index) || []);
 
-      // Update hot topic dates
       const newHotTopicDates: Record<number, { enabled: boolean; date: string }> = {};
       newExtraction.hotTopics?.forEach((topic, index) => {
         newHotTopicDates[index] = {
@@ -378,7 +378,6 @@ export default function ReviewScreen() {
       });
       setHotTopicDates(newHotTopicDates);
 
-      // Update contact info if detected
       if (newExtraction.contactInfo) {
         setEditableContactInfo({
           phone: newExtraction.contactInfo.phone || null,
@@ -387,7 +386,6 @@ export default function ReviewScreen() {
         });
       }
 
-      // Update resolved topics
       setResolvedTopicsState(newExtraction.resolvedTopics || []);
 
       setIsEditingTranscription(false);
@@ -399,7 +397,6 @@ export default function ReviewScreen() {
   };
 
   const handleSave = async () => {
-    // Use ref as primary guard (synchronous) to prevent multiple rapid clicks
     if (isSavingRef.current) return;
     isSavingRef.current = true;
     setIsSaving(true);
@@ -408,7 +405,6 @@ export default function ReviewScreen() {
       let finalContactId = contactId;
 
       if (contactId === 'new') {
-        // Parse edited name into firstName and lastName
         const nameParts = editedName.trim().split(' ');
         const firstName = nameParts[0];
         const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : undefined;
@@ -416,7 +412,7 @@ export default function ReviewScreen() {
         const newContact = await createContactMutation.mutateAsync({
           firstName,
           lastName,
-          nickname: undefined, // Nickname is included in lastName if user kept it
+          nickname: undefined,
           gender: extraction.contactIdentified.gender,
         });
         finalContactId = newContact.id;
@@ -468,9 +464,6 @@ export default function ReviewScreen() {
         transcription: editedTranscription,
       });
 
-      // V2: Facts are no longer stored in a separate table
-      // They are extracted on-demand from notes when needed
-
       if (editableHotTopics.length > 0) {
         for (const index of selectedHotTopics) {
           const topic = editableHotTopics[index];
@@ -509,8 +502,6 @@ export default function ReviewScreen() {
         }
       }
 
-      // V2: Memories are no longer stored in a separate table
-
       await updateContactMutation.mutateAsync({
         id: finalContactId,
         data: { lastContactAt: new Date().toISOString() },
@@ -520,7 +511,6 @@ export default function ReviewScreen() {
       queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(finalContactId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.hotTopics.byContact(finalContactId) });
 
-      // Generate summary from ALL transcriptions in background
       const contactName = contactId === 'new'
         ? editedName.trim()
         : `${extraction.contactIdentified.firstName} ${extraction.contactIdentified.lastName || ''}`.trim();
@@ -533,12 +523,13 @@ export default function ReviewScreen() {
 
           const transcriptions = sortedNotes.map((noteItem) => {
             const date = new Date(noteItem.createdAt);
-            const formattedDate = date.toLocaleDateString('fr-FR', {
+            const dateLocale = getLocaleDateStringLocale();
+            const formattedDate = date.toLocaleDateString(dateLocale, {
               day: 'numeric',
               month: 'long',
               year: 'numeric',
             });
-            const formattedTime = date.toLocaleTimeString('fr-FR', {
+            const formattedTime = date.toLocaleTimeString(dateLocale, {
               hour: '2-digit',
               minute: '2-digit',
             });
@@ -553,7 +544,6 @@ export default function ReviewScreen() {
         .then(async (summary) => {
           if (summary) {
             await contactService.update(finalContactId, { aiSummary: summary });
-            // Invalidate queries after summary is saved so UI updates
             queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
             queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(finalContactId) });
           }
@@ -562,7 +552,6 @@ export default function ReviewScreen() {
           console.error('Summary generation failed:', error);
         });
 
-      // Generate ice breakers in background
       const contactDetails = await contactService.getById(finalContactId);
       if (contactDetails) {
         const requestData = {
@@ -593,9 +582,6 @@ export default function ReviewScreen() {
           .catch(() => {});
       }
 
-      // Auto-generate avatar for contacts without avatar (fire-and-forget)
-      // Works for both new contacts and existing contacts without avatar
-      // Only generate if user has avatar trials remaining (free tier: 5 max)
       const canGenerateAvatar = useSubscriptionStore.getState().canGenerateAvatar();
       const shouldGenerateAvatar = !contactDetails?.avatarUrl && extraction.contactIdentified.avatarHints && canGenerateAvatar;
       if (shouldGenerateAvatar) {
@@ -609,7 +595,6 @@ export default function ReviewScreen() {
 
         addPendingAvatarGeneration(finalContactId);
 
-        // Use avatar trial first
         useAvatarTrial()
           .then(async (trialResult) => {
             if (!trialResult.success && trialResult.error === 'no_trials_left') {
@@ -618,12 +603,10 @@ export default function ReviewScreen() {
               return;
             }
 
-            // Update local state with remaining trials
             if (trialResult.remaining >= 0) {
               useSubscriptionStore.getState().setFreeAvatarTrials(trialResult.remaining);
             }
 
-            // Generate the avatar
             const result = await generateAvatarFromHints({
               contactId: finalContactId,
               gender,
@@ -652,679 +635,257 @@ export default function ReviewScreen() {
   };
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
-    >
-      {isEditingName ? (
-        <View style={styles.editNameContainer}>
-          <TextInput
-            style={styles.editNameInput}
-            value={editedName}
-            onChangeText={setEditedName}
-            autoFocus
-            placeholder={t('review.namePlaceholder')}
-            placeholderTextColor={Colors.textMuted}
-          />
-          <Pressable style={styles.editNameConfirm} onPress={() => setIsEditingName(false)}>
-            <Text style={styles.editNameConfirmText}>OK</Text>
-          </Pressable>
-        </View>
-      ) : (
-        <Pressable
-          style={styles.contactNameRow}
-          onPress={() => contactId === 'new' && setIsEditingName(true)}
-        >
-          <Text style={styles.contactName}>{editedName}</Text>
-          {contactId === 'new' && <Edit3 size={18} color={Colors.textMuted} style={{ marginLeft: 8 }} />}
-        </Pressable>
-      )}
-
-      <Text style={styles.subtitle}>
-        {contactId === 'new' ? t('review.newContact') : t('review.update')}
-      </Text>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('review.transcription')}</Text>
-
-        {isEditingTranscription ? (
-          <View style={styles.transcriptionEditContainer}>
+    <View style={styles.screenContainer}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
+      >
+        {isEditingName ? (
+          <View style={styles.editNameContainer}>
             <TextInput
-              style={styles.transcriptionInput}
-              value={editedTranscription}
-              onChangeText={setEditedTranscription}
-              multiline
+              style={styles.editNameInput}
+              value={editedName}
+              onChangeText={setEditedName}
               autoFocus
-              placeholder={t('review.transcriptionPlaceholder')}
+              placeholder={t('review.namePlaceholder')}
               placeholderTextColor={Colors.textMuted}
-              editable={!isReExtracting}
             />
-            <View style={styles.transcriptionEditActions}>
-              <Pressable
-                style={styles.transcriptionCancelButton}
-                onPress={() => {
-                  setEditedTranscription(transcription);
-                  setIsEditingTranscription(false);
-                }}
-                disabled={isReExtracting}
-              >
-                <Text style={styles.transcriptionCancelButtonText}>{t('common.cancel')}</Text>
-              </Pressable>
-              <Pressable
-                style={[styles.transcriptionConfirmButton, isReExtracting && styles.transcriptionConfirmButtonDisabled]}
-                onPress={handleTranscriptionEdit}
-                disabled={isReExtracting}
-              >
-                <Text style={styles.transcriptionConfirmButtonText}>
-                  {isReExtracting ? t('review.reExtracting') : t('review.done')}
-                </Text>
-              </Pressable>
-            </View>
+            <Pressable style={styles.editNameConfirm} onPress={() => setIsEditingName(false)}>
+              <Text style={styles.editNameConfirmText}>OK</Text>
+            </Pressable>
           </View>
         ) : (
-          <Pressable onPress={() => setIsEditingTranscription(true)}>
-            <View style={styles.transcriptionDisplayContainer}>
-              <Text style={styles.transcriptionText}>{editedTranscription}</Text>
-            </View>
-            <Text style={styles.transcriptionHint}>{t('review.transcriptionHint')}</Text>
+          <Pressable
+            style={styles.contactNameRow}
+            onPress={() => contactId === 'new' && setIsEditingName(true)}
+          >
+            <Text style={styles.contactName}>{editedName}</Text>
+            {contactId === 'new' && <Edit3 size={18} color={Colors.textMuted} style={{ marginLeft: 8 }} />}
           </Pressable>
         )}
-      </View>
 
-      {(editableContactInfo.phone || editableContactInfo.email || editableContactInfo.birthday) && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('contact.contactInfoReview.title')}</Text>
-
-          {editableContactInfo.phone && (
-            <View style={styles.contactInfoRow}>
-              {editingContactInfoField === 'phone' ? (
-                <View style={styles.contactInfoEditContainer}>
-                  <Text style={styles.contactInfoLabel}>{t('contact.contactInfoReview.phone')}</Text>
-                  <TextInput
-                    style={styles.contactInfoInput}
-                    value={editableContactInfo.phone}
-                    onChangeText={(value) => setEditableContactInfo(prev => ({ ...prev, phone: value }))}
-                    keyboardType="phone-pad"
-                    autoFocus
-                  />
-                  <Pressable
-                    style={styles.confirmButton}
-                    onPress={() => setEditingContactInfoField(null)}
-                  >
-                    <Text style={styles.confirmButtonText}>OK</Text>
-                  </Pressable>
-                </View>
-              ) : (
-                <>
-                  <View style={styles.contactInfoContent}>
-                    <Text style={styles.contactInfoLabel}>{t('contact.contactInfoReview.phone')}</Text>
-                    <Text style={styles.contactInfoValue}>{editableContactInfo.phone}</Text>
-                  </View>
-                  <View style={styles.contactInfoIconActions}>
-                    <Pressable
-                      style={styles.iconButton}
-                      onPress={() => setEditingContactInfoField('phone')}
-                    >
-                      <Edit3 size={18} color={Colors.textSecondary} />
-                    </Pressable>
-                    <Pressable
-                      style={styles.iconButton}
-                      onPress={() => setEditableContactInfo(prev => ({ ...prev, phone: null }))}
-                    >
-                      <Trash2 size={18} color={Colors.error} />
-                    </Pressable>
-                  </View>
-                </>
-              )}
-            </View>
-          )}
-
-          {editableContactInfo.email && (
-            <View style={styles.contactInfoRow}>
-              {editingContactInfoField === 'email' ? (
-                <View style={styles.contactInfoEditContainer}>
-                  <Text style={styles.contactInfoLabel}>{t('contact.contactInfoReview.email')}</Text>
-                  <TextInput
-                    style={styles.contactInfoInput}
-                    value={editableContactInfo.email}
-                    onChangeText={(value) => setEditableContactInfo(prev => ({ ...prev, email: value }))}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    autoFocus
-                  />
-                  <Pressable
-                    style={styles.confirmButton}
-                    onPress={() => setEditingContactInfoField(null)}
-                  >
-                    <Text style={styles.confirmButtonText}>OK</Text>
-                  </Pressable>
-                </View>
-              ) : (
-                <>
-                  <View style={styles.contactInfoContent}>
-                    <Text style={styles.contactInfoLabel}>{t('contact.contactInfoReview.email')}</Text>
-                    <Text style={styles.contactInfoValue}>{editableContactInfo.email}</Text>
-                  </View>
-                  <View style={styles.contactInfoIconActions}>
-                    <Pressable
-                      style={styles.iconButton}
-                      onPress={() => setEditingContactInfoField('email')}
-                    >
-                      <Edit3 size={18} color={Colors.textSecondary} />
-                    </Pressable>
-                    <Pressable
-                      style={styles.iconButton}
-                      onPress={() => setEditableContactInfo(prev => ({ ...prev, email: null }))}
-                    >
-                      <Trash2 size={18} color={Colors.error} />
-                    </Pressable>
-                  </View>
-                </>
-              )}
-            </View>
-          )}
-
-          {editableContactInfo.birthday && (
-            <View style={styles.contactInfoRow}>
-              <View style={styles.contactInfoContent}>
-                <Text style={styles.contactInfoLabel}>{t('contact.contactInfoReview.birthday')}</Text>
-                <Text style={styles.contactInfoValue}>
-                  {formatBirthdayDisplay(
-                    editableContactInfo.birthday.day,
-                    editableContactInfo.birthday.month,
-                    t('contact.birthdayModal.months', { returnObjects: true }) as string[],
-                    editableContactInfo.birthday.year
-                  )}
-                </Text>
-              </View>
-              <View style={styles.contactInfoIconActions}>
-                <Pressable
-                  style={styles.iconButton}
-                  onPress={() => setEditableContactInfo(prev => ({ ...prev, birthday: null }))}
-                >
-                  <Trash2 size={18} color={Colors.error} />
-                </Pressable>
-              </View>
-            </View>
-          )}
-        </View>
-      )}
-
-      {editableFacts.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            {t('review.extractedInfo')}
-          </Text>
-
-          {editableFacts.map((fact, index) => {
-            const isEditing = editingFactIndex === index;
-
-            if (isEditing) {
-              return (
-                <View key={index} style={styles.card}>
-                  <Text style={styles.factLabel}>{fact.factKey}</Text>
-                  <TextInput
-                    style={styles.textInput}
-                    value={fact.factValue}
-                    onChangeText={(value) => updateFact(index, 'factValue', value)}
-                    placeholder={t('review.valuePlaceholder')}
-                    placeholderTextColor={Colors.textMuted}
-                  />
-                  <Pressable
-                    style={styles.confirmButton}
-                    onPress={() => setEditingFactIndex(null)}
-                  >
-                    <Text style={styles.confirmButtonText}>OK</Text>
-                  </Pressable>
-                </View>
-              );
-            }
-
-            return (
-              <View key={index} style={styles.cardRowStandalone}>
-                <Pressable onPress={() => toggleFact(index)}>
-                  <View
-                    style={[
-                      styles.checkbox,
-                      selectedFacts.includes(index) && styles.checkboxSelected
-                    ]}
-                  >
-                    {selectedFacts.includes(index) && (
-                      <Text style={styles.checkmark}>✓</Text>
-                    )}
-                  </View>
-                </Pressable>
-
-                <Pressable style={styles.cardContent} onPress={() => setEditingFactIndex(index)}>
-                  <View style={styles.factRow}>
-                    <Text style={styles.factLabel}>{fact.factKey}</Text>
-                    <Edit3 size={14} color={Colors.textMuted} />
-                  </View>
-                  <Text style={styles.factValue}>{fact.factValue}</Text>
-                  {fact.action === 'update' && fact.previousValue && (
-                    <Text style={styles.previousValue}>
-                      {t('review.previousValue', { value: fact.previousValue })}
-                    </Text>
-                  )}
-                </Pressable>
-              </View>
-            );
-          })}
-        </View>
-      )}
-
-      {contactId === 'new' && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            {t('review.groups')}
-          </Text>
-
-          <View style={styles.chipsRow}>
-            {selectedGroups.map((group) => (
-              <Pressable
-                key={group.name}
-                style={styles.groupChip}
-                onPress={() => toggleGroup(group)}
-              >
-                <Text style={styles.groupChipText}>{group.name}</Text>
-                {group.isNew && (
-                  <Text style={styles.groupChipNew}>{t('review.new')}</Text>
-                )}
-                <X size={14} color={Colors.primary} />
-              </Pressable>
-            ))}
-          </View>
-
-          {isAddingGroup ? (
-            <View style={styles.card}>
-              <TextInput
-                style={styles.textInput}
-                value={newGroupSearch}
-                onChangeText={setNewGroupSearch}
-                placeholder={t('review.groupNamePlaceholder')}
-                placeholderTextColor={Colors.textMuted}
-                autoFocus
-              />
-
-              {filteredGroupsForSearch.length > 0 && (
-                <View style={styles.searchResults}>
-                  {filteredGroupsForSearch.map((group) => (
-                    <Pressable
-                      key={group.id}
-                      style={styles.searchResultItem}
-                      onPress={() => addNewGroup(group.name)}
-                    >
-                      <Text style={styles.searchResultText}>{group.name}</Text>
-                    </Pressable>
-                  ))}
-                </View>
-              )}
-
-              {newGroupSearch.trim() && !filteredGroupsForSearch.some(
-                (g) => g.name.toLowerCase() === newGroupSearch.toLowerCase()
-              ) && !allGroups.some(
-                (g) => g.name.toLowerCase() === newGroupSearch.toLowerCase()
-              ) && (
-                <Pressable
-                  style={styles.createGroupButton}
-                  onPress={() => addNewGroup(newGroupSearch)}
-                >
-                  <Text style={styles.createGroupText}>
-                    {t('review.createGroup', { name: newGroupSearch.trim() })}
-                  </Text>
-                </Pressable>
-              )}
-
-              <Pressable
-                style={styles.cancelButton}
-                onPress={() => {
-                  setIsAddingGroup(false);
-                  setNewGroupSearch('');
-                }}
-              >
-                <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
-              </Pressable>
-            </View>
-          ) : (
-            <Pressable
-              style={styles.addGroupButton}
-              onPress={() => setIsAddingGroup(true)}
-            >
-              <Plus size={18} color={Colors.primary} />
-              <Text style={styles.addGroupText}>{t('review.addGroup')}</Text>
-            </Pressable>
-          )}
-        </View>
-      )}
-
-      {(resolvedTopicsWithData.length > 0 || (extraction.resolvedTopics?.length ?? 0) > 0) && (
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Archive size={20} color={Colors.success} />
-            <Text style={styles.sectionTitleWithIcon}>
-              {t('review.topicsToArchive')}
-            </Text>
-          </View>
-          <Text style={styles.sectionDescription}>
-            {t('review.topicsToArchiveDescription')}
-          </Text>
-
-          {existingHotTopics
-            .filter((topic) => extraction.resolvedTopics?.some((resolved) => resolved.id === topic.id))
-            .map((topic) => {
-              const isSelected = resolvedTopicsState.some((resolved) => resolved.id === topic.id);
-              const currentResolution = resolvedTopicsState.find((resolved) => resolved.id === topic.id)?.resolution || '';
-              const isEditing = editingResolutionId === topic.id;
-
-              return (
-                <View key={topic.id} style={styles.resolvedCard}>
-                  <Pressable
-                    style={styles.cardRowStart}
-                    onPress={() => toggleResolvedTopic(topic.id)}
-                  >
-                    <View
-                      style={[
-                        styles.checkbox,
-                        isSelected && styles.checkboxSuccess
-                      ]}
-                    >
-                      {isSelected && (
-                        <Text style={styles.checkmark}>✓</Text>
-                      )}
-                    </View>
-
-                    <View style={styles.cardContent}>
-                      <Text style={styles.factValue}>{topic.title}</Text>
-                      {topic.context && (
-                        <Text style={styles.contextText}>{topic.context}</Text>
-                      )}
-                    </View>
-                  </Pressable>
-
-                  {isSelected && (
-                    <View style={styles.resolutionContainer}>
-                      <Text style={styles.resolutionLabel}>{t('review.resolutionLabel')}</Text>
-                      {isEditing ? (
-                        <View>
-                          <TextInput
-                            style={styles.textInputSmall}
-                            value={currentResolution}
-                            onChangeText={(value) => updateResolution(topic.id, value)}
-                            placeholder={t('review.resolutionPlaceholder')}
-                            placeholderTextColor={Colors.textMuted}
-                            multiline
-                            autoFocus
-                          />
-                          <Pressable
-                            style={styles.confirmButtonSuccess}
-                            onPress={() => setEditingResolutionId(null)}
-                          >
-                            <Text style={styles.confirmButtonSuccessText}>{t('common.confirm')}</Text>
-                          </Pressable>
-                        </View>
-                      ) : (
-                        <Pressable
-                          style={styles.resolutionRow}
-                          onPress={() => setEditingResolutionId(topic.id)}
-                        >
-                          <Text style={styles.resolutionText}>
-                            {currentResolution || t('review.addResolution')}
-                          </Text>
-                          <Edit3 size={14} color={Colors.success} />
-                        </Pressable>
-                      )}
-                    </View>
-                  )}
-                </View>
-              );
-            })}
-        </View>
-      )}
-
-      {editableHotTopics.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('review.news')}</Text>
-          <Text style={styles.reminderExplanation}>{t('review.reminderExplanation')}</Text>
-
-          {editableHotTopics.map((topic, index) => {
-            const isEditing = editingHotTopicIndex === index;
-
-            if (isEditing) {
-              return (
-                <View key={index} style={styles.card}>
-                  <TextInput
-                    style={[styles.textInput, styles.textInputBold]}
-                    value={topic.title}
-                    onChangeText={(value) => updateHotTopic(index, 'title', value)}
-                    placeholder={t('review.titlePlaceholder')}
-                    placeholderTextColor={Colors.textMuted}
-                  />
-                  <TextInput
-                    style={styles.textInput}
-                    value={topic.context || ''}
-                    onChangeText={(value) => updateHotTopic(index, 'context', value)}
-                    placeholder={t('review.contextPlaceholder')}
-                    placeholderTextColor={Colors.textMuted}
-                    multiline
-                  />
-                  <Pressable
-                    style={styles.confirmButton}
-                    onPress={() => setEditingHotTopicIndex(null)}
-                  >
-                    <Text style={styles.confirmButtonText}>{t('common.confirm')}</Text>
-                  </Pressable>
-                </View>
-              );
-            }
-
-            const dateInfo = hotTopicDates[index];
-
-            return (
-              <View key={index} style={styles.card}>
-                <View style={styles.cardRow}>
-                  <Pressable onPress={() => toggleHotTopic(index)}>
-                    <View
-                      style={[
-                        styles.checkbox,
-                        selectedHotTopics.includes(index) && styles.checkboxSelected
-                      ]}
-                    >
-                      {selectedHotTopics.includes(index) && (
-                        <Text style={styles.checkmark}>✓</Text>
-                      )}
-                    </View>
-                  </Pressable>
-
-                  <View style={styles.orangeDot} />
-
-                  <Pressable style={styles.cardContent} onPress={() => setEditingHotTopicIndex(index)}>
-                    <View style={styles.factRow}>
-                      <Text style={styles.factValue}>{topic.title}</Text>
-                      <Edit3 size={14} color={Colors.textMuted} />
-                    </View>
-                    {topic.context && (
-                      <Text style={styles.contextText}>{topic.context}</Text>
-                    )}
-                  </Pressable>
-                </View>
-
-                <View style={styles.reminderRow}>
-                  <Pressable
-                    style={styles.reminderCheckbox}
-                    onPress={() => toggleHotTopicDate(index)}
-                  >
-                    <View
-                      style={[
-                        styles.smallCheckbox,
-                        dateInfo?.enabled && styles.smallCheckboxSelected
-                      ]}
-                    >
-                      {dateInfo?.enabled && (
-                        <Text style={styles.smallCheckmark}>✓</Text>
-                      )}
-                    </View>
-                    <Text style={styles.reminderLabel}>{t('review.reminder')}</Text>
-                  </Pressable>
-
-                  {dateInfo?.enabled && (
-                    <>
-                      <Pressable
-                        style={styles.datePickerButton}
-                        onPress={() => openDatePicker(index)}
-                      >
-                        <Calendar size={16} color={Colors.info} />
-                        <Text style={dateInfo.date ? styles.datePickerText : styles.datePickerPlaceholder}>
-                          {dateInfo.date || t('review.selectDate')}
-                        </Text>
-                      </Pressable>
-                      {dateInfo.date && (
-                        <Text style={styles.relativeDateText}>
-                          {formatRelativeDate(dateInfo.date)}
-                        </Text>
-                      )}
-                    </>
-                  )}
-                </View>
-              </View>
-            );
-          })}
-        </View>
-      )}
-
-      {editableMemories.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('review.memories')}</Text>
-
-          {editableMemories.map((memory, index) => {
-            const isEditing = editingMemoryIndex === index;
-
-            if (isEditing) {
-              return (
-                <View key={index} style={styles.card}>
-                  <TextInput
-                    style={styles.textInput}
-                    value={memory.description}
-                    onChangeText={(value) => updateMemory(index, 'description', value)}
-                    placeholder={t('review.descriptionPlaceholder')}
-                    placeholderTextColor={Colors.textMuted}
-                    multiline
-                  />
-                  <TextInput
-                    style={styles.textInput}
-                    value={memory.eventDate || ''}
-                    onChangeText={(value) => updateMemory(index, 'eventDate', value)}
-                    placeholder={t('review.datePlaceholder')}
-                    placeholderTextColor={Colors.textMuted}
-                  />
-                  <Pressable
-                    style={styles.confirmButton}
-                    onPress={() => setEditingMemoryIndex(null)}
-                  >
-                    <Text style={styles.confirmButtonText}>{t('common.confirm')}</Text>
-                  </Pressable>
-                </View>
-              );
-            }
-
-            return (
-              <View key={index} style={styles.cardRowStandalone}>
-                <Pressable onPress={() => toggleMemory(index)}>
-                  <View
-                    style={[
-                      styles.checkbox,
-                      selectedMemories.includes(index) && styles.checkboxSelected
-                    ]}
-                  >
-                    {selectedMemories.includes(index) && (
-                      <Text style={styles.checkmark}>✓</Text>
-                    )}
-                  </View>
-                </Pressable>
-
-                <View style={[styles.memoryDot, memory.isShared ? styles.blueDot : styles.purpleDot]} />
-
-                <Pressable style={styles.cardContent} onPress={() => setEditingMemoryIndex(index)}>
-                  <View style={styles.factRow}>
-                    <Text style={styles.factValue}>{memory.description}</Text>
-                    <Edit3 size={14} color={Colors.textMuted} />
-                  </View>
-                  <View style={styles.memoryMeta}>
-                    {memory.eventDate && (
-                      <Text style={styles.memoryDate}>{memory.eventDate}</Text>
-                    )}
-                    <Text style={styles.memoryType}>
-                      {memory.isShared ? t('review.together') : t('review.solo')}
-                    </Text>
-                  </View>
-                </Pressable>
-              </View>
-            );
-          })}
-        </View>
-      )}
-
-      <Pressable
-        style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
-        onPress={handleSave}
-        disabled={isSaving}
-      >
-        <Text style={styles.saveButtonText}>
-          {isSaving ? t('review.saving') : t('review.save')}
+        <Text style={styles.subtitle}>
+          {contactId === 'new' ? t('review.newContact') : t('review.update')}
         </Text>
-      </Pressable>
 
-      {Platform.OS === 'android' && showDatePicker && datePickerIndex !== null && (
-        <DateTimePicker
-          value={hotTopicDates[datePickerIndex]?.date
-            ? parseDateStringToDate(hotTopicDates[datePickerIndex].date)
-            : new Date()
-          }
-          mode="date"
-          display="default"
-          onChange={handleDateChange}
-          minimumDate={new Date()}
-        />
-      )}
-
-      {Platform.OS === 'ios' && (
-        <Modal
-          visible={showDatePicker}
-          transparent
-          animationType="slide"
+        <CollapsibleSection
+          title={t('review.transcription')}
+          defaultExpanded={false}
+          icon={<FileText size={18} color={Colors.textSecondary} />}
         >
-          <View style={styles.datePickerModalOverlay}>
-            <View style={styles.datePickerModalContent}>
-              <View style={styles.datePickerModalHeader}>
-                <Pressable onPress={closeDatePicker}>
-                  <Text style={styles.datePickerModalCancel}>{t('common.cancel')}</Text>
-                </Pressable>
-                <Text style={styles.datePickerModalTitle}>{t('review.selectDate')}</Text>
-                <Pressable onPress={closeDatePicker}>
-                  <Text style={styles.datePickerModalDone}>{t('common.confirm')}</Text>
-                </Pressable>
+          <TranscriptionSection
+            transcription={transcription}
+            editedTranscription={editedTranscription}
+            isEditing={isEditingTranscription}
+            isReExtracting={isReExtracting}
+            onEditStart={() => setIsEditingTranscription(true)}
+            onEditCancel={() => {
+              setEditedTranscription(transcription);
+              setIsEditingTranscription(false);
+            }}
+            onChangeText={setEditedTranscription}
+            onConfirm={handleTranscriptionEdit}
+          />
+        </CollapsibleSection>
+
+        {hasContactInfo && (
+          <CollapsibleSection
+            title={t('contact.contactInfoReview.title')}
+            defaultExpanded={true}
+            badge={t('review.newItems', { count: contactInfoCount })}
+            badgeColor={Colors.primary}
+            icon={<Phone size={18} color={Colors.primary} />}
+          >
+            <ContactInfoSection
+              contactInfo={editableContactInfo}
+              editingField={editingContactInfoField}
+              onEditField={setEditingContactInfoField}
+              onUpdateContactInfo={setEditableContactInfo}
+            />
+          </CollapsibleSection>
+        )}
+
+        {editableFacts.length > 0 && (
+          <CollapsibleSection
+            title={t('review.extractedInfo')}
+            defaultExpanded={true}
+            badge={t('review.newItems', { count: editableFacts.length })}
+            badgeColor={Colors.primary}
+            icon={<Info size={18} color={Colors.primary} />}
+          >
+            <FactsSection
+              facts={editableFacts}
+              selectedFacts={selectedFacts}
+              editingFactIndex={editingFactIndex}
+              onToggleFact={toggleFact}
+              onUpdateFact={updateFact}
+              onSetEditingIndex={setEditingFactIndex}
+            />
+          </CollapsibleSection>
+        )}
+
+        {contactId === 'new' && (
+          <CollapsibleSection
+            title={t('review.groups')}
+            defaultExpanded={true}
+            icon={<Users size={18} color={Colors.primary} />}
+          >
+            <GroupsSection
+              state={{
+                selectedGroups,
+                isAddingGroup,
+                newGroupSearch,
+                filteredGroupsForSearch,
+                allGroups,
+              }}
+              handlers={{
+                onToggleGroup: toggleGroup,
+                onAddNewGroup: addNewGroup,
+                onSetIsAddingGroup: setIsAddingGroup,
+                onSetNewGroupSearch: setNewGroupSearch,
+              }}
+            />
+          </CollapsibleSection>
+        )}
+
+        {hasResolvedTopics && (
+          <CollapsibleSection
+            title={t('review.topicsToArchive')}
+            defaultExpanded={false}
+            badge={t('review.toConfirm', { count: resolvedTopicsWithData.length })}
+            badgeColor={Colors.success}
+            icon={<Archive size={18} color={Colors.success} />}
+          >
+            <ResolvedTopicsSection
+              state={{
+                resolvedTopicsWithData,
+                resolvedTopicsState,
+                editingResolutionId,
+              }}
+              handlers={{
+                onToggleResolved: toggleResolvedTopic,
+                onUpdateResolution: updateResolution,
+                onSetEditingResolutionId: setEditingResolutionId,
+              }}
+            />
+          </CollapsibleSection>
+        )}
+
+        {editableHotTopics.length > 0 && (
+          <CollapsibleSection
+            title={t('review.news')}
+            defaultExpanded={true}
+            badge={t('review.newItems', { count: editableHotTopics.length })}
+            badgeColor={Colors.primary}
+            icon={<Zap size={18} color={Colors.warning} />}
+          >
+            <HotTopicsSection
+              state={{
+                hotTopics: editableHotTopics,
+                selectedHotTopics,
+                editingHotTopicIndex,
+                hotTopicDates,
+              }}
+              handlers={{
+                onToggleHotTopic: toggleHotTopic,
+                onUpdateHotTopic: updateHotTopic,
+                onSetEditingIndex: setEditingHotTopicIndex,
+                onToggleDate: toggleHotTopicDate,
+                onOpenDatePicker: openDatePicker,
+                formatRelativeDate,
+              }}
+            />
+          </CollapsibleSection>
+        )}
+
+        {editableMemories.length > 0 && (
+          <CollapsibleSection
+            title={t('review.memories')}
+            defaultExpanded={true}
+            badge={t('review.newItems', { count: editableMemories.length })}
+            badgeColor={Colors.primary}
+            icon={<Lightbulb size={18} color={Colors.primary} />}
+          >
+            <MemoriesSection
+              memories={editableMemories}
+              selectedMemories={selectedMemories}
+              editingMemoryIndex={editingMemoryIndex}
+              onToggleMemory={toggleMemory}
+              onUpdateMemory={updateMemory}
+              onSetEditingIndex={setEditingMemoryIndex}
+            />
+          </CollapsibleSection>
+        )}
+
+        {Platform.OS === 'android' && showDatePicker && datePickerIndex !== null && (
+          <DateTimePicker
+            value={hotTopicDates[datePickerIndex]?.date
+              ? parseDateStringToDate(hotTopicDates[datePickerIndex].date)
+              : new Date()
+            }
+            mode="date"
+            display="default"
+            onChange={handleDateChange}
+            minimumDate={new Date()}
+          />
+        )}
+
+        {Platform.OS === 'ios' && (
+          <Modal
+            visible={showDatePicker}
+            transparent
+            animationType="slide"
+          >
+            <View style={styles.datePickerModalOverlay}>
+              <View style={styles.datePickerModalContent}>
+                <View style={styles.datePickerModalHeader}>
+                  <Pressable onPress={closeDatePicker}>
+                    <Text style={styles.datePickerModalCancel}>{t('common.cancel')}</Text>
+                  </Pressable>
+                  <Text style={styles.datePickerModalTitle}>{t('review.selectDate')}</Text>
+                  <Pressable onPress={closeDatePicker}>
+                    <Text style={styles.datePickerModalDone}>{t('common.confirm')}</Text>
+                  </Pressable>
+                </View>
+                {datePickerIndex !== null && (
+                  <DateTimePicker
+                    value={hotTopicDates[datePickerIndex]?.date
+                      ? parseDateStringToDate(hotTopicDates[datePickerIndex].date)
+                      : new Date()
+                    }
+                    mode="date"
+                    display="spinner"
+                    onChange={handleDateChange}
+                    minimumDate={new Date()}
+                    style={styles.iosDatePicker}
+                  />
+                )}
               </View>
-              {datePickerIndex !== null && (
-                <DateTimePicker
-                  value={hotTopicDates[datePickerIndex]?.date
-                    ? parseDateStringToDate(hotTopicDates[datePickerIndex].date)
-                    : new Date()
-                  }
-                  mode="date"
-                  display="spinner"
-                  onChange={handleDateChange}
-                  minimumDate={new Date()}
-                  style={styles.iosDatePicker}
-                />
-              )}
             </View>
-          </View>
-        </Modal>
-      )}
-    </ScrollView>
+          </Modal>
+        )}
+      </ScrollView>
+
+      <View style={[styles.floatingSaveContainer, { paddingBottom: insets.bottom + 24 }]}>
+        <Pressable
+          style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
+          onPress={handleSave}
+          disabled={isSaving}
+        >
+          <Text style={styles.saveButtonText}>
+            {isSaving ? t('review.saving') : t('review.save')}
+          </Text>
+        </Pressable>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  screenContainer: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
   container: {
     flex: 1,
     backgroundColor: Colors.background,
@@ -1372,299 +933,16 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     marginBottom: 24,
   },
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-    marginBottom: 12,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  sectionTitleWithIcon: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-    marginLeft: 8,
-  },
-  sectionDescription: {
-    fontSize: 14,
-    color: Colors.textMuted,
-    marginBottom: 12,
-  },
-  reminderExplanation: {
-    fontSize: 13,
-    color: Colors.textMuted,
-    marginBottom: 12,
-    marginTop: -4,
-  },
-  card: {
-    backgroundColor: Colors.surface,
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-  },
-  cardRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  cardRowStandalone: {
-    backgroundColor: Colors.surface,
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  cardRowStart: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  cardContent: {
-    flex: 1,
-  },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 4,
-    marginRight: 12,
-    marginTop: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.surfaceHover,
-  },
-  checkboxSelected: {
-    backgroundColor: Colors.primary,
-  },
-  checkboxSuccess: {
-    backgroundColor: Colors.success,
-  },
-  checkmark: {
-    color: Colors.textInverse,
-    fontSize: 12,
-  },
-  factRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  factLabel: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    flex: 1,
-    marginBottom: 8,
-  },
-  factValue: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: Colors.textPrimary,
-    flex: 1,
-  },
-  previousValue: {
-    fontSize: 12,
-    color: Colors.warning,
-    marginTop: 4,
-  },
-  contextText: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    marginTop: 4,
-  },
-  textInput: {
+  floatingSaveContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 24,
+    paddingTop: 12,
     backgroundColor: Colors.background,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    color: Colors.textPrimary,
-    fontSize: 14,
-    marginBottom: 12,
-  },
-  textInputSmall: {
-    backgroundColor: Colors.background,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    color: Colors.textPrimary,
-    fontSize: 14,
-  },
-  textInputBold: {
-    fontWeight: '500',
-  },
-  confirmButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    backgroundColor: Colors.primary,
-    borderRadius: 12,
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-  },
-  confirmButtonText: {
-    color: Colors.textInverse,
-    fontWeight: '600',
-  },
-  confirmButtonSuccess: {
-    marginTop: 8,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    backgroundColor: Colors.success,
-    borderRadius: 12,
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-  },
-  confirmButtonSuccessText: {
-    color: Colors.textInverse,
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  chipsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 12,
-  },
-  groupChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.surface,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: Colors.border,
-  },
-  groupChipText: {
-    color: Colors.textPrimary,
-    marginRight: 4,
-    fontWeight: '600',
-  },
-  groupChipNew: {
-    color: Colors.primary,
-    fontSize: 12,
-    marginRight: 4,
-    fontWeight: '600',
-  },
-  addGroupButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  addGroupText: {
-    color: Colors.primary,
-    marginLeft: 8,
-  },
-  searchResults: {
-    marginBottom: 8,
-  },
-  searchResultItem: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    backgroundColor: Colors.surfaceHover,
-    borderRadius: 8,
-    marginBottom: 4,
-  },
-  searchResultText: {
-    color: Colors.textPrimary,
-  },
-  createGroupButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    backgroundColor: Colors.primary,
-    borderRadius: 12,
-    marginBottom: 8,
-  },
-  createGroupText: {
-    color: Colors.textInverse,
-    fontWeight: '600',
-  },
-  cancelButton: {
-    paddingVertical: 8,
-    alignItems: 'center',
-  },
-  cancelButtonText: {
-    color: Colors.textSecondary,
-    fontWeight: '600',
-  },
-  resolvedCard: {
-    backgroundColor: `${Colors.success}10`,
-    borderWidth: 1,
-    borderColor: `${Colors.success}30`,
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-  },
-  resolutionContainer: {
-    marginTop: 12,
-    marginLeft: 32,
-  },
-  resolutionLabel: {
-    color: Colors.success,
-    fontSize: 12,
-    fontWeight: '500',
-    marginBottom: 4,
-  },
-  resolutionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  resolutionText: {
-    color: Colors.success,
-    fontSize: 14,
-    flex: 1,
-  },
-  orangeDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: Colors.warning,
-    marginTop: 6,
-    marginRight: 12,
-  },
-  memoryDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginTop: 6,
-    marginRight: 12,
-  },
-  blueDot: {
-    backgroundColor: '#3B82F6',
-  },
-  purpleDot: {
-    backgroundColor: '#8B5CF6',
-  },
-  memoryMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  memoryDate: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    marginRight: 8,
-  },
-  memoryType: {
-    fontSize: 12,
-    color: Colors.textMuted,
-  },
-  checkboxInfo: {
-    backgroundColor: Colors.info,
-  },
-  calendarDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: Colors.info,
-    marginTop: 6,
-    marginRight: 12,
-  },
-  eventDate: {
-    fontSize: 14,
-    color: Colors.info,
-    marginTop: 4,
+    borderTopWidth: 1,
+    borderTopColor: Colors.borderLight,
   },
   saveButton: {
     paddingVertical: 16,
@@ -1679,187 +957,6 @@ const styles = StyleSheet.create({
     color: Colors.textInverse,
     fontWeight: '600',
     fontSize: 18,
-  },
-  contactInfoRow: {
-    backgroundColor: Colors.surface,
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  contactInfoContent: {
-    flex: 1,
-  },
-  contactInfoLabel: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-    marginBottom: 2,
-  },
-  contactInfoValue: {
-    fontSize: 15,
-    color: Colors.textPrimary,
-    fontWeight: '500',
-  },
-  contactInfoIconActions: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  iconButton: {
-    padding: 8,
-  },
-  contactInfoEditContainer: {
-    flex: 1,
-  },
-  contactInfoInput: {
-    backgroundColor: Colors.background,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    color: Colors.textPrimary,
-    fontSize: 15,
-    marginVertical: 8,
-  },
-  reminderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 12,
-    gap: 8,
-  },
-  reminderCheckbox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  smallCheckbox: {
-    width: 18,
-    height: 18,
-    borderRadius: 4,
-    borderWidth: 1.5,
-    borderColor: Colors.border,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  smallCheckboxSelected: {
-    backgroundColor: Colors.info,
-    borderColor: Colors.info,
-  },
-  smallCheckmark: {
-    color: Colors.textInverse,
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  reminderLabel: {
-    fontSize: 13,
-    color: Colors.textSecondary,
-  },
-  dateInput: {
-    flex: 1,
-    backgroundColor: Colors.background,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    fontSize: 14,
-    color: Colors.textPrimary,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    maxWidth: 120,
-  },
-  relativeDateText: {
-    fontSize: 12,
-    color: Colors.info,
-    fontWeight: '500',
-  },
-  transcriptionDisplayContainer: {
-    backgroundColor: Colors.surface,
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  transcriptionText: {
-    fontSize: 15,
-    lineHeight: 22,
-    color: Colors.textPrimary,
-  },
-  transcriptionHint: {
-    fontSize: 13,
-    color: Colors.textMuted,
-    marginTop: 8,
-    fontStyle: 'italic',
-  },
-  transcriptionEditContainer: {
-    backgroundColor: Colors.surface,
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: Colors.primary,
-  },
-  transcriptionInput: {
-    fontSize: 15,
-    lineHeight: 22,
-    color: Colors.textPrimary,
-    minHeight: 120,
-    textAlignVertical: 'top',
-    backgroundColor: Colors.background,
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 12,
-  },
-  transcriptionEditActions: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  transcriptionCancelButton: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: Colors.surface,
-    borderRadius: 12,
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: Colors.border,
-  },
-  transcriptionCancelButtonText: {
-    color: Colors.primary,
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  transcriptionConfirmButton: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: Colors.primary,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  transcriptionConfirmButtonDisabled: {
-    opacity: 0.5,
-  },
-  transcriptionConfirmButtonText: {
-    color: Colors.textInverse,
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  datePickerButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.background,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderWidth: 1,
-    borderColor: Colors.info,
-    gap: 6,
-  },
-  datePickerText: {
-    fontSize: 14,
-    color: Colors.textPrimary,
-  },
-  datePickerPlaceholder: {
-    fontSize: 14,
-    color: Colors.textMuted,
   },
   datePickerModalOverlay: {
     flex: 1,
@@ -1879,7 +976,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: Colors.borderLight,
   },
   datePickerModalCancel: {
     fontSize: 16,

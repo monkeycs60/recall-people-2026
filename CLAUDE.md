@@ -17,6 +17,10 @@ Keep this managed block so 'openspec update' can refresh the instructions.
 
 <!-- OPENSPEC:END -->
 
+# App Name
+
+The app is called **Recall People** (two words, always together). Never shorten to just "Recall" in user-facing copy. In code identifiers, `recall-people` or `recallPeople` is acceptable.
+
 # Architecture Principles
 
 ## User-First Data Privacy (SQLite Local)

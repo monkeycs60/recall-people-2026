@@ -40,8 +40,8 @@ import { GlobalGroupsManagementSheet } from '@/components/contact/GlobalGroupsMa
 import { queryKeys } from '@/lib/query-keys';
 import { contactService } from '@/services/contact.service';
 import { formatDistanceToNow } from 'date-fns';
-import { fr } from 'date-fns/locale';
 import { format, parseISO, isFuture, isPast, differenceInDays } from 'date-fns';
+import { getDateLocale } from '@/utils/dateLocale';
 
 const EMPTY_CONTACTS_ILLUSTRATION = require('@/assets/ai-assets/empty-contacts.png');
 
@@ -81,7 +81,7 @@ function getTopHotTopics(hotTopics: HotTopic[], maxCount: number = 2): { topics:
 function formatHotTopicDate(dateString: string): string {
 	try {
 		const date = parseISO(dateString);
-		return format(date, 'd MMM', { locale: fr });
+		return format(date, 'd MMM', { locale: getDateLocale() });
 	} catch {
 		return '';
 	}
@@ -99,15 +99,15 @@ function isWithinOneMonth(dateString: string | undefined): boolean {
 	}
 }
 
-function formatLastContactTime(lastContactAt: string | undefined): string {
+function formatLastContactTime(lastContactAt: string | undefined, t: (key: string, options?: Record<string, string>) => string): string {
 	if (!lastContactAt) return '';
 
 	try {
 		const distance = formatDistanceToNow(parseISO(lastContactAt), {
 			addSuffix: false,
-			locale: fr,
+			locale: getDateLocale(),
 		});
-		return `Il y a ${distance}`;
+		return t('home.timeAgo', { distance });
 	} catch {
 		return '';
 	}
@@ -227,7 +227,7 @@ export default function ContactsScreen() {
 		const preview = contactPreviews.get(item.id);
 		const hotTopics = preview?.hotTopics || [];
 		const { topics: topHotTopics, remainingCount } = getTopHotTopics(hotTopics, 2);
-		const lastContactText = formatLastContactTime(item.lastContactAt);
+		const lastContactText = formatLastContactTime(item.lastContactAt, t);
 
 		const content = (
 			<Pressable
@@ -275,7 +275,7 @@ export default function ContactsScreen() {
 								);
 							})}
 							{remainingCount > 0 && (
-								<Text style={styles.hotTopicMore}>+{remainingCount} autre{remainingCount > 1 ? 's' : ''}</Text>
+								<Text style={styles.hotTopicMore}>+{t('home.moreContacts', { count: remainingCount })}</Text>
 							)}
 						</View>
 					)}
@@ -390,6 +390,9 @@ export default function ContactsScreen() {
 							<Users size={48} color={Colors.textMuted} />
 							<Text style={styles.emptyGroupText}>
 								{t('contacts.noContactsInGroup')}
+							</Text>
+							<Text style={styles.emptyGroupHint}>
+								{t('contacts.noContactsInGroupHint')}
 							</Text>
 						</View>
 					) : (
@@ -661,5 +664,13 @@ const styles = StyleSheet.create({
 		color: Colors.textMuted,
 		textAlign: 'center',
 		marginTop: 16,
+	},
+	emptyGroupHint: {
+		fontSize: 13,
+		color: Colors.textMuted,
+		textAlign: 'center',
+		marginTop: 8,
+		lineHeight: 18,
+		opacity: 0.7,
 	},
 });

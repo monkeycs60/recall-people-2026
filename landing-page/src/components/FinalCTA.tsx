@@ -18,14 +18,14 @@ export default function FinalCTA() {
           </h2>
 
           <p className="text-lg md:text-xl text-white/90 mb-10">
-            Join thousands who never miss a detail again.
+            Try it free. Your next conversation is worth remembering.
           </p>
 
           <Link
             href="#"
             className="group inline-flex items-center justify-center px-10 py-5 text-lg font-semibold text-text-primary bg-white border-2 border-border rounded-xl hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200"
           >
-            Download Recall
+            Download Recall People
             <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
           </Link>
 

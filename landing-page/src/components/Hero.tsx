@@ -14,15 +14,15 @@ export default function Hero() {
             {/* Badge - subtle style */}
             <div className="inline-flex items-center space-x-2 bg-primary-light/30 border border-border-light rounded-full px-4 py-1.5 mb-3 md:mb-10">
               <span className="flex h-1.5 w-1.5 rounded-full bg-primary/60" />
-              <span className="text-sm font-medium text-text-secondary">Your Personal CRM</span>
+              <span className="text-sm font-medium text-text-secondary">Your social memory, upgraded</span>
             </div>
 
             <h1 className="text-[2rem] md:text-4xl lg:text-[3.25rem] font-bold tracking-tight text-text-primary leading-[1.15] mb-4 md:mb-8">
-              <span className="bg-primary/25 px-1 -mx-1 rounded">Small details</span> make<br /><span className="bg-primary/25 px-1 -mx-1 rounded">big differences</span>.
+              You forget <span className="bg-primary/25 px-1 -mx-1 rounded">80%</span> of every conversation.
             </h1>
 
             <p className="text-base md:text-lg text-text-secondary max-w-lg mx-auto lg:mx-0 leading-relaxed mb-5 md:mb-10">
-              His kids&apos; names. Her dream trip to Japan. The side project he works on at night. Never forget what matters with <span className="font-semibold text-text-primary">Recall People</span>.
+              Record a voice note after any meeting. Recall People builds a <span className="font-semibold text-text-primary">smart profile for every person</span> — key details, upcoming events, and conversation starters for next time.
             </p>
 
             {/* Bottom section with buttons */}
@@ -57,9 +57,16 @@ export default function Hero() {
                 </Link>
               </div>
 
-              <p className="hidden md:block text-sm text-text-secondary">
+              <p className="text-sm text-text-secondary">
                 Free to start. Works offline. Your data never leaves your device.
               </p>
+
+              <a
+                href="#how-it-works"
+                className="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors duration-200 mt-3"
+              >
+                See how it works &darr;
+              </a>
             </div>
           </div>
 

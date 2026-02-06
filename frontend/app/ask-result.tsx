@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { Colors, Typography, Spacing, BorderRadius } from '@/constants/theme';
+import { getLocaleDateStringLocale } from '@/utils/dateLocale';
 import { MessageCircle, FileText, ChevronRight, UserCircle, Plus } from 'lucide-react-native';
 
 type AskSource = {
@@ -63,7 +64,7 @@ export default function AskResultScreen() {
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('fr-FR', {
+    return date.toLocaleDateString(getLocaleDateStringLocale(), {
       day: 'numeric',
       month: 'short',
       year: 'numeric',

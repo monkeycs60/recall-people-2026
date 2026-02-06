@@ -20,7 +20,7 @@ const plans = [
     name: 'Pro',
     price: '5.99',
     period: '/month',
-    description: 'Unlimited power for networkers',
+    description: 'For people who meet lots of people',
     features: [
       'Unlimited notes',
       'Unlimited assistant questions',

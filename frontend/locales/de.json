@@ -126,7 +126,12 @@
     "pressToRecord": "Zum Aufnehmen drücken",
     "recording": "Aufnahme...",
     "processing": "Verarbeitung...",
-    "transcribing": "Transkription..."
+    "transcribing": "Transkription...",
+    "today": "Heute",
+    "yesterday": "Gestern",
+    "timeAgo": "Vor {{distance}}",
+    "moreContacts_one": "{{count}} weiterer",
+    "moreContacts_other": "{{count}} weitere"
   },
   "processing": {
     "transcribing": "Audio wird transkribiert...",
@@ -142,6 +147,7 @@
     "noContactsDescription": "Erstelle deine erste Notiz, um loszulegen.",
     "createFirstNote": "Erste Notiz erstellen",
     "noContactsInGroup": "Keine Kontakte in dieser Gruppe",
+    "noContactsInGroupHint": "Füge Kontakte zu dieser Gruppe über deren Profilseite hinzu.",
     "addContact": "Kontakt hinzufügen",
     "createModal": {
       "title": "Neuer Kontakt",
@@ -194,7 +200,7 @@
       "selectGroups": "Gruppen von {{firstName}}",
       "noGroups": "Keine Gruppen erstellt",
       "noGroupsYet": "Noch keine Gruppen",
-      "createFirstGroup": "Erstellen Sie oben Ihre erste Gruppe",
+      "createFirstGroup": "Erstelle oben deine erste Gruppe",
       "groupExists": "Gruppe existiert bereits",
       "groupExistsMessage": "Eine Gruppe \"{{name}}\" existiert bereits",
       "createNew": "Neue Gruppe",
@@ -214,7 +220,7 @@
     "hotTopic": {
       "addPlaceholder": "Neues Thema...",
       "contextPlaceholder": "Kontext (optional)...",
-      "emptyState": "Ihre Projekte. Ihre News. Ihre Kämpfe.",
+      "emptyState": "Ihre Projekte. Ihre Neuigkeiten. Ihre Herausforderungen.",
       "emptyStateDescription": "Eine Sprachnotiz nach deinem nächsten Gespräch, und es ist gespeichert.",
       "deleteTitle": "Diese Neuigkeit löschen",
       "deleteConfirm": "\"{{title}}\" löschen?",
@@ -474,6 +480,17 @@
     "new": "(neu)",
     "events": "Ereignisse",
     "eventTitlePlaceholder": "Ereignistitel",
+    "newItems_one": "{{count}} neues Element",
+    "newItems_other": "{{count}} neue Elemente",
+    "toConfirm_one": "{{count}} zu bestätigen",
+    "toConfirm_other": "{{count}} zu bestätigen",
+    "sectionTranscription": "Transkription",
+    "sectionContactInfo": "Kontaktdaten",
+    "sectionFacts": "Profil",
+    "sectionGroups": "Gruppen",
+    "sectionResolvedTopics": "Erledigte Themen",
+    "sectionHotTopics": "Neuigkeiten",
+    "sectionMemories": "Erinnerungen",
     "reminder": "Erinnerung",
     "reminderExplanation": "Erinnerungen senden dir eine Benachrichtigung, um dich zu ermutigen, diese Themen weiterzuverfolgen.",
     "reminderDate": "Erinnerungsdatum",
@@ -493,7 +510,10 @@
     "noEvents": "Keine anstehenden Ereignisse",
     "noPastEvents": "Keine vergangenen Ereignisse",
     "today": "Heute",
-    "birthdayTitle": "{{firstName}}s Geburtstag"
+    "birthdayTitle": "{{firstName}}s Geburtstag",
+    "emptyDescription": "Ereignisse und Geburtstage deiner Kontakte erscheinen hier.",
+    "emptyPastDescription": "Vergangene Ereignisse deiner Kontakte erscheinen hier.",
+    "recordNote": "Notiz aufnehmen"
   },
   "profile": {
     "title": "Profil",
@@ -564,23 +584,23 @@
       "title": "Rechtliches",
       "privacyFirst": {
         "title": "Datenschutz zuerst",
-        "description": "Recall wurde mit Datenschutz als Kernprinzip entwickelt. Wir glauben, dass Ihre persönlichen Beziehungen und die Informationen, die Sie aufzeichnen, privat bleiben und unter Ihrer Kontrolle sein sollten."
+        "description": "Recall wurde mit Datenschutz als Kernprinzip entwickelt. Wir glauben, dass deine persönlichen Beziehungen und die Informationen, die du aufzeichnest, privat bleiben und unter deiner Kontrolle sein sollten."
       },
       "localStorage": {
         "title": "100% lokale Speicherung",
-        "description": "Alle Ihre Kontaktdaten, Notizen, Fakten und Erinnerungen werden ausschließlich auf Ihrem Gerät in einer sicheren lokalen Datenbank gespeichert. Ihre Daten verlassen niemals Ihr Telefon ohne Ihre explizite Aktion."
+        "description": "Alle deine Kontaktdaten, Notizen, Fakten und Erinnerungen werden ausschließlich auf deinem Gerät in einer sicheren lokalen Datenbank gespeichert. Deine Daten verlassen niemals dein Telefon ohne deine explizite Aktion."
       },
       "dataSovereignty": {
         "title": "Datensouveränität",
-        "description": "Sie haben das vollständige Eigentum an Ihren Daten. Exportieren Sie sie jederzeit im JSON- oder CSV-Format. Löschen Sie sie wann Sie wollen. Kein Cloud-Speicher, kein Data Mining, kein Zugriff Dritter."
+        "description": "Du hast das vollständige Eigentum an deinen Daten. Exportiere sie jederzeit im JSON- oder CSV-Format. Lösche sie wann du willst. Kein Cloud-Speicher, kein Data Mining, kein Zugriff Dritter."
       },
       "aiProcessing": {
         "title": "KI-Verarbeitung",
         "description": "Sprachtranskription und Textanalyse werden nur bei der Aufnahme über sichere APIs verarbeitet. Der verarbeitete Inhalt wird lokal gespeichert und niemals zum Training von KI-Modellen verwendet."
       },
       "contact": {
-        "title": "Kontaktieren Sie uns",
-        "description": "Fragen zu Ihrem Datenschutz oder Ihren Daten? Wir sind hier, um zu helfen."
+        "title": "Kontaktiere uns",
+        "description": "Fragen zu deinem Datenschutz oder deinen Daten? Wir sind hier, um zu helfen."
       },
       "lastUpdated": "Zuletzt aktualisiert: Dezember 2024"
     }
@@ -745,6 +765,7 @@
       "birthdayOf": "Wann hat {{firstName}} Geburtstag?",
       "newsOf": "Was gibt es Neues bei {{firstName}}?"
     },
+    "noSuggestionsText": "Nimm Notizen auf, um Vorschläge zu sehen",
     "newQuestionPlaceholder": "Weitere Frage...",
     "result": {
       "sourceHeader": "Aus deiner Notiz vom {{date}}:",
@@ -804,6 +825,11 @@
     "newContact": "Neuer Kontakt",
     "createNew": "\"{{name}}\" erstellen",
     "suggestedNickname": "Vorgeschlagener Spitzname: {{nickname}}",
-    "lastContact": "Letzter Kontakt: {{date}}"
+    "lastContact": "Letzter Kontakt: {{date}}",
+    "contextLabel": "Kontext",
+    "contextFacts": "{{count}} Infos",
+    "contextTopics": "{{count}} aktive Themen",
+    "dontKnow": "Weiß ich nicht",
+    "noActiveTopics": "Keine aktiven Themen"
   }
 }
