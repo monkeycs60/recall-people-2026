@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { View, Text, Pressable, StyleSheet, LayoutAnimation, Platform, UIManager } from 'react-native';
-import { ChevronRight } from 'lucide-react-native';
+import { ChevronDown, ChevronUp } from 'lucide-react-native';
 import { Colors, BorderRadius, Spacing } from '@/constants/theme';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -32,8 +32,11 @@ export function CollapsibleSection({
   }, []);
 
   return (
-    <View style={styles.container}>
-      <Pressable style={styles.header} onPress={toggleExpanded}>
+    <View style={[styles.container, isExpanded && styles.containerExpanded]}>
+      <Pressable
+        style={[styles.header, isExpanded && styles.headerExpanded]}
+        onPress={toggleExpanded}
+      >
         <View style={styles.headerLeft}>
           {icon && <View style={styles.iconContainer}>{icon}</View>}
           <Text style={styles.title}>{title}</Text>
@@ -43,9 +46,11 @@ export function CollapsibleSection({
             </View>
           )}
         </View>
-        <View style={[styles.chevronContainer, isExpanded && styles.chevronExpanded]}>
-          <ChevronRight size={18} color={Colors.textMuted} />
-        </View>
+        {isExpanded ? (
+          <ChevronUp size={18} color={Colors.textMuted} />
+        ) : (
+          <ChevronDown size={18} color={Colors.textMuted} />
+        )}
       </Pressable>
 
       {isExpanded && (
@@ -60,6 +65,13 @@ export function CollapsibleSection({
 const styles = StyleSheet.create({
   container: {
     marginBottom: Spacing.md,
+    borderRadius: BorderRadius.md,
+    overflow: 'hidden',
+  },
+  containerExpanded: {
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    backgroundColor: Colors.surface,
   },
   header: {
     flexDirection: 'row',
@@ -71,6 +83,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     borderWidth: 1,
     borderColor: Colors.borderLight,
+  },
+  headerExpanded: {
+    borderWidth: 0,
+    borderRadius: 0,
   },
   headerLeft: {
     flexDirection: 'row',
@@ -96,13 +112,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
-  chevronContainer: {
-    transform: [{ rotate: '0deg' }],
-  },
-  chevronExpanded: {
-    transform: [{ rotate: '90deg' }],
-  },
   content: {
-    paddingTop: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    paddingBottom: Spacing.md,
   },
 });
