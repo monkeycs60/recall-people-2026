@@ -595,34 +595,48 @@ export default function ReviewScreen() {
 
         addPendingAvatarGeneration(finalContactId);
 
-        useAvatarTrial()
-          .then(async (trialResult) => {
-            if (!trialResult.success && trialResult.error === 'no_trials_left') {
-              removePendingAvatarGeneration(finalContactId);
-              console.log('[Avatar Auto] No trials left, skipping avatar generation');
-              return;
-            }
+        const isPremium = useSubscriptionStore.getState().isPremium;
 
-            if (trialResult.remaining >= 0) {
-              useSubscriptionStore.getState().setFreeAvatarTrials(trialResult.remaining);
-            }
-
-            const result = await generateAvatarFromHints({
-              contactId: finalContactId,
-              gender,
-              avatarHints,
-            });
-
-            await contactService.update(finalContactId, { avatarUrl: result.avatarUrl });
-            removePendingAvatarGeneration(finalContactId);
-            queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
-            queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(finalContactId) });
-            console.log('[Avatar Auto] Successfully generated avatar for', finalContactId);
-          })
-          .catch((error) => {
-            removePendingAvatarGeneration(finalContactId);
-            console.warn('[Avatar Auto] Generation failed (silent):', error);
+        const proceedWithGeneration = async () => {
+          const result = await generateAvatarFromHints({
+            contactId: finalContactId,
+            gender,
+            avatarHints,
           });
+
+          await contactService.update(finalContactId, { avatarUrl: result.avatarUrl });
+          removePendingAvatarGeneration(finalContactId);
+          queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
+          queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(finalContactId) });
+          console.log('[Avatar Auto] Successfully generated avatar for', finalContactId);
+        };
+
+        if (isPremium) {
+          proceedWithGeneration()
+            .catch((error) => {
+              removePendingAvatarGeneration(finalContactId);
+              console.warn('[Avatar Auto] Generation failed (silent):', error);
+            });
+        } else {
+          useAvatarTrial()
+            .then(async (trialResult) => {
+              if (!trialResult.success && trialResult.error === 'no_trials_left') {
+                removePendingAvatarGeneration(finalContactId);
+                console.log('[Avatar Auto] No trials left, skipping avatar generation');
+                return;
+              }
+
+              if (trialResult.remaining >= 0) {
+                useSubscriptionStore.getState().setFreeAvatarTrials(trialResult.remaining);
+              }
+
+              await proceedWithGeneration();
+            })
+            .catch((error) => {
+              removePendingAvatarGeneration(finalContactId);
+              console.warn('[Avatar Auto] Generation failed (silent):', error);
+            });
+        }
       }
 
       setRecordingState('idle');

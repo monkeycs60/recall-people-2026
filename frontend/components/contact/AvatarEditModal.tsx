@@ -146,17 +146,29 @@ export function AvatarEditModal({
 
     setIsGenerating(true);
     try {
-      // Decrement trial before generating
-      const trialResult = await useAvatarTrial();
-      if (!trialResult.success && trialResult.error === 'no_trials_left') {
-        setShowPaywall(true);
-        setIsGenerating(false);
-        return;
-      }
+      if (!isPremium) {
+        try {
+          const trialResult = await useAvatarTrial();
+          if (!trialResult.success && trialResult.error === 'no_trials_left') {
+            setShowPaywall(true);
+            setIsGenerating(false);
+            return;
+          }
 
-      // Update local state with remaining trials
-      if (trialResult.remaining >= 0) {
-        setFreeAvatarTrials(trialResult.remaining);
+          if (trialResult.remaining >= 0) {
+            setFreeAvatarTrials(trialResult.remaining);
+          }
+        } catch (trialError) {
+          const isNoTrials = trialError instanceof Error &&
+            ('statusCode' in trialError && (trialError as { statusCode: number }).statusCode === 403);
+          if (isNoTrials) {
+            setFreeAvatarTrials(0);
+            setShowPaywall(true);
+            setIsGenerating(false);
+            return;
+          }
+          throw trialError;
+        }
       }
 
       const response = await generateAvatar({
