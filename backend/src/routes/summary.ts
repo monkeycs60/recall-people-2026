@@ -43,12 +43,13 @@ const PROMPT_TEMPLATES: Record<string, {
 2. Utilise des DATES ABSOLUES en texte complet (pas "récemment" mais "en janvier 2026", "le 25 janvier 2026")
 3. FORMATAGE DES DATES: Écris les dates en texte complet avec le nom du mois (ex: "25 janvier 2026", "3 mars 2026"), JAMAIS en format numérique (pas de "25/01/2026" ou "03/03/2026")
 4. N'invente RIEN - base-toi uniquement sur les notes fournies
-5. Mentionne la situation actuelle (travail, projets en cours)
-6. Mentionne les événements à venir importants s'il y en a
-7. Si les notes sont contradictoires, privilégie l'info la plus récente
-8. Style factuel et concis: "Travaille chez X. Entretien prévu le 25 janvier 2026. A un enfant qui fait Y."
-9. Ne dis PAS "selon les notes" ou "d'après les informations"
-10. Si jamais tu évoques l'utilisateur (le narrateur), utilise 'l'utilisateur' pour le désigner`,
+5. N'INVENTE PAS DE DATES - ne mentionne une date que si elle est EXPLICITEMENT présente dans les notes (ex: "en mars 2026", "le 25 janvier", "dans 6 jours"). Si un événement est mentionné SANS date, décris-le SANS date. La date de création de la note N'EST PAS la date de l'événement.
+6. Mentionne la situation actuelle (travail, projets en cours)
+7. Mentionne les événements à venir importants s'il y en a
+8. Si les notes sont contradictoires, privilégie l'info la plus récente
+9. Style factuel et concis: "Travaille chez X. Entretien prévu le 25 janvier 2026. A un enfant qui fait Y."
+10. Ne dis PAS "selon les notes" ou "d'après les informations"
+11. Si jamais tu évoques l'utilisateur (le narrateur), utilise 'l'utilisateur' pour le désigner`,
 		goodExample: `EXEMPLE BON:
 "Marie est consultante chez Deloitte, en recherche d'un nouveau poste (entretien chez Google le 25 janvier 2026). Elle déménage à Lyon en mars 2026. Mère de Lucas qui fait du foot."`,
 		badExample: `EXEMPLE MAUVAIS:
@@ -64,12 +65,13 @@ const PROMPT_TEMPLATES: Record<string, {
 2. Use ABSOLUTE DATES in full text (not "recently" but "in January 2026", "on January 25, 2026")
 3. DATE FORMAT: Write dates in full text with the month name (e.g., "January 25, 2026", "March 3, 2026"), NEVER in numeric format (no "01/25/2026" or "03/03/2026")
 4. DON'T invent ANYTHING - only use information from the provided notes
-5. Mention the current situation (work, ongoing projects)
-6. Mention important upcoming events if any
-7. If notes are contradictory, prefer the most recent information
-8. Factual and concise style: "Works at X. Interview scheduled for January 25, 2026. Has a child who does Y."
-9. DON'T say "according to the notes" or "based on the information"
-10. If you mention the user (the narrator), use 'the user' to refer to them`,
+5. DO NOT INVENT DATES - only mention a date if it is EXPLICITLY present in the notes (e.g., "in March 2026", "on January 25", "in 6 days"). If an event is mentioned WITHOUT a date, describe it WITHOUT a date. The note creation date is NOT the event date.
+6. Mention the current situation (work, ongoing projects)
+7. Mention important upcoming events if any
+8. If notes are contradictory, prefer the most recent information
+9. Factual and concise style: "Works at X. Interview scheduled for January 25, 2026. Has a child who does Y."
+10. DON'T say "according to the notes" or "based on the information"
+11. If you mention the user (the narrator), use 'the user' to refer to them`,
 		goodExample: `GOOD EXAMPLE:
 "Marie is a consultant at Deloitte, looking for a new position (interview at Google on January 25, 2026). She is moving to London in March 2026. Mother of Lucas who plays football."`,
 		badExample: `BAD EXAMPLE:
@@ -85,12 +87,13 @@ const PROMPT_TEMPLATES: Record<string, {
 2. Usa FECHAS ABSOLUTAS en texto completo (no "recientemente" sino "en enero de 2026", "el 25 de enero de 2026")
 3. FORMATO DE FECHAS: Escribe las fechas en texto completo con el nombre del mes (ej: "25 de enero de 2026", "3 de marzo de 2026"), NUNCA en formato numérico (no "25/01/2026" ni "03/03/2026")
 4. NO inventes NADA - baséate únicamente en las notas proporcionadas
-5. Menciona la situación actual (trabajo, proyectos en curso)
-6. Menciona los eventos importantes próximos si los hay
-7. Si las notas son contradictorias, prefiere la información más reciente
-8. Estilo factual y conciso: "Trabaja en X. Entrevista prevista para el 25 de enero de 2026. Tiene un hijo que hace Y."
-9. NO digas "según las notas" o "de acuerdo con la información"
-10. Si mencionas al usuario (el narrador), usa 'el usuario' para referirte a él`,
+5. NO INVENTES FECHAS - solo menciona una fecha si está EXPLÍCITAMENTE presente en las notas (ej: "en marzo de 2026", "el 25 de enero", "en 6 días"). Si un evento se menciona SIN fecha, descríbelo SIN fecha. La fecha de creación de la nota NO es la fecha del evento.
+6. Menciona la situación actual (trabajo, proyectos en curso)
+7. Menciona los eventos importantes próximos si los hay
+8. Si las notas son contradictorias, prefiere la información más reciente
+9. Estilo factual y conciso: "Trabaja en X. Entrevista prevista para el 25 de enero de 2026. Tiene un hijo que hace Y."
+10. NO digas "según las notas" o "de acuerdo con la información"
+11. Si mencionas al usuario (el narrador), usa 'el usuario' para referirte a él`,
 		goodExample: `EJEMPLO BUENO:
 "Marie es consultora en Deloitte, buscando un nuevo puesto (entrevista en Google el 25 de enero de 2026). Se muda a Madrid en marzo de 2026. Madre de Lucas que juega al fútbol."`,
 		badExample: `EJEMPLO MALO:
@@ -106,12 +109,13 @@ const PROMPT_TEMPLATES: Record<string, {
 2. Usa DATE ASSOLUTE in testo completo (non "recentemente" ma "a gennaio 2026", "il 25 gennaio 2026")
 3. FORMATO DATE: Scrivi le date in testo completo con il nome del mese (es: "25 gennaio 2026", "3 marzo 2026"), MAI in formato numerico (no "25/01/2026" o "03/03/2026")
 4. NON inventare NULLA - basati solo sulle note fornite
-5. Menziona la situazione attuale (lavoro, progetti in corso)
-6. Menziona gli eventi importanti in arrivo se ce ne sono
-7. Se le note sono contraddittorie, preferisci l'informazione più recente
-8. Stile fattuale e conciso: "Lavora da X. Colloquio previsto per il 25 gennaio 2026. Ha un figlio che fa Y."
-9. NON dire "secondo le note" o "in base alle informazioni"
-10. Se menzioni l'utente (il narratore), usa 'l'utente' per riferirti a lui`,
+5. NON INVENTARE DATE - menziona una data solo se è ESPLICITAMENTE presente nelle note (es: "a marzo 2026", "il 25 gennaio", "tra 6 giorni"). Se un evento è menzionato SENZA data, descrivilo SENZA data. La data di creazione della nota NON è la data dell'evento.
+6. Menziona la situazione attuale (lavoro, progetti in corso)
+7. Menziona gli eventi importanti in arrivo se ce ne sono
+8. Se le note sono contraddittorie, preferisci l'informazione più recente
+9. Stile fattuale e conciso: "Lavora da X. Colloquio previsto per il 25 gennaio 2026. Ha un figlio che fa Y."
+10. NON dire "secondo le note" o "in base alle informazioni"
+11. Se menzioni l'utente (il narratore), usa 'l'utente' per riferirti a lui`,
 		goodExample: `ESEMPIO BUONO:
 "Marie è consulente presso Deloitte, in cerca di una nuova posizione (colloquio da Google il 25 gennaio 2026). Si trasferisce a Milano a marzo 2026. Madre di Lucas che gioca a calcio."`,
 		badExample: `ESEMPIO CATTIVO:
@@ -127,12 +131,13 @@ const PROMPT_TEMPLATES: Record<string, {
 2. Verwende ABSOLUTE DATEN im vollen Textformat (nicht "kürzlich" sondern "im Januar 2026", "am 25. Januar 2026")
 3. DATUMSFORMAT: Schreibe Daten im vollen Textformat mit dem Monatsnamen (z.B.: "25. Januar 2026", "3. März 2026"), NIEMALS im numerischen Format (kein "25.01.2026" oder "03.03.2026")
 4. Erfinde NICHTS - basiere dich nur auf die bereitgestellten Notizen
-5. Erwähne die aktuelle Situation (Arbeit, laufende Projekte)
-6. Erwähne wichtige bevorstehende Ereignisse, falls vorhanden
-7. Wenn die Notizen widersprüchlich sind, bevorzuge die neueste Information
-8. Sachlicher und prägnanter Stil: "Arbeitet bei X. Vorstellungsgespräch geplant für den 25. Januar 2026. Hat ein Kind, das Y macht."
-9. Sage NICHT "laut den Notizen" oder "basierend auf den Informationen"
-10. Wenn du den Benutzer (den Erzähler) erwähnst, verwende 'der Benutzer' um auf ihn zu verweisen`,
+5. ERFINDE KEINE DATEN - erwähne ein Datum nur, wenn es EXPLIZIT in den Notizen steht (z.B.: "im März 2026", "am 25. Januar", "in 6 Tagen"). Wenn ein Ereignis OHNE Datum erwähnt wird, beschreibe es OHNE Datum. Das Erstellungsdatum der Notiz ist NICHT das Datum des Ereignisses.
+6. Erwähne die aktuelle Situation (Arbeit, laufende Projekte)
+7. Erwähne wichtige bevorstehende Ereignisse, falls vorhanden
+8. Wenn die Notizen widersprüchlich sind, bevorzuge die neueste Information
+9. Sachlicher und prägnanter Stil: "Arbeitet bei X. Vorstellungsgespräch geplant für den 25. Januar 2026. Hat ein Kind, das Y macht."
+10. Sage NICHT "laut den Notizen" oder "basierend auf den Informationen"
+11. Wenn du den Benutzer (den Erzähler) erwähnst, verwende 'der Benutzer' um auf ihn zu verweisen`,
 		goodExample: `GUTES BEISPIEL:
 "Marie ist Beraterin bei Deloitte, auf der Suche nach einer neuen Stelle (Vorstellungsgespräch bei Google am 25. Januar 2026). Sie zieht im März 2026 nach Berlin. Mutter von Lucas, der Fußball spielt."`,
 		badExample: `SCHLECHTES BEISPIEL:

@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Pressable, TextInput, ActivityIndicator, StyleSheet, Animated } from 'react-native';
+import { View, Text, ScrollView, Pressable, TextInput, ActivityIndicator, StyleSheet, Animated, Dimensions } from 'react-native';
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -226,15 +226,15 @@ export default function SelectContactScreen() {
       keyboardShouldPersistTaps="handled"
     >
       <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
-        <Text style={styles.title}>{t('selectContact.question')}</Text>
-
         {isExtracting ? (
-          <View style={styles.loadingSection}>
+          <View style={styles.loadingFullScreen}>
             <ActivityIndicator size="large" color={Colors.primary} />
             <Text style={styles.loadingText}>{t('selectContact.analyzing')}</Text>
           </View>
         ) : (
           <>
+            <Text style={styles.title}>{t('selectContact.question')}</Text>
+
             <View style={styles.createRow}>
               <View style={styles.createInputWrapper}>
                 <TextInput
@@ -313,6 +313,7 @@ export default function SelectContactScreen() {
                         gender={contact.gender}
                         avatarUrl={contact.avatarUrl}
                         size="small"
+                        cacheKey={contact.updatedAt}
                         recyclingKey={contact.id}
                       />
                       <Text style={styles.contactName}>{getContactDisplayName(contact)}</Text>
@@ -346,6 +347,7 @@ export default function SelectContactScreen() {
                         gender={contact.gender}
                         avatarUrl={contact.avatarUrl}
                         size="small"
+                        cacheKey={contact.updatedAt}
                         recyclingKey={contact.id}
                       />
                       <Text style={styles.contactName}>{getContactDisplayName(contact)}</Text>
@@ -384,6 +386,11 @@ const styles = StyleSheet.create({
   loadingSection: {
     alignItems: 'center',
     paddingVertical: Spacing['2xl'],
+  },
+  loadingFullScreen: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: Dimensions.get('window').height * 0.6,
   },
   loadingText: {
     color: Colors.textSecondary,

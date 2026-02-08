@@ -1,4 +1,4 @@
-import { View, StyleSheet, Pressable, Animated, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Animated, ActivityIndicator } from 'react-native';
 import { Image } from 'expo-image';
 import { Camera } from 'lucide-react-native';
 import { Colors } from '@/constants/theme';
@@ -29,6 +29,18 @@ const PLACEHOLDER_VERSION = 'v100';
 
 const getPlaceholderUrl = (gender: Gender): string => {
   return `${API_URL}/api/avatar/placeholders/avatar-${gender}.png?v=${PLACEHOLDER_VERSION}`;
+};
+
+const getInitials = (firstName: string, lastName?: string): string => {
+  const first = firstName?.charAt(0)?.toUpperCase() || '';
+  const last = lastName?.charAt(0)?.toUpperCase() || '';
+  return first + last || '?';
+};
+
+const INITIALS_FONT_SIZE: Record<string, number> = {
+  small: 18,
+  medium: 22,
+  large: 44,
 };
 
 export function ContactAvatar({
@@ -121,22 +133,38 @@ export function ContactAvatar({
     return skeletonContent;
   }
 
+  const initials = getInitials(firstName, lastName);
+
   const imageElement = (
-    <Image
-      source={{ uri: imageUri }}
-      cachePolicy="memory-disk"
-      recyclingKey={recyclingKey}
-      style={{
-        width: pixelSize,
-        height: pixelSize,
-        borderRadius: pixelSize / 2,
-        backgroundColor: Colors.primaryLight,
-      }}
-      contentFit="cover"
-      transition={recyclingKey ? 0 : 200}
-      placeholder={recyclingKey ? undefined : { blurhash: 'LKO2?U%2Tw=w]~RBVZRi};RPxuwH' }}
-      placeholderContentFit="cover"
-    />
+    <View style={{
+      width: pixelSize,
+      height: pixelSize,
+      borderRadius: pixelSize / 2,
+      backgroundColor: Colors.primaryLight,
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}>
+      <Text style={{
+        fontSize: INITIALS_FONT_SIZE[size],
+        fontWeight: '600',
+        color: Colors.primary,
+      }}>
+        {initials}
+      </Text>
+      <Image
+        source={{ uri: imageUri }}
+        cachePolicy="memory-disk"
+        recyclingKey={recyclingKey}
+        style={{
+          ...StyleSheet.absoluteFillObject,
+          borderRadius: pixelSize / 2,
+        }}
+        contentFit="cover"
+        transition={recyclingKey ? 0 : 200}
+        placeholder={recyclingKey ? undefined : { blurhash: 'LKO2?U%2Tw=w]~RBVZRi};RPxuwH' }}
+        placeholderContentFit="cover"
+      />
+    </View>
   );
 
   // Simple version for list items (no badge)

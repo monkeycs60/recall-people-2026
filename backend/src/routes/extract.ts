@@ -178,14 +178,15 @@ const PROMPT_TEMPLATES: Record<string, {
    - "cet hiver" → 2026-12-01
    - "le printemps" → 2026-03-01
 
-   RÈGLE CRITIQUE - TOUJOURS RETOURNER eventDate:
-   - Si une date quelconque est mentionnée (relative ou absolue), tu DOIS retourner eventDate en YYYY-MM-DD
+   RÈGLE CRITIQUE - eventDate:
+   - Si une date est EXPLICITEMENT mentionnée (relative ou absolue), tu DOIS retourner eventDate en YYYY-MM-DD
    - Exemples où eventDate est OBLIGATOIRE:
      * "entretien la semaine prochaine" → eventDate = date calculée
      * "déménage dans 2 mois" → eventDate = date calculée
      * "mariage en juin" → eventDate = "2026-06-01"
      * "examen le 15" → eventDate = "2026-XX-15" (mois actuel ou suivant)
-   - eventDate = null SEULEMENT si aucune date mentionnée OU date trop vague ("un jour", "bientôt", "peut-être")`,
+   - eventDate = null si aucune date mentionnée OU date trop vague ("un jour", "bientôt", "peut-être")
+   - IMPORTANT: N'utilise PAS la date du jour comme date par défaut. Si l'événement n'a pas de référence temporelle explicite, eventDate = null`,
       rule4Title: '4. RÉSOLUTION D\'ACTUALITÉS EXISTANTES',
       rule4Content: `Si une actualité existante est mentionnée avec une issue, marque-la résolue.
 
@@ -201,6 +202,10 @@ const PROMPT_TEMPLATES: Record<string, {
       rule5Title: '5. INFOS DE CONTACT',
       rule5Content: `- phone: numéro si mentionné
    - email: adresse si mentionnée
+     IMPORTANT: Les moteurs de transcription vocale ne transcrivent JAMAIS le symbole "@".
+     Il est remplacé par un point ou un espace (ex: "clement.cerize.gmail.com" au lieu de "clement.cerize@gmail.com").
+     Les mots "arobase", "arrobase", "at" dans la transcription signifient "@".
+     Tu DOIS reconstituer l'adresse email correcte avec "@" devant le nom de domaine.
    - birthday: { day, month, year } si anniversaire mentionné (year peut être null)`,
     },
     absoluteRules: `RÈGLES ABSOLUES:
@@ -357,14 +362,15 @@ Exemple 4 - "On a pris un café, elle m'a raconté ses vacances":
    - "this winter" → 2026-12-01
    - "spring" → 2026-03-01
 
-   CRITICAL RULE - ALWAYS RETURN eventDate:
-   - If any date is mentioned (relative or absolute), you MUST return eventDate in YYYY-MM-DD
+   CRITICAL RULE - eventDate:
+   - If a date is EXPLICITLY mentioned (relative or absolute), you MUST return eventDate in YYYY-MM-DD
    - Examples where eventDate is MANDATORY:
      * "interview next week" → eventDate = calculated date
      * "moving in 2 months" → eventDate = calculated date
      * "wedding in June" → eventDate = "2026-06-01"
      * "exam on the 15th" → eventDate = "2026-XX-15" (current or next month)
-   - eventDate = null ONLY if no date mentioned OR date too vague ("someday", "soon", "maybe")`,
+   - eventDate = null if no date mentioned OR date too vague ("someday", "soon", "maybe")
+   - IMPORTANT: Do NOT use today's date as a default. If the event has no explicit temporal reference, eventDate = null`,
       rule4Title: '4. RESOLUTION OF EXISTING UPDATES',
       rule4Content: `If an existing update is mentioned with an outcome, mark it as resolved.
 
@@ -380,6 +386,10 @@ Exemple 4 - "On a pris un café, elle m'a raconté ses vacances":
       rule5Title: '5. CONTACT INFO',
       rule5Content: `- phone: number if mentioned
    - email: address if mentioned
+     IMPORTANT: Speech-to-text engines NEVER transcribe the "@" symbol.
+     It gets replaced by a dot or space (e.g. "john.doe.gmail.com" instead of "john.doe@gmail.com").
+     Words like "at", "arobase", "arrobase" in the transcription mean "@".
+     You MUST reconstruct the correct email address with "@" before the domain name.
    - birthday: { day, month, year } if birthday mentioned (year can be null)`,
     },
     absoluteRules: `ABSOLUTE RULES:
@@ -536,14 +546,15 @@ Example 4 - "We had coffee, she told me about her vacation":
    - "este invierno" → 2026-12-01
    - "la primavera" → 2026-03-01
 
-   REGLA CRÍTICA - SIEMPRE DEVOLVER eventDate:
-   - Si se menciona cualquier fecha (relativa o absoluta), DEBES devolver eventDate en YYYY-MM-DD
+   REGLA CRÍTICA - eventDate:
+   - Si se menciona EXPLÍCITAMENTE una fecha (relativa o absoluta), DEBES devolver eventDate en YYYY-MM-DD
    - Ejemplos donde eventDate es OBLIGATORIO:
      * "entrevista la semana que viene" → eventDate = fecha calculada
      * "se muda en 2 meses" → eventDate = fecha calculada
      * "boda en junio" → eventDate = "2026-06-01"
      * "examen el 15" → eventDate = "2026-XX-15" (mes actual o siguiente)
-   - eventDate = null SOLO si no se menciona fecha O fecha demasiado vaga ("algún día", "pronto", "quizás")`,
+   - eventDate = null si no se menciona fecha O fecha demasiado vaga ("algún día", "pronto", "quizás")
+   - IMPORTANTE: NO uses la fecha de hoy como predeterminada. Si el evento no tiene referencia temporal explícita, eventDate = null`,
       rule4Title: '4. RESOLUCIÓN DE NOVEDADES EXISTENTES',
       rule4Content: `Si se menciona una novedad existente con un resultado, márcala como resuelta.
 
@@ -559,6 +570,10 @@ Example 4 - "We had coffee, she told me about her vacation":
       rule5Title: '5. INFORMACIÓN DE CONTACTO',
       rule5Content: `- phone: número si se menciona
    - email: dirección si se menciona
+     IMPORTANTE: Los motores de transcripción vocal NUNCA transcriben el símbolo "@".
+     Se reemplaza por un punto o espacio (ej: "juan.perez.gmail.com" en vez de "juan.perez@gmail.com").
+     Las palabras "arroba", "arobase", "at" en la transcripción significan "@".
+     DEBES reconstruir la dirección email correcta con "@" antes del nombre de dominio.
    - birthday: { day, month, year } si se menciona cumpleaños (year puede ser null)`,
     },
     absoluteRules: `REGLAS ABSOLUTAS:
@@ -715,14 +730,15 @@ Ejemplo 4 - "Tomamos un café, me contó sus vacaciones":
    - "quest'inverno" → 2026-12-01
    - "la primavera" → 2026-03-01
 
-   REGOLA CRITICA - RESTITUIRE SEMPRE eventDate:
-   - Se viene menzionata qualsiasi data (relativa o assoluta), DEVI restituire eventDate in YYYY-MM-DD
+   REGOLA CRITICA - eventDate:
+   - Se una data è ESPLICITAMENTE menzionata (relativa o assoluta), DEVI restituire eventDate in YYYY-MM-DD
    - Esempi dove eventDate è OBBLIGATORIO:
      * "colloquio la settimana prossima" → eventDate = data calcolata
      * "si trasferisce tra 2 mesi" → eventDate = data calcolata
      * "matrimonio a giugno" → eventDate = "2026-06-01"
      * "esame il 15" → eventDate = "2026-XX-15" (mese corrente o successivo)
-   - eventDate = null SOLO se nessuna data menzionata O data troppo vaga ("un giorno", "presto", "forse")`,
+   - eventDate = null se nessuna data menzionata O data troppo vaga ("un giorno", "presto", "forse")
+   - IMPORTANTE: NON usare la data di oggi come predefinita. Se l'evento non ha un riferimento temporale esplicito, eventDate = null`,
       rule4Title: '4. RISOLUZIONE DI NOVITÀ ESISTENTI',
       rule4Content: `Se una novità esistente viene menzionata con un esito, segnala come risolta.
 
@@ -738,6 +754,10 @@ Ejemplo 4 - "Tomamos un café, me contó sus vacaciones":
       rule5Title: '5. INFO DI CONTATTO',
       rule5Content: `- phone: numero se menzionato
    - email: indirizzo se menzionato
+     IMPORTANTE: I motori di trascrizione vocale NON trascrivono MAI il simbolo "@".
+     Viene sostituito da un punto o spazio (es: "mario.rossi.gmail.com" invece di "mario.rossi@gmail.com").
+     Le parole "chiocciola", "arobase", "at" nella trascrizione significano "@".
+     DEVI ricostruire l'indirizzo email corretto con "@" prima del nome di dominio.
    - birthday: { day, month, year } se compleanno menzionato (year può essere null)`,
     },
     absoluteRules: `REGOLE ASSOLUTE:
@@ -894,14 +914,15 @@ Esempio 4 - "Abbiamo preso un caffè, mi ha raccontato le sue vacanze":
    - "diesen Winter" → 2026-12-01
    - "im Frühling" → 2026-03-01
 
-   KRITISCHE REGEL - IMMER eventDate ZURÜCKGEBEN:
-   - Wenn irgendein Datum erwähnt wird (relativ oder absolut), MUSST du eventDate im Format YYYY-MM-DD zurückgeben
+   KRITISCHE REGEL - eventDate:
+   - Wenn ein Datum EXPLIZIT erwähnt wird (relativ oder absolut), MUSST du eventDate im Format YYYY-MM-DD zurückgeben
    - Beispiele wo eventDate PFLICHT ist:
      * "Vorstellungsgespräch nächste Woche" → eventDate = berechnetes Datum
      * "zieht in 2 Monaten um" → eventDate = berechnetes Datum
      * "Hochzeit im Juni" → eventDate = "2026-06-01"
      * "Prüfung am 15." → eventDate = "2026-XX-15" (aktueller oder nächster Monat)
-   - eventDate = null NUR wenn kein Datum erwähnt ODER Datum zu vage ("irgendwann", "bald", "vielleicht")`,
+   - eventDate = null wenn kein Datum erwähnt ODER Datum zu vage ("irgendwann", "bald", "vielleicht")
+   - WICHTIG: Verwende NICHT das heutige Datum als Standard. Wenn das Ereignis keine explizite Zeitangabe hat, eventDate = null`,
       rule4Title: '4. LÖSUNG BESTEHENDER NEUIGKEITEN',
       rule4Content: `Wenn eine bestehende Neuigkeit mit einem Ergebnis erwähnt wird, markiere sie als gelöst.
 
@@ -917,6 +938,10 @@ Esempio 4 - "Abbiamo preso un caffè, mi ha raccontato le sue vacanze":
       rule5Title: '5. KONTAKTINFORMATIONEN',
       rule5Content: `- phone: Nummer falls erwähnt
    - email: Adresse falls erwähnt
+     WICHTIG: Spracherkennungs-Engines transkribieren das "@"-Symbol NIE.
+     Es wird durch einen Punkt oder Leerzeichen ersetzt (z.B. "max.mueller.gmail.com" statt "max.mueller@gmail.com").
+     Die Wörter "at", "Klammeraffe", "arobase" in der Transkription bedeuten "@".
+     Du MUSST die korrekte E-Mail-Adresse mit "@" vor dem Domainnamen rekonstruieren.
    - birthday: { day, month, year } falls Geburtstag erwähnt (year kann null sein)`,
     },
     absoluteRules: `ABSOLUTE REGELN:
@@ -1162,12 +1187,49 @@ extractRoutes.post('/', async (c) => {
   }
 });
 
+/**
+ * Normalizes email-like patterns in transcription text.
+ * STT engines never transcribe the "@" symbol — it becomes a dot, space, or spoken word.
+ * This function detects common email patterns and inserts "@" before known domains.
+ */
+const normalizeTranscriptionEmails = (text: string): string => {
+  // Common email provider domains
+  const emailDomains = [
+    'gmail', 'yahoo', 'hotmail', 'outlook', 'protonmail', 'icloud',
+    'live', 'msn', 'aol', 'mail', 'zoho', 'yandex', 'gmx',
+    // French ISPs
+    'orange', 'free', 'sfr', 'laposte', 'wanadoo', 'bbox',
+    // Other common
+    'pm', 'hey', 'fastmail', 'tutanota',
+  ].join('|');
+
+  // Common TLDs
+  const tlds = 'com|fr|net|org|io|co|de|es|it|uk|eu|ch|be|ca|us|info|dev';
+
+  // 1. Replace spoken "@" words: "arobase", "arrobase", "arroba", "chiocciola", "Klammeraffe"
+  //    e.g. "clement.cerize arobase gmail.com" → "clement.cerize@gmail.com"
+  text = text.replace(
+    new RegExp(`(\\S+)\\s+(?:arobase|arrobase|arroba|chiocciola|klammeraffe)\\s+(\\S+)`, 'gi'),
+    '$1@$2'
+  );
+
+  // 2. Replace dot before known email domain.tld with @
+  //    e.g. "clement.cerize.gmail.com" → "clement.cerize@gmail.com"
+  text = text.replace(
+    new RegExp(`(\\S+)\\.((?:${emailDomains})\\.(?:${tlds}))\\b`, 'gi'),
+    '$1@$2'
+  );
+
+  return text;
+};
+
 const buildExtractionPrompt = (
   transcription: string,
   currentContact?: ExtractionRequest['currentContact'],
   language: string = 'fr'
 ): string => {
-  const { wrapped: wrappedTranscription } = wrapUserInput(transcription, 'TRANSCRIPTION');
+  const normalizedTranscription = normalizeTranscriptionEmails(transcription);
+  const { wrapped: wrappedTranscription } = wrapUserInput(normalizedTranscription, 'TRANSCRIPTION');
   const template = PROMPT_TEMPLATES[language] || PROMPT_TEMPLATES.fr;
 
   let currentContactContext = '';
