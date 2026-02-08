@@ -520,11 +520,12 @@
     "noDate": "Pas de date",
     "today": "Aujourd'hui",
     "tomorrow": "Demain",
-    "inDays": "Dans {{count}} jour",
-    "inDays_plural": "Dans {{count}} jours",
-    "inWeeks": "Dans {{count}} semaine",
-    "inWeeks_plural": "Dans {{count}} semaines",
-    "inMonths": "Dans {{count}} mois",
+    "inDays_one": "Dans {{count}} jour",
+    "inDays_other": "Dans {{count}} jours",
+    "inWeeks_one": "Dans {{count}} semaine",
+    "inWeeks_other": "Dans {{count}} semaines",
+    "inMonths_one": "Dans {{count}} mois",
+    "inMonths_other": "Dans {{count}} mois",
     "selectDate": "Choisir la date"
   },
   "upcoming": {

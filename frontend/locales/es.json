@@ -484,11 +484,12 @@
     "noDate": "Sin fecha",
     "today": "Hoy",
     "tomorrow": "Mañana",
-    "inDays": "En {{count}} día",
-    "inDays_plural": "En {{count}} días",
-    "inWeeks": "En {{count}} semana",
-    "inWeeks_plural": "En {{count}} semanas",
-    "inMonths": "En {{count}} meses",
+    "inDays_one": "En {{count}} día",
+    "inDays_other": "En {{count}} días",
+    "inWeeks_one": "En {{count}} semana",
+    "inWeeks_other": "En {{count}} semanas",
+    "inMonths_one": "En {{count}} mes",
+    "inMonths_other": "En {{count}} meses",
     "selectDate": "Seleccionar fecha"
   },
   "upcoming": {
