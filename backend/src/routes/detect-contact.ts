@@ -80,6 +80,8 @@ const PROMPT_TEMPLATES: Record<string, {
    - Identifie LA personne dont on parle principalement dans la note
    - Ignore les mentions secondaires (ex: "Marie m'a parlé de son frère Paul" → protagoniste = Marie)
    - Le prénom doit être un VRAI prénom (pas "contact", "ami", "collègue", "quelqu'un")
+   - PRIORITÉ ABSOLUE: si un prénom (et éventuellement un nom de famille) est EXPLICITEMENT mentionné comme protagoniste, c'est le signal le PLUS FORT. Ne JAMAIS le remplacer par un autre contact trouvé via les sujets ou le résumé.
+     Ex: "J'ai rencontré James Wilson, il fait du marathon" + contact Sarah a sujet "ultra marathon training" → protagoniste = James Wilson (PAS Sarah)
    - ATTENTION aux pronoms "elle/lui/il": cherche QUI est cette personne en utilisant les sujets actuels des contacts
      Ex: "Elle m'a raconté son date avec François" + contact Inès a sujet "Date François" → protagoniste = Inès
 
@@ -87,6 +89,10 @@ const PROMPT_TEMPLATES: Record<string, {
    - Les sujets actuels contiennent des indices précieux sur les contacts
    - Si un nom mentionné dans la transcription apparaît dans un sujet d'un contact, ce contact est probablement le protagoniste
    - Ex: transcription parle de "François" + Inès a sujet "Date François" → le protagoniste est Inès (pas François)
+   - IMPORTANT: les sujets ne doivent JAMAIS remplacer un nom explicitement mentionné. Les sujets sont utiles UNIQUEMENT pour:
+     a) Désambiguïser quand plusieurs contacts partagent le même prénom
+     b) Identifier le protagoniste quand seuls des pronoms sont utilisés (pas de nom explicite)
+     c) Confirmer l'identité d'un contact déjà identifié par son prénom
 
 3. SI UN CONTACT EXISTANT CORRESPOND:
    - Le prénom du protagoniste DOIT correspondre EXACTEMENT à un prénom dans la liste (firstName)
@@ -167,6 +173,8 @@ Contact Inès avec sujet "Date François"
    - Identify THE person who is mainly talked about in the note
    - Ignore secondary mentions (e.g., "Marie told me about her brother Paul" → protagonist = Marie)
    - The first name must be a REAL first name (not "contact", "friend", "colleague", "someone")
+   - ABSOLUTE PRIORITY: if a first name (and optionally a last name) is EXPLICITLY mentioned as the protagonist, this is the STRONGEST signal. NEVER replace it with another contact found via topics or summary.
+     E.g., "I met James Wilson, he runs marathons" + contact Sarah has topic "ultra marathon training" → protagonist = James Wilson (NOT Sarah)
    - PAY ATTENTION to pronouns "she/he/him/her": find WHO this person is by using the contacts' current topics
      E.g., "She told me about her date with François" + contact Inès has topic "Date François" → protagonist = Inès
 
@@ -174,6 +182,10 @@ Contact Inès avec sujet "Date François"
    - Current topics contain valuable clues about contacts
    - If a name mentioned in the transcription appears in a contact's topic, that contact is probably the protagonist
    - E.g., transcription mentions "François" + Inès has topic "Date François" → the protagonist is Inès (not François)
+   - IMPORTANT: topics must NEVER override an explicitly mentioned name. Topics are useful ONLY for:
+     a) Disambiguating when multiple contacts share the same first name
+     b) Identifying the protagonist when only pronouns are used (no explicit name)
+     c) Confirming the identity of a contact already identified by their first name
 
 3. IF AN EXISTING CONTACT MATCHES:
    - The protagonist's first name MUST match EXACTLY a first name in the list (firstName)
@@ -254,6 +266,8 @@ Contact Inès with topic "Date François"
    - Identifica A LA persona de la que se habla principalmente en la nota
    - Ignora las menciones secundarias (ej: "Marie me habló de su hermano Paul" → protagonista = Marie)
    - El nombre debe ser un nombre REAL (no "contacto", "amigo", "colega", "alguien")
+   - PRIORIDAD ABSOLUTA: si un nombre (y opcionalmente un apellido) se menciona EXPLÍCITAMENTE como protagonista, es la señal MÁS FUERTE. NUNCA lo reemplaces con otro contacto encontrado a través de los temas o el resumen.
+     Ej: "Conocí a James Wilson, corre maratones" + contacto Sarah tiene tema "ultra marathon training" → protagonista = James Wilson (NO Sarah)
    - ATENCIÓN a los pronombres "ella/él": busca QUIÉN es esta persona usando los temas actuales de los contactos
      Ej: "Ella me contó sobre su cita con François" + contacto Inès tiene tema "Cita François" → protagonista = Inès
 
@@ -261,6 +275,10 @@ Contact Inès with topic "Date François"
    - Los temas actuales contienen pistas valiosas sobre los contactos
    - Si un nombre mencionado en la transcripción aparece en un tema de un contacto, ese contacto probablemente es el protagonista
    - Ej: transcripción habla de "François" + Inès tiene tema "Cita François" → el protagonista es Inès (no François)
+   - IMPORTANTE: los temas NUNCA deben reemplazar un nombre explícitamente mencionado. Los temas son útiles ÚNICAMENTE para:
+     a) Desambiguar cuando varios contactos comparten el mismo nombre
+     b) Identificar al protagonista cuando solo se usan pronombres (sin nombre explícito)
+     c) Confirmar la identidad de un contacto ya identificado por su nombre
 
 3. SI UN CONTACTO EXISTENTE CORRESPONDE:
    - El nombre del protagonista DEBE corresponder EXACTAMENTE a un nombre en la lista (firstName)
@@ -341,6 +359,8 @@ Contacto Inès con tema "Cita François"
    - Identifica LA persona di cui si parla principalmente nella nota
    - Ignora le menzioni secondarie (es: "Marie mi ha parlato di suo fratello Paul" → protagonista = Marie)
    - Il nome deve essere un nome VERO (non "contatto", "amico", "collega", "qualcuno")
+   - PRIORITÀ ASSOLUTA: se un nome (e eventualmente un cognome) è ESPLICITAMENTE menzionato come protagonista, questo è il segnale PIÙ FORTE. NON sostituirlo MAI con un altro contatto trovato tramite argomenti o riassunto.
+     Es: "Ho conosciuto James Wilson, corre maratone" + contatto Sarah ha argomento "ultra marathon training" → protagonista = James Wilson (NON Sarah)
    - ATTENZIONE ai pronomi "lei/lui": cerca CHI è questa persona usando gli argomenti attuali dei contatti
      Es: "Lei mi ha raccontato del suo appuntamento con François" + contatto Inès ha argomento "Appuntamento François" → protagonista = Inès
 
@@ -348,6 +368,10 @@ Contacto Inès con tema "Cita François"
    - Gli argomenti attuali contengono indizi preziosi sui contatti
    - Se un nome menzionato nella trascrizione appare in un argomento di un contatto, quel contatto è probabilmente il protagonista
    - Es: trascrizione parla di "François" + Inès ha argomento "Appuntamento François" → il protagonista è Inès (non François)
+   - IMPORTANTE: gli argomenti NON devono MAI sostituire un nome esplicitamente menzionato. Gli argomenti sono utili SOLO per:
+     a) Disambiguare quando più contatti condividono lo stesso nome
+     b) Identificare il protagonista quando si usano solo pronomi (nessun nome esplicito)
+     c) Confermare l'identità di un contatto già identificato dal nome
 
 3. SE UN CONTATTO ESISTENTE CORRISPONDE:
    - Il nome del protagonista DEVE corrispondere ESATTAMENTE a un nome nella lista (firstName)
@@ -428,6 +452,8 @@ Contatto Inès con argomento "Appuntamento François"
    - Identifiziere DIE Person, über die hauptsächlich in der Notiz gesprochen wird
    - Ignoriere sekundäre Erwähnungen (z.B.: "Marie hat mir von ihrem Bruder Paul erzählt" → Protagonist = Marie)
    - Der Vorname muss ein ECHTER Vorname sein (nicht "Kontakt", "Freund", "Kollege", "jemand")
+   - ABSOLUTE PRIORITÄT: Wenn ein Vorname (und optional ein Nachname) EXPLIZIT als Protagonist genannt wird, ist dies das STÄRKSTE Signal. Ersetze ihn NIEMALS durch einen anderen Kontakt, der über Themen oder Zusammenfassung gefunden wurde.
+     Z.B.: "Ich habe James Wilson getroffen, er läuft Marathon" + Kontakt Sarah hat Thema "ultra marathon training" → Protagonist = James Wilson (NICHT Sarah)
    - ACHTE auf Pronomen "sie/er/ihm/ihr": finde heraus, WER diese Person ist, indem du die aktuellen Themen der Kontakte verwendest
      Z.B.: "Sie hat mir von ihrem Date mit François erzählt" + Kontakt Inès hat Thema "Date François" → Protagonist = Inès
 
@@ -435,6 +461,10 @@ Contatto Inès con argomento "Appuntamento François"
    - Aktuelle Themen enthalten wertvolle Hinweise zu den Kontakten
    - Wenn ein in der Transkription erwähnter Name in einem Thema eines Kontakts erscheint, ist dieser Kontakt wahrscheinlich der Protagonist
    - Z.B.: Transkription spricht von "François" + Inès hat Thema "Date François" → der Protagonist ist Inès (nicht François)
+   - WICHTIG: Themen dürfen NIEMALS einen explizit genannten Namen ersetzen. Themen sind NUR nützlich für:
+     a) Disambiguierung, wenn mehrere Kontakte denselben Vornamen teilen
+     b) Identifizierung des Protagonisten, wenn nur Pronomen verwendet werden (kein expliziter Name)
+     c) Bestätigung der Identität eines bereits durch seinen Vornamen identifizierten Kontakts
 
 3. WENN EIN BESTEHENDER KONTAKT ÜBEREINSTIMMT:
    - Der Vorname des Protagonisten MUSS GENAU mit einem Vornamen in der Liste übereinstimmen (firstName)
