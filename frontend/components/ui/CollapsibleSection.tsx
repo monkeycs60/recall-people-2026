@@ -66,12 +66,12 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: Spacing.md,
     borderRadius: BorderRadius.md,
-    overflow: 'hidden',
   },
   containerExpanded: {
     borderWidth: 1,
     borderColor: Colors.borderLight,
     backgroundColor: Colors.surface,
+    overflow: 'hidden',
   },
   header: {
     flexDirection: 'row',
