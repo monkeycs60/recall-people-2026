@@ -21,6 +21,14 @@ type Bindings = {
 
 const TOKEN_EXPIRY_MINUTES = 30;
 
+async function hashToken(token: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(token);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 const forgotPasswordSchema = z.object({
   email: z.string().email('Invalid email format'),
 });
@@ -77,17 +85,19 @@ passwordResetRoutes.post('/forgot-password', rateLimiters.login, async (c) => {
     });
 
     const resetToken = generateResetToken();
+    const hashedToken = await hashToken(resetToken);
     const expiresAt = new Date(Date.now() + TOKEN_EXPIRY_MINUTES * 60 * 1000);
 
     await prisma.verification.create({
       data: {
         identifier: email,
-        value: resetToken,
+        value: hashedToken,
         expiresAt,
       },
     });
 
-    const resetUrl = `https://clementserizay.com/reset-password?token=${resetToken}`;
+    const appUrl = c.env.APP_URL || 'https://clementserizay.com';
+    const resetUrl = `${appUrl}/reset-password?token=${resetToken}`;
 
     const sesClient = createSESClient({
       accessKeyId: c.env.AWS_ACCESS_KEY_ID,
@@ -164,8 +174,9 @@ passwordResetRoutes.post('/reset-password', rateLimiters.login, async (c) => {
     const { token, newPassword } = validation.data;
     const prisma = getPrisma(c.env.DATABASE_URL);
 
+    const hashedToken = await hashToken(token);
     const verification = await prisma.verification.findFirst({
-      where: { value: token },
+      where: { value: hashedToken },
     });
 
     if (!verification) {

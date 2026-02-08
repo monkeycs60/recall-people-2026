@@ -26,8 +26,23 @@ export const transcribeRoutes = new Hono<{ Bindings: Bindings; Variables: Variab
 
 transcribeRoutes.use('/*', authMiddleware);
 
+const MAX_UPLOAD_SIZE = 25 * 1024 * 1024; // 25MB
+
 transcribeRoutes.post('/', async (c) => {
   try {
+    // Early check: reject obviously oversized requests via Content-Length header
+    const contentLength = c.req.header('Content-Length');
+    if (contentLength && parseInt(contentLength, 10) > MAX_UPLOAD_SIZE) {
+      await auditLog(c, {
+        userId: c.get('user')?.id,
+        action: 'transcribe',
+        resource: 'transcribe',
+        success: false,
+        details: { error: 'File too large', contentLength: parseInt(contentLength, 10), maxSize: MAX_UPLOAD_SIZE },
+      });
+      return c.json({ error: `File too large. Maximum upload size is ${MAX_UPLOAD_SIZE / (1024 * 1024)}MB.` }, 413);
+    }
+
     const formData = await c.req.formData();
     const audioFile = formData.get('audio');
 
@@ -40,6 +55,19 @@ transcribeRoutes.post('/', async (c) => {
         details: { error: 'No audio file provided' },
       });
       return c.json({ error: 'No audio file provided' }, 400);
+    }
+
+    // Check actual file size after parsing
+    const fileSize = (audioFile as Blob).size;
+    if (fileSize > MAX_UPLOAD_SIZE) {
+      await auditLog(c, {
+        userId: c.get('user')?.id,
+        action: 'transcribe',
+        resource: 'transcribe',
+        success: false,
+        details: { error: 'File too large', fileSize, maxSize: MAX_UPLOAD_SIZE },
+      });
+      return c.json({ error: `File too large. Maximum upload size is ${MAX_UPLOAD_SIZE / (1024 * 1024)}MB.` }, 413);
     }
 
     // audioFile is Blob (File extends Blob in Workers)

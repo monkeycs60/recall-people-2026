@@ -5,6 +5,7 @@ type RateLimitOptions = {
 	window: number;      // Time window in seconds
 	keyPrefix: string;   // Prefix for the KV key
 	keyType: 'ip' | 'user'; // What to base rate limiting on
+	failClosed?: boolean; // If true, block requests when KV is unavailable (default: false)
 };
 
 type Bindings = {
@@ -32,7 +33,7 @@ const getClientIP = (c: Context): string => {
  */
 export const rateLimit = (options: RateLimitOptions) => {
 	return async (c: Context<{ Bindings: Bindings; Variables: Variables }>, next: Next) => {
-		const { limit, window, keyPrefix, keyType } = options;
+		const { limit, window, keyPrefix, keyType, failClosed = false } = options;
 
 		// Build the rate limit key
 		let identifier: string;
@@ -72,8 +73,13 @@ export const rateLimit = (options: RateLimitOptions) => {
 
 			await next();
 		} catch (error) {
-			// If KV fails, log but don't block the request
 			console.error('Rate limit error:', error);
+			if (failClosed) {
+				return c.json(
+					{ error: 'Service temporarily unavailable, please try again later' },
+					503
+				);
+			}
 			await next();
 		}
 	};
@@ -89,12 +95,14 @@ export const rateLimiters = {
 		window: 900, // 15 minutes
 		keyPrefix: 'rl:login',
 		keyType: 'ip',
+		failClosed: true,
 	}),
 	register: rateLimit({
 		limit: 15,
 		window: 3600, // 1 hour
 		keyPrefix: 'rl:register',
 		keyType: 'ip',
+		failClosed: true,
 	}),
 	// API routes - per user
 	api: rateLimit({

@@ -27,6 +27,12 @@ jobs:
         working-directory: backend
         run: npm ci
 
+      # Informational for now — can be made blocking later by removing continue-on-error
+      - name: Security audit
+        working-directory: backend
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
       - name: Type check (non-blocking)
         working-directory: backend
         run: npx tsc --noEmit || true
