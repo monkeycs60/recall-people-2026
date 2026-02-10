@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { generateObject } from 'ai';
+import { generateText, Output } from 'ai';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
 import { createAIModel, AIProviderConfig } from '../lib/ai-provider';
@@ -200,15 +200,15 @@ ${template.summaryLabel}`;
 
 		const model = createAIModel(providerConfig);
 
-		console.log('[Summary] Calling generateObject...');
+		console.log('[Summary] Calling generateText with Output.object...');
 
-		const { object } = await generateObject({
+		const { output } = await generateText({
 			model,
-			schema: summarySchema,
+			output: Output.object({ schema: summarySchema }),
 			prompt,
 		});
 
-		const summary = object.text;
+		const summary = output!.text;
 		console.log('[Summary] Success! Generated summary:', summary);
 
 		// Run evaluation in background (non-blocking)

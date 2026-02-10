@@ -429,7 +429,9 @@
     "createContact": "\"{{name}}\" erstellen",
     "createNewContact": "Erstellen",
     "suggested": "Vorgeschlagen",
-    "allContacts": "Alle Kontakte"
+    "allContacts": "Alle Kontakte",
+    "extractionFailed": "Analyse fehlgeschlagen",
+    "extractionFailedDescription": "Die Notiz konnte nicht analysiert werden. Bitte versuche es erneut."
   },
   "review": {
     "title": "Überprüfen",
@@ -447,6 +449,14 @@
     "addGroup": "Gruppe hinzufügen",
     "groupNamePlaceholder": "Gruppenname...",
     "createGroup": "\"{{name}}\" erstellen",
+    "groupsModalTitle": "Gruppen verwalten",
+    "groupsModalDone": "Fertig",
+    "searchGroups": "Gruppe suchen oder erstellen...",
+    "selectedGroups": "Ausgewählte Gruppen",
+    "availableGroups": "Verfügbare Gruppen",
+    "noGroupsFound": "Keine passenden Gruppen gefunden",
+    "noGroupsYet": "Noch keine Gruppen",
+    "typeToCreateGroup": "Gib oben einen Namen ein, um deine erste Gruppe zu erstellen",
     "topicsToArchive": "Themen zum Archivieren",
     "topicsToArchiveDescription": "Diese Themen scheinen abgeschlossen zu sein. Entferne die Auswahl bei Themen, die noch aktiv sind.",
     "resolutionLabel": "Lösung:",

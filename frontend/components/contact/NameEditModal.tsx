@@ -68,6 +68,9 @@ export function NameEditModal({
                 placeholder={t('contact.nameModal.firstNamePlaceholder')}
                 placeholderTextColor={Colors.textMuted}
                 autoFocus
+                autoCapitalize="words"
+                autoCorrect={true}
+                spellCheck={true}
                 onFocus={() => setFirstNameFocused(true)}
                 onBlur={() => setFirstNameFocused(false)}
               />
@@ -83,6 +86,9 @@ export function NameEditModal({
                 onChangeText={setLastName}
                 placeholder={t('contact.nameModal.lastNamePlaceholder')}
                 placeholderTextColor={Colors.textMuted}
+                autoCapitalize="words"
+                autoCorrect={true}
+                spellCheck={true}
                 onFocus={() => setLastNameFocused(true)}
                 onBlur={() => setLastNameFocused(false)}
               />

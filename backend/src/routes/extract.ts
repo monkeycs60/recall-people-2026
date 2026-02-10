@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { generateObject } from 'ai';
+import { generateText, Output } from 'ai';
 import { z } from 'zod';
 import { format } from 'date-fns';
 import { authMiddleware } from '../middleware/auth';
@@ -1079,11 +1079,15 @@ extractRoutes.post('/', async (c) => {
       input: { transcription: transcription.slice(0, 500), hasCurrentContact: !!currentContact },
     });
 
-    const { object: extraction } = await measurePerformance(
-      () => generateObject({
+    const extractionController = new AbortController();
+    const extractionTimeout = setTimeout(() => extractionController.abort(), 15000);
+
+    const { output: extractionResult } = await measurePerformance(
+      () => generateText({
         model,
-        schema: extractionSchema,
+        output: Output.object({ schema: extractionSchema }),
         prompt,
+        abortSignal: extractionController.signal,
       }),
       {
         route: '/extract',
@@ -1095,6 +1099,10 @@ extractRoutes.post('/', async (c) => {
         enabled: !!c.env.ENABLE_PERFORMANCE_LOGGING as boolean,
       }
     );
+
+    clearTimeout(extractionTimeout);
+
+    const extraction = extractionResult!;
 
     // Server-side matching: find contacts with same first name
     const extractedFirstName = extraction.contactIdentified.firstName.toLowerCase().trim();

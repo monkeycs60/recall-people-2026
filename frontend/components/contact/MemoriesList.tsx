@@ -72,6 +72,8 @@ export function MemoriesList({ memories, onEdit, onDelete, highlightId }: Memori
                 placeholder="Description du souvenir"
                 placeholderTextColor={Colors.textMuted}
                 multiline
+                spellCheck
+                autoCorrect
               />
               <TextInput
                 style={[styles.editInput, styles.editInputSecondary]}

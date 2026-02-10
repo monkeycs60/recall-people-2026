@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { generateObject } from 'ai';
+import { generateText, Output } from 'ai';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
 import { wrapUserInput, sanitize, getSecurityInstructions } from '../lib/security';
@@ -137,10 +137,10 @@ searchRoutes.post('/', async (c) => {
 			input: { query, factsCount: facts.length, memoriesCount: memories.length, notesCount: notes.length },
 		});
 
-		const { object: result } = await measurePerformance(
-			() => generateObject({
+		const { output: searchOutput } = await measurePerformance(
+			() => generateText({
 				model,
-				schema: searchResultSchema,
+				output: Output.object({ schema: searchResultSchema }),
 				prompt,
 			}),
 			{
@@ -153,6 +153,8 @@ searchRoutes.post('/', async (c) => {
 				enabled: String(c.env.ENABLE_PERFORMANCE_LOGGING) === 'true',
 			}
 		);
+
+		const result = searchOutput!;
 
 		const sortedResults = result.results.sort(
 			(a, b) => b.relevanceScore - a.relevanceScore

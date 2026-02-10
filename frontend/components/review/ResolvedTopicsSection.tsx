@@ -65,6 +65,8 @@ export function ResolvedTopicsSection({ state, handlers }: ResolvedTopicsSection
                       placeholderTextColor={Colors.textMuted}
                       multiline
                       autoFocus
+                      spellCheck
+                      autoCorrect
                     />
                     <Pressable
                       style={styles.confirmButtonSuccess}

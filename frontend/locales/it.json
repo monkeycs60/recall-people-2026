@@ -429,7 +429,9 @@
     "createContact": "Crea \"{{name}}\"",
     "createNewContact": "Crea",
     "suggested": "Suggeriti",
-    "allContacts": "Tutti i contatti"
+    "allContacts": "Tutti i contatti",
+    "extractionFailed": "Analisi fallita",
+    "extractionFailedDescription": "Impossibile analizzare la nota. Riprova."
   },
   "review": {
     "title": "Revisione",
@@ -447,6 +449,14 @@
     "addGroup": "Aggiungi un gruppo",
     "groupNamePlaceholder": "Nome del gruppo...",
     "createGroup": "Crea \"{{name}}\"",
+    "groupsModalTitle": "Gestisci gruppi",
+    "groupsModalDone": "Fatto",
+    "searchGroups": "Cerca o crea un gruppo...",
+    "selectedGroups": "Gruppi selezionati",
+    "availableGroups": "Gruppi disponibili",
+    "noGroupsFound": "Nessun gruppo trovato",
+    "noGroupsYet": "Nessun gruppo ancora",
+    "typeToCreateGroup": "Scrivi un nome sopra per creare il tuo primo gruppo",
     "topicsToArchive": "Argomenti da archiviare",
     "topicsToArchiveDescription": "Questi argomenti sembrano risolti. Deseleziona quelli ancora attivi.",
     "resolutionLabel": "Risoluzione:",

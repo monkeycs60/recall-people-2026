@@ -1,4 +1,4 @@
-import { generateObject } from 'ai';
+import { generateText, Output } from 'ai';
 import { z } from 'zod';
 import { createXai } from '@ai-sdk/xai';
 
@@ -119,13 +119,13 @@ Donne un score de 0 à 10:
 
 Sois strict et objectif.`;
 
-		const { object: evaluation } = await generateObject({
+		const { output: evaluation } = await generateText({
 			model: evaluatorModel,
-			schema: evaluationSchema,
+			output: Output.object({ schema: evaluationSchema }),
 			prompt,
 		});
 
-		return evaluation;
+		return evaluation!;
 	} catch (error) {
 		console.error('Evaluation failed:', error);
 		return null;
@@ -201,13 +201,13 @@ Score de 0 à 10:
 
 Sois strict et objectif.`;
 
-		const { object: evaluation } = await generateObject({
+		const { output: evaluation } = await generateText({
 			model: evaluatorModel,
-			schema: evaluationSchema,
+			output: Output.object({ schema: evaluationSchema }),
 			prompt,
 		});
 
-		return evaluation;
+		return evaluation!;
 	} catch (error) {
 		console.error('Search evaluation failed:', error);
 		return null;
@@ -298,13 +298,13 @@ Score de 0 à 10:
 
 Sois strict et objectif.`;
 
-		const { object: evaluation } = await generateObject({
+		const { output: evaluation } = await generateText({
 			model: evaluatorModel,
-			schema: evaluationSchema,
+			output: Output.object({ schema: evaluationSchema }),
 			prompt,
 		});
 
-		return evaluation;
+		return evaluation!;
 	} catch (error) {
 		console.error('Detection evaluation failed:', error);
 		return null;
@@ -386,13 +386,13 @@ Score de 0 à 10:
 
 Sois TRÈS strict sur les hallucinations et les adjectifs.`;
 
-		const { object: evaluation } = await generateObject({
+		const { output: evaluation } = await generateText({
 			model: evaluatorModel,
-			schema: evaluationSchema,
+			output: Output.object({ schema: evaluationSchema }),
 			prompt,
 		});
 
-		return evaluation;
+		return evaluation!;
 	} catch (error) {
 		console.error('Summary evaluation failed:', error);
 		return null;

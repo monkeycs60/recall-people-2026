@@ -7,6 +7,7 @@ import { useContactsQuery } from '@/hooks/useContactsQuery';
 import { useGroupsQuery } from '@/hooks/useGroupsQuery';
 import { useAppStore } from '@/stores/app-store';
 import { extractInfo, DetectionResult } from '@/lib/api';
+import { showErrorToast } from '@/lib/error-handler';
 import { Contact } from '@/types';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { Search, ChevronRight, X } from 'lucide-react-native';
@@ -138,6 +139,10 @@ export default function SelectContactScreen() {
     } catch (error) {
       console.error('Extraction failed:', error);
       setIsExtracting(false);
+      showErrorToast(
+        t('selectContact.extractionFailed'),
+        t('selectContact.extractionFailedDescription')
+      );
     }
   };
 
@@ -192,6 +197,10 @@ export default function SelectContactScreen() {
     } catch (error) {
       console.error('Extraction failed:', error);
       setIsExtracting(false);
+      showErrorToast(
+        t('selectContact.extractionFailed'),
+        t('selectContact.extractionFailedDescription')
+      );
     }
   };
 
@@ -241,6 +250,9 @@ export default function SelectContactScreen() {
                   style={styles.createInput}
                   placeholder={t('selectContact.firstNamePlaceholder')}
                   placeholderTextColor={Colors.textMuted}
+                  autoCapitalize="words"
+                  autoCorrect={true}
+                  spellCheck={true}
                   value={newContactName}
                   onChangeText={(text) => {
                     setNewContactName(text);
@@ -415,8 +427,10 @@ const styles = StyleSheet.create({
   createInput: {
     flex: 1,
     paddingVertical: Spacing.md,
+    paddingRight: Spacing.sm,
     color: Colors.textPrimary,
-    ...Typography.bodyLarge,
+    fontSize: Typography.bodyLarge.fontSize,
+    fontWeight: Typography.bodyLarge.fontWeight,
   },
   clearButton: {
     padding: Spacing.xs,

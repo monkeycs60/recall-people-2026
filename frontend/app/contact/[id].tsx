@@ -586,6 +586,8 @@ export default function ContactDetailScreen() {
         contactName={`${contact.firstName} ${contact.lastName || ''}`.trim()}
         contactFirstName={contact.firstName}
         contactLastName={contact.lastName}
+        avatarUrl={contact.avatarUrl}
+        gender={contact.gender}
         onCancel={() => setShowDeleteDialog(false)}
         onConfirm={handleConfirmDelete}
       />

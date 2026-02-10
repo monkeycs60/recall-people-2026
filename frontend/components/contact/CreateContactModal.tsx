@@ -56,6 +56,9 @@ export function CreateContactModal({ visible, onClose, onCreate }: CreateContact
               placeholder={t('contact.name.firstNamePlaceholder')}
               placeholderTextColor={Colors.textMuted}
               autoFocus
+              autoCapitalize="words"
+              autoCorrect={true}
+              spellCheck={true}
               returnKeyType="next"
               onFocus={() => setFirstNameFocused(true)}
               onBlur={() => setFirstNameFocused(false)}
@@ -70,6 +73,9 @@ export function CreateContactModal({ visible, onClose, onCreate }: CreateContact
               onChangeText={setLastName}
               placeholder={t('contact.name.lastNamePlaceholder')}
               placeholderTextColor={Colors.textMuted}
+              autoCapitalize="words"
+              autoCorrect={true}
+              spellCheck={true}
               returnKeyType="done"
               onSubmitEditing={handleCreate}
               onFocus={() => setLastNameFocused(true)}

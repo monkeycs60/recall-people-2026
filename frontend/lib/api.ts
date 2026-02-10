@@ -10,8 +10,7 @@ const getCurrentLanguage = () => useSettingsStore.getState().language;
 // Retry configuration
 const RETRY_CONFIG = {
   maxRetries: 3,
-  baseDelayMs: 1000,
-  maxDelayMs: 5000,
+  delayMs: 300,
 };
 
 // Utility to delay execution
@@ -51,13 +50,8 @@ const withRetry = async <T>(
         throw error;
       }
 
-      // Calculate delay with exponential backoff
-      const delayMs = Math.min(
-        config.baseDelayMs * Math.pow(2, attempt),
-        config.maxDelayMs
-      );
-      console.log(`[API Retry] Attempt ${attempt + 1} failed, retrying in ${delayMs}ms...`);
-      await delay(delayMs);
+      console.log(`[API Retry] Attempt ${attempt + 1} failed, retrying in ${config.delayMs}ms...`);
+      await delay(config.delayMs);
     }
   }
 
@@ -85,6 +79,9 @@ const apiCall = async <T>(endpoint: string, options: ApiOptions = {}, isRetry = 
   const { showErrorToast = true, ...fetchOptions } = options;
   const token = await getToken();
 
+  const controller = new AbortController();
+  const fetchTimeout = setTimeout(() => controller.abort(), 30000);
+
   try {
     const response = await fetch(`${API_URL}${endpoint}`, {
       method: fetchOptions.method || 'GET',
@@ -94,6 +91,7 @@ const apiCall = async <T>(endpoint: string, options: ApiOptions = {}, isRetry = 
         ...fetchOptions.headers,
       },
       body: fetchOptions.body ? JSON.stringify(fetchOptions.body) : undefined,
+      signal: controller.signal,
     });
 
     if (!response.ok) {
@@ -124,6 +122,13 @@ const apiCall = async <T>(endpoint: string, options: ApiOptions = {}, isRetry = 
     if (error instanceof ApiError) {
       throw error;
     }
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      const networkError = new NetworkError('Request timeout');
+      if (showErrorToast) {
+        showApiError(networkError);
+      }
+      throw networkError;
+    }
     if (isNetworkError(error)) {
       const networkError = new NetworkError();
       if (showErrorToast) {
@@ -132,6 +137,8 @@ const apiCall = async <T>(endpoint: string, options: ApiOptions = {}, isRetry = 
       throw networkError;
     }
     throw error;
+  } finally {
+    clearTimeout(fetchTimeout);
   }
 };
 

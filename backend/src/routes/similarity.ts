@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { generateObject } from 'ai';
+import { generateText, Output } from 'ai';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
 import { similarityRequestSchema } from '../lib/validation';
@@ -115,10 +115,10 @@ similarityRoutes.post('/batch', async (c) => {
 			input: { factsCount: facts.length, typesCount: typesWithMultipleValues.length },
 		});
 
-		const { object: result } = await measurePerformance(
-			() => generateObject({
+		const { output: similarityOutput } = await measurePerformance(
+			() => generateText({
 				model,
-				schema: similaritySchema,
+				output: Output.object({ schema: similaritySchema }),
 				prompt,
 			}),
 			{
@@ -131,6 +131,8 @@ similarityRoutes.post('/batch', async (c) => {
 				enabled: String(c.env.ENABLE_PERFORMANCE_LOGGING) === 'true',
 			}
 		);
+
+		const result = similarityOutput!;
 
 		// Update Langfuse generation with output
 		generation?.end({ output: result.similarities });

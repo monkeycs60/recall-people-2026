@@ -141,15 +141,15 @@ export function getAIProviderName(config: AIProviderConfig): string {
 
 /**
  * Helper function to get recommended settings for Structured Outputs
- * Use this when calling generateObject() with OpenAI provider
+ * Use this when calling generateText() with Output.object() and OpenAI provider
  *
  * @returns Recommended settings for deterministic, structured outputs
  *
  * @example
  * ```typescript
- * const { object } = await generateObject({
+ * const { output } = await generateText({
  *   model,
- *   schema: myZodSchema,
+ *   output: Output.object({ schema: myZodSchema }),
  *   prompt: '...',
  *   ...getStructuredOutputSettings() // Add temperature: 0
  * });

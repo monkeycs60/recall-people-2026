@@ -280,6 +280,8 @@ export function NotesTimeline({ notes, onDelete, onUpdate, highlightId }: NotesT
                 multiline
                 autoFocus
                 textAlignVertical="top"
+                spellCheck
+                autoCorrect
                 placeholder={t('common.transcriptionPlaceholder')}
                 placeholderTextColor={Colors.textMuted}
               />

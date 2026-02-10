@@ -51,6 +51,8 @@ export function HotTopicsSection({ state, handlers }: HotTopicsSectionProps) {
                 onChangeText={(value) => onUpdateHotTopic(index, 'title', value)}
                 placeholder={t('review.titlePlaceholder')}
                 placeholderTextColor={Colors.textMuted}
+                spellCheck
+                autoCorrect
               />
               <TextInput
                 style={styles.textInput}
@@ -59,6 +61,8 @@ export function HotTopicsSection({ state, handlers }: HotTopicsSectionProps) {
                 placeholder={t('review.contextPlaceholder')}
                 placeholderTextColor={Colors.textMuted}
                 multiline
+                spellCheck
+                autoCorrect
               />
               <Pressable style={styles.confirmButton} onPress={() => onSetEditingIndex(null)}>
                 <Text style={styles.confirmButtonText}>{t('common.confirm')}</Text>

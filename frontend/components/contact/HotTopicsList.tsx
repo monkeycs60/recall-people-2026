@@ -126,6 +126,8 @@ export function HotTopicsList({
             onChangeText={setEditTitle}
             placeholder={t('contact.hotTopic.titlePlaceholder')}
             placeholderTextColor={Colors.textMuted}
+            spellCheck
+            autoCorrect
           />
           <TextInput
             style={[styles.editInput, styles.editInputContext]}
@@ -134,6 +136,8 @@ export function HotTopicsList({
             placeholder={t('contact.hotTopic.contextEditPlaceholder')}
             placeholderTextColor={Colors.textMuted}
             multiline
+            spellCheck
+            autoCorrect
           />
           <View style={styles.editActions}>
             <Pressable style={styles.cancelButton} onPress={() => setEditingId(null)}>
@@ -161,6 +165,8 @@ export function HotTopicsList({
             placeholderTextColor={Colors.textMuted}
             multiline
             autoFocus
+            spellCheck
+            autoCorrect
           />
           <Text style={styles.resolveHint}>💡 Cette info sera utilisée pour les prochaines suggestions</Text>
           <View style={styles.editActions}>
@@ -220,6 +226,8 @@ export function HotTopicsList({
                   placeholderTextColor={Colors.textMuted}
                   multiline
                   autoFocus
+                  spellCheck
+                  autoCorrect
                 />
                 <View style={styles.editResolutionActions}>
                   <Pressable style={styles.smallCancelButton} onPress={() => setEditingResolutionId(null)}>

@@ -34,6 +34,8 @@ export function TranscriptionSection({
           onChangeText={onChangeText}
           multiline
           autoFocus
+          spellCheck
+          autoCorrect
           placeholder={t('review.transcriptionPlaceholder')}
           placeholderTextColor={Colors.textMuted}
           editable={!isReExtracting}

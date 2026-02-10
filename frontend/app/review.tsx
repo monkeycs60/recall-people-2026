@@ -100,8 +100,6 @@ export default function ReviewScreen() {
     isNew: boolean;
     existingId?: string;
   }>>(extraction.suggestedGroups || []);
-  const [isAddingGroup, setIsAddingGroup] = useState(false);
-  const [newGroupSearch, setNewGroupSearch] = useState('');
 
   const [editableContactInfo, setEditableContactInfo] = useState<{
     phone: string | null;
@@ -321,19 +319,7 @@ export default function ReviewScreen() {
     if (!selectedGroups.some((g) => g.name.toLowerCase() === group.name.toLowerCase())) {
       setSelectedGroups((prev) => [...prev, group]);
     }
-    setNewGroupSearch('');
-    setIsAddingGroup(false);
   };
-
-  const availableGroups = allGroups.filter((g) =>
-    !selectedGroups.some((sg) => sg.existingId === g.id || sg.name.toLowerCase() === g.name.toLowerCase())
-  );
-
-  const filteredGroupsForSearch = newGroupSearch.trim()
-    ? availableGroups.filter((g) =>
-        g.name.toLowerCase().includes(newGroupSearch.toLowerCase())
-      )
-    : availableGroups.slice(0, 5);
 
   const handleTranscriptionEdit = async () => {
     if (editedTranscription.trim() === transcription.trim()) {
@@ -747,16 +733,11 @@ export default function ReviewScreen() {
             <GroupsSection
               state={{
                 selectedGroups,
-                isAddingGroup,
-                newGroupSearch,
-                filteredGroupsForSearch,
                 allGroups,
               }}
               handlers={{
                 onToggleGroup: toggleGroup,
                 onAddNewGroup: addNewGroup,
-                onSetIsAddingGroup: setIsAddingGroup,
-                onSetNewGroupSearch: setNewGroupSearch,
               }}
             />
           </CollapsibleSection>

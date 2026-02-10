@@ -2,12 +2,15 @@ import { View, Text, Pressable, StyleSheet, Modal } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { ContactAvatar } from '@/components/contact/ContactAvatar';
 import { Colors } from '@/constants/theme';
+import { Gender } from '@/types';
 
 type DeleteContactDialogProps = {
   visible: boolean;
   contactName: string;
   contactFirstName: string;
   contactLastName?: string;
+  avatarUrl?: string;
+  gender?: Gender;
   onCancel: () => void;
   onConfirm: () => void;
 };
@@ -17,6 +20,8 @@ export function DeleteContactDialog({
   contactName,
   contactFirstName,
   contactLastName,
+  avatarUrl,
+  gender,
   onCancel,
   onConfirm,
 }: DeleteContactDialogProps) {
@@ -35,6 +40,8 @@ export function DeleteContactDialog({
             <ContactAvatar
               firstName={contactFirstName}
               lastName={contactLastName}
+              avatarUrl={avatarUrl}
+              gender={gender}
               size="medium"
             />
           </View>

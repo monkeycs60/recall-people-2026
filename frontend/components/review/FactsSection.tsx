@@ -38,6 +38,8 @@ export function FactsSection({
                 onChangeText={(value) => onUpdateFact(index, 'factValue', value)}
                 placeholder={t('review.valuePlaceholder')}
                 placeholderTextColor={Colors.textMuted}
+                spellCheck
+                autoCorrect
               />
               <Pressable style={styles.confirmButton} onPress={() => onSetEditingIndex(null)}>
                 <Text style={styles.confirmButtonText}>OK</Text>

@@ -90,6 +90,8 @@ export function TextInputMode({
           editable={!isProcessing}
           textAlignVertical="top"
           autoFocus
+          spellCheck
+          autoCorrect
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
         />

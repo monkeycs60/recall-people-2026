@@ -38,6 +38,8 @@ export function MemoriesSection({
                 placeholder={t('review.descriptionPlaceholder')}
                 placeholderTextColor={Colors.textMuted}
                 multiline
+                spellCheck
+                autoCorrect
               />
               <TextInput
                 style={styles.textInput}

@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { generateObject } from 'ai';
+import { generateText, Output } from 'ai';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
 import { createAIModel, AIProviderConfig } from '../lib/ai-provider';
@@ -363,13 +363,15 @@ ${template.examples}`;
 			input: { question, contactsCount: contacts.length, language },
 		});
 
-		console.log('[Ask] Calling generateObject...');
+		console.log('[Ask] Calling generateText with Output.object...');
 
-		const { object } = await generateObject({
+		const { output: askResult } = await generateText({
 			model,
-			schema: askResponseSchema,
+			output: Output.object({ schema: askResponseSchema }),
 			prompt,
 		});
+
+		const object = askResult!;
 
 		console.log('[Ask] Success! Generated response:', {
 			answer: object.answer.substring(0, 100) + '...',
