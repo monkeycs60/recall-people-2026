@@ -7,7 +7,7 @@ export default function Hero() {
     <section className="relative pt-20 pb-8 md:pt-28 md:pb-20 md:min-h-screen flex items-center">
       {/* Glows handled by ScrollGlows component with Framer Motion */}
 
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container mx-auto px-6 md:px-8 relative z-10">
         <div className="grid lg:grid-cols-2 gap-10 md:gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
           {/* Left: Text content - more vertical spacing */}
           <div className="text-center lg:text-left min-h-[65svh] md:min-h-0 flex flex-col items-center lg:items-start justify-evenly md:justify-start py-4 md:py-0 gap-2 md:gap-0">
@@ -18,7 +18,7 @@ export default function Hero() {
             </div>
 
             <h1 className="text-[2rem] md:text-4xl lg:text-[3.25rem] font-bold tracking-tight text-text-primary leading-[1.15] mb-4 md:mb-8">
-              You forget <span className="bg-primary/25 px-1 -mx-1 rounded">80%</span> of every conversation.
+              You forget <span className="bg-primary/25 px-1 rounded">80%</span> of every conversation.
             </h1>
 
             <p className="text-base md:text-lg text-text-secondary max-w-lg mx-auto lg:mx-0 leading-relaxed mb-5 md:mb-10">

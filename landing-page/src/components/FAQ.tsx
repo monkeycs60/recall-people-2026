@@ -2,49 +2,7 @@
 
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
-
-const faqs = [
-  {
-    question: 'Why Recall People?',
-    answer:
-      "Tired of forgetting your colleague's kids' names? Can't remember where your friend went on vacation? Recall People helps you never forget the little details that matter. Capture notes effortlessly, get notified about important events, and reconnect naturally with AI summaries and ice breakers.",
-  },
-  {
-    question: "What if I don't want to use my microphone?",
-    answer:
-      "No problem! You can type your notes manually, create contacts by hand, and add upcoming events yourself. Voice is just the fastest option — not the only one.",
-  },
-  {
-    question: "What's included in the free plan?",
-    answer:
-      "You get 10 notes, 10 assistant questions, and 5 custom avatars for free. With a subscription, everything becomes unlimited — contacts, notes, and questions.",
-  },
-  {
-    question: 'What does the Assistant do?',
-    answer:
-      "The Assistant searches through all your notes using AI to find information about one or multiple contacts. Use it for gift ideas, making connections, or just remembering what someone told you months ago.",
-  },
-  {
-    question: "Can I review what I've said about someone?",
-    answer:
-      "Yes! Every note — voice transcription or typed — is saved on each contact's profile. You can read and edit everything anytime, even after the fact. This is also what powers the Assistant: it searches through all your notes to give you accurate, personalized answers.",
-  },
-  {
-    question: 'Can I use it offline?',
-    answer:
-      "Yes! You can browse all your contacts, notes, and information offline. However, recording new notes or asking the AI assistant requires an internet connection. Your data is always accessible on your device.",
-  },
-  {
-    question: 'Where is my data stored?',
-    answer:
-      "All your data stays on your phone — we don't store anything. Data is sent to our AI only when you record or ask a question, but nothing is kept. You can export your data anytime (JSON or CSV). Be careful: if you delete the app, your data is gone. Cloud sync coming soon.",
-  },
-  {
-    question: 'Is my data used to train AI models?',
-    answer:
-      "No. Your notes are processed by our AI to generate summaries and answer questions, but they are never stored or used for training. Your memories stay yours.",
-  },
-];
+import { faqs } from '@/data/faqs';
 
 function FAQItem({
   question,

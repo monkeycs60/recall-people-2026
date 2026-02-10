@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import { faqs } from "@/data/faqs";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-sans",
@@ -61,16 +62,62 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "MobileApplication",
               "name": "Recall People",
-              "description": "Voice-first personal CRM that extracts contacts from voice notes",
+              "description":
+                "Recall People is a voice-first personal CRM. Record a quick voice note after any conversation — AI automatically extracts names, facts, and upcoming events into smart contact profiles. All data is stored locally on your device for complete privacy.",
               "applicationCategory": "ProductivityApplication",
               "operatingSystem": "iOS, Android",
-              "offers": {
-                "@type": "Offer",
-                "price": "0",
-                "priceCurrency": "USD",
-              },
+              "offers": [
+                {
+                  "@type": "Offer",
+                  "price": "0",
+                  "priceCurrency": "USD",
+                  "description": "Free plan: 10 voice notes, 10 AI questions, 5 AI avatars per month",
+                },
+                {
+                  "@type": "Offer",
+                  "price": "5.99",
+                  "priceCurrency": "USD",
+                  "description": "Pro plan: unlimited voice notes, AI questions, and avatars",
+                },
+              ],
+              "featureList": [
+                "Voice-first capture in 5 languages",
+                "AI extraction of names, facts, dates, and events",
+                "Smart contact profiles with AI summaries",
+                "Event reminders and upcoming events feed",
+                "Semantic search across all contacts",
+                "AI conversation starters",
+                "Privacy-first local storage on device",
+                "Offline access to all data",
+                "Data export in JSON and CSV",
+              ],
+              "url": "https://recall-people.com",
+              "downloadUrl": "https://apps.apple.com/app/recall-people-personal-crm/id6746268382",
+              "inLanguage": ["en", "fr", "es", "it", "pt"],
             }),
           }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              "mainEntity": faqs.map((faq) => ({
+                "@type": "Question",
+                "name": faq.question,
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": faq.answer,
+                },
+              })),
+            }),
+          }}
+        />
+        <script
+          defer
+          src="https://cloud.umami.is/script.js"
+          data-website-id="16afad82-6cb1-469b-bca1-bbb3916ba913"
         />
       </head>
       <body className="antialiased font-sans bg-background text-foreground">

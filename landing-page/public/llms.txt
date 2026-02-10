@@ -1,0 +1,45 @@
+# Recall People
+
+> Recall People is a voice-first personal CRM for iOS and Android. Record a quick voice note after any conversation — AI automatically extracts names, facts, and upcoming events into smart contact profiles. All data is stored locally on your device for complete privacy.
+
+## What it does
+
+Recall People helps you remember everyone you meet. After a conversation, you record a voice note describing what you learned. The app transcribes your voice, extracts structured information (names, facts, dates, topics), and builds a searchable contact profile. It also schedules reminders for upcoming events mentioned in conversations and generates AI-powered conversation starters for your next meeting.
+
+## Key features
+
+- Voice-first capture: record notes in English, French, Spanish, Italian, or Portuguese
+- AI extraction: automatically identifies names, facts, dates, and events from voice notes
+- Smart contact profiles: all information about a person in one place
+- Event reminders: never miss a birthday, meeting, or follow-up
+- Semantic search: ask questions like "Who works in tech?" or "Who has kids?"
+- AI conversation starters: get personalized ice breakers before your next meeting
+- Privacy-first: all data stored locally on your device using SQLite, never on our servers
+- Offline access: browse contacts and notes without internet
+- Data export: JSON and CSV export anytime
+
+## Who it's for
+
+- Professionals who attend networking events, conferences, and meetings
+- Consultants and freelancers managing many client relationships
+- Anyone who wants to be more thoughtful in their personal relationships
+- People who forget names and conversation details
+
+## How it's different from other CRMs
+
+- Voice-first input (no manual data entry or typing)
+- Built for personal relationships, not sales pipelines
+- Privacy-focused: local storage on device, no cloud database
+- AI handles all the organization automatically
+
+## Pricing
+
+- Free: 10 voice notes, 10 AI questions, 5 AI avatars per month
+- Pro ($5.99/month or $35.99/year): unlimited everything + priority support
+
+## Links
+
+- Website: https://recall-people.com
+- App Store: https://apps.apple.com/app/recall-people-personal-crm/id6746268382
+- Privacy Policy: https://recall-people.com/privacy
+- Support: support@recall-people.com
