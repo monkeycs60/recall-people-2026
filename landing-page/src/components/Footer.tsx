@@ -22,9 +22,6 @@ export default function Footer() {
             <a href="mailto:support@recall-people.com" className="hover:text-primary transition-colors duration-200">
               Support
             </a>
-            <span className="text-gray-500">
-              Made with &#9829; in Paris
-            </span>
           </div>
         </div>
       </div>
