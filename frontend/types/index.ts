@@ -75,6 +75,9 @@ export type Contact = {
   suggestedQuestions?: string[]; // JSON array of max 3 questions
   highlights?: string[]; // JSON array of key highlights
 
+  // Reminders
+  reminderFrequencyDays?: number;
+
   // Meta
   lastContactAt?: string;
   createdAt: string;

@@ -377,6 +377,12 @@ const runMigrations = async (database: SQLite.SQLiteDatabase) => {
     await database.execAsync("ALTER TABLE contacts ADD COLUMN avatar_url TEXT");
   }
 
+  // Migration: Add reminder_frequency_days to contacts
+  const hasReminderFrequency = contactsInfo.some((col) => col.name === 'reminder_frequency_days');
+  if (!hasReminderFrequency) {
+    await database.execAsync("ALTER TABLE contacts ADD COLUMN reminder_frequency_days INTEGER");
+  }
+
   // V2 Migration: Mark that we've completed V2 migration
   await runV2Migration(database);
 };

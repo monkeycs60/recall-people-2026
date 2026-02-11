@@ -20,6 +20,7 @@ export const contactService = {
       birthday_month: number | null;
       birthday_year: number | null;
       ai_summary: string | null;
+      reminder_frequency_days: number | null;
       last_contact_at: string | null;
       created_at: string;
       updated_at: string;
@@ -38,6 +39,7 @@ export const contactService = {
       birthdayMonth: row.birthday_month || undefined,
       birthdayYear: row.birthday_year || undefined,
       aiSummary: row.ai_summary || undefined,
+      reminderFrequencyDays: row.reminder_frequency_days ?? undefined,
       lastContactAt: row.last_contact_at || undefined,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
@@ -61,6 +63,7 @@ export const contactService = {
       birthday_year: number | null;
       ai_summary: string | null;
       suggested_questions: string | null;
+      reminder_frequency_days: number | null;
       last_contact_at: string | null;
       created_at: string;
       updated_at: string;
@@ -109,6 +112,7 @@ export const contactService = {
       birthdayYear: contactRow.birthday_year || undefined,
       aiSummary: contactRow.ai_summary || undefined,
       suggestedQuestions: contactRow.suggested_questions ? JSON.parse(contactRow.suggested_questions) : undefined,
+      reminderFrequencyDays: contactRow.reminder_frequency_days ?? undefined,
       lastContactAt: contactRow.last_contact_at || undefined,
       createdAt: contactRow.created_at,
       updatedAt: contactRow.updated_at,
