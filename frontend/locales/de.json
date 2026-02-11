@@ -697,7 +697,8 @@
       "recordingDuration": "Längere Aufnahmen erfordern Premium",
       "aiAssistant": "KI-Assistent ist eine Premium-Funktion",
       "avatarGeneration": "Du hast deine 5 kostenlosen KI-Avatar-Generierungen verbraucht",
-      "contactLimit": "Du hast das Limit von 15 kostenlosen Kontakten erreicht"
+      "contactLimit": "Du hast das Limit von 15 kostenlosen Kontakten erreicht",
+      "proactiveReminders": "Intelligente Erinnerungen sind eine Premium-Funktion"
     },
     "errors": {
       "purchaseFailed": "Kauf fehlgeschlagen",
@@ -708,9 +709,13 @@
       "loadingFailed": "Abonnementoptionen konnten nicht geladen werden"
     },
     "features": {
+      "unlimitedContacts": "Unbegrenzte Kontakte",
       "unlimitedNotes": "Unbegrenzte Audionotizen",
       "longerRecordings": "3-Minuten-Aufnahmen (statt 1 Min.)",
-      "aiSearch": "KI-gestützte Suche über alle Notizen"
+      "aiSearch": "KI-gestützte Suche über alle Notizen",
+      "unlimitedAI": "Unbegrenzte KI (Avatare + Assistent)",
+      "smartReminders": "Intelligente personalisierte Erinnerungen",
+      "weeklyDigest": "Wöchentliche Zusammenfassung"
     },
     "monthly": "Monatlich",
     "annual": "Jährlich",

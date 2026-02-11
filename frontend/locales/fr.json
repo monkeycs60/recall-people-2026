@@ -455,7 +455,13 @@
     "photo": {
       "permissionTitle": "Accès aux photos requis",
       "permissionMessage": "Autorise l'accès à ta photothèque pour sélectionner une image."
-    }
+    },
+    "reminderFrequency": "Fréquence de rappel",
+    "reminderDefault": "Par défaut",
+    "reminderWeeks": "Toutes les 2 semaines",
+    "reminderMonth": "Tous les mois",
+    "reminderQuarter": "Tous les 3 mois",
+    "reminderNever": "Jamais"
   },
   "selectContact": {
     "title": "Sélectionner le contact",
@@ -733,7 +739,8 @@
       "recordingDuration": "Les enregistrements plus longs nécessitent premium",
       "aiAssistant": "L'assistant IA est une fonctionnalité premium",
       "avatarGeneration": "Tu as utilisé tes 5 générations d'avatar IA gratuites",
-      "contactLimit": "Tu as atteint la limite de 15 contacts gratuits"
+      "contactLimit": "Tu as atteint la limite de 15 contacts gratuits",
+      "proactiveReminders": "Les rappels personnalisés sont réservés aux membres Pro"
     },
     "errors": {
       "purchaseFailed": "Echec de l'achat",
@@ -744,9 +751,13 @@
       "loadingFailed": "Impossible de charger les options d'abonnement"
     },
     "features": {
+      "unlimitedContacts": "Contacts illimités",
       "unlimitedNotes": "Notes audio illimitées",
       "longerRecordings": "Enregistrements de 3 min (vs 1 min)",
-      "aiSearch": "Recherche IA dans toutes tes notes"
+      "aiSearch": "Recherche IA dans toutes tes notes",
+      "unlimitedAI": "IA illimitée (avatars + assistant)",
+      "smartReminders": "Rappels intelligents personnalisés",
+      "weeklyDigest": "Digest hebdomadaire"
     },
     "monthly": "Mensuel",
     "annual": "Annuel",

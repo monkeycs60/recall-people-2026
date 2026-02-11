@@ -8,7 +8,7 @@ import { revenueCatService } from '@/services/revenuecat.service';
 import { Colors } from '@/constants/theme';
 import { showErrorToast, showSuccessToast } from '@/lib/error-handler';
 
-type PaywallReason = 'notes_limit' | 'ai_search' | 'recording_duration' | 'ai_assistant' | 'avatar_generation' | 'contact_limit';
+type PaywallReason = 'notes_limit' | 'ai_search' | 'recording_duration' | 'ai_assistant' | 'avatar_generation' | 'contact_limit' | 'proactive_reminders';
 
 type PaywallProps = {
   onClose: () => void;
@@ -127,15 +127,20 @@ export function Paywall({ onClose, reason = 'notes_limit' }: PaywallProps) {
         return t('paywall.reason.avatarGeneration');
       case 'contact_limit':
         return t('paywall.reason.contactLimit');
+      case 'proactive_reminders':
+        return t('paywall.reason.proactiveReminders');
       default:
         return '';
     }
   };
 
   const features = [
+    t('paywall.features.unlimitedContacts'),
     t('paywall.features.unlimitedNotes'),
     t('paywall.features.longerRecordings'),
-    t('paywall.features.aiSearch'),
+    t('paywall.features.unlimitedAI'),
+    t('paywall.features.smartReminders'),
+    t('paywall.features.weeklyDigest'),
   ];
 
   if (isLoading) {

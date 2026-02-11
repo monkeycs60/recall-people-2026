@@ -419,7 +419,13 @@
     "photo": {
       "permissionTitle": "Photo Access Required",
       "permissionMessage": "Please grant access to your photo library to select a picture."
-    }
+    },
+    "reminderFrequency": "Reminder frequency",
+    "reminderDefault": "Default",
+    "reminderWeeks": "Every 2 weeks",
+    "reminderMonth": "Every month",
+    "reminderQuarter": "Every 3 months",
+    "reminderNever": "Never"
   },
   "selectContact": {
     "title": "Select contact",
@@ -697,7 +703,8 @@
       "recordingDuration": "Longer recordings require premium",
       "aiAssistant": "AI Assistant is a premium feature",
       "avatarGeneration": "You've used all 5 free AI avatar generations",
-      "contactLimit": "You've reached the 15 free contacts limit"
+      "contactLimit": "You've reached the 15 free contacts limit",
+      "proactiveReminders": "Custom reminders are for Pro members only"
     },
     "errors": {
       "purchaseFailed": "Purchase failed",
@@ -708,9 +715,13 @@
       "loadingFailed": "Unable to load subscription options"
     },
     "features": {
+      "unlimitedContacts": "Unlimited contacts",
       "unlimitedNotes": "Unlimited audio notes",
       "longerRecordings": "3-minute recordings (vs 1 min)",
-      "aiSearch": "AI-powered search across all notes"
+      "aiSearch": "AI-powered search across all notes",
+      "unlimitedAI": "Unlimited AI (avatars + assistant)",
+      "smartReminders": "Smart personalized reminders",
+      "weeklyDigest": "Weekly digest"
     },
     "monthly": "Monthly",
     "annual": "Annual",
