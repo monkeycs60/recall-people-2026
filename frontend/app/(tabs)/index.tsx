@@ -37,6 +37,7 @@ import { getContactDisplayName } from '@/utils/contactDisplayName';
 import { ContactListSkeleton } from '@/components/skeleton/ContactListSkeleton';
 import { CreateContactModal } from '@/components/contact/CreateContactModal';
 import { GlobalGroupsManagementSheet } from '@/components/contact/GlobalGroupsManagementSheet';
+import { TrialBanner } from '@/components/TrialBanner';
 import { queryKeys } from '@/lib/query-keys';
 import { contactService } from '@/services/contact.service';
 import { formatDistanceToNow } from 'date-fns';
@@ -308,6 +309,8 @@ export default function ContactsScreen() {
 					</Pressable>
 				</View>
 			</View>
+
+			<TrialBanner />
 
 			{isLoading ? (
 				<ContactListSkeleton count={6} />

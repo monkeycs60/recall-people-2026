@@ -839,5 +839,10 @@
     "notSeenDescription": "Ricevi una notifica quando un contatto non e stato visto per X giorni",
     "notSeenDays": "{{count}} giorni",
     "notSeenNever": "Mai"
+  },
+  "trial": {
+    "daysRemaining": "Prova gratuita — {{count}} giorno/i rimanente/i",
+    "expired": "Prova terminata",
+    "upgrade": "Passa a Pro"
   }
 }
