@@ -14,21 +14,21 @@ Remember Every Conversation
 
 ## Keywords (100 characters max, comma-separated)
 ```
-personal crm,voice notes,contacts,memory,relationships,networking,voice memo,ai,remember names
+personal crm,voice notes,contacts,memory,relationships,networking,reminders,ai,remember names
 ```
-**Characters: 97**
+**Characters: 94**
 
 ## Promotional Text (170 characters max)
 *Can be updated without app review*
 ```
-Never forget a name again. Record quick voice notes after any conversation — AI extracts names, facts, and events automatically. Your relationships, organized.
+14-day free trial. Record a voice note, AI extracts names and facts. Smart reminders so you never lose touch with the people who matter.
 ```
-**Characters: 168**
+**Characters: 140**
 
 ## Description (4000 characters max)
 
 ```
-You meet someone at a conference. You have a great conversation about their startup, their kids, their upcoming trip to Japan. 
+You meet someone at a conference. You have a great conversation about their startup, their kids, their upcoming trip to Japan.
 
 The next morning? Blank.
 
@@ -66,6 +66,9 @@ Every detail you've ever mentioned about someone, in one place. Job, family, hob
 ◆ UPCOMING EVENTS FEED
 Never miss what matters. Sarah's job interview? Marcus's marathon? Emma's birthday? Recall sends you a reminder the day before.
 
+◆ SMART REMINDERS
+Recall nudges you when you haven't heard from a contact in a while. With Pro: weekly digest, custom frequency per contact, and automatic post-event follow-ups.
+
 ◆ SEMANTIC SEARCH
 Find anyone with a question. "Who works in tech?" "People I met at the conference" "Contacts who have kids" — just describe what you're looking for.
 
@@ -85,8 +88,9 @@ WHO IT'S FOR
 
 PRICING
 
-Free tier: 10 voice notes per month
-Premium: Unlimited notes, longer recordings, unlimited AI features
+Free trial: 14 days of full access
+Free: 15 contacts, unlimited notes, 5 AI avatars/month, 10 AI questions/month
+Pro: $3.99/month or $39.99/year — unlimited contacts, avatars, AI, and smart reminders
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -94,13 +98,16 @@ Small details make big differences.
 
 Download Recall People and never forget what matters again.
 ```
-**Characters: ~2,100**
+**Characters: ~2,400**
 
 ## What's New (4000 characters max)
 ```
-• Improved voice transcription accuracy
-• Faster AI extraction
-• Bug fixes and performance improvements
+New freemium model!
+• 14-day free trial with full access
+• Unlimited notes for everyone
+• Smart reminders: never lose touch with your contacts
+• Monthly renewable quotas (AI avatars, AI questions)
+• New Pro pricing: $3.99/month or $39.99/year
 ```
 
 ## Screenshots Text Overlay Suggestions
@@ -110,4 +117,4 @@ Download Recall People and never forget what matters again.
 3. **Contact profile**: "Everything you know. One glance."
 4. **Upcoming feed**: "Never miss what matters"
 5. **Search**: "Find anyone with a question"
-6. **Privacy**: "Your data stays yours"
+6. **Reminders**: "Recall reminds you to stay in touch"

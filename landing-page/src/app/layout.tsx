@@ -75,7 +75,7 @@ export default function RootLayout({
                 },
                 {
                   "@type": "Offer",
-                  "price": "5.99",
+                  "price": "3.99",
                   "priceCurrency": "USD",
                   "description": "Pro plan: unlimited voice notes, AI questions, and avatars",
                 },

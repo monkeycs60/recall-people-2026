@@ -18,6 +18,16 @@ const resetTestDatabase = async (dbName: string) => {
   }
 };
 
+export const deleteDatabase = async (): Promise<void> => {
+  if (db) {
+    await db.closeAsync();
+    db = null;
+  }
+  const dbName = getDbName();
+  const dbPath = `${documentDirectory}SQLite/${dbName}`;
+  await deleteAsync(dbPath, { idempotent: true });
+};
+
 export const getDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
   if (!db) {
     const dbName = getDbName();

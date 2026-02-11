@@ -2,10 +2,12 @@ import { Hono } from 'hono';
 import { verify } from 'hono/jwt';
 import { hash, compare } from 'bcryptjs';
 import { z } from 'zod';
+import { createRemoteJWKSet, jwtVerify } from 'jose';
 import { getPrisma } from '../lib/db';
 import { rateLimiters } from '../middleware/rateLimit';
 import { generateTokenPair, refreshAccessToken, revokeRefreshToken, revokeAllUserTokens } from '../lib/tokens';
 import { auditLog, getClientInfo } from '../lib/audit';
+import { authMiddleware } from '../middleware/auth';
 
 type Bindings = {
 	DATABASE_URL: string;
@@ -32,9 +34,19 @@ const googleAuthSchema = z.object({
 	idToken: z.string().min(1, 'ID token is required'),
 });
 
+const appleAuthSchema = z.object({
+	identityToken: z.string().min(1, 'Identity token is required'),
+	fullName: z.object({
+		givenName: z.string().nullable().optional(),
+		familyName: z.string().nullable().optional(),
+	}).nullable().optional(),
+});
+
 const refreshTokenSchema = z.object({
 	refreshToken: z.string().min(1, 'Refresh token is required'),
 });
+
+const APPLE_JWKS = createRemoteJWKSet(new URL('https://appleid.apple.com/auth/keys'));
 
 export const authRoutes = new Hono<{ Bindings: Bindings }>();
 
@@ -391,6 +403,150 @@ authRoutes.post('/google', async (c) => {
 	}
 });
 
+// Apple OAuth
+authRoutes.post('/apple', async (c) => {
+	try {
+		const body = await c.req.json();
+
+		const validation = appleAuthSchema.safeParse(body);
+		if (!validation.success) {
+			await auditLog(c, {
+				action: 'login',
+				resource: 'auth',
+				success: false,
+				details: { error: 'Validation failed', provider: 'apple', issues: validation.error.issues },
+			});
+			return c.json({ error: 'Invalid input', details: validation.error.issues }, 400);
+		}
+
+		const { identityToken, fullName } = validation.data;
+
+		// Verify Apple identity token using Apple's public keys
+		let applePayload;
+		try {
+			const { payload } = await jwtVerify(identityToken, APPLE_JWKS, {
+				issuer: 'https://appleid.apple.com',
+				audience: 'com.monkeycs60.recallpeople2026',
+			});
+			applePayload = payload;
+		} catch (jwtError) {
+			console.error('Apple JWT verification failed:', jwtError);
+			return c.json({ error: 'Invalid Apple token' }, 401);
+		}
+
+		const appleUserId = applePayload.sub as string;
+		const email = applePayload.email as string | undefined;
+
+		if (!appleUserId) {
+			return c.json({ error: 'Apple user ID not found in token' }, 400);
+		}
+
+		const prisma = getPrisma(c.env.DATABASE_URL);
+
+		// First, try to find user by Apple account ID (sub claim)
+		let existingAccount = await prisma.account.findFirst({
+			where: {
+				providerId: 'apple',
+				accountId: appleUserId,
+			},
+			include: { user: { include: { accounts: true } } },
+		});
+
+		let user;
+
+		if (existingAccount) {
+			// Returning Apple user - use the existing account
+			user = existingAccount.user;
+		} else if (email) {
+			// First sign-in or user exists with same email
+			user = await prisma.user.findUnique({
+				where: { email },
+				include: { accounts: true },
+			});
+
+			if (!user) {
+				// Build name from Apple-provided fullName (only sent on first sign-in)
+				const givenName = fullName?.givenName || '';
+				const familyName = fullName?.familyName || '';
+				const displayName = [givenName, familyName].filter(Boolean).join(' ') || email.split('@')[0];
+
+				user = await prisma.user.create({
+					data: {
+						email,
+						name: displayName,
+						emailVerified: true,
+						accounts: {
+							create: {
+								accountId: appleUserId,
+								providerId: 'apple',
+							},
+						},
+					},
+					include: { accounts: true },
+				});
+			} else {
+				// User exists, link Apple account
+				const hasAppleAccount = user.accounts.some((account) => account.providerId === 'apple');
+				if (!hasAppleAccount) {
+					await prisma.account.create({
+						data: {
+							accountId: appleUserId,
+							providerId: 'apple',
+							userId: user.id,
+						},
+					});
+				}
+			}
+		} else {
+			// No email and no existing account - cannot proceed
+			// This can happen on subsequent sign-ins if the account was never created
+			return c.json({ error: 'Apple account not found. Please try signing in again.' }, 400);
+		}
+
+		const clientInfo = getClientInfo(c);
+		const tokens = await generateTokenPair(
+			{
+				id: user.id,
+				email: user.email,
+				name: user.name,
+			},
+			c.env.JWT_SECRET,
+			c.env.DATABASE_URL,
+			clientInfo.ipAddress,
+			clientInfo.userAgent
+		);
+
+		await auditLog(c, {
+			userId: user.id,
+			action: 'login',
+			resource: 'auth',
+			success: true,
+			details: { email: user.email, provider: 'apple' },
+		});
+
+		return c.json({
+			user: {
+				id: user.id,
+				email: user.email,
+				name: user.name,
+				provider: 'apple',
+			},
+			accessToken: tokens.accessToken,
+			refreshToken: tokens.refreshToken,
+			expiresAt: tokens.accessTokenExpiresAt,
+		});
+	} catch (error) {
+		console.error('Apple auth error:', error);
+		await auditLog(c, {
+			action: 'login',
+			resource: 'auth',
+			success: false,
+			details: { error: String(error), provider: 'apple' },
+		});
+		return c.json({ error: 'Apple authentication failed' }, 500);
+	}
+});
+
 // Verify token
 authRoutes.get('/verify', async (c) => {
 	try {
@@ -412,9 +568,10 @@ authRoutes.get('/verify', async (c) => {
 			return c.json({ error: 'User not found' }, 401);
 		}
 
-		// Get the provider - prioritize google if user has both
+		// Get the provider - prioritize social providers over credentials
+		const hasApple = user.accounts.some((account) => account.providerId === 'apple');
 		const hasGoogle = user.accounts.some((account) => account.providerId === 'google');
-		const provider = hasGoogle ? 'google' : (user.accounts[0]?.providerId || 'credentials');
+		const provider = hasApple ? 'apple' : hasGoogle ? 'google' : (user.accounts[0]?.providerId || 'credentials');
 
 		return c.json({
 			user: {
@@ -481,8 +638,9 @@ authRoutes.post('/refresh', rateLimiters.login, async (c) => {
 			return c.json({ error: 'User not found' }, 401);
 		}
 
+		const hasApple = user.accounts.some((account) => account.providerId === 'apple');
 		const hasGoogle = user.accounts.some((account) => account.providerId === 'google');
-		const provider = hasGoogle ? 'google' : (user.accounts[0]?.providerId || 'credentials');
+		const provider = hasApple ? 'apple' : hasGoogle ? 'google' : (user.accounts[0]?.providerId || 'credentials');
 
 		await auditLog(c, {
 			userId: user.id,
@@ -558,5 +716,37 @@ authRoutes.post('/logout', async (c) => {
 			details: { error: String(error) },
 		});
 		return c.json({ error: 'Logout failed' }, 500);
+	}
+});
+
+// Delete account (permanently deletes user and all associated data)
+authRoutes.delete('/account', authMiddleware, async (c) => {
+	try {
+		const user = c.get('user');
+		const prisma = getPrisma(c.env.DATABASE_URL);
+
+		await auditLog(c, {
+			userId: user.id,
+			action: 'account_delete',
+			resource: 'auth',
+			success: true,
+			details: { email: user.email },
+		});
+
+		// Cascade delete handles: accounts, sessions, refresh tokens, contacts, notes, etc.
+		await prisma.user.delete({
+			where: { id: user.id },
+		});
+
+		return c.json({ success: true });
+	} catch (error) {
+		console.error('Account deletion error:', error);
+		await auditLog(c, {
+			action: 'account_delete',
+			resource: 'auth',
+			success: false,
+			details: { error: String(error) },
+		});
+		return c.json({ error: 'Account deletion failed' }, 500);
 	}
 });

@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
   loadingFullScreen: {
     alignItems: 'center',
     justifyContent: 'center',
-    height: Dimensions.get('window').height * 0.6,
+    height: Math.min(Dimensions.get('window').height * 0.6, 500),
   },
   loadingText: {
     color: Colors.textSecondary,

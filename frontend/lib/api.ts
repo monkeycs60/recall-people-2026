@@ -685,4 +685,10 @@ export const useAskQuota = async (): Promise<UseQuotaResponse> => {
   return apiCall('/api/subscription/use-ask-quota', { method: 'POST', showErrorToast: false });
 };
 
+export const deleteAccount = async (): Promise<{ success: boolean }> => {
+  return apiCall('/auth/account', {
+    method: 'DELETE',
+  });
+};
+
 export { apiCall };

@@ -30,6 +30,7 @@ const SOLUTION_ILLUSTRATION = require('@/assets/ai-assets/voice-to-contact-cards
 const ONBOARDING_BACKGROUND = Colors.background;
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const CONTENT_WIDTH = Math.min(SCREEN_WIDTH, 500);
 
 type OnboardingProps = {
   onComplete: () => void;
@@ -379,10 +380,13 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: Spacing.lg,
     justifyContent: 'center',
+    alignItems: 'center',
   },
   slideContent: {
     alignItems: 'center',
     marginBottom: Spacing.xl,
+    maxWidth: CONTENT_WIDTH,
+    width: '100%',
   },
   iconContainer: {
     backgroundColor: Colors.primaryLight,
@@ -409,6 +413,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
     borderRadius: BorderRadius.lg,
     padding: Spacing.sm,
+    maxWidth: CONTENT_WIDTH,
+    width: '100%',
   },
   languageRow: {
     flexDirection: 'row',
@@ -437,6 +443,9 @@ const styles = StyleSheet.create({
   },
   bottomSection: {
     paddingHorizontal: Spacing.lg,
+    alignSelf: 'center',
+    width: '100%',
+    maxWidth: CONTENT_WIDTH + Spacing.lg * 2,
   },
   pagination: {
     flexDirection: 'row',
@@ -470,10 +479,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingTop: Spacing.xl,
+    maxWidth: CONTENT_WIDTH,
+    width: '100%',
   },
   illustrationWrapper: {
-    width: SCREEN_WIDTH * 0.45,
-    height: SCREEN_WIDTH * 0.45,
+    width: CONTENT_WIDTH * 0.45,
+    height: CONTENT_WIDTH * 0.45,
     borderRadius: BorderRadius.xl,
     overflow: 'hidden',
     backgroundColor: Colors.surface,
@@ -509,7 +520,7 @@ const styles = StyleSheet.create({
     marginLeft: -Spacing.lg,
   },
   featureCell: {
-    width: (SCREEN_WIDTH - Spacing.xl * 2) / 2.2,
+    width: (CONTENT_WIDTH - Spacing.xl * 2) / 2.2,
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.sm,
     borderRadius: BorderRadius.lg,
@@ -519,7 +530,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.sm,
   },
   featureCellWide: {
-    width: (SCREEN_WIDTH - Spacing.xl * 2) / 1.5,
+    width: (CONTENT_WIDTH - Spacing.xl * 2) / 1.5,
   },
   featureEmoji: {
     fontSize: 20,
@@ -538,10 +549,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingTop: Spacing.lg,
+    maxWidth: CONTENT_WIDTH,
+    width: '100%',
   },
   videoContainer: {
-    width: SCREEN_WIDTH * 0.65,
-    height: SCREEN_WIDTH * 1.1,
+    width: CONTENT_WIDTH * 0.65,
+    height: CONTENT_WIDTH * 1.1,
     borderRadius: BorderRadius.xl,
     overflow: 'hidden',
     backgroundColor: Colors.surface,
@@ -568,9 +581,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    maxWidth: CONTENT_WIDTH,
+    width: '100%',
   },
   searchVisualization: {
-    width: SCREEN_WIDTH * 0.9,
+    width: CONTENT_WIDTH * 0.9,
     height: 260,
     alignItems: 'center',
     justifyContent: 'center',
@@ -592,7 +607,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
-    maxWidth: SCREEN_WIDTH * 0.6,
+    maxWidth: CONTENT_WIDTH * 0.6,
   },
   floatingChipText: {
     color: Colors.textSecondary,
@@ -611,7 +626,7 @@ const styles = StyleSheet.create({
   },
   chipPosition3: {
     bottom: 30,
-    left: SCREEN_WIDTH * 0.15,
+    left: CONTENT_WIDTH * 0.15,
     transform: [{ rotate: '-1deg' }],
   },
   // Typing slide
@@ -619,6 +634,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    maxWidth: CONTENT_WIDTH,
+    width: '100%',
   },
   typingIcons: {
     flexDirection: 'row',
@@ -643,6 +660,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    maxWidth: CONTENT_WIDTH,
+    width: '100%',
   },
   privacyIconContainer: {
     backgroundColor: Colors.primaryLight,

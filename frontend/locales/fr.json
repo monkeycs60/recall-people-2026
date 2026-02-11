@@ -11,6 +11,7 @@
       "loading": "Connexion...",
       "or": "ou",
       "google": "Continuer avec Google",
+      "apple": "Continuer avec Apple",
       "noAccount": "Pas de compte ?",
       "createAccount": "Créer un compte",
       "forgotPassword": "Mot de passe oublié ?"
@@ -58,6 +59,7 @@
       "loading": "Création...",
       "or": "ou",
       "google": "Continuer avec Google",
+      "apple": "Continuer avec Apple",
       "hasAccount": "Déjà un compte ?",
       "signIn": "Se connecter",
       "passwordMismatch": "Les mots de passe ne correspondent pas",
@@ -587,6 +589,10 @@
     },
     "logout": "Se déconnecter",
     "logoutConfirm": "Tu veux vraiment te déconnecter ?",
+    "deleteAccount": "Supprimer le compte",
+    "deleteAccountWarning": "Cela supprimera définitivement ton compte et toutes tes données. Cette action est irréversible.",
+    "deleteAccountConfirm": "Tu es vraiment sûr ? Tous tes contacts, notes et souvenirs seront définitivement supprimés.",
+    "deleteAccountError": "Échec de la suppression du compte. Réessaie.",
     "statistics": {
       "title": "Statistiques",
       "contacts": "Contacts",
@@ -763,11 +769,20 @@
     "month": "mois",
     "year": "an",
     "bestValue": "MEILLEUR PRIX",
-    "save30": "Économise 30%",
+    "save30": "Économise 25%",
     "subscribe": "S'abonner",
     "restore": "Restaurer les achats",
-    "priceMonthly": "5,99 €",
-    "priceAnnual": "49,99 €"
+    "priceMonthly": "4,99 €",
+    "priceAnnual": "44,99 €",
+    "termsOfUse": "Conditions d'utilisation",
+    "privacyPolicy": "Politique de confidentialité",
+    "and": "et",
+    "subscriptionTerms": "Le paiement sera débité de votre compte Apple ID lors de la confirmation de l'achat. L'abonnement se renouvelle automatiquement sauf résiliation au moins 24 heures avant la fin de la période en cours. Votre compte sera débité pour le renouvellement dans les 24 heures précédant la fin de la période en cours.",
+    "loadError": "Impossible de charger les options d'abonnement",
+    "retry": "Réessayer",
+    "perMonth": "/mois",
+    "perYear": "/an",
+    "autoRenews": "Renouvellement auto."
   },
   "recording": {
     "errors": {

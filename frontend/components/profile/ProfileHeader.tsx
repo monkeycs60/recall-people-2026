@@ -7,7 +7,7 @@ import { UserAvatar } from './UserAvatar';
 type ProfileHeaderProps = {
   name: string;
   email: string;
-  provider?: 'credentials' | 'google';
+  provider?: 'credentials' | 'google' | 'apple';
   avatarUrl?: string;
   avatarCacheKey?: string;
   onAvatarPress?: () => void;
@@ -15,6 +15,7 @@ type ProfileHeaderProps = {
 
 const PROVIDER_DISPLAY_NAMES: Record<string, string> = {
   google: 'Google',
+  apple: 'Apple',
 };
 
 export function ProfileHeader({

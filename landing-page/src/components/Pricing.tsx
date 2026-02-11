@@ -19,7 +19,7 @@ const plans = [
   },
   {
     name: 'Pro',
-    price: '4.99',
+    price: '3.99',
     period: '/month',
     annualPrice: '39.99',
     description: 'Your personal relationship assistant',
@@ -88,7 +88,7 @@ export default function Pricing() {
                 )}
                 {plan.annualPrice && (
                   <p className="text-sm text-text-secondary mt-1">
-                    or ${plan.annualPrice}/year (save 33%)
+                    or ${plan.annualPrice}/year (save 25%)
                   </p>
                 )}
               </div>

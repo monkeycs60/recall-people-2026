@@ -8,7 +8,7 @@ type User = {
   id: string;
   email: string;
   name: string;
-  provider?: 'credentials' | 'google';
+  provider?: 'credentials' | 'google' | 'apple';
   avatarUrl?: string;
 };
 
@@ -113,6 +113,29 @@ export const loginWithGoogle = async (idToken: string): Promise<AuthResponse> =>
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.error || 'Google login failed');
+  }
+
+  const data: AuthResponse = await response.json();
+  await setToken(data.accessToken);
+  await setRefreshToken(data.refreshToken);
+  await setUser(data.user);
+  return data;
+};
+
+// Login with Apple
+export const loginWithApple = async (
+  identityToken: string,
+  fullName?: { givenName: string | null; familyName: string | null } | null
+): Promise<AuthResponse> => {
+  const response = await fetch(`${API_URL}/auth/apple`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ identityToken, fullName }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Apple login failed');
   }
 
   const data: AuthResponse = await response.json();

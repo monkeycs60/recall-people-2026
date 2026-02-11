@@ -40,7 +40,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Recall People a besoin d'accéder à vos photos pour définir l'avatar de vos contacts."
+          "photosPermission": "Recall People needs access to your photo library to let you choose profile pictures for your contacts, helping you remember and recognize them easily.",
+          "cameraPermission": "Recall People needs camera access to take photos for your contacts' profile pictures."
         }
       ],
       [
@@ -57,14 +58,20 @@
       ],
       "expo-sqlite",
       "expo-secure-store",
-      "expo-audio",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Recall People needs microphone access to record voice notes about your contacts. These recordings are transcribed to help you remember important details about the people you meet."
+        }
+      ],
       [
         "@react-native-google-signin/google-signin",
         {
           "iosUrlScheme": "com.googleusercontent.apps.546590152270-jsk7vkud486vg1eqsos9bt463fcbljug"
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-apple-authentication"
     ],
     "experiments": {
       "typedRoutes": true,

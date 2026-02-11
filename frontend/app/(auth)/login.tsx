@@ -15,7 +15,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const { login, loginWithGoogle, isLoading, error, isGoogleReady } = useAuth();
+  const { login, loginWithGoogle, loginWithApple, isLoading, error, isGoogleReady, isAppleAvailable } = useAuth();
   const insets = useSafeAreaInsets();
 
   const handleLogin = async () => {
@@ -30,6 +30,14 @@ export default function LoginScreen() {
     try {
       await loginWithGoogle();
     } catch (googleError) {
+      // Error is already handled in useAuth
+    }
+  };
+
+  const handleAppleLogin = async () => {
+    try {
+      await loginWithApple();
+    } catch (appleError) {
       // Error is already handled in useAuth
     }
   };
@@ -142,6 +150,17 @@ export default function LoginScreen() {
               <Ionicons name="logo-google" size={20} color="#DB4437" style={styles.googleIcon} />
               <Text style={styles.googleButtonText}>{t('auth.login.google')}</Text>
             </Pressable>
+
+            {isAppleAvailable && (
+              <Pressable
+                style={[styles.appleButton, isLoading && styles.buttonDisabled]}
+                onPress={handleAppleLogin}
+                disabled={isLoading}
+              >
+                <Ionicons name="logo-apple" size={22} color="#FFFFFF" style={styles.appleIcon} />
+                <Text style={styles.appleButtonText}>{t('auth.login.apple')}</Text>
+              </Pressable>
+            )}
           </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -313,6 +332,23 @@ const styles = StyleSheet.create({
   },
   googleButtonText: {
     color: Colors.textPrimary,
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  appleButton: {
+    backgroundColor: '#000000',
+    paddingVertical: 14,
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 12,
+  },
+  appleIcon: {
+    marginRight: 12,
+  },
+  appleButtonText: {
+    color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '600',
   },

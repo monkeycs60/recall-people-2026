@@ -18,6 +18,7 @@ import {
   Shield,
   Users,
   Bell,
+  UserX,
 } from 'lucide-react-native';
 import { useAuthStore } from '@/stores/auth-store';
 import { useSettingsStore } from '@/stores/settings-store';
@@ -38,6 +39,9 @@ import Constants from 'expo-constants';
 import { revenueCatService } from '@/services/revenuecat.service';
 import { Paywall } from '@/components/Paywall';
 import { canActivateTestPro } from '@/config/pro-whitelist';
+import { deleteAccount } from '@/lib/api';
+import { deleteDatabase } from '@/lib/db';
+import { clearAuth } from '@/lib/auth';
 
 export default function ProfileScreen() {
   const { t } = useTranslation();
@@ -141,6 +145,45 @@ export default function ProfileScreen() {
           onPress: async () => {
             await logout();
             router.replace('/(auth)/login');
+          },
+        },
+      ]
+    );
+  };
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      t('profile.deleteAccount'),
+      t('profile.deleteAccountWarning'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.confirm'),
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert(
+              t('profile.deleteAccount'),
+              t('profile.deleteAccountConfirm'),
+              [
+                { text: t('common.cancel'), style: 'cancel' },
+                {
+                  text: t('common.delete'),
+                  style: 'destructive',
+                  onPress: async () => {
+                    try {
+                      await deleteAccount();
+                      await clearAuth();
+                      await AsyncStorage.clear();
+                      await deleteDatabase();
+                      useAuthStore.setState({ user: null, isInitialized: false });
+                      router.replace('/(auth)/login');
+                    } catch {
+                      Alert.alert(t('common.error'), t('profile.deleteAccountError'));
+                    }
+                  },
+                },
+              ]
+            );
           },
         },
       ]
@@ -296,6 +339,16 @@ export default function ProfileScreen() {
             destructive
           />
         </View>
+
+        <View style={styles.deleteAccountSection}>
+          <SettingsRow
+            icon={<UserX size={20} color={Colors.error} />}
+            label={t('profile.deleteAccount')}
+            onPress={handleDeleteAccount}
+            showChevron={false}
+            destructive
+          />
+        </View>
       </ScrollView>
 
       <LanguagePicker ref={languagePickerRef} />
@@ -353,6 +406,9 @@ const styles = StyleSheet.create({
   },
   logoutSection: {
     marginTop: 8,
+    marginBottom: 8,
+  },
+  deleteAccountSection: {
     marginBottom: 32,
   },
 });

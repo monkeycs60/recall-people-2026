@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
-import { login as authLogin, register as authRegister, loginWithGoogle as authLoginWithGoogle } from '@/lib/auth';
+import { login as authLogin, register as authRegister, loginWithGoogle as authLoginWithGoogle, loginWithApple as authLoginWithApple } from '@/lib/auth';
 import { useAuthStore } from '@/stores/auth-store';
 import { useGoogleAuth } from './useGoogleAuth';
+import { useAppleAuth } from './useAppleAuth';
 
 export const useAuth = () => {
   const router = useRouter();
@@ -10,6 +11,7 @@ export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { promptAsync: googlePromptAsync, isReady: isGoogleReady } = useGoogleAuth();
+  const { promptAsync: applePromptAsync, isAvailable: isAppleAvailable } = useAppleAuth();
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
@@ -70,6 +72,28 @@ export const useAuth = () => {
     }
   };
 
+  const loginWithApple = async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const appleResult = await applePromptAsync();
+
+      if (!appleResult?.identityToken) {
+        throw new Error('Apple authentication cancelled');
+      }
+
+      const result = await authLoginWithApple(appleResult.identityToken, appleResult.fullName);
+      setUser(result.user);
+      router.replace('/(tabs)');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Apple login failed');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     isLoading,
     error,
@@ -78,5 +102,7 @@ export const useAuth = () => {
     logout,
     loginWithGoogle,
     isGoogleReady,
+    loginWithApple,
+    isAppleAvailable,
   };
 };

@@ -14,16 +14,16 @@ N'oubliez plus vos rencontres
 
 ## Mots-clés (100 caractères max, séparés par des virgules)
 ```
-crm personnel,notes vocales,contacts,mémoire,relations,networking,mémo vocal,ia,noms,conversations
+crm personnel,notes vocales,contacts,mémoire,relations,networking,rappels,ia,noms,conversations
 ```
-**Caractères : 100**
+**Caractères : 96**
 
 ## Texte promotionnel (170 caractères max)
 *Peut être mis à jour sans review*
 ```
-Plus jamais un nom oublié. Enregistrez une note vocale après chaque conversation — l'IA extrait noms, infos et événements. Vos relations, organisées.
+14 jours d'essai gratuit. Enregistrez une note vocale, l'IA extrait noms et infos. Rappels intelligents pour ne jamais perdre le fil de vos relations.
 ```
-**Caractères : 157**
+**Caractères : 155**
 
 ## Description (4000 caractères max)
 
@@ -66,6 +66,9 @@ Chaque détail que vous avez mentionné sur quelqu'un, au même endroit. Métier
 ◆ FIL D'ÉVÉNEMENTS
 Ne ratez plus ce qui compte. L'entretien de Sarah ? Le marathon de Marcus ? L'anniversaire d'Emma ? Recall vous envoie un rappel la veille.
 
+◆ RAPPELS INTELLIGENTS
+Recall vous prévient quand vous n'avez pas eu de nouvelles d'un contact depuis longtemps. En version Pro : digest hebdomadaire, fréquence personnalisée par contact, et suivi post-événement automatique.
+
 ◆ RECHERCHE SÉMANTIQUE
 Trouvez n'importe qui avec une question. « Qui travaille dans la tech ? » « Les gens que j'ai rencontrés à la conférence » « Contacts qui ont des enfants » — décrivez simplement ce que vous cherchez.
 
@@ -85,8 +88,9 @@ POUR QUI ?
 
 TARIFS
 
-Gratuit : 10 notes vocales par mois
-Premium : Notes illimitées, enregistrements plus longs, fonctions IA illimitées
+Essai gratuit : 14 jours d'accès complet
+Gratuit : 15 contacts, notes illimitées, 5 avatars IA/mois, 10 questions IA/mois
+Pro : 4,99 €/mois ou 44,99 €/an — contacts, avatars et IA illimités, rappels intelligents
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -94,13 +98,16 @@ Les petits détails font les grandes différences.
 
 Téléchargez Recall People et n'oubliez plus jamais ce qui compte.
 ```
-**Caractères : ~2,200**
+**Caractères : ~2,500**
 
 ## Nouveautés (4000 caractères max)
 ```
-• Amélioration de la transcription vocale
-• Extraction IA plus rapide
-• Corrections de bugs et améliorations de performances
+Nouveau modèle freemium !
+• 14 jours d'essai gratuit avec accès complet
+• Notes illimitées pour tous
+• Rappels intelligents : ne perdez plus le fil de vos relations
+• Quotas mensuels renouvelables (avatars IA, questions IA)
+• Nouveau tarif Pro : 4,99 €/mois ou 44,99 €/an
 ```
 
 ## Suggestions de textes pour les screenshots
@@ -110,4 +117,4 @@ Téléchargez Recall People et n'oubliez plus jamais ce qui compte.
 3. **Fiche contact** : « Tout ce que vous savez. En un coup d'œil. »
 4. **Fil d'événements** : « Ne ratez plus ce qui compte »
 5. **Recherche** : « Trouvez n'importe qui avec une question »
-6. **Vie privée** : « Vos données restent les vôtres »
+6. **Rappels** : « Recall vous rappelle de prendre des nouvelles »

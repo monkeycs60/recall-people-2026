@@ -10,6 +10,7 @@ export type AuditAction =
   | 'register'
   | 'token_refresh'
   | 'logout'
+  | 'account_delete'
   | 'contact_create'
   | 'contact_update'
   | 'contact_delete'

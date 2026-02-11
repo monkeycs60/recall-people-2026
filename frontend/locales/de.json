@@ -11,6 +11,7 @@
       "loading": "Anmeldung...",
       "or": "oder",
       "google": "Mit Google fortfahren",
+      "apple": "Mit Apple fortfahren",
       "noAccount": "Kein Konto?",
       "createAccount": "Erstelle eins",
       "forgotPassword": "Passwort vergessen?"
@@ -58,6 +59,7 @@
       "loading": "Registrierung...",
       "or": "oder",
       "google": "Mit Google fortfahren",
+      "apple": "Mit Apple fortfahren",
       "hasAccount": "Schon ein Konto?",
       "signIn": "Anmelden",
       "passwordMismatch": "Passwörter stimmen nicht überein",
@@ -551,6 +553,10 @@
     },
     "logout": "Abmelden",
     "logoutConfirm": "Möchtest du dich wirklich abmelden?",
+    "deleteAccount": "Konto löschen",
+    "deleteAccountWarning": "Dein Konto und alle Daten werden dauerhaft gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.",
+    "deleteAccountConfirm": "Bist du dir absolut sicher? Alle deine Kontakte, Notizen und Erinnerungen werden dauerhaft gelöscht.",
+    "deleteAccountError": "Konto konnte nicht gelöscht werden. Bitte versuche es erneut.",
     "statistics": {
       "title": "Statistiken",
       "contacts": "Kontakte",
@@ -727,11 +733,20 @@
     "month": "Monat",
     "year": "Jahr",
     "bestValue": "BESTER WERT",
-    "save30": "30% sparen",
+    "save30": "25% sparen",
     "subscribe": "Jetzt abonnieren",
     "restore": "Käufe wiederherstellen",
-    "priceMonthly": "5,99 €",
-    "priceAnnual": "49,99 €"
+    "priceMonthly": "4,99 €",
+    "priceAnnual": "44,99 €",
+    "termsOfUse": "Nutzungsbedingungen",
+    "privacyPolicy": "Datenschutzrichtlinie",
+    "and": "und",
+    "subscriptionTerms": "Die Zahlung wird bei Bestätigung des Kaufs deinem Apple-ID-Konto belastet. Das Abonnement verlängert sich automatisch, sofern es nicht mindestens 24 Stunden vor Ende des aktuellen Zeitraums gekündigt wird. Die Verlängerung wird innerhalb von 24 Stunden vor Ende des aktuellen Zeitraums berechnet.",
+    "loadError": "Abonnementoptionen konnten nicht geladen werden",
+    "retry": "Erneut versuchen",
+    "perMonth": "/Monat",
+    "perYear": "/Jahr",
+    "autoRenews": "Automatische Verlängerung"
   },
   "recording": {
     "errors": {

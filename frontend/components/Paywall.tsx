@@ -1,12 +1,15 @@
-import { View, Text, Pressable, ActivityIndicator, StyleSheet, BackHandler } from 'react-native';
+import { View, Text, Pressable, ActivityIndicator, StyleSheet, BackHandler, Linking, ScrollView } from 'react-native';
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Check, Crown } from 'lucide-react-native';
+import { X, Check, Crown, AlertCircle, RefreshCw } from 'lucide-react-native';
 import { PurchasesOffering } from 'react-native-purchases';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { revenueCatService } from '@/services/revenuecat.service';
 import { Colors } from '@/constants/theme';
 import { showErrorToast, showSuccessToast } from '@/lib/error-handler';
+
+const TERMS_URL = 'https://recall-people-2026.vercel.app/terms';
+const PRIVACY_URL = 'https://recall-people-2026.vercel.app/privacy';
 
 type PaywallReason = 'notes_limit' | 'ai_search' | 'recording_duration' | 'ai_assistant' | 'avatar_generation' | 'contact_limit' | 'proactive_reminders';
 
@@ -22,19 +25,19 @@ export function Paywall({ onClose, reason = 'notes_limit' }: PaywallProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<string>('$rc_annual');
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     loadOfferings();
   }, []);
 
-  // Handle hardware back button to close paywall
   useEffect(() => {
     const handleBackPress = () => {
       if (!isPurchasing) {
         onClose();
         return true;
       }
-      return true; // Block back while purchasing
+      return true;
     };
 
     const subscription = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
@@ -43,21 +46,16 @@ export function Paywall({ onClose, reason = 'notes_limit' }: PaywallProps) {
 
   const loadOfferings = async () => {
     setIsLoading(true);
+    setLoadError(false);
     try {
       const currentOffering = await revenueCatService.getOfferings();
       if (!currentOffering) {
-        showErrorToast(
-          t('paywall.errors.noOfferingsAvailable'),
-          t('paywall.errors.loadingFailed')
-        );
+        setLoadError(true);
       }
       setOffering(currentOffering);
     } catch (error) {
       console.error('[Paywall] Load offerings error:', error);
-      showErrorToast(
-        t('paywall.errors.noOfferingsAvailable'),
-        t('paywall.errors.loadingFailed')
-      );
+      setLoadError(true);
     } finally {
       setIsLoading(false);
     }
@@ -113,6 +111,14 @@ export function Paywall({ onClose, reason = 'notes_limit' }: PaywallProps) {
     }
   };
 
+  const openTerms = useCallback(() => {
+    Linking.openURL(TERMS_URL);
+  }, []);
+
+  const openPrivacy = useCallback(() => {
+    Linking.openURL(PRIVACY_URL);
+  }, []);
+
   const getReasonText = () => {
     switch (reason) {
       case 'notes_limit':
@@ -153,17 +159,40 @@ export function Paywall({ onClose, reason = 'notes_limit' }: PaywallProps) {
         </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={Colors.primary} />
+          <Text style={styles.loadingText}>{t('common.loading')}</Text>
         </View>
       </View>
     );
   }
 
-  const monthlyPackage = offering?.availablePackages.find(
+  if (loadError || !offering) {
+    return (
+      <View style={[styles.container, { paddingTop: insets.top }]}>
+        <View style={styles.header}>
+          <Pressable onPress={onClose} style={styles.closeButton}>
+            <X size={24} color={Colors.textSecondary} />
+          </Pressable>
+        </View>
+        <View style={styles.errorContainer}>
+          <AlertCircle size={48} color={Colors.textSecondary} />
+          <Text style={styles.errorText}>{t('paywall.loadError')}</Text>
+          <Pressable style={styles.retryButton} onPress={loadOfferings}>
+            <RefreshCw size={18} color={Colors.primary} />
+            <Text style={styles.retryButtonText}>{t('paywall.retry')}</Text>
+          </Pressable>
+        </View>
+      </View>
+    );
+  }
+
+  const monthlyPackage = offering.availablePackages.find(
     (pkg) => pkg.identifier === '$rc_monthly'
   );
-  const annualPackage = offering?.availablePackages.find(
+  const annualPackage = offering.availablePackages.find(
     (pkg) => pkg.identifier === '$rc_annual'
   );
+
+  const hasOfferings = monthlyPackage || annualPackage;
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -173,7 +202,11 @@ export function Paywall({ onClose, reason = 'notes_limit' }: PaywallProps) {
         </Pressable>
       </View>
 
-      <View style={styles.content}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         <Crown size={48} color={Colors.primary} style={styles.icon} />
         <Text style={styles.title}>{t('paywall.title')}</Text>
         <Text style={styles.reason}>{getReasonText()}</Text>
@@ -201,9 +234,11 @@ export function Paywall({ onClose, reason = 'notes_limit' }: PaywallProps) {
               </View>
               <Text style={styles.packageTitle}>{t('paywall.annual')}</Text>
               <Text style={styles.packagePrice}>
-                {annualPackage.product.priceString}/{t('paywall.year')}
+                {annualPackage.product.priceString}
               </Text>
+              <Text style={styles.packagePeriod}>{t('paywall.perYear')}</Text>
               <Text style={styles.packageSaving}>{t('paywall.save30')}</Text>
+              <Text style={styles.autoRenewLabel}>{t('paywall.autoRenews')}</Text>
             </Pressable>
           )}
 
@@ -217,16 +252,21 @@ export function Paywall({ onClose, reason = 'notes_limit' }: PaywallProps) {
             >
               <Text style={styles.packageTitle}>{t('paywall.monthly')}</Text>
               <Text style={styles.packagePrice}>
-                {monthlyPackage.product.priceString}/{t('paywall.month')}
+                {monthlyPackage.product.priceString}
               </Text>
+              <Text style={styles.packagePeriod}>{t('paywall.perMonth')}</Text>
+              <Text style={styles.autoRenewLabel}>{t('paywall.autoRenews')}</Text>
             </Pressable>
           )}
         </View>
 
         <Pressable
-          style={styles.purchaseButton}
+          style={[
+            styles.purchaseButton,
+            (!hasOfferings || isPurchasing) && styles.purchaseButtonDisabled,
+          ]}
           onPress={handlePurchase}
-          disabled={isPurchasing}
+          disabled={isPurchasing || !hasOfferings}
         >
           {isPurchasing ? (
             <ActivityIndicator color={Colors.textInverse} />
@@ -238,7 +278,22 @@ export function Paywall({ onClose, reason = 'notes_limit' }: PaywallProps) {
         <Pressable onPress={handleRestore} disabled={isPurchasing}>
           <Text style={styles.restoreText}>{t('paywall.restore')}</Text>
         </Pressable>
-      </View>
+
+        <View style={styles.legalContainer}>
+          <Text style={styles.legalText}>
+            {t('paywall.subscriptionTerms')}
+          </Text>
+          <View style={styles.legalLinksRow}>
+            <Pressable onPress={openTerms} hitSlop={8}>
+              <Text style={styles.legalLink}>{t('paywall.termsOfUse')}</Text>
+            </Pressable>
+            <Text style={styles.legalSeparator}>{t('paywall.and')}</Text>
+            <Pressable onPress={openPrivacy} hitSlop={8}>
+              <Text style={styles.legalLink}>{t('paywall.privacyPolicy')}</Text>
+            </Pressable>
+          </View>
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -265,11 +320,46 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 12,
   },
-  content: {
+  loadingText: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+  },
+  errorContainer: {
     flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 32,
+    gap: 16,
+  },
+  errorText: {
+    fontSize: 16,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+  },
+  retryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.primary,
+  },
+  retryButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.primary,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
     paddingHorizontal: 24,
     alignItems: 'center',
+    paddingBottom: 32,
   },
   icon: {
     marginBottom: 16,
@@ -341,10 +431,20 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.textPrimary,
   },
+  packagePeriod: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    marginTop: 2,
+  },
   packageSaving: {
     fontSize: 12,
     color: Colors.success,
     marginTop: 4,
+  },
+  autoRenewLabel: {
+    fontSize: 10,
+    color: Colors.textSecondary,
+    marginTop: 6,
   },
   purchaseButton: {
     backgroundColor: Colors.primary,
@@ -355,6 +455,9 @@ const styles = StyleSheet.create({
     minWidth: 200,
     alignItems: 'center',
   },
+  purchaseButtonDisabled: {
+    opacity: 0.5,
+  },
   purchaseButtonText: {
     color: Colors.textInverse,
     fontSize: 16,
@@ -363,5 +466,31 @@ const styles = StyleSheet.create({
   restoreText: {
     color: Colors.textSecondary,
     fontSize: 14,
+    marginBottom: 24,
+  },
+  legalContainer: {
+    paddingHorizontal: 8,
+    alignItems: 'center',
+  },
+  legalText: {
+    fontSize: 10,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 14,
+    marginBottom: 8,
+  },
+  legalLinksRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  legalLink: {
+    fontSize: 11,
+    color: Colors.primary,
+    textDecorationLine: 'underline',
+  },
+  legalSeparator: {
+    fontSize: 11,
+    color: Colors.textSecondary,
   },
 });

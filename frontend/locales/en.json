@@ -11,6 +11,7 @@
       "loading": "Signing in...",
       "or": "or",
       "google": "Continue with Google",
+      "apple": "Continue with Apple",
       "noAccount": "No account?",
       "createAccount": "Create one",
       "forgotPassword": "Forgot password?"
@@ -58,6 +59,7 @@
       "loading": "Creating...",
       "or": "or",
       "google": "Continue with Google",
+      "apple": "Continue with Apple",
       "hasAccount": "Already have an account?",
       "signIn": "Sign in",
       "passwordMismatch": "Passwords do not match",
@@ -551,6 +553,10 @@
     },
     "logout": "Log out",
     "logoutConfirm": "Are you sure you want to log out?",
+    "deleteAccount": "Delete Account",
+    "deleteAccountWarning": "This will permanently delete your account and all your data. This action cannot be undone.",
+    "deleteAccountConfirm": "Are you absolutely sure? All your contacts, notes, and memories will be permanently deleted.",
+    "deleteAccountError": "Failed to delete account. Please try again.",
     "statistics": {
       "title": "Statistics",
       "contacts": "Contacts",
@@ -727,11 +733,20 @@
     "month": "month",
     "year": "year",
     "bestValue": "BEST VALUE",
-    "save30": "Save 30%",
+    "save30": "Save 25%",
     "subscribe": "Subscribe Now",
     "restore": "Restore Purchases",
-    "priceMonthly": "$5.99",
-    "priceAnnual": "$49.99"
+    "priceMonthly": "$3.99",
+    "priceAnnual": "$39.99",
+    "termsOfUse": "Terms of Use",
+    "privacyPolicy": "Privacy Policy",
+    "and": "and",
+    "subscriptionTerms": "Payment will be charged to your Apple ID account at confirmation of purchase. Subscription automatically renews unless canceled at least 24 hours before the end of the current period. Your account will be charged for renewal within 24 hours prior to the end of the current period.",
+    "loadError": "Unable to load subscription options",
+    "retry": "Retry",
+    "perMonth": "/month",
+    "perYear": "/year",
+    "autoRenews": "Auto-renews"
   },
   "recording": {
     "errors": {
