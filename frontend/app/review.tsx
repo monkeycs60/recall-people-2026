@@ -618,7 +618,7 @@ export default function ReviewScreen() {
         } else {
           useAvatarQuota()
             .then(async (quotaResult) => {
-              if (!quotaResult.success && quotaResult.error === 'no_trials_left') {
+              if (!quotaResult.success && quotaResult.error === 'quota_exhausted') {
                 removePendingAvatarGeneration(finalContactId);
                 console.log('[Avatar Auto] No quota left, skipping avatar generation');
                 return;

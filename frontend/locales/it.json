@@ -412,8 +412,7 @@
       "deleteError": "Rimozione avatar fallita",
       "permissionDenied": "Accesso foto richiesto",
       "promptRequired": "Descrivi l'aspetto",
-      "trialsRemaining": "{{count}} generazione/i gratuita/e rimanente/i",
-      "noTrialsLeft": "Generazioni gratuite esaurite",
+      "quotaExhausted": "Generazioni gratuite esaurite",
       "quotaRemaining": "{{used}}/{{limit}} questo mese"
     },
     "photo": {
@@ -819,8 +818,7 @@
     },
     "processing": "Sto pensando...",
     "newQuestion": "Fai un'altra domanda...",
-    "trialsRemaining": "{{count}} prove gratuite rimanenti",
-    "noTrialsLeft": "Prove gratuite esaurite",
+    "quotaExhausted": "Prove gratuite esaurite",
     "quotaRemaining": "{{used}}/{{limit}} questo mese",
     "upgradeHint": "Passa a Premium per accesso illimitato",
     "history": {

@@ -412,8 +412,7 @@
       "deleteError": "Failed to remove avatar",
       "permissionDenied": "Photo access required",
       "promptRequired": "Please describe the appearance",
-      "trialsRemaining": "{{count}} free generations remaining",
-      "noTrialsLeft": "Free generations exhausted",
+      "quotaExhausted": "Free generations exhausted",
       "quotaRemaining": "{{used}}/{{limit}} this month"
     },
     "photo": {
@@ -819,8 +818,7 @@
     },
     "processing": "Thinking...",
     "newQuestion": "Ask another question...",
-    "trialsRemaining": "{{count}} free trials remaining",
-    "noTrialsLeft": "Free trials exhausted",
+    "quotaExhausted": "Free trials exhausted",
     "quotaRemaining": "{{used}}/{{limit}} this month",
     "upgradeHint": "Upgrade to Premium for unlimited access",
     "history": {

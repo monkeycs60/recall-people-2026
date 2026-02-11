@@ -412,8 +412,7 @@
       "deleteError": "Avatar konnte nicht entfernt werden",
       "permissionDenied": "Fotozugriff erforderlich",
       "promptRequired": "Bitte beschreibe das Aussehen",
-      "trialsRemaining": "{{count}} kostenlose Generierung(en) übrig",
-      "noTrialsLeft": "Kostenlose Generierungen aufgebraucht",
+      "quotaExhausted": "Kostenlose Generierungen aufgebraucht",
       "quotaRemaining": "{{used}}/{{limit}} diesen Monat"
     },
     "photo": {
@@ -819,8 +818,7 @@
     },
     "processing": "Denke nach...",
     "newQuestion": "Stelle eine weitere Frage...",
-    "trialsRemaining": "{{count}} kostenlose Versuche verbleibend",
-    "noTrialsLeft": "Kostenlose Versuche aufgebraucht",
+    "quotaExhausted": "Kostenlose Versuche aufgebraucht",
     "quotaRemaining": "{{used}}/{{limit}} diesen Monat",
     "upgradeHint": "Upgrade auf Premium für unbegrenzten Zugang",
     "history": {

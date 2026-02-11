@@ -136,7 +136,7 @@ export default function AssistantScreen() {
 
 		if (!canUseAsk()) {
 			showInfoToast(
-				t('assistant.noTrialsLeft'),
+				t('assistant.quotaExhausted'),
 				t('subscription.upgradeToPro')
 			);
 			setShowPaywall(true);
@@ -148,10 +148,10 @@ export default function AssistantScreen() {
 			if (result.success) {
 				await syncTrialAndQuotas();
 				return true;
-			} else if (result.error === 'no_trials_left') {
+			} else if (result.error === 'quota_exhausted') {
 				await syncTrialAndQuotas();
 				showInfoToast(
-					t('assistant.noTrialsLeft'),
+					t('assistant.quotaExhausted'),
 					t('subscription.upgradeToPro')
 				);
 				setShowPaywall(true);
@@ -377,7 +377,7 @@ export default function AssistantScreen() {
 							<Text style={styles.trialsText}>
 								{canUseAsk()
 									? t('assistant.quotaRemaining', { used: askUsed, limit: askLimit })
-									: t('assistant.noTrialsLeft')}
+									: t('assistant.quotaExhausted')}
 							</Text>
 						</Animated.View>
 					)}

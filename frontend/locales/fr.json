@@ -448,8 +448,7 @@
       "deleteError": "Échec de la suppression de l'avatar",
       "permissionDenied": "Accès aux photos requis",
       "promptRequired": "Décris l'apparence",
-      "trialsRemaining": "{{count}} génération(s) gratuite(s) restante(s)",
-      "noTrialsLeft": "Générations gratuites épuisées",
+      "quotaExhausted": "Générations gratuites épuisées",
       "quotaRemaining": "{{used}}/{{limit}} ce mois-ci"
     },
     "photo": {
@@ -805,8 +804,7 @@
     "transcribing": "Transcription en cours...",
     "suggestionsTitle": "Suggestions",
     "noSuggestions": "Enregistre des notes pour voir des suggestions",
-    "trialsRemaining": "{{count}} essais gratuits restants",
-    "noTrialsLeft": "Tu as utilisé tes essais gratuits",
+    "quotaExhausted": "Tu as utilisé tes essais gratuits",
     "quotaRemaining": "{{used}}/{{limit}} ce mois-ci",
     "suggestions": {
       "recentWith": "De quoi j'ai parlé avec {{firstName}} récemment ?",

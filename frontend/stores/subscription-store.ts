@@ -5,7 +5,6 @@ import {
   checkProWhitelist,
   getNotesStatus,
   incrementNoteCount,
-  getTrialsStatus,
   getTrialStatus,
   getQuotas,
 } from '@/lib/api';
@@ -27,12 +26,8 @@ type SubscriptionState = {
   askUsed: number;
   askLimit: number;
 
-  // Legacy (keep for backward compat / migration)
   notesCreatedThisMonth: number;
   currentMonthKey: string;
-  freeNoteTrials: number;
-  freeAskTrials: number;
-  freeAvatarTrials: number;
 };
 
 type SubscriptionActions = {
@@ -47,13 +42,7 @@ type SubscriptionActions = {
   setHydrated: (hydrated: boolean) => void;
   syncNotesStatus: () => Promise<void>;
 
-  // Legacy (kept for backward compat)
-  syncTrialsStatus: () => Promise<void>;
-  setFreeNoteTrials: (count: number) => void;
-  setFreeAskTrials: (count: number) => void;
-  setFreeAvatarTrials: (count: number) => void;
-
-  // New trial + quota actions
+  // Trial + quota actions
   syncTrialAndQuotas: () => Promise<void>;
   canCreateContact: (currentCount: number) => boolean;
   canGenerateAvatar: () => boolean;
@@ -93,15 +82,7 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
         askUsed: 0,
         askLimit: 10,
 
-        // Legacy defaults
-        freeNoteTrials: 10,
-        freeAskTrials: 10,
-        freeAvatarTrials: 5,
-
         setIsPremium: (isPremium) => set({ isPremium }),
-        setFreeNoteTrials: (count) => set({ freeNoteTrials: count }),
-        setFreeAskTrials: (count) => set({ freeAskTrials: count }),
-        setFreeAvatarTrials: (count) => set({ freeAvatarTrials: count }),
 
         activateTestPro: () => set({ isTestPro: true, isPremium: true }),
 
@@ -248,30 +229,6 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
           }
         },
 
-        // Legacy: kept for backward compat with older code paths
-        syncTrialsStatus: async () => {
-          try {
-            const status = await getTrialsStatus();
-            if (status) {
-              if (__DEV__) {
-                console.log('[subscription] Synced trials status from server:', status);
-              }
-              set({
-                freeNoteTrials: status.freeNoteTrials,
-                freeAskTrials: status.freeAskTrials,
-                freeAvatarTrials: status.freeAvatarTrials,
-              });
-              if (status.isPremium) {
-                set({ isPremium: true, isTestPro: true });
-              }
-            }
-          } catch (error) {
-            if (__DEV__) {
-              console.error('[subscription] Failed to sync trials status:', error);
-            }
-          }
-        },
-
         getMaxRecordingDuration: () => {
           const state = get();
           return state.isPremium || state.isTestPro
@@ -304,9 +261,6 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
           isTestPro: state.isTestPro,
           notesCreatedThisMonth: state.notesCreatedThisMonth,
           currentMonthKey: state.currentMonthKey,
-          freeNoteTrials: state.freeNoteTrials,
-          freeAskTrials: state.freeAskTrials,
-          freeAvatarTrials: state.freeAvatarTrials,
           isInTrial: state.isInTrial,
           trialEndDate: state.trialEndDate,
           trialDaysRemaining: state.trialDaysRemaining,

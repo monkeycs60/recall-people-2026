@@ -150,7 +150,7 @@ export function AvatarEditModal({
       if (!isPremium) {
         try {
           const quotaResult = await useAvatarQuota();
-          if (!quotaResult.success && quotaResult.error === 'no_trials_left') {
+          if (!quotaResult.success && quotaResult.error === 'quota_exhausted') {
             setShowPaywall(true);
             setIsGenerating(false);
             return;
@@ -260,7 +260,7 @@ export function AvatarEditModal({
                       ? isPremium
                         ? t('contact.avatar.generateWithAIDescription')
                         : t('contact.avatar.quotaRemaining', { used: avatarUsed, limit: avatarLimit })
-                      : t('contact.avatar.noTrialsLeft')}
+                      : t('contact.avatar.quotaExhausted')}
                   </Text>
                 </View>
               </Pressable>
