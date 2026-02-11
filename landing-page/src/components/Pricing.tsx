@@ -5,28 +5,32 @@ const plans = [
   {
     name: 'Free',
     price: '0',
-    description: 'All features, limited quotas',
+    description: 'Remember the people who matter',
     features: [
-      '10 notes',
-      '10 assistant questions',
-      '5 AI avatars',
-      'Export your data (JSON, CSV)',
-      'View contacts & notes forever',
+      '14-day full trial',
+      '15 contacts',
+      'Unlimited notes',
+      '5 AI avatars / month',
+      '10 assistant questions / month',
+      'Basic reminders',
     ],
-    cta: 'Start Free',
+    cta: 'Start Free Trial',
     highlighted: false,
   },
   {
     name: 'Pro',
-    price: '5.99',
+    price: '4.99',
     period: '/month',
-    description: 'For people who meet lots of people',
+    annualPrice: '39.99',
+    description: 'Your personal relationship assistant',
     features: [
-      'Unlimited notes',
-      'Unlimited assistant questions',
+      'Unlimited contacts',
       'Unlimited AI avatars',
-      'Export your data (JSON, CSV)',
-      'Priority support',
+      'Unlimited assistant questions',
+      '3-minute recordings',
+      'Smart reminders per contact',
+      'Weekly relationship digest',
+      'Post-event follow-ups',
     ],
     cta: 'Go Pro',
     highlighted: true,
@@ -42,7 +46,7 @@ export default function Pricing() {
             Simple pricing
           </h2>
           <p className="text-lg text-text-secondary max-w-2xl mx-auto">
-            Start free, upgrade when you need more.
+            Start with a 14-day free trial. Keep using it forever, upgrade for more.
           </p>
         </div>
 
@@ -81,6 +85,11 @@ export default function Pricing() {
                   <span className="text-text-secondary">
                     {plan.period}
                   </span>
+                )}
+                {plan.annualPrice && (
+                  <p className="text-sm text-text-secondary mt-1">
+                    or ${plan.annualPrice}/year (save 33%)
+                  </p>
                 )}
               </div>
 
