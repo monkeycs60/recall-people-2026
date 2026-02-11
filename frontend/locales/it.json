@@ -855,5 +855,11 @@
     "daysRemaining": "Prova gratuita — {{count}} giorno/i rimanente/i",
     "expired": "Prova terminata",
     "upgrade": "Passa a Pro"
+  },
+  "digest": {
+    "body": "{{events}} evento/i, {{contacts}} contatto/i da ricontattare"
+  },
+  "reminder": {
+    "postEvent": "{{title}} di {{name}} era questa settimana, fatti sentire?"
   }
 }

@@ -1,6 +1,7 @@
 import * as Notifications from 'expo-notifications';
 import type { NotificationResponse } from 'expo-notifications';
-import { addDays, setHours, setMinutes, setSeconds, isBefore } from 'date-fns';
+import { addDays, setHours, setMinutes, setSeconds, isBefore, nextMonday } from 'date-fns';
+import i18n from '@/lib/i18n';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -75,6 +76,58 @@ export const notificationService = {
         title: 'Recall People',
         body: `${contactName} — ${daysSince} jours sans nouvelles`,
         data: { contactId, type: 'not_seen' },
+      },
+      trigger: triggerDate,
+    });
+
+    return identifier;
+  },
+
+  scheduleWeeklyDigest: async (
+    eventsCount: number,
+    staleCount: number
+  ): Promise<string | null> => {
+    const hasPermission = await notificationService.requestPermissions();
+    if (!hasPermission) return null;
+
+    let triggerDate = nextMonday(new Date());
+    triggerDate = setHours(triggerDate, 9);
+    triggerDate = setMinutes(triggerDate, 0);
+    triggerDate = setSeconds(triggerDate, 0);
+
+    if (isBefore(triggerDate, new Date())) return null;
+
+    const identifier = await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Recall People',
+        body: i18n.t('digest.body', { events: eventsCount, contacts: staleCount }),
+        data: { type: 'weekly_digest' },
+      },
+      trigger: triggerDate,
+    });
+
+    return identifier;
+  },
+
+  schedulePostEventFollowUp: async (
+    contactId: string,
+    hotTopicId: string,
+    title: string,
+    contactName: string
+  ): Promise<string | null> => {
+    const hasPermission = await notificationService.requestPermissions();
+    if (!hasPermission) return null;
+
+    let triggerDate = addDays(new Date(), 1);
+    triggerDate = setHours(triggerDate, 10);
+    triggerDate = setMinutes(triggerDate, 0);
+    triggerDate = setSeconds(triggerDate, 0);
+
+    const identifier = await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Recall People',
+        body: i18n.t('reminder.postEvent', { title, name: contactName }),
+        data: { contactId, hotTopicId, type: 'post_event' },
       },
       trigger: triggerDate,
     });

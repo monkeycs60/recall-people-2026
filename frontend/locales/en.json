@@ -855,5 +855,11 @@
     "daysRemaining": "Free trial — {{count}} day(s) remaining",
     "expired": "Trial ended",
     "upgrade": "Upgrade to Pro"
+  },
+  "digest": {
+    "body": "{{events}} event(s), {{contacts}} contact(s) to catch up with"
+  },
+  "reminder": {
+    "postEvent": "{{name}}'s {{title}} was this week, check in with them?"
   }
 }

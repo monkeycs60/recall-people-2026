@@ -855,5 +855,11 @@
     "daysRemaining": "Prueba gratuita — {{count}} día(s) restante(s)",
     "expired": "Prueba finalizada",
     "upgrade": "Pasar a Pro"
+  },
+  "digest": {
+    "body": "{{events}} evento(s), {{contacts}} contacto(s) por reconectar"
+  },
+  "reminder": {
+    "postEvent": "{{title}} de {{name}} fue esta semana, ¿te pones en contacto?"
   }
 }

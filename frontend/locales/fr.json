@@ -845,5 +845,11 @@
     "daysRemaining": "Essai gratuit — {{count}} jour(s) restant(s)",
     "expired": "Essai terminé",
     "upgrade": "Passer à Pro"
+  },
+  "digest": {
+    "body": "{{events}} événement(s), {{contacts}} contact(s) à recontacter"
+  },
+  "reminder": {
+    "postEvent": "{{title}} de {{name}} c'était cette semaine, prends des nouvelles ?"
   }
 }

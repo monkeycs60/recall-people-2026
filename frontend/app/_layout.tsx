@@ -126,6 +126,14 @@ export default function RootLayout() {
       reminderService.scheduleNotSeenReminders().catch((reminderError) => {
         console.warn('[_layout] Failed to schedule not-seen reminders:', reminderError);
       });
+      // Schedule weekly digest (premium only)
+      reminderService.scheduleWeeklyDigest().catch((digestError) => {
+        console.warn('[_layout] Failed to schedule weekly digest:', digestError);
+      });
+      // Schedule post-event follow-ups (premium only)
+      reminderService.schedulePostEventFollowUps().catch((followUpError) => {
+        console.warn('[_layout] Failed to schedule post-event follow-ups:', followUpError);
+      });
     }
   }, [user?.id, isSubscriptionHydrated]);
 
