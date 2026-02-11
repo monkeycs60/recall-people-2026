@@ -1,15 +1,35 @@
 import { create } from 'zustand';
 import { devtools, persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { checkProWhitelist, getNotesStatus, incrementNoteCount, getTrialsStatus } from '@/lib/api';
+import {
+  checkProWhitelist,
+  getNotesStatus,
+  incrementNoteCount,
+  getTrialsStatus,
+  getTrialStatus,
+  getQuotas,
+} from '@/lib/api';
 
 type SubscriptionState = {
   isPremium: boolean;
   isTestPro: boolean;
-  notesCreatedThisMonth: number;
-  currentMonthKey: string; // Format: "2026-01"
   isHydrated: boolean;
   isSyncing: boolean;
+
+  // Trial
+  isInTrial: boolean;
+  trialEndDate: string | null;
+  trialDaysRemaining: number;
+
+  // Monthly quotas
+  avatarUsed: number;
+  avatarLimit: number;
+  askUsed: number;
+  askLimit: number;
+
+  // Legacy (keep for backward compat / migration)
+  notesCreatedThisMonth: number;
+  currentMonthKey: string;
   freeNoteTrials: number;
   freeAskTrials: number;
   freeAvatarTrials: number;
@@ -26,12 +46,19 @@ type SubscriptionActions = {
   resetMonthlyCountIfNeeded: () => void;
   setHydrated: (hydrated: boolean) => void;
   syncNotesStatus: () => Promise<void>;
+
+  // Legacy (kept for backward compat)
   syncTrialsStatus: () => Promise<void>;
   setFreeNoteTrials: (count: number) => void;
   setFreeAskTrials: (count: number) => void;
   setFreeAvatarTrials: (count: number) => void;
-  canUseAsk: () => boolean;
+
+  // New trial + quota actions
+  syncTrialAndQuotas: () => Promise<void>;
+  canCreateContact: (currentCount: number) => boolean;
   canGenerateAvatar: () => boolean;
+  canUseAsk: () => boolean;
+  isTrialActive: () => boolean;
 };
 
 const getCurrentMonthKey = (): string => {
@@ -39,9 +66,10 @@ const getCurrentMonthKey = (): string => {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 };
 
+const FREE_CONTACTS_LIMIT = 15;
 const FREE_NOTES_PER_MONTH = 10;
-const FREE_MAX_DURATION_SECONDS = 60; // 1 minute
-const PREMIUM_MAX_DURATION_SECONDS = 180; // 3 minutes
+const FREE_MAX_DURATION_SECONDS = 60;
+const PREMIUM_MAX_DURATION_SECONDS = 180;
 
 export const useSubscriptionStore = create<SubscriptionState & SubscriptionActions>()(
   devtools(
@@ -53,6 +81,19 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
         currentMonthKey: getCurrentMonthKey(),
         isHydrated: false,
         isSyncing: false,
+
+        // Trial defaults
+        isInTrial: false,
+        trialEndDate: null,
+        trialDaysRemaining: 0,
+
+        // Monthly quota defaults
+        avatarUsed: 0,
+        avatarLimit: 5,
+        askUsed: 0,
+        askLimit: 10,
+
+        // Legacy defaults
         freeNoteTrials: 10,
         freeAskTrials: 10,
         freeAvatarTrials: 5,
@@ -81,7 +122,6 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
           }
         },
 
-        // Sync notes count from server (call on app launch and after network reconnect)
         syncNotesStatus: async () => {
           const state = get();
           if (state.isSyncing) return;
@@ -103,26 +143,21 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
             if (__DEV__) {
               console.error('[subscription] Failed to sync notes status:', error);
             }
-            // Keep local count as fallback
           } finally {
             set({ isSyncing: false });
           }
         },
 
-        // Increment count on server and locally
         incrementNotesCount: async () => {
           const state = get();
           state.resetMonthlyCountIfNeeded();
 
-          // Optimistic local update
           const newCount = get().notesCreatedThisMonth + 1;
           set({ notesCreatedThisMonth: newCount });
 
-          // Sync with server
           try {
             const result = await incrementNoteCount();
             if (result) {
-              // Update with server's authoritative count
               set({ notesCreatedThisMonth: result.used });
               if (__DEV__) {
                 console.log('[subscription] Note count incremented on server:', result);
@@ -132,7 +167,6 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
             if (__DEV__) {
               console.error('[subscription] Failed to increment on server, keeping local count:', error);
             }
-            // Keep optimistic local update as fallback
           }
         },
 
@@ -143,18 +177,78 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
           return get().notesCreatedThisMonth < FREE_NOTES_PER_MONTH;
         },
 
+        canCreateContact: (currentCount: number) => {
+          const state = get();
+          if (state.isPremium || state.isTestPro) return true;
+          return currentCount < FREE_CONTACTS_LIMIT;
+        },
+
         canUseAsk: () => {
           const state = get();
           if (state.isPremium || state.isTestPro) return true;
-          return state.freeAskTrials > 0;
+          if (state.isInTrial) return true;
+          return state.askUsed < state.askLimit;
         },
 
         canGenerateAvatar: () => {
           const state = get();
           if (state.isPremium || state.isTestPro) return true;
-          return state.freeAvatarTrials > 0;
+          return state.avatarUsed < state.avatarLimit;
         },
 
+        isTrialActive: () => {
+          const state = get();
+          if (!state.trialEndDate) return false;
+          return new Date(state.trialEndDate) > new Date();
+        },
+
+        syncTrialAndQuotas: async () => {
+          const state = get();
+          if (state.isSyncing) return;
+
+          set({ isSyncing: true });
+
+          try {
+            const [trialStatus, quotas] = await Promise.all([
+              getTrialStatus(),
+              getQuotas(),
+            ]);
+
+            if (trialStatus) {
+              if (__DEV__) {
+                console.log('[subscription] Synced trial status:', trialStatus);
+              }
+              set({
+                isInTrial: trialStatus.isInTrial,
+                trialEndDate: trialStatus.trialEndDate,
+                trialDaysRemaining: trialStatus.daysRemaining,
+              });
+            }
+
+            if (quotas) {
+              if (__DEV__) {
+                console.log('[subscription] Synced quotas:', quotas);
+              }
+              set({
+                avatarUsed: quotas.avatarUsed,
+                avatarLimit: quotas.avatarLimit,
+                askUsed: quotas.askUsed,
+                askLimit: quotas.askLimit,
+              });
+              if (quotas.isPremium) {
+                set({ isPremium: true, isTestPro: true });
+              }
+            }
+          } catch (error) {
+            if (__DEV__) {
+              console.error('[subscription] Failed to sync trial and quotas:', error);
+            }
+          } finally {
+            set({ isSyncing: false });
+          }
+        },
+
+        // Legacy: kept for backward compat with older code paths
         syncTrialsStatus: async () => {
           try {
             const status = await getTrialsStatus();
@@ -213,6 +307,13 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
           freeNoteTrials: state.freeNoteTrials,
           freeAskTrials: state.freeAskTrials,
           freeAvatarTrials: state.freeAvatarTrials,
+          isInTrial: state.isInTrial,
+          trialEndDate: state.trialEndDate,
+          trialDaysRemaining: state.trialDaysRemaining,
+          avatarUsed: state.avatarUsed,
+          avatarLimit: state.avatarLimit,
+          askUsed: state.askUsed,
+          askLimit: state.askLimit,
         }),
       }
     ),
@@ -220,4 +321,4 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
   )
 );
 
-export { FREE_NOTES_PER_MONTH, FREE_MAX_DURATION_SECONDS, PREMIUM_MAX_DURATION_SECONDS };
+export { FREE_CONTACTS_LIMIT, FREE_NOTES_PER_MONTH, FREE_MAX_DURATION_SECONDS, PREMIUM_MAX_DURATION_SECONDS };

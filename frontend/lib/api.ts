@@ -686,4 +686,49 @@ export const useAvatarTrial = async (): Promise<UseTrialResponse> => {
   });
 };
 
+// ============================================
+// NEW: Trial Status & Monthly Quotas API
+// ============================================
+
+export type TrialStatusResponse = {
+  isInTrial: boolean;
+  trialStartDate: string | null;
+  trialEndDate: string | null;
+  daysRemaining: number;
+};
+
+export const getTrialStatus = async (): Promise<TrialStatusResponse | null> => {
+  try {
+    return await apiCall<TrialStatusResponse>('/api/subscription/trial-status', { showErrorToast: false });
+  } catch (error) {
+    console.error('[API] getTrialStatus error:', error);
+    return null;
+  }
+};
+
+export type QuotasResponse = {
+  avatarUsed: number;
+  avatarLimit: number;
+  askUsed: number;
+  askLimit: number;
+  isPremium: boolean;
+};
+
+export const getQuotas = async (): Promise<QuotasResponse | null> => {
+  try {
+    return await apiCall<QuotasResponse>('/api/subscription/quotas', { showErrorToast: false });
+  } catch (error) {
+    console.error('[API] getQuotas error:', error);
+    return null;
+  }
+};
+
+export const useAvatarQuota = async (): Promise<UseTrialResponse> => {
+  return apiCall('/api/subscription/use-avatar-quota', { method: 'POST', showErrorToast: false });
+};
+
+export const useAskQuota = async (): Promise<UseTrialResponse> => {
+  return apiCall('/api/subscription/use-ask-quota', { method: 'POST', showErrorToast: false });
+};
+
 export { apiCall };
