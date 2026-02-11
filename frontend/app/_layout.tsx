@@ -30,6 +30,7 @@ import { Toaster } from 'sonner-native';
 import { OfflineBanner } from '@/components/ui/OfflineBanner';
 import { notificationService } from '@/services/notification.service';
 import { hotTopicService } from '@/services/hot-topic.service';
+import { reminderService } from '@/services/reminder.service';
 import { revenueCatService } from '@/services/revenuecat.service';
 import { useAuthStore } from '@/stores/auth-store';
 import { useSubscriptionStore } from '@/stores/subscription-store';
@@ -121,6 +122,10 @@ export default function RootLayout() {
       useSubscriptionStore.getState().checkWhitelistStatus();
       // Sync notes count from server (source of truth)
       useSubscriptionStore.getState().syncNotesStatus();
+      // Schedule not-seen reminders (runs once per app launch)
+      reminderService.scheduleNotSeenReminders().catch((reminderError) => {
+        console.warn('[_layout] Failed to schedule not-seen reminders:', reminderError);
+      });
     }
   }, [user?.id, isSubscriptionHydrated]);
 

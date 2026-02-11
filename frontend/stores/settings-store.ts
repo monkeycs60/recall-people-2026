@@ -10,12 +10,14 @@ type SettingsState = {
   language: Language;
   isHydrated: boolean;
   hasSeenOnboarding: boolean;
+  notSeenThresholdDays: number;
 };
 
 type SettingsActions = {
   setLanguage: (language: Language) => void;
   setHydrated: (hydrated: boolean) => void;
   setHasSeenOnboarding: (seen: boolean) => void;
+  setNotSeenThresholdDays: (days: number) => void;
   detectDeviceLanguage: () => Language;
 };
 
@@ -38,6 +40,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         language: detectDeviceLanguage(),
         isHydrated: false,
         hasSeenOnboarding: false,
+        notSeenThresholdDays: 60,
 
         setLanguage: async (language) => {
           set({ language });
@@ -54,6 +57,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         },
         setHydrated: (isHydrated) => set({ isHydrated }),
         setHasSeenOnboarding: (hasSeenOnboarding) => set({ hasSeenOnboarding }),
+        setNotSeenThresholdDays: (notSeenThresholdDays) => set({ notSeenThresholdDays }),
         detectDeviceLanguage,
       }),
       {
@@ -64,7 +68,8 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         },
         partialize: (state) => ({
           language: state.language,
-          hasSeenOnboarding: state.hasSeenOnboarding
+          hasSeenOnboarding: state.hasSeenOnboarding,
+          notSeenThresholdDays: state.notSeenThresholdDays,
         }),
       }
     ),

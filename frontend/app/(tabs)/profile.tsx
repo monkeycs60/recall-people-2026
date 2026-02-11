@@ -17,6 +17,7 @@ import {
   BookOpen,
   Shield,
   Users,
+  Bell,
 } from 'lucide-react-native';
 import { useAuthStore } from '@/stores/auth-store';
 import { useSettingsStore } from '@/stores/settings-store';
@@ -46,6 +47,8 @@ export default function ProfileScreen() {
   const logout = useAuthStore((state) => state.logout);
   const language = useSettingsStore((state) => state.language);
   const setHasSeenOnboarding = useSettingsStore((state) => state.setHasSeenOnboarding);
+  const notSeenThresholdDays = useSettingsStore((state) => state.notSeenThresholdDays);
+  const setNotSeenThresholdDays = useSettingsStore((state) => state.setNotSeenThresholdDays);
   const isTestPro = useSubscriptionStore((state) => state.isTestPro);
 
   const [showPaywall, setShowPaywall] = useState(false);
@@ -150,6 +153,26 @@ export default function ProfileScreen() {
   const isAdmin = adminEmail && user?.email === adminEmail;
   const showTestProCard = canActivateTestPro(user?.email, isTestPro);
 
+  const getNotSeenThresholdLabel = useCallback((days: number): string => {
+    if (days === 0) return t('settings.notSeenNever');
+    return t('settings.notSeenDays', { count: days });
+  }, [t]);
+
+  const handleChangeNotSeenThreshold = useCallback(() => {
+    const options = [30, 60, 90, 0];
+    Alert.alert(
+      t('settings.notSeenThreshold'),
+      t('settings.notSeenDescription'),
+      [
+        ...options.map((days) => ({
+          text: getNotSeenThresholdLabel(days),
+          onPress: () => setNotSeenThresholdDays(days),
+        })),
+        { text: t('common.cancel'), style: 'cancel' as const },
+      ]
+    );
+  }, [t, getNotSeenThresholdLabel, setNotSeenThresholdDays]);
+
   const handleOpenMonitoring = () => {
     router.push('/admin/monitoring');
   };
@@ -196,6 +219,15 @@ export default function ProfileScreen() {
             <TestProCard />
           </View>
         )}
+
+        <SettingsSection title={t('profile.sections.notifications')}>
+          <SettingsRow
+            icon={<Bell size={20} color={Colors.primary} />}
+            label={t('settings.notSeenThreshold')}
+            value={getNotSeenThresholdLabel(notSeenThresholdDays)}
+            onPress={handleChangeNotSeenThreshold}
+          />
+        </SettingsSection>
 
         <SettingsSection title={t('profile.sections.data')}>
           <SettingsRow

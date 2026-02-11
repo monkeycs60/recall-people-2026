@@ -57,6 +57,31 @@ export const notificationService = {
     await Notifications.cancelScheduledNotificationAsync(notificationId);
   },
 
+  scheduleNotSeenReminder: async (
+    contactId: string,
+    contactName: string,
+    daysSince: number
+  ): Promise<string | null> => {
+    const hasPermission = await notificationService.requestPermissions();
+    if (!hasPermission) return null;
+
+    let triggerDate = addDays(new Date(), 1);
+    triggerDate = setHours(triggerDate, 10);
+    triggerDate = setMinutes(triggerDate, 0);
+    triggerDate = setSeconds(triggerDate, 0);
+
+    const identifier = await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Recall People',
+        body: `${contactName} — ${daysSince} jours sans nouvelles`,
+        data: { contactId, type: 'not_seen' },
+      },
+      trigger: triggerDate,
+    });
+
+    return identifier;
+  },
+
   cancelAllReminders: async (): Promise<void> => {
     await Notifications.cancelAllScheduledNotificationsAsync();
   },
