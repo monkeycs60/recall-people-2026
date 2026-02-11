@@ -21,9 +21,19 @@ model User {
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
   preferredLanguage String @default("fr") @map("preferred_language")
-  freeNoteTrials   Int      @default(10) @map("free_note_trials")
-  freeAskTrials    Int      @default(10) @map("free_ask_trials")
-  freeAvatarTrials Int      @default(5) @map("free_avatar_trials")
+  freeNoteTrials   Int      @default(10) @map("free_note_trials")   // KEEP for backward compat during migration
+  freeAskTrials    Int      @default(10) @map("free_ask_trials")    // KEEP for backward compat
+  freeAvatarTrials Int      @default(5) @map("free_avatar_trials")  // KEEP for backward compat
+
+  // Trial tracking
+  trialStartDate   DateTime? @map("trial_start_date")
+  trialEndDate     DateTime? @map("trial_end_date")
+
+  // Monthly quotas (renewable)
+  avatarMonthlyUsed  Int      @default(0) @map("avatar_monthly_used")
+  avatarMonthKey     String   @default("") @map("avatar_month_key")  // "2026-02"
+  askMonthlyUsed     Int      @default(0) @map("ask_monthly_used")
+  askMonthKey        String   @default("") @map("ask_month_key")     // "2026-02"
 
   sessions      Session[]
   accounts      Account[]
