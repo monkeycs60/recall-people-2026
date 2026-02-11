@@ -69,6 +69,7 @@ export function useUpdateContact() {
         birthdayMonth: number | null;
         birthdayYear: number | null;
         highlights: string[];
+        reminderFrequencyDays: number | null;
         lastContactAt: string;
       }>;
     }) => contactService.update(id, data),

@@ -21,7 +21,7 @@ import { useUpdateContact, useDeleteContact } from '@/hooks/useContactsQuery';
 import { useGroupsForContact, useGroupsQuery } from '@/hooks/useGroupsQuery';
 import { SearchSourceType } from '@/types';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import { Edit3, Plus, Trash2, MoreVertical, MessageCircleQuestion, Calendar } from 'lucide-react-native';
+import { Edit3, Plus, Trash2, MoreVertical, MessageCircleQuestion, Calendar, Bell } from 'lucide-react-native';
 import { notificationService } from '@/services/notification.service';
 import { AISummary } from '@/components/contact/AISummary';
 import { AddNoteButton } from '@/components/AddNoteButton';
@@ -42,7 +42,9 @@ import { GroupsManagementSheet } from '@/components/contact/GroupsManagementShee
 import { Colors } from '@/constants/theme';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { useAppStore } from '@/stores/app-store';
+import { useSubscriptionStore } from '@/stores/subscription-store';
 import { ContactDetailSkeleton } from '@/components/skeleton/ContactDetailSkeleton';
+import { Paywall } from '@/components/Paywall';
 
 
 export default function ContactDetailScreen() {
@@ -54,6 +56,7 @@ export default function ContactDetailScreen() {
   const highlightType = params.highlightType as SearchSourceType | undefined;
   const highlightId = params.highlightId as string | undefined;
   const { setPreselectedContactId, isAvatarGenerating } = useAppStore();
+  const isPremium = useSubscriptionStore((state) => state.isPremium);
 
   const scrollViewRef = useRef<ScrollView>(null);
   const sectionPositions = useRef<Record<string, number>>({});
@@ -108,6 +111,7 @@ export default function ContactDetailScreen() {
   const [showBirthdayModal, setShowBirthdayModal] = useState(false);
   const [showGenderModal, setShowGenderModal] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
 
   useEffect(() => {
     if (highlightType && highlightId && contact && !isLoading) {
@@ -241,6 +245,44 @@ export default function ContactDetailScreen() {
 
   const handleSaveAvatar = (avatarUrl: string | null) => {
     invalidate();
+  };
+
+  const getReminderFrequencyLabel = (value: number | undefined): string => {
+    if (value === undefined || value === null) return t('contact.reminderDefault');
+    if (value === 14) return t('contact.reminderWeeks');
+    if (value === 30) return t('contact.reminderMonth');
+    if (value === 90) return t('contact.reminderQuarter');
+    if (value === -1) return t('contact.reminderNever');
+    return t('contact.reminderDefault');
+  };
+
+  const handleReminderFrequencyPress = () => {
+    if (!isPremium) {
+      setShowPaywall(true);
+      return;
+    }
+
+    const options: Array<{ label: string; value: number | null }> = [
+      { label: t('contact.reminderDefault'), value: null },
+      { label: t('contact.reminderWeeks'), value: 14 },
+      { label: t('contact.reminderMonth'), value: 30 },
+      { label: t('contact.reminderQuarter'), value: 90 },
+      { label: t('contact.reminderNever'), value: -1 },
+    ];
+
+    Alert.alert(
+      t('contact.reminderFrequency'),
+      undefined,
+      options.map((option) => ({
+        text: option.label,
+        onPress: () => {
+          updateContactMutation.mutate({
+            id: contactId,
+            data: { reminderFrequencyDays: option.value },
+          });
+        },
+      })),
+    );
   };
 
   const handleRegenerateSummary = () => {
@@ -577,6 +619,22 @@ export default function ContactDetailScreen() {
             onEditBirthday={() => setShowBirthdayModal(true)}
             onEditGender={() => setShowGenderModal(true)}
           />
+
+          {/* Per-contact reminder frequency (premium) */}
+          <Pressable style={styles.reminderFrequencyRow} onPress={handleReminderFrequencyPress}>
+            <Bell size={18} color={Colors.primary} />
+            <View style={styles.reminderFrequencyContent}>
+              <Text style={styles.reminderFrequencyLabel}>{t('contact.reminderFrequency')}</Text>
+              <Text style={styles.reminderFrequencyValue}>
+                {getReminderFrequencyLabel(contact.reminderFrequencyDays)}
+              </Text>
+            </View>
+            {!isPremium && (
+              <View style={styles.proBadge}>
+                <Text style={styles.proBadgeText}>PRO</Text>
+              </View>
+            )}
+          </Pressable>
         </Animated.View>
 
       </ScrollView>
@@ -698,6 +756,13 @@ export default function ContactDetailScreen() {
           </View>
         </Modal>
       )}
+
+      <Modal visible={showPaywall} animationType="slide" presentationStyle="pageSheet">
+        <Paywall
+          reason="proactive_reminders"
+          onClose={() => setShowPaywall(false)}
+        />
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -1037,5 +1102,40 @@ const styles = StyleSheet.create({
   },
   iosDatePicker: {
     height: 200,
+  },
+  reminderFrequencyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.surface,
+    borderRadius: 12,
+    padding: 14,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: Colors.primary + '30',
+  },
+  reminderFrequencyContent: {
+    flex: 1,
+  },
+  reminderFrequencyLabel: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+    marginBottom: 2,
+  },
+  reminderFrequencyValue: {
+    fontSize: 15,
+    color: Colors.textPrimary,
+    fontWeight: '500',
+  },
+  proBadge: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  proBadgeText: {
+    color: Colors.textInverse,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
 });

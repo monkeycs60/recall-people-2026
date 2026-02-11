@@ -419,7 +419,13 @@
     "photo": {
       "permissionTitle": "Fotozugriff erforderlich",
       "permissionMessage": "Bitte erlaube den Zugriff auf deine Fotobibliothek, um ein Bild auszuwählen."
-    }
+    },
+    "reminderFrequency": "Erinnerungsfrequenz",
+    "reminderDefault": "Standard",
+    "reminderWeeks": "Alle 2 Wochen",
+    "reminderMonth": "Jeden Monat",
+    "reminderQuarter": "Alle 3 Monate",
+    "reminderNever": "Nie"
   },
   "selectContact": {
     "title": "Kontakt auswählen",
@@ -698,7 +704,7 @@
       "aiAssistant": "KI-Assistent ist eine Premium-Funktion",
       "avatarGeneration": "Du hast deine 5 kostenlosen KI-Avatar-Generierungen verbraucht",
       "contactLimit": "Du hast das Limit von 15 kostenlosen Kontakten erreicht",
-      "proactiveReminders": "Intelligente Erinnerungen sind eine Premium-Funktion"
+      "proactiveReminders": "Personalisierte Erinnerungen sind nur für Pro-Mitglieder"
     },
     "errors": {
       "purchaseFailed": "Kauf fehlgeschlagen",

@@ -242,6 +242,7 @@ export const contactService = {
       birthdayYear: number | null;
       aiSummary: string;
       suggestedQuestions: string[];
+      reminderFrequencyDays: number | null;
       lastContactAt: string;
     }>
   ): Promise<void> => {
@@ -296,6 +297,10 @@ export const contactService = {
     if (data.suggestedQuestions !== undefined) {
       updates.push('suggested_questions = ?');
       values.push(data.suggestedQuestions ? JSON.stringify(data.suggestedQuestions) : null);
+    }
+    if (data.reminderFrequencyDays !== undefined) {
+      updates.push('reminder_frequency_days = ?');
+      values.push(data.reminderFrequencyDays);
     }
     if (data.lastContactAt) {
       updates.push('last_contact_at = ?');

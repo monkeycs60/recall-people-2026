@@ -18,15 +18,16 @@ export const reminderService = {
 
     const db = await getDatabase();
 
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - thresholdDays);
-    const cutoffISO = cutoffDate.toISOString();
-
     const staleContacts = await db.getAllAsync<StaleContact>(
       `SELECT id, first_name, last_name, last_contact_at FROM contacts
-       WHERE last_contact_at IS NOT NULL AND last_contact_at < ?
+       WHERE last_contact_at IS NOT NULL
+         AND (reminder_frequency_days IS NULL OR reminder_frequency_days != -1)
+         AND (
+           (reminder_frequency_days IS NOT NULL AND julianday('now') - julianday(last_contact_at) > reminder_frequency_days)
+           OR (reminder_frequency_days IS NULL AND julianday('now') - julianday(last_contact_at) > ?)
+         )
        ORDER BY last_contact_at ASC LIMIT 5`,
-      [cutoffISO]
+      [thresholdDays]
     );
 
     for (const contact of staleContacts) {
