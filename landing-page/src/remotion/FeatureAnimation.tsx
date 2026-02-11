@@ -569,7 +569,16 @@ const AssistantScene: React.FC = () => {
               👩‍💼
             </div>
             <div>
-              <div style={{ fontWeight: 600, fontSize: 14, color: COLORS.text }}>Sarah Chen</div>
+              <div style={{ fontWeight: 600, fontSize: 14, color: COLORS.text }}>
+                {"Who works in tech?"}
+                <br />
+                <span className="text-sm opacity-70">
+                  {'\'Sarah\''} found (Software Engineer at TechCorp)
+                </span>
+              </div>
+              <p className="text-xs text-text-secondary mt-1">
+                It{'\'s'} been 3 months since you last spoke.
+              </p>
             </div>
           </div>
 

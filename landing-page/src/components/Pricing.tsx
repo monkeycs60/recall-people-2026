@@ -5,32 +5,30 @@ const plans = [
   {
     name: 'Free',
     price: '0',
-    description: 'Remember the people who matter',
+    description: 'Perfect for getting started',
     features: [
-      '14-day full trial',
       '15 contacts',
-      'Unlimited notes',
+      'Unlimited voice notes',
       '5 AI avatars / month',
-      '10 assistant questions / month',
       'Basic reminders',
+      'Local storage only',
     ],
-    cta: 'Start Free Trial',
+    cta: 'Download & Try',
     highlighted: false,
   },
   {
     name: 'Pro',
-    price: '3.99',
+    price: '4.99',
     period: '/month',
-    annualPrice: '39.99',
-    description: 'Your personal relationship assistant',
+    annualPrice: '49.99',
+    description: 'For power networkers',
     features: [
       'Unlimited contacts',
       'Unlimited AI avatars',
-      'Unlimited assistant questions',
-      '3-minute recordings',
-      'Smart reminders per contact',
-      'Weekly relationship digest',
+      'Priority support',
       'Post-event follow-ups',
+      'Advanced relationship insights',
+      'Export data anytime',
     ],
     cta: 'Go Pro',
     highlighted: true,
@@ -39,14 +37,14 @@ const plans = [
 
 export default function Pricing() {
   return (
-    <section id="pricing" className="py-16 md:py-28 relative">
+    <section id="pricing" className="py-20 md:py-32 relative">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
             Simple pricing
           </h2>
           <p className="text-lg text-text-secondary max-w-2xl mx-auto">
-            Start with a 14-day free trial. Keep using it forever, upgrade for more.
+            Start for free. Upgrade when your network grows.
           </p>
         </div>
 
@@ -54,16 +52,16 @@ export default function Pricing() {
           {plans.map((plan) => (
             <div
               key={plan.name}
-              className={`relative rounded-2xl border-2 border-border p-8 ${
+              className={`relative rounded-3xl border p-8 transition-all duration-300 ${
                 plan.highlighted
-                  ? 'bg-primary-light'
-                  : 'bg-white'
+                  ? 'bg-surface border-primary/20 shadow-xl shadow-primary/5 scale-105 z-10'
+                  : 'bg-surface-alt/50 border-border hover:border-border-dark'
               }`}
             >
               {plan.highlighted && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <span className="bg-primary text-white text-sm font-semibold px-4 py-1.5 rounded-full border-[1.5px] border-border">
-                    Popular
+                  <span className="bg-primary text-white text-sm font-semibold px-4 py-1.5 rounded-full shadow-sm">
+                    Most Popular
                   </span>
                 </div>
               )}
@@ -87,17 +85,19 @@ export default function Pricing() {
                   </span>
                 )}
                 {plan.annualPrice && (
-                  <p className="text-sm text-text-secondary mt-1">
-                    or ${plan.annualPrice}/year (save 25%)
+                  <p className="text-sm text-primary font-medium mt-1">
+                    or ${plan.annualPrice}/year (save ~20%)
                   </p>
                 )}
               </div>
 
-              <ul className="space-y-3 mb-8">
+              <ul className="space-y-4 mb-8">
                 {plan.features.map((feature, index) => (
                   <li key={index} className="flex items-start gap-3">
-                    <Check className="w-5 h-5 mt-0.5 flex-shrink-0 text-primary" />
-                    <span className="text-text-secondary">
+                    <div className={`mt-0.5 rounded-full p-0.5 ${plan.highlighted ? 'bg-primary/10 text-primary' : 'bg-gray-200 text-gray-500'}`}>
+                      <Check className="w-3.5 h-3.5" strokeWidth={3} />
+                    </div>
+                    <span className="text-text-secondary text-sm font-medium">
                       {feature}
                     </span>
                   </li>
@@ -106,10 +106,10 @@ export default function Pricing() {
 
               <Link
                 href="#"
-                className={`block w-full text-center py-3 px-6 rounded-xl font-semibold border-2 border-border transition-all duration-200 hover:-translate-y-0.5 ${
+                className={`block w-full text-center py-3.5 px-6 rounded-xl font-bold transition-all duration-200 hover:-translate-y-0.5 ${
                   plan.highlighted
-                    ? 'bg-primary text-white'
-                    : 'bg-white text-text-primary'
+                    ? 'bg-primary text-white hover:bg-primary-hover shadow-lg shadow-primary/20'
+                    : 'bg-white text-text-primary border border-border hover:border-text-primary/20'
                 }`}
               >
                 {plan.cta}

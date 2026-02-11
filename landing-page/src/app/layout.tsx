@@ -1,19 +1,23 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { faqs } from "@/data/faqs";
 
-const plusJakartaSans = Plus_Jakarta_Sans({
+const inter = Inter({
   variable: "--font-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Recall People - Never Forget Anyone You Meet",
-  description: "The voice-first personal CRM. Record voice notes after conversations, automatically extract contacts, facts, and events. Your data stays on your device.",
-  keywords: ["personal CRM", "voice notes", "contact management", "networking app", "remember names", "AI contacts"],
+  title: "Recall People | The AI Personal CRM for Networking",
+  description: "Stop forgetting the details that matter. Recall People is a voice-first personal CRM with 100% local storage. Build smart contact profiles using AI.",
+  keywords: [
+    "Personal CRM", "Networking App", "Remember names app", 
+    "AI relationship manager", "Voice-to-CRM", "Private contact manager", 
+    "Local storage CRM", "Relationship intelligence", "Social memory upgrade"
+  ],
   authors: [{ name: "Recall People" }],
   creator: "Recall People",
   openGraph: {
@@ -21,21 +25,21 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://recall-people.com",
     siteName: "Recall People",
-    title: "Recall People - Never Forget Anyone You Meet",
-    description: "Record voice notes, automatically extract contacts. The privacy-first CRM that works offline.",
+    title: "Recall People | The AI Personal CRM for Networking",
+    description: "Your social memory, upgraded. Record voice notes, AI extracts the details. 100% private.",
     images: [
       {
         url: "/images/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Recall People - Voice-first Personal CRM",
+        alt: "Recall People - AI Personal CRM",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Recall People - Never Forget Anyone",
-    description: "The voice-first personal CRM. Your data stays on your device.",
+    title: "Recall People | The AI Personal CRM for Networking",
+    description: "Stop forgetting details. Voice-first, 100% private personal CRM.",
     images: ["/images/og-image.png"],
   },
   robots: {
@@ -53,7 +57,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={plusJakartaSans.variable}>
+    <html lang="en" className={inter.variable}>
       <head>
         <script
           type="application/ld+json"

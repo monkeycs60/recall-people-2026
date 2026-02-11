@@ -1,85 +1,93 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
+import { motion } from 'framer-motion';
 import PhoneMockup from './PhoneMockup';
 
 export default function Hero() {
   return (
-    <section className="relative pt-20 pb-8 md:pt-28 md:pb-20 md:min-h-screen flex items-center">
-      {/* Glows handled by ScrollGlows component with Framer Motion */}
+    <section className="relative min-h-screen pt-20 flex flex-col items-center text-center">
+      
+      {/* Main Content - Centered */}
+      <div className="container mx-auto px-6 relative z-10 max-w-5xl flex-1 flex flex-col justify-center pt-32 md:pt-48">
+          
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-text-primary leading-[1.1] mb-6"
+          >
+            You forget <span className="bg-primary/10 text-primary px-2 rounded-lg relative inline-block">80%</span> of every conversation.
+          </motion.h1>
 
-      <div className="container mx-auto px-6 md:px-8 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-10 md:gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
-          {/* Left: Text content - more vertical spacing */}
-          <div className="text-center lg:text-left min-h-[65svh] md:min-h-0 flex flex-col items-center lg:items-start justify-evenly md:justify-start py-4 md:py-0 gap-2 md:gap-0">
-            {/* Badge - subtle style */}
-            <div className="inline-flex items-center space-x-2 bg-primary-light/30 border border-border-light rounded-full px-4 py-1.5 mb-3 md:mb-10">
-              <span className="flex h-1.5 w-1.5 rounded-full bg-primary/60" />
-              <span className="text-sm font-medium text-text-secondary">Your social memory, upgraded</span>
-            </div>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="text-lg md:text-xl text-text-secondary max-w-2xl mx-auto leading-relaxed mb-10"
+          >
+            Become the person who never forgets a detail. <br className="hidden md:block" />
+            <span className="opacity-80">The privacy-first personal CRM that turns your voice notes into real connections.</span>
+          </motion.p>
 
-            <h1 className="text-[2rem] md:text-4xl lg:text-[3.25rem] font-bold tracking-tight text-text-primary leading-[1.15] mb-4 md:mb-8">
-              You forget <span className="bg-primary/25 px-1 rounded">80%</span> of every conversation.
-            </h1>
-
-            <p className="text-base md:text-lg text-text-secondary max-w-lg mx-auto lg:mx-0 leading-relaxed mb-5 md:mb-10">
-              Record a voice note after any meeting. Recall People builds a <span className="font-semibold text-text-primary">smart profile for every person</span> — key details, upcoming events, and conversation starters for next time.
-            </p>
-
-            {/* Bottom section with buttons */}
-            <div>
-              {/* Store buttons - bigger on mobile */}
-              <div className="flex flex-row items-center justify-center lg:justify-start gap-3 lg:gap-4 mb-4">
-                <Link
-                  href="#"
-                  className="group transition-all duration-200 ease-out hover:-translate-y-0.5 w-[160px] md:w-[165px] lg:w-[175px]"
-                  aria-label="Download on the App Store"
-                >
-                  <Image
-                    src="/images/app-store-badge.svg"
-                    alt="Download on the App Store"
-                    width={175}
-                    height={52}
-                    className="h-[48px] md:h-[50px] lg:h-[52px] w-full"
-                  />
-                </Link>
-                <Link
-                  href="#"
-                  className="group transition-all duration-200 ease-out hover:-translate-y-0.5 w-[160px] md:w-[165px] lg:w-[175px]"
-                  aria-label="Get it on Google Play"
-                >
-                  <Image
-                    src="/images/google-play-badge.svg"
-                    alt="Get it on Google Play"
-                    width={175}
-                    height={52}
-                    className="h-[48px] md:h-[50px] lg:h-[52px] w-full"
-                  />
-                </Link>
-              </div>
-
-              <p className="text-sm text-text-secondary">
-                Free to start. Works offline. Your data never leaves your device.
-              </p>
-
-              <a
-                href="#how-it-works"
-                className="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors duration-200 mt-3"
+          {/* Bottom section with buttons */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="flex flex-col items-center"
+          >
+            {/* Store buttons */}
+            <div className="flex flex-row items-center justify-center gap-4 mb-6">
+              <Link
+                href="#"
+                className="group transition-all duration-200 ease-out hover:-translate-y-1"
+                aria-label="Download on the App Store"
               >
-                See how it works &darr;
-              </a>
+                <Image
+                  src="/images/app-store-badge.svg"
+                  alt="Download on the App Store"
+                  width={180}
+                  height={54}
+                  className="h-[54px] w-auto"
+                />
+              </Link>
+              <Link
+                href="#"
+                className="group transition-all duration-200 ease-out hover:-translate-y-1"
+                aria-label="Get it on Google Play"
+              >
+                <Image
+                  src="/images/google-play-badge.svg"
+                  alt="Get it on Google Play"
+                  width={180}
+                  height={54}
+                  className="h-[54px] w-auto"
+                />
+              </Link>
             </div>
-          </div>
 
-          {/* Right: Phone mockup */}
-          <div className="flex justify-center -mt-8 md:mt-0">
-            <PhoneMockup
-              videoSrc="/app-tour.webm"
-              alt="Recall app demo video"
-              className="transform lg:translate-x-4"
-            />
-          </div>
-        </div>
+            <p className="text-sm text-text-muted max-w-md mx-auto">
+              Privacy-first: AI processing with 100% local storage. <br className="hidden md:block"/>
+              Your data never leaves your device.
+            </p>
+          </motion.div>
       </div>
+
+      {/* Phone Mockup Overlap */}
+      <motion.div
+        initial={{ opacity: 0, y: 100 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, delay: 0.6 }}
+        className="relative z-20 mt-20 -mb-24 md:-mb-40 w-full max-w-[85%] md:max-w-xl px-4"
+      >
+        <PhoneMockup 
+          videoSrc="/app-tour.webm" 
+          alt="Recall People App Interface"
+          className="mx-auto"
+        />
+      </motion.div>
 
     </section>
   );

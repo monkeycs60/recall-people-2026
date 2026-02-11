@@ -2,6 +2,7 @@
 
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState, Suspense } from 'react';
+import Link from 'next/link';
 import Footer from '@/components/Footer';
 
 const DEEP_LINK_SCHEME = 'recall-people://';
@@ -74,9 +75,9 @@ function ResetPasswordContent() {
           </button>
           <p className="text-text-muted text-sm mt-4">
             Don&apos;t have the app?{' '}
-            <a href="/" className="text-primary hover:underline">
-              Download Recall People
-            </a>
+            <Link href="/" className="font-semibold text-indigo-600 hover:text-indigo-500">
+              Back to home
+            </Link>
           </p>
         </>
       )}
