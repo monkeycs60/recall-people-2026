@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { contactService } from '@/services/contact.service';
+import { useSubscriptionStore } from '@/stores/subscription-store';
 import { Contact, ContactWithDetails, Gender } from '@/types';
 
 type ContactsState = {
@@ -60,6 +61,13 @@ export const useContactsStore = create<ContactsState & ContactsActions>()(
       },
 
       createContact: async (data) => {
+        const contactCount = get().contacts.length;
+        const canCreate = useSubscriptionStore.getState().canCreateContact(contactCount);
+
+        if (!canCreate) {
+          throw new Error('CONTACT_LIMIT_REACHED');
+        }
+
         const newContact = await contactService.create(data);
         await get().loadContacts();
         return newContact;

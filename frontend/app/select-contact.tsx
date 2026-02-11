@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Pressable, TextInput, ActivityIndicator, StyleSheet, Animated, Dimensions } from 'react-native';
+import { View, Text, ScrollView, Pressable, TextInput, ActivityIndicator, StyleSheet, Animated, Dimensions, Modal } from 'react-native';
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useContactsQuery } from '@/hooks/useContactsQuery';
 import { useGroupsQuery } from '@/hooks/useGroupsQuery';
 import { useAppStore } from '@/stores/app-store';
+import { useSubscriptionStore } from '@/stores/subscription-store';
 import { extractInfo, DetectionResult } from '@/lib/api';
 import { showErrorToast } from '@/lib/error-handler';
 import { Contact } from '@/types';
@@ -14,6 +15,7 @@ import { Search, ChevronRight, X } from 'lucide-react-native';
 import { Colors, Spacing, BorderRadius, Typography, Fonts } from '@/constants/theme';
 import { ContactAvatar } from '@/components/contact/ContactAvatar';
 import { getContactDisplayName } from '@/utils/contactDisplayName';
+import { Paywall } from '@/components/Paywall';
 
 export default function SelectContactScreen() {
   const { t } = useTranslation();
@@ -41,6 +43,7 @@ export default function SelectContactScreen() {
   const [newContactName, setNewContactName] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [hasEditedName, setHasEditedName] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
 
   const suggestedContact = useMemo(() => {
     if (!detection?.contactId) return null;
@@ -147,6 +150,12 @@ export default function SelectContactScreen() {
   };
 
   const handleCreateNew = async () => {
+    const canCreate = useSubscriptionStore.getState().canCreateContact(contacts.length);
+    if (!canCreate) {
+      setShowPaywall(true);
+      return;
+    }
+
     setIsExtracting(true);
     try {
       const contactsForExtraction = contacts.map((contactItem) => ({
@@ -228,155 +237,161 @@ export default function SelectContactScreen() {
   }, [fadeAnim, slideAnim]);
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
-    >
-      <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
-        {isExtracting ? (
-          <View style={styles.loadingFullScreen}>
-            <ActivityIndicator size="large" color={Colors.primary} />
-            <Text style={styles.loadingText}>{t('selectContact.analyzing')}</Text>
-          </View>
-        ) : (
-          <>
-            <Text style={styles.title}>{t('selectContact.question')}</Text>
+    <>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
+          {isExtracting ? (
+            <View style={styles.loadingFullScreen}>
+              <ActivityIndicator size="large" color={Colors.primary} />
+              <Text style={styles.loadingText}>{t('selectContact.analyzing')}</Text>
+            </View>
+          ) : (
+            <>
+              <Text style={styles.title}>{t('selectContact.question')}</Text>
 
-            <View style={styles.createRow}>
-              <View style={styles.createInputWrapper}>
-                <TextInput
-                  style={styles.createInput}
-                  placeholder={t('selectContact.firstNamePlaceholder')}
-                  placeholderTextColor={Colors.textMuted}
-                  autoCapitalize="words"
-                  autoCorrect={true}
-                  spellCheck={true}
-                  value={newContactName}
-                  onChangeText={(text) => {
-                    setNewContactName(text);
-                    setHasEditedName(true);
-                  }}
-                />
-                {newContactName.length > 0 && (
-                  <Pressable
-                    style={styles.clearButton}
-                    onPress={() => {
-                      setNewContactName('');
+              <View style={styles.createRow}>
+                <View style={styles.createInputWrapper}>
+                  <TextInput
+                    style={styles.createInput}
+                    placeholder={t('selectContact.firstNamePlaceholder')}
+                    placeholderTextColor={Colors.textMuted}
+                    autoCapitalize="words"
+                    autoCorrect={true}
+                    spellCheck={true}
+                    value={newContactName}
+                    onChangeText={(text) => {
+                      setNewContactName(text);
                       setHasEditedName(true);
                     }}
-                    hitSlop={8}
-                  >
-                    <X size={16} color={Colors.textMuted} />
-                  </Pressable>
-                )}
+                  />
+                  {newContactName.length > 0 && (
+                    <Pressable
+                      style={styles.clearButton}
+                      onPress={() => {
+                        setNewContactName('');
+                        setHasEditedName(true);
+                      }}
+                      hitSlop={8}
+                    >
+                      <X size={16} color={Colors.textMuted} />
+                    </Pressable>
+                  )}
+                </View>
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.createButton,
+                    pressed && styles.createButtonPressed,
+                    !newContactName.trim() && styles.createButtonDisabled,
+                  ]}
+                  onPress={handleCreateNew}
+                  disabled={!newContactName.trim()}
+                >
+                  <Text style={[
+                    styles.createButtonText,
+                    !newContactName.trim() && styles.createButtonTextDisabled,
+                  ]}>
+                    {t('selectContact.createNewContact')}
+                  </Text>
+                </Pressable>
               </View>
-              <Pressable
-                style={({ pressed }) => [
-                  styles.createButton,
-                  pressed && styles.createButtonPressed,
-                  !newContactName.trim() && styles.createButtonDisabled,
-                ]}
-                onPress={handleCreateNew}
-                disabled={!newContactName.trim()}
-              >
-                <Text style={[
-                  styles.createButtonText,
-                  !newContactName.trim() && styles.createButtonTextDisabled,
-                ]}>
-                  {t('selectContact.createNewContact')}
-                </Text>
+
+              <View style={styles.separator} />
+
+              <View style={styles.searchContainer}>
+                <Search size={18} color={Colors.textMuted} />
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder={t('selectContact.searchPlaceholder')}
+                  placeholderTextColor={Colors.textMuted}
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                />
+              </View>
+
+              {suggestedContacts.length > 0 && !searchQuery && (
+                <View style={styles.contactsSection}>
+                  <Text style={styles.sectionLabel}>{t('selectContact.suggested')}</Text>
+                  <View style={styles.contactsList}>
+                    {suggestedContacts.map((contact, index) => (
+                      <Pressable
+                        key={contact.id}
+                        style={({ pressed }) => [
+                          styles.contactRow,
+                          styles.suggestedRow,
+                          index === 0 && styles.contactRowFirst,
+                          index === suggestedContacts.length - 1 && styles.contactRowLast,
+                          pressed && styles.contactRowPressed,
+                        ]}
+                        onPress={() => handleSelectContact(contact)}
+                      >
+                        <ContactAvatar
+                          firstName={contact.firstName}
+                          lastName={contact.lastName}
+                          gender={contact.gender}
+                          avatarUrl={contact.avatarUrl}
+                          size="small"
+                          cacheKey={contact.updatedAt}
+                          recyclingKey={contact.id}
+                        />
+                        <Text style={styles.contactName}>{getContactDisplayName(contact)}</Text>
+                        <ChevronRight size={18} color={Colors.textMuted} />
+                      </Pressable>
+                    ))}
+                  </View>
+                </View>
+              )}
+
+              {filteredContacts.length > 0 && (
+                <View style={styles.contactsSection}>
+                  {suggestedContacts.length > 0 && !searchQuery && (
+                    <Text style={styles.sectionLabel}>{t('selectContact.allContacts')}</Text>
+                  )}
+                  <View style={styles.contactsList}>
+                    {filteredContacts.map((contact, index) => (
+                      <Pressable
+                        key={contact.id}
+                        style={({ pressed }) => [
+                          styles.contactRow,
+                          index === 0 && styles.contactRowFirst,
+                          index === filteredContacts.length - 1 && styles.contactRowLast,
+                          pressed && styles.contactRowPressed,
+                        ]}
+                        onPress={() => handleSelectContact(contact)}
+                      >
+                        <ContactAvatar
+                          firstName={contact.firstName}
+                          lastName={contact.lastName}
+                          gender={contact.gender}
+                          avatarUrl={contact.avatarUrl}
+                          size="small"
+                          cacheKey={contact.updatedAt}
+                          recyclingKey={contact.id}
+                        />
+                        <Text style={styles.contactName}>{getContactDisplayName(contact)}</Text>
+                        <ChevronRight size={18} color={Colors.textMuted} />
+                      </Pressable>
+                    ))}
+                  </View>
+                </View>
+              )}
+
+              <Pressable style={styles.cancelButton} onPress={handleCancel}>
+                <Text style={styles.cancelText}>{t('common.cancel')}</Text>
               </Pressable>
-            </View>
+            </>
+          )}
+        </Animated.View>
+      </ScrollView>
 
-            <View style={styles.separator} />
-
-            <View style={styles.searchContainer}>
-              <Search size={18} color={Colors.textMuted} />
-              <TextInput
-                style={styles.searchInput}
-                placeholder={t('selectContact.searchPlaceholder')}
-                placeholderTextColor={Colors.textMuted}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-              />
-            </View>
-
-            {suggestedContacts.length > 0 && !searchQuery && (
-              <View style={styles.contactsSection}>
-                <Text style={styles.sectionLabel}>{t('selectContact.suggested')}</Text>
-                <View style={styles.contactsList}>
-                  {suggestedContacts.map((contact, index) => (
-                    <Pressable
-                      key={contact.id}
-                      style={({ pressed }) => [
-                        styles.contactRow,
-                        styles.suggestedRow,
-                        index === 0 && styles.contactRowFirst,
-                        index === suggestedContacts.length - 1 && styles.contactRowLast,
-                        pressed && styles.contactRowPressed,
-                      ]}
-                      onPress={() => handleSelectContact(contact)}
-                    >
-                      <ContactAvatar
-                        firstName={contact.firstName}
-                        lastName={contact.lastName}
-                        gender={contact.gender}
-                        avatarUrl={contact.avatarUrl}
-                        size="small"
-                        cacheKey={contact.updatedAt}
-                        recyclingKey={contact.id}
-                      />
-                      <Text style={styles.contactName}>{getContactDisplayName(contact)}</Text>
-                      <ChevronRight size={18} color={Colors.textMuted} />
-                    </Pressable>
-                  ))}
-                </View>
-              </View>
-            )}
-
-            {filteredContacts.length > 0 && (
-              <View style={styles.contactsSection}>
-                {suggestedContacts.length > 0 && !searchQuery && (
-                  <Text style={styles.sectionLabel}>{t('selectContact.allContacts')}</Text>
-                )}
-                <View style={styles.contactsList}>
-                  {filteredContacts.map((contact, index) => (
-                    <Pressable
-                      key={contact.id}
-                      style={({ pressed }) => [
-                        styles.contactRow,
-                        index === 0 && styles.contactRowFirst,
-                        index === filteredContacts.length - 1 && styles.contactRowLast,
-                        pressed && styles.contactRowPressed,
-                      ]}
-                      onPress={() => handleSelectContact(contact)}
-                    >
-                      <ContactAvatar
-                        firstName={contact.firstName}
-                        lastName={contact.lastName}
-                        gender={contact.gender}
-                        avatarUrl={contact.avatarUrl}
-                        size="small"
-                        cacheKey={contact.updatedAt}
-                        recyclingKey={contact.id}
-                      />
-                      <Text style={styles.contactName}>{getContactDisplayName(contact)}</Text>
-                      <ChevronRight size={18} color={Colors.textMuted} />
-                    </Pressable>
-                  ))}
-                </View>
-              </View>
-            )}
-
-            <Pressable style={styles.cancelButton} onPress={handleCancel}>
-              <Text style={styles.cancelText}>{t('common.cancel')}</Text>
-            </Pressable>
-          </>
-        )}
-      </Animated.View>
-    </ScrollView>
+      <Modal visible={showPaywall} animationType="slide" presentationStyle="pageSheet">
+        <Paywall onClose={() => setShowPaywall(false)} reason="contact_limit" />
+      </Modal>
+    </>
   );
 }
 

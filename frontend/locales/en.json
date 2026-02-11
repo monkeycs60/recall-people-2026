@@ -694,7 +694,8 @@
       "aiSearch": "AI Search is a premium feature",
       "recordingDuration": "Longer recordings require premium",
       "aiAssistant": "AI Assistant is a premium feature",
-      "avatarGeneration": "You've used all 5 free AI avatar generations"
+      "avatarGeneration": "You've used all 5 free AI avatar generations",
+      "contactLimit": "You've reached the 15 free contacts limit"
     },
     "errors": {
       "purchaseFailed": "Purchase failed",

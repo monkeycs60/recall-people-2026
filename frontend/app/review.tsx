@@ -7,6 +7,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { ExtractionResult, HotTopic, ResolvedTopic, ExtractedMemory } from '@/types';
 import { useCreateContact, useUpdateContact } from '@/hooks/useContactsQuery';
+import { useContactsQuery } from '@/hooks/useContactsQuery';
 import { useGroupsQuery } from '@/hooks/useGroupsQuery';
 import { useNotes } from '@/hooks/useNotes';
 import { hotTopicService } from '@/services/hot-topic.service';
@@ -29,6 +30,7 @@ import { MemoriesSection } from '@/components/review/MemoriesSection';
 import { ResolvedTopicsSection } from '@/components/review/ResolvedTopicsSection';
 import { GroupsSection } from '@/components/review/GroupsSection';
 import { getLocaleDateStringLocale } from '@/utils/dateLocale';
+import { Paywall } from '@/components/Paywall';
 
 export default function ReviewScreen() {
   const { t } = useTranslation();
@@ -38,6 +40,7 @@ export default function ReviewScreen() {
   const queryClient = useQueryClient();
   const createContactMutation = useCreateContact();
   const updateContactMutation = useUpdateContact();
+  const { contacts: allContacts } = useContactsQuery();
   const { groups: allGroups } = useGroupsQuery();
   const { createNote } = useNotes();
   const { setRecordingState, addPendingAvatarGeneration, removePendingAvatarGeneration } = useAppStore();
@@ -85,6 +88,7 @@ export default function ReviewScreen() {
   const [isSaving, setIsSaving] = useState(false);
   const isSavingRef = useRef(false);
   const [existingHotTopics, setExistingHotTopics] = useState<HotTopic[]>([]);
+  const [showPaywall, setShowPaywall] = useState(false);
 
   const [resolvedTopicsState, setResolvedTopicsState] = useState<ResolvedTopic[]>(
     extraction.resolvedTopics || []
@@ -391,6 +395,14 @@ export default function ReviewScreen() {
       let finalContactId = contactId;
 
       if (contactId === 'new') {
+        const canCreate = useSubscriptionStore.getState().canCreateContact(allContacts.length);
+        if (!canCreate) {
+          setShowPaywall(true);
+          isSavingRef.current = false;
+          setIsSaving(false);
+          return;
+        }
+
         const nameParts = editedName.trim().split(' ');
         const firstName = nameParts[0];
         const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : undefined;
@@ -872,6 +884,10 @@ export default function ReviewScreen() {
           </Text>
         </Pressable>
       </View>
+
+      <Modal visible={showPaywall} animationType="slide" presentationStyle="pageSheet">
+        <Paywall onClose={() => setShowPaywall(false)} reason="contact_limit" />
+      </Modal>
     </View>
   );
 }

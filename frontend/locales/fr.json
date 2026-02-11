@@ -730,7 +730,8 @@
       "aiSearch": "La recherche IA est une fonctionnalité premium",
       "recordingDuration": "Les enregistrements plus longs nécessitent premium",
       "aiAssistant": "L'assistant IA est une fonctionnalité premium",
-      "avatarGeneration": "Tu as utilisé tes 5 générations d'avatar IA gratuites"
+      "avatarGeneration": "Tu as utilisé tes 5 générations d'avatar IA gratuites",
+      "contactLimit": "Tu as atteint la limite de 15 contacts gratuits"
     },
     "errors": {
       "purchaseFailed": "Echec de l'achat",

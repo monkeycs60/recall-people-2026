@@ -694,7 +694,8 @@
       "aiSearch": "KI-Suche ist eine Premium-Funktion",
       "recordingDuration": "Längere Aufnahmen erfordern Premium",
       "aiAssistant": "KI-Assistent ist eine Premium-Funktion",
-      "avatarGeneration": "Du hast deine 5 kostenlosen KI-Avatar-Generierungen verbraucht"
+      "avatarGeneration": "Du hast deine 5 kostenlosen KI-Avatar-Generierungen verbraucht",
+      "contactLimit": "Du hast das Limit von 15 kostenlosen Kontakten erreicht"
     },
     "errors": {
       "purchaseFailed": "Kauf fehlgeschlagen",

@@ -8,9 +8,11 @@ import { revenueCatService } from '@/services/revenuecat.service';
 import { Colors } from '@/constants/theme';
 import { showErrorToast, showSuccessToast } from '@/lib/error-handler';
 
+type PaywallReason = 'notes_limit' | 'ai_search' | 'recording_duration' | 'ai_assistant' | 'avatar_generation' | 'contact_limit';
+
 type PaywallProps = {
   onClose: () => void;
-  reason?: 'notes_limit' | 'ai_search' | 'recording_duration' | 'ai_assistant' | 'avatar_generation';
+  reason?: PaywallReason;
 };
 
 export function Paywall({ onClose, reason = 'notes_limit' }: PaywallProps) {
@@ -123,6 +125,8 @@ export function Paywall({ onClose, reason = 'notes_limit' }: PaywallProps) {
         return t('paywall.reason.aiAssistant');
       case 'avatar_generation':
         return t('paywall.reason.avatarGeneration');
+      case 'contact_limit':
+        return t('paywall.reason.contactLimit');
       default:
         return '';
     }

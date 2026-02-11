@@ -694,7 +694,8 @@
       "aiSearch": "La ricerca IA e una funzionalita premium",
       "recordingDuration": "Le registrazioni piu lunghe richiedono premium",
       "aiAssistant": "L'assistente IA e una funzionalita premium",
-      "avatarGeneration": "Hai usato le tue 5 generazioni gratuite di avatar IA"
+      "avatarGeneration": "Hai usato le tue 5 generazioni gratuite di avatar IA",
+      "contactLimit": "Hai raggiunto il limite di 15 contatti gratuiti"
     },
     "errors": {
       "purchaseFailed": "Acquisto fallito",
