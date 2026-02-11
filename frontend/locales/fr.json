@@ -449,7 +449,8 @@
       "permissionDenied": "Accès aux photos requis",
       "promptRequired": "Décris l'apparence",
       "trialsRemaining": "{{count}} génération(s) gratuite(s) restante(s)",
-      "noTrialsLeft": "Générations gratuites épuisées"
+      "noTrialsLeft": "Générations gratuites épuisées",
+      "quotaRemaining": "{{used}}/{{limit}} ce mois-ci"
     },
     "photo": {
       "permissionTitle": "Accès aux photos requis",
@@ -555,6 +556,7 @@
     "sections": {
       "language": "Langue",
       "subscription": "Abonnement",
+      "notifications": "Notifications",
       "data": "Données",
       "about": "À propos"
     },
@@ -794,6 +796,7 @@
     "noSuggestions": "Enregistre des notes pour voir des suggestions",
     "trialsRemaining": "{{count}} essais gratuits restants",
     "noTrialsLeft": "Tu as utilisé tes essais gratuits",
+    "quotaRemaining": "{{used}}/{{limit}} ce mois-ci",
     "suggestions": {
       "recentWith": "De quoi j'ai parlé avec {{firstName}} récemment ?",
       "birthdayOf": "C'est quand l'anniversaire de {{firstName}} ?",
@@ -820,5 +823,11 @@
     "contextTopics": "{{count}} sujets actifs",
     "dontKnow": "Je ne sais pas",
     "noActiveTopics": "Aucun sujet actif"
+  },
+  "settings": {
+    "notSeenThreshold": "Rappel de contact inactif",
+    "notSeenDescription": "Etre notifie quand un contact n'a pas ete vu depuis X jours",
+    "notSeenDays": "{{count}} jours",
+    "notSeenNever": "Jamais"
   }
 }

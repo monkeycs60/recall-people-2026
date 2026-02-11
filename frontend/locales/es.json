@@ -413,7 +413,8 @@
       "permissionDenied": "Se requiere acceso a las fotos",
       "promptRequired": "Por favor describe la apariencia",
       "trialsRemaining": "{{count}} generación(es) gratis restante(s)",
-      "noTrialsLeft": "Generaciones gratuitas agotadas"
+      "noTrialsLeft": "Generaciones gratuitas agotadas",
+      "quotaRemaining": "{{used}}/{{limit}} este mes"
     },
     "photo": {
       "permissionTitle": "Se requiere acceso a las fotos",
@@ -519,6 +520,7 @@
     "sections": {
       "language": "Idioma",
       "subscription": "Suscripción",
+      "notifications": "Notificaciones",
       "data": "Datos",
       "about": "Acerca de"
     },
@@ -808,6 +810,7 @@
     "newQuestion": "Haz otra pregunta...",
     "trialsRemaining": "{{count}} pruebas gratuitas restantes",
     "noTrialsLeft": "Pruebas gratuitas agotadas",
+    "quotaRemaining": "{{used}}/{{limit}} este mes",
     "upgradeHint": "Pasa a Premium para acceso ilimitado",
     "history": {
       "title": "Historial de preguntas",
@@ -830,5 +833,11 @@
     "contextTopics": "{{count}} temas activos",
     "dontKnow": "No lo sé",
     "noActiveTopics": "Sin temas activos"
+  },
+  "settings": {
+    "notSeenThreshold": "Recordatorio de contacto inactivo",
+    "notSeenDescription": "Recibir notificaciones cuando un contacto no ha sido visto en X dias",
+    "notSeenDays": "{{count}} dias",
+    "notSeenNever": "Nunca"
   }
 }

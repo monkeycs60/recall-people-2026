@@ -14,7 +14,7 @@ import { hotTopicService } from '@/services/hot-topic.service';
 import { notificationService } from '@/services/notification.service';
 import { contactService } from '@/services/contact.service';
 import { groupService } from '@/services/group.service';
-import { generateSuggestedQuestions, generateSummary, generateAvatarFromHints, extractInfo, useAvatarTrial } from '@/lib/api';
+import { generateSuggestedQuestions, generateSummary, generateAvatarFromHints, extractInfo, useAvatarQuota } from '@/lib/api';
 import { noteService } from '@/services/note.service';
 import { useAppStore } from '@/stores/app-store';
 import { useSubscriptionStore } from '@/stores/subscription-store';
@@ -616,18 +616,15 @@ export default function ReviewScreen() {
               console.warn('[Avatar Auto] Generation failed (silent):', error);
             });
         } else {
-          useAvatarTrial()
-            .then(async (trialResult) => {
-              if (!trialResult.success && trialResult.error === 'no_trials_left') {
+          useAvatarQuota()
+            .then(async (quotaResult) => {
+              if (!quotaResult.success && quotaResult.error === 'no_trials_left') {
                 removePendingAvatarGeneration(finalContactId);
-                console.log('[Avatar Auto] No trials left, skipping avatar generation');
+                console.log('[Avatar Auto] No quota left, skipping avatar generation');
                 return;
               }
 
-              if (trialResult.remaining >= 0) {
-                useSubscriptionStore.getState().setFreeAvatarTrials(trialResult.remaining);
-              }
-
+              await useSubscriptionStore.getState().syncTrialAndQuotas();
               await proceedWithGeneration();
             })
             .catch((error) => {

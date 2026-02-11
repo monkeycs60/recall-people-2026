@@ -413,7 +413,8 @@
       "permissionDenied": "Photo access required",
       "promptRequired": "Please describe the appearance",
       "trialsRemaining": "{{count}} free generations remaining",
-      "noTrialsLeft": "Free generations exhausted"
+      "noTrialsLeft": "Free generations exhausted",
+      "quotaRemaining": "{{used}}/{{limit}} this month"
     },
     "photo": {
       "permissionTitle": "Photo Access Required",
@@ -519,6 +520,7 @@
     "sections": {
       "language": "Language",
       "subscription": "Subscription",
+      "notifications": "Notifications",
       "data": "Data",
       "about": "About"
     },
@@ -808,6 +810,7 @@
     "newQuestion": "Ask another question...",
     "trialsRemaining": "{{count}} free trials remaining",
     "noTrialsLeft": "Free trials exhausted",
+    "quotaRemaining": "{{used}}/{{limit}} this month",
     "upgradeHint": "Upgrade to Premium for unlimited access",
     "history": {
       "title": "Question history",
@@ -830,5 +833,11 @@
     "contextTopics": "{{count}} active topics",
     "dontKnow": "I don't know",
     "noActiveTopics": "No active topics"
+  },
+  "settings": {
+    "notSeenThreshold": "Inactive contact reminder",
+    "notSeenDescription": "Get notified when a contact hasn't been seen for X days",
+    "notSeenDays": "{{count}} days",
+    "notSeenNever": "Never"
   }
 }

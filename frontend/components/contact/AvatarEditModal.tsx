@@ -18,7 +18,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system/legacy';
 import { Image } from 'expo-image';
 import { Colors, Spacing, BorderRadius } from '@/constants/theme';
-import { uploadAvatar, generateAvatar, deleteAvatar, useAvatarTrial } from '@/lib/api';
+import { uploadAvatar, generateAvatar, deleteAvatar, useAvatarQuota } from '@/lib/api';
 import { contactService } from '@/services/contact.service';
 import { useSubscriptionStore } from '@/stores/subscription-store';
 import { Paywall } from '@/components/Paywall';
@@ -51,9 +51,10 @@ export function AvatarEditModal({
   const [showPaywall, setShowPaywall] = useState(false);
 
   const canGenerateAvatar = useSubscriptionStore((state) => state.canGenerateAvatar);
-  const freeAvatarTrials = useSubscriptionStore((state) => state.freeAvatarTrials);
-  const setFreeAvatarTrials = useSubscriptionStore((state) => state.setFreeAvatarTrials);
+  const avatarUsed = useSubscriptionStore((state) => state.avatarUsed);
+  const avatarLimit = useSubscriptionStore((state) => state.avatarLimit);
   const isPremium = useSubscriptionStore((state) => state.isPremium);
+  const syncTrialAndQuotas = useSubscriptionStore((state) => state.syncTrialAndQuotas);
 
   const resetState = () => {
     setMode('choose');
@@ -148,26 +149,24 @@ export function AvatarEditModal({
     try {
       if (!isPremium) {
         try {
-          const trialResult = await useAvatarTrial();
-          if (!trialResult.success && trialResult.error === 'no_trials_left') {
+          const quotaResult = await useAvatarQuota();
+          if (!quotaResult.success && quotaResult.error === 'no_trials_left') {
             setShowPaywall(true);
             setIsGenerating(false);
             return;
           }
 
-          if (trialResult.remaining >= 0) {
-            setFreeAvatarTrials(trialResult.remaining);
-          }
-        } catch (trialError) {
-          const isNoTrials = trialError instanceof Error &&
-            ('statusCode' in trialError && (trialError as { statusCode: number }).statusCode === 403);
-          if (isNoTrials) {
-            setFreeAvatarTrials(0);
+          await syncTrialAndQuotas();
+        } catch (quotaError) {
+          const isQuotaExhausted = quotaError instanceof Error &&
+            ('statusCode' in quotaError && (quotaError as unknown as { statusCode: number }).statusCode === 403);
+          if (isQuotaExhausted) {
+            await syncTrialAndQuotas();
             setShowPaywall(true);
             setIsGenerating(false);
             return;
           }
-          throw trialError;
+          throw quotaError;
         }
       }
 
@@ -260,7 +259,7 @@ export function AvatarEditModal({
                     {canGenerateAvatar()
                       ? isPremium
                         ? t('contact.avatar.generateWithAIDescription')
-                        : t('contact.avatar.trialsRemaining', { count: freeAvatarTrials })
+                        : t('contact.avatar.quotaRemaining', { used: avatarUsed, limit: avatarLimit })
                       : t('contact.avatar.noTrialsLeft')}
                   </Text>
                 </View>

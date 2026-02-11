@@ -19,7 +19,7 @@ import { Colors, Spacing, BorderRadius } from '@/constants/theme';
 import { DecoCircle } from '@/components/ui/DecoCircle';
 import { useContactsQuery } from '@/hooks/useContactsQuery';
 import { noteService } from '@/services/note.service';
-import { transcribeAudio, askQuestion, useAskTrial } from '@/lib/api';
+import { transcribeAudio, askQuestion, useAskQuota } from '@/lib/api';
 import { useAudioRecorder, RecordingPresets, setAudioModeAsync } from 'expo-audio';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeIn, FadeOut, FadeInDown } from 'react-native-reanimated';
@@ -37,9 +37,10 @@ export default function AssistantScreen() {
 
 	const { contacts } = useContactsQuery();
 	const isPremium = useSubscriptionStore((state) => state.isPremium);
-	const freeAskTrials = useSubscriptionStore((state) => state.freeAskTrials);
-	const setFreeAskTrials = useSubscriptionStore((state) => state.setFreeAskTrials);
-	const syncTrialsStatus = useSubscriptionStore((state) => state.syncTrialsStatus);
+	const askUsed = useSubscriptionStore((state) => state.askUsed);
+	const askLimit = useSubscriptionStore((state) => state.askLimit);
+	const canUseAsk = useSubscriptionStore((state) => state.canUseAsk);
+	const syncTrialAndQuotas = useSubscriptionStore((state) => state.syncTrialAndQuotas);
 
 	const [question, setQuestion] = useState('');
 	const [isRecording, setIsRecording] = useState(false);
@@ -58,7 +59,7 @@ export default function AssistantScreen() {
 
 	useFocusEffect(
 		useCallback(() => {
-			syncTrialsStatus();
+			syncTrialAndQuotas();
 			return () => {
 				if (durationIntervalRef.current) {
 					clearInterval(durationIntervalRef.current);
@@ -130,10 +131,10 @@ export default function AssistantScreen() {
 		}
 	};
 
-	const checkAndUseAskTrial = async (): Promise<boolean> => {
+	const checkAndUseAskQuota = async (): Promise<boolean> => {
 		if (isPremium) return true;
 
-		if (freeAskTrials <= 0) {
+		if (!canUseAsk()) {
 			showInfoToast(
 				t('assistant.noTrialsLeft'),
 				t('subscription.upgradeToPro')
@@ -143,12 +144,12 @@ export default function AssistantScreen() {
 		}
 
 		try {
-			const result = await useAskTrial();
+			const result = await useAskQuota();
 			if (result.success) {
-				setFreeAskTrials(result.remaining);
+				await syncTrialAndQuotas();
 				return true;
 			} else if (result.error === 'no_trials_left') {
-				setFreeAskTrials(0);
+				await syncTrialAndQuotas();
 				showInfoToast(
 					t('assistant.noTrialsLeft'),
 					t('subscription.upgradeToPro')
@@ -157,7 +158,7 @@ export default function AssistantScreen() {
 				return false;
 			}
 		} catch (error) {
-			console.error('[Assistant] Failed to use trial:', error);
+			console.error('[Assistant] Failed to use quota:', error);
 		}
 
 		return true;
@@ -166,7 +167,7 @@ export default function AssistantScreen() {
 	const handleSubmit = async () => {
 		if (!question.trim() || isSubmitting) return;
 
-		const canProceed = await checkAndUseAskTrial();
+		const canProceed = await checkAndUseAskQuota();
 		if (!canProceed) return;
 
 		setIsSubmitting(true);
@@ -374,8 +375,8 @@ export default function AssistantScreen() {
 					{!isPremium && (
 						<Animated.View entering={FadeInDown.delay(200)} style={styles.trialsInfo}>
 							<Text style={styles.trialsText}>
-								{freeAskTrials > 0
-									? t('assistant.trialsRemaining', { count: freeAskTrials })
+								{canUseAsk()
+									? t('assistant.quotaRemaining', { used: askUsed, limit: askLimit })
 									: t('assistant.noTrialsLeft')}
 							</Text>
 						</Animated.View>
