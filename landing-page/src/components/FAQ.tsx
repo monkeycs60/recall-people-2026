@@ -21,11 +21,11 @@ function FAQItem({
         onClick={() => setIsOpen(!isOpen)}
         className="w-full py-6 flex items-center justify-between text-left group"
       >
-        <span className="flex items-baseline gap-2 sm:gap-4">
+        <span className="flex items-baseline gap-4">
           <span className="text-sm text-text-muted font-mono">
             {String(index + 1).padStart(2, '0')}
           </span>
-          <span className="font-medium text-text-primary text-base sm:text-lg group-hover:text-primary transition-colors">
+          <span className="font-medium text-text-primary text-lg group-hover:text-primary transition-colors">
             {question}
           </span>
         </span>
@@ -51,7 +51,7 @@ function FAQItem({
         }}
       >
         <div className="overflow-hidden">
-          <p className="pb-6 pl-0 sm:pl-10 pr-4 sm:pr-12 text-text-secondary leading-relaxed">
+          <p className="pb-6 pl-10 pr-12 text-text-secondary leading-relaxed">
             {answer}
           </p>
         </div>
@@ -62,7 +62,7 @@ function FAQItem({
 
 export default function FAQ() {
   return (
-    <section id="faq" className="py-16 md:py-28 relative">
+    <section id="faq" className="py-20 md:py-32 bg-background">
       <div className="container mx-auto px-4">
         {/* Section header */}
         <div className="max-w-3xl mx-auto mb-12">

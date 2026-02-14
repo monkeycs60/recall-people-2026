@@ -2,6 +2,7 @@ import Hero from "@/components/Hero";
 import VisualProof from "@/components/VisualProof";
 import Features from "@/components/Features";
 import Pricing from "@/components/Pricing";
+import FAQ from "@/components/FAQ";
 import Footer from "@/components/Footer";
 import Privacy from "@/components/Privacy";
 
@@ -13,6 +14,7 @@ export default function Home() {
       <Features />
       <Privacy />
       <Pricing />
+      <FAQ />
       <Footer />
     </main>
   );
