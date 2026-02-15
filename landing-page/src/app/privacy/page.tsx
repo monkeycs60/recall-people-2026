@@ -77,7 +77,8 @@ export default function PrivacyPage() {
                 </p>
                 <ul className="list-disc pl-6 text-text-secondary space-y-2">
                   <li><strong>Voice recordings:</strong> Sent to Groq for transcription (using Whisper), then immediately deleted from their servers</li>
-                  <li><strong>Text for AI analysis:</strong> Sent to Cerebras to extract contacts and generate summaries, not stored or used for training</li>
+                  <li><strong>Text for AI analysis:</strong> Sent to Cerebras to extract contacts, generate summaries, and answer your questions via the Assistant. Not stored or used for training</li>
+                  <li><strong>Avatar generation:</strong> Text descriptions (gender, age range, ethnicity) are sent to Google Gemini to generate contact avatars. No real photos or personal data are sent</li>
                 </ul>
               </section>
 
@@ -105,9 +106,10 @@ export default function PrivacyPage() {
                 </p>
                 <ul className="list-disc pl-6 text-text-secondary space-y-2">
                   <li><strong>Groq:</strong> Speech-to-text transcription (using Whisper)</li>
-                  <li><strong>Cerebras:</strong> AI analysis, contact extraction, and summaries</li>
+                  <li><strong>Cerebras:</strong> AI analysis, contact extraction, summaries, and AI assistant</li>
+                  <li><strong>Google Gemini:</strong> AI avatar generation from text descriptions</li>
                   <li><strong>RevenueCat:</strong> Subscription and payment management via App Store / Google Play</li>
-                  <li><strong>Google Sign-In:</strong> Optional authentication method</li>
+                  <li><strong>Google Sign-In / Apple Sign-In:</strong> Optional authentication methods</li>
                 </ul>
                 <p className="text-text-secondary leading-relaxed mt-4">
                   These services process data only as needed to provide their functionality and are bound by their own privacy policies.

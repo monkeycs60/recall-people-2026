@@ -63,15 +63,20 @@ export default function TermsOfService() {
 
             <h3 className="text-lg font-semibold mt-6 mb-3">Free Plan</h3>
             <ul className="list-disc pl-6 text-text-secondary space-y-2">
-              <li>Limited to 5 notes per month</li>
-              <li>Maximum 60-second recording duration</li>
+              <li>Up to 15 contacts</li>
+              <li>Maximum 1-minute recording duration</li>
+              <li>Limited AI avatar generation and AI questions</li>
             </ul>
 
             <h3 className="text-lg font-semibold mt-6 mb-3">Premium Plan (Recall People Pro)</h3>
+            <p className="text-text-secondary leading-relaxed mb-2">
+              Available at $3.99/month or $39.99/year.
+            </p>
             <ul className="list-disc pl-6 text-text-secondary space-y-2">
-              <li>Unlimited notes</li>
+              <li>Unlimited contacts</li>
               <li>Up to 3-minute recording duration</li>
-              <li>Priority support</li>
+              <li>Unlimited AI avatar generation and AI questions</li>
+              <li>Smart reminders and weekly digest</li>
             </ul>
 
             <h3 className="text-lg font-semibold mt-6 mb-3">Billing</h3>
