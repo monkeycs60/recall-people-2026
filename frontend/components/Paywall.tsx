@@ -1,7 +1,7 @@
 import { View, Text, Pressable, ActivityIndicator, StyleSheet, BackHandler, Linking, ScrollView } from 'react-native';
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Check, Crown, AlertCircle, RefreshCw } from 'lucide-react-native';
+import { X, AlertCircle, RefreshCw, ArrowRight, Check, Minus } from 'lucide-react-native';
 import { PurchasesOffering } from 'react-native-purchases';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { revenueCatService } from '@/services/revenuecat.service';
@@ -12,6 +12,13 @@ const TERMS_URL = 'https://recall-people-2026.vercel.app/terms';
 const PRIVACY_URL = 'https://recall-people-2026.vercel.app/privacy';
 
 type PaywallReason = 'ai_search' | 'recording_duration' | 'ai_assistant' | 'avatar_generation' | 'contact_limit' | 'proactive_reminders';
+
+type ComparisonRow = {
+  label: string;
+  free: string;
+  pro: string;
+  isBoolean?: boolean;
+};
 
 type PaywallProps = {
   onClose: () => void;
@@ -138,12 +145,16 @@ export function Paywall({ onClose, reason = 'contact_limit' }: PaywallProps) {
     }
   };
 
-  const features = [
-    t('paywall.features.unlimitedContacts'),
-    t('paywall.features.longerRecordings'),
-    t('paywall.features.unlimitedAI'),
-    t('paywall.features.smartReminders'),
-    t('paywall.features.weeklyDigest'),
+  const unlimited = t('paywall.comparison.unlimited');
+  const perMonth = t('paywall.comparison.perMonth');
+
+  const comparisonRows: ComparisonRow[] = [
+    { label: t('paywall.comparison.contacts'), free: '15', pro: unlimited },
+    { label: t('paywall.comparison.recordings'), free: '1 min', pro: '3 min' },
+    { label: t('paywall.comparison.aiAvatars'), free: `5${perMonth}`, pro: unlimited },
+    { label: t('paywall.comparison.aiAssistant'), free: `10${perMonth}`, pro: unlimited },
+    { label: t('paywall.comparison.reminders'), free: '', pro: '', isBoolean: true },
+    { label: t('paywall.comparison.digest'), free: '', pro: '', isBoolean: true },
   ];
 
   if (isLoading) {
@@ -205,15 +216,45 @@ export function Paywall({ onClose, reason = 'contact_limit' }: PaywallProps) {
         showsVerticalScrollIndicator={false}
         bounces={true}
       >
-        <Crown size={48} color={Colors.primary} style={styles.icon} />
         <Text style={styles.title}>{t('paywall.title')}</Text>
         <Text style={styles.reason}>{getReasonText()}</Text>
 
-        <View style={styles.features}>
-          {features.map((feature, index) => (
-            <View key={index} style={styles.featureRow}>
-              <Check size={20} color={Colors.success} />
-              <Text style={styles.featureText}>{feature}</Text>
+        <View style={styles.comparisonCard}>
+          <View style={styles.comparisonHeader}>
+            <View style={styles.comparisonHeaderLabel} />
+            <Text style={styles.comparisonHeaderFree}>{t('paywall.comparison.free')}</Text>
+            <ArrowRight size={14} color={Colors.textMuted} />
+            <Text style={styles.comparisonHeaderPro}>{t('paywall.comparison.pro')}</Text>
+          </View>
+
+          {comparisonRows.map((row, index) => (
+            <View
+              key={row.label}
+              style={[
+                styles.comparisonRow,
+                index === comparisonRows.length - 1 && styles.comparisonRowLast,
+              ]}
+            >
+              <Text style={styles.comparisonLabel}>{row.label}</Text>
+              {row.isBoolean ? (
+                <>
+                  <View style={styles.comparisonFreeValue}>
+                    <Minus size={14} color={Colors.textMuted} />
+                  </View>
+                  <View style={styles.comparisonArrow} />
+                  <View style={styles.comparisonProValue}>
+                    <Check size={14} color={Colors.primary} strokeWidth={3} />
+                  </View>
+                </>
+              ) : (
+                <>
+                  <Text style={styles.comparisonFreeText}>{row.free}</Text>
+                  <View style={styles.comparisonArrow}>
+                    <ArrowRight size={12} color={Colors.textMuted} />
+                  </View>
+                  <Text style={styles.comparisonProText}>{row.pro}</Text>
+                </>
+              )}
             </View>
           ))}
         </View>
@@ -312,7 +353,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 20,
-    backgroundColor: Colors.surfaceHover,
+    backgroundColor: Colors.surfaceAlt,
   },
   loadingContainer: {
     flex: 1,
@@ -359,35 +400,99 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingBottom: 32,
   },
-  icon: {
-    marginBottom: 16,
-  },
   title: {
     fontFamily: 'PlayfairDisplay_700Bold',
     fontSize: 28,
     color: Colors.textPrimary,
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   reason: {
-    fontSize: 16,
+    fontSize: 15,
     color: Colors.textSecondary,
     textAlign: 'center',
-    marginBottom: 32,
+    marginBottom: 24,
   },
-  features: {
+  comparisonCard: {
     alignSelf: 'stretch',
-    marginBottom: 32,
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    paddingVertical: 4,
+    marginBottom: 24,
+    overflow: 'hidden',
   },
-  featureRow: {
+  comparisonHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    marginBottom: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
   },
-  featureText: {
-    fontSize: 16,
+  comparisonHeaderLabel: {
+    flex: 1,
+  },
+  comparisonHeaderFree: {
+    width: 60,
+    fontSize: 12,
+    fontWeight: '600',
+    color: Colors.textMuted,
+    textAlign: 'center',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  comparisonHeaderPro: {
+    width: 80,
+    fontSize: 12,
+    fontWeight: '700',
+    color: Colors.primary,
+    textAlign: 'center',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  comparisonRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
+  },
+  comparisonRowLast: {
+    borderBottomWidth: 0,
+  },
+  comparisonLabel: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '500',
     color: Colors.textPrimary,
+  },
+  comparisonFreeValue: {
+    width: 60,
+    alignItems: 'center',
+  },
+  comparisonFreeText: {
+    width: 60,
+    fontSize: 13,
+    color: Colors.textMuted,
+    textAlign: 'center',
+  },
+  comparisonArrow: {
+    width: 20,
+    alignItems: 'center',
+  },
+  comparisonProValue: {
+    width: 80,
+    alignItems: 'center',
+  },
+  comparisonProText: {
+    width: 80,
+    fontSize: 13,
+    fontWeight: '600',
+    color: Colors.primary,
+    textAlign: 'center',
   },
   packages: {
     flexDirection: 'row',
@@ -401,7 +506,7 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: Colors.border,
+    borderColor: Colors.borderLight,
   },
   packageCardSelected: {
     borderColor: Colors.primary,

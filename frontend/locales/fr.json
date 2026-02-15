@@ -762,6 +762,18 @@
       "smartReminders": "Rappels intelligents personnalisés",
       "weeklyDigest": "Digest hebdomadaire"
     },
+    "comparison": {
+      "free": "Gratuit",
+      "pro": "Pro",
+      "unlimited": "Illimité",
+      "perMonth": "/mois",
+      "contacts": "Contacts",
+      "recordings": "Enregistrements",
+      "aiAvatars": "Avatars IA",
+      "aiAssistant": "Assistant IA",
+      "reminders": "Rappels intelligents",
+      "digest": "Digest hebdo"
+    },
     "monthly": "Mensuel",
     "annual": "Annuel",
     "month": "mois",

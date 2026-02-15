@@ -726,6 +726,18 @@
       "smartReminders": "Intelligente personalisierte Erinnerungen",
       "weeklyDigest": "Wöchentliche Zusammenfassung"
     },
+    "comparison": {
+      "free": "Kostenlos",
+      "pro": "Pro",
+      "unlimited": "Unbegrenzt",
+      "perMonth": "/Mo.",
+      "contacts": "Kontakte",
+      "recordings": "Aufnahmen",
+      "aiAvatars": "KI-Avatare",
+      "aiAssistant": "KI-Assistent",
+      "reminders": "Intelligente Erinnerungen",
+      "digest": "Wöchentliche Zusammenfassung"
+    },
     "monthly": "Monatlich",
     "annual": "Jährlich",
     "month": "Monat",

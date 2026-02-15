@@ -726,6 +726,18 @@
       "smartReminders": "Promemoria intelligenti personalizzati",
       "weeklyDigest": "Riepilogo settimanale"
     },
+    "comparison": {
+      "free": "Gratis",
+      "pro": "Pro",
+      "unlimited": "Illimitato",
+      "perMonth": "/mese",
+      "contacts": "Contatti",
+      "recordings": "Registrazioni",
+      "aiAvatars": "Avatar IA",
+      "aiAssistant": "Assistente IA",
+      "reminders": "Promemoria intelligenti",
+      "digest": "Riepilogo settimanale"
+    },
     "monthly": "Mensile",
     "annual": "Annuale",
     "month": "mese",

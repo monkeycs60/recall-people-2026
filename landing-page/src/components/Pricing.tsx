@@ -10,7 +10,7 @@ const plans = [
       '15 contacts',
       'Unlimited voice notes',
       '1-minute recordings',
-      '5 AI avatars / month',
+      'AI avatars (5/month)',
       'AI assistant (10/month)',
       'Event & birthday reminders',
       'Export data anytime',

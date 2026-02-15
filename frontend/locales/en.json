@@ -726,6 +726,18 @@
       "smartReminders": "Smart personalized reminders",
       "weeklyDigest": "Weekly digest"
     },
+    "comparison": {
+      "free": "Free",
+      "pro": "Pro",
+      "unlimited": "Unlimited",
+      "perMonth": "/mo",
+      "contacts": "Contacts",
+      "recordings": "Recordings",
+      "aiAvatars": "AI avatars",
+      "aiAssistant": "AI assistant",
+      "reminders": "Smart reminders",
+      "digest": "Weekly digest"
+    },
     "monthly": "Monthly",
     "annual": "Annual",
     "month": "month",
