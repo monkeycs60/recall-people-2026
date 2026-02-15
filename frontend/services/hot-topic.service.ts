@@ -188,6 +188,52 @@ export const hotTopicService = {
     await db.runAsync('DELETE FROM hot_topics WHERE id = ?', [id]);
   },
 
+  getPast: async (daysBack: number = 90): Promise<HotTopic[]> => {
+    const db = await getDatabase();
+    const today = startOfDay(new Date()).toISOString();
+    const startDate = addDays(startOfDay(new Date()), -daysBack).toISOString();
+
+    const result = await db.getAllAsync<{
+      id: string;
+      contact_id: string;
+      title: string;
+      context: string | null;
+      resolution: string | null;
+      status: string;
+      source_note_id: string | null;
+      event_date: string | null;
+      notified_at: string | null;
+      birthday_contact_id: string | null;
+      created_at: string;
+      updated_at: string;
+      resolved_at: string | null;
+    }>(
+      `SELECT * FROM hot_topics
+       WHERE event_date IS NOT NULL
+       AND event_date < ?
+       AND event_date >= ?
+       AND birthday_contact_id IS NULL
+       ORDER BY event_date DESC`,
+      [today, startDate]
+    );
+
+    return result.map((row) => ({
+      id: row.id,
+      contactId: row.contact_id,
+      title: row.title,
+      context: row.context || undefined,
+      resolution: row.resolution || undefined,
+      status: row.status as HotTopicStatus,
+      sourceNoteId: row.source_note_id || undefined,
+      eventDate: row.event_date || undefined,
+      notifiedAt: row.notified_at || undefined,
+      birthdayContactId: row.birthday_contact_id || undefined,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      resolvedAt: row.resolved_at || undefined,
+    }));
+  },
+
   getUpcoming: async (daysAhead: number = 30): Promise<HotTopic[]> => {
     const db = await getDatabase();
     const today = startOfDay(new Date()).toISOString();

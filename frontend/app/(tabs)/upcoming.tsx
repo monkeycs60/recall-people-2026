@@ -82,8 +82,16 @@ export default function UpcomingScreen() {
 
       setTimeline(days);
     } else {
-      // Past view: hot topics don't track past events, show empty
-      setPastEvents([]);
+      const pastTopics = await hotTopicService.getPast(90);
+
+      const pastWithContacts = await Promise.all(
+        pastTopics.map(async (topic) => {
+          const contact = await contactService.getById(topic.contactId);
+          return { ...topic, contact: contact! };
+        })
+      );
+
+      setPastEvents(pastWithContacts.filter((event) => event.contact));
     }
 
     setHasLoaded(true);
