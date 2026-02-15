@@ -6,7 +6,7 @@ const features = [
   {
     icon: Mic,
     title: 'Capture in seconds',
-    description: 'Record a voice note after your meeting. No typing, no effort. AI handles the rest.',
+    description: "Just met someone? Record a quick voice note. AI builds their profile with every detail — so next time, you remember everything.",
     className: 'md:col-span-2 bg-text-primary text-text-inverse', // Dark card for contrast
     iconClass: 'text-primary'
   },
