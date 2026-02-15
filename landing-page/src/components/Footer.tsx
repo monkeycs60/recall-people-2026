@@ -28,7 +28,7 @@ export default function Footer() {
 
         <div className="flex flex-col md:flex-row items-center justify-between border-t border-white/10 pt-8 mt-8 text-sm text-text-muted">
             <div className="flex items-center gap-2 mb-4 md:mb-0">
-                <Image src="/logo.png" alt="Recall Logo" width={24} height={24} className="opacity-50 grayscale" unoptimized />
+                <Image src="/logo.png" alt="Recall Logo" width={24} height={24} className="opacity-50 grayscale" />
                 <span>© {new Date().getFullYear()} Recall People</span>
             </div>
             

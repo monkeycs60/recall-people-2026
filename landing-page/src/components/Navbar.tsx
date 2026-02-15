@@ -7,7 +7,7 @@ import { Menu, X } from 'lucide-react';
 
 const navLinks = [
   { label: 'Features', href: '/#features' },
-  { label: 'Privacy', href: '/privacy' },
+  { label: 'Privacy', href: '/#privacy' },
   { label: 'Pricing', href: '/#pricing' },
 ];
 
@@ -26,24 +26,24 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-out border-b ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-out ${
         isScrolled || isOpen
-          ? 'bg-background/80 backdrop-blur-xl border-border-light py-3'
-          : 'bg-transparent border-transparent py-5'
+          ? 'bg-background/80 backdrop-blur-xl border-b border-border-light py-3'
+          : 'bg-transparent py-5'
       }`}
     >
       <div className="container mx-auto px-6 max-w-6xl">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <Image
-              src="/logo.png"
-              alt="Recall People"
-              width={32}
-              height={32}
-              className="rounded-lg"
-              unoptimized
-            />
+            <div className="relative w-8 h-8 rounded-lg overflow-hidden">
+              <Image
+                src="/logo.png"
+                alt="Recall People"
+                fill
+                className="object-cover"
+              />
+            </div>
             <span className="font-bold text-lg text-text-primary tracking-tight">
               Recall People
             </span>
