@@ -1,4 +1,5 @@
-import { View, Text, ScrollView, Pressable, TextInput, Alert, Platform, KeyboardAvoidingView, StyleSheet, BackHandler, Modal } from 'react-native';
+import { View, Text, ScrollView, Pressable, TextInput, Platform, KeyboardAvoidingView, StyleSheet, BackHandler, Modal } from 'react-native';
+import { OptionPickerSheet } from '@/components/ui/OptionPickerSheet';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
@@ -43,6 +44,7 @@ import { Colors } from '@/constants/theme';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { useAppStore } from '@/stores/app-store';
 import { useSubscriptionStore } from '@/stores/subscription-store';
+import { useSettingsStore } from '@/stores/settings-store';
 import { ContactDetailSkeleton } from '@/components/skeleton/ContactDetailSkeleton';
 import { Paywall } from '@/components/Paywall';
 
@@ -57,6 +59,7 @@ export default function ContactDetailScreen() {
   const highlightId = params.highlightId as string | undefined;
   const { setPreselectedContactId, isAvatarGenerating } = useAppStore();
   const isPremium = useSubscriptionStore((state) => state.isPremium);
+  const notSeenThresholdDays = useSettingsStore((state) => state.notSeenThresholdDays);
 
   const scrollViewRef = useRef<ScrollView>(null);
   const sectionPositions = useRef<Record<string, number>>({});
@@ -90,6 +93,7 @@ export default function ContactDetailScreen() {
   const [showNameModal, setShowNameModal] = useState(false);
 
   const groupsSheetRef = useRef<BottomSheetModal>(null);
+  const reminderFrequencySheetRef = useRef<BottomSheetModal>(null);
 
   const handleOpenGroupsSheet = useCallback(() => {
     groupsSheetRef.current?.present();
@@ -247,42 +251,40 @@ export default function ContactDetailScreen() {
     invalidate();
   };
 
+  const defaultLabel = notSeenThresholdDays === 0
+    ? t('contact.reminderNever')
+    : t('settings.notSeenDays', { count: notSeenThresholdDays });
+
   const getReminderFrequencyLabel = (value: number | undefined): string => {
-    if (value === undefined || value === null) return t('contact.reminderDefault');
+    if (value === undefined || value === null) return `${t('contact.reminderDefault')} (${defaultLabel})`;
     if (value === 14) return t('contact.reminderWeeks');
     if (value === 30) return t('contact.reminderMonth');
     if (value === 90) return t('contact.reminderQuarter');
     if (value === -1) return t('contact.reminderNever');
-    return t('contact.reminderDefault');
+    return `${t('contact.reminderDefault')} (${defaultLabel})`;
   };
+
+  const reminderFrequencyOptions: Array<{ label: string; value: number | null }> = [
+    { label: `${t('contact.reminderDefault')} (${defaultLabel})`, value: null },
+    { label: t('contact.reminderWeeks'), value: 14 },
+    { label: t('contact.reminderMonth'), value: 30 },
+    { label: t('contact.reminderQuarter'), value: 90 },
+    { label: t('contact.reminderNever'), value: -1 },
+  ];
 
   const handleReminderFrequencyPress = () => {
     if (!isPremium) {
       setShowPaywall(true);
       return;
     }
+    reminderFrequencySheetRef.current?.present();
+  };
 
-    const options: Array<{ label: string; value: number | null }> = [
-      { label: t('contact.reminderDefault'), value: null },
-      { label: t('contact.reminderWeeks'), value: 14 },
-      { label: t('contact.reminderMonth'), value: 30 },
-      { label: t('contact.reminderQuarter'), value: 90 },
-      { label: t('contact.reminderNever'), value: -1 },
-    ];
-
-    Alert.alert(
-      t('contact.reminderFrequency'),
-      undefined,
-      options.map((option) => ({
-        text: option.label,
-        onPress: () => {
-          updateContactMutation.mutate({
-            id: contactId,
-            data: { reminderFrequencyDays: option.value },
-          });
-        },
-      })),
-    );
+  const handleReminderFrequencySelect = (value: number | null) => {
+    updateContactMutation.mutate({
+      id: contactId,
+      data: { reminderFrequencyDays: value },
+    });
   };
 
   const handleRegenerateSummary = () => {
@@ -715,6 +717,14 @@ export default function ContactDetailScreen() {
         contactFirstName={contact.firstName}
         allGroups={allGroups}
         contactGroups={contactGroups}
+      />
+
+      <OptionPickerSheet
+        ref={reminderFrequencySheetRef}
+        title={t('contact.reminderFrequency')}
+        options={reminderFrequencyOptions}
+        selectedValue={contact.reminderFrequencyDays}
+        onSelect={handleReminderFrequencySelect}
       />
 
       {Platform.OS === 'android' && showReminderDatePicker && (

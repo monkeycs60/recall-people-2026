@@ -421,7 +421,7 @@
       "permissionTitle": "Accesso foto richiesto",
       "permissionMessage": "Consenti l'accesso alla galleria per selezionare un'immagine."
     },
-    "reminderFrequency": "Frequenza promemoria",
+    "reminderFrequency": "Ricordami di risentirlo",
     "reminderDefault": "Predefinito",
     "reminderWeeks": "Ogni 2 settimane",
     "reminderMonth": "Ogni mese",
@@ -860,9 +860,13 @@
   },
   "settings": {
     "notSeenThreshold": "Promemoria contatto inattivo",
-    "notSeenDescription": "Ricevi una notifica quando un contatto non e stato visto per X giorni",
+    "notSeenDescription": "Ricevi una notifica quando non senti un contatto da un po'. Personalizzabile per ogni contatto.",
     "notSeenDays": "{{count}} giorni",
-    "notSeenNever": "Mai"
+    "notSeenNever": "Mai",
+    "weeklyDigest": "Riepilogo settimanale",
+    "weeklyDigestDescription": "Ogni lunedì, un riepilogo della settimana: eventi in arrivo e contatti da risentire",
+    "postEventFollowUp": "Follow-up post-evento",
+    "postEventFollowUpDescription": "Ricevi un promemoria per farti sentire dopo un evento passato"
   },
   "trial": {
     "daysRemaining": "Prova gratuita — {{count}} giorno/i rimanente/i",

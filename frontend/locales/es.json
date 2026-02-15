@@ -421,7 +421,7 @@
       "permissionTitle": "Se requiere acceso a las fotos",
       "permissionMessage": "Por favor permite el acceso a tu galería para seleccionar una imagen."
     },
-    "reminderFrequency": "Frecuencia de recordatorio",
+    "reminderFrequency": "Recordarme ponerme al día",
     "reminderDefault": "Por defecto",
     "reminderWeeks": "Cada 2 semanas",
     "reminderMonth": "Cada mes",
@@ -860,9 +860,13 @@
   },
   "settings": {
     "notSeenThreshold": "Recordatorio de contacto inactivo",
-    "notSeenDescription": "Recibir notificaciones cuando un contacto no ha sido visto en X dias",
+    "notSeenDescription": "Recibir notificaciones cuando llevas tiempo sin contactar a alguien. Ajustable individualmente en cada ficha de contacto.",
     "notSeenDays": "{{count}} dias",
-    "notSeenNever": "Nunca"
+    "notSeenNever": "Nunca",
+    "weeklyDigest": "Resumen semanal",
+    "weeklyDigestDescription": "Cada lunes, un resumen de tu semana: eventos próximos y contactos por reconectar",
+    "postEventFollowUp": "Seguimiento post-evento",
+    "postEventFollowUpDescription": "Recibe un recordatorio para ponerte al día después de un evento"
   },
   "trial": {
     "daysRemaining": "Prueba gratuita — {{count}} día(s) restante(s)",

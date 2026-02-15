@@ -457,7 +457,7 @@
       "permissionTitle": "Accès aux photos requis",
       "permissionMessage": "Autorise l'accès à ta photothèque pour sélectionner une image."
     },
-    "reminderFrequency": "Fréquence de rappel",
+    "reminderFrequency": "Me rappeler de prendre des nouvelles",
     "reminderDefault": "Par défaut",
     "reminderWeeks": "Toutes les 2 semaines",
     "reminderMonth": "Tous les mois",
@@ -850,9 +850,13 @@
   },
   "settings": {
     "notSeenThreshold": "Rappel de contact inactif",
-    "notSeenDescription": "Etre notifie quand un contact n'a pas ete vu depuis X jours",
+    "notSeenDescription": "Être notifié quand un contact n'a pas été vu depuis longtemps. Réglable individuellement sur chaque fiche contact.",
     "notSeenDays": "{{count}} jours",
-    "notSeenNever": "Jamais"
+    "notSeenNever": "Jamais",
+    "weeklyDigest": "Résumé hebdomadaire",
+    "weeklyDigestDescription": "Chaque lundi, un récap de ta semaine : événements à venir et contacts à recontacter",
+    "postEventFollowUp": "Suivi post-événement",
+    "postEventFollowUpDescription": "Être rappelé de prendre des nouvelles après un événement passé"
   },
   "trial": {
     "daysRemaining": "Essai gratuit — {{count}} jour(s) restant(s)",

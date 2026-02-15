@@ -421,7 +421,7 @@
       "permissionTitle": "Photo Access Required",
       "permissionMessage": "Please grant access to your photo library to select a picture."
     },
-    "reminderFrequency": "Reminder frequency",
+    "reminderFrequency": "Remind me to catch up",
     "reminderDefault": "Default",
     "reminderWeeks": "Every 2 weeks",
     "reminderMonth": "Every month",
@@ -860,9 +860,13 @@
   },
   "settings": {
     "notSeenThreshold": "Inactive contact reminder",
-    "notSeenDescription": "Get notified when a contact hasn't been seen for X days",
+    "notSeenDescription": "Get notified when you haven't caught up with a contact in a while. Can be customized per contact.",
     "notSeenDays": "{{count}} days",
-    "notSeenNever": "Never"
+    "notSeenNever": "Never",
+    "weeklyDigest": "Weekly digest",
+    "weeklyDigestDescription": "Every Monday, a recap of your week: upcoming events and contacts to reach out to",
+    "postEventFollowUp": "Post-event follow-up",
+    "postEventFollowUpDescription": "Get reminded to check in after an event has passed"
   },
   "trial": {
     "daysRemaining": "Free trial — {{count}} day(s) remaining",

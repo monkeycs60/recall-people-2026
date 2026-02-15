@@ -19,6 +19,8 @@ import {
   Users,
   Bell,
   UserX,
+  CalendarCheck,
+  Newspaper,
 } from 'lucide-react-native';
 import { useAuthStore } from '@/stores/auth-store';
 import { useSettingsStore } from '@/stores/settings-store';
@@ -28,6 +30,7 @@ import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { SettingsSection } from '@/components/profile/SettingsSection';
 import { SettingsRow } from '@/components/profile/SettingsRow';
 import { LanguagePicker } from '@/components/profile/LanguagePicker';
+import { OptionPickerSheet } from '@/components/ui/OptionPickerSheet';
 import { StatisticsSheet } from '@/components/profile/StatisticsSheet';
 import { ExportDataSheet } from '@/components/profile/ExportDataSheet';
 import { LegalNoticesSheet } from '@/components/profile/LegalNoticesSheet';
@@ -53,7 +56,12 @@ export default function ProfileScreen() {
   const setHasSeenOnboarding = useSettingsStore((state) => state.setHasSeenOnboarding);
   const notSeenThresholdDays = useSettingsStore((state) => state.notSeenThresholdDays);
   const setNotSeenThresholdDays = useSettingsStore((state) => state.setNotSeenThresholdDays);
+  const weeklyDigestEnabled = useSettingsStore((state) => state.weeklyDigestEnabled);
+  const setWeeklyDigestEnabled = useSettingsStore((state) => state.setWeeklyDigestEnabled);
+  const postEventFollowUpEnabled = useSettingsStore((state) => state.postEventFollowUpEnabled);
+  const setPostEventFollowUpEnabled = useSettingsStore((state) => state.setPostEventFollowUpEnabled);
   const isTestPro = useSubscriptionStore((state) => state.isTestPro);
+  const isPremium = useSubscriptionStore((state) => state.isPremium);
 
   const [showPaywall, setShowPaywall] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
@@ -63,6 +71,7 @@ export default function ProfileScreen() {
   const statisticsSheetRef = useRef<BottomSheetModal>(null);
   const exportDataSheetRef = useRef<BottomSheetModal>(null);
   const legalNoticesSheetRef = useRef<BottomSheetModal>(null);
+  const notSeenThresholdSheetRef = useRef<BottomSheetModal>(null);
 
   const handleOpenLanguagePicker = useCallback(() => {
     languagePickerRef.current?.present();
@@ -201,20 +210,22 @@ export default function ProfileScreen() {
     return t('settings.notSeenDays', { count: days });
   }, [t]);
 
+  const notSeenThresholdOptions = [
+    { label: getNotSeenThresholdLabel(30), value: 30 },
+    { label: getNotSeenThresholdLabel(60), value: 60 },
+    { label: getNotSeenThresholdLabel(90), value: 90 },
+    { label: getNotSeenThresholdLabel(0), value: 0 },
+  ];
+
   const handleChangeNotSeenThreshold = useCallback(() => {
-    const options = [30, 60, 90, 0];
-    Alert.alert(
-      t('settings.notSeenThreshold'),
-      t('settings.notSeenDescription'),
-      [
-        ...options.map((days) => ({
-          text: getNotSeenThresholdLabel(days),
-          onPress: () => setNotSeenThresholdDays(days),
-        })),
-        { text: t('common.cancel'), style: 'cancel' as const },
-      ]
-    );
-  }, [t, getNotSeenThresholdLabel, setNotSeenThresholdDays]);
+    notSeenThresholdSheetRef.current?.present();
+  }, []);
+
+  const handleNotSeenThresholdSelect = useCallback((value: number | null) => {
+    if (value !== null) {
+      setNotSeenThresholdDays(value);
+    }
+  }, [setNotSeenThresholdDays]);
 
   const handleOpenMonitoring = () => {
     router.push('/admin/monitoring');
@@ -267,9 +278,28 @@ export default function ProfileScreen() {
           <SettingsRow
             icon={<Bell size={20} color={Colors.primary} />}
             label={t('settings.notSeenThreshold')}
+            description={t('settings.notSeenDescription')}
             value={getNotSeenThresholdLabel(notSeenThresholdDays)}
             onPress={handleChangeNotSeenThreshold}
           />
+          {isPremium && (
+            <>
+              <SettingsRow
+                icon={<Newspaper size={20} color={Colors.primary} />}
+                label={t('settings.weeklyDigest')}
+                description={t('settings.weeklyDigestDescription')}
+                toggleValue={weeklyDigestEnabled}
+                onToggle={setWeeklyDigestEnabled}
+              />
+              <SettingsRow
+                icon={<CalendarCheck size={20} color={Colors.primary} />}
+                label={t('settings.postEventFollowUp')}
+                description={t('settings.postEventFollowUpDescription')}
+                toggleValue={postEventFollowUpEnabled}
+                onToggle={setPostEventFollowUpEnabled}
+              />
+            </>
+          )}
         </SettingsSection>
 
         <SettingsSection title={t('profile.sections.data')}>
@@ -355,6 +385,13 @@ export default function ProfileScreen() {
       <StatisticsSheet ref={statisticsSheetRef} />
       <ExportDataSheet ref={exportDataSheetRef} />
       <LegalNoticesSheet ref={legalNoticesSheetRef} />
+      <OptionPickerSheet
+        ref={notSeenThresholdSheetRef}
+        title={t('settings.notSeenThreshold')}
+        options={notSeenThresholdOptions}
+        selectedValue={notSeenThresholdDays}
+        onSelect={handleNotSeenThresholdSelect}
+      />
 
       <Modal visible={showPaywall} animationType="slide" presentationStyle="pageSheet">
         <Paywall onClose={() => setShowPaywall(false)} />

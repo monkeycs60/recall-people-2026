@@ -421,7 +421,7 @@
       "permissionTitle": "Fotozugriff erforderlich",
       "permissionMessage": "Bitte erlaube den Zugriff auf deine Fotobibliothek, um ein Bild auszuwählen."
     },
-    "reminderFrequency": "Erinnerungsfrequenz",
+    "reminderFrequency": "Erinnere mich nachzufragen",
     "reminderDefault": "Standard",
     "reminderWeeks": "Alle 2 Wochen",
     "reminderMonth": "Jeden Monat",
@@ -860,9 +860,13 @@
   },
   "settings": {
     "notSeenThreshold": "Erinnerung inaktiver Kontakt",
-    "notSeenDescription": "Benachrichtigt werden, wenn ein Kontakt seit X Tagen nicht gesehen wurde",
+    "notSeenDescription": "Benachrichtigung erhalten, wenn du dich lange nicht bei einem Kontakt gemeldet hast. Individuell pro Kontakt einstellbar.",
     "notSeenDays": "{{count}} Tage",
-    "notSeenNever": "Nie"
+    "notSeenNever": "Nie",
+    "weeklyDigest": "Wöchentliche Zusammenfassung",
+    "weeklyDigestDescription": "Jeden Montag ein Überblick deiner Woche: kommende Ereignisse und Kontakte zum Nachholen",
+    "postEventFollowUp": "Nachfassen nach Ereignis",
+    "postEventFollowUpDescription": "Erinnert werden, dich nach einem vergangenen Ereignis zu melden"
   },
   "trial": {
     "daysRemaining": "Kostenlose Testversion — {{count}} Tag(e) verbleibend",

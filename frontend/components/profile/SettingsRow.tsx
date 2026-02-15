@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable, Switch, StyleSheet } from 'react-native';
 import { ChevronRight } from 'lucide-react-native';
 import { ReactNode } from 'react';
 import { Colors } from '@/constants/theme';
@@ -10,6 +10,9 @@ type SettingsRowProps = {
   onPress?: () => void;
   showChevron?: boolean;
   destructive?: boolean;
+  toggleValue?: boolean;
+  onToggle?: (value: boolean) => void;
+  description?: string;
 };
 
 export function SettingsRow({
@@ -19,24 +22,53 @@ export function SettingsRow({
   onPress,
   showChevron = true,
   destructive = false,
+  toggleValue,
+  onToggle,
+  description,
 }: SettingsRowProps) {
+  const isToggle = onToggle !== undefined;
+  const hasDescription = !!description;
+
   return (
     <Pressable
       style={({ pressed }) => [
         styles.container,
-        pressed && styles.containerPressed,
+        hasDescription && styles.containerWithDescription,
+        pressed && !isToggle && styles.containerPressed,
       ]}
-      onPress={onPress}
-      disabled={!onPress}
+      onPress={isToggle ? () => onToggle(!toggleValue) : onPress}
+      disabled={!onPress && !isToggle}
     >
-      <View style={styles.iconContainer}>{icon}</View>
-      <Text style={[styles.label, destructive && styles.labelDestructive]}>
-        {label}
-      </Text>
-      {value && <Text style={styles.value}>{value}</Text>}
-      {showChevron && onPress && (
-        <ChevronRight size={20} color={Colors.textMuted} />
-      )}
+      <View style={[styles.iconContainer, hasDescription && styles.iconContainerTop]}>
+        {icon}
+      </View>
+      <View style={styles.content}>
+        <View style={styles.labelRow}>
+          <Text
+            style={[styles.label, destructive && styles.labelDestructive]}
+            numberOfLines={1}
+          >
+            {label}
+          </Text>
+          {value && !isToggle && (
+            <Text style={styles.value} numberOfLines={1}>{value}</Text>
+          )}
+          {isToggle && (
+            <Switch
+              value={toggleValue}
+              onValueChange={onToggle}
+              trackColor={{ false: Colors.borderLight, true: Colors.primaryLight }}
+              thumbColor={toggleValue ? Colors.primary : Colors.textMuted}
+            />
+          )}
+          {showChevron && onPress && !isToggle && (
+            <ChevronRight size={20} color={Colors.textMuted} />
+          )}
+        </View>
+        {hasDescription && (
+          <Text style={styles.description}>{description}</Text>
+        )}
+      </View>
     </Pressable>
   );
 }
@@ -50,25 +82,44 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.borderLight,
   },
+  containerWithDescription: {
+    alignItems: 'flex-start',
+  },
   containerPressed: {
-    backgroundColor: Colors.surfaceHover,
+    backgroundColor: Colors.surfaceAlt,
   },
   iconContainer: {
     width: 32,
     alignItems: 'center',
   },
-  label: {
+  iconContainerTop: {
+    marginTop: 2,
+  },
+  content: {
     flex: 1,
     marginLeft: 12,
+  },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  label: {
+    flex: 1,
     fontSize: 16,
     color: Colors.textPrimary,
   },
   labelDestructive: {
     color: Colors.error,
   },
+  description: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+    marginTop: 2,
+  },
   value: {
     fontSize: 15,
     color: Colors.textSecondary,
-    marginRight: 8,
+    marginLeft: 8,
+    marginRight: 4,
   },
 });

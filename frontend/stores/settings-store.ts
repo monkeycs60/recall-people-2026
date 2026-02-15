@@ -11,6 +11,8 @@ type SettingsState = {
   isHydrated: boolean;
   hasSeenOnboarding: boolean;
   notSeenThresholdDays: number;
+  weeklyDigestEnabled: boolean;
+  postEventFollowUpEnabled: boolean;
 };
 
 type SettingsActions = {
@@ -18,6 +20,8 @@ type SettingsActions = {
   setHydrated: (hydrated: boolean) => void;
   setHasSeenOnboarding: (seen: boolean) => void;
   setNotSeenThresholdDays: (days: number) => void;
+  setWeeklyDigestEnabled: (enabled: boolean) => void;
+  setPostEventFollowUpEnabled: (enabled: boolean) => void;
   detectDeviceLanguage: () => Language;
 };
 
@@ -41,6 +45,8 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         isHydrated: false,
         hasSeenOnboarding: false,
         notSeenThresholdDays: 60,
+        weeklyDigestEnabled: true,
+        postEventFollowUpEnabled: true,
 
         setLanguage: async (language) => {
           set({ language });
@@ -58,6 +64,8 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         setHydrated: (isHydrated) => set({ isHydrated }),
         setHasSeenOnboarding: (hasSeenOnboarding) => set({ hasSeenOnboarding }),
         setNotSeenThresholdDays: (notSeenThresholdDays) => set({ notSeenThresholdDays }),
+        setWeeklyDigestEnabled: (weeklyDigestEnabled) => set({ weeklyDigestEnabled }),
+        setPostEventFollowUpEnabled: (postEventFollowUpEnabled) => set({ postEventFollowUpEnabled }),
         detectDeviceLanguage,
       }),
       {
@@ -70,6 +78,8 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
           language: state.language,
           hasSeenOnboarding: state.hasSeenOnboarding,
           notSeenThresholdDays: state.notSeenThresholdDays,
+          weeklyDigestEnabled: state.weeklyDigestEnabled,
+          postEventFollowUpEnabled: state.postEventFollowUpEnabled,
         }),
       }
     ),

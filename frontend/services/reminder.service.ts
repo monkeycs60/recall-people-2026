@@ -61,6 +61,9 @@ export const reminderService = {
     const { isPremium } = useSubscriptionStore.getState();
     if (!isPremium) return;
 
+    const { weeklyDigestEnabled } = useSettingsStore.getState();
+    if (!weeklyDigestEnabled) return;
+
     const db = await getDatabase();
 
     const eventsResult = await db.getFirstAsync<CountResult>(
@@ -93,6 +96,9 @@ export const reminderService = {
   schedulePostEventFollowUps: async () => {
     const { isPremium } = useSubscriptionStore.getState();
     if (!isPremium) return;
+
+    const { postEventFollowUpEnabled } = useSettingsStore.getState();
+    if (!postEventFollowUpEnabled) return;
 
     const db = await getDatabase();
 
