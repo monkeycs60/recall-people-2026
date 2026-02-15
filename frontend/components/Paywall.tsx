@@ -1,7 +1,7 @@
-import { View, Text, Pressable, ActivityIndicator, StyleSheet, BackHandler, Linking, ScrollView } from 'react-native';
+import { View, Text, Pressable, ActivityIndicator, StyleSheet, BackHandler, Linking, ScrollView, Platform } from 'react-native';
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, AlertCircle, RefreshCw, ArrowRight, Check, Minus } from 'lucide-react-native';
+import { X, AlertCircle, RefreshCw, Check, Minus, Sparkles } from 'lucide-react-native';
 import { PurchasesOffering } from 'react-native-purchases';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { revenueCatService } from '@/services/revenuecat.service';
@@ -217,14 +217,17 @@ export function Paywall({ onClose, reason = 'contact_limit' }: PaywallProps) {
         bounces={true}
       >
         <Text style={styles.title}>{t('paywall.title')}</Text>
+        <View style={styles.titleAccent} />
         <Text style={styles.reason}>{getReasonText()}</Text>
 
         <View style={styles.comparisonCard}>
           <View style={styles.comparisonHeader}>
             <View style={styles.comparisonHeaderLabel} />
             <Text style={styles.comparisonHeaderFree}>{t('paywall.comparison.free')}</Text>
-            <ArrowRight size={14} color={Colors.textMuted} />
-            <Text style={styles.comparisonHeaderPro}>{t('paywall.comparison.pro')}</Text>
+            <View style={styles.proBadge}>
+              <Sparkles size={10} color={Colors.primary} />
+              <Text style={styles.proBadgeText}>{t('paywall.comparison.pro')}</Text>
+            </View>
           </View>
 
           {comparisonRows.map((row, index) => (
@@ -232,6 +235,7 @@ export function Paywall({ onClose, reason = 'contact_limit' }: PaywallProps) {
               key={row.label}
               style={[
                 styles.comparisonRow,
+                index % 2 === 1 && styles.comparisonRowAlt,
                 index === comparisonRows.length - 1 && styles.comparisonRowLast,
               ]}
             >
@@ -239,20 +243,24 @@ export function Paywall({ onClose, reason = 'contact_limit' }: PaywallProps) {
               {row.isBoolean ? (
                 <>
                   <View style={styles.comparisonFreeValue}>
-                    <Minus size={14} color={Colors.textMuted} />
+                    <View style={styles.booleanMinus}>
+                      <Minus size={10} color={Colors.textMuted} />
+                    </View>
                   </View>
-                  <View style={styles.comparisonArrow} />
                   <View style={styles.comparisonProValue}>
-                    <Check size={14} color={Colors.primary} strokeWidth={3} />
+                    <View style={styles.booleanCheck}>
+                      <Check size={12} color={Colors.surface} strokeWidth={3} />
+                    </View>
                   </View>
                 </>
               ) : (
                 <>
                   <Text style={styles.comparisonFreeText}>{row.free}</Text>
-                  <View style={styles.comparisonArrow}>
-                    <ArrowRight size={12} color={Colors.textMuted} />
+                  <View style={styles.comparisonProValue}>
+                    <View style={styles.proPill}>
+                      <Text style={styles.proPillText}>{row.pro}</Text>
+                    </View>
                   </View>
-                  <Text style={styles.comparisonProText}>{row.pro}</Text>
                 </>
               )}
             </View>
@@ -405,60 +413,85 @@ const styles = StyleSheet.create({
     fontSize: 28,
     color: Colors.textPrimary,
     textAlign: 'center',
-    marginBottom: 6,
+    marginBottom: 10,
+  },
+  titleAccent: {
+    width: 40,
+    height: 3,
+    backgroundColor: Colors.primary,
+    borderRadius: 2,
+    marginBottom: 12,
   },
   reason: {
     fontSize: 15,
     color: Colors.textSecondary,
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: 28,
+    lineHeight: 21,
   },
   comparisonCard: {
     alignSelf: 'stretch',
     backgroundColor: Colors.surface,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
-    paddingVertical: 4,
-    marginBottom: 24,
+    borderRadius: 20,
+    marginBottom: 28,
     overflow: 'hidden',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
   comparisonHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    backgroundColor: Colors.surfaceAlt,
   },
   comparisonHeaderLabel: {
     flex: 1,
   },
   comparisonHeaderFree: {
-    width: 60,
-    fontSize: 12,
+    width: 64,
+    fontSize: 11,
     fontWeight: '600',
     color: Colors.textMuted,
     textAlign: 'center',
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 1,
   },
-  comparisonHeaderPro: {
+  proBadge: {
     width: 80,
-    fontSize: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    backgroundColor: Colors.primaryLight,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+  },
+  proBadgeText: {
+    fontSize: 11,
     fontWeight: '700',
     color: Colors.primary,
-    textAlign: 'center',
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 1,
   },
   comparisonRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+  },
+  comparisonRowAlt: {
+    backgroundColor: 'rgba(0,0,0,0.015)',
   },
   comparisonRowLast: {
     borderBottomWidth: 0,
@@ -470,59 +503,99 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   comparisonFreeValue: {
-    width: 60,
+    width: 64,
     alignItems: 'center',
   },
   comparisonFreeText: {
-    width: 60,
+    width: 64,
     fontSize: 13,
     color: Colors.textMuted,
     textAlign: 'center',
-  },
-  comparisonArrow: {
-    width: 20,
-    alignItems: 'center',
   },
   comparisonProValue: {
     width: 80,
     alignItems: 'center',
   },
-  comparisonProText: {
-    width: 80,
-    fontSize: 13,
-    fontWeight: '600',
+  proPill: {
+    backgroundColor: Colors.primaryLight,
+    paddingVertical: 3,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+  },
+  proPillText: {
+    fontSize: 12,
+    fontWeight: '700',
     color: Colors.primary,
-    textAlign: 'center',
+  },
+  booleanMinus: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: Colors.surfaceAlt,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  booleanCheck: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   packages: {
     flexDirection: 'row',
     gap: 12,
+    alignSelf: 'stretch',
     marginBottom: 24,
   },
   packageCard: {
     flex: 1,
     backgroundColor: Colors.surface,
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 16,
     alignItems: 'center',
     borderWidth: 2,
     borderColor: Colors.borderLight,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.04,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
   },
   packageCardSelected: {
     borderColor: Colors.primary,
     backgroundColor: Colors.primaryLight,
+    ...Platform.select({
+      ios: {
+        shadowColor: Colors.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 6,
+      },
+    }),
   },
   packageBadge: {
     backgroundColor: Colors.primary,
-    paddingHorizontal: 8,
+    paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 8,
-    marginBottom: 8,
+    borderRadius: 10,
+    marginBottom: 10,
   },
   packageBadgeText: {
     color: Colors.textInverse,
     fontSize: 10,
     fontWeight: '700',
+    letterSpacing: 0.5,
   },
   packageTitle: {
     fontSize: 14,
@@ -530,7 +603,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   packagePrice: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '700',
     color: Colors.textPrimary,
   },
@@ -541,30 +614,42 @@ const styles = StyleSheet.create({
   },
   packageSaving: {
     fontSize: 12,
+    fontWeight: '600',
     color: Colors.success,
     marginTop: 4,
   },
   autoRenewLabel: {
     fontSize: 10,
-    color: Colors.textSecondary,
+    color: Colors.textMuted,
     marginTop: 6,
   },
   purchaseButton: {
+    alignSelf: 'stretch',
     backgroundColor: Colors.primary,
-    paddingVertical: 16,
-    paddingHorizontal: 48,
-    borderRadius: 12,
+    paddingVertical: 18,
+    borderRadius: 16,
     marginBottom: 16,
-    minWidth: 200,
     alignItems: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: Colors.primary,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.3,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 8,
+      },
+    }),
   },
   purchaseButtonDisabled: {
     opacity: 0.5,
   },
   purchaseButtonText: {
     color: Colors.textInverse,
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 17,
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
   restoreText: {
     color: Colors.textSecondary,
@@ -577,7 +662,7 @@ const styles = StyleSheet.create({
   },
   legalText: {
     fontSize: 10,
-    color: Colors.textSecondary,
+    color: Colors.textMuted,
     textAlign: 'center',
     lineHeight: 14,
     marginBottom: 8,
