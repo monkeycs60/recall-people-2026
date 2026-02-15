@@ -31,7 +31,7 @@ module.exports = {
     userInterfaceStyle: 'automatic',
     newArchEnabled: true,
     ios: {
-      supportsTablet: true,
+      supportsTablet: false,
       bundleIdentifier: 'com.monkeycs60.recallpeople2026',
       buildNumber: '12',
     },
