@@ -4,7 +4,7 @@ import { ShieldCheck, Database, WifiOff } from 'lucide-react';
 
 export default function Privacy() {
   return (
-    <section className="py-24 bg-surface-alt border-y border-border-light relative overflow-hidden">
+    <section id="privacy" className="py-24 bg-surface-alt border-y border-border-light relative overflow-hidden">
         {/* Background blobs */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-primary-light/30 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-voice-light/30 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />
