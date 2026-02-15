@@ -52,7 +52,7 @@ export function TrialBanner() {
           presentationStyle="fullScreen"
           onRequestClose={() => setIsPaywallVisible(false)}
         >
-          <Paywall onClose={() => setIsPaywallVisible(false)} reason="notes_limit" />
+          <Paywall onClose={() => setIsPaywallVisible(false)} reason="contact_limit" />
         </Modal>
       </>
     );
@@ -79,7 +79,7 @@ export function TrialBanner() {
           presentationStyle="fullScreen"
           onRequestClose={() => setIsPaywallVisible(false)}
         >
-          <Paywall onClose={() => setIsPaywallVisible(false)} reason="notes_limit" />
+          <Paywall onClose={() => setIsPaywallVisible(false)} reason="contact_limit" />
         </Modal>
       </>
     );

@@ -27,7 +27,7 @@ const features = [
   {
     icon: Bell,
     title: 'Smart Reminders',
-    description: "Get notified before birthdays and important life events. A friend's job interview, a move, an exam — never miss a chance to show you care.",
+    description: "Birthdays, job interviews, exams — get notified before the moments that matter. Nudges when you haven't reached out in a while. Plus a weekly digest to stay on top of all your relationships.",
     className: 'md:col-span-2 bg-surface-alt border border-border',
     iconClass: 'text-primary'
   },

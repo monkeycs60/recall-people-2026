@@ -9,25 +9,27 @@ const plans = [
     features: [
       '15 contacts',
       'Unlimited voice notes',
+      '1-minute recordings',
       '5 AI avatars / month',
-      'Basic reminders',
-      'Local storage only',
+      'AI assistant (10/month)',
+      'Event & birthday reminders',
+      'Export data anytime',
     ],
     cta: 'Download & Try',
     highlighted: false,
   },
   {
     name: 'Pro',
-    price: '4.99',
+    price: '3.99',
     period: '/month',
-    annualPrice: '49.99',
+    annualPrice: '39.99',
     description: 'For power networkers',
     features: [
       'Unlimited contacts',
-      'Unlimited AI avatars',
-      'Priority support',
-      'Post-event follow-ups',
-      'Advanced relationship insights',
+      '3-minute recordings',
+      'Unlimited AI avatar generation',
+      'Unlimited AI assistant',
+      'Smart reminders & weekly digest',
       'Export data anytime',
     ],
     cta: 'Go Pro',
@@ -86,7 +88,7 @@ export default function Pricing() {
                 )}
                 {plan.annualPrice && (
                   <p className="text-sm text-primary font-medium mt-1">
-                    or ${plan.annualPrice}/year (save ~20%)
+                    or ${plan.annualPrice}/year (save ~17%)
                   </p>
                 )}
               </div>

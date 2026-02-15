@@ -661,17 +661,17 @@
   },
   "subscription": {
     "freePlan": "FREE",
-    "notesUsed": "notes",
-    "notesRemaining": "{{count}} notes remaining this month",
-    "noNotesRemaining": "No notes remaining this month",
+    "contactsUsed": "contacts",
+    "contactsRemaining": "{{count}} contacts remaining",
+    "noContactsRemaining": "No contacts remaining",
     "upgradeToPro": "Upgrade to Pro",
     "unlockWith": "Unlock with Pro:",
-    "feature1": "Unlimited audio notes",
+    "feature1": "Unlimited contacts",
     "feature2": "3-minute recordings (vs 1 min)",
     "feature3": "AI-powered search",
     "premiumTitle": "You're a Pro!",
     "premiumSubtitle": "Thanks for supporting Recall People",
-    "unlimitedNotes": "Unlimited notes",
+    "unlimitedContacts": "Unlimited contacts",
     "aiSearch": "AI Search",
     "manageTitle": "Manage subscription",
     "manageDescription": "To manage or cancel your subscription, go to your device settings > Subscriptions."
@@ -703,12 +703,11 @@
   "paywall": {
     "title": "Upgrade to Premium",
     "reason": {
-      "notesLimit": "You've reached your free monthly limit of 10 notes",
       "aiSearch": "AI Search is a premium feature",
       "recordingDuration": "Longer recordings require premium",
       "aiAssistant": "AI Assistant is a premium feature",
-      "avatarGeneration": "You've used all 5 free AI avatar generations",
-      "contactLimit": "You've reached the 15 free contacts limit",
+      "avatarGeneration": "You've used all your free AI avatar generations",
+      "contactLimit": "You've reached the free contacts limit",
       "proactiveReminders": "Custom reminders are for Pro members only"
     },
     "errors": {
@@ -723,8 +722,7 @@
       "unlimitedContacts": "Unlimited contacts",
       "unlimitedNotes": "Unlimited audio notes",
       "longerRecordings": "3-minute recordings (vs 1 min)",
-      "aiSearch": "AI-powered search across all notes",
-      "unlimitedAI": "Unlimited AI (avatars + assistant)",
+      "unlimitedAI": "Unlimited AI avatar generation",
       "smartReminders": "Smart personalized reminders",
       "weeklyDigest": "Weekly digest"
     },
@@ -733,7 +731,7 @@
     "month": "month",
     "year": "year",
     "bestValue": "BEST VALUE",
-    "save30": "Save 25%",
+    "save30": "Save ~17%",
     "subscribe": "Subscribe Now",
     "restore": "Restore Purchases",
     "priceMonthly": "$3.99",

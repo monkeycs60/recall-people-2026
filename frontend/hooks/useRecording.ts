@@ -47,11 +47,10 @@ export const useRecording = () => {
   const router = useRouter();
   const { contacts, loadContacts, isInitialized } = useContactsStore();
   const getMaxRecordingDuration = useSubscriptionStore((state) => state.getMaxRecordingDuration);
-  const canCreateNote = useSubscriptionStore((state) => state.canCreateNote);
   const incrementNotesCount = useSubscriptionStore((state) => state.incrementNotesCount);
   const maxDuration = getMaxRecordingDuration();
   const [showPaywall, setShowPaywall] = useState(false);
-  const [paywallReason, setPaywallReason] = useState<'notes_limit' | 'recording_duration'>('notes_limit');
+  const [paywallReason, setPaywallReason] = useState<'recording_duration'>('recording_duration');
   const [recordingDuration, setRecordingDuration] = useState(0);
   const durationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const stopRecordingRef = useRef<(() => Promise<{ uri: string; transcription: string } | null | undefined>) | null>(null);
@@ -79,12 +78,6 @@ export const useRecording = () => {
   };
 
   const startRecording = async () => {
-    if (!canCreateNote()) {
-      setPaywallReason('notes_limit');
-      setShowPaywall(true);
-      return;
-    }
-
     try {
       // Load contacts if not initialized
       if (!isInitialized) {
@@ -371,12 +364,6 @@ export const useRecording = () => {
   stopRecordingRef.current = stopRecording;
 
   const processText = async (text: string) => {
-    if (!canCreateNote()) {
-      setPaywallReason('notes_limit');
-      setShowPaywall(true);
-      return;
-    }
-
     if (text.trim().length < 10) {
       showErrorToast(
         i18n.t('recording.errors.textTooShort', { defaultValue: 'Text too short' }),

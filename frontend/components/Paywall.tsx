@@ -11,14 +11,14 @@ import { showErrorToast, showSuccessToast } from '@/lib/error-handler';
 const TERMS_URL = 'https://recall-people-2026.vercel.app/terms';
 const PRIVACY_URL = 'https://recall-people-2026.vercel.app/privacy';
 
-type PaywallReason = 'notes_limit' | 'ai_search' | 'recording_duration' | 'ai_assistant' | 'avatar_generation' | 'contact_limit' | 'proactive_reminders';
+type PaywallReason = 'ai_search' | 'recording_duration' | 'ai_assistant' | 'avatar_generation' | 'contact_limit' | 'proactive_reminders';
 
 type PaywallProps = {
   onClose: () => void;
   reason?: PaywallReason;
 };
 
-export function Paywall({ onClose, reason = 'notes_limit' }: PaywallProps) {
+export function Paywall({ onClose, reason = 'contact_limit' }: PaywallProps) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const [offering, setOffering] = useState<PurchasesOffering | null>(null);
@@ -121,8 +121,6 @@ export function Paywall({ onClose, reason = 'notes_limit' }: PaywallProps) {
 
   const getReasonText = () => {
     switch (reason) {
-      case 'notes_limit':
-        return t('paywall.reason.notesLimit');
       case 'ai_search':
         return t('paywall.reason.aiSearch');
       case 'recording_duration':
@@ -142,7 +140,6 @@ export function Paywall({ onClose, reason = 'notes_limit' }: PaywallProps) {
 
   const features = [
     t('paywall.features.unlimitedContacts'),
-    t('paywall.features.unlimitedNotes'),
     t('paywall.features.longerRecordings'),
     t('paywall.features.unlimitedAI'),
     t('paywall.features.smartReminders'),
@@ -204,8 +201,9 @@ export function Paywall({ onClose, reason = 'notes_limit' }: PaywallProps) {
 
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: Math.max(insets.bottom, 16) + 24 }]}
         showsVerticalScrollIndicator={false}
+        bounces={true}
       >
         <Crown size={48} color={Colors.primary} style={styles.icon} />
         <Text style={styles.title}>{t('paywall.title')}</Text>

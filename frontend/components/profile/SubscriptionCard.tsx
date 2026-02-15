@@ -1,7 +1,8 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Crown, Sparkles, Mic, Search, ChevronRight } from 'lucide-react-native';
-import { useSubscriptionStore, FREE_NOTES_PER_MONTH } from '@/stores/subscription-store';
+import { Crown, Sparkles, Mic, Search, ChevronRight, Users } from 'lucide-react-native';
+import { useSubscriptionStore, FREE_CONTACTS_LIMIT } from '@/stores/subscription-store';
+import { useContactsStore } from '@/stores/contacts-store';
 import { Colors } from '@/constants/theme';
 
 type SubscriptionCardProps = {
@@ -12,7 +13,7 @@ type SubscriptionCardProps = {
 export function SubscriptionCard({ onUpgrade, onManage }: SubscriptionCardProps) {
   const { t } = useTranslation();
   const isPremium = useSubscriptionStore((state) => state.isPremium);
-  const notesCreatedThisMonth = useSubscriptionStore((state) => state.notesCreatedThisMonth);
+  const contactCount = useContactsStore((state) => state.contacts.length);
 
   if (isPremium) {
     return (
@@ -28,8 +29,8 @@ export function SubscriptionCard({ onUpgrade, onManage }: SubscriptionCardProps)
         <Text style={styles.premiumSubtitle}>{t('subscription.premiumSubtitle')}</Text>
         <View style={styles.premiumFeatures}>
           <View style={styles.featureItem}>
-            <Mic size={16} color={Colors.primary} />
-            <Text style={styles.featureText}>{t('subscription.unlimitedNotes')}</Text>
+            <Users size={16} color={Colors.primary} />
+            <Text style={styles.featureText}>{t('subscription.unlimitedContacts')}</Text>
           </View>
           <View style={styles.featureItem}>
             <Search size={16} color={Colors.primary} />
@@ -40,8 +41,8 @@ export function SubscriptionCard({ onUpgrade, onManage }: SubscriptionCardProps)
     );
   }
 
-  const notesRemaining = FREE_NOTES_PER_MONTH - notesCreatedThisMonth;
-  const progressPercent = (notesCreatedThisMonth / FREE_NOTES_PER_MONTH) * 100;
+  const contactsRemaining = FREE_CONTACTS_LIMIT - contactCount;
+  const progressPercent = Math.min((contactCount / FREE_CONTACTS_LIMIT) * 100, 100);
 
   return (
     <View style={styles.freeCard}>
@@ -50,7 +51,7 @@ export function SubscriptionCard({ onUpgrade, onManage }: SubscriptionCardProps)
           <Text style={styles.freeBadgeText}>{t('subscription.freePlan')}</Text>
         </View>
         <Text style={styles.quotaText}>
-          {notesCreatedThisMonth}/{FREE_NOTES_PER_MONTH} {t('subscription.notesUsed')}
+          {contactCount}/{FREE_CONTACTS_LIMIT} {t('subscription.contactsUsed')}
         </Text>
       </View>
 
@@ -59,9 +60,9 @@ export function SubscriptionCard({ onUpgrade, onManage }: SubscriptionCardProps)
           <View style={[styles.progressFill, { width: `${progressPercent}%` }]} />
         </View>
         <Text style={styles.remainingText}>
-          {notesRemaining > 0
-            ? t('subscription.notesRemaining', { count: notesRemaining })
-            : t('subscription.noNotesRemaining')}
+          {contactsRemaining > 0
+            ? t('subscription.contactsRemaining', { count: contactsRemaining })
+            : t('subscription.noContactsRemaining')}
         </Text>
       </View>
 
