@@ -13,21 +13,21 @@ const features = [
   {
     icon: UserSquare2,
     title: 'Instant Smart Profiles',
-    description: 'AI extracts names, dates, and facts (kids, hobbies, projects) into structured cards automatically.',
+    description: 'AI extracts names, personal details and upcoming life events into organized contact cards.',
     className: 'bg-surface border border-border',
     iconClass: 'text-primary'
   },
   {
     icon: Sparkles,
     title: 'Relationship Intelligence',
-    description: "Semantic search. Ask: 'Who likes skiing?' or 'Who works in tech?' to find the right person instantly.",
+    description: "AI summaries of each person, icebreaker questions for your next meeting, and semantic search across all your contacts.",
     className: 'bg-surface border border-border',
     iconClass: 'text-primary'
   },
   {
     icon: Bell,
     title: 'Smart Reminders',
-    description: 'Get notified before birthdays or follow-ups. Show up prepared and never miss a beat.',
+    description: "Get notified before birthdays and important life events. A friend's job interview, a move, an exam — never miss a chance to show you care.",
     className: 'md:col-span-2 bg-surface-alt border border-border',
     iconClass: 'text-primary'
   },
