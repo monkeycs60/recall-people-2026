@@ -79,6 +79,7 @@ module.exports = {
         },
       ],
       'expo-font',
+      'react-native-purchases',
     ],
     experiments: {
       typedRoutes: true,

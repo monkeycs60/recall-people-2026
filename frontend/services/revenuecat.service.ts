@@ -21,7 +21,10 @@ export const revenueCatService = {
       return;
     }
 
-    await Purchases.configure({ apiKey });
+    await Purchases.configure({
+      apiKey,
+      usesStoreKit2IfAvailable: true,
+    });
 
     if (userId) {
       await Purchases.logIn(userId);
