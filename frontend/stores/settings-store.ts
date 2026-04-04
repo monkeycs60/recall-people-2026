@@ -10,6 +10,7 @@ type SettingsState = {
   language: Language;
   isHydrated: boolean;
   hasSeenOnboarding: boolean;
+  hasAcceptedAIConsent: boolean;
   notSeenThresholdDays: number;
   weeklyDigestEnabled: boolean;
   postEventFollowUpEnabled: boolean;
@@ -19,6 +20,7 @@ type SettingsActions = {
   setLanguage: (language: Language) => void;
   setHydrated: (hydrated: boolean) => void;
   setHasSeenOnboarding: (seen: boolean) => void;
+  setHasAcceptedAIConsent: (accepted: boolean) => void;
   setNotSeenThresholdDays: (days: number) => void;
   setWeeklyDigestEnabled: (enabled: boolean) => void;
   setPostEventFollowUpEnabled: (enabled: boolean) => void;
@@ -44,6 +46,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         language: detectDeviceLanguage(),
         isHydrated: false,
         hasSeenOnboarding: false,
+        hasAcceptedAIConsent: false,
         notSeenThresholdDays: 60,
         weeklyDigestEnabled: true,
         postEventFollowUpEnabled: true,
@@ -63,6 +66,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         },
         setHydrated: (isHydrated) => set({ isHydrated }),
         setHasSeenOnboarding: (hasSeenOnboarding) => set({ hasSeenOnboarding }),
+        setHasAcceptedAIConsent: (hasAcceptedAIConsent) => set({ hasAcceptedAIConsent }),
         setNotSeenThresholdDays: (notSeenThresholdDays) => set({ notSeenThresholdDays }),
         setWeeklyDigestEnabled: (weeklyDigestEnabled) => set({ weeklyDigestEnabled }),
         setPostEventFollowUpEnabled: (postEventFollowUpEnabled) => set({ postEventFollowUpEnabled }),
@@ -77,6 +81,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         partialize: (state) => ({
           language: state.language,
           hasSeenOnboarding: state.hasSeenOnboarding,
+          hasAcceptedAIConsent: state.hasAcceptedAIConsent,
           notSeenThresholdDays: state.notSeenThresholdDays,
           weeklyDigestEnabled: state.weeklyDigestEnabled,
           postEventFollowUpEnabled: state.postEventFollowUpEnabled,

@@ -16,7 +16,7 @@ export default function PrivacyPage() {
               Privacy Policy
             </h1>
             <p className="text-text-secondary mb-8">
-              Last updated: January 2026
+              Last updated: March 2026
             </p>
 
             <div className="prose prose-stone max-w-none">
@@ -76,9 +76,9 @@ export default function PrivacyPage() {
                   When you use voice recording or AI features, data is sent temporarily to our AI providers for processing:
                 </p>
                 <ul className="list-disc pl-6 text-text-secondary space-y-2">
-                  <li><strong>Voice recordings:</strong> Sent to Groq for transcription (using Whisper), then immediately deleted from their servers</li>
+                  <li><strong>Voice recordings:</strong> Sent to Deepgram or Groq for transcription (using speech-to-text models), then immediately deleted from their servers</li>
                   <li><strong>Text for AI analysis:</strong> Sent to Cerebras to extract contacts, generate summaries, and answer your questions via the Assistant. Not stored or used for training</li>
-                  <li><strong>Avatar generation:</strong> Text descriptions (gender, age range, ethnicity) are sent to Google Gemini to generate contact avatars. No real photos or personal data are sent</li>
+                  <li><strong>Avatar generation:</strong> Text descriptions (gender, age range, style) are sent to Google Gemini to generate contact avatars. No real photos or personal data are sent</li>
                 </ul>
               </section>
 
@@ -105,7 +105,8 @@ export default function PrivacyPage() {
                   We use the following third-party services to provide app functionality:
                 </p>
                 <ul className="list-disc pl-6 text-text-secondary space-y-2">
-                  <li><strong>Groq:</strong> Speech-to-text transcription (using Whisper)</li>
+                  <li><strong>Deepgram:</strong> Speech-to-text transcription (primary provider)</li>
+                  <li><strong>Groq:</strong> Speech-to-text transcription (fallback provider, using Whisper)</li>
                   <li><strong>Cerebras:</strong> AI analysis, contact extraction, summaries, and AI assistant</li>
                   <li><strong>Google Gemini:</strong> AI avatar generation from text descriptions</li>
                   <li><strong>RevenueCat:</strong> Subscription and payment management via App Store / Google Play</li>

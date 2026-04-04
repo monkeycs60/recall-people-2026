@@ -6,6 +6,7 @@ import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useSettingsStore } from '@/stores/settings-store';
 import { Onboarding } from '@/components/Onboarding';
+import { AIConsentModal } from '@/components/AIConsentModal';
 import { Colors } from '@/constants/theme';
 import { CustomTabBar } from '@/components/ui/CustomTabBar';
 
@@ -15,6 +16,8 @@ export default function TabLayout() {
   const { t } = useTranslation();
   const hasSeenOnboarding = useSettingsStore((state) => state.hasSeenOnboarding);
   const setHasSeenOnboarding = useSettingsStore((state) => state.setHasSeenOnboarding);
+  const hasAcceptedAIConsent = useSettingsStore((state) => state.hasAcceptedAIConsent);
+  const setHasAcceptedAIConsent = useSettingsStore((state) => state.setHasAcceptedAIConsent);
 
   useFocusEffect(
     useCallback(() => {
@@ -43,6 +46,10 @@ export default function TabLayout() {
 
   if (!hasSeenOnboarding) {
     return <Onboarding onComplete={handleOnboardingComplete} />;
+  }
+
+  if (!hasAcceptedAIConsent) {
+    return <AIConsentModal onAccept={() => setHasAcceptedAIConsent(true)} />;
   }
 
   return (

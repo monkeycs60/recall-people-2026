@@ -607,13 +607,13 @@
       },
       "aiProcessing": {
         "title": "AI Processing",
-        "description": "Voice transcription and text analysis are processed through secure APIs only when you record. The processed content is stored locally and is never used to train AI models."
+        "description": "Voice transcription (Deepgram, Groq) and text analysis (Cerebras) are processed through secure APIs only when you record or ask questions. Avatar generation uses Google Gemini. The processed content is stored locally and is never used to train AI models."
       },
       "contact": {
         "title": "Contact Us",
         "description": "Questions about your privacy or data? We're here to help."
       },
-      "lastUpdated": "Last updated: December 2024"
+      "lastUpdated": "Last updated: March 2026"
     }
   },
   "languagePicker": {
@@ -888,5 +888,23 @@
   },
   "reminder": {
     "postEvent": "{{name}}'s {{title}} was this week, check in with them?"
+  },
+  "aiConsent": {
+    "title": "AI Data Processing",
+    "subtitle": "Recall People uses third-party AI services to transcribe your voice recordings, extract contact information, and generate avatars. Here's what you need to know.",
+    "whatWeShare": "What data is processed",
+    "voiceData": "Voice recordings are sent for speech-to-text transcription",
+    "textData": "Transcribed text is analyzed to extract contacts, facts, and answer your questions",
+    "avatarData": "Text descriptions (gender, age, style) are used to generate illustrated avatars",
+    "whoReceives": "Third-party AI providers",
+    "providerTranscription": "Transcription",
+    "providerAnalysis": "Text analysis",
+    "providerAvatar": "Avatar generation",
+    "protections": "Your protections",
+    "noTraining": "Your data is never used to train AI models",
+    "noStorage": "Data is processed in real-time and not stored by AI providers",
+    "localFirst": "All your contacts and notes stay on your device",
+    "readPrivacyPolicy": "Read our full Privacy Policy",
+    "accept": "I Understand and Agree"
   }
 }

@@ -607,13 +607,13 @@
       },
       "aiProcessing": {
         "title": "Elaborazione IA",
-        "description": "La trascrizione vocale e l'analisi del testo vengono elaborate tramite API sicure solo durante la registrazione. Il contenuto elaborato viene archiviato localmente e non viene mai utilizzato per addestrare modelli IA."
+        "description": "La trascrizione vocale (Deepgram, Groq) e l'analisi del testo (Cerebras) vengono elaborate tramite API sicure solo durante la registrazione o le domande. La generazione di avatar utilizza Google Gemini. Il contenuto elaborato viene archiviato localmente e non viene mai utilizzato per addestrare modelli IA."
       },
       "contact": {
         "title": "Contattaci",
         "description": "Domande sulla tua privacy o sui tuoi dati? Siamo qui per aiutarti."
       },
-      "lastUpdated": "Ultimo aggiornamento: Dicembre 2024"
+      "lastUpdated": "Ultimo aggiornamento: Marzo 2026"
     }
   },
   "languagePicker": {
@@ -888,5 +888,23 @@
   },
   "reminder": {
     "postEvent": "{{title}} di {{name}} era questa settimana, fatti sentire?"
+  },
+  "aiConsent": {
+    "title": "Elaborazione dati con IA",
+    "subtitle": "Recall People utilizza servizi di IA di terze parti per trascrivere le registrazioni vocali, estrarre informazioni sui contatti e generare avatar. Ecco cosa devi sapere.",
+    "whatWeShare": "Quali dati vengono elaborati",
+    "voiceData": "Le registrazioni vocali vengono inviate per la trascrizione audio-testo",
+    "textData": "Il testo trascritto viene analizzato per estrarre contatti, fatti e rispondere alle tue domande",
+    "avatarData": "Descrizioni testuali (genere, età, stile) vengono usate per generare avatar illustrati",
+    "whoReceives": "Fornitori di IA esterni",
+    "providerTranscription": "Trascrizione",
+    "providerAnalysis": "Analisi del testo",
+    "providerAvatar": "Generazione avatar",
+    "protections": "Le tue protezioni",
+    "noTraining": "I tuoi dati non vengono mai usati per addestrare modelli di IA",
+    "noStorage": "I dati vengono elaborati in tempo reale e non memorizzati dai fornitori di IA",
+    "localFirst": "Tutti i tuoi contatti e note restano sul tuo dispositivo",
+    "readPrivacyPolicy": "Leggi la nostra informativa sulla privacy",
+    "accept": "Capisco e accetto"
   }
 }

@@ -607,13 +607,13 @@
       },
       "aiProcessing": {
         "title": "KI-Verarbeitung",
-        "description": "Sprachtranskription und Textanalyse werden nur bei der Aufnahme über sichere APIs verarbeitet. Der verarbeitete Inhalt wird lokal gespeichert und niemals zum Training von KI-Modellen verwendet."
+        "description": "Sprachtranskription (Deepgram, Groq) und Textanalyse (Cerebras) werden nur bei Aufnahmen oder Fragen über sichere APIs verarbeitet. Die Avatar-Erstellung nutzt Google Gemini. Der verarbeitete Inhalt wird lokal gespeichert und niemals zum Training von KI-Modellen verwendet."
       },
       "contact": {
         "title": "Kontaktiere uns",
         "description": "Fragen zu deinem Datenschutz oder deinen Daten? Wir sind hier, um zu helfen."
       },
-      "lastUpdated": "Zuletzt aktualisiert: Dezember 2024"
+      "lastUpdated": "Zuletzt aktualisiert: März 2026"
     }
   },
   "languagePicker": {
@@ -888,5 +888,23 @@
   },
   "reminder": {
     "postEvent": "{{title}} von {{name}} war diese Woche, melde dich?"
+  },
+  "aiConsent": {
+    "title": "KI-Datenverarbeitung",
+    "subtitle": "Recall People nutzt KI-Dienste von Drittanbietern, um deine Sprachaufnahmen zu transkribieren, Kontaktinformationen zu extrahieren und Avatare zu erstellen. Hier ist, was du wissen musst.",
+    "whatWeShare": "Welche Daten verarbeitet werden",
+    "voiceData": "Sprachaufnahmen werden zur Sprach-zu-Text-Transkription gesendet",
+    "textData": "Transkribierter Text wird analysiert, um Kontakte, Fakten zu extrahieren und deine Fragen zu beantworten",
+    "avatarData": "Textbeschreibungen (Geschlecht, Alter, Stil) werden zur Erstellung illustrierter Avatare verwendet",
+    "whoReceives": "Externe KI-Anbieter",
+    "providerTranscription": "Transkription",
+    "providerAnalysis": "Textanalyse",
+    "providerAvatar": "Avatar-Erstellung",
+    "protections": "Dein Schutz",
+    "noTraining": "Deine Daten werden niemals zum Training von KI-Modellen verwendet",
+    "noStorage": "Daten werden in Echtzeit verarbeitet und nicht von KI-Anbietern gespeichert",
+    "localFirst": "Alle deine Kontakte und Notizen bleiben auf deinem Gerät",
+    "readPrivacyPolicy": "Unsere vollständige Datenschutzrichtlinie lesen",
+    "accept": "Ich verstehe und stimme zu"
   }
 }

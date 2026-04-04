@@ -20,6 +20,7 @@ bucket_name = "recall-people-avatars"
 # For local dev, override via .dev.vars or CLI
 [vars]
 BETTER_AUTH_URL = "https://recall-people-api.clement-serizay.workers.dev"
+PRO_WHITELIST = "apple-review@recall-people.com,clement.serizay@gmail.com,serizay.clem@gmail.com,solenn.toupin@gmail.com,toupin.solenn@gmail.com,toupin.morgane@outlook.fr"
 
 [observability]
 [observability.logs]

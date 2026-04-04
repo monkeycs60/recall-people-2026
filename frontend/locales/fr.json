@@ -643,13 +643,13 @@
       },
       "aiProcessing": {
         "title": "Traitement IA",
-        "description": "La transcription vocale et l'analyse de texte sont traitées via des API sécurisées uniquement lors de l'enregistrement. Le contenu traité est stocké localement et n'est jamais utilisé pour entraîner des modèles IA."
+        "description": "La transcription vocale (Deepgram, Groq) et l'analyse de texte (Cerebras) sont traitées via des API sécurisées uniquement lors de l'enregistrement ou des questions. La génération d'avatars utilise Google Gemini. Le contenu traité est stocké localement et n'est jamais utilisé pour entraîner des modèles IA."
       },
       "contact": {
         "title": "Nous contacter",
         "description": "Des questions sur ta vie privée ou tes données ? On est là pour t'aider."
       },
-      "lastUpdated": "Dernière mise à jour : Décembre 2024"
+      "lastUpdated": "Dernière mise à jour : Mars 2026"
     }
   },
   "languagePicker": {
@@ -878,5 +878,23 @@
   },
   "reminder": {
     "postEvent": "{{title}} de {{name}} c'était cette semaine, prends des nouvelles ?"
+  },
+  "aiConsent": {
+    "title": "Traitement IA des données",
+    "subtitle": "Recall People utilise des services d'IA tiers pour transcrire tes enregistrements vocaux, extraire les informations de contacts et générer des avatars. Voici ce que tu dois savoir.",
+    "whatWeShare": "Quelles données sont traitées",
+    "voiceData": "Les enregistrements vocaux sont envoyés pour transcription audio-texte",
+    "textData": "Le texte transcrit est analysé pour extraire contacts, faits et répondre à tes questions",
+    "avatarData": "Des descriptions textuelles (genre, âge, style) sont utilisées pour générer des avatars illustrés",
+    "whoReceives": "Fournisseurs d'IA tiers",
+    "providerTranscription": "Transcription",
+    "providerAnalysis": "Analyse de texte",
+    "providerAvatar": "Génération d'avatar",
+    "protections": "Tes protections",
+    "noTraining": "Tes données ne sont jamais utilisées pour entraîner des modèles IA",
+    "noStorage": "Les données sont traitées en temps réel et non stockées par les fournisseurs IA",
+    "localFirst": "Tous tes contacts et notes restent sur ton appareil",
+    "readPrivacyPolicy": "Lire notre politique de confidentialité",
+    "accept": "Je comprends et j'accepte"
   }
 }
