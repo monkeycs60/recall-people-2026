@@ -33,7 +33,7 @@ module.exports = {
     ios: {
       supportsTablet: false,
       bundleIdentifier: 'com.monkeycs60.recallpeople2026',
-      buildNumber: '17',
+      buildNumber: '19',
     },
     android: {
       adaptiveIcon: {
@@ -79,7 +79,6 @@ module.exports = {
         },
       ],
       'expo-font',
-      'react-native-purchases',
     ],
     experiments: {
       typedRoutes: true,

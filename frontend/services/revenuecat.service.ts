@@ -1,4 +1,4 @@
-import Purchases, { PurchasesOffering, CustomerInfo } from 'react-native-purchases';
+import Purchases, { PurchasesOffering, CustomerInfo, STOREKIT_VERSION } from 'react-native-purchases';
 import { Platform } from 'react-native';
 import { useSubscriptionStore } from '@/stores/subscription-store';
 
@@ -23,7 +23,7 @@ export const revenueCatService = {
 
     await Purchases.configure({
       apiKey,
-      usesStoreKit2IfAvailable: true,
+      storeKitVersion: STOREKIT_VERSION.STOREKIT_2,
     });
 
     if (userId) {
