@@ -114,10 +114,10 @@ const styles = StyleSheet.create({
   cancelButton: {
     flex: 1,
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: 14,
     backgroundColor: Colors.surface,
     borderWidth: 2,
-    borderColor: Colors.border,
+    borderColor: Colors.hairline,
     alignItems: 'center',
   },
   cancelButtonText: {
@@ -128,10 +128,10 @@ const styles = StyleSheet.create({
   deleteButton: {
     flex: 1,
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: 14,
     backgroundColor: '#FEE2E2',
     borderWidth: 2,
-    borderColor: Colors.border,
+    borderColor: Colors.hairline,
     alignItems: 'center',
   },
   deleteButtonText: {

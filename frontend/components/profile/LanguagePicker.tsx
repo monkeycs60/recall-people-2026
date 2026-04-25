@@ -34,7 +34,7 @@ export const LanguagePicker = forwardRef<BottomSheetModal>((_, ref) => {
       enableDynamicSizing
       backdropComponent={renderBackdrop}
       backgroundStyle={{ backgroundColor: Colors.surface }}
-      handleIndicatorStyle={{ backgroundColor: Colors.border }}
+      handleIndicatorStyle={{ backgroundColor: Colors.hairline }}
     >
       <BottomSheetView style={{ paddingBottom: 32 }}>
         <View className="px-4 pb-2 border-b border-surfaceHover">

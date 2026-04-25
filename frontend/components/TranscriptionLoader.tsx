@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.borderLight,
+    backgroundColor: Colors.hairline,
   },
   stepDotCompleted: {
     backgroundColor: Colors.primary,

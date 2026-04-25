@@ -148,10 +148,10 @@ const styles = StyleSheet.create({
   emptyState: {
     backgroundColor: `${Colors.surface}50`,
     padding: 20,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: Colors.border,
+    borderColor: Colors.hairline,
     alignItems: 'center',
   },
   emptyStateIllustration: {
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   editCard: {
     backgroundColor: Colors.surface,
     padding: 16,
-    borderRadius: 12,
+    borderRadius: 14,
     marginBottom: 8,
   },
   editInput: {
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 10,
     borderRadius: 8,
-    backgroundColor: Colors.surfaceHover,
+    backgroundColor: Colors.surfaceAlt,
     alignItems: 'center',
   },
   cancelButtonText: {
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
   },
   memoryCard: {
     backgroundColor: Colors.surface,
-    borderRadius: 12,
+    borderRadius: 14,
     marginBottom: 8,
     overflow: 'hidden',
   },

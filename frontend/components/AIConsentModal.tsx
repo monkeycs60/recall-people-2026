@@ -2,7 +2,7 @@ import { View, Text, Pressable, StyleSheet, ScrollView, Linking } from 'react-na
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Shield, ExternalLink } from 'lucide-react-native';
-import { Colors } from '@/constants/theme';
+import { Colors, Fonts } from '@/constants/theme';
 
 const PRIVACY_URL = 'https://recall-people-2026.vercel.app/privacy';
 
@@ -119,8 +119,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   title: {
-    fontFamily: 'PlayfairDisplay_700Bold',
+    fontFamily: Fonts.sans.bold,
     fontSize: 24,
+    letterSpacing: -0.5,
     color: Colors.textPrimary,
     textAlign: 'center',
     marginBottom: 8,

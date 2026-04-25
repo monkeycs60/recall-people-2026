@@ -145,9 +145,13 @@
     "searchPlaceholder": "Chi stai cercando?",
     "filterPlaceholder": "Cerca un contatto...",
     "askHint": "Fai una domanda all'IA",
-    "noContacts": "Parla di questa persona, della vostra relazione, dei suoi progetti... Ci pensiamo noi al resto.",
+    "noContacts": "Nessuno qui per ora.",
     "noContactsDescription": "Crea la tua prima nota per iniziare.",
-    "createFirstNote": "Crea la tua prima nota",
+    "createFirstNote": "Registra la tua prima nota",
+    "people": "persone",
+    "needFollowUp": "da ricontattare",
+    "allGroup": "Tutti",
+    "recentSection": "Recenti",
     "noContactsInGroup": "Nessun contatto in questo gruppo",
     "noContactsInGroupHint": "Aggiungi contatti a questo gruppo dalla loro scheda.",
     "addContact": "Aggiungi un contatto",
@@ -173,6 +177,7 @@
     "lastContact": "Ultimo contatto",
     "addNote": "Novita su {{firstName}}?",
     "addNoteButton": {
+      "label": "Nuova nota",
       "title": "Aggiungi nota su {{firstName}}",
       "voiceOption": "Registra una nota vocale",
       "voiceDescription": "Parla di {{firstName}} al microfono",
@@ -668,7 +673,10 @@
     "unlockWith": "Sblocca con Pro:",
     "feature1": "Contatti illimitati",
     "feature2": "Registrazioni di 3 min (vs 1 min)",
-    "feature3": "Ricerca IA",
+    "feature3": "Generazione avatar IA illimitata",
+    "feature4": "Assistente IA illimitato",
+    "feature5": "Promemoria intelligenti e riepilogo settimanale",
+    "feature6": "Esporta dati in qualsiasi momento",
     "premiumTitle": "Sei Pro!",
     "premiumSubtitle": "Grazie per supportare Recall People",
     "unlimitedContacts": "Contatti illimitati",
@@ -843,7 +851,7 @@
     },
     "processing": "Sto pensando...",
     "newQuestion": "Fai un'altra domanda...",
-    "quotaExhausted": "Prove gratuite esaurite",
+    "quotaExhausted": "Quota IA mensile esaurita",
     "quotaRemaining": "{{used}}/{{limit}} questo mese",
     "upgradeHint": "Passa a Premium per accesso illimitato",
     "history": {
@@ -877,11 +885,6 @@
     "weeklyDigestDescription": "Ogni lunedì, un riepilogo della settimana: eventi in arrivo e contatti da risentire",
     "postEventFollowUp": "Follow-up post-evento",
     "postEventFollowUpDescription": "Ricevi un promemoria per farti sentire dopo un evento passato"
-  },
-  "trial": {
-    "daysRemaining": "Prova gratuita — {{count}} giorno/i rimanente/i",
-    "expired": "Prova terminata",
-    "upgrade": "Passa a Pro"
   },
   "digest": {
     "body": "{{events}} evento/i, {{contacts}} contatto/i da ricontattare"

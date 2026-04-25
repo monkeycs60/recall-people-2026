@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
     backgroundColor: `${Colors.warning}20`,
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 14,
   },
   badgeText: {
     color: Colors.warning,
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     paddingVertical: 12,
-    borderRadius: 12,
+    borderRadius: 14,
   },
   buttonActivate: {
     backgroundColor: Colors.warning,

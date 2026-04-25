@@ -56,13 +56,13 @@ export function SearchInput({
     const loadingBorderColor = interpolateColor(
       borderColorProgress.value,
       [0, 1],
-      [Colors.borderLight, Colors.primary]
+      [Colors.hairline, Colors.primary]
     );
 
     const focusBorderColor = interpolateColor(
       focusProgress.value,
       [0, 1],
-      [Colors.borderLight, Colors.primary]
+      [Colors.hairline, Colors.primary]
     );
 
     return {
@@ -120,12 +120,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.surface,
-    borderRadius: 12,
+    borderRadius: 14,
     paddingLeft: 16,
     paddingRight: 8,
     height: 56,
     borderWidth: 1.5,
-    borderColor: Colors.borderLight,
+    borderColor: Colors.hairline,
   },
   iconContainer: {
     marginRight: 12,

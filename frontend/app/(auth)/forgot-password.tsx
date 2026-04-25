@@ -4,7 +4,7 @@ import { Link, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '@/constants/theme';
+import { Colors, Fonts, Shadows } from '@/constants/theme';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { requestPasswordReset } from '@/lib/auth';
 
@@ -188,13 +188,13 @@ const styles = StyleSheet.create({
     marginTop: 40,
   },
   title: {
-    fontFamily: 'PlayfairDisplay_700Bold',
+    fontFamily: Fonts.sans.bold,
     fontSize: 28,
+    letterSpacing: -0.8,
     color: Colors.textPrimary,
     textAlign: 'center',
   },
   subtitle: {
-    fontFamily: 'PlayfairDisplay_400Regular',
     fontSize: 14,
     color: Colors.textSecondary,
     textAlign: 'center',
@@ -205,11 +205,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
     borderRadius: 20,
     padding: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 3,
+    ...Shadows.elevated,
   },
   inputGroup: {
     marginBottom: 16,
@@ -223,11 +219,11 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: Colors.background,
     borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
+    borderColor: Colors.hairline,
+    borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 14,
-    fontSize: 16,
+    fontSize: 15,
     color: Colors.textPrimary,
   },
   errorText: {
@@ -238,18 +234,14 @@ const styles = StyleSheet.create({
   primaryButton: {
     backgroundColor: Colors.primary,
     paddingVertical: 16,
-    borderRadius: 12,
+    borderRadius: 16,
     alignItems: 'center',
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 4,
+    ...Shadows.fab,
   },
   primaryButtonText: {
-    color: Colors.textInverse,
-    fontSize: 17,
-    fontWeight: '600',
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
   },
   buttonDisabled: {
     opacity: 0.5,
@@ -272,11 +264,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 32,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 3,
+    ...Shadows.elevated,
     marginTop: 40,
   },
   successIconContainer: {
@@ -289,8 +277,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   successTitle: {
-    fontFamily: 'PlayfairDisplay_700Bold',
+    fontFamily: Fonts.sans.bold,
     fontSize: 24,
+    letterSpacing: -0.5,
     color: Colors.textPrimary,
     textAlign: 'center',
     marginBottom: 12,
@@ -311,10 +300,10 @@ const styles = StyleSheet.create({
   resendButton: {
     backgroundColor: Colors.background,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.hairline,
     paddingVertical: 14,
     paddingHorizontal: 24,
-    borderRadius: 12,
+    borderRadius: 14,
     marginBottom: 16,
   },
   resendButtonText: {

@@ -277,17 +277,17 @@ const styles = StyleSheet.create({
   },
   menu: {
     backgroundColor: Colors.surface,
-    borderRadius: 12,
+    borderRadius: 14,
     marginTop: 8,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.hairline,
     overflow: 'hidden',
   },
   menuItem: {
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
+    borderBottomColor: Colors.hairline,
   },
   menuItemLast: {
     borderBottomWidth: 0,

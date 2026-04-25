@@ -26,7 +26,7 @@ export const StyledTextInput = forwardRef<TextInput, StyledTextInputProps>(
         ? Colors.error
         : isFocused
           ? Colors.primary
-          : Colors.borderLight;
+          : Colors.hairline;
 
       const targetBorderWidth = hasError || isFocused ? 2 : 1.5;
 
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
     borderRadius: BorderRadius.md,
     borderWidth: 1.5,
-    borderColor: Colors.borderLight,
+    borderColor: Colors.hairline,
   },
   containerDisabled: {
     backgroundColor: Colors.surfaceAlt,

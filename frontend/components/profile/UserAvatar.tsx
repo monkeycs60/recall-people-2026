@@ -2,7 +2,7 @@ import { View, StyleSheet, Pressable } from 'react-native';
 import { SvgUri } from 'react-native-svg';
 import { Image } from 'expo-image';
 import { Camera } from 'lucide-react-native';
-import { Colors } from '@/constants/theme';
+import { Colors, Shadows } from '@/constants/theme';
 
 type UserAvatarProps = {
   name: string;
@@ -46,7 +46,7 @@ export function UserAvatar({
         width: size,
         height: size,
         borderRadius: size / 2,
-        backgroundColor: Colors.secondaryLight,
+        backgroundColor: Colors.primaryLight,
       }}
       contentFit="cover"
       transition={200}
@@ -100,14 +100,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
-    backgroundColor: Colors.secondaryLight,
+    backgroundColor: Colors.primaryLight,
   },
   wrapper: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 6,
+    ...Shadows.floating,
   },
   editBadge: {
     position: 'absolute',

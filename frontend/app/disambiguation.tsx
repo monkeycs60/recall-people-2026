@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { Contact, ExtractionResult, HotTopic } from '@/types';
 import { Plus, FileText } from 'lucide-react-native';
-import { Colors } from '@/constants/theme';
+import { Colors, Fonts, Shadows } from '@/constants/theme';
 import { ContactAvatar } from '@/components/contact/ContactAvatar';
 import { getContactDisplayName } from '@/utils/contactDisplayName';
 import { hotTopicService } from '@/services/hot-topic.service';
@@ -233,8 +233,9 @@ const styles = StyleSheet.create({
 		paddingTop: 16,
 	},
 	title: {
+		fontFamily: Fonts.sans.bold,
 		fontSize: 24,
-		fontWeight: '700',
+		letterSpacing: -0.5,
 		color: Colors.textPrimary,
 		marginBottom: 8,
 	},
@@ -246,7 +247,7 @@ const styles = StyleSheet.create({
 	},
 	contextCard: {
 		backgroundColor: Colors.primaryLight,
-		borderRadius: 12,
+		borderRadius: 18,
 		padding: 16,
 		marginBottom: 20,
 	},
@@ -271,18 +272,20 @@ const styles = StyleSheet.create({
 		marginBottom: 20,
 	},
 	sectionTitle: {
+		fontFamily: Fonts.sans.bold,
 		fontSize: 18,
-		fontWeight: '600',
+		letterSpacing: -0.3,
 		color: Colors.textPrimary,
 		marginBottom: 12,
 	},
 	contactCard: {
 		backgroundColor: Colors.surface,
 		padding: 16,
-		borderRadius: 12,
+		borderRadius: 16,
 		marginBottom: 12,
 		flexDirection: 'row',
 		alignItems: 'center',
+		...Shadows.card,
 	},
 	avatarContainer: {
 		marginRight: 14,
@@ -322,13 +325,13 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	createNewCard: {
-		borderWidth: 2,
+		borderWidth: 1.5,
 		borderStyle: 'dashed',
-		borderColor: `${Colors.primary}80`,
+		borderColor: Colors.primary,
 		padding: 16,
-		borderRadius: 12,
+		borderRadius: 16,
 		alignItems: 'center',
-		backgroundColor: `${Colors.primary}08`,
+		backgroundColor: 'transparent',
 	},
 	createNewRow: {
 		flexDirection: 'row',

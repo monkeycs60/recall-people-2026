@@ -18,7 +18,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system/legacy';
 import { Image } from 'expo-image';
 import { Colors, Spacing, BorderRadius } from '@/constants/theme';
-import { uploadUserAvatar, generateUserAvatar, deleteUserAvatar, useAvatarQuota } from '@/lib/api';
+import { uploadUserAvatar, generateUserAvatar, deleteUserAvatar, consumeAvatarQuota } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth-store';
 import { setUser } from '@/lib/auth';
 import { useSubscriptionStore } from '@/stores/subscription-store';
@@ -53,7 +53,7 @@ export function UserAvatarEditModal({
   const avatarUsed = useSubscriptionStore((state) => state.avatarUsed);
   const avatarLimit = useSubscriptionStore((state) => state.avatarLimit);
   const isPremium = useSubscriptionStore((state) => state.isPremium);
-  const syncTrialAndQuotas = useSubscriptionStore((state) => state.syncTrialAndQuotas);
+  const syncQuotas = useSubscriptionStore((state) => state.syncQuotas);
 
   const resetState = () => {
     setMode('choose');
@@ -153,19 +153,19 @@ export function UserAvatarEditModal({
     try {
       if (!isPremium) {
         try {
-          const quotaResult = await useAvatarQuota();
+          const quotaResult = await consumeAvatarQuota();
           if (!quotaResult.success && quotaResult.error === 'quota_exhausted') {
             setShowPaywall(true);
             setIsGenerating(false);
             return;
           }
 
-          await syncTrialAndQuotas();
+          await syncQuotas();
         } catch (quotaError) {
           const isQuotaExhausted = quotaError instanceof Error &&
             ('statusCode' in quotaError && (quotaError as unknown as { statusCode: number }).statusCode === 403);
           if (isQuotaExhausted) {
-            await syncTrialAndQuotas();
+            await syncQuotas();
             setShowPaywall(true);
             setIsGenerating(false);
             return;
@@ -386,7 +386,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.hairline,
     gap: Spacing.md,
   },
   optionIconContainer: {
@@ -442,13 +442,13 @@ const styles = StyleSheet.create({
   },
   promptInput: {
     backgroundColor: Colors.surface,
-    borderRadius: 12,
+    borderRadius: 14,
     paddingVertical: 12,
     paddingHorizontal: 16,
     fontSize: 15,
     color: Colors.textPrimary,
     borderWidth: 1.5,
-    borderColor: Colors.borderLight,
+    borderColor: Colors.hairline,
     minHeight: 100,
     marginBottom: Spacing.lg,
   },
@@ -462,7 +462,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     backgroundColor: Colors.background,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.hairline,
     alignItems: 'center',
   },
   backButtonText: {

@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
-    borderColor: Colors.borderLight,
+    borderColor: Colors.hairline,
   },
   text: {
     fontSize: 15,
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: Colors.borderLight,
+    borderColor: Colors.hairline,
   },
   cancelButtonText: {
     color: Colors.primary,

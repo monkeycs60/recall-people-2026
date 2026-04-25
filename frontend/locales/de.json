@@ -145,9 +145,13 @@
     "searchPlaceholder": "Wen suchst du?",
     "filterPlaceholder": "Kontakt suchen...",
     "askHint": "Stelle der KI eine Frage",
-    "noContacts": "Erzähle über diese Person, eure Beziehung, ihre Projekte... Wir kümmern uns um den Rest.",
+    "noContacts": "Noch niemand hier.",
     "noContactsDescription": "Erstelle deine erste Notiz, um loszulegen.",
-    "createFirstNote": "Erste Notiz erstellen",
+    "createFirstNote": "Erste Notiz aufnehmen",
+    "people": "Personen",
+    "needFollowUp": "brauchen ein Follow-up",
+    "allGroup": "Alle",
+    "recentSection": "Kürzlich",
     "noContactsInGroup": "Keine Kontakte in dieser Gruppe",
     "noContactsInGroupHint": "Füge Kontakte zu dieser Gruppe über deren Profilseite hinzu.",
     "addContact": "Kontakt hinzufügen",
@@ -173,6 +177,7 @@
     "lastContact": "Letzter Kontakt",
     "addNote": "Was gibt's Neues bei {{firstName}}?",
     "addNoteButton": {
+      "label": "Neue Notiz",
       "title": "Notiz über {{firstName}} hinzufügen",
       "voiceOption": "Sprachnotiz aufnehmen",
       "voiceDescription": "Über {{firstName}} ins Mikrofon sprechen",
@@ -668,7 +673,10 @@
     "unlockWith": "Mit Pro freischalten:",
     "feature1": "Unbegrenzte Kontakte",
     "feature2": "3-Minuten-Aufnahmen (statt 1 Min.)",
-    "feature3": "KI-gestützte Suche",
+    "feature3": "Unbegrenzte KI-Avatar-Generierung",
+    "feature4": "Unbegrenzter KI-Assistent",
+    "feature5": "Intelligente Erinnerungen & wöchentliche Zusammenfassung",
+    "feature6": "Daten jederzeit exportieren",
     "premiumTitle": "Du bist Pro!",
     "premiumSubtitle": "Danke für deine Unterstützung von Recall People",
     "unlimitedContacts": "Unbegrenzte Kontakte",
@@ -843,7 +851,7 @@
     },
     "processing": "Denke nach...",
     "newQuestion": "Stelle eine weitere Frage...",
-    "quotaExhausted": "Kostenlose Versuche aufgebraucht",
+    "quotaExhausted": "Monatliches KI-Kontingent aufgebraucht",
     "quotaRemaining": "{{used}}/{{limit}} diesen Monat",
     "upgradeHint": "Upgrade auf Premium für unbegrenzten Zugang",
     "history": {
@@ -877,11 +885,6 @@
     "weeklyDigestDescription": "Jeden Montag ein Überblick deiner Woche: kommende Ereignisse und Kontakte zum Nachholen",
     "postEventFollowUp": "Nachfassen nach Ereignis",
     "postEventFollowUpDescription": "Erinnert werden, dich nach einem vergangenen Ereignis zu melden"
-  },
-  "trial": {
-    "daysRemaining": "Kostenlose Testversion — {{count}} Tag(e) verbleibend",
-    "expired": "Testversion abgelaufen",
-    "upgrade": "Auf Pro upgraden"
   },
   "digest": {
     "body": "{{events}} Ereignis(se), {{contacts}} Kontakt(e) zum Nachholen"

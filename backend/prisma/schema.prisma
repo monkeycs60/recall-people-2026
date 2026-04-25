@@ -22,10 +22,6 @@ model User {
   updatedAt     DateTime  @updatedAt @map("updated_at")
   preferredLanguage String @default("fr") @map("preferred_language")
 
-  // Trial tracking
-  trialStartDate   DateTime? @map("trial_start_date")
-  trialEndDate     DateTime? @map("trial_end_date")
-
   // Monthly quotas (renewable)
   avatarMonthlyUsed  Int      @default(0) @map("avatar_monthly_used")
   avatarMonthKey     String   @default("") @map("avatar_month_key")  // "2026-02"

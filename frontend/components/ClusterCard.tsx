@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: Colors.surface,
     borderWidth: 1.5,
-    borderColor: Colors.border,
+    borderColor: Colors.hairline,
   },
   header: {
     flexDirection: 'row',
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     minWidth: 150,
     borderWidth: 1.5,
-    borderColor: Colors.border,
+    borderColor: Colors.hairline,
   },
   contactAvatar: {
     width: 40,

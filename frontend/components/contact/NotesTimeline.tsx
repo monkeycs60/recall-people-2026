@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { X, Trash2, ChevronDown, ChevronUp, Pencil, Check } from 'lucide-react-native';
 import { Note } from '@/types';
-import { Colors, Spacing, BorderRadius, Typography } from '@/constants/theme';
+import { Colors, Spacing, BorderRadius, Typography, Fonts } from '@/constants/theme';
 
 type NotesTimelineProps = {
   notes: Note[];
@@ -309,8 +309,9 @@ export function NotesTimeline({ notes, onDelete, onUpdate, highlightId }: NotesT
 
 const styles = StyleSheet.create({
   sectionTitle: {
-    fontFamily: 'PlayfairDisplay_600SemiBold',
+    fontFamily: Fonts.sans.bold,
     fontSize: 22,
+    letterSpacing: -0.5,
     color: Colors.textPrimary,
     marginBottom: Spacing.md,
   },
@@ -340,7 +341,7 @@ const styles = StyleSheet.create({
   timelineLine: {
     flex: 1,
     width: 2,
-    backgroundColor: Colors.border,
+    backgroundColor: Colors.hairline,
     marginTop: 2,
   },
   timelineContent: {
@@ -359,7 +360,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     padding: Spacing.md,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.hairline,
   },
   noteCardHighlighted: {
     borderColor: Colors.primary,
@@ -397,7 +398,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: Spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: Colors.hairline,
   },
   modalTitleContainer: {
     flex: 1,
@@ -438,7 +439,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.lg,
     paddingTop: Spacing.md,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    borderTopColor: Colors.hairline,
   },
   editIndicatorText: {
     fontSize: 13,
@@ -451,7 +452,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
     paddingBottom: Spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: Colors.hairline,
   },
   editHintText: {
     fontSize: 13,

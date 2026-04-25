@@ -65,7 +65,7 @@ export function TextInputMode({
   }));
 
   const containerAnimatedStyle = useAnimatedStyle(() => ({
-    borderColor: withTiming(isFocused ? Colors.primary : Colors.borderLight, { duration: 150 }),
+    borderColor: withTiming(isFocused ? Colors.primary : Colors.hairline, { duration: 150 }),
     borderWidth: withTiming(isFocused ? 2 : 1.5, { duration: 150 }),
   }));
 
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
     borderRadius: BorderRadius.md,
     borderWidth: 1.5,
-    borderColor: Colors.borderLight,
+    borderColor: Colors.hairline,
     overflow: 'hidden',
   },
   textInput: {
@@ -157,8 +157,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     borderTopWidth: 1,
-    borderTopColor: Colors.borderLight,
-    backgroundColor: Colors.surfaceHover,
+    borderTopColor: Colors.hairline,
+    backgroundColor: Colors.surfaceAlt,
   },
   charCount: {
     fontSize: 12,
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   submitButton: {
     width: 44,
     height: 44,
-    borderRadius: 12,
+    borderRadius: 14,
     backgroundColor: Colors.surfaceAlt,
     alignItems: 'center',
     justifyContent: 'center',

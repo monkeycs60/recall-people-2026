@@ -1,15 +1,19 @@
-import { View, Pressable, StyleSheet, Modal } from 'react-native';
+import { View, Pressable, StyleSheet, Text } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Users, User, Mic, Calendar, Sparkle, Plus } from 'lucide-react-native';
+import { Users, User, Calendar, Sparkle, Mic } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Colors } from '@/constants/theme';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Colors, Shadows } from '@/constants/theme';
+import {
+  CUSTOM_TAB_BAR_BOTTOM_GAP,
+  getBottomNavigationInset,
+} from '@/constants/bottom-navigation';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
-import { useState } from 'react';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -23,147 +27,84 @@ interface TabBarProps {
   };
 }
 
+const TAB_CONFIG = [
+  { name: 'index', icon: Users, labelKey: 'tabs.contacts' },
+  { name: 'upcoming', icon: Calendar, labelKey: 'tabs.upcoming' },
+  { name: '__fab', icon: Mic, labelKey: '' },
+  { name: 'search', icon: Sparkle, labelKey: 'tabs.assistant' },
+  { name: 'profile', icon: User, labelKey: 'tabs.profile' },
+] as const;
+
 export function CustomTabBar({ state, navigation }: TabBarProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const fabScale = useSharedValue(1);
-  const [menuVisible, setMenuVisible] = useState(false);
-
-  const leftTabs = [
-    { name: 'index', icon: Users, label: t('tabs.contacts') },
-    { name: 'upcoming', icon: Calendar, label: t('tabs.upcoming') },
-  ];
-
-  const rightTabs = [
-    { name: 'search', icon: Sparkle, label: t('tabs.assistant') },
-    { name: 'profile', icon: User, label: t('tabs.profile') },
-  ];
+  const bottomInset = getBottomNavigationInset(insets.bottom);
 
   const handleFabPress = () => {
     fabScale.value = withSpring(0.9, { damping: 15 }, () => {
       fabScale.value = withSpring(1, { damping: 15 });
     });
-    setMenuVisible(true);
-  };
-
-  const handleMenuOption = (route: string) => {
-    setMenuVisible(false);
-    router.push(route as '/record' | '/ask');
+    router.push('/record');
   };
 
   const fabAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: fabScale.value }],
   }));
 
-  const renderTab = (tab: { name: string; icon: typeof Users; label: string }) => {
-    const isActive = state.routes[state.index]?.name === tab.name;
-    const Icon = tab.icon;
-
-    return (
-      <Pressable
-        key={tab.name}
-        onPress={() => navigation.navigate(tab.name)}
-        style={styles.tabItem}
-      >
-        <Icon
-          size={24}
-          color={isActive ? Colors.primary : Colors.tabIconDefault}
-          strokeWidth={isActive ? 2.5 : 2}
-        />
-        <Animated.Text
-          style={[
-            styles.tabLabel,
-            { color: isActive ? Colors.primary : Colors.tabIconDefault },
-          ]}
-        >
-          {tab.label}
-        </Animated.Text>
-      </Pressable>
-    );
-  };
-
   return (
-    <View style={[styles.container, { paddingBottom: insets.bottom }]}>
-      <View style={styles.tabBar}>
-        <View style={styles.tabGroup}>
-          {leftTabs.map(renderTab)}
-        </View>
+    <View style={[styles.container, { paddingBottom: bottomInset + CUSTOM_TAB_BAR_BOTTOM_GAP }]}>
+      <View style={styles.pill}>
+        {TAB_CONFIG.map((tab) => {
+          if (tab.name === '__fab') {
+            return (
+              <AnimatedPressable
+                key="fab"
+                onPress={handleFabPress}
+                style={[styles.fab, fabAnimatedStyle]}
+              >
+                <LinearGradient
+                  colors={[Colors.primary, Colors.primaryDark]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.fabGradient}
+                >
+                  <Mic size={22} color={Colors.textInverse} strokeWidth={2.5} />
+                </LinearGradient>
+              </AnimatedPressable>
+            );
+          }
 
-        <View style={styles.fabSpacer} />
+          const isActive = state.routes[state.index]?.name === tab.name;
+          const Icon = tab.icon;
 
-        <View style={styles.tabGroup}>
-          {rightTabs.map(renderTab)}
-        </View>
-      </View>
-
-      <View style={styles.fabContainer}>
-        <AnimatedPressable
-          onPress={handleFabPress}
-          style={[styles.fab, fabAnimatedStyle]}
-        >
-          <View style={styles.fabInner}>
-            <Plus size={32} color={Colors.textInverse} strokeWidth={2.5} />
-          </View>
-        </AnimatedPressable>
-      </View>
-
-      <Modal
-        visible={menuVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setMenuVisible(false)}
-      >
-        <Pressable
-          style={styles.modalOverlay}
-          onPress={() => setMenuVisible(false)}
-        >
-          <View
-            style={[styles.menuContainer, { paddingBottom: insets.bottom + 16 }]}
-            onStartShouldSetResponder={() => true}
-          >
-            <View style={styles.menuHeader}>
-              <View style={styles.menuHandle} />
-            </View>
-
+          return (
             <Pressable
-              style={styles.menuOptionRow}
-              onPress={() => handleMenuOption('/record')}
+              key={tab.name}
+              onPress={() => navigation.navigate(tab.name)}
+              style={[
+                styles.tabButton,
+                isActive && styles.tabButtonActive,
+              ]}
             >
-              <View style={[styles.menuIconCircle, { backgroundColor: Colors.primary }]}>
-                <Mic size={22} color={Colors.textInverse} strokeWidth={2.5} />
-              </View>
-              <View style={styles.menuOptionTextContainer}>
-                <Animated.Text style={styles.menuOptionTitle}>
-                  {t('fab.newNote')}
-                </Animated.Text>
-                <Animated.Text style={styles.menuOptionSubtitle}>
-                  {t('fab.newNoteSubtitle')}
-                </Animated.Text>
-              </View>
+              <Icon
+                size={20}
+                color={isActive ? Colors.primary : Colors.textMuted}
+                strokeWidth={isActive ? 2.5 : 2}
+              />
+              <Text
+                style={[
+                  styles.tabLabel,
+                  { color: isActive ? Colors.primary : Colors.textMuted },
+                ]}
+              >
+                {t(tab.labelKey)}
+              </Text>
             </Pressable>
-
-            <View style={styles.menuDivider} />
-
-            <Pressable
-              style={styles.menuOptionRow}
-              onPress={() => handleMenuOption('/ask')}
-            >
-              <View style={[styles.menuIconCircle, { backgroundColor: Colors.calendar }]}>
-                <Sparkle size={22} color={Colors.textInverse} strokeWidth={2.5} />
-              </View>
-              <View style={styles.menuOptionTextContainer}>
-                <Animated.Text style={styles.menuOptionTitle}>
-                  {t('fab.askQuestion')}
-                </Animated.Text>
-                <Animated.Text style={styles.menuOptionSubtitle}>
-                  {t('fab.askQuestionSubtitle')}
-                </Animated.Text>
-              </View>
-            </Pressable>
-          </View>
-        </Pressable>
-      </Modal>
+          );
+        })}
+      </View>
     </View>
   );
 }
@@ -174,103 +115,44 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: Colors.surface,
-    borderTopWidth: 1,
-    borderTopColor: Colors.borderLight,
+    paddingHorizontal: 12,
+    pointerEvents: 'box-none',
   },
-  tabBar: {
+  pill: {
+    backgroundColor: Colors.surface,
+    borderRadius: 28,
+    padding: 6,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    height: 60,
-    paddingHorizontal: 16,
+    ...Shadows.floating,
   },
-  tabGroup: {
-    flexDirection: 'row',
+  tabButton: {
     flex: 1,
-  },
-  fabSpacer: {
-    width: 80,
-  },
-  tabItem: {
-    flex: 1,
+    height: 48,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 8,
+    gap: 2,
+  },
+  tabButtonActive: {
+    backgroundColor: Colors.primaryLight,
   },
   tabLabel: {
-    fontSize: 12,
-    marginTop: 4,
-    fontWeight: '500',
-  },
-  fabContainer: {
-    position: 'absolute',
-    top: -28,
-    left: '50%',
-    marginLeft: -32,
-    alignItems: 'center',
+    fontSize: 10,
+    fontWeight: '600',
   },
   fab: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: Colors.primary,
+    width: 56,
+    height: 56,
+    borderRadius: 24,
+    ...Shadows.fab,
   },
-  fabInner: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    justifyContent: 'flex-end',
-  },
-  menuContainer: {
-    backgroundColor: Colors.surface,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingHorizontal: 20,
-  },
-  menuHeader: {
-    alignItems: 'center',
-    paddingVertical: 12,
-  },
-  menuHandle: {
-    width: 36,
-    height: 4,
-    backgroundColor: Colors.border,
-    borderRadius: 2,
-  },
-  menuOptionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 16,
-    gap: 16,
-  },
-  menuIconCircle: {
-    width: 48,
-    height: 48,
+  fabGradient: {
+    width: 56,
+    height: 56,
     borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  menuOptionTextContainer: {
-    flex: 1,
-  },
-  menuOptionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.text,
-    marginBottom: 2,
-  },
-  menuOptionSubtitle: {
-    fontSize: 13,
-    color: Colors.textSecondary,
-  },
-  menuDivider: {
-    height: 1,
-    backgroundColor: Colors.border,
-    marginLeft: 64,
   },
 });

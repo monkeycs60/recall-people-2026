@@ -5,7 +5,6 @@ import {
   checkProWhitelist,
   getNotesStatus,
   incrementNoteCount,
-  getTrialStatus,
   getQuotas,
 } from '@/lib/api';
 
@@ -14,11 +13,6 @@ type SubscriptionState = {
   isTestPro: boolean;
   isHydrated: boolean;
   isSyncing: boolean;
-
-  // Trial
-  isInTrial: boolean;
-  trialEndDate: string | null;
-  trialDaysRemaining: number;
 
   // Monthly quotas
   avatarUsed: number;
@@ -42,12 +36,10 @@ type SubscriptionActions = {
   setHydrated: (hydrated: boolean) => void;
   syncNotesStatus: () => Promise<void>;
 
-  // Trial + quota actions
-  syncTrialAndQuotas: () => Promise<void>;
+  syncQuotas: () => Promise<void>;
   canCreateContact: (currentCount: number) => boolean;
   canGenerateAvatar: () => boolean;
   canUseAsk: () => boolean;
-  isTrialActive: () => boolean;
 };
 
 const getCurrentMonthKey = (): string => {
@@ -56,7 +48,6 @@ const getCurrentMonthKey = (): string => {
 };
 
 const FREE_CONTACTS_LIMIT = 15;
-const FREE_NOTES_PER_MONTH = 10;
 const FREE_MAX_DURATION_SECONDS = 60;
 const PREMIUM_MAX_DURATION_SECONDS = 180;
 
@@ -70,11 +61,6 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
         currentMonthKey: getCurrentMonthKey(),
         isHydrated: false,
         isSyncing: false,
-
-        // Trial defaults
-        isInTrial: false,
-        trialEndDate: null,
-        trialDaysRemaining: 0,
 
         // Monthly quota defaults
         avatarUsed: 0,
@@ -152,10 +138,7 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
         },
 
         canCreateNote: () => {
-          const state = get();
-          if (state.isPremium || state.isTestPro) return true;
-          state.resetMonthlyCountIfNeeded();
-          return get().notesCreatedThisMonth < FREE_NOTES_PER_MONTH;
+          return true;
         },
 
         canCreateContact: (currentCount: number) => {
@@ -167,7 +150,6 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
         canUseAsk: () => {
           const state = get();
           if (state.isPremium || state.isTestPro) return true;
-          if (state.isInTrial) return true;
           return state.askUsed < state.askLimit;
         },
 
@@ -177,35 +159,14 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
           return state.avatarUsed < state.avatarLimit;
         },
 
-        isTrialActive: () => {
-          const state = get();
-          if (!state.trialEndDate) return false;
-          return new Date(state.trialEndDate) > new Date();
-        },
-
-        syncTrialAndQuotas: async () => {
+        syncQuotas: async () => {
           const state = get();
           if (state.isSyncing) return;
 
           set({ isSyncing: true });
 
           try {
-            const [trialStatus, quotas] = await Promise.all([
-              getTrialStatus(),
-              getQuotas(),
-            ]);
-
-            if (trialStatus) {
-              if (__DEV__) {
-                console.log('[subscription] Synced trial status:', trialStatus);
-              }
-              set({
-                isInTrial: trialStatus.isInTrial,
-                trialEndDate: trialStatus.trialEndDate,
-                trialDaysRemaining: trialStatus.daysRemaining,
-              });
-            }
-
+            const quotas = await getQuotas();
             if (quotas) {
               if (__DEV__) {
                 console.log('[subscription] Synced quotas:', quotas);
@@ -222,7 +183,7 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
             }
           } catch (error) {
             if (__DEV__) {
-              console.error('[subscription] Failed to sync trial and quotas:', error);
+              console.error('[subscription] Failed to sync quotas:', error);
             }
           } finally {
             set({ isSyncing: false });
@@ -261,9 +222,6 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
           isTestPro: state.isTestPro,
           notesCreatedThisMonth: state.notesCreatedThisMonth,
           currentMonthKey: state.currentMonthKey,
-          isInTrial: state.isInTrial,
-          trialEndDate: state.trialEndDate,
-          trialDaysRemaining: state.trialDaysRemaining,
           avatarUsed: state.avatarUsed,
           avatarLimit: state.avatarLimit,
           askUsed: state.askUsed,
@@ -275,4 +233,4 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
   )
 );
 
-export { FREE_CONTACTS_LIMIT, FREE_NOTES_PER_MONTH, FREE_MAX_DURATION_SECONDS, PREMIUM_MAX_DURATION_SECONDS };
+export { FREE_CONTACTS_LIMIT, FREE_MAX_DURATION_SECONDS, PREMIUM_MAX_DURATION_SECONDS };

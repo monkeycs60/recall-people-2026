@@ -14,7 +14,7 @@ import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, Mic, Send, Sparkles } from 'lucide-react-native';
-import { Colors, Spacing, BorderRadius } from '@/constants/theme';
+import { Colors, Spacing, Fonts, Shadows } from '@/constants/theme';
 import { useContactsQuery } from '@/hooks/useContactsQuery';
 import { noteService } from '@/services/note.service';
 import { transcribeAudio, askQuestion } from '@/lib/api';
@@ -397,7 +397,7 @@ const styles = StyleSheet.create({
 		paddingBottom: Spacing.md,
 		backgroundColor: Colors.background,
 		borderBottomWidth: 1,
-		borderBottomColor: Colors.border,
+		borderBottomColor: Colors.hairline,
 	},
 	backButton: {
 		width: 40,
@@ -406,8 +406,9 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 	},
 	headerTitle: {
+		fontFamily: Fonts.sans.bold,
 		fontSize: 18,
-		fontWeight: '600',
+		letterSpacing: -0.3,
 		color: Colors.textPrimary,
 	},
 	content: {
@@ -418,11 +419,12 @@ const styles = StyleSheet.create({
 	},
 	inputContainer: {
 		backgroundColor: Colors.surface,
-		borderRadius: BorderRadius.lg,
+		borderRadius: 18,
 		borderWidth: 1,
-		borderColor: Colors.border,
+		borderColor: Colors.hairline,
 		padding: Spacing.md,
 		minHeight: 120,
+		...Shadows.card,
 	},
 	input: {
 		fontSize: 16,
@@ -443,14 +445,14 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		gap: Spacing.sm,
 		backgroundColor: Colors.surface,
-		borderWidth: 2,
-		borderColor: Colors.border,
+		borderWidth: 1,
+		borderColor: Colors.hairline,
 		paddingVertical: 14,
-		borderRadius: 12,
+		borderRadius: 999,
 	},
 	voiceButtonActive: {
 		backgroundColor: '#FEE2E2',
-		borderColor: Colors.border,
+		borderColor: Colors.hairline,
 	},
 	voiceButtonText: {
 		fontSize: 16,
@@ -465,7 +467,8 @@ const styles = StyleSheet.create({
 		gap: Spacing.sm,
 		backgroundColor: Colors.primary,
 		paddingVertical: 14,
-		borderRadius: 12,
+		borderRadius: 14,
+		...Shadows.fab,
 	},
 	sendButtonDisabled: {
 		backgroundColor: Colors.textMuted,
@@ -516,24 +519,25 @@ const styles = StyleSheet.create({
 	},
 	divider: {
 		height: 1,
-		backgroundColor: Colors.border,
+		backgroundColor: Colors.hairline,
 		marginVertical: Spacing.xl,
 	},
 	suggestionsContainer: {
 		gap: Spacing.md,
 	},
 	suggestionsTitle: {
-		fontSize: 16,
-		fontWeight: '500',
-		color: Colors.textSecondary,
+		fontSize: 11,
+		fontWeight: '700',
+		color: Colors.textMuted,
 		marginBottom: Spacing.sm,
+		textTransform: 'uppercase',
+		letterSpacing: 1,
 	},
 	suggestionCard: {
 		backgroundColor: Colors.surface,
-		borderRadius: BorderRadius.md,
+		borderRadius: 14,
 		padding: Spacing.md,
-		borderWidth: 1,
-		borderColor: Colors.border,
+		...Shadows.card,
 	},
 	suggestionText: {
 		fontSize: 15,

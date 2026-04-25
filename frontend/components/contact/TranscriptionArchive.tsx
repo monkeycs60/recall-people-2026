@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
   },
   noteItemBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: Colors.surfaceHover,
+    borderBottomColor: Colors.surfaceAlt,
   },
   noteItemHighlighted: {
     backgroundColor: '#8b5cf630',
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: Spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.surfaceHover,
+    borderBottomColor: Colors.surfaceAlt,
   },
   modalTitleContainer: {
     flex: 1,

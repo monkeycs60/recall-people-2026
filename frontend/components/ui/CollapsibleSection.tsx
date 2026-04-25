@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { View, Text, Pressable, StyleSheet, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { ChevronDown, ChevronUp } from 'lucide-react-native';
-import { Colors, BorderRadius, Spacing } from '@/constants/theme';
+import { Colors, Shadows, Fonts } from '@/constants/theme';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -64,56 +64,52 @@ export function CollapsibleSection({
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: Spacing.md,
-    borderRadius: BorderRadius.md,
-  },
-  containerExpanded: {
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
+    marginBottom: 12,
+    borderRadius: 18,
     backgroundColor: Colors.surface,
+    ...Shadows.card,
     overflow: 'hidden',
   },
+  containerExpanded: {},
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.md,
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.md,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
   },
   headerExpanded: {
-    borderWidth: 0,
-    borderRadius: 0,
+    paddingBottom: 14,
   },
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
-    gap: Spacing.sm,
+    gap: 10,
   },
   iconContainer: {
     width: 24,
     alignItems: 'center',
   },
   title: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontFamily: Fonts.sans.bold,
+    fontSize: 15,
+    letterSpacing: -0.2,
     color: Colors.textPrimary,
   },
   badge: {
     paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: BorderRadius.full,
+    paddingVertical: 3,
+    borderRadius: 999,
   },
   badgeText: {
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 10.5,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   content: {
-    paddingHorizontal: Spacing.md,
-    paddingBottom: Spacing.md,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
   },
 });

@@ -18,12 +18,12 @@ export function CreateContactModal({ visible, onClose, onCreate }: CreateContact
   const [lastNameFocused, setLastNameFocused] = useState(false);
 
   const firstNameInputStyle = useAnimatedStyle(() => ({
-    borderColor: withTiming(firstNameFocused ? Colors.primary : Colors.borderLight, { duration: 150 }),
+    borderColor: withTiming(firstNameFocused ? Colors.primary : Colors.hairline, { duration: 150 }),
     borderWidth: withTiming(firstNameFocused ? 2 : 1.5, { duration: 150 }),
   }));
 
   const lastNameInputStyle = useAnimatedStyle(() => ({
-    borderColor: withTiming(lastNameFocused ? Colors.primary : Colors.borderLight, { duration: 150 }),
+    borderColor: withTiming(lastNameFocused ? Colors.primary : Colors.hairline, { duration: 150 }),
     borderWidth: withTiming(lastNameFocused ? 2 : 1.5, { duration: 150 }),
   }));
 
@@ -133,9 +133,9 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     backgroundColor: Colors.surface,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: Colors.borderLight,
+    borderColor: Colors.hairline,
     marginBottom: 16,
   },
   input: {
@@ -153,10 +153,10 @@ const styles = StyleSheet.create({
   cancelButton: {
     paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 12,
+    borderRadius: 14,
     backgroundColor: Colors.surface,
     borderWidth: 2,
-    borderColor: Colors.border,
+    borderColor: Colors.hairline,
   },
   cancelButtonText: {
     color: Colors.primary,
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
   createButton: {
     paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 12,
+    borderRadius: 14,
     backgroundColor: Colors.primary,
   },
   createButtonDisabled: {
