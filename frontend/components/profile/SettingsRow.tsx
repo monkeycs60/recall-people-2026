@@ -57,8 +57,9 @@ export function SettingsRow({
             <Switch
               value={toggleValue}
               onValueChange={onToggle}
-              trackColor={{ false: Colors.borderLight, true: Colors.primaryLight }}
-              thumbColor={toggleValue ? Colors.primary : Colors.textMuted}
+              trackColor={{ false: Colors.surfaceAlt, true: Colors.primary }}
+              thumbColor="#FFFFFF"
+              ios_backgroundColor={Colors.surfaceAlt}
             />
           )}
           {showChevron && onPress && !isToggle && (
@@ -80,7 +81,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
+    borderBottomColor: Colors.hairline,
   },
   containerWithDescription: {
     alignItems: 'flex-start',
@@ -90,7 +91,11 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: Colors.primaryLight,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   iconContainerTop: {
     marginTop: 2,
@@ -105,20 +110,21 @@ const styles = StyleSheet.create({
   },
   label: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 15,
+    fontWeight: '500',
     color: Colors.textPrimary,
   },
   labelDestructive: {
     color: Colors.error,
   },
   description: {
-    fontSize: 13,
-    color: Colors.textSecondary,
+    fontSize: 12,
+    color: Colors.textMuted,
     marginTop: 2,
   },
   value: {
-    fontSize: 15,
-    color: Colors.textSecondary,
+    fontSize: 14,
+    color: Colors.textMuted,
     marginLeft: 8,
     marginRight: 4,
   },

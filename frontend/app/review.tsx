@@ -14,12 +14,12 @@ import { hotTopicService } from '@/services/hot-topic.service';
 import { notificationService } from '@/services/notification.service';
 import { contactService } from '@/services/contact.service';
 import { groupService } from '@/services/group.service';
-import { generateSuggestedQuestions, generateSummary, generateAvatarFromHints, extractInfo, useAvatarQuota } from '@/lib/api';
+import { generateSuggestedQuestions, generateSummary, generateAvatarFromHints, extractInfo, consumeAvatarQuota } from '@/lib/api';
 import { noteService } from '@/services/note.service';
 import { useAppStore } from '@/stores/app-store';
 import { useSubscriptionStore } from '@/stores/subscription-store';
 import { queryKeys } from '@/lib/query-keys';
-import { Colors } from '@/constants/theme';
+import { Colors, Fonts, Shadows } from '@/constants/theme';
 import { Archive, Edit3, FileText, Info, Lightbulb, Phone, Users, Zap } from 'lucide-react-native';
 import { CollapsibleSection } from '@/components/ui/CollapsibleSection';
 import { TranscriptionSection } from '@/components/review/TranscriptionSection';
@@ -616,7 +616,7 @@ export default function ReviewScreen() {
               console.warn('[Avatar Auto] Generation failed (silent):', error);
             });
         } else {
-          useAvatarQuota()
+          consumeAvatarQuota()
             .then(async (quotaResult) => {
               if (!quotaResult.success && quotaResult.error === 'quota_exhausted') {
                 removePendingAvatarGeneration(finalContactId);
@@ -624,7 +624,7 @@ export default function ReviewScreen() {
                 return;
               }
 
-              await useSubscriptionStore.getState().syncTrialAndQuotas();
+              await useSubscriptionStore.getState().syncQuotas();
               await proceedWithGeneration();
             })
             .catch((error) => {
@@ -897,97 +897,108 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
-    paddingHorizontal: 24,
-    paddingTop: 16,
+    paddingHorizontal: 20,
+    paddingTop: 12,
   },
   contactName: {
-    fontSize: 24,
-    fontWeight: '700',
+    fontFamily: Fonts.sans.bold,
+    fontSize: 18,
+    letterSpacing: -0.3,
     color: Colors.textPrimary,
   },
   contactNameRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    backgroundColor: Colors.primaryLight,
+    borderRadius: 18,
+    padding: 14,
+    gap: 12,
+    marginBottom: 16,
   },
   editNameContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    backgroundColor: Colors.primaryLight,
+    borderRadius: 18,
+    padding: 14,
     gap: 8,
+    marginBottom: 16,
   },
   editNameInput: {
     flex: 1,
-    fontSize: 24,
-    fontWeight: '700',
+    fontFamily: Fonts.sans.bold,
+    fontSize: 18,
+    letterSpacing: -0.3,
     color: Colors.textPrimary,
     backgroundColor: Colors.surface,
     paddingVertical: 8,
     paddingHorizontal: 12,
-    borderRadius: 8,
+    borderRadius: 14,
   },
   editNameConfirm: {
     paddingVertical: 8,
     paddingHorizontal: 16,
     backgroundColor: Colors.primary,
-    borderRadius: 12,
+    borderRadius: 14,
   },
   editNameConfirmText: {
-    color: Colors.textInverse,
+    color: '#FFFFFF',
     fontWeight: '600',
   },
   subtitle: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    marginBottom: 24,
+    fontSize: 11,
+    fontWeight: '700',
+    color: Colors.primary,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 16,
+    marginLeft: 4,
   },
   floatingSaveContainer: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: 24,
-    paddingTop: 12,
-    backgroundColor: Colors.background,
-    borderTopWidth: 1,
-    borderTopColor: Colors.borderLight,
+    paddingHorizontal: 20,
+    paddingTop: 14,
   },
   saveButton: {
     paddingVertical: 16,
-    borderRadius: 12,
+    borderRadius: 18,
     alignItems: 'center',
     backgroundColor: Colors.primary,
+    ...Shadows.fab,
   },
   saveButtonDisabled: {
     opacity: 0.5,
   },
   saveButtonText: {
-    color: Colors.textInverse,
-    fontWeight: '600',
-    fontSize: 18,
+    color: '#FFFFFF',
+    fontFamily: Fonts.sans.bold,
+    fontSize: 16,
   },
   datePickerModalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(29, 26, 46, 0.5)',
     justifyContent: 'flex-end',
   },
   datePickerModalContent: {
     backgroundColor: Colors.surface,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
     paddingBottom: 40,
   },
   datePickerModalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
+    borderBottomColor: Colors.hairline,
   },
   datePickerModalCancel: {
-    fontSize: 16,
+    fontSize: 15,
     color: Colors.textSecondary,
   },
   datePickerModalTitle: {
@@ -996,7 +1007,7 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   datePickerModalDone: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
     color: Colors.primary,
   },

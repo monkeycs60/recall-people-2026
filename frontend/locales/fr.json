@@ -145,9 +145,13 @@
     "searchPlaceholder": "Qui cherches-tu ?",
     "filterPlaceholder": "Rechercher un contact...",
     "askHint": "Pose une question à l'IA",
-    "noContacts": "Parle de cette personne, de ta relation, de ses projets... On s'occupe du reste.",
+    "noContacts": "Personne ici pour le moment.",
     "noContactsDescription": "Crée ta première note pour commencer.",
-    "createFirstNote": "Créer ta première note",
+    "createFirstNote": "Enregistre ta première note",
+    "people": "personnes",
+    "needFollowUp": "à recontacter",
+    "allGroup": "Tous",
+    "recentSection": "Récents",
     "noContactsInGroup": "Aucun contact dans ce groupe",
     "noContactsInGroupHint": "Ajoute des contacts à ce groupe depuis leur fiche.",
     "addContact": "Ajouter un contact",
@@ -209,6 +213,7 @@
     "lastContact": "Dernier contact",
     "addNote": "Quoi de neuf avec {{firstName}} ?",
     "addNoteButton": {
+      "label": "Nouvelle note",
       "title": "Ajouter une note sur {{firstName}}",
       "voiceOption": "Enregistrer une note vocale",
       "voiceDescription": "Parler de {{firstName}} au micro",
@@ -704,7 +709,10 @@
     "unlockWith": "Débloque avec Pro :",
     "feature1": "Contacts illimités",
     "feature2": "Enregistrements de 3 min (vs 1 min)",
-    "feature3": "Recherche IA",
+    "feature3": "Génération d'avatars IA illimitée",
+    "feature4": "Assistant IA illimité",
+    "feature5": "Rappels intelligents et résumé hebdomadaire",
+    "feature6": "Export des données à tout moment",
     "premiumTitle": "Tu es Pro !",
     "premiumSubtitle": "Merci de soutenir Recall People",
     "unlimitedContacts": "Contacts illimités",
@@ -829,7 +837,7 @@
     "transcribing": "Transcription en cours...",
     "suggestionsTitle": "Suggestions",
     "noSuggestions": "Enregistre des notes pour voir des suggestions",
-    "quotaExhausted": "Tu as utilisé tes essais gratuits",
+    "quotaExhausted": "Tu as utilisé ton quota IA du mois",
     "quotaRemaining": "{{used}}/{{limit}} ce mois-ci",
     "suggestions": {
       "recentWith": "De quoi j'ai parlé avec {{firstName}} récemment ?",
@@ -867,11 +875,6 @@
     "weeklyDigestDescription": "Chaque lundi, un récap de ta semaine : événements à venir et contacts à recontacter",
     "postEventFollowUp": "Suivi post-événement",
     "postEventFollowUpDescription": "Être rappelé de prendre des nouvelles après un événement passé"
-  },
-  "trial": {
-    "daysRemaining": "Essai gratuit — {{count}} jour(s) restant(s)",
-    "expired": "Essai terminé",
-    "upgrade": "Passer à Pro"
   },
   "digest": {
     "body": "{{events}} événement(s), {{contacts}} contact(s) à recontacter"

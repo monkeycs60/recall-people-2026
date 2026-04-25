@@ -38,7 +38,7 @@ function SkeletonLine({ width, height = 14, delay }: { width: DimensionValue; he
         {
           width,
           height,
-          backgroundColor: Colors.border,
+          backgroundColor: Colors.hairline,
           borderRadius: 9999,
         },
       ]}
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     paddingVertical: 14,
     paddingHorizontal: 24,
-    borderRadius: 12,
+    borderRadius: 14,
     opacity: 0.5,
   },
   section: {

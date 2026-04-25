@@ -38,7 +38,7 @@ function SkeletonLine({ width, delay }: { width: DimensionValue; delay: number }
         {
           width,
           height: 14,
-          backgroundColor: Colors.border,
+          backgroundColor: Colors.hairline,
           borderRadius: 9999,
         },
       ]}

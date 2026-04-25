@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
 		backgroundColor: Colors.primary,
 		paddingVertical: 14,
 		paddingHorizontal: 24,
-		borderRadius: 12,
+		borderRadius: 14,
 	},
 	ctaButtonText: {
 		fontSize: 16,

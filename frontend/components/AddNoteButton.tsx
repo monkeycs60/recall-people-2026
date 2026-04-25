@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     paddingVertical: 14,
     paddingHorizontal: 24,
-    borderRadius: 12,
+    borderRadius: 14,
     marginTop: 20,
     gap: 8,
   },
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
   menuHandle: {
     width: 36,
     height: 4,
-    backgroundColor: Colors.border,
+    backgroundColor: Colors.hairline,
     borderRadius: 2,
   },
   menuOptionRow: {
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: Colors.border,
+    borderColor: Colors.hairline,
   },
   menuOptionTextContainer: {
     flex: 1,
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
   },
   menuDivider: {
     height: 1,
-    backgroundColor: Colors.border,
+    backgroundColor: Colors.hairline,
     marginLeft: 64,
   },
 });

@@ -1,11 +1,11 @@
-import { View, Text, Pressable, ActivityIndicator, StyleSheet, BackHandler, Linking, ScrollView, Platform } from 'react-native';
+import { View, Text, Pressable, ActivityIndicator, StyleSheet, BackHandler, Linking, ScrollView } from 'react-native';
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, AlertCircle, RefreshCw, Check, Minus, Sparkles } from 'lucide-react-native';
 import { PurchasesOffering } from 'react-native-purchases';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { revenueCatService } from '@/services/revenuecat.service';
-import { Colors } from '@/constants/theme';
+import { Colors, Fonts, Shadows } from '@/constants/theme';
 import { showErrorToast, showSuccessToast } from '@/lib/error-handler';
 
 const TERMS_URL = 'https://recall-people-2026.vercel.app/terms';
@@ -391,7 +391,7 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingVertical: 12,
     paddingHorizontal: 24,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: Colors.primary,
   },
@@ -409,8 +409,9 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
   title: {
-    fontFamily: 'PlayfairDisplay_700Bold',
+    fontFamily: Fonts.sans.bold,
     fontSize: 28,
+    letterSpacing: -0.8,
     color: Colors.textPrimary,
     textAlign: 'center',
     marginBottom: 10,
@@ -435,17 +436,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginBottom: 28,
     overflow: 'hidden',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.08,
-        shadowRadius: 12,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
+    ...Shadows.elevated,
   },
   comparisonHeader: {
     flexDirection: 'row',
@@ -556,33 +547,13 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: Colors.borderLight,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.04,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
+    borderColor: Colors.hairline,
+    ...Shadows.card,
   },
   packageCardSelected: {
     borderColor: Colors.primary,
     backgroundColor: Colors.primaryLight,
-    ...Platform.select({
-      ios: {
-        shadowColor: Colors.primary,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.15,
-        shadowRadius: 12,
-      },
-      android: {
-        elevation: 6,
-      },
-    }),
+    ...Shadows.fab,
   },
   packageBadge: {
     backgroundColor: Colors.primary,
@@ -630,17 +601,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginBottom: 16,
     alignItems: 'center',
-    ...Platform.select({
-      ios: {
-        shadowColor: Colors.primary,
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.3,
-        shadowRadius: 12,
-      },
-      android: {
-        elevation: 8,
-      },
-    }),
+    ...Shadows.fab,
   },
   purchaseButtonDisabled: {
     opacity: 0.5,

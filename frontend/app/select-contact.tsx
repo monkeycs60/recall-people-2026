@@ -12,7 +12,7 @@ import { showErrorToast } from '@/lib/error-handler';
 import { Contact } from '@/types';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { Search, ChevronRight, X } from 'lucide-react-native';
-import { Colors, Spacing, BorderRadius, Typography, Fonts } from '@/constants/theme';
+import { Colors, Spacing, BorderRadius, Typography, Fonts, Shadows } from '@/constants/theme';
 import { ContactAvatar } from '@/components/contact/ContactAvatar';
 import { getContactDisplayName } from '@/utils/contactDisplayName';
 import { Paywall } from '@/components/Paywall';
@@ -402,9 +402,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
   },
   title: {
-    fontFamily: Fonts.serif.semibold,
-    fontSize: 26,
-    lineHeight: 34,
+    fontFamily: Fonts.sans.bold,
+    fontSize: 24,
+    letterSpacing: -0.5,
     color: Colors.textPrimary,
     textAlign: 'center',
     paddingTop: Spacing.xl,
@@ -434,9 +434,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.md,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.hairline,
     paddingHorizontal: Spacing.md,
   },
   createInput: {
@@ -444,8 +444,8 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     paddingRight: Spacing.sm,
     color: Colors.textPrimary,
-    fontSize: Typography.bodyLarge.fontSize,
-    fontWeight: Typography.bodyLarge.fontWeight,
+    fontSize: 16,
+    fontWeight: '500',
   },
   clearButton: {
     padding: Spacing.xs,
@@ -454,8 +454,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.md,
-    borderRadius: BorderRadius.md,
+    borderRadius: 14,
     justifyContent: 'center',
+    ...Shadows.fab,
   },
   createButtonPressed: {
     backgroundColor: Colors.primaryDark,
@@ -473,17 +474,17 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 1,
-    backgroundColor: Colors.borderLight,
+    backgroundColor: Colors.hairline,
     marginBottom: Spacing.lg,
   },
   searchContainer: {
     backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.lg,
+    borderRadius: 14,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: Spacing.md,
     borderWidth: 1,
-    borderColor: Colors.borderLight,
+    borderColor: Colors.hairline,
     marginBottom: Spacing.lg,
   },
   searchInput: {
@@ -505,10 +506,9 @@ const styles = StyleSheet.create({
   },
   contactsList: {
     backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.lg,
+    borderRadius: 18,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
+    ...Shadows.card,
   },
   contactRow: {
     paddingVertical: Spacing.md,
@@ -516,7 +516,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
+    borderBottomColor: Colors.hairline,
     gap: Spacing.sm,
   },
   suggestedRow: {

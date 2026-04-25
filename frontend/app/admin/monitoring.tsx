@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    fontFamily: 'PlayfairDisplay_700Bold',
+    fontFamily: 'PlusJakartaSans_700Bold',
     fontSize: 20,
     color: Colors.textPrimary,
   },

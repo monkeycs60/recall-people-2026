@@ -8,7 +8,7 @@ import Animated, {
   withDelay,
 } from 'react-native-reanimated';
 import { useEffect } from 'react';
-import { Colors } from '@/constants/theme';
+import { Colors, Shadows } from '@/constants/theme';
 
 function SkeletonLine({ width, delay }: { width: DimensionValue; delay: number }) {
   const shimmerOpacity = useSharedValue(0.3);
@@ -38,7 +38,7 @@ function SkeletonLine({ width, delay }: { width: DimensionValue; delay: number }
         {
           width,
           height: 14,
-          backgroundColor: Colors.border,
+          backgroundColor: Colors.hairline,
           borderRadius: 9999,
         },
       ]}
@@ -100,11 +100,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
+    ...Shadows.card,
   },
   avatarPlaceholder: {
     width: 48,
@@ -125,13 +121,13 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 12,
+    borderRadius: 14,
   },
   chevronPlaceholder: {
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: Colors.border,
+    backgroundColor: Colors.hairline,
     opacity: 0.3,
   },
 });

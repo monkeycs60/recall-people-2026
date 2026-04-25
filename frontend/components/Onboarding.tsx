@@ -22,7 +22,7 @@ import { Video, ResizeMode } from 'expo-av';
 import { useSettingsStore } from '@/stores/settings-store';
 import { changeLanguage } from '@/lib/i18n';
 import { Language, SUPPORTED_LANGUAGES, LANGUAGE_NAMES, LANGUAGE_FLAGS } from '@/types';
-import { Colors, Spacing, BorderRadius } from '@/constants/theme';
+import { Colors, Spacing, BorderRadius, Fonts, Shadows } from '@/constants/theme';
 
 const DEMO_VIDEO = require('@/assets/video/onboarding-demo.webm');
 const SOLUTION_ILLUSTRATION = require('@/assets/ai-assets/voice-to-contact-cards.png');
@@ -363,17 +363,16 @@ const styles = StyleSheet.create({
     zIndex: 10,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
-    borderRadius: 12,
+    borderRadius: 999,
     backgroundColor: Colors.surface,
-    borderWidth: 2,
-    borderColor: Colors.border,
+    ...Shadows.card,
   },
   skipButtonPressed: {
     backgroundColor: Colors.surfaceAlt,
   },
   skipText: {
     color: Colors.textSecondary,
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '600',
   },
   slideContainer: {
@@ -395,9 +394,10 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   title: {
+    fontFamily: Fonts.sans.bold,
     color: Colors.textPrimary,
     fontSize: 24,
-    fontWeight: '700',
+    letterSpacing: -0.5,
     textAlign: 'center',
     marginBottom: Spacing.md,
     paddingHorizontal: Spacing.md,
@@ -411,20 +411,21 @@ const styles = StyleSheet.create({
   },
   languageList: {
     backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.lg,
+    borderRadius: 18,
     padding: Spacing.sm,
     maxWidth: CONTENT_WIDTH,
     width: '100%',
+    ...Shadows.card,
   },
   languageRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.md,
+    paddingVertical: 14,
+    borderRadius: 14,
   },
   languageRowPressed: {
-    backgroundColor: Colors.surfaceHover,
+    backgroundColor: Colors.primaryLight,
   },
   languageFlag: {
     fontSize: 28,
@@ -460,18 +461,17 @@ const styles = StyleSheet.create({
   nextButton: {
     backgroundColor: Colors.primary,
     paddingVertical: Spacing.md,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: Colors.border,
+    borderRadius: 18,
+    ...Shadows.fab,
   },
   nextButtonPressed: {
     backgroundColor: Colors.primaryDark,
   },
   nextButtonText: {
-    color: Colors.textInverse,
+    color: '#FFFFFF',
     textAlign: 'center',
-    fontSize: 17,
-    fontWeight: '600',
+    fontSize: 16,
+    fontWeight: '700',
   },
   // Solution slide
   solutionContent: {
@@ -488,20 +488,17 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.xl,
     overflow: 'hidden',
     backgroundColor: Colors.surface,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 6,
+    ...Shadows.floating,
   },
   solutionIllustration: {
     width: '100%',
     height: '100%',
   },
   solutionTitle: {
+    fontFamily: Fonts.sans.bold,
     color: Colors.textPrimary,
     fontSize: 22,
-    fontWeight: '700',
+    letterSpacing: -0.5,
     textAlign: 'center',
     marginTop: Spacing.xl,
     marginBottom: Spacing.md,
@@ -558,11 +555,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.xl,
     overflow: 'hidden',
     backgroundColor: Colors.surface,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 8,
+    ...Shadows.floating,
     marginVertical: Spacing.lg,
   },
   video: {
@@ -602,11 +595,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
     borderRadius: BorderRadius.full,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    ...Shadows.elevated,
     maxWidth: CONTENT_WIDTH * 0.6,
   },
   floatingChipText: {

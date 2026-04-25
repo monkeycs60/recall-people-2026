@@ -59,7 +59,7 @@ export function InputModeToggle({ mode, onModeChange, disabled = false }: InputM
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: Colors.surfaceHover,
+    backgroundColor: Colors.surfaceAlt,
     borderRadius: BorderRadius.full,
     padding: 4,
     position: 'relative',

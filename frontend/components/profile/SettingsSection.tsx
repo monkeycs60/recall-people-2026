@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { ReactNode } from 'react';
-import { Colors } from '@/constants/theme';
+import { Colors, Shadows } from '@/constants/theme';
 
 type SettingsSectionProps = {
   title: string;
@@ -18,14 +18,14 @@ export function SettingsSection({ title, children }: SettingsSectionProps) {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 24,
+    marginBottom: 22,
   },
   title: {
-    fontSize: 12,
-    fontWeight: '500',
+    fontSize: 11,
+    fontWeight: '700',
     color: Colors.textMuted,
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 1,
     marginBottom: 8,
     paddingLeft: 4,
   },
@@ -33,10 +33,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
     borderRadius: 16,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
+    ...Shadows.card,
   },
 });

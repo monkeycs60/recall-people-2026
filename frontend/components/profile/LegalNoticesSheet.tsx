@@ -25,7 +25,7 @@ export const LegalNoticesSheet = forwardRef<BottomSheetModal>((_, ref) => {
       snapPoints={['85%']}
       backdropComponent={renderBackdrop}
       backgroundStyle={{ backgroundColor: Colors.surface }}
-      handleIndicatorStyle={{ backgroundColor: Colors.border }}
+      handleIndicatorStyle={{ backgroundColor: Colors.hairline }}
     >
       <BottomSheetScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 32 }}>
         <View className="px-4 pb-4 border-b border-surfaceHover">

@@ -633,7 +633,7 @@ export const askQuestion = async (data: AskRequest): Promise<AskResponse> => {
 };
 
 // ============================================
-// Trial Status & Monthly Quotas API
+// Monthly Quotas API
 // ============================================
 
 export type UseQuotaResponse = {
@@ -641,23 +641,7 @@ export type UseQuotaResponse = {
   isPremium?: boolean;
   remaining: number;
   error?: string;
-  type?: 'notes' | 'ask' | 'avatar';
-};
-
-export type TrialStatusResponse = {
-  isInTrial: boolean;
-  trialStartDate: string | null;
-  trialEndDate: string | null;
-  daysRemaining: number;
-};
-
-export const getTrialStatus = async (): Promise<TrialStatusResponse | null> => {
-  try {
-    return await apiCall<TrialStatusResponse>('/api/subscription/trial-status', { showErrorToast: false });
-  } catch (error) {
-    console.error('[API] getTrialStatus error:', error);
-    return null;
-  }
+  type?: 'ask' | 'avatar';
 };
 
 export type QuotasResponse = {
@@ -677,11 +661,11 @@ export const getQuotas = async (): Promise<QuotasResponse | null> => {
   }
 };
 
-export const useAvatarQuota = async (): Promise<UseQuotaResponse> => {
+export const consumeAvatarQuota = async (): Promise<UseQuotaResponse> => {
   return apiCall('/api/subscription/use-avatar-quota', { method: 'POST', showErrorToast: false });
 };
 
-export const useAskQuota = async (): Promise<UseQuotaResponse> => {
+export const consumeAskQuota = async (): Promise<UseQuotaResponse> => {
   return apiCall('/api/subscription/use-ask-quota', { method: 'POST', showErrorToast: false });
 };
 

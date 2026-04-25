@@ -114,14 +114,22 @@ export default function RootLayout() {
     }
   }, [user?.id, isSubscriptionHydrated]);
 
-  // Check whitelist status and sync notes count on every app launch
-  // This ensures whitelist changes are picked up and notes count is accurate
+  // Check server-backed subscription state on every app launch.
   useEffect(() => {
     if (user?.id && isSubscriptionHydrated) {
       console.log('[_layout] Checking whitelist status for user:', user.email);
-      useSubscriptionStore.getState().checkWhitelistStatus();
-      // Sync notes count from server (source of truth)
-      useSubscriptionStore.getState().syncNotesStatus();
+      const syncSubscriptionState = async () => {
+        const subscriptionStore = useSubscriptionStore.getState();
+        await subscriptionStore.checkWhitelistStatus();
+        // Sync server-backed subscription counters in sequence because the store shares one sync lock.
+        await subscriptionStore.syncNotesStatus();
+        await subscriptionStore.syncQuotas();
+      };
+
+      syncSubscriptionState().catch((subscriptionError) => {
+        console.warn('[_layout] Failed to sync subscription state:', subscriptionError);
+      });
+
       // Schedule not-seen reminders (runs once per app launch)
       reminderService.scheduleNotSeenReminders().catch((reminderError) => {
         console.warn('[_layout] Failed to schedule not-seen reminders:', reminderError);
@@ -135,7 +143,7 @@ export default function RootLayout() {
         console.warn('[_layout] Failed to schedule post-event follow-ups:', followUpError);
       });
     }
-  }, [user?.id, isSubscriptionHydrated]);
+  }, [user?.id, user?.email, isSubscriptionHydrated]);
 
   if (dbError) {
     return (
@@ -164,7 +172,7 @@ export default function RootLayout() {
               headerShown: false,
               headerStyle: { backgroundColor: Colors.background },
               headerTintColor: Colors.textPrimary,
-              headerTitleStyle: { fontFamily: 'PlayfairDisplay_600SemiBold', fontSize: 18 },
+              headerTitleStyle: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 18 },
               contentStyle: { backgroundColor: Colors.background },
             }}
           >
@@ -210,17 +218,7 @@ export default function RootLayout() {
             <Stack.Screen
               name="contact/[id]"
               options={{
-                headerShown: true,
-                title: t('contacts.title'),
-                headerShadowVisible: false,
-                headerLeft: () => (
-                  <Pressable
-                    onPress={() => router.dismissTo('/(tabs)')}
-                    style={styles.backButton}
-                  >
-                    <ArrowLeft size={24} color={Colors.textPrimary} />
-                  </Pressable>
-                ),
+                headerShown: false,
               }}
             />
             <Stack.Screen

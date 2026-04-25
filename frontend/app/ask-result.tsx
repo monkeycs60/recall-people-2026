@@ -2,9 +2,9 @@ import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { Colors, Typography, Spacing, BorderRadius } from '@/constants/theme';
+import { Colors, Typography, Shadows, Fonts } from '@/constants/theme';
 import { getLocaleDateStringLocale } from '@/utils/dateLocale';
-import { MessageCircle, FileText, ChevronRight, UserCircle, Plus } from 'lucide-react-native';
+import { Sparkle, ChevronRight, UserCircle, Plus } from 'lucide-react-native';
 
 type AskSource = {
   noteId: string;
@@ -79,7 +79,7 @@ export default function AskResultScreen() {
         contentContainerStyle={[styles.contentContainer, { paddingBottom: insets.bottom + 20 }]}
       >
         <View style={styles.questionContainer}>
-          <MessageCircle size={20} color={Colors.primary} />
+          <Sparkle size={18} color={Colors.primary} />
           <Text style={styles.questionText}>{question}</Text>
         </View>
 
@@ -135,7 +135,7 @@ export default function AskResultScreen() {
         contentContainerStyle={[styles.contentContainer, { paddingBottom: insets.bottom + 20 }]}
       >
         <View style={styles.questionContainer}>
-          <MessageCircle size={20} color={Colors.primary} />
+          <Sparkle size={18} color={Colors.primary} />
           <Text style={styles.questionText}>{question}</Text>
         </View>
 
@@ -171,21 +171,18 @@ export default function AskResultScreen() {
       contentContainerStyle={[styles.contentContainer, { paddingBottom: insets.bottom + 20 }]}
     >
       <View style={styles.questionContainer}>
-        <MessageCircle size={20} color={Colors.primary} />
+        <Sparkle size={18} color={Colors.primary} />
         <Text style={styles.questionText}>{question}</Text>
       </View>
 
       <View style={styles.divider} />
 
       {sources.length > 0 && (
-        <View style={styles.sourceHeaderContainer}>
-          <FileText size={16} color={Colors.textSecondary} />
-          <Text style={styles.sourceHeaderText}>
-            {t('ask.result.sourceHeader', {
-              date: formatDate(sources[0].noteDate),
-            })}
-          </Text>
-        </View>
+        <Text style={styles.sourceHeaderText}>
+          {t('ask.result.sourceHeader', {
+            date: formatDate(sources[0].noteDate),
+          })}
+        </Text>
       )}
 
       <View style={styles.answerContainer}>
@@ -236,117 +233,132 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   contentContainer: {
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.md,
+    paddingHorizontal: 20,
+    paddingTop: 16,
   },
   questionContainer: {
+    backgroundColor: Colors.primaryLight,
+    borderRadius: 18,
+    padding: 16,
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: Spacing.sm,
-    marginBottom: Spacing.lg,
+    gap: 10,
+    marginBottom: 20,
   },
   questionText: {
-    ...Typography.titleLarge,
-    color: Colors.textPrimary,
+    fontFamily: Fonts.sans.semibold,
+    fontSize: 16,
+    color: Colors.primaryDark,
+    lineHeight: 22,
     flex: 1,
   },
   divider: {
     height: 1,
-    backgroundColor: Colors.border,
-    marginVertical: Spacing.lg,
-  },
-  sourceHeaderContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    marginBottom: Spacing.md,
+    backgroundColor: Colors.hairline,
+    marginVertical: 20,
   },
   sourceHeaderText: {
-    ...Typography.bodyMedium,
-    color: Colors.textSecondary,
+    fontSize: 11,
+    fontWeight: '600',
+    color: Colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 8,
   },
   answerContainer: {
-    paddingVertical: Spacing.sm,
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 24,
+    ...Shadows.card,
   },
   answerText: {
-    ...Typography.bodyLarge,
+    fontSize: 14,
+    lineHeight: 22,
     color: Colors.textPrimary,
-    lineHeight: 28,
   },
   sourcesSection: {
-    marginTop: Spacing.md,
+    marginTop: 8,
   },
   sourcesTitle: {
-    ...Typography.titleMedium,
-    color: Colors.textPrimary,
-    marginBottom: Spacing.md,
+    fontSize: 12,
+    fontWeight: '600',
+    color: Colors.textSecondary,
+    marginBottom: 10,
   },
   sourceCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     backgroundColor: Colors.surface,
-    padding: Spacing.md,
-    borderRadius: BorderRadius.md,
-    marginBottom: Spacing.sm,
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 8,
+    ...Shadows.card,
   },
   sourceCardContent: {
     flex: 1,
   },
   sourceCardTitle: {
-    ...Typography.titleMedium,
+    fontSize: 14,
+    fontWeight: '600',
     color: Colors.textPrimary,
-    marginBottom: Spacing.xs,
+    marginBottom: 2,
   },
   sourceCardDate: {
-    ...Typography.bodySmall,
+    fontSize: 11,
     color: Colors.textMuted,
   },
   viewContactButton: {
+    marginTop: 16,
+    backgroundColor: Colors.primary,
+    borderRadius: 14,
+    padding: 14,
     alignItems: 'center',
-    paddingVertical: Spacing.lg,
+    ...Shadows.fab,
   },
   viewContactButtonText: {
-    ...Typography.titleMedium,
-    color: Colors.primary,
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
   emptyStateContainer: {
     alignItems: 'center',
-    paddingVertical: Spacing.xl,
+    paddingVertical: 32,
   },
   emptyStateEmoji: {
     fontSize: 48,
-    marginBottom: Spacing.md,
+    marginBottom: 16,
   },
   emptyStateTitle: {
     ...Typography.headlineMedium,
     color: Colors.textPrimary,
     textAlign: 'center',
-    marginBottom: Spacing.sm,
+    marginBottom: 8,
   },
   emptyStateDescription: {
     ...Typography.bodyMedium,
     color: Colors.textSecondary,
     textAlign: 'center',
-    marginBottom: Spacing.lg,
+    marginBottom: 24,
   },
   suggestionsContainer: {
     width: '100%',
-    marginBottom: Spacing.lg,
+    marginBottom: 24,
   },
   suggestionsTitle: {
     ...Typography.labelLarge,
     color: Colors.textSecondary,
-    marginBottom: Spacing.md,
+    marginBottom: 12,
   },
   suggestionItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.sm,
+    gap: 8,
     backgroundColor: Colors.surface,
-    padding: Spacing.md,
-    borderRadius: BorderRadius.md,
-    marginBottom: Spacing.sm,
+    padding: 14,
+    borderRadius: 14,
+    marginBottom: 8,
+    ...Shadows.card,
   },
   suggestionText: {
     ...Typography.bodyMedium,
@@ -356,27 +368,29 @@ const styles = StyleSheet.create({
   createButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.sm,
+    gap: 8,
     backgroundColor: Colors.primaryLight,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.md,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderRadius: 14,
   },
   createButtonText: {
-    ...Typography.titleMedium,
+    fontSize: 14,
+    fontWeight: '600',
     color: Colors.primary,
   },
   addNoteButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.sm,
+    gap: 8,
     backgroundColor: Colors.primaryLight,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.md,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderRadius: 14,
   },
   addNoteButtonText: {
-    ...Typography.titleMedium,
+    fontSize: 14,
+    fontWeight: '600',
     color: Colors.primary,
   },
 });

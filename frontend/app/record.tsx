@@ -1,15 +1,16 @@
-import { View, Text, Pressable, Modal, BackHandler, KeyboardAvoidingView, Platform } from 'react-native';
-import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import { View, Text, Pressable, Modal, BackHandler, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
+import { useState, useMemo, useCallback, useRef } from 'react';
 import { useRouter, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { X } from 'lucide-react-native';
+import { X, Mic, Type } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { Colors } from '@/constants/theme';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Colors, Fonts } from '@/constants/theme';
 import { RecordButton } from '@/components/RecordButton';
 import { Paywall } from '@/components/Paywall';
 import { TestProActivation } from '@/components/TestProActivation';
 import { TranscriptionLoader } from '@/components/TranscriptionLoader';
-import { InputModeToggle, InputMode } from '@/components/InputModeToggle';
+import type { InputMode } from '@/components/InputModeToggle';
 import { TextInputMode } from '@/components/TextInputMode';
 import { useRecording } from '@/hooks/useRecording';
 import { useContactsQuery } from '@/hooks/useContactsQuery';
@@ -19,18 +20,18 @@ import Animated, {
   FadeOut,
 } from 'react-native-reanimated';
 
-const getHelperPrompts = (t: (key: string) => string) => [
-  t('record.helperPrompts.citeName'),
-  t('record.helperPrompts.talkAbout'),
-  t('record.helperPrompts.mentionDetails'),
-  t('record.helperPrompts.shareKnowledge'),
+const getHelperPrompts = (translationFn: (key: string) => string) => [
+  translationFn('record.helperPrompts.citeName'),
+  translationFn('record.helperPrompts.talkAbout'),
+  translationFn('record.helperPrompts.mentionDetails'),
+  translationFn('record.helperPrompts.shareKnowledge'),
 ];
 
-const getContactPrompts = (t: (key: string, options?: Record<string, string>) => string, firstName: string) => [
-  t('record.contactPrompts.whatsNew', { firstName }),
-  t('record.contactPrompts.shareNews'),
-  t('record.contactPrompts.howIs', { firstName }),
-  t('record.contactPrompts.whatLearned', { firstName }),
+const getContactPrompts = (translationFn: (key: string, options?: Record<string, string>) => string, firstName: string) => [
+  translationFn('record.contactPrompts.whatsNew', { firstName }),
+  translationFn('record.contactPrompts.shareNews'),
+  translationFn('record.contactPrompts.howIs', { firstName }),
+  translationFn('record.contactPrompts.whatLearned', { firstName }),
 ];
 
 export default function RecordScreen() {
@@ -63,13 +64,10 @@ export default function RecordScreen() {
   const cancelRecordingRef = useRef(cancelRecording);
   const resetRecordingRef = useRef(resetRecording);
 
-  // Keep refs in sync with values
-  useEffect(() => {
-    isRecordingRef.current = isRecording;
-    isProcessingRef.current = isProcessing;
-    cancelRecordingRef.current = cancelRecording;
-    resetRecordingRef.current = resetRecording;
-  }, [isRecording, isProcessing, cancelRecording, resetRecording]);
+  isRecordingRef.current = isRecording;
+  isProcessingRef.current = isProcessing;
+  cancelRecordingRef.current = cancelRecording;
+  resetRecordingRef.current = resetRecording;
 
   const preselectedContact = useMemo(() => {
     if (!preselectedContactId) return null;
@@ -135,82 +133,67 @@ export default function RecordScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={0}
     >
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: Colors.background,
-          paddingTop: insets.top,
-          paddingBottom: insets.bottom,
-        }}
+      <LinearGradient
+        colors={[Colors.primaryLight, Colors.background]}
+        locations={[0, 0.6]}
+        style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
       >
-        {/* Header fixe */}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingTop: 8 }}>
-          <View style={{ width: 40 }} />
-
-          <InputModeToggle
-            mode={inputMode}
-            onModeChange={setInputMode}
-            disabled={isRecording || isProcessing}
-          />
-
+        {/* Top bar */}
+        <View style={styles.topBar}>
+          <View style={styles.modeToggleRow}>
+            <Pressable
+              style={[styles.modeButton, inputMode === 'audio' && styles.modeButtonActive]}
+              onPress={() => !isRecording && !isProcessing && setInputMode('audio')}
+            >
+              <Mic size={16} color={inputMode === 'audio' ? Colors.textInverse : Colors.textMuted} strokeWidth={2} />
+            </Pressable>
+            <Pressable
+              style={[styles.modeButton, inputMode === 'text' && styles.modeButtonActive]}
+              onPress={() => !isRecording && !isProcessing && setInputMode('text')}
+            >
+              <Type size={16} color={inputMode === 'text' ? Colors.textInverse : Colors.textMuted} strokeWidth={2} />
+            </Pressable>
+          </View>
           <Pressable
             onPress={handleClose}
-            style={{
-              width: 40,
-              height: 40,
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: 20,
-              backgroundColor: Colors.surfaceHover,
-            }}
+            style={styles.closeButton}
             disabled={isRecording || isProcessing}
           >
-            <X size={20} color={Colors.textSecondary} />
+            <X size={16} color={Colors.textSecondary} />
           </Pressable>
         </View>
 
-        {/* Titre fixe */}
-        <View style={{ paddingTop: 32, paddingHorizontal: 32, alignItems: 'center' }}>
-          <Text
-            style={{
-              fontFamily: 'PlayfairDisplay_700Bold',
-              fontSize: 32,
-              color: Colors.textPrimary,
-              textAlign: 'center',
-            }}
-          >
-            {preselectedContact ? preselectedContact.firstName : 'Recall People'}
+        {/* Eyebrow + Title */}
+        <View style={styles.titleSection}>
+          {isRecording && (
+            <Animated.Text entering={FadeIn} style={styles.eyebrow}>
+              {t('record.listening', { defaultValue: 'LISTENING...' })}
+            </Animated.Text>
+          )}
+          <Text style={styles.screenTitle}>
+            {preselectedContact
+              ? preselectedContact.firstName
+              : isRecording
+                ? t('record.tellMe', { defaultValue: 'Tell me about them' })
+                : 'Recall People'}
           </Text>
         </View>
 
-        {/* Zone de contenu centrale */}
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: inputMode === 'text' ? 'flex-start' : 'center', paddingHorizontal: 24, paddingTop: inputMode === 'text' ? 24 : 0 }}>
+        {/* Central content */}
+        <View style={styles.centerContent}>
           {isProcessing ? (
             <Animated.View entering={FadeIn}>
               <TranscriptionLoader step={processingStep} hasPreselectedContact={!!preselectedContactId} />
             </Animated.View>
           ) : inputMode === 'audio' ? (
-            <View style={{ alignItems: 'center' }}>
+            <View style={styles.audioContent}>
               {isRecording ? (
-                <Animated.View entering={FadeIn} exiting={FadeOut} style={{ alignItems: 'center', marginBottom: 32 }}>
-                  <Text
-                    style={{
-                      fontFamily: 'PlayfairDisplay_500Medium',
-                      fontSize: 48,
-                      color: Colors.primary,
-                      textAlign: 'center',
-                    }}
-                  >
+                <Animated.View entering={FadeIn} exiting={FadeOut} style={styles.timerContainer}>
+                  <Text style={styles.timerText}>
                     {formatDuration(recordingDuration)}
                   </Text>
-                  <Text
-                    style={{
-                      fontSize: 14,
-                      color: Colors.textMuted,
-                      textAlign: 'center',
-                    }}
-                  >
-                    {formatDuration(maxRecordingDuration - recordingDuration)} {t('record.remaining', { defaultValue: 'restant' })}
+                  <Text style={styles.remainingText}>
+                    {formatDuration(maxRecordingDuration - recordingDuration)} {t('record.remaining', { defaultValue: 'remaining' })}
                   </Text>
                 </Animated.View>
               ) : (
@@ -218,14 +201,7 @@ export default function RecordScreen() {
                   key={promptIndex}
                   entering={FadeIn.duration(500)}
                   exiting={FadeOut.duration(300)}
-                  style={{
-                    color: Colors.textMuted,
-                    textAlign: 'center',
-                    marginBottom: 32,
-                    fontSize: 16,
-                    fontStyle: 'italic',
-                    minHeight: 24,
-                  }}
+                  style={styles.promptText}
                 >
                   {currentPrompts[promptIndex]}
                 </Animated.Text>
@@ -240,12 +216,7 @@ export default function RecordScreen() {
               {isRecording && (
                 <Animated.Text
                   entering={FadeIn.delay(300)}
-                  style={{
-                    color: Colors.textMuted,
-                    textAlign: 'center',
-                    marginTop: 32,
-                    fontSize: 14,
-                  }}
+                  style={styles.tapHint}
                 >
                   {t('record.pressToFinish')}
                 </Animated.Text>
@@ -265,10 +236,10 @@ export default function RecordScreen() {
           )}
         </View>
 
-        {/* Footer avec conseil */}
-        <View style={{ paddingHorizontal: 32, paddingBottom: 32, minHeight: 60 }}>
+        {/* Tip footer */}
+        <View style={styles.footer}>
           {!isProcessing && inputMode === 'audio' && (
-            <Text style={{ color: Colors.textMuted, textAlign: 'center', fontSize: 12, lineHeight: 20 }}>
+            <Text style={styles.tipText}>
               {preselectedContact
                 ? t('record.helperTextWithContact', { firstName: preselectedContact.firstName })
                 : t('record.helperText')}
@@ -295,7 +266,116 @@ export default function RecordScreen() {
             />
           )}
         </Modal>
-      </View>
+      </LinearGradient>
     </KeyboardAvoidingView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  topBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 14,
+  },
+  modeToggleRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  modeButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.hairline,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modeButtonActive: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  closeButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  titleSection: {
+    alignItems: 'center',
+    marginTop: 24,
+  },
+  eyebrow: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: Colors.primary,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+    marginBottom: 4,
+  },
+  screenTitle: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 32,
+    letterSpacing: -0.8,
+    color: Colors.textPrimary,
+    textAlign: 'center',
+  },
+  centerContent: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  audioContent: {
+    alignItems: 'center',
+  },
+  timerContainer: {
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  timerText: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 72,
+    color: Colors.primary,
+    letterSpacing: -3,
+    lineHeight: 72,
+  },
+  remainingText: {
+    fontSize: 13,
+    color: Colors.textMuted,
+    fontFamily: Fonts.mono,
+    marginTop: 4,
+  },
+  promptText: {
+    color: Colors.textMuted,
+    textAlign: 'center',
+    marginBottom: 32,
+    fontSize: 16,
+    fontStyle: 'italic',
+    minHeight: 24,
+  },
+  tapHint: {
+    color: Colors.textMuted,
+    textAlign: 'center',
+    marginTop: 32,
+    fontSize: 12,
+  },
+  footer: {
+    paddingHorizontal: 32,
+    paddingBottom: 40,
+    minHeight: 60,
+  },
+  tipText: {
+    color: Colors.textMuted,
+    textAlign: 'center',
+    fontSize: 11.5,
+    lineHeight: 17,
+  },
+});

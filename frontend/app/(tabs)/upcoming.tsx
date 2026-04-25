@@ -4,14 +4,13 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { format, startOfDay, addDays, isSameDay } from 'date-fns';
+import { format, startOfDay, isSameDay } from 'date-fns';
 import { getDateLocale } from '@/utils/dateLocale';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { contactService } from '@/services/contact.service';
 import { HotTopic, Contact } from '@/types';
-import { Colors } from '@/constants/theme';
-import { Calendar } from 'lucide-react-native';
-import { SwipeableEventCard } from '@/components/upcoming/SwipeableEventCard';
+import { Colors, Shadows, Fonts } from '@/constants/theme';
+import { Calendar, ChevronRight } from 'lucide-react-native';
 import { EventListSkeleton } from '@/components/skeleton/EventListSkeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 
@@ -38,7 +37,6 @@ export default function UpcomingScreen() {
     if (view === 'upcoming') {
       const hotTopics = await hotTopicService.getUpcoming(365);
 
-      // Filter birthday duplicates: only show the closest upcoming birthday per contact
       const seenBirthdayContacts = new Set<string>();
       const filteredTopics = hotTopics.filter((topic) => {
         if (topic.birthdayContactId) {
@@ -58,8 +56,6 @@ export default function UpcomingScreen() {
       );
 
       const today = startOfDay(new Date());
-
-      // Group events by date (only days with events)
       const eventsByDate = new Map<string, Array<HotTopic & { contact: Contact }>>();
 
       for (const topic of topicsWithContacts) {
@@ -71,14 +67,13 @@ export default function UpcomingScreen() {
         }
       }
 
-      // Convert to timeline format, sorted by date
       const days: TimelineDay[] = Array.from(eventsByDate.entries())
         .map(([dateKey, events]) => ({
           date: new Date(dateKey),
           events,
           isToday: isSameDay(new Date(dateKey), today),
         }))
-        .sort((a, b) => a.date.getTime() - b.date.getTime());
+        .sort((dayA, dayB) => dayA.date.getTime() - dayB.date.getTime());
 
       setTimeline(days);
     } else {
@@ -130,7 +125,11 @@ export default function UpcomingScreen() {
 
   return (
     <GestureHandlerRootView style={[styles.container, { paddingTop: insets.top }]}>
+      {/* Header */}
       <View style={styles.header}>
+        <Text style={styles.screenTitle}>{t('upcoming.title')}</Text>
+
+        {/* Segmented control */}
         <View style={styles.segmentedControl}>
           <Pressable
             style={[styles.segment, view === 'upcoming' && styles.segmentActive]}
@@ -153,7 +152,7 @@ export default function UpcomingScreen() {
 
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 100 }]}
+        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 120 }]}
       >
         {!hasLoaded ? (
           <EventListSkeleton />
@@ -166,18 +165,28 @@ export default function UpcomingScreen() {
                 </Text>
 
                 {day.events.map((event) => (
-                  <SwipeableEventCard
+                  <Pressable
                     key={event.id}
-                    event={event}
-                    onPress={handleEventPress}
-                    onDelete={handleDeleteEvent}
-                  />
+                    style={styles.eventCard}
+                    onPress={() => handleEventPress(event.contactId)}
+                  >
+                    <View style={[styles.eventIcon, day.isToday && styles.eventIconToday]}>
+                      <Calendar size={16} color={day.isToday ? Colors.textInverse : '#6B4B00'} />
+                    </View>
+                    <View style={styles.eventContent}>
+                      <Text style={styles.eventTitle}>{event.title}</Text>
+                      <Text style={styles.eventContact}>
+                        {event.contact.firstName} {event.contact.lastName || ''}
+                      </Text>
+                    </View>
+                    <ChevronRight size={14} color={Colors.textMuted} />
+                  </Pressable>
                 ))}
               </View>
             ))
           ) : (
             <EmptyState
-              icon={<Calendar size={48} color={Colors.calendarLight} />}
+              icon={<Calendar size={48} color={Colors.amberLight} />}
               title={t('upcoming.noEvents')}
               description={t('upcoming.emptyDescription')}
               ctaLabel={t('upcoming.recordNote')}
@@ -189,16 +198,20 @@ export default function UpcomingScreen() {
             pastEvents.map((event) => (
               <Pressable
                 key={event.id}
-                style={styles.pastEventCard}
+                style={styles.eventCard}
                 onPress={() => handleEventPress(event.contactId)}
               >
-                <Calendar size={16} color={Colors.textMuted} />
+                <View style={styles.eventIcon}>
+                  <Calendar size={16} color={'#6B4B00'} />
+                </View>
                 <View style={styles.eventContent}>
-                  <Text style={styles.pastEventTitle}>{event.title}</Text>
+                  <Text style={styles.eventTitle}>{event.title}</Text>
                   <Text style={styles.eventContact}>
-                    {event.contact.firstName} {event.contact.lastName || ''}{event.eventDate ? ` • ${format(new Date(event.eventDate), 'd MMM', { locale })}` : ''}
+                    {event.contact.firstName} {event.contact.lastName || ''}
+                    {event.eventDate ? ` · ${format(new Date(event.eventDate), 'd MMM', { locale })}` : ''}
                   </Text>
                 </View>
+                <ChevronRight size={14} color={Colors.textMuted} />
               </Pressable>
             ))
           ) : (
@@ -220,90 +233,95 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   header: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 20,
+    paddingTop: 14,
+    paddingBottom: 16,
+  },
+  screenTitle: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 30,
+    letterSpacing: -0.8,
+    color: Colors.textPrimary,
+    marginBottom: 14,
   },
   segmentedControl: {
     flexDirection: 'row',
-    backgroundColor: Colors.surface,
-    borderRadius: 8,
+    backgroundColor: Colors.surfaceAlt,
+    borderRadius: 14,
     padding: 4,
+    gap: 4,
   },
   segment: {
     flex: 1,
-    paddingVertical: 8,
+    paddingVertical: 9,
     alignItems: 'center',
-    borderRadius: 6,
+    borderRadius: 10,
   },
   segmentActive: {
-    backgroundColor: Colors.calendar,
+    backgroundColor: Colors.surface,
+    ...Shadows.elevated,
   },
   segmentText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: Colors.textSecondary,
+    fontSize: 13,
+    fontWeight: '600',
+    color: Colors.textMuted,
+    textTransform: 'capitalize',
   },
   segmentTextActive: {
-    color: Colors.textInverse,
+    color: Colors.textPrimary,
   },
   scrollView: {
     flex: 1,
   },
   content: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
   },
   dayContainer: {
-    marginBottom: 16,
+    marginBottom: 18,
   },
   dayHeader: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
-    color: Colors.textSecondary,
+    color: Colors.textMuted,
     marginBottom: 8,
-    textTransform: 'capitalize',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   dayHeaderToday: {
-    color: Colors.calendar,
+    color: Colors.accent,
   },
   eventCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.surface,
-    padding: 12,
-    borderRadius: 8,
+    borderRadius: 16,
+    padding: 14,
     marginBottom: 8,
+    gap: 12,
+    ...Shadows.card,
+  },
+  eventIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 14,
+    backgroundColor: Colors.amberLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  eventIconToday: {
+    backgroundColor: Colors.primary,
   },
   eventContent: {
-    marginLeft: 12,
     flex: 1,
   },
   eventTitle: {
-    fontSize: 16,
-    fontWeight: '500',
+    fontSize: 15,
+    fontWeight: '600',
     color: Colors.textPrimary,
+    marginBottom: 2,
   },
   eventContact: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    marginTop: 2,
-  },
-  pastEventCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.surface,
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 8,
-    opacity: 0.7,
-  },
-  pastEventTitle: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: Colors.textSecondary,
-  },
-  emptyText: {
-    textAlign: 'center',
+    fontSize: 12,
     color: Colors.textMuted,
-    marginTop: 40,
   },
 });

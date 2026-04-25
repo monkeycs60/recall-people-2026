@@ -22,10 +22,9 @@ import { useUpdateContact, useDeleteContact } from '@/hooks/useContactsQuery';
 import { useGroupsForContact, useGroupsQuery } from '@/hooks/useGroupsQuery';
 import { SearchSourceType } from '@/types';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import { Edit3, Plus, Trash2, MoreVertical, MessageCircleQuestion, Calendar, Bell } from 'lucide-react-native';
+import { ChevronLeft, Edit3, Plus, Trash2, MoreVertical, Calendar, Bell } from 'lucide-react-native';
 import { notificationService } from '@/services/notification.service';
 import { AISummary } from '@/components/contact/AISummary';
-import { AddNoteButton } from '@/components/AddNoteButton';
 import type { InputMode } from '@/components/InputModeToggle';
 import { SuggestedQuestions } from '@/components/contact/SuggestedQuestions';
 import { HotTopicsList } from '@/components/contact/HotTopicsList';
@@ -40,7 +39,8 @@ import { GenderEditModal } from '@/components/contact/GenderEditModal';
 import { AvatarEditModal } from '@/components/contact/AvatarEditModal';
 import { NameEditModal } from '@/components/contact/NameEditModal';
 import { GroupsManagementSheet } from '@/components/contact/GroupsManagementSheet';
-import { Colors } from '@/constants/theme';
+import { Colors, Shadows, Fonts } from '@/constants/theme';
+import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { useAppStore } from '@/stores/app-store';
 import { useSubscriptionStore } from '@/stores/subscription-store';
@@ -247,7 +247,7 @@ export default function ContactDetailScreen() {
     setShowAvatarModal(true);
   };
 
-  const handleSaveAvatar = (avatarUrl: string | null) => {
+  const handleSaveAvatar = () => {
     invalidate();
   };
 
@@ -387,16 +387,34 @@ export default function ContactDetailScreen() {
         contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Hero Header with Avatar */}
-        <Animated.View entering={FadeIn.duration(400)} style={styles.heroSection}>
-          {/* Options menu button */}
-          <View style={styles.menuButtonContainer}>
-            <Pressable
-              style={styles.menuButton}
-              onPress={() => setShowOptionsMenu(!showOptionsMenu)}
-            >
-              <MoreVertical size={24} color={Colors.textSecondary} />
-            </Pressable>
+        {/* Hero Header with Gradient */}
+        <Animated.View entering={FadeIn.duration(400)}>
+          <LinearGradient
+            colors={[Colors.primaryLight, Colors.background]}
+            start={{ x: 0.2, y: 0 }}
+            end={{ x: 0.8, y: 1 }}
+            style={styles.heroSection}
+          >
+            <View style={{ paddingTop: insets.top }} />
+
+            {/* Top bar: back + actions */}
+            <View style={styles.heroTopBar}>
+              <Pressable style={styles.heroBackButton} onPress={() => router.back()}>
+                <ChevronLeft size={24} color={Colors.textPrimary} strokeWidth={2.5} />
+              </Pressable>
+              <View style={styles.heroActions}>
+                <Pressable style={styles.heroActionButton} onPress={() => setShowNameModal(true)}>
+                  <Edit3 size={14} color={Colors.textSecondary} />
+                </Pressable>
+                <Pressable
+                  style={styles.heroActionButton}
+                  onPress={() => setShowOptionsMenu(!showOptionsMenu)}
+                >
+                  <MoreVertical size={14} color={Colors.textSecondary} />
+                </Pressable>
+              </View>
+            </View>
+
             {showOptionsMenu && (
               <View style={styles.optionsMenu}>
                 <Pressable style={styles.optionsMenuItem} onPress={handleDeletePress}>
@@ -407,67 +425,58 @@ export default function ContactDetailScreen() {
                 </Pressable>
               </View>
             )}
-          </View>
 
-          <View style={styles.avatarContainer}>
-            <ContactAvatar
-              firstName={contact.firstName}
-              lastName={contact.lastName}
-              gender={contact.gender}
-              avatarUrl={contact.avatarUrl}
-              size="large"
-              onPress={handleEditAvatar}
-              showEditBadge
-              cacheKey={contact.updatedAt}
-              isGenerating={isAvatarGenerating(contactId)}
-            />
-          </View>
-
-          <Pressable style={styles.nameRow} onPress={() => setShowNameModal(true)}>
-            <Text style={styles.contactName}>
-              {contact.firstName} {contact.lastName || contact.nickname || ''}
-            </Text>
-            <Edit3 size={18} color={Colors.textMuted} />
-          </Pressable>
-
-          {/* Groups display */}
-          {contactGroups.length > 0 ? (
-            <Pressable style={styles.groupChipsContainer} onPress={handleOpenGroupsSheet}>
-              {contactGroups.map((group) => (
-                <View key={group.id} style={styles.groupChip}>
-                  <Text style={styles.groupChipText}>{group.name}</Text>
+            {/* Avatar + Info row */}
+            <View style={styles.heroContent}>
+              <ContactAvatar
+                firstName={contact.firstName}
+                lastName={contact.lastName}
+                gender={contact.gender}
+                avatarUrl={contact.avatarUrl}
+                size="large"
+                onPress={handleEditAvatar}
+                showEditBadge
+                cacheKey={contact.updatedAt}
+                isGenerating={isAvatarGenerating(contactId)}
+              />
+              <View style={styles.heroTextColumn}>
+                {contact.lastContactAt && (
+                  <Text style={styles.heroEyebrow}>
+                    {t('contact.lastContact').toUpperCase()} {new Date(contact.lastContactAt).toLocaleDateString()}
+                  </Text>
+                )}
+                <Text style={styles.contactName}>
+                  {contact.firstName} {contact.lastName || ''}
+                </Text>
+                <View style={styles.groupChipsContainer}>
+                  {contactGroups.length > 0 ? (
+                    contactGroups.map((group) => (
+                      <Pressable key={group.id} style={styles.groupChip} onPress={handleOpenGroupsSheet}>
+                        <Text style={styles.groupChipText}>{group.name}</Text>
+                      </Pressable>
+                    ))
+                  ) : (
+                    <Pressable style={styles.addGroupButton} onPress={handleOpenGroupsSheet}>
+                      <Plus size={12} color={Colors.primary} />
+                      <Text style={styles.addGroupText}>{t('contact.addGroup')}</Text>
+                    </Pressable>
+                  )}
                 </View>
-              ))}
-              <View style={styles.editGroupsChip}>
-                <Edit3 size={12} color={Colors.textMuted} />
               </View>
-            </Pressable>
-          ) : (
-            <Pressable style={styles.addGroupButton} onPress={handleOpenGroupsSheet}>
-              <Plus size={14} color={Colors.primary} />
-              <Text style={styles.addGroupText}>{t('contact.addGroup')}</Text>
-            </Pressable>
-          )}
+            </View>
 
-          {contact.lastContactAt && (
-            <Text style={styles.lastContactText}>
-              {t('contact.lastContact')} : {new Date(contact.lastContactAt).toLocaleDateString()}
-            </Text>
-          )}
-
-          {/* Add note button */}
-          <AddNoteButton
-            firstName={contact.firstName}
-            onAddNote={handleAddNote}
-          />
-
-          {/* Ask about contact button */}
-          <Pressable style={styles.askButton} onPress={handleAskAboutContact}>
-            <MessageCircleQuestion size={18} color={Colors.primary} />
-            <Text style={styles.askButtonText}>
-              {t('contact.askAbout', { firstName: contact.firstName })}
-            </Text>
-          </Pressable>
+            {/* Two CTAs */}
+            <View style={styles.heroCTARow}>
+              <Pressable style={styles.heroNewNoteButton} onPress={() => handleAddNote('voice' as InputMode)}>
+                <Text style={styles.heroNewNoteText}>{t('contact.addNoteButton.label')}</Text>
+              </Pressable>
+              <Pressable style={styles.askButton} onPress={handleAskAboutContact}>
+                <Text style={styles.askButtonText}>
+                  {t('contact.askAbout', { firstName: contact.firstName })}
+                </Text>
+              </Pressable>
+            </View>
+          </LinearGradient>
         </Animated.View>
 
         {/* AI Summary (L'essentiel) - Most important info first */}
@@ -793,35 +802,82 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   heroSection: {
-    backgroundColor: Colors.primaryLight,
-    paddingHorizontal: 24,
-    paddingTop: 24,
-    paddingBottom: 32,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 24,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+  },
+  heroTopBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 16,
   },
-  menuButtonContainer: {
-    position: 'absolute',
-    top: 16,
-    right: 16,
-    zIndex: 10,
+  heroBackButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: Colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Shadows.elevated,
   },
-  menuButton: {
-    padding: 8,
+  heroActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  heroActionButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: Colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  heroContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    marginBottom: 20,
+  },
+  heroTextColumn: {
+    flex: 1,
+  },
+  heroEyebrow: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: Colors.primary,
+    letterSpacing: 1.2,
+    marginBottom: 2,
+  },
+  heroCTARow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  heroNewNoteButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 14,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Shadows.fab,
+  },
+  heroNewNoteText: {
+    color: Colors.textInverse,
+    fontSize: 13.5,
+    fontWeight: '600',
   },
   optionsMenu: {
     position: 'absolute',
-    top: 40,
-    right: 0,
+    top: 90,
+    right: 20,
     backgroundColor: Colors.surface,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
+    borderRadius: 14,
     minWidth: 200,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    zIndex: 20,
+    ...Shadows.floating,
   },
   optionsMenuItem: {
     flexDirection: 'row',
@@ -835,19 +891,12 @@ const styles = StyleSheet.create({
     color: Colors.error,
     fontWeight: '500',
   },
-  avatarContainer: {
-    marginBottom: 16,
-  },
-  nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
   contactName: {
-    fontFamily: 'PlayfairDisplay_700Bold',
+    fontFamily: Fonts.sans.bold,
     fontSize: 28,
+    letterSpacing: -0.8,
     color: Colors.textPrimary,
-    textAlign: 'center',
+    lineHeight: 32,
   },
   inputLabel: {
     fontSize: 14,
@@ -858,8 +907,8 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: Colors.background,
     borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
+    borderColor: Colors.hairline,
+    borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
@@ -878,10 +927,10 @@ const styles = StyleSheet.create({
   cancelButton: {
     flex: 1,
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: 14,
     backgroundColor: Colors.surface,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.hairline,
     alignItems: 'center',
   },
   cancelButtonText: {
@@ -892,7 +941,7 @@ const styles = StyleSheet.create({
   saveButton: {
     flex: 1,
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: 14,
     backgroundColor: Colors.primary,
     alignItems: 'center',
   },
@@ -904,30 +953,19 @@ const styles = StyleSheet.create({
   groupChipsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
-    marginTop: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
+    gap: 6,
+    marginTop: 4,
   },
   groupChip: {
     backgroundColor: Colors.surface,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: Colors.border,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 999,
   },
   groupChipText: {
-    color: Colors.textPrimary,
-    fontSize: 13,
-    fontWeight: '500',
-  },
-  editGroupsChip: {
-    backgroundColor: Colors.surface,
-    padding: 6,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
+    color: Colors.textSecondary,
+    fontSize: 11,
+    fontWeight: '600',
   },
   addGroupButton: {
     flexDirection: 'row',
@@ -940,70 +978,45 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
-  lastContactText: {
-    color: Colors.textSecondary,
-    fontSize: 14,
-    marginTop: 12,
-  },
   askButton: {
-    flexDirection: 'row',
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: Colors.primary,
+    backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.surface,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    marginTop: 12,
-    gap: 8,
-    borderWidth: 1,
-    borderColor: Colors.primary,
   },
   askButtonText: {
     color: Colors.primary,
-    fontSize: 15,
-    fontWeight: '500',
-  },
-  addNoteButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.primary,
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-    borderRadius: 12,
-    marginTop: 20,
-    gap: 8,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  addNoteButtonText: {
-    color: Colors.textInverse,
-    fontSize: 16,
+    fontSize: 13.5,
     fontWeight: '600',
   },
   section: {
-    paddingHorizontal: 24,
-    marginTop: 24,
+    paddingHorizontal: 20,
+    marginTop: 22,
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: 10,
   },
   sectionTitle: {
-    fontFamily: 'PlayfairDisplay_600SemiBold',
-    fontSize: 22,
-    color: Colors.textPrimary,
+    fontSize: 11,
+    fontWeight: '700',
+    color: Colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    marginLeft: 4,
   },
   addCard: {
     backgroundColor: Colors.surface,
     padding: 16,
-    borderRadius: 16,
+    borderRadius: 18,
     marginBottom: 16,
+    ...Shadows.card,
   },
   emptyState: {
     backgroundColor: Colors.surface,
@@ -1011,7 +1024,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: Colors.border,
+    borderColor: Colors.hairline,
   },
   emptyStateText: {
     color: Colors.textMuted,
@@ -1035,7 +1048,7 @@ const styles = StyleSheet.create({
     height: 18,
     borderRadius: 4,
     borderWidth: 1.5,
-    borderColor: Colors.border,
+    borderColor: Colors.hairline,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -1094,7 +1107,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: Colors.hairline,
   },
   datePickerModalCancel: {
     fontSize: 16,
@@ -1117,7 +1130,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.surface,
-    borderRadius: 12,
+    borderRadius: 14,
     padding: 14,
     gap: 12,
     borderWidth: 1,

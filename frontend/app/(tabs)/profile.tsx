@@ -37,7 +37,7 @@ import { LegalNoticesSheet } from '@/components/profile/LegalNoticesSheet';
 import { SubscriptionCard } from '@/components/profile/SubscriptionCard';
 import { TestProCard } from '@/components/profile/TestProCard';
 import { UserAvatarEditModal } from '@/components/profile/UserAvatarEditModal';
-import { Colors } from '@/constants/theme';
+import { Colors, Fonts } from '@/constants/theme';
 import Constants from 'expo-constants';
 import { revenueCatService } from '@/services/revenuecat.service';
 import { Paywall } from '@/components/Paywall';
@@ -418,28 +418,30 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingBottom: 180,
   },
   screenTitle: {
-    fontFamily: 'PlayfairDisplay_700Bold',
-    fontSize: 32,
+    fontFamily: Fonts.sans.bold,
+    fontSize: 30,
+    letterSpacing: -0.8,
     color: Colors.textPrimary,
-    marginBottom: 24,
+    marginBottom: 18,
   },
   subscriptionSection: {
-    marginBottom: 24,
+    marginBottom: 22,
   },
   testProSection: {
-    marginBottom: 24,
+    marginBottom: 22,
   },
   sectionTitle: {
-    fontSize: 13,
-    fontWeight: '600',
+    fontSize: 11,
+    fontWeight: '700',
     color: Colors.textMuted,
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 12,
+    letterSpacing: 1,
+    marginBottom: 8,
+    marginLeft: 4,
   },
   logoutSection: {
     marginTop: 8,

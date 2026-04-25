@@ -7,7 +7,7 @@ import Animated, {
   FadeInDown,
 } from 'react-native-reanimated';
 import { SemanticSearchResult, SearchSourceType } from '@/types';
-import { Colors } from '@/constants/theme';
+import { Colors, Shadows } from '@/constants/theme';
 
 type SearchResultItemProps = {
   result: SemanticSearchResult;
@@ -100,11 +100,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
+    ...Shadows.card,
   },
   content: {
     padding: 16,
@@ -157,7 +153,7 @@ const styles = StyleSheet.create({
   typeBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 12,
+    borderRadius: 14,
     paddingHorizontal: 10,
     paddingVertical: 4,
   },

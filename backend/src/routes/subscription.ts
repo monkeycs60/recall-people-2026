@@ -16,11 +16,8 @@ type AuthContext = {
 // Constants
 // ============================================
 
-const FREE_NOTES_PER_MONTH = 10;
-const TRIAL_DURATION_DAYS = 14;
 const FREE_AVATARS_PER_MONTH = 5;
 const FREE_ASK_PER_MONTH = 10;
-const TRIAL_AVATARS_LIMIT = 20;
 
 // ============================================
 // Helpers
@@ -48,11 +45,6 @@ const checkIsPremium = (email: string | undefined, rawWhitelist: string | undefi
   const whitelist = parseWhitelist(rawWhitelist);
   const userEmail = email?.toLowerCase().trim() || '';
   return userEmail ? whitelist.has(userEmail) : false;
-};
-
-const isTrialActive = (trialEndDate: Date | null): boolean => {
-  if (!trialEndDate) return false;
-  return new Date() < trialEndDate;
 };
 
 // ============================================
@@ -97,14 +89,13 @@ subscriptionRoutes.get('/notes-status', async (c) => {
   });
 
   const notesCount = usage?.notesCount ?? 0;
-  const canCreate = notesCount < FREE_NOTES_PER_MONTH;
 
   return c.json({
     success: true,
     used: notesCount,
-    limit: FREE_NOTES_PER_MONTH,
-    remaining: Math.max(0, FREE_NOTES_PER_MONTH - notesCount),
-    canCreate,
+    limit: -1,
+    remaining: -1,
+    canCreate: true,
     monthKey,
   });
 });
@@ -132,75 +123,11 @@ subscriptionRoutes.post('/increment-note', async (c) => {
     },
   });
 
-  const remaining = Math.max(0, FREE_NOTES_PER_MONTH - usage.notesCount);
-
   return c.json({
     success: true,
     used: usage.notesCount,
-    remaining,
-    canCreate: usage.notesCount < FREE_NOTES_PER_MONTH,
-  });
-});
-
-// ============================================
-// NEW: Trial status endpoint
-// ============================================
-
-// GET /trial-status — Returns trial state; starts trial on first call if trialStartDate is null
-subscriptionRoutes.get('/trial-status', async (c) => {
-  const user = c.get('user');
-  const prisma = getPrisma(c.env.DATABASE_URL);
-  const isPremium = checkIsPremium(user.email, c.env.PRO_WHITELIST);
-
-  if (isPremium) {
-    return c.json({
-      success: true,
-      isInTrial: false,
-      trialStartDate: null,
-      trialEndDate: null,
-      daysRemaining: 0,
-      isPremium: true,
-    });
-  }
-
-  let userData = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { trialStartDate: true, trialEndDate: true },
-  });
-
-  // Auto-start trial on first call if trialStartDate is null
-  if (!userData?.trialStartDate) {
-    const now = new Date();
-    const endDate = new Date(now);
-    endDate.setDate(endDate.getDate() + TRIAL_DURATION_DAYS);
-
-    userData = await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        trialStartDate: now,
-        trialEndDate: endDate,
-      },
-      select: { trialStartDate: true, trialEndDate: true },
-    });
-  }
-
-  const trialEndDate = userData.trialEndDate;
-  const now = new Date();
-  const inTrial = trialEndDate ? now < trialEndDate : false;
-
-  let daysRemaining = 0;
-  if (trialEndDate && inTrial) {
-    const diffMs = trialEndDate.getTime() - now.getTime();
-    daysRemaining = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
-  }
-
-  return c.json({
-    success: true,
-    isInTrial: inTrial,
-    trialStartDate: userData.trialStartDate?.toISOString() ?? null,
-    trialEndDate: trialEndDate?.toISOString() ?? null,
-    daysRemaining,
-    isPremium: false,
+    remaining: -1,
+    canCreate: true,
   });
 });
 
@@ -229,8 +156,6 @@ subscriptionRoutes.get('/quotas', async (c) => {
   let userData = await prisma.user.findUnique({
     where: { id: user.id },
     select: {
-      trialStartDate: true,
-      trialEndDate: true,
       avatarMonthlyUsed: true,
       avatarMonthKey: true,
       askMonthlyUsed: true,
@@ -261,8 +186,6 @@ subscriptionRoutes.get('/quotas', async (c) => {
       where: { id: user.id },
       data: updateData,
       select: {
-        trialStartDate: true,
-        trialEndDate: true,
         avatarMonthlyUsed: true,
         avatarMonthKey: true,
         askMonthlyUsed: true,
@@ -271,21 +194,13 @@ subscriptionRoutes.get('/quotas', async (c) => {
     });
   }
 
-  const inTrial = isTrialActive(userData.trialEndDate);
-
-  // During trial: avatar limit = TRIAL_AVATARS_LIMIT (20), ask = unlimited (-1)
-  // After trial: avatar limit = FREE_AVATARS_PER_MONTH (5), ask = FREE_ASK_PER_MONTH (10)
-  const avatarLimit = inTrial ? TRIAL_AVATARS_LIMIT : FREE_AVATARS_PER_MONTH;
-  const askLimit = inTrial ? -1 : FREE_ASK_PER_MONTH;
-
   return c.json({
     success: true,
     avatarUsed: userData.avatarMonthlyUsed,
-    avatarLimit,
+    avatarLimit: FREE_AVATARS_PER_MONTH,
     askUsed: userData.askMonthlyUsed,
-    askLimit,
+    askLimit: FREE_ASK_PER_MONTH,
     isPremium: false,
-    isInTrial: inTrial,
   });
 });
 
@@ -307,7 +222,6 @@ subscriptionRoutes.post('/use-avatar-quota', async (c) => {
   const userData = await prisma.user.findUnique({
     where: { id: user.id },
     select: {
-      trialEndDate: true,
       avatarMonthlyUsed: true,
       avatarMonthKey: true,
     },
@@ -321,8 +235,7 @@ subscriptionRoutes.post('/use-avatar-quota', async (c) => {
   const needsReset = userData.avatarMonthKey !== currentMonthKey;
   const currentUsed = needsReset ? 0 : userData.avatarMonthlyUsed;
 
-  const inTrial = isTrialActive(userData.trialEndDate);
-  const limit = inTrial ? TRIAL_AVATARS_LIMIT : FREE_AVATARS_PER_MONTH;
+  const limit = FREE_AVATARS_PER_MONTH;
 
   if (currentUsed >= limit) {
     return c.json(
@@ -361,7 +274,7 @@ subscriptionRoutes.post('/use-avatar-quota', async (c) => {
 // NEW: Use ask quota
 // ============================================
 
-// POST /use-ask-quota — Decrement ask monthly quota; unlimited during trial
+// POST /use-ask-quota — Decrement ask monthly quota
 subscriptionRoutes.post('/use-ask-quota', async (c) => {
   const user = c.get('user');
   const prisma = getPrisma(c.env.DATABASE_URL);
@@ -375,7 +288,6 @@ subscriptionRoutes.post('/use-ask-quota', async (c) => {
   const userData = await prisma.user.findUnique({
     where: { id: user.id },
     select: {
-      trialEndDate: true,
       askMonthlyUsed: true,
       askMonthKey: true,
     },
@@ -385,32 +297,6 @@ subscriptionRoutes.post('/use-ask-quota', async (c) => {
     return c.json({ success: false, error: 'user_not_found' }, 404);
   }
 
-  const inTrial = isTrialActive(userData.trialEndDate);
-
-  // During trial, ask is unlimited — still track usage but don't block
-  if (inTrial) {
-    const needsReset = userData.askMonthKey !== currentMonthKey;
-    const currentUsed = needsReset ? 0 : userData.askMonthlyUsed;
-    const newUsed = currentUsed + 1;
-
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        askMonthlyUsed: newUsed,
-        askMonthKey: currentMonthKey,
-      },
-    });
-
-    return c.json({
-      success: true,
-      isPremium: false,
-      used: newUsed,
-      limit: -1,
-      remaining: -1,
-    });
-  }
-
-  // After trial: enforce monthly limit
   const needsReset = userData.askMonthKey !== currentMonthKey;
   const currentUsed = needsReset ? 0 : userData.askMonthlyUsed;
 
@@ -446,4 +332,3 @@ subscriptionRoutes.post('/use-ask-quota', async (c) => {
     remaining: Math.max(0, FREE_ASK_PER_MONTH - newUsed),
   });
 });
-

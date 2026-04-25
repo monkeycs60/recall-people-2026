@@ -18,7 +18,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system/legacy';
 import { Image } from 'expo-image';
 import { Colors, Spacing, BorderRadius } from '@/constants/theme';
-import { uploadAvatar, generateAvatar, deleteAvatar, useAvatarQuota } from '@/lib/api';
+import { uploadAvatar, generateAvatar, deleteAvatar, consumeAvatarQuota } from '@/lib/api';
 import { contactService } from '@/services/contact.service';
 import { useSubscriptionStore } from '@/stores/subscription-store';
 import { Paywall } from '@/components/Paywall';
@@ -54,7 +54,7 @@ export function AvatarEditModal({
   const avatarUsed = useSubscriptionStore((state) => state.avatarUsed);
   const avatarLimit = useSubscriptionStore((state) => state.avatarLimit);
   const isPremium = useSubscriptionStore((state) => state.isPremium);
-  const syncTrialAndQuotas = useSubscriptionStore((state) => state.syncTrialAndQuotas);
+  const syncQuotas = useSubscriptionStore((state) => state.syncQuotas);
 
   const resetState = () => {
     setMode('choose');
@@ -149,19 +149,19 @@ export function AvatarEditModal({
     try {
       if (!isPremium) {
         try {
-          const quotaResult = await useAvatarQuota();
+          const quotaResult = await consumeAvatarQuota();
           if (!quotaResult.success && quotaResult.error === 'quota_exhausted') {
             setShowPaywall(true);
             setIsGenerating(false);
             return;
           }
 
-          await syncTrialAndQuotas();
+          await syncQuotas();
         } catch (quotaError) {
           const isQuotaExhausted = quotaError instanceof Error &&
             ('statusCode' in quotaError && (quotaError as unknown as { statusCode: number }).statusCode === 403);
           if (isQuotaExhausted) {
-            await syncTrialAndQuotas();
+            await syncQuotas();
             setShowPaywall(true);
             setIsGenerating(false);
             return;
@@ -369,9 +369,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: Spacing.md,
     backgroundColor: Colors.surface,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 2,
-    borderColor: Colors.border,
+    borderColor: Colors.hairline,
     gap: Spacing.md,
   },
   optionIconContainer: {
@@ -427,13 +427,13 @@ const styles = StyleSheet.create({
   },
   promptInput: {
     backgroundColor: Colors.surface,
-    borderRadius: 12,
+    borderRadius: 14,
     paddingVertical: 12,
     paddingHorizontal: 16,
     fontSize: 15,
     color: Colors.textPrimary,
     borderWidth: 1.5,
-    borderColor: Colors.borderLight,
+    borderColor: Colors.hairline,
     minHeight: 100,
     marginBottom: Spacing.lg,
   },
@@ -444,10 +444,10 @@ const styles = StyleSheet.create({
   backButton: {
     flex: 1,
     paddingVertical: Spacing.md,
-    borderRadius: 12,
+    borderRadius: 14,
     backgroundColor: Colors.surface,
     borderWidth: 2,
-    borderColor: Colors.border,
+    borderColor: Colors.hairline,
     alignItems: 'center',
   },
   backButtonText: {
@@ -459,7 +459,7 @@ const styles = StyleSheet.create({
     flex: 2,
     flexDirection: 'row',
     paddingVertical: Spacing.md,
-    borderRadius: 12,
+    borderRadius: 14,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',

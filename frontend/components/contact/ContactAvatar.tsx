@@ -1,52 +1,64 @@
 import { View, Text, StyleSheet, Pressable, Animated, ActivityIndicator } from 'react-native';
 import { Image } from 'expo-image';
 import { Camera } from 'lucide-react-native';
-import { Colors } from '@/constants/theme';
+import { Colors, Shadows } from '@/constants/theme';
 import { Gender } from '@/types';
-import { API_URL } from '@/lib/config';
-import { useRef, useEffect } from 'react';
+import { useRef, useCallback } from 'react';
+
+const AVATAR_PALETTE: Array<[string, string]> = [
+  ['#FFD7C2', '#B03A11'],
+  ['#D0E5FF', '#0F3C75'],
+  ['#E6D7FF', '#3F18A4'],
+  ['#CDF2DC', '#0A5C38'],
+  ['#FFE7A8', '#6B4B00'],
+  ['#FFD0E4', '#8A1B4E'],
+  ['#C7E9E8', '#0D4F4F'],
+  ['#F5D3C0', '#6B2E0B'],
+];
+
+function hashName(name: string): number {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+  }
+  return hash;
+}
+
+function getInitials(name: string): string {
+  return (name || '?')
+    .split(' ')
+    .map((word) => word[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+}
+
+type AvatarSize = 'small' | 'medium' | 'large';
+
+const SIZE_MAP: Record<AvatarSize, number> = {
+  small: 48,
+  medium: 60,
+  large: 72,
+};
 
 type ContactAvatarProps = {
   firstName: string;
   lastName?: string;
   gender?: Gender;
   avatarUrl?: string;
-  size?: 'small' | 'medium' | 'large';
+  size?: AvatarSize;
   onPress?: () => void;
   showEditBadge?: boolean;
-  cacheKey?: string; // Use updatedAt to force cache invalidation
-  recyclingKey?: string; // Use contact id to prevent FlatList recycling issues
-  isGenerating?: boolean; // Show skeleton while avatar is being generated
-};
-
-const SIZE_MAP = {
-  small: 52,
-  medium: 60,
-  large: 120,
-} as const;
-
-const PLACEHOLDER_VERSION = 'v100';
-
-const getPlaceholderUrl = (gender: Gender): string => {
-  return `${API_URL}/api/avatar/placeholders/avatar-${gender}.png?v=${PLACEHOLDER_VERSION}`;
-};
-
-const getInitials = (firstName: string, lastName?: string): string => {
-  const first = firstName?.charAt(0)?.toUpperCase() || '';
-  const last = lastName?.charAt(0)?.toUpperCase() || '';
-  return first + last || '?';
-};
-
-const INITIALS_FONT_SIZE: Record<string, number> = {
-  small: 18,
-  medium: 22,
-  large: 44,
+  cacheKey?: string;
+  recyclingKey?: string;
+  isGenerating?: boolean;
 };
 
 export function ContactAvatar({
   firstName,
   lastName,
-  gender = 'unknown',
+  gender: _gender,
   avatarUrl,
   size = 'medium',
   onPress,
@@ -56,131 +68,109 @@ export function ContactAvatar({
   isGenerating = false,
 }: ContactAvatarProps) {
   const pixelSize = SIZE_MAP[size];
-  const placeholderUrl = getPlaceholderUrl(gender);
   const needsBadge = showEditBadge && size === 'large';
   const badgeSize = 32;
 
-  // Pulse animation for generating state
+  const fullName = [firstName, lastName].filter(Boolean).join(' ');
+  const hash = hashName(fullName);
+  const [tileBg, tileFg] = AVATAR_PALETTE[hash % AVATAR_PALETTE.length];
+  const initials = getInitials(fullName);
+  const rotation = (hash % 5) - 2;
+
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
-  useEffect(() => {
+  const startPulse = useCallback(() => {
     if (isGenerating) {
       const animation = Animated.loop(
         Animated.sequence([
-          Animated.timing(pulseAnim, {
-            toValue: 0.5,
-            duration: 800,
-            useNativeDriver: true,
-          }),
-          Animated.timing(pulseAnim, {
-            toValue: 1,
-            duration: 800,
-            useNativeDriver: true,
-          }),
+          Animated.timing(pulseAnim, { toValue: 0.5, duration: 800, useNativeDriver: true }),
+          Animated.timing(pulseAnim, { toValue: 1, duration: 800, useNativeDriver: true }),
         ])
       );
       animation.start();
       return () => animation.stop();
-    } else {
-      pulseAnim.setValue(1);
     }
+    pulseAnim.setValue(1);
+    return undefined;
   }, [isGenerating, pulseAnim]);
 
-  // Add cache buster to avatar URL if cacheKey provided
   const imageUri = avatarUrl
     ? `${avatarUrl}${avatarUrl.includes('?') ? '&' : '?'}v=${cacheKey || ''}`
-    : placeholderUrl;
+    : null;
 
-  // Show skeleton when generating (no avatar yet)
   if (isGenerating && !avatarUrl) {
     const skeletonElement = (
       <Animated.View
         style={{
           width: pixelSize,
           height: pixelSize,
-          borderRadius: pixelSize / 2,
-          backgroundColor: Colors.primaryLight,
+          borderRadius: 14,
+          backgroundColor: tileBg,
           opacity: pulseAnim,
           alignItems: 'center',
           justifyContent: 'center',
+          transform: [{ rotate: `${rotation}deg` }],
         }}
+        ref={() => startPulse()}
       >
-        <ActivityIndicator size={size === 'large' ? 'large' : 'small'} color={Colors.primary} />
+        <ActivityIndicator size={size === 'large' ? 'large' : 'small'} color={tileFg} />
       </Animated.View>
     );
 
-    if (!needsBadge) {
-      if (onPress) {
-        return <Pressable onPress={onPress}>{skeletonElement}</Pressable>;
-      }
-      return skeletonElement;
-    }
-
-    const skeletonContent = (
-      <View style={[styles.wrapper, { width: pixelSize, height: pixelSize }]}>
-        <View style={[styles.imageContainer, { width: pixelSize, height: pixelSize, borderRadius: pixelSize / 2 }]}>
-          {skeletonElement}
-        </View>
-        <View style={[styles.editBadge, { width: badgeSize, height: badgeSize, borderRadius: badgeSize / 2 }]}>
-          <Camera size={badgeSize * 0.5} color={Colors.textInverse} />
-        </View>
-      </View>
-    );
-
     if (onPress) {
-      return <Pressable onPress={onPress}>{skeletonContent}</Pressable>;
+      return <Pressable onPress={onPress}>{skeletonElement}</Pressable>;
     }
-    return skeletonContent;
+    return skeletonElement;
   }
 
-  const initials = getInitials(firstName, lastName);
-
-  const imageElement = (
-    <View style={{
-      width: pixelSize,
-      height: pixelSize,
-      borderRadius: pixelSize / 2,
-      backgroundColor: Colors.primaryLight,
-      alignItems: 'center',
-      justifyContent: 'center',
-    }}>
-      <Text style={{
-        fontSize: INITIALS_FONT_SIZE[size],
-        fontWeight: '600',
-        color: Colors.primary,
-      }}>
+  const initialsElement = (
+    <View
+      style={{
+        width: pixelSize,
+        height: pixelSize,
+        borderRadius: 14,
+        backgroundColor: tileBg,
+        alignItems: 'center',
+        justifyContent: 'center',
+        transform: [{ rotate: `${rotation}deg` }],
+      }}
+    >
+      <Text
+        style={{
+          fontSize: pixelSize * 0.38,
+          fontWeight: '700',
+          color: tileFg,
+          letterSpacing: -0.5,
+        }}
+      >
         {initials}
       </Text>
-      <Image
-        source={{ uri: imageUri }}
-        cachePolicy="memory-disk"
-        recyclingKey={recyclingKey}
-        style={{
-          ...StyleSheet.absoluteFillObject,
-          borderRadius: pixelSize / 2,
-        }}
-        contentFit="cover"
-        transition={recyclingKey ? 0 : 200}
-        placeholder={recyclingKey ? undefined : { blurhash: 'LKO2?U%2Tw=w]~RBVZRi};RPxuwH' }}
-        placeholderContentFit="cover"
-      />
+      {imageUri && (
+        <Image
+          source={{ uri: imageUri }}
+          cachePolicy="memory-disk"
+          recyclingKey={recyclingKey}
+          style={{
+            ...StyleSheet.absoluteFillObject,
+            borderRadius: 14,
+          }}
+          contentFit="cover"
+          transition={recyclingKey ? 0 : 200}
+        />
+      )}
     </View>
   );
 
-  // Simple version for list items (no badge)
   if (!needsBadge) {
     if (onPress) {
-      return <Pressable onPress={onPress}>{imageElement}</Pressable>;
+      return <Pressable onPress={onPress}>{initialsElement}</Pressable>;
     }
-    return imageElement;
+    return initialsElement;
   }
 
-  // Version with badge for profile header
   const content = (
     <View style={[styles.wrapper, { width: pixelSize, height: pixelSize }]}>
-      <View style={[styles.imageContainer, { width: pixelSize, height: pixelSize, borderRadius: pixelSize / 2 }]}>
-        {imageElement}
-      </View>
+      {initialsElement}
       <View style={[styles.editBadge, { width: badgeSize, height: badgeSize, borderRadius: badgeSize / 2 }]}>
         <Camera size={badgeSize * 0.5} color={Colors.textInverse} />
       </View>
@@ -190,20 +180,12 @@ export function ContactAvatar({
   if (onPress) {
     return <Pressable onPress={onPress}>{content}</Pressable>;
   }
-
   return content;
 }
 
 const styles = StyleSheet.create({
   wrapper: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 6,
-  },
-  imageContainer: {
-    overflow: 'hidden',
+    ...Shadows.floating,
   },
   editBadge: {
     position: 'absolute',

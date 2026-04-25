@@ -31,12 +31,12 @@ export function BirthdayEditModal({
   const [yearFocused, setYearFocused] = useState(false);
 
   const dayInputStyle = useAnimatedStyle(() => ({
-    borderColor: withTiming(dayFocused ? Colors.primary : Colors.borderLight, { duration: 150 }),
+    borderColor: withTiming(dayFocused ? Colors.primary : Colors.hairline, { duration: 150 }),
     borderWidth: withTiming(dayFocused ? 2 : 1.5, { duration: 150 }),
   }));
 
   const yearInputStyle = useAnimatedStyle(() => ({
-    borderColor: withTiming(yearFocused ? Colors.primary : Colors.borderLight, { duration: 150 }),
+    borderColor: withTiming(yearFocused ? Colors.primary : Colors.hairline, { duration: 150 }),
     borderWidth: withTiming(yearFocused ? 2 : 1.5, { duration: 150 }),
   }));
 
@@ -201,9 +201,9 @@ const styles = StyleSheet.create({
   },
   dayInputContainer: {
     backgroundColor: Colors.surface,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: Colors.borderLight,
+    borderColor: Colors.hairline,
   },
   dayInput: {
     paddingVertical: 12,
@@ -217,11 +217,11 @@ const styles = StyleSheet.create({
   },
   monthButton: {
     backgroundColor: Colors.surface,
-    borderRadius: 12,
+    borderRadius: 14,
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderWidth: 1.5,
-    borderColor: Colors.borderLight,
+    borderColor: Colors.hairline,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -237,15 +237,15 @@ const styles = StyleSheet.create({
   monthPicker: {
     maxHeight: 200,
     backgroundColor: Colors.surface,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: Colors.borderLight,
+    borderColor: Colors.hairline,
     marginBottom: 16,
   },
   monthOption: {
     padding: 12,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
+    borderBottomColor: Colors.hairline,
   },
   monthOptionSelected: {
     backgroundColor: Colors.primaryLight,
@@ -263,9 +263,9 @@ const styles = StyleSheet.create({
   },
   yearInputContainer: {
     backgroundColor: Colors.surface,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: Colors.borderLight,
+    borderColor: Colors.hairline,
   },
   yearInput: {
     paddingVertical: 12,
@@ -287,10 +287,10 @@ const styles = StyleSheet.create({
   cancelButton: {
     paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 12,
+    borderRadius: 14,
     backgroundColor: Colors.surface,
     borderWidth: 2,
-    borderColor: Colors.border,
+    borderColor: Colors.hairline,
   },
   cancelButtonText: {
     color: Colors.primary,
@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
   saveButton: {
     paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 12,
+    borderRadius: 14,
     backgroundColor: Colors.primary,
   },
   saveButtonDisabled: {

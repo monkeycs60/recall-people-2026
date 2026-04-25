@@ -131,7 +131,7 @@ export const ExportDataSheet = forwardRef<BottomSheetModal>((_, ref) => {
       enableDynamicSizing
       backdropComponent={renderBackdrop}
       backgroundStyle={{ backgroundColor: Colors.surface }}
-      handleIndicatorStyle={{ backgroundColor: Colors.border }}
+      handleIndicatorStyle={{ backgroundColor: Colors.hairline }}
     >
       <BottomSheetView style={{ paddingBottom: 32 }}>
         <View className="px-4 pb-4 border-b border-surfaceHover">
@@ -149,7 +149,7 @@ export const ExportDataSheet = forwardRef<BottomSheetModal>((_, ref) => {
               flexDirection: 'row',
               alignItems: 'center',
               padding: 16,
-              borderRadius: 12,
+              borderRadius: 14,
               marginBottom: 12,
               backgroundColor: selectedFormat === 'json' ? Colors.primaryLight : Colors.background,
               borderWidth: selectedFormat === 'json' ? 1 : 0,
@@ -172,7 +172,7 @@ export const ExportDataSheet = forwardRef<BottomSheetModal>((_, ref) => {
               flexDirection: 'row',
               alignItems: 'center',
               padding: 16,
-              borderRadius: 12,
+              borderRadius: 14,
               backgroundColor: selectedFormat === 'csv' ? Colors.primaryLight : Colors.background,
               borderWidth: selectedFormat === 'csv' ? 1 : 0,
               borderColor: Colors.primary,

@@ -41,7 +41,7 @@ export const OptionPickerSheet = forwardRef<BottomSheetModal, OptionPickerSheetP
         enableDynamicSizing
         backdropComponent={renderBackdrop}
         backgroundStyle={{ backgroundColor: Colors.surface }}
-        handleIndicatorStyle={{ backgroundColor: Colors.border }}
+        handleIndicatorStyle={{ backgroundColor: Colors.hairline }}
       >
         <BottomSheetView style={styles.container}>
           <View style={styles.header}>
@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingBottom: Spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
+    borderBottomColor: Colors.hairline,
   },
   title: {
     color: Colors.textPrimary,

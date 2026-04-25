@@ -1,59 +1,74 @@
 import { Platform } from 'react-native';
 
 export const Colors = {
-  // Backgrounds - Pop Friendly
-  background: '#F8F7F4', // crème chaud
-  surface: '#FFFFFF', // cards, modals
+  // Backgrounds — Memory Pop
+  background: '#F4F2FB',
+  surface: '#FFFFFF',
   surfaceElevated: '#FFFFFF',
-  surfaceAlt: '#F1F0ED', // zones secondaires, séparateurs
+  surfaceAlt: '#EBE7F7',
 
-  // Text - Bold & Clear
-  textPrimary: '#1A1A1A',
-  textSecondary: '#57534E',
-  textMuted: '#A8A29E',
+  // Text — Ink hierarchy
+  textPrimary: '#1D1A2E',
+  textSecondary: '#524F66',
+  textMuted: '#8E8AA3',
   textInverse: '#FFFFFF',
 
-  // Primary - Violet Moderne (brand principal)
-  primary: '#8B5CF6', // violet vibrant
-  primaryLight: '#EDE9FE', // lavande pastel
-  primaryDark: '#7C3AED', // violet dark (hover)
+  // Primary — Indigo
+  primary: '#5B3DF5',
+  primaryLight: '#E8E2FE',
+  primaryDark: '#4328D0',
 
-  // Pastels Avatars
-  jaune: '#FEF3C7', // background avatar, tags
-  peche: '#FFEDD5', // background avatar, tags
-  menthe: '#D1FAE5', // background avatar, success
-  lavande: '#EDE9FE', // background avatar, tags
+  // Accent — Coral
+  accent: '#FF6B4A',
+  accentLight: '#FFE4DC',
 
-  // Couleurs sémantiques fonctionnelles
-  // Voice/Recording - Emerald
-  voice: '#10B981', // emerald - pour micro, enregistrement, "Speak"
-  voiceLight: '#D1FAE5', // emerald light
-  voiceDark: '#059669', // emerald dark (hover)
+  // Mint — Success / Confirm
+  mint: '#2ECC8B',
+  mintLight: '#D4F5E5',
 
-  // Calendar/Events - Amber
-  calendar: '#F59E0B', // amber - pour events, dates, "Upcoming"
-  calendarLight: '#FEF3C7', // amber light
-  calendarDark: '#D97706', // amber dark (hover)
+  // Amber — Calendar / Events
+  amber: '#F5A623',
+  amberLight: '#FFF0D6',
 
-  // AI/Assistant - Violet (= primary)
-  ai: '#8B5CF6', // violet - pour Assistant, FAB, features IA
-  aiLight: '#EDE9FE',
-  aiDark: '#7C3AED',
+  // Hairlines
+  hairline: 'rgba(29,26,46,0.08)',
+  hairlineStrong: 'rgba(29,26,46,0.16)',
 
   // Semantic (états)
-  success: '#10B981',
-  successLight: '#D1FAE5',
-  warning: '#F59E0B',
+  success: '#2ECC8B',
+  successLight: '#D4F5E5',
+  warning: '#F5A623',
   error: '#EF4444',
-  info: '#8B5CF6', // = violet
+  info: '#5B3DF5',
 
-  // Borders - Flat & Bold style
-  border: '#1A1A1A', // noir pour style flat & bold
-  borderLight: '#E7E5E4',
+  // Voice/Recording — kept for compatibility, now maps to primary
+  voice: '#2ECC8B',
+  voiceLight: '#D4F5E5',
+  voiceDark: '#059669',
+
+  // Calendar/Events — Amber
+  calendar: '#F5A623',
+  calendarLight: '#FFF0D6',
+  calendarDark: '#D97706',
+
+  // AI/Assistant — Violet (= primary)
+  ai: '#5B3DF5',
+  aiLight: '#E8E2FE',
+  aiDark: '#4328D0',
+
+  // Legacy color aliases — kept for backward compat
+  jaune: '#FFF0D6',
+  peche: '#FFE4DC',
+  menthe: '#D4F5E5',
+  lavande: '#E8E2FE',
+
+  // Borders
+  border: 'rgba(29,26,46,0.08)',
+  borderLight: 'rgba(29,26,46,0.08)',
 
   // Tab bar
-  tabIconDefault: '#A8A29E',
-  tabIconSelected: '#8B5CF6', // violet
+  tabIconDefault: '#8E8AA3',
+  tabIconSelected: '#5B3DF5',
 };
 
 export const Spacing = {
@@ -70,94 +85,164 @@ export const BorderRadius = {
   sm: 8,
   md: 12,
   lg: 16,
-  xl: 24,
+  xl: 20,
+  '2xl': 28,
   full: 9999,
 };
 
+export const Shadows = {
+  card: {
+    shadowColor: '#1D1A2E',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  elevated: {
+    shadowColor: '#1D1A2E',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  floating: {
+    shadowColor: '#1D1A2E',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.14,
+    shadowRadius: 28,
+    elevation: 8,
+  },
+  fab: {
+    shadowColor: '#5B3DF5',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.35,
+    shadowRadius: 18,
+    elevation: 6,
+  },
+};
+
 export const Fonts = {
-  // @deprecated - Playfair Display is being phased out for Pop art direction
   serif: {
     regular: 'PlayfairDisplay_400Regular',
     medium: 'PlayfairDisplay_500Medium',
     semibold: 'PlayfairDisplay_600SemiBold',
     bold: 'PlayfairDisplay_700Bold',
   },
-  // Plus Jakarta Sans - Primary font for Pop art direction
   sans: {
     regular: 'PlusJakartaSans_400Regular',
     medium: 'PlusJakartaSans_500Medium',
     semibold: 'PlusJakartaSans_600SemiBold',
     bold: 'PlusJakartaSans_700Bold',
   },
-  // System font fallback
   system: Platform.select({
     ios: 'System',
     android: 'Roboto',
     default: 'System',
   }),
+  mono: Platform.select({
+    ios: 'Menlo',
+    android: 'monospace',
+    default: 'monospace',
+  }),
 };
 
 export const Typography = {
-  displayLarge: {
-    fontFamily: Fonts.serif.bold,
-    fontSize: 32,
-    lineHeight: 40,
+  display: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 30,
+    letterSpacing: -0.8,
+    lineHeight: 33,
   },
-  displayMedium: {
-    fontFamily: Fonts.serif.semibold,
+  heroName: {
+    fontFamily: Fonts.sans.bold,
     fontSize: 28,
-    lineHeight: 36,
-  },
-  headlineLarge: {
-    fontFamily: Fonts.serif.semibold,
-    fontSize: 24,
+    letterSpacing: -0.8,
     lineHeight: 32,
   },
-  headlineMedium: {
-    fontFamily: Fonts.serif.medium,
-    fontSize: 20,
-    lineHeight: 28,
+  title: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 18,
+    letterSpacing: -0.3,
+    lineHeight: 23,
   },
   titleLarge: {
-    fontSize: 18,
-    fontWeight: '600' as const,
-    lineHeight: 24,
+    fontFamily: Fonts.sans.bold,
+    fontSize: 22,
+    letterSpacing: -0.5,
+    lineHeight: 29,
   },
   titleMedium: {
+    fontFamily: Fonts.sans.semibold,
     fontSize: 16,
-    fontWeight: '500' as const,
+    letterSpacing: -0.2,
     lineHeight: 22,
   },
   bodyLarge: {
+    fontFamily: Fonts.sans.semibold,
     fontSize: 16,
-    fontWeight: '400' as const,
+    letterSpacing: -0.2,
     lineHeight: 24,
   },
   bodyMedium: {
+    fontFamily: Fonts.sans.regular,
     fontSize: 14,
-    fontWeight: '400' as const,
-    lineHeight: 20,
+    lineHeight: 21,
   },
   bodySmall: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 13,
+    lineHeight: 20,
+  },
+  caption: {
+    fontFamily: Fonts.sans.semibold,
     fontSize: 12,
-    fontWeight: '400' as const,
-    lineHeight: 16,
+    lineHeight: 17,
+  },
+  meta: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 11,
+    letterSpacing: 1.2,
+    lineHeight: 14,
+    textTransform: 'uppercase' as const,
+  },
+  // Legacy aliases
+  displayLarge: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 30,
+    letterSpacing: -0.8,
+    lineHeight: 33,
+  },
+  displayMedium: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 28,
+    letterSpacing: -0.8,
+    lineHeight: 32,
+  },
+  headlineLarge: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 24,
+    lineHeight: 31,
+  },
+  headlineMedium: {
+    fontFamily: Fonts.sans.semibold,
+    fontSize: 20,
+    lineHeight: 28,
   },
   labelLarge: {
+    fontFamily: Fonts.sans.semibold,
     fontSize: 14,
-    fontWeight: '500' as const,
     lineHeight: 20,
   },
   labelMedium: {
+    fontFamily: Fonts.sans.semibold,
     fontSize: 12,
-    fontWeight: '500' as const,
     lineHeight: 16,
   },
   labelSmall: {
-    fontSize: 10,
-    fontWeight: '500' as const,
+    fontFamily: Fonts.sans.bold,
+    fontSize: 10.5,
     lineHeight: 14,
     textTransform: 'uppercase' as const,
-    letterSpacing: 0.5,
+    letterSpacing: 1,
   },
 };

@@ -145,9 +145,13 @@
     "searchPlaceholder": "Who are you looking for?",
     "filterPlaceholder": "Search a contact...",
     "askHint": "Ask the AI a question",
-    "noContacts": "Talk about this person, your relationship, their projects... We'll take care of the rest.",
+    "noContacts": "No one here yet.",
     "noContactsDescription": "Create your first note to get started.",
-    "createFirstNote": "Create your first note",
+    "createFirstNote": "Record your first note",
+    "people": "people",
+    "needFollowUp": "need a follow-up",
+    "allGroup": "All",
+    "recentSection": "Recent",
     "noContactsInGroup": "No contacts in this group",
     "noContactsInGroupHint": "Add contacts to this group from their profile page.",
     "addContact": "Add a contact",
@@ -173,6 +177,7 @@
     "lastContact": "Last contact",
     "addNote": "What's new with {{firstName}}?",
     "addNoteButton": {
+      "label": "New note",
       "title": "Add note about {{firstName}}",
       "voiceOption": "Record a voice note",
       "voiceDescription": "Talk about {{firstName}} using your microphone",
@@ -668,7 +673,10 @@
     "unlockWith": "Unlock with Pro:",
     "feature1": "Unlimited contacts",
     "feature2": "3-minute recordings (vs 1 min)",
-    "feature3": "AI-powered search",
+    "feature3": "Unlimited AI avatar generation",
+    "feature4": "Unlimited AI assistant",
+    "feature5": "Smart reminders & weekly digest",
+    "feature6": "Export data anytime",
     "premiumTitle": "You're a Pro!",
     "premiumSubtitle": "Thanks for supporting Recall People",
     "unlimitedContacts": "Unlimited contacts",
@@ -843,7 +851,7 @@
     },
     "processing": "Thinking...",
     "newQuestion": "Ask another question...",
-    "quotaExhausted": "Free trials exhausted",
+    "quotaExhausted": "Monthly AI quota exhausted",
     "quotaRemaining": "{{used}}/{{limit}} this month",
     "upgradeHint": "Upgrade to Premium for unlimited access",
     "history": {
@@ -877,11 +885,6 @@
     "weeklyDigestDescription": "Every Monday, a recap of your week: upcoming events and contacts to reach out to",
     "postEventFollowUp": "Post-event follow-up",
     "postEventFollowUpDescription": "Get reminded to check in after an event has passed"
-  },
-  "trial": {
-    "daysRemaining": "Free trial — {{count}} day(s) remaining",
-    "expired": "Trial ended",
-    "upgrade": "Upgrade to Pro"
   },
   "digest": {
     "body": "{{events}} event(s), {{contacts}} contact(s) to catch up with"

@@ -25,7 +25,7 @@ export function EmailEditModal({ visible, initialValue, onSave, onClose }: Email
       ? Colors.error
       : isFocused
         ? Colors.primary
-        : Colors.borderLight;
+        : Colors.hairline;
     const borderWidth = error || isFocused ? 2 : 1.5;
 
     return {
@@ -119,9 +119,9 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     backgroundColor: Colors.surface,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: Colors.borderLight,
+    borderColor: Colors.hairline,
     marginBottom: 8,
   },
   input: {
@@ -150,10 +150,10 @@ const styles = StyleSheet.create({
   cancelButton: {
     paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 12,
+    borderRadius: 14,
     backgroundColor: Colors.surface,
     borderWidth: 2,
-    borderColor: Colors.border,
+    borderColor: Colors.hairline,
   },
   cancelButtonText: {
     color: Colors.primary,
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
   saveButton: {
     paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 12,
+    borderRadius: 14,
     backgroundColor: Colors.primary,
   },
   saveButtonText: {

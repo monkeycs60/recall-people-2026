@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, RotateCcw, Trash2, ChevronDown, ChevronUp, Edit3 } from 'lucide-react-native';
 import { HotTopic } from '@/types';
-import { Colors } from '@/constants/theme';
+import { Colors, Shadows } from '@/constants/theme';
 
 const EMPTY_NEWS_ILLUSTRATION = require('@/assets/ai-assets/empty-news.png');
 
@@ -311,10 +311,10 @@ const styles = StyleSheet.create({
   emptyState: {
     backgroundColor: `${Colors.surface}50`,
     padding: 20,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: Colors.border,
+    borderColor: Colors.hairline,
     alignItems: 'center',
   },
   emptyStateIllustration: {
@@ -338,7 +338,7 @@ const styles = StyleSheet.create({
   editCard: {
     backgroundColor: Colors.surface,
     padding: 16,
-    borderRadius: 12,
+    borderRadius: 14,
     marginBottom: 8,
   },
   editInput: {
@@ -363,7 +363,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 10,
     borderRadius: 8,
-    backgroundColor: Colors.surfaceHover,
+    backgroundColor: Colors.surfaceAlt,
     alignItems: 'center',
   },
   cancelButtonText: {
@@ -392,15 +392,11 @@ const styles = StyleSheet.create({
   resolveCard: {
     backgroundColor: Colors.surface,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.hairline,
     padding: 20,
     borderRadius: 16,
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    ...Shadows.elevated,
   },
   resolveCardTitle: {
     fontSize: 18,
@@ -426,13 +422,13 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
     paddingVertical: 12,
     paddingHorizontal: 14,
-    borderRadius: 12,
+    borderRadius: 14,
     fontSize: 15,
     color: Colors.textPrimary,
     marginBottom: 12,
     minHeight: 80,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.hairline,
     textAlignVertical: 'top',
   },
   resolveHint: {
@@ -443,7 +439,7 @@ const styles = StyleSheet.create({
   },
   topicCard: {
     backgroundColor: Colors.surface,
-    borderRadius: 12,
+    borderRadius: 14,
     marginBottom: 8,
     overflow: 'hidden',
   },
@@ -532,7 +528,7 @@ const styles = StyleSheet.create({
   smallCancelButton: {
     paddingVertical: 6,
     paddingHorizontal: 12,
-    backgroundColor: Colors.surfaceHover,
+    backgroundColor: Colors.surfaceAlt,
     borderRadius: 6,
   },
   smallCancelText: {

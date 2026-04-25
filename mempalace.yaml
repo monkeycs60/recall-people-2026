@@ -1,0 +1,28 @@
+wing: recall_people_2026
+rooms:
+- name: landing_page
+  description: Files from landing-page/
+- name: screenshot_designer
+  description: Files from screenshot-designer/
+- name: screenshots
+  description: Files from screenshots/
+- name: documentation
+  description: Files from docs/
+- name: data
+  description: Files from data/
+- name: backend
+  description: Files from backend/
+- name: openspec
+  description: Files from openspec/
+- name: frontend
+  description: Files from frontend/
+- name: planning
+  description: Files from specs/
+- name: scripts
+  description: Files from scripts/
+- name: design
+  description: Files from assets/
+- name: configuration
+  description: Files from config/
+- name: general
+  description: Files that don't fit other rooms

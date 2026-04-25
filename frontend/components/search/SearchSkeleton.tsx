@@ -9,7 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useEffect, useState } from 'react';
 import { Brain, Sparkles, Search } from 'lucide-react-native';
-import { Colors } from '@/constants/theme';
+import { Colors, Shadows } from '@/constants/theme';
 
 const LOADING_MESSAGES = [
   { text: 'Analyse de vos contacts...', icon: Search },
@@ -45,7 +45,7 @@ function SkeletonLine({ width, delay }: { width: DimensionValue; delay: number }
         {
           width,
           height: 16,
-          backgroundColor: Colors.border,
+          backgroundColor: Colors.hairline,
           borderRadius: 9999,
         },
       ]}
@@ -155,11 +155,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
+    ...Shadows.card,
   },
   skeletonHeader: {
     flexDirection: 'row',

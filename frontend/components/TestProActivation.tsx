@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Crown, CheckCircle2, AlertCircle } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Colors } from '@/constants/theme';
+import { Colors, Fonts } from '@/constants/theme';
 import { useSubscriptionStore } from '@/stores/subscription-store';
 import { checkProWhitelist } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth-store';
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 20,
-    backgroundColor: Colors.surfaceHover,
+    backgroundColor: Colors.surfaceAlt,
   },
   loadingContainer: {
     flex: 1,
@@ -210,8 +210,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    fontFamily: 'PlayfairDisplay_700Bold',
+    fontFamily: Fonts.sans.bold,
     fontSize: 28,
+    letterSpacing: -0.8,
     color: Colors.textPrimary,
     textAlign: 'center',
     marginBottom: 8,
@@ -267,7 +268,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     paddingVertical: 16,
     paddingHorizontal: 48,
-    borderRadius: 12,
+    borderRadius: 14,
     minWidth: 200,
     alignItems: 'center',
   },

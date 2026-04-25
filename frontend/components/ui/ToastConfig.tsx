@@ -49,9 +49,9 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.md,
     marginHorizontal: Spacing.md,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: Colors.border,
+    borderColor: Colors.hairline,
     gap: Spacing.sm,
   },
   successContainer: {

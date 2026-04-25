@@ -252,7 +252,7 @@ export function ProfileCard({ facts, onEditFact, onDeleteFact, highlightId }: Pr
 const styles = StyleSheet.create({
   factCard: {
     backgroundColor: Colors.surface,
-    borderRadius: 12,
+    borderRadius: 14,
     overflow: 'hidden',
     marginBottom: 8,
   },
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingBottom: 12,
     borderTopWidth: 1,
-    borderTopColor: Colors.borderLight,
+    borderTopColor: Colors.hairline,
     paddingTop: 8,
   },
   expandedItem: {
@@ -352,10 +352,10 @@ const styles = StyleSheet.create({
   emptyState: {
     backgroundColor: `${Colors.surface}50`,
     padding: 16,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: Colors.border,
+    borderColor: Colors.hairline,
   },
   emptyStateText: {
     fontSize: 14,
@@ -367,7 +367,7 @@ const styles = StyleSheet.create({
   },
   otherCard: {
     backgroundColor: Colors.surface,
-    borderRadius: 12,
+    borderRadius: 14,
     overflow: 'hidden',
   },
   otherContent: {

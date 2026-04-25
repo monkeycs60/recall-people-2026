@@ -18,7 +18,7 @@ export function PhoneEditModal({ visible, initialValue, onSave, onClose }: Phone
   const [isFocused, setIsFocused] = useState(false);
 
   const inputContainerStyle = useAnimatedStyle(() => ({
-    borderColor: withTiming(isFocused ? Colors.primary : Colors.borderLight, { duration: 150 }),
+    borderColor: withTiming(isFocused ? Colors.primary : Colors.hairline, { duration: 150 }),
     borderWidth: withTiming(isFocused ? 2 : 1.5, { duration: 150 }),
   }));
 
@@ -96,9 +96,9 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     backgroundColor: Colors.surface,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: Colors.borderLight,
+    borderColor: Colors.hairline,
     marginBottom: 20,
   },
   input: {
@@ -121,10 +121,10 @@ const styles = StyleSheet.create({
   cancelButton: {
     paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 12,
+    borderRadius: 14,
     backgroundColor: Colors.surface,
     borderWidth: 2,
-    borderColor: Colors.border,
+    borderColor: Colors.hairline,
   },
   cancelButtonText: {
     color: Colors.primary,
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
   saveButton: {
     paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 12,
+    borderRadius: 14,
     backgroundColor: Colors.primary,
   },
   saveButtonText: {

@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.secondaryLight,
     padding: 16,
-    borderRadius: 12,
+    borderRadius: 14,
     marginBottom: 16,
     borderLeftWidth: 4,
     borderLeftColor: Colors.secondary,
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   loadingContainer: {
     backgroundColor: `${Colors.surface}80`,
     padding: 16,
-    borderRadius: 12,
+    borderRadius: 14,
     marginBottom: 16,
   },
   loadingContent: {
@@ -118,11 +118,11 @@ const styles = StyleSheet.create({
   emptyContainer: {
     backgroundColor: `${Colors.surface}50`,
     padding: 16,
-    borderRadius: 12,
+    borderRadius: 14,
     marginBottom: 16,
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: Colors.border,
+    borderColor: Colors.hairline,
   },
   emptyText: {
     fontSize: 14,

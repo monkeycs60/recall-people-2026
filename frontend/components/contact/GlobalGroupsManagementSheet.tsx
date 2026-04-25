@@ -108,7 +108,7 @@ export const GlobalGroupsManagementSheet = forwardRef<BottomSheetModal>(
         android_keyboardInputMode="adjustResize"
         backdropComponent={renderBackdrop}
         backgroundStyle={{ backgroundColor: Colors.surface }}
-        handleIndicatorStyle={{ backgroundColor: Colors.border }}
+        handleIndicatorStyle={{ backgroundColor: Colors.hairline }}
       >
         <View style={styles.header}>
           <Text style={styles.title}>{t('contact.groupsSheet.manageGroupsTitle')}</Text>
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: Colors.hairline,
   },
   title: {
     fontSize: 18,
@@ -239,8 +239,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.surface,
     borderWidth: 1.5,
-    borderColor: Colors.borderLight,
-    borderRadius: 12,
+    borderColor: Colors.hairline,
+    borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 15,
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
   createButton: {
     width: 44,
     height: 44,
-    borderRadius: 12,
+    borderRadius: 14,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',

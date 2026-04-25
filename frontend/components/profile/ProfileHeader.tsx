@@ -1,7 +1,7 @@
-import { View, Text, StyleSheet } from 'react-native';
-import { Check } from 'lucide-react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { Check, Pencil } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { Colors } from '@/constants/theme';
+import { Colors, Shadows, Fonts } from '@/constants/theme';
 import { UserAvatar } from './UserAvatar';
 
 type ProfileHeaderProps = {
@@ -36,7 +36,7 @@ export function ProfileHeader({
       <View style={styles.avatarWrapper}>
         <UserAvatar
           name={name}
-          size={64}
+          size={56}
           avatarUrl={avatarUrl}
           cacheKey={avatarCacheKey}
           onPress={onAvatarPress}
@@ -55,6 +55,11 @@ export function ProfileHeader({
           </View>
         )}
       </View>
+      {onAvatarPress && (
+        <Pressable style={styles.editButton} onPress={onAvatarPress}>
+          <Pencil size={14} color={Colors.primary} />
+        </Pressable>
+      )}
     </View>
   );
 }
@@ -62,41 +67,44 @@ export function ProfileHeader({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.surface,
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 24,
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 22,
     flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
+    gap: 14,
+    ...Shadows.card,
   },
-  avatarWrapper: {
-    marginRight: 16,
-  },
+  avatarWrapper: {},
   infoContainer: {
     flex: 1,
   },
   name: {
-    fontSize: 20,
-    fontWeight: '600',
+    fontFamily: Fonts.sans.bold,
+    fontSize: 18,
     color: Colors.textPrimary,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   email: {
-    fontSize: 14,
-    color: Colors.textSecondary,
+    fontSize: 13,
+    color: Colors.textMuted,
   },
   providerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 6,
   },
   providerText: {
-    fontSize: 13,
+    fontSize: 12,
     color: Colors.success,
     marginLeft: 6,
+  },
+  editButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
