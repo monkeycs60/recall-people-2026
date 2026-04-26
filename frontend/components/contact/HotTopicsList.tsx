@@ -318,9 +318,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyStateIllustration: {
-    width: 140,
-    height: 110,
-    marginBottom: 16,
+    width: 112,
+    height: 112,
+    borderRadius: 22,
+    marginBottom: 18,
   },
   emptyStateTitle: {
     fontSize: 15,
