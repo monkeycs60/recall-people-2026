@@ -134,6 +134,7 @@ authRoutes.post('/register', rateLimiters.register, async (c) => {
 			accessToken: tokens.accessToken,
 			refreshToken: tokens.refreshToken,
 			expiresAt: tokens.accessTokenExpiresAt,
+			isNewUser: true,
 		});
 	} catch (error) {
 		console.error('Register error:', error);
@@ -246,6 +247,7 @@ authRoutes.post('/login', rateLimiters.login, async (c) => {
 			accessToken: tokens.accessToken,
 			refreshToken: tokens.refreshToken,
 			expiresAt: tokens.accessTokenExpiresAt,
+			isNewUser: false,
 		});
 	} catch (error) {
 		console.error('Login error:', error);
@@ -312,6 +314,7 @@ authRoutes.post('/google', async (c) => {
 		}
 
 		const prisma = getPrisma(c.env.DATABASE_URL);
+		let isNewUser = false;
 
 		// Find or create user
 		let user = await prisma.user.findUnique({
@@ -335,6 +338,7 @@ authRoutes.post('/google', async (c) => {
 				},
 				include: { accounts: true },
 			});
+			isNewUser = true;
 		} else {
 			// Check if user has a google account, if not create one
 			const hasGoogleAccount = user.accounts.some((account) => account.providerId === 'google');
@@ -390,6 +394,7 @@ authRoutes.post('/google', async (c) => {
 			accessToken: tokens.accessToken,
 			refreshToken: tokens.refreshToken,
 			expiresAt: tokens.accessTokenExpiresAt,
+			isNewUser,
 		});
 	} catch (error) {
 		console.error('Google auth error:', error);
@@ -442,6 +447,7 @@ authRoutes.post('/apple', async (c) => {
 		}
 
 		const prisma = getPrisma(c.env.DATABASE_URL);
+		let isNewUser = false;
 
 		// First, try to find user by Apple account ID (sub claim)
 		let existingAccount = await prisma.account.findFirst({
@@ -484,6 +490,7 @@ authRoutes.post('/apple', async (c) => {
 					},
 					include: { accounts: true },
 				});
+				isNewUser = true;
 			} else {
 				// User exists, link Apple account
 				const hasAppleAccount = user.accounts.some((account) => account.providerId === 'apple');
@@ -534,6 +541,7 @@ authRoutes.post('/apple', async (c) => {
 			accessToken: tokens.accessToken,
 			refreshToken: tokens.refreshToken,
 			expiresAt: tokens.accessTokenExpiresAt,
+			isNewUser,
 		});
 	} catch (error) {
 		console.error('Apple auth error:', error);
@@ -660,6 +668,7 @@ authRoutes.post('/refresh', rateLimiters.login, async (c) => {
 			accessToken: tokens.accessToken,
 			refreshToken: tokens.refreshToken,
 			expiresAt: tokens.accessTokenExpiresAt,
+			isNewUser: false,
 		});
 	} catch (error) {
 		console.error('Refresh token error:', error);

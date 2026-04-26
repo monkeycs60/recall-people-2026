@@ -17,6 +17,7 @@ type AuthResponse = {
   accessToken: string;
   refreshToken: string;
   expiresAt: number;
+  isNewUser?: boolean;
 };
 
 // Store token

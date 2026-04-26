@@ -1,17 +1,25 @@
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { login as authLogin, register as authRegister, loginWithGoogle as authLoginWithGoogle, loginWithApple as authLoginWithApple } from '@/lib/auth';
+import { shouldResetFirstRunSettings } from '@/lib/auth-onboarding';
 import { useAuthStore } from '@/stores/auth-store';
+import { useSettingsStore } from '@/stores/settings-store';
 import { useGoogleAuth } from './useGoogleAuth';
 import { useAppleAuth } from './useAppleAuth';
 
 export const useAuth = () => {
   const router = useRouter();
   const { setUser, logout: storeLogout } = useAuthStore();
+  const { setHasSeenOnboarding, setHasAcceptedAIConsent } = useSettingsStore();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { promptAsync: googlePromptAsync, isReady: isGoogleReady } = useGoogleAuth();
   const { promptAsync: applePromptAsync, isAvailable: isAppleAvailable } = useAppleAuth();
+
+  const resetFirstRunSettings = () => {
+    setHasSeenOnboarding(false);
+    setHasAcceptedAIConsent(false);
+  };
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
@@ -35,6 +43,9 @@ export const useAuth = () => {
 
     try {
       const result = await authRegister(email, password, name);
+      if (shouldResetFirstRunSettings(result, { assumeNewUserWhenMissing: true })) {
+        resetFirstRunSettings();
+      }
       setUser(result.user);
       router.replace('/(tabs)');
     } catch (err) {
@@ -62,6 +73,9 @@ export const useAuth = () => {
       }
 
       const result = await authLoginWithGoogle(googleResult.idToken);
+      if (shouldResetFirstRunSettings(result)) {
+        resetFirstRunSettings();
+      }
       setUser(result.user);
       router.replace('/(tabs)');
     } catch (err) {
@@ -84,6 +98,9 @@ export const useAuth = () => {
       }
 
       const result = await authLoginWithApple(appleResult.identityToken, appleResult.fullName);
+      if (shouldResetFirstRunSettings(result)) {
+        resetFirstRunSettings();
+      }
       setUser(result.user);
       router.replace('/(tabs)');
     } catch (err) {
