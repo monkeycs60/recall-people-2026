@@ -640,21 +640,21 @@
       },
       "localStorage": {
         "title": "Stockage 100% local",
-        "description": "Toutes tes données de contacts, notes, faits et souvenirs sont stockées exclusivement sur ton appareil dans une base de données locale sécurisée. Tes données ne quittent jamais ton téléphone sans ton action explicite."
+        "description": "Tes données de contacts, notes, faits et souvenirs sont stockées localement sur ton appareil. Elles ne quittent ton téléphone que lorsque tu utilises des fonctions en ligne comme l'IA, la connexion ou l'abonnement."
       },
       "dataSovereignty": {
         "title": "Souveraineté des données",
-        "description": "Tu as la propriété complète de tes données. Exporte-les à tout moment en JSON ou CSV. Supprime-les quand tu veux. Pas de cloud, pas de data mining, pas d'accès tiers."
+        "description": "Tu as la propriété complète de tes données. Exporte-les à tout moment en JSON ou CSV. Supprime-les quand tu veux. Pas de cloud de contacts, pas de data mining."
       },
       "aiProcessing": {
         "title": "Traitement IA",
-        "description": "La transcription vocale (Groq Whisper) et l'analyse de texte (Cerebras) sont traitées via des API sécurisées uniquement lors de l'enregistrement ou des questions. La génération d'avatars utilise Google Gemini. Le contenu traité est stocké localement et n'est jamais utilisé pour entraîner des modèles IA."
+        "description": "La transcription vocale (Groq Whisper) et l'analyse de texte (Cerebras) sont traitées via des API sécurisées uniquement lors de l'enregistrement ou des questions. La génération d'avatars utilise Google Gemini. Nous configurons les fournisseurs IA pour que ton contenu ne serve pas à entraîner des modèles."
       },
       "contact": {
         "title": "Nous contacter",
         "description": "Des questions sur ta vie privée ou tes données ? On est là pour t'aider."
       },
-      "lastUpdated": "Dernière mise à jour : Mars 2026"
+      "lastUpdated": "Dernière mise à jour : Avril 2026"
     }
   },
   "languagePicker": {
@@ -695,7 +695,7 @@
     },
     "privacy": {
       "title": "Tes données restent sur ton téléphone",
-      "description": "Rien n'est stocké sur nos serveurs. Tes notes sont privées, toujours.",
+      "description": "Tes notes restent locales. L'IA n'est utilisée que quand tu demandes un traitement.",
       "local": "local"
     },
     "redoTour": "Refaire le tour guidé"
@@ -895,7 +895,7 @@
     "providerAvatar": "Génération d'avatar",
     "protections": "Tes protections",
     "noTraining": "Tes données ne sont jamais utilisées pour entraîner des modèles IA",
-    "noStorage": "Les données sont traitées en temps réel et non stockées par les fournisseurs IA",
+    "noStorage": "Les fournisseurs IA traitent les données pour répondre, pas pour entraîner des modèles",
     "localFirst": "Tous tes contacts et notes restent sur ton appareil",
     "readPrivacyPolicy": "Lire notre politique de confidentialité",
     "accept": "Je comprends et j'accepte"

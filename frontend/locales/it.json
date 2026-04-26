@@ -604,21 +604,21 @@
       },
       "localStorage": {
         "title": "Archiviazione 100% locale",
-        "description": "Tutti i tuoi dati di contatto, note, fatti e ricordi sono archiviati esclusivamente sul tuo dispositivo in un database locale sicuro. I tuoi dati non lasciano mai il tuo telefono senza la tua azione esplicita."
+        "description": "I tuoi dati di contatto, note, fatti e ricordi sono archiviati localmente sul tuo dispositivo. Lasciano il telefono solo quando usi funzioni online come IA, accesso o abbonamenti."
       },
       "dataSovereignty": {
         "title": "Sovranita dei dati",
-        "description": "Hai la proprieta completa dei tuoi dati. Esportali in qualsiasi momento in formato JSON o CSV. Eliminali quando vuoi. Nessun cloud storage, nessun data mining, nessun accesso di terze parti."
+        "description": "Hai la proprieta completa dei tuoi dati. Esportali in qualsiasi momento in formato JSON o CSV. Eliminali quando vuoi. Nessun cloud dei contatti, nessun data mining."
       },
       "aiProcessing": {
         "title": "Elaborazione IA",
-        "description": "La trascrizione vocale (Groq Whisper) e l'analisi del testo (Cerebras) vengono elaborate tramite API sicure solo durante la registrazione o le domande. La generazione di avatar utilizza Google Gemini. Il contenuto elaborato viene archiviato localmente e non viene mai utilizzato per addestrare modelli IA."
+        "description": "La trascrizione vocale (Groq Whisper) e l'analisi del testo (Cerebras) vengono elaborate tramite API sicure solo durante la registrazione o le domande. La generazione di avatar utilizza Google Gemini. Configuriamo i fornitori IA affinche il tuo contenuto non venga usato per addestrare modelli."
       },
       "contact": {
         "title": "Contattaci",
         "description": "Domande sulla tua privacy o sui tuoi dati? Siamo qui per aiutarti."
       },
-      "lastUpdated": "Ultimo aggiornamento: Marzo 2026"
+      "lastUpdated": "Ultimo aggiornamento: Aprile 2026"
     }
   },
   "languagePicker": {
@@ -659,7 +659,7 @@
     },
     "privacy": {
       "title": "I tuoi dati restano sul tuo telefono",
-      "description": "Nulla viene salvato sui nostri server. Le tue note sono private, sempre.",
+      "description": "Le tue note restano locali. L'IA viene usata solo quando richiedi elaborazione.",
       "local": "locale"
     },
     "redoTour": "Ripeti tour guidato"
@@ -905,7 +905,7 @@
     "providerAvatar": "Generazione avatar",
     "protections": "Le tue protezioni",
     "noTraining": "I tuoi dati non vengono mai usati per addestrare modelli di IA",
-    "noStorage": "I dati vengono elaborati in tempo reale e non memorizzati dai fornitori di IA",
+    "noStorage": "I fornitori IA elaborano i dati per restituire risultati, non per addestrare modelli",
     "localFirst": "Tutti i tuoi contatti e note restano sul tuo dispositivo",
     "readPrivacyPolicy": "Leggi la nostra informativa sulla privacy",
     "accept": "Capisco e accetto"

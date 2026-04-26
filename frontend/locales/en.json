@@ -604,21 +604,21 @@
       },
       "localStorage": {
         "title": "100% Local Storage",
-        "description": "All your contact data, notes, facts, and memories are stored exclusively on your device in a secure local database. Your data never leaves your phone without your explicit action."
+        "description": "Your contact data, notes, facts, and memories are stored locally on your device. They only leave your phone when you use online features such as AI processing, login, or subscriptions."
       },
       "dataSovereignty": {
         "title": "Data Sovereignty",
-        "description": "You have complete ownership of your data. Export it anytime in JSON or CSV format. Delete it whenever you want. No cloud storage, no data mining, no third-party access."
+        "description": "You have complete ownership of your data. Export it anytime in JSON or CSV format. Delete it whenever you want. No contact cloud, no data mining."
       },
       "aiProcessing": {
         "title": "AI Processing",
-        "description": "Voice transcription (Groq Whisper) and text analysis (Cerebras) are processed through secure APIs only when you record or ask questions. Avatar generation uses Google Gemini. The processed content is stored locally and is never used to train AI models."
+        "description": "Voice transcription (Groq Whisper) and text analysis (Cerebras) are processed through secure APIs only when you record or ask questions. Avatar generation uses Google Gemini. We configure AI providers so your content is not used to train models."
       },
       "contact": {
         "title": "Contact Us",
         "description": "Questions about your privacy or data? We're here to help."
       },
-      "lastUpdated": "Last updated: March 2026"
+      "lastUpdated": "Last updated: April 2026"
     }
   },
   "languagePicker": {
@@ -659,7 +659,7 @@
     },
     "privacy": {
       "title": "Your data stays on your phone",
-      "description": "Nothing is stored on our servers. Your notes are private, always.",
+      "description": "Your notes live locally. AI is used only when you ask for processing.",
       "local": "local"
     },
     "redoTour": "Redo guided tour"
@@ -905,7 +905,7 @@
     "providerAvatar": "Avatar generation",
     "protections": "Your protections",
     "noTraining": "Your data is never used to train AI models",
-    "noStorage": "Data is processed in real-time and not stored by AI providers",
+    "noStorage": "AI providers process data to return results, not to train models",
     "localFirst": "All your contacts and notes stay on your device",
     "readPrivacyPolicy": "Read our full Privacy Policy",
     "accept": "I Understand and Agree"

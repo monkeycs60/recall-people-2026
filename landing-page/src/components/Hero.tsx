@@ -70,7 +70,7 @@ export default function Hero() {
 
             <p className="text-sm text-text-muted max-w-md mx-auto">
               Privacy-first: AI processing with 100% local storage. <br className="hidden md:block"/>
-              Your data never leaves your device.
+              Your notes stay local unless you choose AI processing.
             </p>
           </motion.div>
       </div>

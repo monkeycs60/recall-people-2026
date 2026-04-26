@@ -604,21 +604,21 @@
       },
       "localStorage": {
         "title": "100% lokale Speicherung",
-        "description": "Alle deine Kontaktdaten, Notizen, Fakten und Erinnerungen werden ausschließlich auf deinem Gerät in einer sicheren lokalen Datenbank gespeichert. Deine Daten verlassen niemals dein Telefon ohne deine explizite Aktion."
+        "description": "Deine Kontaktdaten, Notizen, Fakten und Erinnerungen werden lokal auf deinem Gerät gespeichert. Sie verlassen dein Telefon nur, wenn du Online-Funktionen wie KI-Verarbeitung, Anmeldung oder Abos nutzt."
       },
       "dataSovereignty": {
         "title": "Datensouveränität",
-        "description": "Du hast das vollständige Eigentum an deinen Daten. Exportiere sie jederzeit im JSON- oder CSV-Format. Lösche sie wann du willst. Kein Cloud-Speicher, kein Data Mining, kein Zugriff Dritter."
+        "description": "Du hast das vollständige Eigentum an deinen Daten. Exportiere sie jederzeit im JSON- oder CSV-Format. Lösche sie wann du willst. Keine Kontakt-Cloud, kein Data Mining."
       },
       "aiProcessing": {
         "title": "KI-Verarbeitung",
-        "description": "Sprachtranskription (Groq Whisper) und Textanalyse (Cerebras) werden nur bei Aufnahmen oder Fragen über sichere APIs verarbeitet. Die Avatar-Erstellung nutzt Google Gemini. Der verarbeitete Inhalt wird lokal gespeichert und niemals zum Training von KI-Modellen verwendet."
+        "description": "Sprachtranskription (Groq Whisper) und Textanalyse (Cerebras) werden nur bei Aufnahmen oder Fragen über sichere APIs verarbeitet. Die Avatar-Erstellung nutzt Google Gemini. Wir konfigurieren KI-Anbieter so, dass deine Inhalte nicht zum Trainieren von Modellen verwendet werden."
       },
       "contact": {
         "title": "Kontaktiere uns",
         "description": "Fragen zu deinem Datenschutz oder deinen Daten? Wir sind hier, um zu helfen."
       },
-      "lastUpdated": "Zuletzt aktualisiert: März 2026"
+      "lastUpdated": "Zuletzt aktualisiert: April 2026"
     }
   },
   "languagePicker": {
@@ -659,7 +659,7 @@
     },
     "privacy": {
       "title": "Deine Daten bleiben auf deinem Handy",
-      "description": "Nichts wird auf unseren Servern gespeichert. Deine Notizen sind privat, immer.",
+      "description": "Deine Notizen bleiben lokal. KI wird nur genutzt, wenn du Verarbeitung anforderst.",
       "local": "lokal"
     },
     "redoTour": "Geführte Tour wiederholen"
@@ -905,7 +905,7 @@
     "providerAvatar": "Avatar-Erstellung",
     "protections": "Dein Schutz",
     "noTraining": "Deine Daten werden niemals zum Training von KI-Modellen verwendet",
-    "noStorage": "Daten werden in Echtzeit verarbeitet und nicht von KI-Anbietern gespeichert",
+    "noStorage": "KI-Anbieter verarbeiten Daten, um Ergebnisse zu liefern, nicht um Modelle zu trainieren",
     "localFirst": "Alle deine Kontakte und Notizen bleiben auf deinem Gerät",
     "readPrivacyPolicy": "Unsere vollständige Datenschutzrichtlinie lesen",
     "accept": "Ich verstehe und stimme zu"
