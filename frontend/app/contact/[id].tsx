@@ -375,6 +375,11 @@ export default function ContactDetailScreen() {
     );
   }
 
+  const hasNotes = contact.notes.length > 0;
+  const hasSummaryContent = hasNotes || Boolean(contact.aiSummary) || isWaitingForSummary;
+  const hasSuggestedQuestionsContent =
+    hasNotes || Boolean(contact.suggestedQuestions?.length) || isWaitingForSuggestedQuestions;
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -480,15 +485,17 @@ export default function ContactDetailScreen() {
         </Animated.View>
 
         {/* AI Summary (L'essentiel) - Most important info first */}
-        <Animated.View entering={FadeInDown.delay(100).duration(300)} style={styles.section}>
-          <AISummary
-            summary={contact.aiSummary}
-            isLoading={isWaitingForSummary}
-            isRegenerating={regenerateSummaryMutation.isPending}
-            firstName={contact.firstName}
-            onRegenerate={contact.notes.length > 0 ? handleRegenerateSummary : undefined}
-          />
-        </Animated.View>
+        {hasSummaryContent && (
+          <Animated.View entering={FadeInDown.delay(100).duration(300)} style={styles.section}>
+            <AISummary
+              summary={contact.aiSummary}
+              isLoading={isWaitingForSummary}
+              isRegenerating={regenerateSummaryMutation.isPending}
+              firstName={contact.firstName}
+              onRegenerate={hasNotes ? handleRegenerateSummary : undefined}
+            />
+          </Animated.View>
+        )}
 
         {/* Hot Topics Section (Actualités) - Things to follow up on */}
         <Animated.View
@@ -590,15 +597,17 @@ export default function ContactDetailScreen() {
         </Animated.View>
 
         {/* Suggested Questions - Conversation starters / Ask AI */}
-        <Animated.View entering={FadeInDown.delay(200).duration(300)} style={styles.section}>
-          <SuggestedQuestions
-            suggestedQuestions={contact.suggestedQuestions}
-            isLoading={isWaitingForSuggestedQuestions}
-            isRegenerating={regenerateSuggestedQuestionsMutation.isPending}
-            firstName={contact.firstName}
-            onRegenerate={contact.hotTopics.length > 0 ? handleRegenerateSuggestedQuestions : undefined}
-          />
-        </Animated.View>
+        {hasSuggestedQuestionsContent && (
+          <Animated.View entering={FadeInDown.delay(200).duration(300)} style={styles.section}>
+            <SuggestedQuestions
+              suggestedQuestions={contact.suggestedQuestions}
+              isLoading={isWaitingForSuggestedQuestions}
+              isRegenerating={regenerateSuggestedQuestionsMutation.isPending}
+              firstName={contact.firstName}
+              onRegenerate={contact.hotTopics.length > 0 ? handleRegenerateSuggestedQuestions : undefined}
+            />
+          </Animated.View>
+        )}
 
         {/* Notes Timeline - History of interactions */}
         <Animated.View

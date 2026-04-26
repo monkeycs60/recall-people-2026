@@ -170,14 +170,17 @@ export const importService = {
           );
         }
 
-        // Collect info for avatar generation
-        if (contact.avatarHints) {
-          contactsForAvatars.push({
-            id: contact.id,
-            gender: (contact.gender || 'unknown') as Gender,
-            avatarHints: contact.avatarHints,
-          });
-        }
+        // Collect info for avatar generation. Every imported contact should start with an avatar.
+        contactsForAvatars.push({
+          id: contact.id,
+          gender: (contact.gender || 'unknown') as Gender,
+          avatarHints: contact.avatarHints || {
+            physical: null,
+            personality: null,
+            interest: null,
+            context: null,
+          },
+        });
 
         importedCount++;
       } catch (error) {

@@ -42,6 +42,9 @@ import { format, parseISO, differenceInDays } from 'date-fns';
 import { getDateLocale } from '@/utils/dateLocale';
 import { useSettingsStore } from '@/stores/settings-store';
 import { useSubscriptionStore } from '@/stores/subscription-store';
+import { useAppStore } from '@/stores/app-store';
+import { generateAvatarFromHints } from '@/lib/api';
+import { showErrorToast, showInfoToast } from '@/lib/error-handler';
 
 const FOLLOW_UP_THRESHOLD_DAYS = 14;
 
@@ -117,6 +120,7 @@ export default function ContactsScreen() {
   const notSeenThresholdDays = useSettingsStore((state) => state.notSeenThresholdDays);
   const syncQuotas = useSubscriptionStore((state) => state.syncQuotas);
   const canCreateContact = useSubscriptionStore((state) => state.canCreateContact);
+  const { addPendingAvatarGeneration, removePendingAvatarGeneration, isAvatarGenerating } = useAppStore();
 
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
@@ -162,6 +166,35 @@ export default function ContactsScreen() {
     });
     queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
     setIsCreateModalVisible(false);
+
+    addPendingAvatarGeneration(newContact.id);
+    showInfoToast(
+      t('contact.avatar.generationStartedTitle'),
+      t('contact.avatar.generationStartedDescription')
+    );
+    generateAvatarFromHints({
+      contactId: newContact.id,
+      gender: 'unknown',
+      avatarHints: {
+        physical: null,
+        personality: null,
+        interest: null,
+        context: null,
+      },
+    })
+      .then(async (result) => {
+        await contactService.update(newContact.id, { avatarUrl: result.avatarUrl });
+        queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
+        queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(newContact.id) });
+      })
+      .catch((error) => {
+        console.warn('[Avatar Auto] Generation failed after contact creation:', error);
+        showErrorToast(t('contact.avatar.generateError'));
+      })
+      .finally(() => {
+        removePendingAvatarGeneration(newContact.id);
+      });
+
     router.push(`/contact/${newContact.id}`);
   };
 
@@ -251,6 +284,7 @@ export default function ContactsScreen() {
           size="small"
           cacheKey={item.updatedAt}
           recyclingKey={item.id}
+          isGenerating={isAvatarGenerating(item.id)}
         />
 
         <View style={styles.contactInfo}>

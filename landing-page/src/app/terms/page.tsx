@@ -65,7 +65,7 @@ export default function TermsOfService() {
             <ul className="list-disc pl-6 text-text-secondary space-y-2">
               <li>Up to 15 contacts</li>
               <li>Maximum 1-minute recording duration</li>
-              <li>Limited AI avatar generation and AI questions</li>
+              <li>Unlimited AI avatar generation and limited AI questions</li>
             </ul>
 
             <h3 className="text-lg font-semibold mt-6 mb-3">Premium Plan (Recall People Pro)</h3>
@@ -75,7 +75,7 @@ export default function TermsOfService() {
             <ul className="list-disc pl-6 text-text-secondary space-y-2">
               <li>Unlimited contacts</li>
               <li>Up to 3-minute recording duration</li>
-              <li>Unlimited AI avatar generation and AI questions</li>
+              <li>Unlimited AI questions</li>
               <li>Smart reminders and weekly digest</li>
             </ul>
 

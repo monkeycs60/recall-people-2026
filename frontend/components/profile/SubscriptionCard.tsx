@@ -36,7 +36,7 @@ export function SubscriptionCard({ onUpgrade, onManage }: SubscriptionCardProps)
           <Text style={styles.premiumTitle}>{t('subscription.premiumTitle')}</Text>
           <Text style={styles.premiumSubtitle}>{t('subscription.premiumSubtitle')}</Text>
           <View style={styles.premiumFeatures}>
-            {[t('subscription.unlimitedContacts'), t('subscription.aiSearch'), t('subscription.feature3')].map((feature) => (
+            {[t('subscription.unlimitedContacts'), t('subscription.aiSearch'), t('subscription.feature4')].map((feature) => (
               <View key={feature} style={styles.featureChip}>
                 <Text style={styles.featureChipText}>{feature}</Text>
               </View>

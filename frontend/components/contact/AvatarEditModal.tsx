@@ -13,15 +13,15 @@ import {
 } from 'react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image as ImageIcon, Sparkles, Trash2, X, Lock } from 'lucide-react-native';
+import { Image as ImageIcon, Sparkles, Trash2, X } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system/legacy';
 import { Image } from 'expo-image';
 import { Colors, Spacing, BorderRadius } from '@/constants/theme';
-import { uploadAvatar, generateAvatar, deleteAvatar, consumeAvatarQuota } from '@/lib/api';
+import { uploadAvatar, generateAvatar, deleteAvatar } from '@/lib/api';
 import { contactService } from '@/services/contact.service';
-import { useSubscriptionStore } from '@/stores/subscription-store';
-import { Paywall } from '@/components/Paywall';
+import { useAppStore } from '@/stores/app-store';
+import { showErrorToast, showInfoToast, showSuccessToast } from '@/lib/error-handler';
 
 type AvatarEditModalProps = {
   visible: boolean;
@@ -46,23 +46,15 @@ export function AvatarEditModal({
   const [mode, setMode] = useState<ModeType>('choose');
   const [prompt, setPrompt] = useState('');
   const [isUploading, setIsUploading] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [showPaywall, setShowPaywall] = useState(false);
-
-  const canGenerateAvatar = useSubscriptionStore((state) => state.canGenerateAvatar);
-  const avatarUsed = useSubscriptionStore((state) => state.avatarUsed);
-  const avatarLimit = useSubscriptionStore((state) => state.avatarLimit);
-  const isPremium = useSubscriptionStore((state) => state.isPremium);
-  const syncQuotas = useSubscriptionStore((state) => state.syncQuotas);
+  const addPendingAvatarGeneration = useAppStore((state) => state.addPendingAvatarGeneration);
+  const removePendingAvatarGeneration = useAppStore((state) => state.removePendingAvatarGeneration);
 
   const resetState = () => {
     setMode('choose');
     setPrompt('');
     setPreviewUrl(null);
     setIsUploading(false);
-    setIsGenerating(false);
-    setShowPaywall(false);
   };
 
   const handleClose = () => {
@@ -71,10 +63,6 @@ export function AvatarEditModal({
   };
 
   const handleGeneratePress = () => {
-    if (!canGenerateAvatar()) {
-      setShowPaywall(true);
-      return;
-    }
     setMode('generate');
   };
 
@@ -134,57 +122,36 @@ export function AvatarEditModal({
     }
   };
 
-  const handleGenerate = async () => {
+  const handleGenerate = () => {
     if (!prompt.trim()) {
       Alert.alert(t('common.error'), t('contact.avatar.promptRequired'));
       return;
     }
 
-    if (!canGenerateAvatar()) {
-      setShowPaywall(true);
-      return;
-    }
+    const avatarPrompt = prompt.trim();
+    addPendingAvatarGeneration(contactId);
+    showInfoToast(
+      t('contact.avatar.generationStartedTitle'),
+      t('contact.avatar.generationStartedDescription')
+    );
+    handleClose();
 
-    setIsGenerating(true);
-    try {
-      if (!isPremium) {
-        try {
-          const quotaResult = await consumeAvatarQuota();
-          if (!quotaResult.success && quotaResult.error === 'quota_exhausted') {
-            setShowPaywall(true);
-            setIsGenerating(false);
-            return;
-          }
-
-          await syncQuotas();
-        } catch (quotaError) {
-          const isQuotaExhausted = quotaError instanceof Error &&
-            ('statusCode' in quotaError && (quotaError as unknown as { statusCode: number }).statusCode === 403);
-          if (isQuotaExhausted) {
-            await syncQuotas();
-            setShowPaywall(true);
-            setIsGenerating(false);
-            return;
-          }
-          throw quotaError;
-        }
-      }
-
-      const response = await generateAvatar({
-        contactId,
-        prompt: prompt.trim(),
+    generateAvatar({
+      contactId,
+      prompt: avatarPrompt,
+    })
+      .then(async (response) => {
+        await contactService.update(contactId, { avatarUrl: response.avatarUrl });
+        onSave(response.avatarUrl);
+        showSuccessToast(t('contact.avatar.generateSuccess'));
+      })
+      .catch((error) => {
+        console.error('Generate error:', error);
+        showErrorToast(t('contact.avatar.generateError'));
+      })
+      .finally(() => {
+        removePendingAvatarGeneration(contactId);
       });
-
-      setPreviewUrl(response.avatarUrl);
-      await contactService.update(contactId, { avatarUrl: response.avatarUrl });
-      onSave(response.avatarUrl);
-      handleClose();
-    } catch (error) {
-      console.error('Generate error:', error);
-      Alert.alert(t('common.error'), t('contact.avatar.generateError'));
-    } finally {
-      setIsGenerating(false);
-    }
   };
 
   const handleDelete = async () => {
@@ -199,15 +166,7 @@ export function AvatarEditModal({
     }
   };
 
-  const isLoading = isUploading || isGenerating;
-
-  if (showPaywall) {
-    return (
-      <Modal visible={visible} animationType="slide" onRequestClose={() => setShowPaywall(false)}>
-        <Paywall onClose={() => setShowPaywall(false)} reason="avatar_generation" />
-      </Modal>
-    );
-  }
+  const isLoading = isUploading;
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
@@ -247,20 +206,12 @@ export function AvatarEditModal({
 
               <Pressable style={styles.optionButton} onPress={handleGeneratePress}>
                 <View style={[styles.optionIconContainer, styles.optionIconGenerate]}>
-                  {canGenerateAvatar() ? (
-                    <Sparkles size={24} color={Colors.primary} />
-                  ) : (
-                    <Lock size={24} color={Colors.textMuted} />
-                  )}
+                  <Sparkles size={24} color={Colors.primary} />
                 </View>
                 <View style={styles.optionTextContainer}>
                   <Text style={styles.optionTitle}>{t('contact.avatar.generateWithAI')}</Text>
                   <Text style={styles.optionDescription}>
-                    {canGenerateAvatar()
-                      ? isPremium
-                        ? t('contact.avatar.generateWithAIDescription')
-                        : t('contact.avatar.quotaRemaining', { used: avatarUsed, limit: avatarLimit })
-                      : t('contact.avatar.quotaExhausted')}
+                    {t('contact.avatar.generateWithAIDescription')}
                   </Text>
                 </View>
               </Pressable>
@@ -309,10 +260,11 @@ export function AvatarEditModal({
 
           {isLoading && (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={Colors.primary} />
-              <Text style={styles.loadingText}>
-                {isUploading ? t('contact.avatar.uploading') : t('contact.avatar.generating')}
-              </Text>
+              <View style={styles.loadingIconContainer}>
+                <ActivityIndicator size="large" color={Colors.primary} />
+              </View>
+              <Text style={styles.loadingTitle}>{t('contact.avatar.uploadingTitle')}</Text>
+              <Text style={styles.loadingDescription}>{t('contact.avatar.uploadingDescription')}</Text>
             </View>
           )}
         </View>
@@ -478,10 +430,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: Spacing.xl,
-    gap: Spacing.md,
+    paddingHorizontal: Spacing.md,
   },
-  loadingText: {
+  loadingIconContainer: {
+    width: 72,
+    height: 72,
+    borderRadius: 24,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.md,
+  },
+  loadingTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+    marginBottom: Spacing.xs,
+    textAlign: 'center',
+  },
+  loadingDescription: {
     fontSize: 15,
     color: Colors.textSecondary,
+    lineHeight: 21,
+    textAlign: 'center',
   },
 });

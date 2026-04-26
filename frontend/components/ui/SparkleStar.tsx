@@ -1,11 +1,11 @@
 import Svg, { Path } from 'react-native-svg';
 
-type GeminiStarProps = {
+type SparkleStarProps = {
   size?: number;
   color?: string;
 };
 
-export function GeminiStar({ size = 24, color = '#000' }: GeminiStarProps) {
+export function SparkleStar({ size = 24, color = '#000' }: SparkleStarProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <Path

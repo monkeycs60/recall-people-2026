@@ -14,7 +14,7 @@ import { hotTopicService } from '@/services/hot-topic.service';
 import { notificationService } from '@/services/notification.service';
 import { contactService } from '@/services/contact.service';
 import { groupService } from '@/services/group.service';
-import { generateSuggestedQuestions, generateSummary, generateAvatarFromHints, extractInfo, consumeAvatarQuota } from '@/lib/api';
+import { generateSuggestedQuestions, generateSummary, generateAvatarFromHints, extractInfo } from '@/lib/api';
 import { noteService } from '@/services/note.service';
 import { useAppStore } from '@/stores/app-store';
 import { useSubscriptionStore } from '@/stores/subscription-store';
@@ -580,8 +580,7 @@ export default function ReviewScreen() {
           .catch(() => {});
       }
 
-      const canGenerateAvatar = useSubscriptionStore.getState().canGenerateAvatar();
-      const shouldGenerateAvatar = !contactDetails?.avatarUrl && extraction.contactIdentified.avatarHints && canGenerateAvatar;
+      const shouldGenerateAvatar = !contactDetails?.avatarUrl;
       if (shouldGenerateAvatar) {
         const gender = extraction.contactIdentified.gender || 'unknown';
         const avatarHints = extraction.contactIdentified.avatarHints || {
@@ -593,45 +592,23 @@ export default function ReviewScreen() {
 
         addPendingAvatarGeneration(finalContactId);
 
-        const isPremium = useSubscriptionStore.getState().isPremium;
-
-        const proceedWithGeneration = async () => {
-          const result = await generateAvatarFromHints({
-            contactId: finalContactId,
-            gender,
-            avatarHints,
+        generateAvatarFromHints({
+          contactId: finalContactId,
+          gender,
+          avatarHints,
+        })
+          .then(async (result) => {
+            await contactService.update(finalContactId, { avatarUrl: result.avatarUrl });
+            queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
+            queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(finalContactId) });
+            console.log('[Avatar Auto] Successfully generated avatar for', finalContactId);
+          })
+          .catch((error) => {
+            console.warn('[Avatar Auto] Generation failed (silent):', error);
+          })
+          .finally(() => {
+            removePendingAvatarGeneration(finalContactId);
           });
-
-          await contactService.update(finalContactId, { avatarUrl: result.avatarUrl });
-          removePendingAvatarGeneration(finalContactId);
-          queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
-          queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(finalContactId) });
-          console.log('[Avatar Auto] Successfully generated avatar for', finalContactId);
-        };
-
-        if (isPremium) {
-          proceedWithGeneration()
-            .catch((error) => {
-              removePendingAvatarGeneration(finalContactId);
-              console.warn('[Avatar Auto] Generation failed (silent):', error);
-            });
-        } else {
-          consumeAvatarQuota()
-            .then(async (quotaResult) => {
-              if (!quotaResult.success && quotaResult.error === 'quota_exhausted') {
-                removePendingAvatarGeneration(finalContactId);
-                console.log('[Avatar Auto] No quota left, skipping avatar generation');
-                return;
-              }
-
-              await useSubscriptionStore.getState().syncQuotas();
-              await proceedWithGeneration();
-            })
-            .catch((error) => {
-              removePendingAvatarGeneration(finalContactId);
-              console.warn('[Avatar Auto] Generation failed (silent):', error);
-            });
-        }
       }
 
       setRecordingState('idle');

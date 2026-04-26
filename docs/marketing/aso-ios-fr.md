@@ -89,7 +89,7 @@ POUR QUI ?
 TARIFS
 
 Essai gratuit : 14 jours d'accès complet
-Gratuit : 15 contacts, notes illimitées, 5 avatars IA/mois, 10 questions IA/mois
+Gratuit : 15 contacts, notes illimitées, avatars IA illimités, 10 questions IA/mois
 Pro : 4,99 €/mois ou 44,99 €/an — contacts, avatars et IA illimités, rappels intelligents
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

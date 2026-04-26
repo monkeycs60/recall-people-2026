@@ -11,7 +11,7 @@ import { showErrorToast, showSuccessToast } from '@/lib/error-handler';
 const TERMS_URL = 'https://recall-people-2026.vercel.app/terms';
 const PRIVACY_URL = 'https://recall-people-2026.vercel.app/privacy';
 
-type PaywallReason = 'ai_search' | 'recording_duration' | 'ai_assistant' | 'avatar_generation' | 'contact_limit' | 'proactive_reminders';
+type PaywallReason = 'ai_search' | 'recording_duration' | 'ai_assistant' | 'contact_limit' | 'proactive_reminders';
 
 type ComparisonRow = {
   label: string;
@@ -134,8 +134,6 @@ export function Paywall({ onClose, reason = 'contact_limit' }: PaywallProps) {
         return t('paywall.reason.recordingDuration');
       case 'ai_assistant':
         return t('paywall.reason.aiAssistant');
-      case 'avatar_generation':
-        return t('paywall.reason.avatarGeneration');
       case 'contact_limit':
         return t('paywall.reason.contactLimit');
       case 'proactive_reminders':
@@ -151,7 +149,6 @@ export function Paywall({ onClose, reason = 'contact_limit' }: PaywallProps) {
   const comparisonRows: ComparisonRow[] = [
     { label: t('paywall.comparison.contacts'), free: '15', pro: unlimited },
     { label: t('paywall.comparison.recordings'), free: '1 min', pro: '3 min' },
-    { label: t('paywall.comparison.aiAvatars'), free: `5${perMonth}`, pro: unlimited },
     { label: t('paywall.comparison.aiAssistant'), free: `10${perMonth}`, pro: unlimited },
     { label: t('paywall.comparison.reminders'), free: '', pro: '', isBoolean: true },
     { label: t('paywall.comparison.digest'), free: '', pro: '', isBoolean: true },

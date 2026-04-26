@@ -16,7 +16,6 @@ type AuthContext = {
 // Constants
 // ============================================
 
-const FREE_AVATARS_PER_MONTH = 5;
 const FREE_ASK_PER_MONTH = 10;
 
 // ============================================
@@ -156,8 +155,6 @@ subscriptionRoutes.get('/quotas', async (c) => {
   let userData = await prisma.user.findUnique({
     where: { id: user.id },
     select: {
-      avatarMonthlyUsed: true,
-      avatarMonthKey: true,
       askMonthlyUsed: true,
       askMonthKey: true,
     },
@@ -168,15 +165,10 @@ subscriptionRoutes.get('/quotas', async (c) => {
   }
 
   // Auto-reset quotas if month has changed
-  const needsAvatarReset = userData.avatarMonthKey !== currentMonthKey;
   const needsAskReset = userData.askMonthKey !== currentMonthKey;
 
-  if (needsAvatarReset || needsAskReset) {
-    const updateData: { avatarMonthlyUsed?: number; avatarMonthKey?: string; askMonthlyUsed?: number; askMonthKey?: string } = {};
-    if (needsAvatarReset) {
-      updateData.avatarMonthlyUsed = 0;
-      updateData.avatarMonthKey = currentMonthKey;
-    }
+  if (needsAskReset) {
+    const updateData: { askMonthlyUsed?: number; askMonthKey?: string } = {};
     if (needsAskReset) {
       updateData.askMonthlyUsed = 0;
       updateData.askMonthKey = currentMonthKey;
@@ -186,8 +178,6 @@ subscriptionRoutes.get('/quotas', async (c) => {
       where: { id: user.id },
       data: updateData,
       select: {
-        avatarMonthlyUsed: true,
-        avatarMonthKey: true,
         askMonthlyUsed: true,
         askMonthKey: true,
       },
@@ -196,8 +186,8 @@ subscriptionRoutes.get('/quotas', async (c) => {
 
   return c.json({
     success: true,
-    avatarUsed: userData.avatarMonthlyUsed,
-    avatarLimit: FREE_AVATARS_PER_MONTH,
+    avatarUsed: 0,
+    avatarLimit: -1,
     askUsed: userData.askMonthlyUsed,
     askLimit: FREE_ASK_PER_MONTH,
     isPremium: false,
@@ -205,68 +195,17 @@ subscriptionRoutes.get('/quotas', async (c) => {
 });
 
 // ============================================
-// NEW: Use avatar quota
+// Compatibility: avatar quota endpoint
 // ============================================
 
-// POST /use-avatar-quota — Decrement avatar monthly quota
+// POST /use-avatar-quota — Backward-compatible no-op; avatars are unlimited.
 subscriptionRoutes.post('/use-avatar-quota', async (c) => {
-  const user = c.get('user');
-  const prisma = getPrisma(c.env.DATABASE_URL);
-  const isPremium = checkIsPremium(user.email, c.env.PRO_WHITELIST);
-  const currentMonthKey = getCurrentMonthKey();
-
-  if (isPremium) {
-    return c.json({ success: true, isPremium: true, remaining: -1 });
-  }
-
-  const userData = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: {
-      avatarMonthlyUsed: true,
-      avatarMonthKey: true,
-    },
-  });
-
-  if (!userData) {
-    return c.json({ success: false, error: 'user_not_found' }, 404);
-  }
-
-  // Auto-reset if month changed
-  const needsReset = userData.avatarMonthKey !== currentMonthKey;
-  const currentUsed = needsReset ? 0 : userData.avatarMonthlyUsed;
-
-  const limit = FREE_AVATARS_PER_MONTH;
-
-  if (currentUsed >= limit) {
-    return c.json(
-      {
-        success: false,
-        error: 'quota_exhausted',
-        type: 'avatar',
-        used: currentUsed,
-        limit,
-        remaining: 0,
-      },
-      403
-    );
-  }
-
-  const newUsed = currentUsed + 1;
-
-  await prisma.user.update({
-    where: { id: user.id },
-    data: {
-      avatarMonthlyUsed: newUsed,
-      avatarMonthKey: currentMonthKey,
-    },
-  });
-
   return c.json({
     success: true,
-    isPremium: false,
-    used: newUsed,
-    limit,
-    remaining: Math.max(0, limit - newUsed),
+    isPremium: true,
+    used: 0,
+    limit: -1,
+    remaining: -1,
   });
 });
 

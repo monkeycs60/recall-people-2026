@@ -1,14 +1,13 @@
 import { Hono } from 'hono';
 import { authMiddleware } from '../middleware/auth';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { generateText } from 'ai';
 import type { User } from '@prisma/client';
+import { buildAvatarGenerationPrompt, generateAvatarImage } from '../lib/avatar-image';
 
 type Bindings = {
   DATABASE_URL: string;
   BETTER_AUTH_SECRET: string;
   BETTER_AUTH_URL: string;
-  GOOGLE_GENERATIVE_AI_API_KEY: string;
+  OPENAI_API_KEY: string;
   AVATARS_BUCKET: R2Bucket;
   AVATARS_PUBLIC_URL?: string;
   ADMIN_EMAIL?: string;
@@ -43,60 +42,6 @@ type GenerateFromHintsRequest = {
   avatarHints: AvatarHints;
 };
 
-const AVATAR_STYLE_PROMPT = `Create a character avatar in "Happy Humans" style - like Bored Apes NFT but the OPPOSITE: friendly smiling HUMANS instead of bored apes.
-
-CONCEPT: Think Bored Ape Yacht Club meets DiceBear Micah - distinctive cartoon humans who are always HAPPY and SMILING.
-
-IMAGE SIZE: Generate a SQUARE image (1:1 aspect ratio). The image must be perfectly square.
-
-CRITICAL STYLE RULES:
-
-BACKGROUND:
-- Solid pastel color filling the ENTIRE image (soft pink, light yellow, pale blue, lavender, peach, mint)
-- The pastel background must cover 100% of the image, edge to edge, no white space
-- NO border, NO outline, NO white margins anywhere
-
-CHARACTER STYLE:
-- Simple cartoon illustration with black outlines ONLY on the character
-- Flat colors, NO gradients, NO realistic shading
-- Bold, distinctive, collectible-looking character design
-- Each character should feel unique but part of the same "collection"
-
-EXPRESSION (MOST IMPORTANT):
-- ALWAYS happy, friendly, positive expression
-- Big warm smile showing teeth, or cheerful closed-mouth smile
-- Happy eyes: can be simple dots, half-circles (happy squint), or wide open with joy
-- Overall vibe: optimistic, welcoming, joyful - the OPPOSITE of "bored"
-
-FACE:
-- Small simple eyes with happy expression
-- Minimal nose: tiny curved line or small dot
-- BIG FRIENDLY SMILE - this is the signature feature
-- Optional: rosy cheeks, freckles for character
-- Round or oval head shape
-
-HAIR:
-- Bold geometric silhouette
-- Solid flat color (natural OR fun colors like pink, mint, white, orange)
-- Simple distinctive shapes
-
-BODY:
-- Shoulders and neck visible
-- Simple clothing: shirt collar, turtleneck, crew neck, hoodie
-- Solid colors, can be bold/fun
-
-COMPOSITION:
-- SQUARE image where the pastel background fills the ENTIRE image (100%, edge to edge)
-- NO white margins, NO empty space - the pastel color covers the whole canvas
-- The background is a solid pastel color filling the entire square image
-- Character centered within this pastel background
-- Character slightly off-center or at a slight angle
-- Head and shoulders only
-
-DO NOT: Add any circular border/outline. DO NOT leave white margins around the background.
-
-USER'S DESCRIPTION:`;
-
 export const avatarRoutes = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
 // Placeholder prompts for default avatars (Happy Humans style)
@@ -126,63 +71,27 @@ avatarRoutes.post('/generate-placeholders', async (c) => {
       return c.json({ error: 'Admin access required' }, 403);
     }
 
-    if (!c.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-      return c.json({ error: 'Google AI API key not configured' }, 500);
+    if (!c.env.OPENAI_API_KEY) {
+      return c.json({ error: 'OpenAI API key not configured' }, 500);
     }
-
-    const googleAI = createGoogleGenerativeAI({
-      apiKey: c.env.GOOGLE_GENERATIVE_AI_API_KEY,
-    });
 
     const results: Record<string, string> = {};
 
     for (const [gender, description] of Object.entries(PLACEHOLDER_PROMPTS)) {
       console.log(`[Placeholder] Starting generation for ${gender}...`);
 
-      const fullPrompt = `${AVATAR_STYLE_PROMPT}
-${description}
-
-Generate a single portrait illustration following the design system above. The avatar should be warm, inviting, and professional. This will be used as a default placeholder avatar.`;
+      const fullPrompt = `${buildAvatarGenerationPrompt(description)} This will be used as a default placeholder avatar.`;
 
       try {
-        const result = await generateText({
-          model: googleAI('gemini-2.5-flash-image') as Parameters<typeof generateText>[0]['model'],
+        const {
+          imageBuffer,
+          mimeType,
+          extension,
+        } = await generateAvatarImage({
+          apiKey: c.env.OPENAI_API_KEY,
           prompt: fullPrompt,
-          providerOptions: {
-            google: {
-              responseModalities: ['IMAGE', 'TEXT'],
-            },
-          },
         });
 
-        console.log(`[Placeholder] Gemini response for ${gender}:`, JSON.stringify({
-          text: result.text?.substring(0, 100),
-          hasFiles: !!result.files,
-          filesLength: (result.files as unknown[])?.length,
-          fileKeys: result.files ? Object.keys((result.files as unknown[])[0] || {}) : [],
-        }));
-
-        type GeneratedFileWithMime = { base64Data?: string; mimeType?: string; data?: string };
-        const imageFile = (result.files as GeneratedFileWithMime[] | undefined)?.[0];
-
-        if (!imageFile) {
-          console.error(`[Placeholder] ${gender}: No image file in response`);
-          continue;
-        }
-
-        // Handle both possible key names
-        const base64Data = imageFile.base64Data || imageFile.data;
-        const mimeType = imageFile.mimeType || 'image/png';
-
-        console.log(`[Placeholder] ${gender}: base64Data present: ${!!base64Data}, mimeType: ${mimeType}`);
-
-        if (!base64Data) {
-          console.error(`[Placeholder] ${gender}: No base64 data found. Keys: ${Object.keys(imageFile).join(', ')}`);
-          continue;
-        }
-
-        const imageBuffer = Uint8Array.from(atob(base64Data), (char) => char.charCodeAt(0));
-        const extension = mimeType.split('/')[1] || 'png';
         const filename = `placeholders/avatar-${gender}.${extension}`;
 
         console.log(`[Placeholder] Uploading ${filename}, buffer size: ${imageBuffer.length}, mimeType: ${mimeType}`);
@@ -358,48 +267,20 @@ avatarRoutes.post('/generate', async (c) => {
       return c.json({ error: 'Prompt too long. Maximum 500 characters' }, 400);
     }
 
-    if (!c.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-      return c.json({ error: 'Google AI API key not configured' }, 500);
+    if (!c.env.OPENAI_API_KEY) {
+      return c.json({ error: 'OpenAI API key not configured' }, 500);
     }
 
-    const fullPrompt = `${AVATAR_STYLE_PROMPT}
-${prompt}
-
-Generate a single portrait illustration following the design system above. The avatar should be warm, inviting, and professional.`;
-
-    const googleAI = createGoogleGenerativeAI({
-      apiKey: c.env.GOOGLE_GENERATIVE_AI_API_KEY,
-    });
-
-    const result = await generateText({
-      model: googleAI('gemini-2.5-flash-image') as Parameters<typeof generateText>[0]['model'],
+    const fullPrompt = buildAvatarGenerationPrompt(prompt);
+    const {
+      imageBuffer,
+      mimeType,
+      extension,
+    } = await generateAvatarImage({
+      apiKey: c.env.OPENAI_API_KEY,
       prompt: fullPrompt,
-      providerOptions: {
-        google: {
-          responseModalities: ['IMAGE', 'TEXT'],
-        },
-      },
     });
 
-    type GeneratedFileWithMime = { base64Data?: string; mimeType?: string; data?: string };
-    const imageFile = (result.files as GeneratedFileWithMime[] | undefined)?.[0];
-
-    if (!imageFile) {
-      console.error('Avatar generation: No image file in response');
-      return c.json({ error: 'Failed to generate avatar image' }, 500);
-    }
-
-    // Handle both possible key names from Gemini API
-    const base64Data = imageFile.base64Data || imageFile.data;
-    const mimeType = imageFile.mimeType || 'image/png';
-
-    if (!base64Data) {
-      console.error('Avatar generation: No base64 data. Keys:', Object.keys(imageFile));
-      return c.json({ error: 'Failed to generate avatar image' }, 500);
-    }
-
-    const imageBuffer = Uint8Array.from(atob(base64Data), (char) => char.charCodeAt(0));
-    const extension = mimeType.split('/')[1] || 'png';
     const filename = `${contactId}/avatar-generated-${Date.now()}.${extension}`;
 
     await c.env.AVATARS_BUCKET.put(filename, imageBuffer, {
@@ -484,8 +365,8 @@ avatarRoutes.post('/generate-from-hints', async (c) => {
       return c.json({ error: 'Missing required fields: contactId, gender' }, 400);
     }
 
-    if (!c.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-      return c.json({ error: 'Google AI API key not configured' }, 500);
+    if (!c.env.OPENAI_API_KEY) {
+      return c.json({ error: 'OpenAI API key not configured' }, 500);
     }
 
     // Build prompt from hints
@@ -498,43 +379,16 @@ avatarRoutes.post('/generate-from-hints', async (c) => {
 
     console.log(`[Avatar Auto] Generating for ${contactId} with prompt: ${description}`);
 
-    const fullPrompt = `${AVATAR_STYLE_PROMPT}
-${description}
-
-Generate a single portrait illustration following the design system above. The avatar should be warm, inviting, and professional.`;
-
-    const googleAI = createGoogleGenerativeAI({
-      apiKey: c.env.GOOGLE_GENERATIVE_AI_API_KEY,
-    });
-
-    const result = await generateText({
-      model: googleAI('gemini-2.5-flash-image') as Parameters<typeof generateText>[0]['model'],
+    const fullPrompt = buildAvatarGenerationPrompt(description);
+    const {
+      imageBuffer,
+      mimeType,
+      extension,
+    } = await generateAvatarImage({
+      apiKey: c.env.OPENAI_API_KEY,
       prompt: fullPrompt,
-      providerOptions: {
-        google: {
-          responseModalities: ['IMAGE', 'TEXT'],
-        },
-      },
     });
 
-    type GeneratedFileWithMime = { base64Data?: string; mimeType?: string; data?: string };
-    const imageFile = (result.files as GeneratedFileWithMime[] | undefined)?.[0];
-
-    if (!imageFile) {
-      console.error('[Avatar Auto] No image file in response');
-      return c.json({ error: 'Failed to generate avatar image' }, 500);
-    }
-
-    const base64Data = imageFile.base64Data || imageFile.data;
-    const mimeType = imageFile.mimeType || 'image/png';
-
-    if (!base64Data) {
-      console.error('[Avatar Auto] No base64 data. Keys:', Object.keys(imageFile));
-      return c.json({ error: 'Failed to generate avatar image' }, 500);
-    }
-
-    const imageBuffer = Uint8Array.from(atob(base64Data), (char) => char.charCodeAt(0));
-    const extension = mimeType.split('/')[1] || 'png';
     const filename = `${contactId}/avatar-auto-${Date.now()}.${extension}`;
 
     await c.env.AVATARS_BUCKET.put(filename, imageBuffer, {
@@ -663,47 +517,20 @@ avatarRoutes.post('/user/generate', async (c) => {
       return c.json({ error: 'Prompt too long. Maximum 500 characters' }, 400);
     }
 
-    if (!c.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-      return c.json({ error: 'Google AI API key not configured' }, 500);
+    if (!c.env.OPENAI_API_KEY) {
+      return c.json({ error: 'OpenAI API key not configured' }, 500);
     }
 
-    const fullPrompt = `${AVATAR_STYLE_PROMPT}
-${prompt}
-
-Generate a single portrait illustration following the design system above. The avatar should be warm, inviting, and professional.`;
-
-    const googleAI = createGoogleGenerativeAI({
-      apiKey: c.env.GOOGLE_GENERATIVE_AI_API_KEY,
-    });
-
-    const result = await generateText({
-      model: googleAI('gemini-2.5-flash-image') as Parameters<typeof generateText>[0]['model'],
+    const fullPrompt = buildAvatarGenerationPrompt(prompt);
+    const {
+      imageBuffer,
+      mimeType,
+      extension,
+    } = await generateAvatarImage({
+      apiKey: c.env.OPENAI_API_KEY,
       prompt: fullPrompt,
-      providerOptions: {
-        google: {
-          responseModalities: ['IMAGE', 'TEXT'],
-        },
-      },
     });
 
-    type GeneratedFileWithMime = { base64Data?: string; mimeType?: string; data?: string };
-    const imageFile = (result.files as GeneratedFileWithMime[] | undefined)?.[0];
-
-    if (!imageFile) {
-      console.error('User avatar generation: No image file in response');
-      return c.json({ error: 'Failed to generate avatar image' }, 500);
-    }
-
-    const base64Data = imageFile.base64Data || imageFile.data;
-    const mimeType = imageFile.mimeType || 'image/png';
-
-    if (!base64Data) {
-      console.error('User avatar generation: No base64 data. Keys:', Object.keys(imageFile));
-      return c.json({ error: 'Failed to generate avatar image' }, 500);
-    }
-
-    const imageBuffer = Uint8Array.from(atob(base64Data), (char) => char.charCodeAt(0));
-    const extension = mimeType.split('/')[1] || 'png';
     const timestamp = Date.now();
     const filename = `users/${user.id}/avatar-generated-${timestamp}.${extension}`;
 

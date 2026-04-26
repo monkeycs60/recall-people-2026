@@ -29,7 +29,7 @@ type Bindings = {
   AI_PROVIDER?: string;
   RATE_LIMIT: KVNamespace;
   AVATARS_BUCKET: R2Bucket;
-  GOOGLE_GENERATIVE_AI_API_KEY?: string;
+  OPENAI_API_KEY?: string;
   AVATARS_PUBLIC_URL?: string;
   LANGFUSE_SECRET_KEY?: string;
   LANGFUSE_PUBLIC_KEY?: string;

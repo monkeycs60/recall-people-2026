@@ -82,7 +82,7 @@ export default function PrivacyPage() {
                 <ul className="list-disc pl-6 text-text-secondary space-y-2">
                   <li><strong>Voice recordings:</strong> Sent to Groq for transcription using Whisper. We do not store those recordings on our servers.</li>
                   <li><strong>Text for AI analysis:</strong> Sent to Cerebras to extract contacts, generate summaries, run semantic search, and answer your questions via the Assistant.</li>
-                  <li><strong>Avatar generation:</strong> Text descriptions such as gender, age range, and style are sent to Google Gemini to generate illustrated contact avatars. No real photos are required for this feature.</li>
+                  <li><strong>Avatar generation:</strong> Text descriptions such as gender, age range, and style are sent to OpenAI GPT Image 2 to generate illustrated contact avatars. No real photos are required for this feature.</li>
                   <li><strong>Website analytics:</strong> Our public website uses Umami analytics to understand aggregate page usage without building advertising profiles.</li>
                 </ul>
               </section>
@@ -112,7 +112,7 @@ export default function PrivacyPage() {
                 <ul className="list-disc pl-6 text-text-secondary space-y-2">
                   <li><strong>Groq:</strong> Speech-to-text transcription using Whisper</li>
                   <li><strong>Cerebras:</strong> AI analysis, contact extraction, summaries, and AI assistant</li>
-                  <li><strong>Google Gemini:</strong> AI avatar generation from text descriptions</li>
+                  <li><strong>OpenAI GPT Image 2:</strong> AI avatar generation from text descriptions</li>
                   <li><strong>RevenueCat:</strong> Subscription and payment management via App Store / Google Play</li>
                   <li><strong>Google Sign-In / Apple Sign-In:</strong> Optional authentication methods</li>
                   <li><strong>Umami:</strong> Privacy-friendly analytics for the public website</li>
@@ -151,8 +151,9 @@ export default function PrivacyPage() {
                 <p className="text-text-secondary leading-relaxed">
                   Providers may retain limited operational, safety, abuse-prevention, billing, or usage
                   metrics under their own terms. For example, Cerebras states that it does not retain prompt
-                  content, API requests or responses, chat logs, user input, or model output, while Google
-                  Gemini API logging depends on project logging and sharing settings.
+                  content, API requests or responses, chat logs, user input, or model output. OpenAI may retain
+                  API inputs and outputs for a limited period for safety, abuse prevention, and service operation
+                  according to its API data controls.
                 </p>
               </section>
 

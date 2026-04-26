@@ -34,7 +34,7 @@ Recall People helps you remember everyone you meet. After a conversation, you re
 
 ## Pricing
 
-- Free: 10 voice notes, 10 AI questions, 5 AI avatars per month
+- Free: 10 voice notes, 10 AI questions, unlimited AI avatars
 - Pro ($5.99/month or $35.99/year): unlimited everything + priority support
 
 ## Links

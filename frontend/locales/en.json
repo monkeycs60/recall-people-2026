@@ -184,7 +184,7 @@
       "textOption": "Write a note",
       "textDescription": "Type a note about {{firstName}}"
     },
-    "askAbout": "Ask about {{firstName}}",
+    "askAbout": "Ask AI",
     "aiSummary": {
       "header": "The essentials on {{firstName}}",
       "loading": "Preparing the essentials...",
@@ -411,6 +411,12 @@
       "generate": "Generate",
       "uploading": "Uploading...",
       "generating": "Generating avatar...",
+      "uploadingTitle": "Uploading image",
+      "uploadingDescription": "Preparing and saving the selected photo.",
+      "generatingTitle": "Creating avatar",
+      "generatingDescription": "GPT Image 2 is drawing the illustration. This should be ready in under a minute.",
+      "generationStartedTitle": "Avatar in progress",
+      "generationStartedDescription": "You can keep using the app. It should be ready in under a minute.",
       "uploadSuccess": "Avatar updated!",
       "uploadError": "Failed to upload avatar",
       "generateSuccess": "Avatar generated!",
@@ -418,9 +424,7 @@
       "deleteSuccess": "Avatar removed",
       "deleteError": "Failed to remove avatar",
       "permissionDenied": "Photo access required",
-      "promptRequired": "Please describe the appearance",
-      "quotaExhausted": "Free generations exhausted",
-      "quotaRemaining": "{{used}}/{{limit}} this month"
+      "promptRequired": "Please describe the appearance"
     },
     "photo": {
       "permissionTitle": "Photo Access Required",
@@ -612,7 +616,7 @@
       },
       "aiProcessing": {
         "title": "AI Processing",
-        "description": "Voice transcription (Groq Whisper) and text analysis (Cerebras) are processed through secure APIs only when you record or ask questions. Avatar generation uses Google Gemini. We configure AI providers so your content is not used to train models."
+        "description": "Voice transcription (Groq Whisper) and text analysis (Cerebras) are processed through secure APIs only when you record or ask questions. Avatar generation uses OpenAI GPT Image 2. We configure AI providers so your content is not used to train models."
       },
       "contact": {
         "title": "Contact Us",
@@ -673,7 +677,7 @@
     "unlockWith": "Unlock with Pro:",
     "feature1": "Unlimited contacts",
     "feature2": "3-minute recordings (vs 1 min)",
-    "feature3": "Unlimited AI avatar generation",
+    "feature3": "AI search",
     "feature4": "Unlimited AI assistant",
     "feature5": "Smart reminders & weekly digest",
     "feature6": "Export data anytime",
@@ -714,7 +718,6 @@
       "aiSearch": "AI Search is a premium feature",
       "recordingDuration": "Longer recordings require premium",
       "aiAssistant": "AI Assistant is a premium feature",
-      "avatarGeneration": "You've used all your free AI avatar generations",
       "contactLimit": "You've reached the free contacts limit",
       "proactiveReminders": "Custom reminders are for Pro members only"
     },
@@ -730,7 +733,7 @@
       "unlimitedContacts": "Unlimited contacts",
       "unlimitedNotes": "Unlimited audio notes",
       "longerRecordings": "3-minute recordings (vs 1 min)",
-      "unlimitedAI": "Unlimited AI avatar generation",
+      "unlimitedAI": "Unlimited AI assistant",
       "smartReminders": "Smart personalized reminders",
       "weeklyDigest": "Weekly digest"
     },

@@ -64,7 +64,7 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
 
         // Monthly quota defaults
         avatarUsed: 0,
-        avatarLimit: 5,
+        avatarLimit: -1,
         askUsed: 0,
         askLimit: 10,
 
@@ -154,9 +154,7 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
         },
 
         canGenerateAvatar: () => {
-          const state = get();
-          if (state.isPremium || state.isTestPro) return true;
-          return state.avatarUsed < state.avatarLimit;
+          return true;
         },
 
         syncQuotas: async () => {

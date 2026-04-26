@@ -89,7 +89,7 @@ WHO IT'S FOR
 PRICING
 
 Free trial: 14 days of full access
-Free: 15 contacts, unlimited notes, 5 AI avatars/month, 10 AI questions/month
+Free: 15 contacts, unlimited notes, unlimited AI avatars, 10 AI questions/month
 Pro: $3.99/month or $39.99/year — unlimited contacts, avatars, AI, and smart reminders
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

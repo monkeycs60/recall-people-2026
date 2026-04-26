@@ -13,6 +13,9 @@ const RETRY_CONFIG = {
   delayMs: 300,
 };
 
+const DEFAULT_TIMEOUT_MS = 30000;
+const AVATAR_GENERATION_TIMEOUT_MS = 120000;
+
 // Utility to delay execution
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -63,6 +66,7 @@ type ApiOptions = {
   body?: unknown;
   headers?: Record<string, string>;
   showErrorToast?: boolean;
+  timeoutMs?: number;
 };
 
 function isNetworkError(error: unknown): boolean {
@@ -76,11 +80,11 @@ function isNetworkError(error: unknown): boolean {
 }
 
 const apiCall = async <T>(endpoint: string, options: ApiOptions = {}, isRetry = false): Promise<T> => {
-  const { showErrorToast = true, ...fetchOptions } = options;
+  const { showErrorToast = true, timeoutMs = DEFAULT_TIMEOUT_MS, ...fetchOptions } = options;
   const token = await getToken();
 
   const controller = new AbortController();
-  const fetchTimeout = setTimeout(() => controller.abort(), 30000);
+  const fetchTimeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
     const response = await fetch(`${API_URL}${endpoint}`, {
@@ -373,6 +377,7 @@ export const generateAvatar = async (data: {
     {
       method: 'POST',
       body: { ...data, language: getCurrentLanguage() },
+      timeoutMs: AVATAR_GENERATION_TIMEOUT_MS,
     }
   );
   return { avatarUrl: response.avatarUrl, filename: response.filename };
@@ -395,6 +400,7 @@ export const generateAvatarFromHints = async (data: {
       method: 'POST',
       body: data,
       showErrorToast: false, // Silent fail for auto-generation
+      timeoutMs: AVATAR_GENERATION_TIMEOUT_MS,
     }
   );
   return { avatarUrl: response.avatarUrl, filename: response.filename };
@@ -422,6 +428,7 @@ export const generateUserAvatar = async (data: {
     {
       method: 'POST',
       body: { ...data, language: getCurrentLanguage() },
+      timeoutMs: AVATAR_GENERATION_TIMEOUT_MS,
     }
   );
   return { avatarUrl: response.avatarUrl, filename: response.filename };

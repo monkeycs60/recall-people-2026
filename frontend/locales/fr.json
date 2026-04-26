@@ -220,7 +220,7 @@
       "textOption": "Ecrire une note",
       "textDescription": "Taper une note sur {{firstName}}"
     },
-    "askAbout": "Poser une question sur {{firstName}}",
+    "askAbout": "Question IA",
     "aiSummary": {
       "header": "L'essentiel sur {{firstName}}",
       "loading": "Préparation de l'essentiel...",
@@ -447,6 +447,12 @@
       "generate": "Générer",
       "uploading": "Envoi en cours...",
       "generating": "Génération de l'avatar...",
+      "uploadingTitle": "Envoi de l'image",
+      "uploadingDescription": "Préparation et sauvegarde de la photo sélectionnée.",
+      "generatingTitle": "Création de l'avatar",
+      "generatingDescription": "GPT Image 2 dessine l'illustration. Cela devrait prendre moins d'une minute.",
+      "generationStartedTitle": "Avatar en cours",
+      "generationStartedDescription": "Tu peux continuer à utiliser l'app. Il devrait arriver en moins d'une minute.",
       "uploadSuccess": "Avatar mis à jour !",
       "uploadError": "Échec de l'envoi de l'avatar",
       "generateSuccess": "Avatar généré !",
@@ -454,9 +460,7 @@
       "deleteSuccess": "Avatar supprimé",
       "deleteError": "Échec de la suppression de l'avatar",
       "permissionDenied": "Accès aux photos requis",
-      "promptRequired": "Décris l'apparence",
-      "quotaExhausted": "Générations gratuites épuisées",
-      "quotaRemaining": "{{used}}/{{limit}} ce mois-ci"
+      "promptRequired": "Décris l'apparence"
     },
     "photo": {
       "permissionTitle": "Accès aux photos requis",
@@ -648,7 +652,7 @@
       },
       "aiProcessing": {
         "title": "Traitement IA",
-        "description": "La transcription vocale (Groq Whisper) et l'analyse de texte (Cerebras) sont traitées via des API sécurisées uniquement lors de l'enregistrement ou des questions. La génération d'avatars utilise Google Gemini. Nous configurons les fournisseurs IA pour que ton contenu ne serve pas à entraîner des modèles."
+        "description": "La transcription vocale (Groq Whisper) et l'analyse de texte (Cerebras) sont traitées via des API sécurisées uniquement lors de l'enregistrement ou des questions. La génération d'avatars utilise OpenAI GPT Image 2. Nous configurons les fournisseurs IA pour que ton contenu ne serve pas à entraîner des modèles."
       },
       "contact": {
         "title": "Nous contacter",
@@ -709,7 +713,7 @@
     "unlockWith": "Débloque avec Pro :",
     "feature1": "Contacts illimités",
     "feature2": "Enregistrements de 3 min (vs 1 min)",
-    "feature3": "Génération d'avatars IA illimitée",
+    "feature3": "Recherche IA",
     "feature4": "Assistant IA illimité",
     "feature5": "Rappels intelligents et résumé hebdomadaire",
     "feature6": "Export des données à tout moment",
@@ -750,7 +754,6 @@
       "aiSearch": "La recherche IA est une fonctionnalité premium",
       "recordingDuration": "Les enregistrements plus longs nécessitent premium",
       "aiAssistant": "L'assistant IA est une fonctionnalité premium",
-      "avatarGeneration": "Tu as utilisé toutes tes générations d'avatar IA gratuites",
       "contactLimit": "Tu as atteint la limite de contacts gratuits",
       "proactiveReminders": "Les rappels personnalisés sont réservés aux membres Pro"
     },
@@ -766,7 +769,7 @@
       "unlimitedContacts": "Contacts illimités",
       "unlimitedNotes": "Notes audio illimitées",
       "longerRecordings": "Enregistrements de 3 min (vs 1 min)",
-      "unlimitedAI": "Génération d'avatars IA illimitée",
+      "unlimitedAI": "Assistant IA illimité",
       "smartReminders": "Rappels intelligents personnalisés",
       "weeklyDigest": "Digest hebdomadaire"
     },

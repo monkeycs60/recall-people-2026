@@ -61,7 +61,7 @@ export function AIConsentModal({ onAccept }: AIConsentModalProps) {
             <Text style={styles.providerPurpose}>{t('aiConsent.providerAnalysis')}</Text>
           </View>
           <View style={styles.providerRow}>
-            <Text style={styles.providerName}>Google Gemini</Text>
+            <Text style={styles.providerName}>OpenAI GPT Image 2</Text>
             <Text style={styles.providerPurpose}>{t('aiConsent.providerAvatar')}</Text>
           </View>
         </View>

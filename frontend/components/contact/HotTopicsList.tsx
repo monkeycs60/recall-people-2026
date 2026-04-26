@@ -5,7 +5,7 @@ import { Check, RotateCcw, Trash2, ChevronDown, ChevronUp, Edit3 } from 'lucide-
 import { HotTopic } from '@/types';
 import { Colors, Shadows } from '@/constants/theme';
 
-const EMPTY_NEWS_ILLUSTRATION = require('@/assets/ai-assets/empty-news.png');
+const EMPTY_NEWS_ILLUSTRATION = require('@/assets/ai-assets/empty-hot-topics.png');
 
 type HotTopicsListProps = {
   hotTopics: HotTopic[];
@@ -155,7 +155,7 @@ export function HotTopicsList({
       return (
         <View key={`${topic.id}-resolving`} style={styles.resolveCard}>
           <Text style={styles.resolveCardTitle}>✅ Marquer comme résolu</Text>
-          <Text style={styles.resolveTitle}>"{topic.title}"</Text>
+          <Text style={styles.resolveTitle}>{`"${topic.title}"`}</Text>
           <Text style={styles.resolveLabel}>{t('contact.hotTopic.resolutionLabel')}</Text>
           <TextInput
             style={styles.resolveInput}

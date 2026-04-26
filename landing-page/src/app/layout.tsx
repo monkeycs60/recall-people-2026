@@ -75,13 +75,13 @@ export default function RootLayout({
                   "@type": "Offer",
                   "price": "0",
                   "priceCurrency": "USD",
-                  "description": "Free plan: 10 voice notes, 10 AI questions, 5 AI avatars per month",
+                  "description": "Free plan: 10 voice notes, 10 AI questions, unlimited AI avatars",
                 },
                 {
                   "@type": "Offer",
                   "price": "3.99",
                   "priceCurrency": "USD",
-                  "description": "Pro plan: unlimited voice notes, AI questions, and avatars",
+                  "description": "Pro plan: unlimited voice notes and AI questions",
                 },
               ],
               "featureList": [

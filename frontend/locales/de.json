@@ -184,7 +184,7 @@
       "textOption": "Notiz schreiben",
       "textDescription": "Eine Notiz über {{firstName}} schreiben"
     },
-    "askAbout": "Frage über {{firstName}}",
+    "askAbout": "KI fragen",
     "aiSummary": {
       "header": "Das Wichtigste über {{firstName}}",
       "loading": "Bereite das Wichtigste vor...",
@@ -411,6 +411,12 @@
       "generate": "Generieren",
       "uploading": "Hochladen...",
       "generating": "Avatar wird generiert...",
+      "uploadingTitle": "Bild wird hochgeladen",
+      "uploadingDescription": "Das ausgewählte Foto wird vorbereitet und gespeichert.",
+      "generatingTitle": "Avatar wird erstellt",
+      "generatingDescription": "GPT Image 2 zeichnet die Illustration. Sie sollte in unter einer Minute fertig sein.",
+      "generationStartedTitle": "Avatar läuft",
+      "generationStartedDescription": "Du kannst die App weiter nutzen. Er sollte in unter einer Minute fertig sein.",
       "uploadSuccess": "Avatar aktualisiert!",
       "uploadError": "Avatar konnte nicht hochgeladen werden",
       "generateSuccess": "Avatar generiert!",
@@ -418,9 +424,7 @@
       "deleteSuccess": "Avatar entfernt",
       "deleteError": "Avatar konnte nicht entfernt werden",
       "permissionDenied": "Fotozugriff erforderlich",
-      "promptRequired": "Bitte beschreibe das Aussehen",
-      "quotaExhausted": "Kostenlose Generierungen aufgebraucht",
-      "quotaRemaining": "{{used}}/{{limit}} diesen Monat"
+      "promptRequired": "Bitte beschreibe das Aussehen"
     },
     "photo": {
       "permissionTitle": "Fotozugriff erforderlich",
@@ -612,7 +616,7 @@
       },
       "aiProcessing": {
         "title": "KI-Verarbeitung",
-        "description": "Sprachtranskription (Groq Whisper) und Textanalyse (Cerebras) werden nur bei Aufnahmen oder Fragen über sichere APIs verarbeitet. Die Avatar-Erstellung nutzt Google Gemini. Wir konfigurieren KI-Anbieter so, dass deine Inhalte nicht zum Trainieren von Modellen verwendet werden."
+        "description": "Sprachtranskription (Groq Whisper) und Textanalyse (Cerebras) werden nur bei Aufnahmen oder Fragen über sichere APIs verarbeitet. Die Avatar-Erstellung nutzt OpenAI GPT Image 2. Wir konfigurieren KI-Anbieter so, dass deine Inhalte nicht zum Trainieren von Modellen verwendet werden."
       },
       "contact": {
         "title": "Kontaktiere uns",
@@ -673,7 +677,7 @@
     "unlockWith": "Mit Pro freischalten:",
     "feature1": "Unbegrenzte Kontakte",
     "feature2": "3-Minuten-Aufnahmen (statt 1 Min.)",
-    "feature3": "Unbegrenzte KI-Avatar-Generierung",
+    "feature3": "KI-Suche",
     "feature4": "Unbegrenzter KI-Assistent",
     "feature5": "Intelligente Erinnerungen & wöchentliche Zusammenfassung",
     "feature6": "Daten jederzeit exportieren",
@@ -714,7 +718,6 @@
       "aiSearch": "KI-Suche ist eine Premium-Funktion",
       "recordingDuration": "Längere Aufnahmen erfordern Premium",
       "aiAssistant": "KI-Assistent ist eine Premium-Funktion",
-      "avatarGeneration": "Du hast alle deine kostenlosen KI-Avatar-Generierungen verbraucht",
       "contactLimit": "Du hast das Limit kostenloser Kontakte erreicht",
       "proactiveReminders": "Personalisierte Erinnerungen sind nur für Pro-Mitglieder"
     },
@@ -730,7 +733,7 @@
       "unlimitedContacts": "Unbegrenzte Kontakte",
       "unlimitedNotes": "Unbegrenzte Audionotizen",
       "longerRecordings": "3-Minuten-Aufnahmen (statt 1 Min.)",
-      "unlimitedAI": "Unbegrenzte KI-Avatar-Generierung",
+      "unlimitedAI": "Unbegrenzter KI-Assistent",
       "smartReminders": "Intelligente personalisierte Erinnerungen",
       "weeklyDigest": "Wöchentliche Zusammenfassung"
     },

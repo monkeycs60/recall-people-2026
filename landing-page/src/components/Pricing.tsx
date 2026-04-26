@@ -10,7 +10,7 @@ const plans = [
       '15 contacts',
       'Unlimited voice notes',
       '1-minute recordings',
-      'AI avatars (5/month)',
+      'Unlimited AI avatars',
       'AI assistant (10/month)',
       'Event & birthday reminders',
       'Export data anytime',
@@ -27,7 +27,6 @@ const plans = [
     features: [
       'Unlimited contacts',
       '3-minute recordings',
-      'Unlimited AI avatar generation',
       'Unlimited AI assistant',
       'Smart reminders & weekly digest',
       'Export data anytime',

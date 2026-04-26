@@ -13,16 +13,15 @@ import {
 } from 'react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image as ImageIcon, Sparkles, Trash2, X, Lock } from 'lucide-react-native';
+import { Image as ImageIcon, Sparkles, Trash2, X } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system/legacy';
 import { Image } from 'expo-image';
 import { Colors, Spacing, BorderRadius } from '@/constants/theme';
-import { uploadUserAvatar, generateUserAvatar, deleteUserAvatar, consumeAvatarQuota } from '@/lib/api';
+import { uploadUserAvatar, generateUserAvatar, deleteUserAvatar } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth-store';
 import { setUser } from '@/lib/auth';
-import { useSubscriptionStore } from '@/stores/subscription-store';
-import { Paywall } from '@/components/Paywall';
+import { showErrorToast, showInfoToast, showSuccessToast } from '@/lib/error-handler';
 
 type UserAvatarEditModalProps = {
   visible: boolean;
@@ -43,25 +42,15 @@ export function UserAvatarEditModal({
   const [mode, setMode] = useState<ModeType>('choose');
   const [prompt, setPrompt] = useState('');
   const [isUploading, setIsUploading] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [showPaywall, setShowPaywall] = useState(false);
   const updateUser = useAuthStore((state) => state.updateUser);
   const user = useAuthStore((state) => state.user);
-
-  const canGenerateAvatar = useSubscriptionStore((state) => state.canGenerateAvatar);
-  const avatarUsed = useSubscriptionStore((state) => state.avatarUsed);
-  const avatarLimit = useSubscriptionStore((state) => state.avatarLimit);
-  const isPremium = useSubscriptionStore((state) => state.isPremium);
-  const syncQuotas = useSubscriptionStore((state) => state.syncQuotas);
 
   const resetState = () => {
     setMode('choose');
     setPrompt('');
     setPreviewUrl(null);
     setIsUploading(false);
-    setIsGenerating(false);
-    setShowPaywall(false);
   };
 
   const handleClose = () => {
@@ -70,10 +59,6 @@ export function UserAvatarEditModal({
   };
 
   const handleGeneratePress = () => {
-    if (!canGenerateAvatar()) {
-      setShowPaywall(true);
-      return;
-    }
     setMode('generate');
   };
 
@@ -138,59 +123,34 @@ export function UserAvatarEditModal({
     }
   };
 
-  const handleGenerate = async () => {
+  const handleGenerate = () => {
     if (!prompt.trim()) {
       Alert.alert(t('common.error'), t('contact.avatar.promptRequired'));
       return;
     }
 
-    if (!canGenerateAvatar()) {
-      setShowPaywall(true);
-      return;
-    }
+    const avatarPrompt = prompt.trim();
+    showInfoToast(
+      t('contact.avatar.generationStartedTitle'),
+      t('contact.avatar.generationStartedDescription')
+    );
+    handleClose();
 
-    setIsGenerating(true);
-    try {
-      if (!isPremium) {
-        try {
-          const quotaResult = await consumeAvatarQuota();
-          if (!quotaResult.success && quotaResult.error === 'quota_exhausted') {
-            setShowPaywall(true);
-            setIsGenerating(false);
-            return;
-          }
-
-          await syncQuotas();
-        } catch (quotaError) {
-          const isQuotaExhausted = quotaError instanceof Error &&
-            ('statusCode' in quotaError && (quotaError as unknown as { statusCode: number }).statusCode === 403);
-          if (isQuotaExhausted) {
-            await syncQuotas();
-            setShowPaywall(true);
-            setIsGenerating(false);
-            return;
-          }
-          throw quotaError;
+    generateUserAvatar({
+      prompt: avatarPrompt,
+    })
+      .then(async (response) => {
+        updateUser({ avatarUrl: response.avatarUrl });
+        if (user) {
+          await setUser({ ...user, avatarUrl: response.avatarUrl });
         }
-      }
-
-      const response = await generateUserAvatar({
-        prompt: prompt.trim(),
+        onSave(response.avatarUrl);
+        showSuccessToast(t('contact.avatar.generateSuccess'));
+      })
+      .catch((error) => {
+        console.error('Generate error:', error);
+        showErrorToast(t('contact.avatar.generateError'));
       });
-
-      setPreviewUrl(response.avatarUrl);
-      updateUser({ avatarUrl: response.avatarUrl });
-      if (user) {
-        await setUser({ ...user, avatarUrl: response.avatarUrl });
-      }
-      onSave(response.avatarUrl);
-      handleClose();
-    } catch (error) {
-      console.error('Generate error:', error);
-      Alert.alert(t('common.error'), t('contact.avatar.generateError'));
-    } finally {
-      setIsGenerating(false);
-    }
   };
 
   const handleDelete = async () => {
@@ -212,15 +172,7 @@ export function UserAvatarEditModal({
     }
   };
 
-  const isLoading = isUploading || isGenerating;
-
-  if (showPaywall) {
-    return (
-      <Modal visible={visible} animationType="slide" onRequestClose={() => setShowPaywall(false)}>
-        <Paywall onClose={() => setShowPaywall(false)} reason="avatar_generation" />
-      </Modal>
-    );
-  }
+  const isLoading = isUploading;
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
@@ -262,20 +214,12 @@ export function UserAvatarEditModal({
 
               <Pressable style={styles.optionButton} onPress={handleGeneratePress}>
                 <View style={[styles.optionIconContainer, styles.optionIconGenerate]}>
-                  {canGenerateAvatar() ? (
-                    <Sparkles size={24} color={Colors.primary} />
-                  ) : (
-                    <Lock size={24} color={Colors.textMuted} />
-                  )}
+                  <Sparkles size={24} color={Colors.primary} />
                 </View>
                 <View style={styles.optionTextContainer}>
                   <Text style={styles.optionTitle}>{t('contact.avatar.generateWithAI')}</Text>
                   <Text style={styles.optionDescription}>
-                    {canGenerateAvatar()
-                      ? isPremium
-                        ? t('contact.avatar.generateWithAIDescription')
-                        : t('contact.avatar.quotaRemaining', { used: avatarUsed, limit: avatarLimit })
-                      : t('contact.avatar.quotaExhausted')}
+                    {t('contact.avatar.generateWithAIDescription')}
                   </Text>
                 </View>
               </Pressable>
@@ -324,10 +268,11 @@ export function UserAvatarEditModal({
 
           {isLoading && (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={Colors.primary} />
-              <Text style={styles.loadingText}>
-                {isUploading ? t('profile.avatar.uploading') : t('contact.avatar.generating')}
-              </Text>
+              <View style={styles.loadingIconContainer}>
+                <ActivityIndicator size="large" color={Colors.primary} />
+              </View>
+              <Text style={styles.loadingTitle}>{t('contact.avatar.uploadingTitle')}</Text>
+              <Text style={styles.loadingDescription}>{t('contact.avatar.uploadingDescription')}</Text>
             </View>
           )}
         </View>
@@ -492,10 +437,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: Spacing.xl,
-    gap: Spacing.md,
+    paddingHorizontal: Spacing.md,
   },
-  loadingText: {
+  loadingIconContainer: {
+    width: 72,
+    height: 72,
+    borderRadius: BorderRadius.xl,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.md,
+  },
+  loadingTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+    marginBottom: Spacing.xs,
+    textAlign: 'center',
+  },
+  loadingDescription: {
     fontSize: 15,
     color: Colors.textSecondary,
+    lineHeight: 21,
+    textAlign: 'center',
   },
 });
