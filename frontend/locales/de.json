@@ -612,7 +612,7 @@
       },
       "aiProcessing": {
         "title": "KI-Verarbeitung",
-        "description": "Sprachtranskription (Deepgram, Groq) und Textanalyse (Cerebras) werden nur bei Aufnahmen oder Fragen über sichere APIs verarbeitet. Die Avatar-Erstellung nutzt Google Gemini. Der verarbeitete Inhalt wird lokal gespeichert und niemals zum Training von KI-Modellen verwendet."
+        "description": "Sprachtranskription (Groq Whisper) und Textanalyse (Cerebras) werden nur bei Aufnahmen oder Fragen über sichere APIs verarbeitet. Die Avatar-Erstellung nutzt Google Gemini. Der verarbeitete Inhalt wird lokal gespeichert und niemals zum Training von KI-Modellen verwendet."
       },
       "contact": {
         "title": "Kontaktiere uns",

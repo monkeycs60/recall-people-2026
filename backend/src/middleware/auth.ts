@@ -6,7 +6,6 @@ import type { User } from '@prisma/client';
 type Bindings = {
   DATABASE_URL: string;
   JWT_SECRET: string;
-  DEEPGRAM_API_KEY: string;
   ANTHROPIC_API_KEY: string;
 };
 

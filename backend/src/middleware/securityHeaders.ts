@@ -21,7 +21,7 @@ export const securityHeaders = async (c: Context, next: Next) => {
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https:",
       "font-src 'self' data:",
-      "connect-src 'self' https://oauth2.googleapis.com https://deepgram.com https://api.anthropic.com https://api.x.ai",
+      "connect-src 'self' https://oauth2.googleapis.com https://api.anthropic.com https://api.x.ai",
       "frame-ancestors 'none'", // Equivalent to X-Frame-Options: DENY
       "base-uri 'self'",
       "form-action 'self'",

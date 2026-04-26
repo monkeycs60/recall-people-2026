@@ -8,7 +8,7 @@ Backend API pour l'application Recall People, construit avec Hono et déployé s
 - **Runtime**: Cloudflare Workers
 - **Base de données**: PostgreSQL (Neon) via Prisma
 - **AI Providers**: OpenAI GPT-5 mini (recommandé), xAI Grok, Cerebras
-- **Transcription**: Groq Whisper v3 Turbo ou Deepgram
+- **Transcription**: Groq Whisper v3 Turbo
 - **Observabilité**: LangFuse (optionnel)
 
 ## Migration vers OpenAI GPT-5 mini (Redesign V2)
@@ -84,7 +84,6 @@ D'après le [Redesign V2](/REDESIGN_V2.md), section 9:
 
    # Transcription
    GROQ_API_KEY=your-groq-key
-   DEEPGRAM_API_KEY=your-deepgram-key
 
    # Observabilité
    ENABLE_LANGFUSE=true

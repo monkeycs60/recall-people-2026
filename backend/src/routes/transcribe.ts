@@ -9,9 +9,8 @@ type Bindings = {
   DATABASE_URL: string;
   BETTER_AUTH_SECRET: string;
   BETTER_AUTH_URL: string;
-  DEEPGRAM_API_KEY: string;
   GROQ_API_KEY?: string;
-  STT_PROVIDER?: 'deepgram' | 'groq-whisper-v3' | 'groq-whisper-v3-turbo';
+  STT_PROVIDER?: 'groq-whisper-v3' | 'groq-whisper-v3-turbo';
   ENABLE_PERFORMANCE_LOGGING?: boolean;
   ANTHROPIC_API_KEY: string;
 };
@@ -80,7 +79,6 @@ transcribeRoutes.post('/', async (c) => {
 
     // Provider config
     const providerConfig = {
-      DEEPGRAM_API_KEY: c.env.DEEPGRAM_API_KEY,
       GROQ_API_KEY: c.env.GROQ_API_KEY,
       STT_PROVIDER: c.env.STT_PROVIDER,
       ENABLE_PERFORMANCE_LOGGING: c.env.ENABLE_PERFORMANCE_LOGGING,

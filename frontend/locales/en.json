@@ -612,7 +612,7 @@
       },
       "aiProcessing": {
         "title": "AI Processing",
-        "description": "Voice transcription (Deepgram, Groq) and text analysis (Cerebras) are processed through secure APIs only when you record or ask questions. Avatar generation uses Google Gemini. The processed content is stored locally and is never used to train AI models."
+        "description": "Voice transcription (Groq Whisper) and text analysis (Cerebras) are processed through secure APIs only when you record or ask questions. Avatar generation uses Google Gemini. The processed content is stored locally and is never used to train AI models."
       },
       "contact": {
         "title": "Contact Us",

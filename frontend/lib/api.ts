@@ -434,6 +434,14 @@ export const deleteUserAvatar = async (): Promise<void> => {
 };
 
 export const checkProWhitelist = async (): Promise<boolean> => {
+  const token = await getToken();
+  if (!token) {
+    if (__DEV__) {
+      console.log('[API] Skipping checkProWhitelist: no auth token');
+    }
+    return false;
+  }
+
   try {
     console.log('[API] Calling checkProWhitelist...');
     const response = await apiCall<{ success: boolean; isWhitelisted: boolean }>(
@@ -443,7 +451,9 @@ export const checkProWhitelist = async (): Promise<boolean> => {
     console.log('[API] checkProWhitelist response:', response);
     return response.isWhitelisted;
   } catch (error) {
-    console.error('[API] checkProWhitelist error:', error);
+    if (__DEV__) {
+      console.log('[API] checkProWhitelist failed:', error);
+    }
     return false;
   }
 };
@@ -469,6 +479,14 @@ export type IncrementNoteResponse = {
 };
 
 export const getNotesStatus = async (): Promise<NotesStatusResponse | null> => {
+  const token = await getToken();
+  if (!token) {
+    if (__DEV__) {
+      console.log('[API] Skipping getNotesStatus: no auth token');
+    }
+    return null;
+  }
+
   try {
     const response = await apiCall<NotesStatusResponse>(
       '/api/subscription/notes-status',
@@ -476,12 +494,22 @@ export const getNotesStatus = async (): Promise<NotesStatusResponse | null> => {
     );
     return response;
   } catch (error) {
-    console.error('[API] getNotesStatus error:', error);
+    if (__DEV__) {
+      console.log('[API] getNotesStatus failed:', error);
+    }
     return null;
   }
 };
 
 export const incrementNoteCount = async (): Promise<IncrementNoteResponse | null> => {
+  const token = await getToken();
+  if (!token) {
+    if (__DEV__) {
+      console.log('[API] Skipping incrementNoteCount: no auth token');
+    }
+    return null;
+  }
+
   try {
     const response = await apiCall<IncrementNoteResponse>(
       '/api/subscription/increment-note',
@@ -489,7 +517,9 @@ export const incrementNoteCount = async (): Promise<IncrementNoteResponse | null
     );
     return response;
   } catch (error) {
-    console.error('[API] incrementNoteCount error:', error);
+    if (__DEV__) {
+      console.log('[API] incrementNoteCount failed:', error);
+    }
     return null;
   }
 };
@@ -653,10 +683,20 @@ export type QuotasResponse = {
 };
 
 export const getQuotas = async (): Promise<QuotasResponse | null> => {
+  const token = await getToken();
+  if (!token) {
+    if (__DEV__) {
+      console.log('[API] Skipping getQuotas: no auth token');
+    }
+    return null;
+  }
+
   try {
     return await apiCall<QuotasResponse>('/api/subscription/quotas', { showErrorToast: false });
   } catch (error) {
-    console.error('[API] getQuotas error:', error);
+    if (__DEV__) {
+      console.log('[API] getQuotas failed:', error);
+    }
     return null;
   }
 };

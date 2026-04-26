@@ -24,7 +24,6 @@ import { langfuseMiddleware } from './middleware/langfuse';
 type Bindings = {
   DATABASE_URL: string;
   JWT_SECRET: string;
-  DEEPGRAM_API_KEY: string;
   XAI_API_KEY: string;
   CEREBRAS_API_KEY?: string;
   AI_PROVIDER?: string;

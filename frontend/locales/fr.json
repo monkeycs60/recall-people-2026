@@ -648,7 +648,7 @@
       },
       "aiProcessing": {
         "title": "Traitement IA",
-        "description": "La transcription vocale (Deepgram, Groq) et l'analyse de texte (Cerebras) sont traitées via des API sécurisées uniquement lors de l'enregistrement ou des questions. La génération d'avatars utilise Google Gemini. Le contenu traité est stocké localement et n'est jamais utilisé pour entraîner des modèles IA."
+        "description": "La transcription vocale (Groq Whisper) et l'analyse de texte (Cerebras) sont traitées via des API sécurisées uniquement lors de l'enregistrement ou des questions. La génération d'avatars utilise Google Gemini. Le contenu traité est stocké localement et n'est jamais utilisé pour entraîner des modèles IA."
       },
       "contact": {
         "title": "Nous contacter",

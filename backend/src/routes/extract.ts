@@ -13,7 +13,6 @@ type Bindings = {
   DATABASE_URL: string;
   BETTER_AUTH_SECRET: string;
   BETTER_AUTH_URL: string;
-  DEEPGRAM_API_KEY: string;
   OPENAI_API_KEY?: string;
   XAI_API_KEY: string;
   CEREBRAS_API_KEY?: string;

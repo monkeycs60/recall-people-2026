@@ -1,4 +1,3 @@
-import { createClient } from '@deepgram/sdk';
 import Groq from 'groq-sdk';
 import type { TranscriptionCreateParams } from 'groq-sdk/resources/audio/transcriptions';
 
@@ -7,10 +6,9 @@ import type { TranscriptionCreateParams } from 'groq-sdk/resources/audio/transcr
  * Supports switching between different STT providers via environment variables
  */
 
-export type STTProviderType = 'deepgram' | 'groq-whisper-v3' | 'groq-whisper-v3-turbo';
+export type STTProviderType = 'groq-whisper-v3' | 'groq-whisper-v3-turbo';
 
 export type STTProviderConfig = {
-	DEEPGRAM_API_KEY?: string;
 	GROQ_API_KEY?: string;
 	STT_PROVIDER?: STTProviderType;
 	ENABLE_PERFORMANCE_LOGGING?: boolean;
@@ -26,14 +24,22 @@ export type TranscriptionResult = {
  * Model configuration for each provider
  */
 const PROVIDER_MODELS = {
-	deepgram: 'nova-3',
 	'groq-whisper-v3': 'whisper-large-v3',
 	'groq-whisper-v3-turbo': 'whisper-large-v3-turbo',
 } as const;
 
+const DEFAULT_STT_PROVIDER: STTProviderType = 'groq-whisper-v3-turbo';
+
+function resolveSTTProvider(provider: string | undefined): STTProviderType {
+	if (provider === 'groq-whisper-v3' || provider === 'groq-whisper-v3-turbo') {
+		return provider;
+	}
+
+	return DEFAULT_STT_PROVIDER;
+}
+
 /**
  * Language mapping for different providers
- * Deepgram uses ISO 639-1 codes (fr, en, es, it, de)
  * Groq Whisper uses the same format
  */
 const LANGUAGE_MAP: Record<string, string> = {
@@ -43,45 +49,6 @@ const LANGUAGE_MAP: Record<string, string> = {
 	it: 'it',
 	de: 'de',
 };
-
-/**
- * Transcribes audio using Deepgram
- */
-async function transcribeWithDeepgram(
-	config: STTProviderConfig,
-	audioBuffer: ArrayBuffer,
-	language: string
-): Promise<TranscriptionResult> {
-	if (!config.DEEPGRAM_API_KEY) {
-		throw new Error('DEEPGRAM_API_KEY is required when using deepgram provider');
-	}
-
-	const deepgram = createClient(config.DEEPGRAM_API_KEY);
-	const mappedLanguage = LANGUAGE_MAP[language] || 'fr';
-
-	const { result } = await deepgram.listen.prerecorded.transcribeFile(
-		Buffer.from(audioBuffer),
-		{
-			model: PROVIDER_MODELS.deepgram,
-			language: mappedLanguage,
-			smart_format: true,
-			punctuate: true,
-		}
-	);
-
-	if (!result?.results?.channels?.[0]?.alternatives?.[0]) {
-		throw new Error('No transcription result from Deepgram');
-	}
-
-	const transcript = result.results.channels[0].alternatives[0].transcript;
-	const confidence = result.results.channels[0].alternatives[0].confidence;
-
-	return {
-		transcript,
-		confidence,
-		duration: result.metadata?.duration,
-	};
-}
 
 /**
  * Transcribes audio using Groq Whisper
@@ -137,18 +104,15 @@ export async function transcribeAudio(
 	audioBuffer: ArrayBuffer,
 	language: string = 'fr'
 ): Promise<TranscriptionResult> {
-	const provider = (config.STT_PROVIDER || 'deepgram') as STTProviderType;
+	const provider = resolveSTTProvider(config.STT_PROVIDER);
 
 	switch (provider) {
 		case 'groq-whisper-v3':
 			return transcribeWithGroq(config, audioBuffer, language, 'whisper-large-v3');
 
 		case 'groq-whisper-v3-turbo':
-			return transcribeWithGroq(config, audioBuffer, language, 'whisper-large-v3-turbo');
-
-		case 'deepgram':
 		default:
-			return transcribeWithDeepgram(config, audioBuffer, language);
+			return transcribeWithGroq(config, audioBuffer, language, 'whisper-large-v3-turbo');
 	}
 }
 
@@ -156,13 +120,12 @@ export async function transcribeAudio(
  * Gets the current STT provider name
  */
 export function getSTTProviderName(config: STTProviderConfig): string {
-	return (config.STT_PROVIDER || 'deepgram') as STTProviderType;
+	return resolveSTTProvider(config.STT_PROVIDER);
 }
 
 /**
  * Gets the current STT model name
  */
 export function getSTTModelName(config: STTProviderConfig): string {
-	const provider = config.STT_PROVIDER || 'deepgram';
-	return PROVIDER_MODELS[provider as STTProviderType];
+	return PROVIDER_MODELS[resolveSTTProvider(config.STT_PROVIDER)];
 }

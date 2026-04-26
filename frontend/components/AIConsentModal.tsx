@@ -53,7 +53,7 @@ export function AIConsentModal({ onAccept }: AIConsentModalProps) {
           <Text style={styles.sectionTitle}>{t('aiConsent.whoReceives')}</Text>
 
           <View style={styles.providerRow}>
-            <Text style={styles.providerName}>Deepgram & Groq</Text>
+            <Text style={styles.providerName}>Groq Whisper</Text>
             <Text style={styles.providerPurpose}>{t('aiConsent.providerTranscription')}</Text>
           </View>
           <View style={styles.providerRow}>
