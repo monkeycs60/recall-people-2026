@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { useQueryClient, QueryClient } from '@tanstack/react-query';
 import { useContactsQuery } from '@/hooks/useContactsQuery';
 import { useContactPreviewsQuery } from '@/hooks/useContactPreviewsQuery';
-import { useGroupsQuery, useContactIdsForGroup } from '@/hooks/useGroupsQuery';
+import { useGroupsQuery, useContactIdsForGroup, useGroupContactCounts } from '@/hooks/useGroupsQuery';
 import { Contact, HotTopic } from '@/types';
 import {
   Search,
@@ -37,14 +37,14 @@ import { GlobalGroupsManagementSheet } from '@/components/contact/GlobalGroupsMa
 import { Paywall } from '@/components/Paywall';
 import { queryKeys } from '@/lib/query-keys';
 import { contactService } from '@/services/contact.service';
-import { formatDistanceToNow } from 'date-fns';
-import { format, parseISO, differenceInDays } from 'date-fns';
+import { format, formatDistanceToNow, parseISO, differenceInDays } from 'date-fns';
 import { getDateLocale } from '@/utils/dateLocale';
 import { useSettingsStore } from '@/stores/settings-store';
 import { useSubscriptionStore } from '@/stores/subscription-store';
 import { useAppStore } from '@/stores/app-store';
 import { generateAvatarFromHints } from '@/lib/api';
 import { showErrorToast, showInfoToast } from '@/lib/error-handler';
+import { buildGroupChips } from '@/lib/group-cache';
 
 const FOLLOW_UP_THRESHOLD_DAYS = 14;
 
@@ -116,7 +116,9 @@ export default function ContactsScreen() {
 
   const { contacts, isLoading, refetch, isPlaceholderData } = useContactsQuery();
   const { previews: contactPreviews, refetchAll: refetchPreviews } = useContactPreviewsQuery(contacts);
-  const { groups } = useGroupsQuery();
+  const { groups, refetch: refetchGroups } = useGroupsQuery();
+  const { data: contactCountByGroupId = {}, refetch: refetchGroupContactCounts } =
+    useGroupContactCounts();
   const notSeenThresholdDays = useSettingsStore((state) => state.notSeenThresholdDays);
   const syncQuotas = useSubscriptionStore((state) => state.syncQuotas);
   const canCreateContact = useSubscriptionStore((state) => state.canCreateContact);
@@ -130,14 +132,28 @@ export default function ContactsScreen() {
 
   const groupsSheetRef = useRef<BottomSheetModal>(null);
 
-  const { data: groupContactIds } = useContactIdsForGroup(selectedGroupId);
+  const { data: groupContactIds, refetch: refetchGroupContactIds } =
+    useContactIdsForGroup(selectedGroupId);
 
   useFocusEffect(
     useCallback(() => {
       refetch();
       refetchPreviews();
+      refetchGroups();
+      refetchGroupContactCounts();
+      if (selectedGroupId) {
+        refetchGroupContactIds();
+      }
       syncQuotas();
-    }, [refetch, refetchPreviews, syncQuotas])
+    }, [
+      refetch,
+      refetchPreviews,
+      refetchGroups,
+      refetchGroupContactCounts,
+      refetchGroupContactIds,
+      selectedGroupId,
+      syncQuotas,
+    ])
   );
 
   const handleGroupSelect = (groupId: string | null) => {
@@ -204,7 +220,7 @@ export default function ContactsScreen() {
   }).current;
 
   const onViewableItemsChanged = useCallback(
-    ({ viewableItems }: { viewableItems: Array<{ item: Contact }> }) => {
+    ({ viewableItems }: { viewableItems: { item: Contact }[] }) => {
       viewableItems.forEach(({ item }) => {
         prefetchContactDetails(queryClient, item.id);
       });
@@ -252,19 +268,24 @@ export default function ContactsScreen() {
 
   const handleRefresh = async () => {
     setIsPullRefreshing(true);
-    await Promise.all([refetch(), refetchPreviews()]);
+    await Promise.all([
+      refetch(),
+      refetchPreviews(),
+      refetchGroups(),
+      refetchGroupContactCounts(),
+      selectedGroupId ? refetchGroupContactIds() : Promise.resolve(),
+    ]);
     setIsPullRefreshing(false);
   };
 
   const groupChips = useMemo(() => {
-    const allChip = { id: null as string | null, name: t('contacts.allGroup'), count: contacts.length };
-    const groupList = groups.map((group) => ({
-      id: group.id as string | null,
-      name: group.name,
-      count: 0,
-    }));
-    return [allChip, ...groupList];
-  }, [groups, contacts, t]);
+    return buildGroupChips({
+      allGroups: groups,
+      contactCountByGroupId,
+      allGroupLabel: t('contacts.allGroup'),
+      totalContactsCount: contacts.length,
+    });
+  }, [groups, contactCountByGroupId, contacts.length, t]);
 
   const renderContact = ({ item, index }: { item: Contact; index: number }) => {
     const preview = contactPreviews.get(item.id);
