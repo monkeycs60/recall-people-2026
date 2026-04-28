@@ -57,7 +57,7 @@ export function AIConsentModal({ onAccept }: AIConsentModalProps) {
             <Text style={styles.providerPurpose}>{t('aiConsent.providerTranscription')}</Text>
           </View>
           <View style={styles.providerRow}>
-            <Text style={styles.providerName}>Cerebras</Text>
+            <Text style={styles.providerName}>Cerebras gpt-oss-120b</Text>
             <Text style={styles.providerPurpose}>{t('aiConsent.providerAnalysis')}</Text>
           </View>
           <View style={styles.providerRow}>

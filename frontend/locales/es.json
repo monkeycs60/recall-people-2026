@@ -607,7 +607,7 @@
         "description": "Recall está construido con la privacidad como principio fundamental. Creemos que tus relaciones personales y la información que registras deben permanecer privadas y bajo tu control."
       },
       "localStorage": {
-        "title": "Almacenamiento 100% local",
+        "title": "Almacenamiento local-first",
         "description": "Tus datos de contactos, notas, hechos y recuerdos se almacenan localmente en tu dispositivo. Solo salen de tu teléfono cuando usas funciones en línea como IA, inicio de sesión o suscripciones."
       },
       "dataSovereignty": {
@@ -663,8 +663,8 @@
     },
     "privacy": {
       "title": "Tus datos se quedan en tu teléfono",
-      "description": "Tus notas viven localmente. La IA solo se usa cuando pides procesamiento.",
-      "local": "local"
+      "description": "Tus notas viven localmente. Los proveedores de IA procesan datos solo cuando usas funciones de IA.",
+      "local": "local-first"
     },
     "redoTour": "Repetir tour guiado"
   },
@@ -897,10 +897,10 @@
   },
   "aiConsent": {
     "title": "Procesamiento de datos con IA",
-    "subtitle": "Recall People utiliza servicios de IA de terceros para transcribir tus grabaciones de voz, extraer información de contactos y generar avatares. Esto es lo que debes saber.",
+    "subtitle": "Recall People utiliza servicios de IA de terceros para transcribir tus grabaciones de voz, extraer información de contactos, responder preguntas y generar avatares. Esto es lo que debes saber.",
     "whatWeShare": "Qué datos se procesan",
     "voiceData": "Las grabaciones de voz se envían para transcripción de audio a texto",
-    "textData": "El texto transcrito se analiza para extraer contactos, datos y responder a tus preguntas",
+    "textData": "El texto transcrito, los nombres de contactos, las notas y tus preguntas se analizan para extraer información, crear resúmenes, sugerir preguntas y responderte",
     "avatarData": "Descripciones textuales (género, edad, estilo) se usan para generar avatares ilustrados",
     "whoReceives": "Proveedores de IA externos",
     "providerTranscription": "Transcripción",
@@ -909,7 +909,7 @@
     "protections": "Tus protecciones",
     "noTraining": "Tus datos nunca se usan para entrenar modelos de IA",
     "noStorage": "Los proveedores de IA procesan datos para devolver resultados, no para entrenar modelos",
-    "localFirst": "Todos tus contactos y notas permanecen en tu dispositivo",
+    "localFirst": "La base de datos de la app permanece en tu dispositivo; los datos de IA se envían solo para el procesamiento solicitado",
     "readPrivacyPolicy": "Leer nuestra política de privacidad",
     "accept": "Entiendo y acepto"
   }

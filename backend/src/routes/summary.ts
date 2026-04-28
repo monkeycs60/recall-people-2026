@@ -176,7 +176,7 @@ summaryRoutes.post('/', async (c) => {
 			AI_PROVIDER: c.env.AI_PROVIDER,
 		};
 
-		console.log('[Summary] Using AI provider:', c.env.AI_PROVIDER || 'openai');
+		console.log('[Summary] Using AI provider:', c.env.AI_PROVIDER || 'cerebras');
 
 		const template = PROMPT_TEMPLATES[language] || PROMPT_TEMPLATES.fr;
 

@@ -16,6 +16,7 @@ import Animated, {
   withSpring,
   interpolate,
   Extrapolation,
+  SharedValue,
 } from 'react-native-reanimated';
 import { Globe, Check, Shield, Search, Mic, PenLine } from 'lucide-react-native';
 import { Video, ResizeMode } from 'expo-av';
@@ -34,6 +35,36 @@ const CONTENT_WIDTH = Math.min(SCREEN_WIDTH, 500);
 
 type OnboardingProps = {
   onComplete: () => void;
+};
+
+type PaginationDotProps = {
+  index: number;
+  scrollX: SharedValue<number>;
+};
+
+const PaginationDot = ({ index, scrollX }: PaginationDotProps) => {
+  const dotStyle = useAnimatedStyle(() => {
+    const inputRange = [
+      (index - 1) * SCREEN_WIDTH,
+      index * SCREEN_WIDTH,
+      (index + 1) * SCREEN_WIDTH,
+    ];
+
+    const width = interpolate(scrollX.value, inputRange, [8, 24, 8], Extrapolation.CLAMP);
+    const isActive = interpolate(
+      scrollX.value,
+      inputRange,
+      [0, 1, 0],
+      Extrapolation.CLAMP
+    );
+
+    return {
+      width: withSpring(width),
+      backgroundColor: isActive > 0.5 ? Colors.primary : Colors.textMuted,
+    };
+  });
+
+  return <Animated.View style={[styles.dot, dotStyle]} />;
 };
 
 export const Onboarding = ({ onComplete }: OnboardingProps) => {
@@ -314,30 +345,9 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
 
       <View style={[styles.bottomSection, { paddingBottom: Math.max(insets.bottom, Spacing.lg), backgroundColor: ONBOARDING_BACKGROUND }]}>
         <View style={styles.pagination}>
-          {slides.map((_, index) => {
-            const dotStyle = useAnimatedStyle(() => {
-              const inputRange = [
-                (index - 1) * SCREEN_WIDTH,
-                index * SCREEN_WIDTH,
-                (index + 1) * SCREEN_WIDTH,
-              ];
-
-              const width = interpolate(scrollX.value, inputRange, [8, 24, 8], Extrapolation.CLAMP);
-              const isActive = interpolate(
-                scrollX.value,
-                inputRange,
-                [0, 1, 0],
-                Extrapolation.CLAMP
-              );
-
-              return {
-                width: withSpring(width),
-                backgroundColor: isActive > 0.5 ? Colors.primary : Colors.textMuted,
-              };
-            });
-
-            return <Animated.View key={index} style={[styles.dot, dotStyle]} />;
-          })}
+          {slides.map((_, index) => (
+            <PaginationDot key={index} index={index} scrollX={scrollX} />
+          ))}
         </View>
 
         <Pressable
