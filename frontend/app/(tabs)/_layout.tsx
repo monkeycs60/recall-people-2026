@@ -33,7 +33,7 @@ export default function TabLayout() {
 
   const handleOnboardingComplete = () => {
     setHasSeenOnboarding(true);
-    router.push('/record');
+    router.replace('/(tabs)');
   };
 
   if (checking) {
