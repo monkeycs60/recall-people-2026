@@ -18,15 +18,15 @@ import Animated, {
   Extrapolation,
   SharedValue,
 } from 'react-native-reanimated';
-import { Globe, Check, Shield, Search, Mic, PenLine } from 'lucide-react-native';
-import { Video, ResizeMode } from 'expo-av';
+import { Globe, Check, Search, Mic, PenLine } from 'lucide-react-native';
 import { useSettingsStore } from '@/stores/settings-store';
 import { changeLanguage } from '@/lib/i18n';
 import { Language, SUPPORTED_LANGUAGES, LANGUAGE_NAMES, LANGUAGE_FLAGS } from '@/types';
 import { Colors, Spacing, BorderRadius, Fonts, Shadows } from '@/constants/theme';
 
-const DEMO_VIDEO = require('@/assets/video/onboarding-demo.webm');
-const SOLUTION_ILLUSTRATION = require('@/assets/ai-assets/voice-to-contact-cards.png');
+const SOLUTION_ILLUSTRATION = require('@/assets/ai-assets/onboarding-solution.png');
+const DEMO_ILLUSTRATION = require('@/assets/ai-assets/onboarding-demo.png');
+const PRIVACY_ILLUSTRATION = require('@/assets/ai-assets/onboarding-privacy.png');
 
 const ONBOARDING_BACKGROUND = Colors.background;
 
@@ -204,15 +204,11 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
       <View style={styles.demoContent}>
         <Text style={styles.title}>{t('onboarding.demo.title')}</Text>
 
-        {/* Video demo */}
-        <View style={styles.videoContainer}>
-          <Video
-            source={DEMO_VIDEO}
-            style={styles.video}
-            resizeMode={ResizeMode.CONTAIN}
-            shouldPlay
-            isLooping
-            isMuted
+        <View style={styles.demoIllustrationWrapper}>
+          <Image
+            source={DEMO_ILLUSTRATION}
+            style={styles.demoIllustration}
+            resizeMode="cover"
           />
         </View>
 
@@ -282,8 +278,12 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
       style={[styles.slideContainer, { width: SCREEN_WIDTH, backgroundColor: ONBOARDING_BACKGROUND }]}
     >
       <View style={styles.privacyContent}>
-        <View style={styles.privacyIconContainer}>
-          <Shield size={64} color={Colors.primary} />
+        <View style={styles.privacyIllustrationWrapper}>
+          <Image
+            source={PRIVACY_ILLUSTRATION}
+            style={styles.privacyIllustration}
+            resizeMode="cover"
+          />
         </View>
         <Text style={styles.title}>{t('onboarding.privacy.title')}</Text>
         <Text style={styles.description}>{t('onboarding.privacy.description')}</Text>
@@ -406,11 +406,14 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: Fonts.sans.bold,
     color: Colors.textPrimary,
+    width: '100%',
     fontSize: 24,
+    lineHeight: 32,
     letterSpacing: -0.5,
     textAlign: 'center',
     marginBottom: Spacing.md,
     paddingHorizontal: Spacing.md,
+    paddingVertical: 2,
   },
   description: {
     color: Colors.textSecondary,
@@ -493,8 +496,8 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   illustrationWrapper: {
-    width: CONTENT_WIDTH * 0.45,
-    height: CONTENT_WIDTH * 0.45,
+    width: CONTENT_WIDTH * 0.5,
+    height: CONTENT_WIDTH * 0.5,
     borderRadius: BorderRadius.xl,
     overflow: 'hidden',
     backgroundColor: Colors.surface,
@@ -507,7 +510,9 @@ const styles = StyleSheet.create({
   solutionTitle: {
     fontFamily: Fonts.sans.bold,
     color: Colors.textPrimary,
+    width: '100%',
     fontSize: 22,
+    lineHeight: 30,
     letterSpacing: -0.5,
     textAlign: 'center',
     marginTop: Spacing.xl,
@@ -559,16 +564,16 @@ const styles = StyleSheet.create({
     maxWidth: CONTENT_WIDTH,
     width: '100%',
   },
-  videoContainer: {
-    width: CONTENT_WIDTH * 0.65,
-    height: CONTENT_WIDTH * 1.1,
+  demoIllustrationWrapper: {
+    width: CONTENT_WIDTH * 0.78,
+    height: CONTENT_WIDTH * 0.78,
     borderRadius: BorderRadius.xl,
     overflow: 'hidden',
     backgroundColor: Colors.surface,
     ...Shadows.floating,
     marginVertical: Spacing.lg,
   },
-  video: {
+  demoIllustration: {
     width: '100%',
     height: '100%',
   },
@@ -662,11 +667,17 @@ const styles = StyleSheet.create({
     maxWidth: CONTENT_WIDTH,
     width: '100%',
   },
-  privacyIconContainer: {
-    backgroundColor: Colors.primaryLight,
-    padding: Spacing.xl,
-    borderRadius: BorderRadius.full,
+  privacyIllustrationWrapper: {
+    width: CONTENT_WIDTH * 0.68,
+    height: CONTENT_WIDTH * 0.68,
+    borderRadius: BorderRadius.xl,
+    overflow: 'hidden',
+    backgroundColor: Colors.background,
     marginBottom: Spacing.xl,
+  },
+  privacyIllustration: {
+    width: '100%',
+    height: '100%',
   },
   privacyBadge: {
     backgroundColor: Colors.primary,
