@@ -14,7 +14,7 @@ import { useState, useRef, useCallback } from 'react';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { Mic, Send, Sparkle, ChevronRight, Trash2 } from 'lucide-react-native';
+import { BotMessageSquare, Mic, Send, ChevronRight, Trash2 } from 'lucide-react-native';
 import { Colors, Shadows, Fonts } from '@/constants/theme';
 import { useContactsQuery } from '@/hooks/useContactsQuery';
 import { noteService } from '@/services/note.service';
@@ -279,8 +279,10 @@ export default function AssistantScreen() {
 			<View style={styles.container}>
 				<View style={[styles.header, { paddingTop: insets.top + 14 }]}>
 					<View style={styles.titleRow}>
-						<Sparkle size={22} color={Colors.primary} />
 						<Text style={styles.screenTitle}>{t('assistant.title')}</Text>
+						<View style={styles.titleIconContainer}>
+							<BotMessageSquare size={19} color={Colors.primary} strokeWidth={2.1} />
+						</View>
 					</View>
 					<Text style={styles.headerDescription}>{t('assistant.description')}</Text>
 				</View>
@@ -467,6 +469,11 @@ const styles = StyleSheet.create({
 		fontSize: 30,
 		letterSpacing: -0.8,
 		color: Colors.textPrimary,
+	},
+	titleIconContainer: {
+		height: 30,
+		justifyContent: 'center',
+		transform: [{ translateY: 4 }],
 	},
 	headerDescription: {
 		fontSize: 13,

@@ -5,7 +5,7 @@ import '../global.css';
 import '@/lib/i18n';
 import { initDatabase } from '@/lib/db';
 import { Text, View, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
-import { ArrowLeft } from 'lucide-react-native';
+import { ArrowLeft, BotMessageSquare } from 'lucide-react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useSettingsStore } from '@/stores/settings-store';
 import { useAppStore } from '@/stores/app-store';
@@ -253,7 +253,12 @@ export default function RootLayout() {
           </Stack>
         </QueryClientProvider>
       </BottomSheetModalProvider>
-      <Toaster position="bottom-center" />
+      <Toaster
+        position="bottom-center"
+        icons={{
+          info: <BotMessageSquare size={18} color={Colors.primary} strokeWidth={2.1} />,
+        }}
+      />
     </GestureHandlerRootView>
   );
 }

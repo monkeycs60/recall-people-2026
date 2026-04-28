@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { ToastConfig as ToastConfigType } from 'react-native-toast-message';
 import { Colors, Spacing } from '@/constants/theme';
-import { AlertCircle, CheckCircle, Info } from 'lucide-react-native';
+import { AlertCircle, BotMessageSquare, CheckCircle } from 'lucide-react-native';
 
 export const toastConfig: ToastConfigType = {
   success: (props) => (
@@ -24,7 +24,7 @@ export const toastConfig: ToastConfigType = {
   ),
   info: (props) => (
     <View style={[styles.container, styles.infoContainer]}>
-      <Info size={20} color={Colors.textPrimary} />
+      <BotMessageSquare size={20} color={Colors.textPrimary} />
       <View style={styles.textContainer}>
         <Text style={styles.title}>{props.text1}</Text>
         {props.text2 && <Text style={styles.subtitle}>{props.text2}</Text>}
