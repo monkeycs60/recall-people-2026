@@ -24,7 +24,7 @@ module.exports = {
   expo: {
     name: 'Recall People',
     slug: 'recall-people',
-    version: '1.0.1',
+    version: '1.0.2',
     orientation: 'portrait',
     icon: './assets/images/icon.png',
     scheme: 'recall-people',
@@ -33,7 +33,7 @@ module.exports = {
     ios: {
       supportsTablet: false,
       bundleIdentifier: 'com.monkeycs60.recallpeople2026',
-      buildNumber: '21',
+      buildNumber: '23',
     },
     android: {
       adaptiveIcon: {
@@ -48,7 +48,7 @@ module.exports = {
         'android.permission.RECORD_AUDIO',
         'android.permission.MODIFY_AUDIO_SETTINGS',
       ],
-      versionCode: 2,
+      versionCode: 3,
     },
     web: {
       output: 'static',
@@ -109,7 +109,7 @@ module.exports = {
       localApiUrl: `http://${localIp}:${BACKEND_PORT}`,
     },
     owner: 'clement-serizay',
-    runtimeVersion: '1.0.1',
+    runtimeVersion: '1.0.2',
     updates: {
       url: 'https://u.expo.dev/005eaea1-73bc-47b0-80e8-5e15dee1c600',
     },
