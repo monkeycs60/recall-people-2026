@@ -7,8 +7,10 @@ import Purchases, {
 import { Platform } from 'react-native';
 import { useSubscriptionStore } from '@/stores/subscription-store';
 
-const REVENUECAT_API_KEY_IOS = process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY || '';
-const REVENUECAT_API_KEY_ANDROID = process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY || '';
+const REVENUECAT_API_KEY_IOS =
+  process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY || 'appl_fKYAAfmiprNgavJpGZzMZguNXmL';
+const REVENUECAT_API_KEY_ANDROID =
+  process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY || 'goog_OsgjXyFGkTUhWvmlduKVEtihcoa';
 const ENTITLEMENT_IDS = ['premium', 'Recall People Pro'];
 
 let configurePromise: Promise<void> | null = null;

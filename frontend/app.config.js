@@ -48,7 +48,7 @@ module.exports = {
         'android.permission.RECORD_AUDIO',
         'android.permission.MODIFY_AUDIO_SETTINGS',
       ],
-      versionCode: 4,
+      versionCode: 5,
     },
     web: {
       output: 'static',
