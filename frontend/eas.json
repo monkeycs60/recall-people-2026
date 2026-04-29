@@ -60,6 +60,13 @@
         "buildType": "apk",
         "gradleCommand": ":app:assembleRelease"
       }
+    },
+    "local-android-store": {
+      "extends": "production",
+      "android": {
+        "buildType": "app-bundle",
+        "autoIncrement": false
+      }
     }
   },
   "submit": {
