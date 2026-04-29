@@ -468,9 +468,14 @@
     },
     "reminderFrequency": "Me rappeler de prendre des nouvelles",
     "reminderDefault": "Par défaut",
+    "reminderWeek": "Toutes les semaines",
     "reminderWeeks": "Toutes les 2 semaines",
     "reminderMonth": "Tous les mois",
+    "reminderTwoMonths": "Tous les 2 mois",
     "reminderQuarter": "Tous les 3 mois",
+    "reminderSixMonths": "Tous les 6 mois",
+    "reminderYear": "Tous les ans",
+    "reminderCustomDays": "Tous les {{count}} jours",
     "reminderNever": "Jamais"
   },
   "selectContact": {

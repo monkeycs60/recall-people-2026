@@ -3,12 +3,21 @@ import { notificationService } from './notification.service';
 import { useSettingsStore } from '@/stores/settings-store';
 import { useSubscriptionStore } from '@/stores/subscription-store';
 import { differenceInDays } from 'date-fns';
+import {
+  buildStaleContactReminderFilter,
+  CONTACT_REMINDER_NEVER_DAYS,
+  getEffectiveReminderFrequencyDays,
+} from '@/lib/reminder-frequency';
 
 type StaleContact = {
   id: string;
   first_name: string;
   last_name: string | null;
   last_contact_at: string;
+};
+
+type ContactReminderCandidate = StaleContact & {
+  reminder_frequency_days: number | null;
 };
 
 type PostEventHotTopic = {
@@ -26,21 +35,17 @@ type CountResult = {
 export const reminderService = {
   scheduleNotSeenReminders: async () => {
     const thresholdDays = useSettingsStore.getState().notSeenThresholdDays;
-
-    if (thresholdDays === 0) return;
-
     const db = await getDatabase();
+    const staleFilter = buildStaleContactReminderFilter(thresholdDays);
+
+    await notificationService.cancelNotSeenReminders();
 
     const staleContacts = await db.getAllAsync<StaleContact>(
       `SELECT id, first_name, last_name, last_contact_at FROM contacts
        WHERE last_contact_at IS NOT NULL
-         AND (reminder_frequency_days IS NULL OR reminder_frequency_days != -1)
-         AND (
-           (reminder_frequency_days IS NOT NULL AND julianday('now') - julianday(last_contact_at) > reminder_frequency_days)
-           OR (reminder_frequency_days IS NULL AND julianday('now') - julianday(last_contact_at) > ?)
-         )
+         AND ${staleFilter.whereSql}
        ORDER BY last_contact_at ASC LIMIT 5`,
-      [thresholdDays]
+      staleFilter.params
     );
 
     for (const contact of staleContacts) {
@@ -55,6 +60,42 @@ export const reminderService = {
         daysSince
       );
     }
+  },
+
+  rescheduleNotSeenReminderForContact: async (contactId: string) => {
+    const db = await getDatabase();
+    const thresholdDays = useSettingsStore.getState().notSeenThresholdDays;
+
+    await notificationService.cancelNotSeenReminders(contactId);
+
+    const contact = await db.getFirstAsync<ContactReminderCandidate>(
+      `SELECT id, first_name, last_name, last_contact_at, reminder_frequency_days
+       FROM contacts
+       WHERE id = ? AND last_contact_at IS NOT NULL`,
+      [contactId]
+    );
+
+    if (!contact) return;
+
+    const effectiveFrequencyDays = getEffectiveReminderFrequencyDays(
+      contact.reminder_frequency_days,
+      thresholdDays
+    );
+
+    if (effectiveFrequencyDays === CONTACT_REMINDER_NEVER_DAYS) return;
+
+    const daysSince = differenceInDays(new Date(), new Date(contact.last_contact_at));
+    if (daysSince <= effectiveFrequencyDays) return;
+
+    const contactName = contact.last_name
+      ? `${contact.first_name} ${contact.last_name}`
+      : contact.first_name;
+
+    await notificationService.scheduleNotSeenReminder(
+      contact.id,
+      contactName,
+      daysSince
+    );
   },
 
   scheduleWeeklyDigest: async () => {
@@ -74,15 +115,12 @@ export const reminderService = {
     );
 
     const thresholdDays = useSettingsStore.getState().notSeenThresholdDays;
+    const staleFilter = buildStaleContactReminderFilter(thresholdDays);
     const staleResult = await db.getFirstAsync<CountResult>(
       `SELECT COUNT(*) as count FROM contacts
        WHERE last_contact_at IS NOT NULL
-         AND (reminder_frequency_days IS NULL OR reminder_frequency_days != -1)
-         AND (
-           (reminder_frequency_days IS NOT NULL AND julianday('now') - julianday(last_contact_at) > reminder_frequency_days)
-           OR (reminder_frequency_days IS NULL AND julianday('now') - julianday(last_contact_at) > ?)
-         )`,
-      [thresholdDays || 30]
+         AND ${staleFilter.whereSql}`,
+      staleFilter.params
     );
 
     const eventsCount = eventsResult?.count ?? 0;

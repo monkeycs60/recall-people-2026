@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { contactService } from '@/services/contact.service';
+import { reminderService } from '@/services/reminder.service';
 import { queryKeys } from '@/lib/query-keys';
 import { Gender } from '@/types';
 
@@ -73,11 +74,15 @@ export function useUpdateContact() {
         lastContactAt: string;
       }>;
     }) => contactService.update(id, data),
-    onSuccess: (_, variables) => {
+    onSuccess: async (_, variables) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
       queryClient.invalidateQueries({
         queryKey: queryKeys.contacts.detail(variables.id),
       });
+
+      if (Object.prototype.hasOwnProperty.call(variables.data, 'reminderFrequencyDays')) {
+        await reminderService.rescheduleNotSeenReminderForContact(variables.id);
+      }
     },
   });
 }

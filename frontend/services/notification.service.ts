@@ -58,6 +58,20 @@ export const notificationService = {
     await Notifications.cancelScheduledNotificationAsync(notificationId);
   },
 
+  cancelNotSeenReminders: async (contactId?: string): Promise<void> => {
+    const scheduledNotifications = await Notifications.getAllScheduledNotificationsAsync();
+    const notSeenReminders = scheduledNotifications.filter((notification) => {
+      const data = notification.content.data;
+      return data?.type === 'not_seen' && (!contactId || data?.contactId === contactId);
+    });
+
+    await Promise.all(
+      notSeenReminders.map((notification) =>
+        Notifications.cancelScheduledNotificationAsync(notification.identifier)
+      )
+    );
+  },
+
   scheduleNotSeenReminder: async (
     contactId: string,
     contactName: string,
@@ -139,11 +153,14 @@ export const notificationService = {
     await Notifications.cancelAllScheduledNotificationsAsync();
   },
 
-  setupNotificationListener: (onNotificationTap: (eventId: string) => void): (() => void) => {
+  setupNotificationListener: (onNotificationTap: (data: { eventId?: string; contactId?: string }) => void): (() => void) => {
     const subscription = Notifications.addNotificationResponseReceivedListener((response: NotificationResponse) => {
-      const eventId = response.notification.request.content.data?.eventId as string;
-      if (eventId) {
-        onNotificationTap(eventId);
+      const data = response.notification.request.content.data;
+      const eventId = data?.eventId as string | undefined;
+      const contactId = data?.contactId as string | undefined;
+
+      if (eventId || contactId) {
+        onNotificationTap({ eventId, contactId });
       }
     });
 

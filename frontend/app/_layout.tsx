@@ -96,10 +96,17 @@ export default function RootLayout() {
 
   // Setup notification tap handler to navigate to contact
   useEffect(() => {
-    const cleanup = notificationService.setupNotificationListener(async (eventId) => {
-      const hotTopic = await hotTopicService.getById(eventId);
-      if (hotTopic) {
-        router.push(`/contact/${hotTopic.contactId}`);
+    const cleanup = notificationService.setupNotificationListener(async ({ eventId, contactId }) => {
+      if (contactId) {
+        router.push(`/contact/${contactId}`);
+        return;
+      }
+
+      if (eventId) {
+        const hotTopic = await hotTopicService.getById(eventId);
+        if (hotTopic) {
+          router.push(`/contact/${hotTopic.contactId}`);
+        }
       }
     });
 

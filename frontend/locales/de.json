@@ -432,9 +432,14 @@
     },
     "reminderFrequency": "Erinnere mich nachzufragen",
     "reminderDefault": "Standard",
+    "reminderWeek": "Jede Woche",
     "reminderWeeks": "Alle 2 Wochen",
     "reminderMonth": "Jeden Monat",
+    "reminderTwoMonths": "Alle 2 Monate",
     "reminderQuarter": "Alle 3 Monate",
+    "reminderSixMonths": "Alle 6 Monate",
+    "reminderYear": "Jedes Jahr",
+    "reminderCustomDays": "Alle {{count}} Tage",
     "reminderNever": "Nie"
   },
   "selectContact": {

@@ -45,6 +45,8 @@ import { canActivateTestPro } from '@/config/pro-whitelist';
 import { deleteAccount } from '@/lib/api';
 import { deleteDatabase } from '@/lib/db';
 import { clearAuth } from '@/lib/auth';
+import { ACCOUNT_REMINDER_FREQUENCY_OPTIONS } from '@/lib/reminder-frequency';
+import { reminderService } from '@/services/reminder.service';
 
 export default function ProfileScreen() {
   const { t } = useTranslation();
@@ -210,12 +212,10 @@ export default function ProfileScreen() {
     return t('settings.notSeenDays', { count: days });
   }, [t]);
 
-  const notSeenThresholdOptions = [
-    { label: getNotSeenThresholdLabel(30), value: 30 },
-    { label: getNotSeenThresholdLabel(60), value: 60 },
-    { label: getNotSeenThresholdLabel(90), value: 90 },
-    { label: getNotSeenThresholdLabel(0), value: 0 },
-  ];
+  const notSeenThresholdOptions = ACCOUNT_REMINDER_FREQUENCY_OPTIONS.map((value) => ({
+    label: getNotSeenThresholdLabel(value),
+    value,
+  }));
 
   const handleChangeNotSeenThreshold = useCallback(() => {
     notSeenThresholdSheetRef.current?.present();
@@ -224,6 +224,9 @@ export default function ProfileScreen() {
   const handleNotSeenThresholdSelect = useCallback((value: number | null) => {
     if (value !== null) {
       setNotSeenThresholdDays(value);
+      reminderService.scheduleNotSeenReminders().catch((error) => {
+        console.warn('[profile] Failed to reschedule not-seen reminders:', error);
+      });
     }
   }, [setNotSeenThresholdDays]);
 

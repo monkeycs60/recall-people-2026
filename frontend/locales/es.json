@@ -432,9 +432,14 @@
     },
     "reminderFrequency": "Recordarme ponerme al día",
     "reminderDefault": "Por defecto",
+    "reminderWeek": "Cada semana",
     "reminderWeeks": "Cada 2 semanas",
     "reminderMonth": "Cada mes",
+    "reminderTwoMonths": "Cada 2 meses",
     "reminderQuarter": "Cada 3 meses",
+    "reminderSixMonths": "Cada 6 meses",
+    "reminderYear": "Cada año",
+    "reminderCustomDays": "Cada {{count}} días",
     "reminderNever": "Nunca"
   },
   "selectContact": {

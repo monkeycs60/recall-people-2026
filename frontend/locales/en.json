@@ -432,9 +432,14 @@
     },
     "reminderFrequency": "Remind me to catch up",
     "reminderDefault": "Default",
+    "reminderWeek": "Every week",
     "reminderWeeks": "Every 2 weeks",
     "reminderMonth": "Every month",
+    "reminderTwoMonths": "Every 2 months",
     "reminderQuarter": "Every 3 months",
+    "reminderSixMonths": "Every 6 months",
+    "reminderYear": "Every year",
+    "reminderCustomDays": "Every {{count}} days",
     "reminderNever": "Never"
   },
   "selectContact": {

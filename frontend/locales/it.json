@@ -432,9 +432,14 @@
     },
     "reminderFrequency": "Ricordami di risentirlo",
     "reminderDefault": "Predefinito",
+    "reminderWeek": "Ogni settimana",
     "reminderWeeks": "Ogni 2 settimane",
     "reminderMonth": "Ogni mese",
+    "reminderTwoMonths": "Ogni 2 mesi",
     "reminderQuarter": "Ogni 3 mesi",
+    "reminderSixMonths": "Ogni 6 mesi",
+    "reminderYear": "Ogni anno",
+    "reminderCustomDays": "Ogni {{count}} giorni",
     "reminderNever": "Mai"
   },
   "selectContact": {

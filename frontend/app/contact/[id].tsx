@@ -47,6 +47,7 @@ import { useSubscriptionStore } from '@/stores/subscription-store';
 import { useSettingsStore } from '@/stores/settings-store';
 import { ContactDetailSkeleton } from '@/components/skeleton/ContactDetailSkeleton';
 import { Paywall } from '@/components/Paywall';
+import { REMINDER_FREQUENCY_PRESETS } from '@/lib/reminder-frequency';
 
 
 export default function ContactDetailScreen() {
@@ -257,18 +258,23 @@ export default function ContactDetailScreen() {
 
   const getReminderFrequencyLabel = (value: number | undefined): string => {
     if (value === undefined || value === null) return `${t('contact.reminderDefault')} (${defaultLabel})`;
+    if (value === 7) return t('contact.reminderWeek');
     if (value === 14) return t('contact.reminderWeeks');
     if (value === 30) return t('contact.reminderMonth');
+    if (value === 60) return t('contact.reminderTwoMonths');
     if (value === 90) return t('contact.reminderQuarter');
+    if (value === 180) return t('contact.reminderSixMonths');
+    if (value === 365) return t('contact.reminderYear');
     if (value === -1) return t('contact.reminderNever');
-    return `${t('contact.reminderDefault')} (${defaultLabel})`;
+    return t('contact.reminderCustomDays', { count: value });
   };
 
   const reminderFrequencyOptions: Array<{ label: string; value: number | null }> = [
     { label: `${t('contact.reminderDefault')} (${defaultLabel})`, value: null },
-    { label: t('contact.reminderWeeks'), value: 14 },
-    { label: t('contact.reminderMonth'), value: 30 },
-    { label: t('contact.reminderQuarter'), value: 90 },
+    ...REMINDER_FREQUENCY_PRESETS.map((value) => ({
+      label: getReminderFrequencyLabel(value),
+      value,
+    })),
     { label: t('contact.reminderNever'), value: -1 },
   ];
 
