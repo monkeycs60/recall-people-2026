@@ -6,11 +6,10 @@ import { createOpenAI } from '@ai-sdk/openai';
  * AI Provider configuration
  * Supports switching between different AI providers via environment variables
  *
- * MIGRATION TO OPENAI (Redesign V2):
- * - Primary provider: OpenAI GPT-5 mini with Structured Outputs
- * - Structured Outputs guarantee 100% schema compliance (no parsing errors)
- * - Use temperature: 0 for deterministic outputs
- * - Fallback providers: xAI (Grok) and Cerebras remain available
+ * AI Provider configuration:
+ * - Primary provider: Cerebras gpt-oss-120b
+ * - OpenAI is reserved for avatar image generation in avatar-image.ts
+ * - xAI and OpenAI text providers remain available behind explicit configuration
  */
 
 export type AIProviderType = 'openai' | 'grok' | 'cerebras';
@@ -27,10 +26,7 @@ export type AIProviderConfig = {
 /**
  * Model configuration for each provider
  *
- * OpenAI GPT-5 mini:
- * - Recommended for extraction tasks (review flow)
- * - Supports Structured Outputs with Zod schemas
- * - Best quality/price ratio for structured data extraction
+ * Text model configuration for each provider.
  */
 const PROVIDER_MODELS = {
 	openai: 'gpt-5-mini',
@@ -56,14 +52,14 @@ export function createLlama8BModel(apiKey: string) {
 /**
  * Creates an AI provider instance based on environment configuration
  * @param config - Provider configuration including API keys
- * @returns An AI provider instance (openai, xai, or cerebras)
+ * @returns An AI provider instance (cerebras, openai, or xai)
  *
- * DEFAULT PROVIDER: OpenAI (Redesign V2)
- * - Defaults to OpenAI GPT-5 mini if AI_PROVIDER is not set
- * - Falls back to xAI (Grok) or Cerebras if OpenAI key is missing
+ * DEFAULT PROVIDER: Cerebras
+ * - Defaults to Cerebras gpt-oss-120b if AI_PROVIDER is not set
+ * - Set AI_PROVIDER explicitly in production to avoid ambiguous disclosures
  */
 export function createAIProvider(config: AIProviderConfig) {
-	const provider = (config.AI_PROVIDER || 'openai') as AIProviderType;
+	const provider = (config.AI_PROVIDER || 'cerebras') as AIProviderType;
 
 	switch (provider) {
 		case 'openai': {
@@ -101,7 +97,7 @@ export function createAIProvider(config: AIProviderConfig) {
  * @returns The model name to use
  */
 export function getAIModel(config: AIProviderConfig) {
-	const provider = (config.AI_PROVIDER || 'openai') as AIProviderType;
+	const provider = (config.AI_PROVIDER || 'cerebras') as AIProviderType;
 	return PROVIDER_MODELS[provider];
 }
 
@@ -136,7 +132,7 @@ export function getTelemetryOptions(config: AIProviderConfig) {
  * Get the current provider name (for logging)
  */
 export function getAIProviderName(config: AIProviderConfig): string {
-	return (config.AI_PROVIDER || 'openai') as AIProviderType;
+	return (config.AI_PROVIDER || 'cerebras') as AIProviderType;
 }
 
 /**

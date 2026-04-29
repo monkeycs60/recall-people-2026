@@ -22,7 +22,7 @@ import { useUpdateContact, useDeleteContact } from '@/hooks/useContactsQuery';
 import { useGroupsForContact, useGroupsQuery } from '@/hooks/useGroupsQuery';
 import { SearchSourceType } from '@/types';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import { ChevronLeft, Edit3, Plus, Trash2, MoreVertical, Calendar, Bell } from 'lucide-react-native';
+import { ChevronLeft, Edit3, Plus, Trash2, MoreVertical, Calendar, Bell, Users } from 'lucide-react-native';
 import { notificationService } from '@/services/notification.service';
 import { AISummary } from '@/components/contact/AISummary';
 import type { InputMode } from '@/components/InputModeToggle';
@@ -269,7 +269,7 @@ export default function ContactDetailScreen() {
     return t('contact.reminderCustomDays', { count: value });
   };
 
-  const reminderFrequencyOptions: Array<{ label: string; value: number | null }> = [
+  const reminderFrequencyOptions: { label: string; value: number | null }[] = [
     { label: `${t('contact.reminderDefault')} (${defaultLabel})`, value: null },
     ...REMINDER_FREQUENCY_PRESETS.map((value) => ({
       label: getReminderFrequencyLabel(value),
@@ -461,11 +461,20 @@ export default function ContactDetailScreen() {
                 </Text>
                 <View style={styles.groupChipsContainer}>
                   {contactGroups.length > 0 ? (
-                    contactGroups.map((group) => (
-                      <Pressable key={group.id} style={styles.groupChip} onPress={handleOpenGroupsSheet}>
-                        <Text style={styles.groupChipText}>{group.name}</Text>
+                    <>
+                      {contactGroups.map((group) => (
+                        <Pressable key={group.id} style={styles.groupChip} onPress={handleOpenGroupsSheet}>
+                          <Text style={styles.groupChipText}>{group.name}</Text>
+                        </Pressable>
+                      ))}
+                      <Pressable
+                        style={styles.manageGroupsButton}
+                        onPress={handleOpenGroupsSheet}
+                        accessibilityLabel={t('contact.groupsSheet.title')}
+                      >
+                        <Users size={13} color={Colors.primary} />
                       </Pressable>
-                    ))
+                    </>
                   ) : (
                     <Pressable style={styles.addGroupButton} onPress={handleOpenGroupsSheet}>
                       <Plus size={12} color={Colors.primary} />
@@ -981,6 +990,14 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     fontSize: 11,
     fontWeight: '600',
+  },
+  manageGroupsButton: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: Colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   addGroupButton: {
     flexDirection: 'row',

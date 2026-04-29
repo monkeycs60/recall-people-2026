@@ -1,6 +1,6 @@
 import { View, Pressable, StyleSheet, Text } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Users, User, Calendar, Sparkle, Mic } from 'lucide-react-native';
+import { Users, User, Calendar, Mic, BotMessageSquare } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, Shadows } from '@/constants/theme';
@@ -31,7 +31,7 @@ const TAB_CONFIG = [
   { name: 'index', icon: Users, labelKey: 'tabs.contacts' },
   { name: 'upcoming', icon: Calendar, labelKey: 'tabs.upcoming' },
   { name: '__fab', icon: Mic, labelKey: '' },
-  { name: 'search', icon: Sparkle, labelKey: 'tabs.assistant' },
+  { name: 'search', icon: BotMessageSquare, labelKey: 'tabs.assistant' },
   { name: 'profile', icon: User, labelKey: 'tabs.profile' },
 ] as const;
 

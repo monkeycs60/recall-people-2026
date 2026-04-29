@@ -313,7 +313,7 @@ askRoutes.post('/', async (c) => {
 			AI_PROVIDER: c.env.AI_PROVIDER,
 		};
 
-		console.log('[Ask] Using AI provider:', c.env.AI_PROVIDER || 'openai');
+		console.log('[Ask] Using AI provider:', c.env.AI_PROVIDER || 'cerebras');
 
 		const template = PROMPT_TEMPLATES[language] || PROMPT_TEMPLATES.fr;
 
@@ -359,7 +359,7 @@ ${template.examples}`;
 		// Create Langfuse generation span
 		const generation = trace?.generation({
 			name: 'ask-generation',
-			model: c.env.AI_PROVIDER || 'openai',
+			model: c.env.AI_PROVIDER || 'cerebras',
 			input: { question, contactsCount: contacts.length, language },
 		});
 

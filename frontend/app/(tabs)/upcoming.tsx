@@ -127,7 +127,12 @@ export default function UpcomingScreen() {
     <GestureHandlerRootView style={[styles.container, { paddingTop: insets.top }]}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.screenTitle}>{t('upcoming.title')}</Text>
+        <View style={styles.titleRow}>
+          <Text style={styles.screenTitle}>{t('upcoming.title')}</Text>
+          <View style={styles.titleIconContainer}>
+            <Calendar size={19} color={Colors.primary} strokeWidth={2.1} />
+          </View>
+        </View>
 
         {/* Segmented control */}
         <View style={styles.segmentedControl}>
@@ -237,12 +242,22 @@ const styles = StyleSheet.create({
     paddingTop: 14,
     paddingBottom: 16,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 14,
+  },
   screenTitle: {
     fontFamily: Fonts.sans.bold,
     fontSize: 30,
     letterSpacing: -0.8,
     color: Colors.textPrimary,
-    marginBottom: 14,
+  },
+  titleIconContainer: {
+    height: 30,
+    justifyContent: 'center',
+    transform: [{ translateY: 4 }],
   },
   segmentedControl: {
     flexDirection: 'row',

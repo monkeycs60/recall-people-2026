@@ -612,7 +612,7 @@
         "description": "Recall is built with privacy as a core principle. We believe your personal relationships and the information you record about them should remain private and under your control."
       },
       "localStorage": {
-        "title": "100% Local Storage",
+        "title": "Local-first storage",
         "description": "Your contact data, notes, facts, and memories are stored locally on your device. They only leave your phone when you use online features such as AI processing, login, or subscriptions."
       },
       "dataSovereignty": {
@@ -668,8 +668,8 @@
     },
     "privacy": {
       "title": "Your data stays on your phone",
-      "description": "Your notes live locally. AI is used only when you ask for processing.",
-      "local": "local"
+      "description": "Your notes live locally. AI providers process data only when you use AI features.",
+      "local": "local-first"
     },
     "redoTour": "Redo guided tour"
   },
@@ -902,10 +902,10 @@
   },
   "aiConsent": {
     "title": "AI Data Processing",
-    "subtitle": "Recall People uses third-party AI services to transcribe your voice recordings, extract contact information, and generate avatars. Here's what you need to know.",
+    "subtitle": "Recall People uses third-party AI services to transcribe your voice recordings, extract contact information, answer questions, and generate avatars. Here's what you need to know.",
     "whatWeShare": "What data is processed",
     "voiceData": "Voice recordings are sent for speech-to-text transcription",
-    "textData": "Transcribed text is analyzed to extract contacts, facts, and answer your questions",
+    "textData": "Transcribed text, contact names, notes, and question text are analyzed to extract information, create summaries, suggest questions, and answer you",
     "avatarData": "Text descriptions (gender, age, style) are used to generate illustrated avatars",
     "whoReceives": "Third-party AI providers",
     "providerTranscription": "Transcription",
@@ -914,7 +914,7 @@
     "protections": "Your protections",
     "noTraining": "Your data is never used to train AI models",
     "noStorage": "AI providers process data to return results, not to train models",
-    "localFirst": "All your contacts and notes stay on your device",
+    "localFirst": "Your app database is stored on your device; AI data is sent only for requested processing",
     "readPrivacyPolicy": "Read our full Privacy Policy",
     "accept": "I Understand and Agree"
   }

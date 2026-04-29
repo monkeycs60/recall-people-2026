@@ -2,11 +2,12 @@ import { View, Text, Pressable, ActivityIndicator, StyleSheet, BackHandler, Link
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, AlertCircle, RefreshCw, Check, Minus, Sparkles } from 'lucide-react-native';
-import { PurchasesOffering } from 'react-native-purchases';
+import { PACKAGE_TYPE, PurchasesOffering } from 'react-native-purchases';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { revenueCatService } from '@/services/revenuecat.service';
 import { Colors, Fonts, Shadows } from '@/constants/theme';
 import { showErrorToast, showSuccessToast } from '@/lib/error-handler';
+import { useAuthStore } from '@/stores/auth-store';
 
 const TERMS_URL = 'https://recall-people-2026.vercel.app/terms';
 const PRIVACY_URL = 'https://recall-people-2026.vercel.app/privacy';
@@ -28,15 +29,39 @@ type PaywallProps = {
 export function Paywall({ onClose, reason = 'contact_limit' }: PaywallProps) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const userId = useAuthStore((state) => state.user?.id);
   const [offering, setOffering] = useState<PurchasesOffering | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<string>('$rc_annual');
   const [loadError, setLoadError] = useState(false);
 
+  const loadOfferings = useCallback(async () => {
+    setIsLoading(true);
+    setLoadError(false);
+    try {
+      const currentOffering = await revenueCatService.getOfferings(userId);
+      const preferredPackage = currentOffering.availablePackages.find(
+        (pkg) => pkg.packageType === PACKAGE_TYPE.ANNUAL || pkg.identifier === '$rc_annual'
+      ) ?? currentOffering.availablePackages.find(
+        (pkg) => pkg.packageType === PACKAGE_TYPE.MONTHLY || pkg.identifier === '$rc_monthly'
+      );
+
+      if (preferredPackage) {
+        setSelectedPackage(preferredPackage.identifier);
+      }
+      setOffering(currentOffering);
+    } catch (error) {
+      console.error('[Paywall] Load offerings error:', error);
+      setLoadError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [userId]);
+
   useEffect(() => {
     loadOfferings();
-  }, []);
+  }, [loadOfferings]);
 
   useEffect(() => {
     const handleBackPress = () => {
@@ -50,23 +75,6 @@ export function Paywall({ onClose, reason = 'contact_limit' }: PaywallProps) {
     const subscription = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
     return () => subscription.remove();
   }, [isPurchasing, onClose]);
-
-  const loadOfferings = async () => {
-    setIsLoading(true);
-    setLoadError(false);
-    try {
-      const currentOffering = await revenueCatService.getOfferings();
-      if (!currentOffering) {
-        setLoadError(true);
-      }
-      setOffering(currentOffering);
-    } catch (error) {
-      console.error('[Paywall] Load offerings error:', error);
-      setLoadError(true);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handlePurchase = async () => {
     if (!offering) return;
@@ -191,10 +199,10 @@ export function Paywall({ onClose, reason = 'contact_limit' }: PaywallProps) {
   }
 
   const monthlyPackage = offering.availablePackages.find(
-    (pkg) => pkg.identifier === '$rc_monthly'
+    (pkg) => pkg.identifier === '$rc_monthly' || pkg.packageType === PACKAGE_TYPE.MONTHLY
   );
   const annualPackage = offering.availablePackages.find(
-    (pkg) => pkg.identifier === '$rc_annual'
+    (pkg) => pkg.identifier === '$rc_annual' || pkg.packageType === PACKAGE_TYPE.ANNUAL
   );
 
   const hasOfferings = monthlyPackage || annualPackage;
@@ -269,9 +277,9 @@ export function Paywall({ onClose, reason = 'contact_limit' }: PaywallProps) {
             <Pressable
               style={[
                 styles.packageCard,
-                selectedPackage === '$rc_annual' && styles.packageCardSelected,
+                selectedPackage === annualPackage.identifier && styles.packageCardSelected,
               ]}
-              onPress={() => setSelectedPackage('$rc_annual')}
+              onPress={() => setSelectedPackage(annualPackage.identifier)}
             >
               <View style={styles.packageBadge}>
                 <Text style={styles.packageBadgeText}>{t('paywall.bestValue')}</Text>
@@ -290,9 +298,9 @@ export function Paywall({ onClose, reason = 'contact_limit' }: PaywallProps) {
             <Pressable
               style={[
                 styles.packageCard,
-                selectedPackage === '$rc_monthly' && styles.packageCardSelected,
+                selectedPackage === monthlyPackage.identifier && styles.packageCardSelected,
               ]}
-              onPress={() => setSelectedPackage('$rc_monthly')}
+              onPress={() => setSelectedPackage(monthlyPackage.identifier)}
             >
               <Text style={styles.packageTitle}>{t('paywall.monthly')}</Text>
               <Text style={styles.packagePrice}>

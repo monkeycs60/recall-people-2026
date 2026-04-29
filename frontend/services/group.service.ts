@@ -9,6 +9,11 @@ type GroupRow = {
   updated_at: string;
 };
 
+type GroupContactCountRow = {
+  group_id: string;
+  count: number;
+};
+
 const rowToGroup = (row: GroupRow): Group => ({
   id: row.id,
   name: row.name,
@@ -98,6 +103,20 @@ export const groupService = {
       [groupId]
     );
     return rows.map((row) => row.contact_id);
+  },
+
+  getContactCountsByGroup: async (): Promise<Record<string, number>> => {
+    const db = await getDatabase();
+    const rows = await db.getAllAsync<GroupContactCountRow>(
+      `SELECT group_id, COUNT(contact_id) AS count
+       FROM contact_groups
+       GROUP BY group_id`
+    );
+
+    return rows.reduce<Record<string, number>>((countsByGroupId, row) => ({
+      ...countsByGroupId,
+      [row.group_id]: row.count,
+    }), {});
   },
 
   addContactToGroup: async (contactId: string, groupId: string): Promise<void> => {

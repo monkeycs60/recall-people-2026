@@ -1,5 +1,5 @@
 import { Tabs, useRouter, useFocusEffect } from 'expo-router';
-import { Users, User, Calendar, Sparkle } from 'lucide-react-native';
+import { Users, User, Calendar, BotMessageSquare } from 'lucide-react-native';
 import { useState, useCallback } from 'react';
 import { isLoggedIn } from '@/lib/auth';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
@@ -33,7 +33,7 @@ export default function TabLayout() {
 
   const handleOnboardingComplete = () => {
     setHasSeenOnboarding(true);
-    router.push('/record');
+    router.replace('/(tabs)');
   };
 
   if (checking) {
@@ -85,7 +85,7 @@ export default function TabLayout() {
         name="search"
         options={{
           title: t('tabs.assistant'),
-          tabBarIcon: ({ color, size }) => <Sparkle color={color} size={size} />,
+          tabBarIcon: ({ color, size }) => <BotMessageSquare color={color} size={size} />,
         }}
       />
     </Tabs>

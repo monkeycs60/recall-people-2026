@@ -1,6 +1,11 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { groupService } from '@/services/group.service';
 import { queryKeys } from '@/lib/query-keys';
+import {
+  mergeGroupIntoGroupsCache,
+  selectContactGroupsFromCache,
+} from '@/lib/group-cache';
+import { Group } from '@/types';
 
 export function useGroupsQuery() {
   const queryClient = useQueryClient();
@@ -43,12 +48,25 @@ export function useContactIdsForGroup(groupId: string | null) {
   });
 }
 
+export function useGroupContactCounts() {
+  return useQuery({
+    queryKey: queryKeys.groups.contactCounts(),
+    queryFn: () => groupService.getContactCountsByGroup(),
+    staleTime: 1000 * 60,
+    placeholderData: keepPreviousData,
+  });
+}
+
 export function useCreateGroup() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (name: string) => groupService.create(name),
-    onSuccess: () => {
+    onSuccess: (createdGroup) => {
+      queryClient.setQueryData<Group[]>(
+        queryKeys.groups.list(),
+        (cachedGroups) => mergeGroupIntoGroupsCache(cachedGroups, createdGroup)
+      );
       queryClient.invalidateQueries({ queryKey: queryKeys.groups.all });
     },
   });
@@ -67,10 +85,15 @@ export function useDeleteGroup() {
   return useMutation({
     mutationFn: (id: string) => groupService.delete(id),
     onSuccess: (_, deletedGroupId) => {
+      queryClient.setQueryData<Group[]>(
+        queryKeys.groups.list(),
+        (cachedGroups) => (cachedGroups ?? []).filter((group) => group.id !== deletedGroupId)
+      );
       queryClient.invalidateQueries({ queryKey: queryKeys.groups.all });
       queryClient.invalidateQueries({
         queryKey: queryKeys.groups.contactIds(deletedGroupId),
       });
+      queryClient.invalidateQueries({ queryKey: queryKeys.groups.contactCounts() });
     },
   });
 }
@@ -81,7 +104,21 @@ export function useUpdateGroup() {
   return useMutation({
     mutationFn: ({ id, name }: { id: string; name: string }) =>
       groupService.update(id, name),
-    onSuccess: () => {
+    onSuccess: (_, updatedGroup) => {
+      const now = new Date().toISOString();
+      queryClient.setQueryData<Group[]>(
+        queryKeys.groups.list(),
+        (cachedGroups) => {
+          const cachedGroup = cachedGroups?.find((group) => group.id === updatedGroup.id);
+          if (!cachedGroup) return cachedGroups ?? [];
+
+          return mergeGroupIntoGroupsCache(cachedGroups, {
+            ...cachedGroup,
+            name: updatedGroup.name,
+            updatedAt: now,
+          });
+        }
+      );
       queryClient.invalidateQueries({ queryKey: queryKeys.groups.all });
     },
   });
@@ -99,6 +136,13 @@ export function useSetContactGroups() {
       groupIds: string[];
     }) => groupService.setContactGroups(contactId, groupIds),
     onSuccess: (_, variables) => {
+      const cachedGroups = queryClient.getQueryData<Group[]>(queryKeys.groups.list());
+      if (cachedGroups) {
+        queryClient.setQueryData<Group[]>(
+          queryKeys.groups.forContact(variables.contactId),
+          selectContactGroupsFromCache(cachedGroups, variables.groupIds)
+        );
+      }
       queryClient.invalidateQueries({
         queryKey: queryKeys.groups.forContact(variables.contactId),
       });
@@ -106,6 +150,8 @@ export function useSetContactGroups() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.contacts.detail(variables.contactId),
       });
+      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.list() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.groups.contactCounts() });
       invalidateAllGroupContactIds(queryClient);
     },
   });

@@ -21,6 +21,7 @@ import {
   UserX,
   CalendarCheck,
   Newspaper,
+  UserRound,
 } from 'lucide-react-native';
 import { useAuthStore } from '@/stores/auth-store';
 import { useSettingsStore } from '@/stores/settings-store';
@@ -244,7 +245,12 @@ export default function ProfileScreen() {
         style={[styles.scrollView, { paddingTop: insets.top + 16 }]}
         contentContainerStyle={styles.scrollContent}
       >
-        <Text style={styles.screenTitle}>{t('profile.title')}</Text>
+        <View style={styles.titleRow}>
+          <Text style={styles.screenTitle}>{t('profile.title')}</Text>
+          <View style={styles.titleIconContainer}>
+            <UserRound size={19} color={Colors.primary} strokeWidth={2.1} />
+          </View>
+        </View>
 
         {user && (
           <ProfileHeader
@@ -424,12 +430,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 180,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 18,
+  },
   screenTitle: {
     fontFamily: Fonts.sans.bold,
     fontSize: 30,
     letterSpacing: -0.8,
     color: Colors.textPrimary,
-    marginBottom: 18,
+  },
+  titleIconContainer: {
+    height: 30,
+    justifyContent: 'center',
+    transform: [{ translateY: 4 }],
   },
   subscriptionSection: {
     marginBottom: 22,

@@ -648,7 +648,7 @@
         "description": "Recall est conçu avec la vie privée comme principe fondamental. Nous croyons que tes relations personnelles et les informations que tu enregistres doivent rester privées et sous ton contrôle."
       },
       "localStorage": {
-        "title": "Stockage 100% local",
+        "title": "Stockage local-first",
         "description": "Tes données de contacts, notes, faits et souvenirs sont stockées localement sur ton appareil. Elles ne quittent ton téléphone que lorsque tu utilises des fonctions en ligne comme l'IA, la connexion ou l'abonnement."
       },
       "dataSovereignty": {
@@ -687,7 +687,7 @@
       "feature5": "Notifications pour les événements de tes contacts"
     },
     "demo": {
-      "title": "Voici comment ça marche",
+      "title": "Comment ça marche",
       "description": "Parle après une rencontre. L'IA extrait automatiquement les infos clés et crée la fiche contact."
     },
     "assistant": {
@@ -704,8 +704,8 @@
     },
     "privacy": {
       "title": "Tes données restent sur ton téléphone",
-      "description": "Tes notes restent locales. L'IA n'est utilisée que quand tu demandes un traitement.",
-      "local": "local"
+      "description": "Tes notes restent locales. Les fournisseurs IA traitent des données uniquement quand tu utilises des fonctions IA.",
+      "local": "local-first"
     },
     "redoTour": "Refaire le tour guidé"
   },
@@ -892,10 +892,10 @@
   },
   "aiConsent": {
     "title": "Traitement IA des données",
-    "subtitle": "Recall People utilise des services d'IA tiers pour transcrire tes enregistrements vocaux, extraire les informations de contacts et générer des avatars. Voici ce que tu dois savoir.",
+    "subtitle": "Recall People utilise des services d'IA tiers pour transcrire tes enregistrements vocaux, extraire les informations de contacts, répondre à tes questions et générer des avatars. Voici ce que tu dois savoir.",
     "whatWeShare": "Quelles données sont traitées",
     "voiceData": "Les enregistrements vocaux sont envoyés pour transcription audio-texte",
-    "textData": "Le texte transcrit est analysé pour extraire contacts, faits et répondre à tes questions",
+    "textData": "Le texte transcrit, les noms de contacts, les notes et tes questions sont analysés pour extraire des informations, créer des résumés, suggérer des questions et te répondre",
     "avatarData": "Des descriptions textuelles (genre, âge, style) sont utilisées pour générer des avatars illustrés",
     "whoReceives": "Fournisseurs d'IA tiers",
     "providerTranscription": "Transcription",
@@ -904,7 +904,7 @@
     "protections": "Tes protections",
     "noTraining": "Tes données ne sont jamais utilisées pour entraîner des modèles IA",
     "noStorage": "Les fournisseurs IA traitent les données pour répondre, pas pour entraîner des modèles",
-    "localFirst": "Tous tes contacts et notes restent sur ton appareil",
+    "localFirst": "La base de données de l'app reste sur ton appareil ; les données IA sont envoyées seulement pour les traitements demandés",
     "readPrivacyPolicy": "Lire notre politique de confidentialité",
     "accept": "Je comprends et j'accepte"
   }

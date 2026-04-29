@@ -11,6 +11,7 @@ export const queryKeys = {
     detail: (id: string) => [...queryKeys.groups.all, 'detail', id] as const,
     forContact: (contactId: string) => [...queryKeys.groups.all, 'forContact', contactId] as const,
     contactIds: (groupId: string) => [...queryKeys.groups.all, 'contactIds', groupId] as const,
+    contactCounts: () => [...queryKeys.groups.all, 'contactCounts'] as const,
   },
   facts: {
     all: ['facts'] as const,
