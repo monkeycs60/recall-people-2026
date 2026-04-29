@@ -1,29 +1,14 @@
 import assert from 'node:assert/strict';
-import { mkdir, rm } from 'node:fs/promises';
-import { createRequire } from 'node:module';
-import { dirname, resolve } from 'node:path';
 import test from 'node:test';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { cleanTsModule, loadTsModule } from './helpers/load-ts-module.mjs';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const frontendRoot = resolve(__dirname, '..');
-const requireFromBackend = createRequire(resolve(frontendRoot, '../backend/package.json'));
-const esbuild = requireFromBackend('esbuild');
-const outdir = resolve(frontendRoot, '.tmp-tests');
-const outfile = resolve(outdir, 'auth-onboarding.mjs');
+const suiteName = 'auth-onboarding';
 
 async function loadModule() {
-  await rm(outdir, { force: true, recursive: true });
-  await mkdir(outdir, { recursive: true });
-  await esbuild.build({
-    entryPoints: [resolve(frontendRoot, 'lib/auth-onboarding.ts')],
-    outfile,
-    bundle: true,
-    platform: 'neutral',
-    format: 'esm',
-    target: 'es2022',
+  return loadTsModule({
+    entryPoint: 'lib/auth-onboarding.ts',
+    suiteName,
   });
-  return import(`${pathToFileURL(outfile).href}?t=${Date.now()}`);
 }
 
 test('resets first-run settings when auth response says the user is new', async () => {
@@ -38,6 +23,18 @@ test('does not reset first-run settings for returning auth users', async () => {
   assert.equal(shouldResetFirstRunSettings({ isNewUser: false }), false);
 });
 
+test('does not let the missing-flag fallback override an explicit returning user', async () => {
+  const { shouldResetFirstRunSettings } = await loadModule();
+
+  assert.equal(
+    shouldResetFirstRunSettings(
+      { isNewUser: false },
+      { assumeNewUserWhenMissing: true },
+    ),
+    false,
+  );
+});
+
 test('can assume explicit credential registration is new when older APIs omit the flag', async () => {
   const { shouldResetFirstRunSettings } = await loadModule();
 
@@ -47,6 +44,12 @@ test('can assume explicit credential registration is new when older APIs omit th
   );
 });
 
+test('defaults to keeping first-run settings when the auth response omits the new-user flag', async () => {
+  const { shouldResetFirstRunSettings } = await loadModule();
+
+  assert.equal(shouldResetFirstRunSettings({}), false);
+});
+
 test.after(async () => {
-  await rm(outdir, { force: true, recursive: true });
+  await cleanTsModule(suiteName);
 });

@@ -1,29 +1,14 @@
 import assert from 'node:assert/strict';
-import { mkdir, rm } from 'node:fs/promises';
-import { createRequire } from 'node:module';
-import { dirname, resolve } from 'node:path';
 import test from 'node:test';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { cleanTsModule, loadTsModule } from './helpers/load-ts-module.mjs';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const frontendRoot = resolve(__dirname, '..');
-const requireFromBackend = createRequire(resolve(frontendRoot, '../backend/package.json'));
-const esbuild = requireFromBackend('esbuild');
-const outdir = resolve(frontendRoot, '.tmp-tests');
-const outfile = resolve(outdir, 'group-cache.mjs');
+const suiteName = 'group-cache';
 
 async function loadModule() {
-  await rm(outdir, { force: true, recursive: true });
-  await mkdir(outdir, { recursive: true });
-  await esbuild.build({
-    entryPoints: [resolve(frontendRoot, 'lib/group-cache.ts')],
-    outfile,
-    bundle: true,
-    platform: 'neutral',
-    format: 'esm',
-    target: 'es2022',
+  return loadTsModule({
+    entryPoint: 'lib/group-cache.ts',
+    suiteName,
   });
-  return import(`${pathToFileURL(outfile).href}?t=${Date.now()}`);
 }
 
 const friendGroup = {
@@ -56,6 +41,27 @@ test('merges a created group into the cached group list in display order', async
   );
 });
 
+test('merges a group into an empty cache when no cached groups are available', async () => {
+  const { mergeGroupIntoGroupsCache } = await loadModule();
+
+  assert.deepEqual(mergeGroupIntoGroupsCache(undefined, friendGroup), [friendGroup]);
+});
+
+test('sorts merged groups case-insensitively for stable display order', async () => {
+  const { mergeGroupIntoGroupsCache } = await loadModule();
+  const alphaGroup = {
+    id: 'alpha',
+    name: 'alpha',
+    createdAt: '2026-01-04T00:00:00.000Z',
+    updatedAt: '2026-01-04T00:00:00.000Z',
+  };
+
+  assert.deepEqual(
+    mergeGroupIntoGroupsCache([yogaGroup, friendGroup], alphaGroup).map((group) => group.id),
+    ['alpha', 'friend', 'yoga'],
+  );
+});
+
 test('replaces an existing cached group instead of duplicating it', async () => {
   const { mergeGroupIntoGroupsCache } = await loadModule();
 
@@ -77,6 +83,21 @@ test('selects the contact groups from cached groups after an association change'
   );
 });
 
+test('ignores unknown contact group ids when selecting from cache', async () => {
+  const { selectContactGroupsFromCache } = await loadModule();
+
+  assert.deepEqual(
+    selectContactGroupsFromCache([friendGroup], ['missing', 'friend']).map((group) => group.id),
+    ['friend'],
+  );
+});
+
+test('returns no selected groups when the group cache is empty', async () => {
+  const { selectContactGroupsFromCache } = await loadModule();
+
+  assert.deepEqual(selectContactGroupsFromCache(undefined, ['friend']), []);
+});
+
 test('builds group chips with contact counts from the counts query', async () => {
   const { buildGroupChips } = await loadModule();
 
@@ -95,6 +116,20 @@ test('builds group chips with contact counts from the counts query', async () =>
   );
 });
 
+test('builds the all-groups chip even when there are no groups', async () => {
+  const { buildGroupChips } = await loadModule();
+
+  assert.deepEqual(
+    buildGroupChips({
+      allGroups: [],
+      contactCountByGroupId: {},
+      allGroupLabel: 'All',
+      totalContactsCount: 0,
+    }),
+    [{ id: null, name: 'All', count: 0 }],
+  );
+});
+
 test.after(async () => {
-  await rm(outdir, { force: true, recursive: true });
+  await cleanTsModule(suiteName);
 });

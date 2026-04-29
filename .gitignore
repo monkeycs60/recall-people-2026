@@ -40,6 +40,10 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
+# test artifacts
+.tmp-tests/
+**/.tmp-tests/
+
 app-example
 
 # generated native folders

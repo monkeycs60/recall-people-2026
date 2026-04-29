@@ -9,6 +9,7 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
+    "test": "node --test test/*.test.mjs",
     "test:avatar-image": "node --test test/avatar-image.test.mjs",
     "postinstall": "prisma generate"
   },
@@ -38,6 +39,7 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20.0.0",
     "dotenv-cli": "^11.0.0",
+    "esbuild": "^0.28.0",
     "prisma": "^5.22.0",
     "typescript": "^5.4.0",
     "wrangler": "^3.60.0"
