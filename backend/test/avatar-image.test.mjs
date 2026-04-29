@@ -1,27 +1,14 @@
 import assert from 'node:assert/strict';
-import { readFile, rm, mkdir } from 'node:fs/promises';
-import { dirname, resolve } from 'node:path';
 import test from 'node:test';
-import { fileURLToPath, pathToFileURL } from 'node:url';
-import esbuild from 'esbuild';
+import { cleanTsModule, loadTsModule } from './helpers/load-ts-module.mjs';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const backendRoot = resolve(__dirname, '..');
-const outdir = resolve(backendRoot, '.tmp-tests');
-const outfile = resolve(outdir, 'avatar-image.mjs');
+const suiteName = 'avatar-image';
 
 async function loadModule() {
-  await rm(outdir, { force: true, recursive: true });
-  await mkdir(outdir, { recursive: true });
-  await esbuild.build({
-    entryPoints: [resolve(backendRoot, 'src/lib/avatar-image.ts')],
-    outfile,
-    bundle: true,
-    platform: 'neutral',
-    format: 'esm',
-    target: 'es2022',
+  return loadTsModule({
+    entryPoint: 'src/lib/avatar-image.ts',
+    suiteName,
   });
-  return import(`${pathToFileURL(outfile).href}?t=${Date.now()}`);
 }
 
 test('generates avatars with gpt-image-2 low quality square output', async () => {
@@ -115,5 +102,5 @@ test('buildAvatarGenerationPrompt keeps the existing Happy Humans prompt intact'
 });
 
 test.after(async () => {
-  await rm(outdir, { force: true, recursive: true });
+  await cleanTsModule(suiteName);
 });

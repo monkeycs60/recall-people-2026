@@ -1,29 +1,14 @@
 import assert from 'node:assert/strict';
-import { mkdir, rm } from 'node:fs/promises';
-import { createRequire } from 'node:module';
-import { dirname, resolve } from 'node:path';
 import test from 'node:test';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { cleanTsModule, loadTsModule } from './helpers/load-ts-module.mjs';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const frontendRoot = resolve(__dirname, '..');
-const requireFromBackend = createRequire(resolve(frontendRoot, '../backend/package.json'));
-const esbuild = requireFromBackend('esbuild');
-const outdir = resolve(frontendRoot, '.tmp-tests', 'reminder-frequency');
-const outfile = resolve(outdir, 'reminder-frequency.mjs');
+const suiteName = 'reminder-frequency';
 
 async function loadModule() {
-  await rm(outdir, { force: true, recursive: true });
-  await mkdir(outdir, { recursive: true });
-  await esbuild.build({
-    entryPoints: [resolve(frontendRoot, 'lib/reminder-frequency.ts')],
-    outfile,
-    bundle: true,
-    platform: 'neutral',
-    format: 'esm',
-    target: 'es2022',
+  return loadTsModule({
+    entryPoint: 'lib/reminder-frequency.ts',
+    suiteName,
   });
-  return import(`${pathToFileURL(outfile).href}?t=${Date.now()}`);
 }
 
 test('exposes granular reminder presets shared by settings and contacts', async () => {
@@ -36,8 +21,16 @@ test('uses the account default only when the contact has no override', async () 
   const { getEffectiveReminderFrequencyDays } = await loadModule();
 
   assert.equal(getEffectiveReminderFrequencyDays(null, 60), 60);
+  assert.equal(getEffectiveReminderFrequencyDays(undefined, 60), 60);
   assert.equal(getEffectiveReminderFrequencyDays(14, 60), 14);
   assert.equal(getEffectiveReminderFrequencyDays(-1, 60), -1);
+});
+
+test('treats zero and unsupported negative contact overrides as account defaults', async () => {
+  const { getEffectiveReminderFrequencyDays } = await loadModule();
+
+  assert.equal(getEffectiveReminderFrequencyDays(0, 30), 30);
+  assert.equal(getEffectiveReminderFrequencyDays(-2, 30), 30);
 });
 
 test('keeps explicit contact reminders active when the account default is disabled', async () => {
@@ -49,6 +42,7 @@ test('keeps explicit contact reminders active when the account default is disabl
   assert.deepEqual(filter.params, []);
   assert.match(filter.whereSql, /reminder_frequency_days > 0/);
   assert.doesNotMatch(filter.whereSql, /reminder_frequency_days IS NULL/);
+  assert.doesNotMatch(filter.whereSql, /\?/);
 });
 
 test('includes default contacts in stale reminders when the account default is enabled', async () => {
@@ -58,8 +52,9 @@ test('includes default contacts in stale reminders when the account default is e
 
   assert.deepEqual(filter.params, [90]);
   assert.match(filter.whereSql, /reminder_frequency_days IS NULL/);
+  assert.match(filter.whereSql, /\?/);
 });
 
 test.after(async () => {
-  await rm(outdir, { force: true, recursive: true });
+  await cleanTsModule(suiteName);
 });
