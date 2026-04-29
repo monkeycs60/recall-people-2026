@@ -1,4 +1,4 @@
-import { View, Text, TextInput, Pressable, StyleSheet, Modal, ScrollView } from 'react-native';
+import { View, Text, TextInput, Pressable, StyleSheet, Modal, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Trash2, ChevronDown } from 'lucide-react-native';
@@ -63,7 +63,10 @@ export function BirthdayEditModal({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View style={styles.overlay}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.overlay}
+      >
         <View style={styles.modal}>
           <Text style={styles.title}>{t('contact.birthdayModal.title')}</Text>
 
@@ -159,7 +162,7 @@ export function BirthdayEditModal({
             </Pressable>
           </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

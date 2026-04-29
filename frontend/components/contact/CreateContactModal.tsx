@@ -1,4 +1,4 @@
-import { View, Text, TextInput, Pressable, StyleSheet, Modal } from 'react-native';
+import { View, Text, TextInput, Pressable, StyleSheet, Modal, KeyboardAvoidingView, Platform } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
@@ -43,7 +43,11 @@ export function CreateContactModal({ visible, onClose, onCreate }: CreateContact
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={styles.overlay} onPress={onClose}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.overlay}
+      >
+        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
         <Pressable style={styles.modal} onPress={(e) => e.stopPropagation()}>
           <Text style={styles.title}>{t('contacts.createModal.title')}</Text>
 
@@ -98,7 +102,7 @@ export function CreateContactModal({ visible, onClose, onCreate }: CreateContact
             </Pressable>
           </View>
         </Pressable>
-      </Pressable>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

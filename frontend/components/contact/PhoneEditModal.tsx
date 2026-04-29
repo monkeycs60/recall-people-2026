@@ -1,4 +1,4 @@
-import { View, Text, TextInput, Pressable, StyleSheet, Modal } from 'react-native';
+import { View, Text, TextInput, Pressable, StyleSheet, Modal, KeyboardAvoidingView, Platform } from 'react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Trash2 } from 'lucide-react-native';
@@ -34,7 +34,10 @@ export function PhoneEditModal({ visible, initialValue, onSave, onClose }: Phone
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View style={styles.overlay}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.overlay}
+      >
         <View style={styles.modal}>
           <Text style={styles.title}>{t('contact.phoneModal.title')}</Text>
 
@@ -67,7 +70,7 @@ export function PhoneEditModal({ visible, initialValue, onSave, onClose }: Phone
             </Pressable>
           </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

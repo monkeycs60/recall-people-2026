@@ -396,6 +396,7 @@ export default function ContactDetailScreen() {
         ref={scrollViewRef}
         style={styles.scrollView}
         contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
+        automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
         keyboardShouldPersistTaps="handled"
       >
         {/* Hero Header with Gradient */}

@@ -1,4 +1,4 @@
-import { View, Text, TextInput, Pressable, StyleSheet, Modal } from 'react-native';
+import { View, Text, TextInput, Pressable, StyleSheet, Modal, KeyboardAvoidingView, Platform } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
@@ -54,7 +54,10 @@ export function NameEditModal({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View style={styles.overlay}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.overlay}
+      >
         <View style={styles.modal}>
           <Text style={styles.title}>{t('contact.nameModal.title')}</Text>
 
@@ -108,7 +111,7 @@ export function NameEditModal({
             </Pressable>
           </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

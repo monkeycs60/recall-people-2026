@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Pressable, TextInput, ActivityIndicator, StyleSheet, Animated, Dimensions, Modal } from 'react-native';
+import { View, Text, ScrollView, Pressable, TextInput, ActivityIndicator, StyleSheet, Animated, Dimensions, Modal, KeyboardAvoidingView, Platform } from 'react-native';
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -237,11 +237,15 @@ export default function SelectContactScreen() {
   }, [fadeAnim, slideAnim]);
 
   return (
-    <>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.screenContainer}
+    >
       <ScrollView
         style={styles.container}
         contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
         showsVerticalScrollIndicator={false}
+        automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
         keyboardShouldPersistTaps="handled"
       >
         <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
@@ -391,11 +395,15 @@ export default function SelectContactScreen() {
       <Modal visible={showPaywall} animationType="slide" presentationStyle="pageSheet">
         <Paywall onClose={() => setShowPaywall(false)} reason="contact_limit" />
       </Modal>
-    </>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  screenContainer: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
   container: {
     flex: 1,
     backgroundColor: Colors.background,

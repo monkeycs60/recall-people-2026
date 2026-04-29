@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Pressable, TextInput, StyleSheet, Platform, Modal } from 'react-native';
+import { View, Text, ScrollView, Pressable, TextInput, StyleSheet, Platform, Modal, KeyboardAvoidingView } from 'react-native';
 import { useState, useEffect, useRef } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -621,10 +621,16 @@ export default function ReviewScreen() {
   };
 
   return (
-    <View style={styles.screenContainer}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.screenContainer}
+    >
       <ScrollView
         style={styles.container}
         contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
+        automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
       >
         {isEditingName ? (
           <View style={styles.editNameContainer}>
@@ -862,7 +868,7 @@ export default function ReviewScreen() {
       <Modal visible={showPaywall} animationType="slide" presentationStyle="pageSheet">
         <Paywall onClose={() => setShowPaywall(false)} reason="contact_limit" />
       </Modal>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
