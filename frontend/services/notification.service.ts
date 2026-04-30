@@ -72,6 +72,19 @@ export const notificationService = {
     );
   },
 
+  cancelRemindersByType: async (type: string): Promise<void> => {
+    const scheduledNotifications = await Notifications.getAllScheduledNotificationsAsync();
+    const matchingNotifications = scheduledNotifications.filter(
+      (notification) => notification.content.data?.type === type
+    );
+
+    await Promise.all(
+      matchingNotifications.map((notification) =>
+        Notifications.cancelScheduledNotificationAsync(notification.identifier)
+      )
+    );
+  },
+
   scheduleNotSeenReminder: async (
     contactId: string,
     contactName: string,
@@ -103,6 +116,8 @@ export const notificationService = {
   ): Promise<string | null> => {
     const hasPermission = await notificationService.requestPermissions();
     if (!hasPermission) return null;
+
+    await notificationService.cancelRemindersByType('weekly_digest');
 
     let triggerDate = nextMonday(new Date());
     triggerDate = setHours(triggerDate, 9);

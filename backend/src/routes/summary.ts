@@ -47,9 +47,11 @@ const PROMPT_TEMPLATES: Record<string, {
 6. Mentionne la situation actuelle (travail, projets en cours)
 7. Mentionne les événements à venir importants s'il y en a
 8. Si les notes sont contradictoires, privilégie l'info la plus récente
-9. Style factuel et concis: "Travaille chez X. Entretien prévu le 25 janvier 2026. A un enfant qui fait Y."
+9. Style mémo humain avant de revoir la personne: concret, utile, sans lyrisme
 10. Ne dis PAS "selon les notes" ou "d'après les informations"
-11. Si jamais tu évoques l'utilisateur (le narrateur), utilise 'l'utilisateur' pour le désigner`,
+11. Si jamais tu évoques l'utilisateur (le narrateur), utilise 'l'utilisateur' pour le désigner
+12. Ne fais PAS une fiche à libellés ("Profil:", "Sujet actuel:", "Relation:"). Écris des phrases naturelles.
+13. Si possible, garde une phrase pour le contexte durable et une phrase pour ce qu'il faut suivre maintenant.`,
 		goodExample: `EXEMPLE BON:
 "Marie est consultante chez Deloitte, en recherche d'un nouveau poste (entretien chez Google le 25 janvier 2026). Elle déménage à Lyon en mars 2026. Mère de Lucas qui fait du foot."`,
 		badExample: `EXEMPLE MAUVAIS:

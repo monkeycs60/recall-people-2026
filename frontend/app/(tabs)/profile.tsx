@@ -231,6 +231,28 @@ export default function ProfileScreen() {
     }
   }, [setNotSeenThresholdDays]);
 
+  const handleWeeklyDigestToggle = useCallback((enabled: boolean) => {
+    setWeeklyDigestEnabled(enabled);
+    const operation = enabled
+      ? reminderService.scheduleWeeklyDigest()
+      : reminderService.cancelWeeklyDigest();
+
+    operation.catch((error) => {
+      console.warn('[profile] Failed to update weekly digest reminder:', error);
+    });
+  }, [setWeeklyDigestEnabled]);
+
+  const handlePostEventFollowUpToggle = useCallback((enabled: boolean) => {
+    setPostEventFollowUpEnabled(enabled);
+    const operation = enabled
+      ? reminderService.schedulePostEventFollowUps()
+      : reminderService.cancelPostEventFollowUps();
+
+    operation.catch((error) => {
+      console.warn('[profile] Failed to update post-event reminders:', error);
+    });
+  }, [setPostEventFollowUpEnabled]);
+
   const handleOpenMonitoring = () => {
     router.push('/admin/monitoring');
   };
@@ -242,8 +264,11 @@ export default function ProfileScreen() {
   return (
     <View style={styles.container}>
       <ScrollView
-        style={[styles.scrollView, { paddingTop: insets.top + 16 }]}
-        contentContainerStyle={styles.scrollContent}
+        style={styles.scrollView}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: insets.top + 16 },
+        ]}
       >
         <View style={styles.titleRow}>
           <Text style={styles.screenTitle}>{t('profile.title')}</Text>
@@ -298,14 +323,14 @@ export default function ProfileScreen() {
                 label={t('settings.weeklyDigest')}
                 description={t('settings.weeklyDigestDescription')}
                 toggleValue={weeklyDigestEnabled}
-                onToggle={setWeeklyDigestEnabled}
+                onToggle={handleWeeklyDigestToggle}
               />
               <SettingsRow
                 icon={<CalendarCheck size={20} color={Colors.primary} />}
                 label={t('settings.postEventFollowUp')}
                 description={t('settings.postEventFollowUpDescription')}
                 toggleValue={postEventFollowUpEnabled}
-                onToggle={setPostEventFollowUpEnabled}
+                onToggle={handlePostEventFollowUpToggle}
               />
             </>
           )}

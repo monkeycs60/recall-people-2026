@@ -706,22 +706,28 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
+    maxWidth: '100%',
+    minWidth: 0,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 8,
   },
   topicPillEmoji: {
     fontSize: 11,
+    flexShrink: 0,
   },
   topicPillText: {
     fontSize: 11.5,
     fontWeight: '500',
+    flexShrink: 1,
+    minWidth: 0,
   },
   topicPillDate: {
     fontSize: 10,
     fontFamily: Fonts.mono,
     opacity: 0.55,
     color: Colors.textMuted,
+    flexShrink: 0,
   },
   emptyStateContainer: {
     flex: 1,

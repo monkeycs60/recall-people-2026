@@ -100,10 +100,16 @@ export const reminderService = {
 
   scheduleWeeklyDigest: async () => {
     const { isPremium } = useSubscriptionStore.getState();
-    if (!isPremium) return;
+    if (!isPremium) {
+      await notificationService.cancelRemindersByType('weekly_digest');
+      return;
+    }
 
     const { weeklyDigestEnabled } = useSettingsStore.getState();
-    if (!weeklyDigestEnabled) return;
+    if (!weeklyDigestEnabled) {
+      await notificationService.cancelRemindersByType('weekly_digest');
+      return;
+    }
 
     const db = await getDatabase();
 
@@ -126,17 +132,30 @@ export const reminderService = {
     const eventsCount = eventsResult?.count ?? 0;
     const staleCount = staleResult?.count ?? 0;
 
-    if (eventsCount === 0 && staleCount === 0) return;
+    if (eventsCount === 0 && staleCount === 0) {
+      await notificationService.cancelRemindersByType('weekly_digest');
+      return;
+    }
 
     await notificationService.scheduleWeeklyDigest(eventsCount, staleCount);
   },
 
+  cancelWeeklyDigest: async () => {
+    await notificationService.cancelRemindersByType('weekly_digest');
+  },
+
   schedulePostEventFollowUps: async () => {
     const { isPremium } = useSubscriptionStore.getState();
-    if (!isPremium) return;
+    if (!isPremium) {
+      await notificationService.cancelRemindersByType('post_event');
+      return;
+    }
 
     const { postEventFollowUpEnabled } = useSettingsStore.getState();
-    if (!postEventFollowUpEnabled) return;
+    if (!postEventFollowUpEnabled) {
+      await notificationService.cancelRemindersByType('post_event');
+      return;
+    }
 
     const db = await getDatabase();
 
@@ -169,5 +188,9 @@ export const reminderService = {
         [hotTopic.id]
       );
     }
+  },
+
+  cancelPostEventFollowUps: async () => {
+    await notificationService.cancelRemindersByType('post_event');
   },
 };

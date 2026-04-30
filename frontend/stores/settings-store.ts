@@ -3,8 +3,8 @@ import { devtools, persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getLocales } from 'expo-localization';
 import { Language, SUPPORTED_LANGUAGES, DEFAULT_LANGUAGE } from '@/types';
-import { updateUserSettings } from '@/lib/api';
 import { getToken } from '@/lib/auth';
+import { API_URL } from '@/lib/config';
 
 type SettingsState = {
   language: Language;
@@ -58,7 +58,17 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
           const token = await getToken();
           if (token) {
             try {
-              await updateUserSettings({ preferredLanguage: language });
+              const response = await fetch(`${API_URL}/api/settings`, {
+                method: 'PATCH',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ preferredLanguage: language }),
+              });
+              if (!response.ok) {
+                throw new Error(`Settings sync failed with ${response.status}`);
+              }
             } catch {
               // Ignore sync errors - local change is already applied
             }

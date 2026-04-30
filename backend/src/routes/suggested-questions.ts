@@ -68,12 +68,14 @@ const PROMPT_TEMPLATES: Record<string, {
 8. N'invente JAMAIS de questions sur des sujets non mentionnés
 9. Les questions doivent inviter à partager, pas être des questions oui/non
 10. Maximum 15 mots par question
+11. Adresse-toi directement à la personne avec "tu"; jamais "a-t-il/elle" ni une formulation de fiche
+12. Évite les questions génériques qui répètent juste le titre ("Comment avance X ?"). Ancre la question dans un détail, une échéance ou une prochaine action.
 
 IMPORTANT: Mieux vaut 1 bonne question que 3 questions artificielles ou répétitives.`,
 		format: 'FORMAT DE RÉPONSE:\nRetourne entre 1 et 3 questions, une par ligne, sans numérotation ni tirets.',
 		examples: `Exemples:
-Comment s'est passé ton entretien chez Google ?
-Alors le déménagement à Lyon, c'est calé pour mars ?`,
+Qu'est-ce que ça a donné, ton entretien chez Google ?
+Tu sais déjà quand tu poses tes cartons à Lyon ?`,
 		noInfo: "Si aucune info pertinente n'est disponible, retourne une ligne vide.",
 	},
 	en: {
