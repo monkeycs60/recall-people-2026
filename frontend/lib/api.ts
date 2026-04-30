@@ -268,6 +268,12 @@ export const generateSuggestedQuestions = async (data: {
     title: string;
     context: string;
     status: string;
+    eventDate?: string;
+  }>;
+  recentNotes?: Array<{
+    title: string;
+    transcription: string;
+    createdAt: string;
   }>;
 }): Promise<string[]> => {
   const response = await apiCall<{ success: boolean; suggestedQuestions: string[] }>(

@@ -17,6 +17,7 @@ let configurePromise: Promise<void> | null = null;
 let isConfigured = false;
 let configuredUserId: string | null = null;
 let hasCustomerInfoListener = false;
+let hasLogHandler = false;
 
 const shouldPreserveDevPremiumStatus = (): boolean => {
   if (!__DEV__) return false;
@@ -35,6 +36,17 @@ const hasPremiumEntitlement = (customerInfo: Awaited<ReturnType<typeof Purchases
 
 const getErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
+
+const registerLogHandler = () => {
+  if (hasLogHandler) return;
+
+  hasLogHandler = true;
+  Purchases.setLogHandler((_level, message) => {
+    if (__DEV__) {
+      console.log('[RevenueCat]', message);
+    }
+  });
+};
 
 const registerCustomerInfoListener = () => {
   if (hasCustomerInfoListener) return;
@@ -61,14 +73,16 @@ const ensureConfigured = async (userId?: string): Promise<void> => {
 
   if (!nativeIsConfigured && !configurePromise) {
     configurePromise = (async () => {
-      await Purchases.setLogLevel(LOG_LEVEL.DEBUG).catch((error) => {
-        console.warn('[RevenueCat] Failed to enable debug logs:', error);
-      });
+      registerLogHandler();
 
       Purchases.configure({
         apiKey,
         appUserID: userId,
         storeKitVersion: STOREKIT_VERSION.STOREKIT_2,
+      });
+
+      await Purchases.setLogLevel(LOG_LEVEL.DEBUG).catch((error) => {
+        console.warn('[RevenueCat] Failed to enable debug logs:', error);
       });
 
       isConfigured = true;

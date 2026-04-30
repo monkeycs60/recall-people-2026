@@ -99,6 +99,28 @@ def build_questions(first: str, project: str, hobby: str) -> list[str]:
     ]
 
 
+def build_meeting_context(first: str, last: str, relationship: str, person_groups: list[str], city: str) -> str:
+    overrides = {
+        "Thomas Nguyen": "atelier CTO RH a Paris",
+        "Camille Roux": "sortie running aux Buttes-Chaumont",
+        "Nadia Benali": "vernissage photo a Montreuil",
+        "Lucas Moreau": "projet data chez un ancien client",
+        "Emma Petit": "atelier design produit a Paris",
+    }
+    key = f"{first} {last}"
+    if key in overrides:
+        return overrides[key]
+    if relationship == "famille":
+        return "lien familial, vu surtout lors des repas de famille"
+    if "seed-group-startup" in person_groups:
+        return f"evenement startup a {city}"
+    if "seed-group-running" in person_groups:
+        return f"sortie running a {city}"
+    if "seed-group-creative" in person_groups:
+        return f"evenement creatif a {city}"
+    return f"rencontre personnelle a {city}"
+
+
 def run(cmd: list[str], *, check: bool = True, capture: bool = True, input_bytes: bytes | None = None) -> subprocess.CompletedProcess[bytes]:
     result = subprocess.run(
         cmd,
@@ -294,6 +316,7 @@ def seed_database(db_path: Path, count: int, replace_seed: bool) -> dict[str, in
         last_contact_at = now - timedelta(days=days_since_contact + (index // len(PEOPLE)))
         summary = build_summary(first, last, suffix, city, job, project, hobby, relationship)
         questions = build_questions(first, project, hobby)
+        meeting_context = build_meeting_context(first, last, relationship, person_groups, city)
         cur.execute(
             """
             INSERT OR REPLACE INTO contacts (
@@ -334,8 +357,8 @@ def seed_database(db_path: Path, count: int, replace_seed: bool) -> dict[str, in
         for note_index, template in enumerate(NOTE_TEMPLATES, 1):
             note_date = last_contact_at - timedelta(days=(note_index - 1) * 12)
             transcription = (
-                f"{first} {last}{suffix}. {template} Details memorises: {summary}. "
-                f"Questions utiles: {' / '.join(questions)}"
+                f"{first} {last}{suffix}. Contexte de rencontre: {meeting_context}. "
+                f"{template} Details memorises: {summary}."
             )
             cur.execute(
                 """

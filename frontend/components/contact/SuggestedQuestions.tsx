@@ -1,7 +1,7 @@
 import { View, Text, ActivityIndicator, Pressable, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { MessageCircle, RefreshCw } from 'lucide-react-native';
-import { Colors } from '@/constants/theme';
+import { Colors, Fonts } from '@/constants/theme';
 
 type SuggestedQuestionsProps = {
   suggestedQuestions?: string[];
@@ -11,9 +11,6 @@ type SuggestedQuestionsProps = {
   onRegenerate?: () => void;
 };
 
-const ORANGE_ACCENT = '#E07B39';
-const ORANGE_LIGHT = '#FDF4EC';
-
 export function SuggestedQuestions({ suggestedQuestions, isLoading, isRegenerating, firstName, onRegenerate }: SuggestedQuestionsProps) {
   const { t } = useTranslation();
 
@@ -21,7 +18,7 @@ export function SuggestedQuestions({ suggestedQuestions, isLoading, isRegenerati
     return (
       <View style={styles.loadingContainer}>
         <View style={styles.loadingContent}>
-          <ActivityIndicator size="small" color={ORANGE_ACCENT} />
+          <ActivityIndicator size="small" color={Colors.accent} />
           <Text style={styles.loadingText}>{t('contact.suggestedQuestions.loading')}</Text>
         </View>
       </View>
@@ -42,7 +39,7 @@ export function SuggestedQuestions({ suggestedQuestions, isLoading, isRegenerati
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <MessageCircle size={16} color={ORANGE_ACCENT} />
+          <MessageCircle size={16} color={Colors.accent} strokeWidth={2.1} />
           <Text style={styles.headerText}>{t('contact.suggestedQuestions.header')}</Text>
         </View>
         {onRegenerate && (
@@ -52,9 +49,9 @@ export function SuggestedQuestions({ suggestedQuestions, isLoading, isRegenerati
             disabled={isRegenerating}
           >
             {isRegenerating ? (
-              <ActivityIndicator size="small" color={ORANGE_ACCENT} />
+              <ActivityIndicator size="small" color={Colors.accent} />
             ) : (
-              <RefreshCw size={16} color={ORANGE_ACCENT} />
+              <RefreshCw size={15} color={Colors.textSecondary} />
             )}
           </Pressable>
         )}
@@ -62,7 +59,7 @@ export function SuggestedQuestions({ suggestedQuestions, isLoading, isRegenerati
       <View style={styles.questionsContainer}>
         {suggestedQuestions.map((question, index) => (
           <View key={index} style={styles.questionItem}>
-            <Text style={styles.bullet}>•</Text>
+            <Text style={styles.questionIndex}>{index + 1}</Text>
             <Text style={styles.questionText}>{question}</Text>
           </View>
         ))}
@@ -73,12 +70,12 @@ export function SuggestedQuestions({ suggestedQuestions, isLoading, isRegenerati
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: ORANGE_LIGHT,
-    padding: 16,
-    borderRadius: 14,
+    backgroundColor: Colors.surface,
+    padding: 18,
+    borderRadius: 18,
     marginBottom: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: ORANGE_ACCENT,
+    borderWidth: 1,
+    borderColor: Colors.hairline,
   },
   header: {
     flexDirection: 'row',
@@ -89,37 +86,55 @@ const styles = StyleSheet.create({
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
+    flex: 1,
+    minWidth: 0,
   },
   headerText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: ORANGE_ACCENT,
-    marginLeft: 6,
+    flex: 1,
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    color: Colors.textMuted,
   },
   regenerateButton: {
-    padding: 4,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.surfaceAlt,
   },
   questionsContainer: {
-    gap: 8,
+    gap: 10,
   },
   questionItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
+    gap: 10,
   },
-  bullet: {
-    fontSize: 16,
-    color: ORANGE_ACCENT,
-    marginRight: 8,
+  questionIndex: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    overflow: 'hidden',
+    textAlign: 'center',
     lineHeight: 22,
+    fontSize: 11,
+    fontWeight: '700',
+    color: Colors.accent,
+    backgroundColor: Colors.accentLight,
   },
   questionText: {
     flex: 1,
-    fontSize: 15,
+    fontFamily: Fonts.sans.medium,
+    fontSize: 15.5,
     color: Colors.textPrimary,
-    lineHeight: 22,
+    lineHeight: 23,
   },
   loadingContainer: {
-    backgroundColor: `${ORANGE_LIGHT}80`,
+    backgroundColor: `${Colors.surface}80`,
     padding: 16,
     borderRadius: 14,
     marginBottom: 16,

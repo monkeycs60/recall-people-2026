@@ -20,13 +20,14 @@ import {
 } from '@/hooks/useContactQuery';
 import { useUpdateContact, useDeleteContact } from '@/hooks/useContactsQuery';
 import { useGroupsForContact, useGroupsQuery } from '@/hooks/useGroupsQuery';
-import { SearchSourceType } from '@/types';
+import type { Note, SearchSourceType } from '@/types';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { ChevronLeft, Edit3, Plus, Trash2, MoreVertical, Calendar, Bell, Users } from 'lucide-react-native';
 import { notificationService } from '@/services/notification.service';
 import { AISummary } from '@/components/contact/AISummary';
 import type { InputMode } from '@/components/InputModeToggle';
 import { SuggestedQuestions } from '@/components/contact/SuggestedQuestions';
+import { MeetingContextCard } from '@/components/contact/MeetingContextCard';
 import { HotTopicsList } from '@/components/contact/HotTopicsList';
 import { NotesTimeline } from '@/components/contact/NotesTimeline';
 import { ContactAvatar } from '@/components/contact/ContactAvatar';
@@ -48,6 +49,44 @@ import { useSettingsStore } from '@/stores/settings-store';
 import { ContactDetailSkeleton } from '@/components/skeleton/ContactDetailSkeleton';
 import { Paywall } from '@/components/Paywall';
 import { REMINDER_FREQUENCY_PRESETS } from '@/lib/reminder-frequency';
+
+type MeetingContext = {
+  context: string;
+  sourceTitle?: string;
+};
+
+const MEETING_CONTEXT_PATTERNS = [
+  /contexte de rencontre\s*:\s*([^.!?\n]{3,100})/i,
+  /(?:rencontr[ée]?\s+(?:à|au|aux|chez|pendant|lors de|via|gr[aâ]ce à|par|en)\s+)([^.!?\n]{3,100})/i,
+  /(?:on s['’]est rencontr[ée]s?\s+(?:à|au|aux|chez|pendant|lors de|via|gr[aâ]ce à|par|en)\s+)([^.!?\n]{3,100})/i,
+  /(?:met|meet)\s+(?:at|during|through|via)\s+([^.!?\n]{3,100})/i,
+];
+
+function cleanMeetingContext(value: string): string {
+  const cleaned = value.trim().replace(/\s+/g, ' ').replace(/[,:;]+$/, '');
+  return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+}
+
+function getMeetingContext(notes: Note[]): MeetingContext | null {
+  const chronologicalNotes = notes
+    .filter((note) => note.transcription.trim().length > 0)
+    .slice()
+    .sort((first, second) => new Date(first.createdAt).getTime() - new Date(second.createdAt).getTime());
+
+  for (const note of chronologicalNotes) {
+    for (const pattern of MEETING_CONTEXT_PATTERNS) {
+      const match = note.transcription.match(pattern);
+      if (match?.[1]) {
+        return {
+          context: cleanMeetingContext(match[1]),
+          sourceTitle: note.title,
+        };
+      }
+    }
+  }
+
+  return null;
+}
 
 
 export default function ContactDetailScreen() {
@@ -385,6 +424,7 @@ export default function ContactDetailScreen() {
   const hasSummaryContent = hasNotes || Boolean(contact.aiSummary) || isWaitingForSummary;
   const hasSuggestedQuestionsContent =
     hasNotes || Boolean(contact.suggestedQuestions?.length) || isWaitingForSuggestedQuestions;
+  const meetingContext = getMeetingContext(contact.notes);
 
   return (
     <KeyboardAvoidingView
@@ -499,6 +539,15 @@ export default function ContactDetailScreen() {
             </View>
           </LinearGradient>
         </Animated.View>
+
+        {meetingContext && (
+          <Animated.View entering={FadeInDown.delay(80).duration(300)} style={styles.section}>
+            <MeetingContextCard
+              context={meetingContext.context}
+              sourceTitle={meetingContext.sourceTitle}
+            />
+          </Animated.View>
+        )}
 
         {/* AI Summary (L'essentiel) - Most important info first */}
         {hasSummaryContent && (
@@ -979,12 +1028,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 6,
-    marginTop: 4,
+    marginTop: 12,
   },
   groupChip: {
     backgroundColor: Colors.surface,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
+    paddingHorizontal: 11,
+    paddingVertical: 5,
     borderRadius: 999,
   },
   groupChipText: {
@@ -993,9 +1042,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   manageGroupsButton: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: Colors.surface,
     alignItems: 'center',
     justifyContent: 'center',

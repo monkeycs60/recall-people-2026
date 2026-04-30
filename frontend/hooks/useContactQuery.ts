@@ -214,6 +214,8 @@ export function useRegenerateSummary() {
 
       const transcriptions = contact.notes
         .filter((note) => note.transcription)
+        .slice()
+        .reverse()
         .map((note) => note.transcription);
 
       if (transcriptions.length === 0) {
@@ -258,6 +260,12 @@ export function useRegenerateSuggestedQuestions() {
           title: topic.title,
           context: topic.context || '',
           status: topic.status,
+          eventDate: topic.eventDate,
+        })),
+        recentNotes: contact.notes.slice(0, 6).map((note) => ({
+          title: note.title || 'Note',
+          transcription: note.transcription,
+          createdAt: note.createdAt,
         })),
       });
 

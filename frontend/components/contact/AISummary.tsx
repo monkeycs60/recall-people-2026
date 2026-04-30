@@ -1,7 +1,7 @@
 import { View, Text, ActivityIndicator, Pressable, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Sparkles, RefreshCw } from 'lucide-react-native';
-import { Colors } from '@/constants/theme';
+import { BookOpenText, RefreshCw } from 'lucide-react-native';
+import { Colors, Fonts } from '@/constants/theme';
 
 type AISummaryProps = {
   summary?: string;
@@ -39,7 +39,7 @@ export function AISummary({ summary, isLoading, isRegenerating, firstName, onReg
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Sparkles size={16} color={Colors.secondary} />
+          <BookOpenText size={16} color={Colors.primary} strokeWidth={2.1} />
           <Text style={styles.headerText}>{t('contact.aiSummary.header', { firstName })}</Text>
         </View>
         {onRegenerate && (
@@ -49,9 +49,9 @@ export function AISummary({ summary, isLoading, isRegenerating, firstName, onReg
             disabled={isRegenerating}
           >
             {isRegenerating ? (
-              <ActivityIndicator size="small" color={Colors.secondary} />
+              <ActivityIndicator size="small" color={Colors.primary} />
             ) : (
-              <RefreshCw size={16} color={Colors.secondary} />
+              <RefreshCw size={15} color={Colors.textSecondary} />
             )}
           </Pressable>
         )}
@@ -63,12 +63,12 @@ export function AISummary({ summary, isLoading, isRegenerating, firstName, onReg
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.secondaryLight,
-    padding: 16,
-    borderRadius: 14,
+    backgroundColor: Colors.surface,
+    padding: 18,
+    borderRadius: 18,
     marginBottom: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: Colors.secondary,
+    borderWidth: 1,
+    borderColor: Colors.hairline,
   },
   header: {
     flexDirection: 'row',
@@ -79,26 +79,31 @@ const styles = StyleSheet.create({
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
+    flex: 1,
+    minWidth: 0,
   },
   headerText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: Colors.secondary,
-    marginLeft: 6,
+    flex: 1,
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    color: Colors.textMuted,
   },
   regenerateButton: {
-    padding: 4,
-  },
-  contextHeader: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    marginBottom: 10,
-    fontStyle: 'italic',
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.surfaceAlt,
   },
   summaryText: {
-    fontSize: 15,
+    fontFamily: Fonts.sans.medium,
+    fontSize: 16,
     color: Colors.textPrimary,
-    lineHeight: 22,
+    lineHeight: 24,
   },
   loadingContainer: {
     backgroundColor: `${Colors.surface}80`,

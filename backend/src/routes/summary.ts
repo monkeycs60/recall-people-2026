@@ -39,7 +39,7 @@ const PROMPT_TEMPLATES: Record<string, {
 		intro: (contactName) => `Tu génères un résumé factuel et concis de ${contactName}.`,
 		notesHeader: 'NOTES (ordonnées chronologiquement de la plus ancienne à la plus récente)',
 		rules: `RÈGLES ABSOLUES:
-1. Résumé de 2-4 phrases maximum
+1. Résumé de 2-3 phrases maximum
 2. Utilise des DATES ABSOLUES en texte complet (pas "récemment" mais "en janvier 2026", "le 25 janvier 2026")
 3. FORMATAGE DES DATES: Écris les dates en texte complet avec le nom du mois (ex: "25 janvier 2026", "3 mars 2026"), JAMAIS en format numérique (pas de "25/01/2026" ou "03/03/2026")
 4. N'invente RIEN - base-toi uniquement sur les notes fournies
@@ -51,7 +51,12 @@ const PROMPT_TEMPLATES: Record<string, {
 10. Ne dis PAS "selon les notes" ou "d'après les informations"
 11. Si jamais tu évoques l'utilisateur (le narrateur), utilise 'l'utilisateur' pour le désigner
 12. Ne fais PAS une fiche à libellés ("Profil:", "Sujet actuel:", "Relation:"). Écris des phrases naturelles.
-13. Si possible, garde une phrase pour le contexte durable et une phrase pour ce qu'il faut suivre maintenant.`,
+13. Si possible, garde une phrase pour le contexte durable et une phrase pour ce qu'il faut suivre maintenant
+14. Si les notes mentionnent le contexte de rencontre (où, via qui, à quel événement), intègre-le brièvement sans l'étirer
+15. Ignore les sections de notes qui sont déjà des suggestions ou questions à poser. Ne les transforme PAS en faits.
+16. N'écris pas "l'utilisateur pourra". Formule directement le mémo: "À suivre: ...", "Penser à ...", ou une phrase naturelle équivalente.
+17. Priorité au contexte de lien et au prochain suivi concret. Oublie les hobbies ou préférences vagues s'ils ne donnent pas une relance utile.
+18. Ne dis pas "vous avez rencontré" ni "tu as rencontré". Pour le contexte de rencontre, écris plutôt "Rencontré lors de..." ou "Croisé via...".`,
 		goodExample: `EXEMPLE BON:
 "Marie est consultante chez Deloitte, en recherche d'un nouveau poste (entretien chez Google le 25 janvier 2026). Elle déménage à Lyon en mars 2026. Mère de Lucas qui fait du foot."`,
 		badExample: `EXEMPLE MAUVAIS:

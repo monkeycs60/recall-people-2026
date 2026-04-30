@@ -70,6 +70,8 @@ const PROMPT_TEMPLATES: Record<string, {
 10. Maximum 15 mots par question
 11. Adresse-toi directement à la personne avec "tu"; jamais "a-t-il/elle" ni une formulation de fiche
 12. Évite les questions génériques qui répètent juste le titre ("Comment avance X ?"). Ancre la question dans un détail, une échéance ou une prochaine action.
+13. N'invente JAMAIS de date, jour, créneau, lieu ou personne. Si aucun créneau précis n'est mentionné, reste général.
+14. Pour caler un moment sans date fournie, écris une question générale du type "Tu serais dispo bientôt pour se voir ?" sans proposer d'options.
 
 IMPORTANT: Mieux vaut 1 bonne question que 3 questions artificielles ou répétitives.`,
 		format: 'FORMAT DE RÉPONSE:\nRetourne entre 1 et 3 questions, une par ligne, sans numérotation ni tirets.',
