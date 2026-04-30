@@ -2,7 +2,7 @@
   "expo": {
     "name": "Recall People",
     "slug": "recall-people",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "recall-people",
@@ -86,7 +86,7 @@
       }
     },
     "owner": "clement-serizay",
-    "runtimeVersion": "1.0.2",
+    "runtimeVersion": "1.0.3",
     "updates": {
       "url": "https://u.expo.dev/005eaea1-73bc-47b0-80e8-5e15dee1c600"
     }
