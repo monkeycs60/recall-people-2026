@@ -80,9 +80,9 @@ export function showErrorToast(title: string, subtitle?: string) {
   });
 }
 
-export function showInfoToast(title: string, subtitle?: string) {
+export function showInfoToast(title: string, subtitle?: string, duration: number = 3000) {
   toast.info(title, {
     description: subtitle,
-    duration: 3000,
+    duration,
   });
 }

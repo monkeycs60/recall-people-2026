@@ -3,6 +3,7 @@ import { startOfDay, addDays, isBefore } from 'date-fns';
 import { getDatabase } from '@/lib/db';
 import { HotTopic, HotTopicStatus } from '@/types';
 import i18n from '@/lib/i18n';
+import { notificationService } from '@/services/notification.service';
 
 export const hotTopicService = {
   getById: async (id: string): Promise<HotTopic | null> => {
@@ -185,6 +186,7 @@ export const hotTopicService = {
 
   delete: async (id: string): Promise<void> => {
     const db = await getDatabase();
+    await notificationService.cancelEventRemindersByEventId(id);
     await db.runAsync('DELETE FROM hot_topics WHERE id = ?', [id]);
   },
 

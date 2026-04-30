@@ -149,6 +149,8 @@
     "noContactsDescription": "Crea la tua prima nota per iniziare.",
     "createFirstNote": "Registra la tua prima nota",
     "people": "persone",
+    "peopleCount_one": "{{count}} persona",
+    "peopleCount_other": "{{count}} persone",
     "needFollowUp": "da ricontattare",
     "allGroup": "Tutti",
     "recentSection": "Recenti",
@@ -157,7 +159,9 @@
     "addContact": "Aggiungi un contatto",
     "createModal": {
       "title": "Nuovo contatto",
-      "create": "Crea"
+      "create": "Crea",
+      "createdTitle": "Contatto creato",
+      "avatarPendingDescription": "L'avatar illustrato è in generazione. Può richiedere fino a un minuto prima di apparire."
     }
   },
   "search": {
@@ -194,6 +198,25 @@
       "header": "Un'idea per riprendere la conversazione?",
       "loading": "Preparazione delle idee...",
       "empty": "Aggiungi note per ottenere idee di conversazione"
+    },
+    "nextAction": {
+      "label": "Prossima azione",
+      "questionTitle": "Ricontatta {{firstName}}",
+      "eventDescriptionWithDate": "Da seguire il {{date}}.",
+      "eventDescription": "Tema da riprendere nel prossimo scambio.",
+      "addNote": "Aggiungi nota",
+      "ask": "Chiedi all'IA"
+    },
+    "meetingContext": {
+      "label": "Contesto dell'incontro",
+      "source": "Da \"{{title}}\"",
+      "edit": "Modifica contesto dell'incontro"
+    },
+    "firstNotePrompt": {
+      "title": "Inizia con una nota breve",
+      "description": "Aggiungi dove hai incontrato {{firstName}}, il contesto o qualcosa da ricordare.",
+      "voiceCta": "Voce",
+      "textCta": "Testo"
     },
     "editGroups": "Modifica gruppi",
     "addGroup": "Aggiungi gruppo",
@@ -360,6 +383,12 @@
       "lastName": "Cognome",
       "firstNamePlaceholder": "Nome",
       "lastNamePlaceholder": "Cognome (opzionale)",
+      "save": "Salva",
+      "cancel": "Annulla"
+    },
+    "meetingContextModal": {
+      "title": "Modifica contesto",
+      "placeholder": "Es: Conosciuto al Web Summit tramite Anna",
       "save": "Salva",
       "cancel": "Annulla"
     },
@@ -804,11 +833,13 @@
     "placeholder": "Chiedimi qualcosa...",
     "title": "Chiedi",
     "titleAbout": "Su {{firstName}}",
+    "inputLabel": "La tua domanda",
+    "inputHint": "Scegli un suggerimento o chiedi un dettaglio preciso già salvato nelle tue note.",
     "inputPlaceholder": "Scrivi la tua domanda...",
     "inputPlaceholderAbout": "Chiedi di {{firstName}}...",
     "voiceButton": "Parla",
     "sendButton": "Invia",
-    "suggestionsTitle": "Suggerimenti:",
+    "suggestionsTitle": "Domande utili",
     "suggestions": {
       "recent": "Di cosa ho parlato con Marie di recente?",
       "birthday": "Quand'e il compleanno di Lucas?",
@@ -898,6 +929,7 @@
     "body": "{{events}} evento/i, {{contacts}} contatto/i da ricontattare"
   },
   "reminder": {
+    "eventTomorrow": "Domani: {{name}} — {{title}}",
     "postEvent": "{{title}} di {{name}} era questa settimana, fatti sentire?"
   },
   "aiConsent": {

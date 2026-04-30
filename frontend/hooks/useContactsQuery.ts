@@ -70,6 +70,7 @@ export function useUpdateContact() {
         birthdayMonth: number | null;
         birthdayYear: number | null;
         highlights: string[];
+        meetingContext: string | null;
         reminderFrequencyDays: number | null;
         lastContactAt: string;
       }>;

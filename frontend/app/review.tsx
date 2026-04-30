@@ -31,6 +31,7 @@ import { ResolvedTopicsSection } from '@/components/review/ResolvedTopicsSection
 import { GroupsSection } from '@/components/review/GroupsSection';
 import { getLocaleDateStringLocale } from '@/utils/dateLocale';
 import { Paywall } from '@/components/Paywall';
+import { shouldApplyExtractedMeetingContext } from '@/utils/meetingContext';
 
 export default function ReviewScreen() {
   const { t } = useTranslation();
@@ -114,6 +115,9 @@ export default function ReviewScreen() {
     email: extraction.contactInfo?.email || null,
     birthday: extraction.contactInfo?.birthday || null,
   });
+  const [meetingContext, setMeetingContext] = useState<string | undefined>(
+    extraction.meetingContext?.trim() || undefined
+  );
 
   const [editingContactInfoField, setEditingContactInfoField] = useState<'phone' | 'email' | 'birthday' | null>(null);
 
@@ -376,6 +380,7 @@ export default function ReviewScreen() {
         });
       }
 
+      setMeetingContext(newExtraction.meetingContext?.trim() || undefined);
       setResolvedTopicsState(newExtraction.resolvedTopics || []);
 
       setIsEditingTranscription(false);
@@ -500,9 +505,22 @@ export default function ReviewScreen() {
         }
       }
 
+      const persistedContact = contactId !== 'new'
+        ? await contactService.getById(finalContactId)
+        : null;
+
+      const contactUpdate: {
+        lastContactAt: string;
+        meetingContext?: string | null;
+      } = { lastContactAt: new Date().toISOString() };
+
+      if (shouldApplyExtractedMeetingContext(meetingContext, persistedContact?.meetingContext)) {
+        contactUpdate.meetingContext = meetingContext;
+      }
+
       await updateContactMutation.mutateAsync({
         id: finalContactId,
-        data: { lastContactAt: new Date().toISOString() },
+        data: contactUpdate,
       });
 
       await queryClient.refetchQueries({ queryKey: queryKeys.contacts.all });

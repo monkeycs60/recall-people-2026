@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Trash2, Edit3, Users, User } from 'lucide-react-native';
 import { Memory } from '@/types';
 import { Colors } from '@/constants/theme';
+import { formatLocalizedDate } from '@/utils/dateLocale';
 
 const EMPTY_MEMORIES_ILLUSTRATION = require('@/assets/ai-assets/empty-memories.png');
 
@@ -125,7 +126,7 @@ export function MemoriesList({ memories, onEdit, onDelete, highlightId }: Memori
                   </Text>
                 </View>
                 <Text style={styles.memoryCreatedAt}>
-                  {new Date(memory.createdAt).toLocaleDateString()}
+                  {formatLocalizedDate(memory.createdAt)}
                 </Text>
               </View>
               <View style={styles.memoryActions}>

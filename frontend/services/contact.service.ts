@@ -20,6 +20,7 @@ export const contactService = {
       birthday_month: number | null;
       birthday_year: number | null;
       ai_summary: string | null;
+      meeting_context: string | null;
       reminder_frequency_days: number | null;
       last_contact_at: string | null;
       created_at: string;
@@ -39,6 +40,7 @@ export const contactService = {
       birthdayMonth: row.birthday_month || undefined,
       birthdayYear: row.birthday_year || undefined,
       aiSummary: row.ai_summary || undefined,
+      meetingContext: row.meeting_context || undefined,
       reminderFrequencyDays: row.reminder_frequency_days ?? undefined,
       lastContactAt: row.last_contact_at || undefined,
       createdAt: row.created_at,
@@ -63,6 +65,7 @@ export const contactService = {
       birthday_year: number | null;
       ai_summary: string | null;
       suggested_questions: string | null;
+      meeting_context: string | null;
       reminder_frequency_days: number | null;
       last_contact_at: string | null;
       created_at: string;
@@ -112,6 +115,7 @@ export const contactService = {
       birthdayYear: contactRow.birthday_year || undefined,
       aiSummary: contactRow.ai_summary || undefined,
       suggestedQuestions: contactRow.suggested_questions ? JSON.parse(contactRow.suggested_questions) : undefined,
+      meetingContext: contactRow.meeting_context || undefined,
       reminderFrequencyDays: contactRow.reminder_frequency_days ?? undefined,
       lastContactAt: contactRow.last_contact_at || undefined,
       createdAt: contactRow.created_at,
@@ -242,6 +246,7 @@ export const contactService = {
       birthdayYear: number | null;
       aiSummary: string;
       suggestedQuestions: string[];
+      meetingContext: string | null;
       reminderFrequencyDays: number | null;
       lastContactAt: string;
     }>
@@ -297,6 +302,10 @@ export const contactService = {
     if (data.suggestedQuestions !== undefined) {
       updates.push('suggested_questions = ?');
       values.push(data.suggestedQuestions ? JSON.stringify(data.suggestedQuestions) : null);
+    }
+    if (data.meetingContext !== undefined) {
+      updates.push('meeting_context = ?');
+      values.push(data.meetingContext || null);
     }
     if (data.reminderFrequencyDays !== undefined) {
       updates.push('reminder_frequency_days = ?');

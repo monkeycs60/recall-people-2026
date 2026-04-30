@@ -169,6 +169,8 @@ export default function ContactsScreen() {
     setIsCreateModalVisible(true);
   };
 
+  const formatPeopleCount = (count: number) => t('contacts.peopleCount', { count });
+
   const handleCreateContact = async (firstName: string, lastName: string) => {
     if (!canCreateContact(contacts.length)) {
       setIsCreateModalVisible(false);
@@ -185,8 +187,9 @@ export default function ContactsScreen() {
 
     addPendingAvatarGeneration(newContact.id);
     showInfoToast(
-      t('contact.avatar.generationStartedTitle'),
-      t('contact.avatar.generationStartedDescription')
+      t('contacts.createModal.createdTitle'),
+      t('contacts.createModal.avatarPendingDescription'),
+      6000
     );
     generateAvatarFromHints({
       contactId: newContact.id,
@@ -393,7 +396,7 @@ export default function ContactsScreen() {
         {needsFollowupCount > 0 && (
           <View style={styles.followUpRow}>
             <Text style={styles.followUpText}>
-              <Text style={styles.followUpBold}>{needsFollowupCount} {t('contacts.people')}</Text>
+              <Text style={styles.followUpBold}>{formatPeopleCount(needsFollowupCount)}</Text>
               {' '}{t('contacts.needFollowUp')}{' '}
             </Text>
             <Text style={styles.followUpArrow}>{'↗'}</Text>
@@ -474,7 +477,7 @@ export default function ContactsScreen() {
           {/* Section header */}
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionLabel}>{t('contacts.recentSection')}</Text>
-            <Text style={styles.sectionCount}>{allContacts.length} {t('contacts.people')}</Text>
+            <Text style={styles.sectionCount}>{formatPeopleCount(allContacts.length)}</Text>
           </View>
 
           {allContacts.length === 0 && selectedGroupId ? (

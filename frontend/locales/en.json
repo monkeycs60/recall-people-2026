@@ -149,6 +149,8 @@
     "noContactsDescription": "Create your first note to get started.",
     "createFirstNote": "Record your first note",
     "people": "people",
+    "peopleCount_one": "{{count}} person",
+    "peopleCount_other": "{{count}} people",
     "needFollowUp": "need a follow-up",
     "allGroup": "All",
     "recentSection": "Recent",
@@ -157,7 +159,9 @@
     "addContact": "Add a contact",
     "createModal": {
       "title": "New contact",
-      "create": "Create"
+      "create": "Create",
+      "createdTitle": "Contact created",
+      "avatarPendingDescription": "The illustrated avatar is being generated. It can take up to a minute to appear."
     }
   },
   "search": {
@@ -194,6 +198,25 @@
       "header": "Need an idea to restart the conversation?",
       "loading": "Preparing ideas...",
       "empty": "Add notes to get conversation ideas"
+    },
+    "nextAction": {
+      "label": "Next action",
+      "questionTitle": "Follow up with {{firstName}}",
+      "eventDescriptionWithDate": "Follow up on {{date}}.",
+      "eventDescription": "Topic to revisit in the next exchange.",
+      "addNote": "Add note",
+      "ask": "Ask AI"
+    },
+    "meetingContext": {
+      "label": "Meeting context",
+      "source": "From \"{{title}}\"",
+      "edit": "Edit meeting context"
+    },
+    "firstNotePrompt": {
+      "title": "Start with a short note",
+      "description": "Add where you met {{firstName}}, the context, or something worth remembering.",
+      "voiceCta": "Voice",
+      "textCta": "Text"
     },
     "editGroups": "Edit groups",
     "addGroup": "Add group",
@@ -360,6 +383,12 @@
       "lastName": "Last name",
       "firstNamePlaceholder": "First name",
       "lastNamePlaceholder": "Last name (optional)",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "meetingContextModal": {
+      "title": "Edit context",
+      "placeholder": "E.g. Met at Web Summit through Anna",
       "save": "Save",
       "cancel": "Cancel"
     },
@@ -804,11 +833,13 @@
     "placeholder": "Ask me something...",
     "title": "Ask",
     "titleAbout": "About {{firstName}}",
+    "inputLabel": "Your question",
+    "inputHint": "Choose a suggestion or ask for a precise detail already saved in your notes.",
     "inputPlaceholder": "Type your question...",
     "inputPlaceholderAbout": "Ask about {{firstName}}...",
     "voiceButton": "Speak",
     "sendButton": "Send",
-    "suggestionsTitle": "💡 Suggestions:",
+    "suggestionsTitle": "Useful questions",
     "suggestions": {
       "recent": "What did I talk about with Marie recently?",
       "birthday": "When is Lucas's birthday?",
@@ -898,6 +929,7 @@
     "body": "{{events}} event(s), {{contacts}} contact(s) to catch up with"
   },
   "reminder": {
+    "eventTomorrow": "Tomorrow: {{name}} — {{title}}",
     "postEvent": "{{name}}'s {{title}} was this week, check in with them?"
   },
   "aiConsent": {

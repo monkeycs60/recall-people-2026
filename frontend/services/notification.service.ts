@@ -1,7 +1,12 @@
 import * as Notifications from 'expo-notifications';
 import type { NotificationResponse } from 'expo-notifications';
-import { addDays, setHours, setMinutes, setSeconds, isBefore, nextMonday } from 'date-fns';
 import i18n from '@/lib/i18n';
+import {
+  getEventReminderTriggerDate,
+  getNotSeenReminderTriggerDate,
+  getPostEventFollowUpTriggerDate,
+  getWeeklyDigestTriggerDate,
+} from '@/lib/notification-schedule';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -25,30 +30,36 @@ export const notificationService = {
     return status === 'granted';
   },
 
+  hasPermissions: async (): Promise<boolean> => {
+    const { status } = await Notifications.getPermissionsAsync();
+    return status === 'granted';
+  },
+
   scheduleEventReminder: async (
     eventId: string,
     eventDate: string,
     title: string,
-    contactName: string
+    contactName: string,
+    options: { requestPermission?: boolean } = {}
   ): Promise<string | null> => {
-    const hasPermission = await notificationService.requestPermissions();
+    const hasPermission = options.requestPermission === false
+      ? await notificationService.hasPermissions()
+      : await notificationService.requestPermissions();
     if (!hasPermission) return null;
 
-    const eventDateObj = new Date(eventDate);
-    let triggerDate = addDays(eventDateObj, -1);
-    triggerDate = setHours(triggerDate, 19);
-    triggerDate = setMinutes(triggerDate, 0);
-    triggerDate = setSeconds(triggerDate, 0);
-
-    if (isBefore(triggerDate, new Date())) return null;
+    const triggerDate = getEventReminderTriggerDate(eventDate);
+    if (!triggerDate) return null;
 
     const identifier = await Notifications.scheduleNotificationAsync({
       content: {
         title: 'Recall People',
-        body: `Demain : ${contactName} ${title}`,
+        body: i18n.t('reminder.eventTomorrow', { title, name: contactName }),
         data: { eventId },
       },
-      trigger: triggerDate,
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        date: triggerDate,
+      },
     });
 
     return identifier;
@@ -56,6 +67,19 @@ export const notificationService = {
 
   cancelEventReminder: async (notificationId: string): Promise<void> => {
     await Notifications.cancelScheduledNotificationAsync(notificationId);
+  },
+
+  cancelEventRemindersByEventId: async (eventId: string): Promise<void> => {
+    const scheduledNotifications = await Notifications.getAllScheduledNotificationsAsync();
+    const eventReminders = scheduledNotifications.filter(
+      (notification) => notification.content.data?.eventId === eventId
+    );
+
+    await Promise.all(
+      eventReminders.map((notification) =>
+        Notifications.cancelScheduledNotificationAsync(notification.identifier)
+      )
+    );
   },
 
   cancelNotSeenReminders: async (contactId?: string): Promise<void> => {
@@ -85,18 +109,25 @@ export const notificationService = {
     );
   },
 
+  getScheduledReminderDataByType: async (type: string): Promise<Record<string, unknown>[]> => {
+    const scheduledNotifications = await Notifications.getAllScheduledNotificationsAsync();
+    return scheduledNotifications
+      .filter((notification) => notification.content.data?.type === type)
+      .map((notification) => notification.content.data);
+  },
+
   scheduleNotSeenReminder: async (
     contactId: string,
     contactName: string,
-    daysSince: number
+    daysSince: number,
+    options: { requestPermission?: boolean } = {}
   ): Promise<string | null> => {
-    const hasPermission = await notificationService.requestPermissions();
+    const hasPermission = options.requestPermission === false
+      ? await notificationService.hasPermissions()
+      : await notificationService.requestPermissions();
     if (!hasPermission) return null;
 
-    let triggerDate = addDays(new Date(), 1);
-    triggerDate = setHours(triggerDate, 10);
-    triggerDate = setMinutes(triggerDate, 0);
-    triggerDate = setSeconds(triggerDate, 0);
+    const triggerDate = getNotSeenReminderTriggerDate();
 
     const identifier = await Notifications.scheduleNotificationAsync({
       content: {
@@ -104,7 +135,10 @@ export const notificationService = {
         body: `${contactName} — ${daysSince} jours sans nouvelles`,
         data: { contactId, type: 'not_seen' },
       },
-      trigger: triggerDate,
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        date: triggerDate,
+      },
     });
 
     return identifier;
@@ -112,27 +146,28 @@ export const notificationService = {
 
   scheduleWeeklyDigest: async (
     eventsCount: number,
-    staleCount: number
+    staleCount: number,
+    options: { requestPermission?: boolean } = {}
   ): Promise<string | null> => {
-    const hasPermission = await notificationService.requestPermissions();
+    const hasPermission = options.requestPermission === false
+      ? await notificationService.hasPermissions()
+      : await notificationService.requestPermissions();
     if (!hasPermission) return null;
 
     await notificationService.cancelRemindersByType('weekly_digest');
 
-    let triggerDate = nextMonday(new Date());
-    triggerDate = setHours(triggerDate, 9);
-    triggerDate = setMinutes(triggerDate, 0);
-    triggerDate = setSeconds(triggerDate, 0);
-
-    if (isBefore(triggerDate, new Date())) return null;
+    const triggerDate = getWeeklyDigestTriggerDate();
 
     const identifier = await Notifications.scheduleNotificationAsync({
       content: {
         title: 'Recall People',
         body: i18n.t('digest.body', { events: eventsCount, contacts: staleCount }),
-        data: { type: 'weekly_digest' },
+        data: { type: 'weekly_digest', screen: 'upcoming' },
       },
-      trigger: triggerDate,
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        date: triggerDate,
+      },
     });
 
     return identifier;
@@ -142,15 +177,15 @@ export const notificationService = {
     contactId: string,
     hotTopicId: string,
     title: string,
-    contactName: string
+    contactName: string,
+    options: { requestPermission?: boolean } = {}
   ): Promise<string | null> => {
-    const hasPermission = await notificationService.requestPermissions();
+    const hasPermission = options.requestPermission === false
+      ? await notificationService.hasPermissions()
+      : await notificationService.requestPermissions();
     if (!hasPermission) return null;
 
-    let triggerDate = addDays(new Date(), 1);
-    triggerDate = setHours(triggerDate, 10);
-    triggerDate = setMinutes(triggerDate, 0);
-    triggerDate = setSeconds(triggerDate, 0);
+    const triggerDate = getPostEventFollowUpTriggerDate();
 
     const identifier = await Notifications.scheduleNotificationAsync({
       content: {
@@ -158,7 +193,10 @@ export const notificationService = {
         body: i18n.t('reminder.postEvent', { title, name: contactName }),
         data: { contactId, hotTopicId, type: 'post_event' },
       },
-      trigger: triggerDate,
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        date: triggerDate,
+      },
     });
 
     return identifier;
@@ -168,15 +206,11 @@ export const notificationService = {
     await Notifications.cancelAllScheduledNotificationsAsync();
   },
 
-  setupNotificationListener: (onNotificationTap: (data: { eventId?: string; contactId?: string }) => void): (() => void) => {
+  setupNotificationListener: (onNotificationTap: (data: Record<string, unknown>) => void): (() => void) => {
     const subscription = Notifications.addNotificationResponseReceivedListener((response: NotificationResponse) => {
       const data = response.notification.request.content.data;
-      const eventId = data?.eventId as string | undefined;
-      const contactId = data?.contactId as string | undefined;
 
-      if (eventId || contactId) {
-        onNotificationTap({ eventId, contactId });
-      }
+      onNotificationTap(data);
     });
 
     return () => subscription.remove();

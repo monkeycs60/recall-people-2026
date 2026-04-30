@@ -2,7 +2,7 @@ import { getDatabase } from '@/lib/db';
 import { notificationService } from './notification.service';
 import { useSettingsStore } from '@/stores/settings-store';
 import { useSubscriptionStore } from '@/stores/subscription-store';
-import { differenceInDays } from 'date-fns';
+import { addDays, differenceInDays, startOfDay } from 'date-fns';
 import {
   buildStaleContactReminderFilter,
   CONTACT_REMINDER_NEVER_DAYS,
@@ -32,8 +32,12 @@ type CountResult = {
   count: number;
 };
 
+type ScheduleOptions = {
+  requestPermission?: boolean;
+};
+
 export const reminderService = {
-  scheduleNotSeenReminders: async () => {
+  scheduleNotSeenReminders: async (options: ScheduleOptions = {}) => {
     const thresholdDays = useSettingsStore.getState().notSeenThresholdDays;
     const db = await getDatabase();
     const staleFilter = buildStaleContactReminderFilter(thresholdDays);
@@ -57,12 +61,13 @@ export const reminderService = {
       await notificationService.scheduleNotSeenReminder(
         contact.id,
         contactName,
-        daysSince
+        daysSince,
+        options
       );
     }
   },
 
-  rescheduleNotSeenReminderForContact: async (contactId: string) => {
+  rescheduleNotSeenReminderForContact: async (contactId: string, options: ScheduleOptions = {}) => {
     const db = await getDatabase();
     const thresholdDays = useSettingsStore.getState().notSeenThresholdDays;
 
@@ -85,7 +90,7 @@ export const reminderService = {
     if (effectiveFrequencyDays === CONTACT_REMINDER_NEVER_DAYS) return;
 
     const daysSince = differenceInDays(new Date(), new Date(contact.last_contact_at));
-    if (daysSince <= effectiveFrequencyDays) return;
+    if (daysSince < effectiveFrequencyDays) return;
 
     const contactName = contact.last_name
       ? `${contact.first_name} ${contact.last_name}`
@@ -94,11 +99,12 @@ export const reminderService = {
     await notificationService.scheduleNotSeenReminder(
       contact.id,
       contactName,
-      daysSince
+      daysSince,
+      options
     );
   },
 
-  scheduleWeeklyDigest: async () => {
+  scheduleWeeklyDigest: async (options: ScheduleOptions = {}) => {
     const { isPremium } = useSubscriptionStore.getState();
     if (!isPremium) {
       await notificationService.cancelRemindersByType('weekly_digest');
@@ -112,12 +118,17 @@ export const reminderService = {
     }
 
     const db = await getDatabase();
+    const today = startOfDay(new Date());
+    const digestWindowStart = today.toISOString();
+    const digestWindowEnd = addDays(today, 8).toISOString();
 
     const eventsResult = await db.getFirstAsync<CountResult>(
       `SELECT COUNT(*) as count FROM hot_topics
        WHERE status = 'active'
          AND event_date IS NOT NULL
-         AND date(event_date) BETWEEN date('now') AND date('now', '+7 days')`
+         AND event_date >= ?
+         AND event_date < ?`,
+      [digestWindowStart, digestWindowEnd]
     );
 
     const thresholdDays = useSettingsStore.getState().notSeenThresholdDays;
@@ -137,14 +148,14 @@ export const reminderService = {
       return;
     }
 
-    await notificationService.scheduleWeeklyDigest(eventsCount, staleCount);
+    await notificationService.scheduleWeeklyDigest(eventsCount, staleCount, options);
   },
 
   cancelWeeklyDigest: async () => {
     await notificationService.cancelRemindersByType('weekly_digest');
   },
 
-  schedulePostEventFollowUps: async () => {
+  schedulePostEventFollowUps: async (options: ScheduleOptions = {}) => {
     const { isPremium } = useSubscriptionStore.getState();
     if (!isPremium) {
       await notificationService.cancelRemindersByType('post_event');
@@ -158,6 +169,9 @@ export const reminderService = {
     }
 
     const db = await getDatabase();
+    const today = startOfDay(new Date());
+    const followUpWindowStart = addDays(today, -4).toISOString();
+    const followUpWindowEnd = today.toISOString();
 
     const hotTopics = await db.getAllAsync<PostEventHotTopic>(
       `SELECT ht.id, ht.title, ht.contact_id, c.first_name, c.last_name
@@ -165,10 +179,12 @@ export const reminderService = {
        JOIN contacts c ON c.id = ht.contact_id
        WHERE ht.status = 'active'
          AND ht.event_date IS NOT NULL
-         AND date(ht.event_date) BETWEEN date('now', '-4 days') AND date('now', '-1 day')
+         AND ht.event_date >= ?
+         AND ht.event_date < ?
          AND ht.notified_at IS NULL
          AND ht.birthday_contact_id IS NULL
-       LIMIT 3`
+       LIMIT 3`,
+      [followUpWindowStart, followUpWindowEnd]
     );
 
     for (const hotTopic of hotTopics) {
@@ -176,12 +192,15 @@ export const reminderService = {
         ? `${hotTopic.first_name} ${hotTopic.last_name}`
         : hotTopic.first_name;
 
-      await notificationService.schedulePostEventFollowUp(
+      const notificationId = await notificationService.schedulePostEventFollowUp(
         hotTopic.contact_id,
         hotTopic.id,
         hotTopic.title,
-        contactName
+        contactName,
+        options
       );
+
+      if (!notificationId) continue;
 
       await db.runAsync(
         `UPDATE hot_topics SET notified_at = datetime('now') WHERE id = ?`,
@@ -191,6 +210,20 @@ export const reminderService = {
   },
 
   cancelPostEventFollowUps: async () => {
+    const scheduledPostEvents = await notificationService.getScheduledReminderDataByType('post_event');
+    const hotTopicIds = scheduledPostEvents
+      .map((data) => data.hotTopicId)
+      .filter((hotTopicId): hotTopicId is string => typeof hotTopicId === 'string' && hotTopicId.length > 0);
+
     await notificationService.cancelRemindersByType('post_event');
+
+    if (hotTopicIds.length === 0) return;
+
+    const db = await getDatabase();
+    const placeholders = hotTopicIds.map(() => '?').join(', ');
+    await db.runAsync(
+      `UPDATE hot_topics SET notified_at = NULL WHERE id IN (${placeholders})`,
+      hotTopicIds
+    );
   },
 };

@@ -13,10 +13,12 @@ import { Colors, Shadows, Fonts } from '@/constants/theme';
 import { Calendar, ChevronRight } from 'lucide-react-native';
 import { EventListSkeleton } from '@/components/skeleton/EventListSkeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { SwipeableEventCard } from '@/components/upcoming/SwipeableEventCard';
+import { ContactAvatar } from '@/components/contact/ContactAvatar';
 
 type TimelineDay = {
   date: Date;
-  events: Array<HotTopic & { contact: Contact }>;
+  events: (HotTopic & { contact: Contact })[];
   isToday: boolean;
 };
 
@@ -28,7 +30,7 @@ export default function UpcomingScreen() {
   const insets = useSafeAreaInsets();
   const [view, setView] = useState<FeedView>('upcoming');
   const [timeline, setTimeline] = useState<TimelineDay[]>([]);
-  const [pastEvents, setPastEvents] = useState<Array<HotTopic & { contact: Contact }>>([]);
+  const [pastEvents, setPastEvents] = useState<(HotTopic & { contact: Contact })[]>([]);
   const [hasLoaded, setHasLoaded] = useState(false);
 
   const locale = getDateLocale();
@@ -56,7 +58,7 @@ export default function UpcomingScreen() {
       );
 
       const today = startOfDay(new Date());
-      const eventsByDate = new Map<string, Array<HotTopic & { contact: Contact }>>();
+      const eventsByDate = new Map<string, (HotTopic & { contact: Contact })[]>();
 
       for (const topic of topicsWithContacts) {
         if (topic.eventDate) {
@@ -170,22 +172,13 @@ export default function UpcomingScreen() {
                 </Text>
 
                 {day.events.map((event) => (
-                  <Pressable
+                  <SwipeableEventCard
                     key={event.id}
-                    style={styles.eventCard}
-                    onPress={() => handleEventPress(event.contactId)}
-                  >
-                    <View style={[styles.eventIcon, day.isToday && styles.eventIconToday]}>
-                      <Calendar size={16} color={day.isToday ? Colors.textInverse : '#6B4B00'} />
-                    </View>
-                    <View style={styles.eventContent}>
-                      <Text style={styles.eventTitle}>{event.title}</Text>
-                      <Text style={styles.eventContact}>
-                        {event.contact.firstName} {event.contact.lastName || ''}
-                      </Text>
-                    </View>
-                    <ChevronRight size={14} color={Colors.textMuted} />
-                  </Pressable>
+                    event={event}
+                    isToday={day.isToday}
+                    onPress={handleEventPress}
+                    onDelete={handleDeleteEvent}
+                  />
                 ))}
               </View>
             ))
@@ -206,9 +199,15 @@ export default function UpcomingScreen() {
                 style={styles.eventCard}
                 onPress={() => handleEventPress(event.contactId)}
               >
-                <View style={styles.eventIcon}>
-                  <Calendar size={16} color={'#6B4B00'} />
-                </View>
+                <ContactAvatar
+                  firstName={event.contact.firstName}
+                  lastName={event.contact.lastName}
+                  gender={event.contact.gender}
+                  avatarUrl={event.contact.avatarUrl}
+                  cacheKey={event.contact.updatedAt}
+                  recyclingKey={`past-${event.id}`}
+                  size="tiny"
+                />
                 <View style={styles.eventContent}>
                   <Text style={styles.eventTitle}>{event.title}</Text>
                   <Text style={styles.eventContact}>
@@ -314,17 +313,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     gap: 12,
     ...Shadows.card,
-  },
-  eventIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 14,
-    backgroundColor: Colors.amberLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  eventIconToday: {
-    backgroundColor: Colors.primary,
   },
   eventContent: {
     flex: 1,

@@ -149,6 +149,8 @@
     "noContactsDescription": "Crée ta première note pour commencer.",
     "createFirstNote": "Enregistre ta première note",
     "people": "personnes",
+    "peopleCount_one": "{{count}} personne",
+    "peopleCount_other": "{{count}} personnes",
     "needFollowUp": "à recontacter",
     "allGroup": "Tous",
     "recentSection": "Récents",
@@ -157,7 +159,9 @@
     "addContact": "Ajouter un contact",
     "createModal": {
       "title": "Nouveau contact",
-      "create": "Créer"
+      "create": "Créer",
+      "createdTitle": "Contact créé",
+      "avatarPendingDescription": "L'avatar illustré est en cours de génération. Il peut mettre jusqu'à une minute à apparaître."
     }
   },
   "search": {
@@ -176,11 +180,13 @@
     "placeholder": "Demande-moi quelque chose...",
     "title": "Demander",
     "titleAbout": "Sur {{firstName}}",
+    "inputLabel": "Ta question",
+    "inputHint": "Choisis une suggestion ou demande une information précise déjà présente dans tes notes.",
     "inputPlaceholder": "Tape ta question...",
     "inputPlaceholderAbout": "Question sur {{firstName}}...",
     "voiceButton": "Parler",
     "sendButton": "Envoyer",
-    "suggestionsTitle": "💡 Suggestions :",
+    "suggestionsTitle": "Questions utiles",
     "suggestions": {
       "recent": "De quoi j'ai parlé avec Marie récemment ?",
       "birthday": "C'est quand l'anniversaire de Lucas ?",
@@ -230,6 +236,25 @@
       "header": "Une idée pour relancer la conversation ?",
       "loading": "Préparation des idées...",
       "empty": "Ajoute des notes pour obtenir des idées de conversation"
+    },
+    "nextAction": {
+      "label": "Prochaine action",
+      "questionTitle": "Relancer {{firstName}}",
+      "eventDescriptionWithDate": "À suivre {{date}}.",
+      "eventDescription": "Sujet à suivre lors du prochain échange.",
+      "addNote": "Ajouter une note",
+      "ask": "Question IA"
+    },
+    "meetingContext": {
+      "label": "Contexte de rencontre",
+      "source": "Depuis \"{{title}}\"",
+      "edit": "Modifier le contexte de rencontre"
+    },
+    "firstNotePrompt": {
+      "title": "Commence par une note courte",
+      "description": "Ajoute où tu as rencontré {{firstName}}, le contexte, ou un sujet à retenir.",
+      "voiceCta": "Vocal",
+      "textCta": "Texte"
     },
     "editGroups": "Modifier les groupes",
     "addGroup": "Ajouter un groupe",
@@ -396,6 +421,12 @@
       "lastName": "Nom",
       "firstNamePlaceholder": "Prénom",
       "lastNamePlaceholder": "Nom (optionnel)",
+      "save": "Enregistrer",
+      "cancel": "Annuler"
+    },
+    "meetingContextModal": {
+      "title": "Modifier le contexte",
+      "placeholder": "Ex: Rencontré au Web Summit via Anna",
       "save": "Enregistrer",
       "cancel": "Annuler"
     },
@@ -888,6 +919,7 @@
     "body": "{{events}} événement(s), {{contacts}} contact(s) à recontacter"
   },
   "reminder": {
+    "eventTomorrow": "Demain : {{name}} — {{title}}",
     "postEvent": "{{title}} de {{name}} c'était cette semaine, prends des nouvelles ?"
   },
   "aiConsent": {

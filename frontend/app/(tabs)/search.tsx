@@ -23,6 +23,8 @@ import { useAudioRecorder, RecordingPresets, setAudioModeAsync } from 'expo-audi
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeIn, FadeOut, FadeInDown } from 'react-native-reanimated';
 import { showErrorToast, showInfoToast } from '@/lib/error-handler';
+import { formatLocalizedDate } from '@/utils/dateLocale';
+import { normalizeQuestionText } from '@/utils/questionText';
 import { useSubscriptionStore } from '@/stores/subscription-store';
 import { useQuestionHistoryStore, QuestionHistoryEntry } from '@/stores/question-history-store';
 import { Paywall } from '@/components/Paywall';
@@ -163,11 +165,13 @@ export default function AssistantScreen() {
 	};
 
 	const handleSubmit = async () => {
-		if (!question.trim() || isSubmitting) return;
+		const normalizedQuestion = normalizeQuestionText(question);
+		if (!normalizedQuestion.trim() || isSubmitting) return;
 
 		const canProceed = await checkAndUseAskQuota();
 		if (!canProceed) return;
 
+		setQuestion(normalizedQuestion);
 		setIsSubmitting(true);
 
 		try {
@@ -189,7 +193,7 @@ export default function AssistantScreen() {
 			);
 
 			const response = await askQuestion({
-				question: question.trim(),
+				question: normalizedQuestion.trim(),
 				contacts: allContactsWithNotes,
 			});
 
@@ -202,7 +206,7 @@ export default function AssistantScreen() {
 				: undefined;
 
 			addHistoryEntry({
-				question: question.trim(),
+				question: normalizedQuestion.trim(),
 				answerSummary: response.answer,
 				relatedContactId: response.relatedContactId || undefined,
 				relatedContactName,
@@ -211,7 +215,7 @@ export default function AssistantScreen() {
 			router.push({
 				pathname: '/ask-result',
 				params: {
-					question,
+					question: normalizedQuestion,
 					answer: response.answer,
 					sources: JSON.stringify(response.sources),
 					relatedContactId: response.relatedContactId || undefined,
@@ -251,17 +255,18 @@ export default function AssistantScreen() {
 			return t('assistant.history.daysAgo', { count: diffDays });
 		}
 
-		return date.toLocaleDateString(undefined, {
+		return formatLocalizedDate(date, {
 			day: 'numeric',
 			month: 'short',
 		});
 	};
 
 	const handleHistoryItemPress = (entry: QuestionHistoryEntry) => {
+		const normalizedQuestion = normalizeQuestionText(entry.question);
 		router.push({
 			pathname: '/ask-result',
 			params: {
-				question: entry.question,
+				question: normalizedQuestion,
 				answer: entry.answerSummary,
 				sources: JSON.stringify([]),
 				relatedContactId: entry.relatedContactId || undefined,
@@ -298,7 +303,7 @@ export default function AssistantScreen() {
 							placeholder={t('assistant.inputPlaceholder')}
 							placeholderTextColor={Colors.textMuted}
 							value={question}
-							onChangeText={setQuestion}
+							onChangeText={(value) => setQuestion(normalizeQuestionText(value))}
 							multiline
 							maxLength={500}
 							editable={!isRecording && !isTranscribing}
@@ -395,7 +400,7 @@ export default function AssistantScreen() {
 									<View style={styles.historyCardContent}>
 										<View style={styles.historyCardTop}>
 											<Text style={styles.historyQuestion} numberOfLines={2}>
-												{entry.question}
+												{normalizeQuestionText(entry.question)}
 											</Text>
 											<ChevronRight size={14} color={Colors.textMuted} />
 										</View>

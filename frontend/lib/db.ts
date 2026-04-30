@@ -75,6 +75,7 @@ export const initDatabase = async () => {
       -- AI-generated (regenerated after each note)
       ai_summary TEXT,
       suggested_questions TEXT,
+      meeting_context TEXT,
 
       -- Meta
       last_contact_at TEXT,
@@ -193,6 +194,11 @@ const runMigrations = async (database: SQLite.SQLiteDatabase) => {
   const hasSuggestedQuestions = contactsInfo.some((col) => col.name === 'suggested_questions');
   if (!hasSuggestedQuestions) {
     await database.execAsync("ALTER TABLE contacts ADD COLUMN suggested_questions TEXT");
+  }
+
+  const hasMeetingContext = contactsInfo.some((col) => col.name === 'meeting_context');
+  if (!hasMeetingContext) {
+    await database.execAsync("ALTER TABLE contacts ADD COLUMN meeting_context TEXT");
   }
 
   // Legacy migrations
@@ -473,6 +479,7 @@ const runV2Migration = async (database: SQLite.SQLiteDatabase) => {
   const hasTags = contactsInfo.some((col) => col.name === 'tags');
   const hasHighlights = contactsInfo.some((col) => col.name === 'highlights');
   const hasIceBreakersMigration = contactsInfo.some((col) => col.name === 'ice_breakers');
+  const hasMeetingContext = contactsInfo.some((col) => col.name === 'meeting_context');
 
   if (hasTags || hasHighlights || hasIceBreakersMigration) {
     console.log('[Migration V2] Removing deprecated columns from contacts table...');
@@ -495,6 +502,7 @@ const runV2Migration = async (database: SQLite.SQLiteDatabase) => {
         avatar_url TEXT,
         ai_summary TEXT,
         suggested_questions TEXT,
+        meeting_context TEXT,
         last_contact_at TEXT,
         created_at TEXT DEFAULT (datetime('now')),
         updated_at TEXT DEFAULT (datetime('now'))
@@ -508,7 +516,7 @@ const runV2Migration = async (database: SQLite.SQLiteDatabase) => {
         id, first_name, last_name, nickname, gender,
         phone, email, birthday_day, birthday_month, birthday_year,
         relationship_type, photo_uri, avatar_url,
-        ai_summary, suggested_questions,
+        ai_summary, suggested_questions, meeting_context,
         last_contact_at, created_at, updated_at
       )
       SELECT
@@ -521,6 +529,7 @@ const runV2Migration = async (database: SQLite.SQLiteDatabase) => {
           THEN ${hasIceBreakersMigration ? 'ice_breakers' : 'NULL'}
           ELSE suggested_questions
         END,
+        ${hasMeetingContext ? 'meeting_context' : 'NULL'},
         last_contact_at, created_at, updated_at
       FROM contacts;
     `);

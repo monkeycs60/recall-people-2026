@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Check, RotateCcw, Trash2, ChevronDown, ChevronUp, Edit3 } from 'lucide-react-native';
 import { HotTopic } from '@/types';
 import { Colors, Shadows } from '@/constants/theme';
+import { formatLocalizedDate } from '@/utils/dateLocale';
 
 const EMPTY_NEWS_ILLUSTRATION = require('@/assets/ai-assets/empty-hot-topics.png');
 
@@ -241,12 +242,12 @@ export function HotTopicsList({
             )}
             {topic.eventDate && (
               <Text style={styles.topicDate}>
-                📅 {new Date(topic.eventDate).toLocaleDateString()}
+                📅 {formatLocalizedDate(topic.eventDate)}
               </Text>
             )}
             {isResolved && topic.resolvedAt && (
               <Text style={styles.topicDate}>
-                {t('contact.hotTopic.resolvedAt', { date: new Date(topic.resolvedAt).toLocaleDateString() })}
+                {t('contact.hotTopic.resolvedAt', { date: formatLocalizedDate(topic.resolvedAt) })}
               </Text>
             )}
           </View>

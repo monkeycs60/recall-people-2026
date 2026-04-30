@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChevronDown, ChevronUp, FileText, X, Trash2 } from 'lucide-react-native';
 import { Note } from '@/types';
 import { Colors, Spacing, BorderRadius } from '@/constants/theme';
+import { formatLocalizedDate } from '@/utils/dateLocale';
 
 type TranscriptionArchiveProps = {
   notes: Note[];
@@ -74,7 +75,7 @@ export function TranscriptionArchive({ notes, onDelete, highlightId }: Transcrip
               >
                 <Text style={styles.noteEmoji}>📝</Text>
                 <Text style={isHighlighted ? styles.noteTextHighlighted : styles.noteText}>
-                  {new Date(note.createdAt).toLocaleDateString()}
+                  {formatLocalizedDate(note.createdAt)}
                   {note.title && ` — ${note.title}`}
                 </Text>
               </Pressable>
@@ -96,7 +97,7 @@ export function TranscriptionArchive({ notes, onDelete, highlightId }: Transcrip
                 {selectedNote?.title || 'Transcription'}
               </Text>
               <Text style={styles.modalDate}>
-                {selectedNote && new Date(selectedNote.createdAt).toLocaleDateString()}
+                {selectedNote && formatLocalizedDate(selectedNote.createdAt)}
               </Text>
             </View>
             <View style={styles.modalActions}>

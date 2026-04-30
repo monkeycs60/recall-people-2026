@@ -13,14 +13,24 @@ type AISummaryProps = {
 
 export function AISummary({ summary, isLoading, isRegenerating, firstName, onRegenerate }: AISummaryProps) {
   const { t } = useTranslation();
+  const isBusy = isLoading || isRegenerating;
 
-  if (isLoading) {
+  if (isBusy) {
     return (
-      <View style={styles.loadingContainer}>
-        <View style={styles.loadingContent}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.headerLeft}>
+            <BookOpenText size={16} color={Colors.primary} strokeWidth={2.1} />
+            <Text style={styles.headerText}>{t('contact.aiSummary.header', { firstName })}</Text>
+          </View>
           <ActivityIndicator size="small" color={Colors.primary} />
-          <Text style={styles.loadingText}>{t('contact.aiSummary.loading')}</Text>
         </View>
+        <View style={styles.skeletonBlock}>
+          <View style={[styles.skeletonLine, styles.skeletonLineFull]} />
+          <View style={[styles.skeletonLine, styles.skeletonLineWide]} />
+          <View style={[styles.skeletonLine, styles.skeletonLineShort]} />
+        </View>
+        <Text style={styles.loadingText}>{t('contact.aiSummary.loading')}</Text>
       </View>
     );
   }
@@ -105,20 +115,28 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     lineHeight: 24,
   },
-  loadingContainer: {
-    backgroundColor: `${Colors.surface}80`,
-    padding: 16,
-    borderRadius: 14,
-    marginBottom: 16,
-  },
-  loadingContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
   loadingText: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    marginLeft: 8,
+    fontSize: 12,
+    color: Colors.textMuted,
+    marginTop: 10,
+  },
+  skeletonBlock: {
+    gap: 9,
+    paddingTop: 4,
+  },
+  skeletonLine: {
+    height: 14,
+    borderRadius: 999,
+    backgroundColor: Colors.surfaceAlt,
+  },
+  skeletonLineFull: {
+    width: '100%',
+  },
+  skeletonLineWide: {
+    width: '86%',
+  },
+  skeletonLineShort: {
+    width: '62%',
   },
   emptyContainer: {
     backgroundColor: `${Colors.surface}50`,

@@ -20,7 +20,7 @@ import {
 } from '@/hooks/useContactQuery';
 import { useUpdateContact, useDeleteContact } from '@/hooks/useContactsQuery';
 import { useGroupsForContact, useGroupsQuery } from '@/hooks/useGroupsQuery';
-import type { Note, SearchSourceType } from '@/types';
+import type { HotTopic, SearchSourceType } from '@/types';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { ChevronLeft, Edit3, Plus, Trash2, MoreVertical, Calendar, Bell, Users } from 'lucide-react-native';
 import { notificationService } from '@/services/notification.service';
@@ -28,6 +28,8 @@ import { AISummary } from '@/components/contact/AISummary';
 import type { InputMode } from '@/components/InputModeToggle';
 import { SuggestedQuestions } from '@/components/contact/SuggestedQuestions';
 import { MeetingContextCard } from '@/components/contact/MeetingContextCard';
+import { NextActionCard } from '@/components/contact/NextActionCard';
+import { FirstNotePrompt } from '@/components/contact/FirstNotePrompt';
 import { HotTopicsList } from '@/components/contact/HotTopicsList';
 import { NotesTimeline } from '@/components/contact/NotesTimeline';
 import { ContactAvatar } from '@/components/contact/ContactAvatar';
@@ -39,6 +41,7 @@ import { BirthdayEditModal } from '@/components/contact/BirthdayEditModal';
 import { GenderEditModal } from '@/components/contact/GenderEditModal';
 import { AvatarEditModal } from '@/components/contact/AvatarEditModal';
 import { NameEditModal } from '@/components/contact/NameEditModal';
+import { MeetingContextEditModal } from '@/components/contact/MeetingContextEditModal';
 import { GroupsManagementSheet } from '@/components/contact/GroupsManagementSheet';
 import { Colors, Shadows, Fonts } from '@/constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -49,43 +52,26 @@ import { useSettingsStore } from '@/stores/settings-store';
 import { ContactDetailSkeleton } from '@/components/skeleton/ContactDetailSkeleton';
 import { Paywall } from '@/components/Paywall';
 import { REMINDER_FREQUENCY_PRESETS } from '@/lib/reminder-frequency';
+import { formatLocalizedDate } from '@/utils/dateLocale';
+import { getMeetingContext } from '@/utils/meetingContext';
 
-type MeetingContext = {
-  context: string;
-  sourceTitle?: string;
-};
+function getNextActionTopic(hotTopics: HotTopic[]): HotTopic | null {
+  const activeTopics = hotTopics.filter((topic) => topic.status === 'active');
+  if (activeTopics.length === 0) return null;
 
-const MEETING_CONTEXT_PATTERNS = [
-  /contexte de rencontre\s*:\s*([^.!?\n]{3,100})/i,
-  /(?:rencontr[ée]?\s+(?:à|au|aux|chez|pendant|lors de|via|gr[aâ]ce à|par|en)\s+)([^.!?\n]{3,100})/i,
-  /(?:on s['’]est rencontr[ée]s?\s+(?:à|au|aux|chez|pendant|lors de|via|gr[aâ]ce à|par|en)\s+)([^.!?\n]{3,100})/i,
-  /(?:met|meet)\s+(?:at|during|through|via)\s+([^.!?\n]{3,100})/i,
-];
-
-function cleanMeetingContext(value: string): string {
-  const cleaned = value.trim().replace(/\s+/g, ' ').replace(/[,:;]+$/, '');
-  return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
-}
-
-function getMeetingContext(notes: Note[]): MeetingContext | null {
-  const chronologicalNotes = notes
-    .filter((note) => note.transcription.trim().length > 0)
+  return activeTopics
     .slice()
-    .sort((first, second) => new Date(first.createdAt).getTime() - new Date(second.createdAt).getTime());
+    .sort((first, second) => {
+      const firstTime = first.eventDate
+        ? new Date(first.eventDate).getTime()
+        : Number.MAX_SAFE_INTEGER;
+      const secondTime = second.eventDate
+        ? new Date(second.eventDate).getTime()
+        : Number.MAX_SAFE_INTEGER;
 
-  for (const note of chronologicalNotes) {
-    for (const pattern of MEETING_CONTEXT_PATTERNS) {
-      const match = note.transcription.match(pattern);
-      if (match?.[1]) {
-        return {
-          context: cleanMeetingContext(match[1]),
-          sourceTitle: note.title,
-        };
-      }
-    }
-  }
-
-  return null;
+      if (firstTime !== secondTime) return firstTime - secondTime;
+      return new Date(second.updatedAt).getTime() - new Date(first.updatedAt).getTime();
+    })[0];
 }
 
 
@@ -155,6 +141,7 @@ export default function ContactDetailScreen() {
   const [showBirthdayModal, setShowBirthdayModal] = useState(false);
   const [showGenderModal, setShowGenderModal] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const [showMeetingContextModal, setShowMeetingContextModal] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
 
   useEffect(() => {
@@ -237,6 +224,14 @@ export default function ContactDetailScreen() {
         firstName,
         lastName: lastName || undefined,
       },
+    });
+  };
+
+  const handleSaveMeetingContext = async (value: string) => {
+    if (!contact) return;
+    await updateContactMutation.mutateAsync({
+      id: contact.id,
+      data: { meetingContext: value },
     });
   };
 
@@ -385,12 +380,8 @@ export default function ContactDetailScreen() {
     }
   };
 
-  const formatReminderDate = (date: Date): string => {
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-  };
+  const formatReminderDate = (date: Date): string =>
+    formatLocalizedDate(date, { day: 'numeric', month: 'short', year: 'numeric' });
 
   const formatRelativeDate = (date: Date): string => {
     const today = new Date();
@@ -424,7 +415,9 @@ export default function ContactDetailScreen() {
   const hasSummaryContent = hasNotes || Boolean(contact.aiSummary) || isWaitingForSummary;
   const hasSuggestedQuestionsContent =
     hasNotes || Boolean(contact.suggestedQuestions?.length) || isWaitingForSuggestedQuestions;
-  const meetingContext = getMeetingContext(contact.notes);
+  const meetingContext = getMeetingContext(contact.notes, contact.meetingContext);
+  const nextActionTopic = getNextActionTopic(contact.hotTopics);
+  const nextSuggestedQuestion = contact.suggestedQuestions?.[0];
 
   return (
     <KeyboardAvoidingView
@@ -494,7 +487,7 @@ export default function ContactDetailScreen() {
               <View style={styles.heroTextColumn}>
                 {contact.lastContactAt && (
                   <Text style={styles.heroEyebrow}>
-                    {t('contact.lastContact').toUpperCase()} {new Date(contact.lastContactAt).toLocaleDateString()}
+                    {t('contact.lastContact').toUpperCase()} {formatLocalizedDate(contact.lastContactAt)}
                   </Text>
                 )}
                 <Text style={styles.contactName}>
@@ -528,7 +521,7 @@ export default function ContactDetailScreen() {
 
             {/* Two CTAs */}
             <View style={styles.heroCTARow}>
-              <Pressable style={styles.heroNewNoteButton} onPress={() => handleAddNote('voice' as InputMode)}>
+              <Pressable style={styles.heroNewNoteButton} onPress={() => handleAddNote('audio' as InputMode)}>
                 <Text style={styles.heroNewNoteText}>{t('contact.addNoteButton.label')}</Text>
               </Pressable>
               <Pressable style={styles.askButton} onPress={handleAskAboutContact}>
@@ -545,6 +538,29 @@ export default function ContactDetailScreen() {
             <MeetingContextCard
               context={meetingContext.context}
               sourceTitle={meetingContext.sourceTitle}
+              onEdit={() => setShowMeetingContextModal(true)}
+            />
+          </Animated.View>
+        )}
+
+        {!hasNotes && (
+          <Animated.View entering={FadeInDown.delay(80).duration(300)} style={styles.section}>
+            <FirstNotePrompt
+              firstName={contact.firstName}
+              onVoiceNote={() => handleAddNote('audio' as InputMode)}
+              onTextNote={() => handleAddNote('text' as InputMode)}
+            />
+          </Animated.View>
+        )}
+
+        {(nextActionTopic || nextSuggestedQuestion) && (
+          <Animated.View entering={FadeInDown.delay(90).duration(300)} style={styles.section}>
+            <NextActionCard
+              firstName={contact.firstName}
+              topic={nextActionTopic}
+              suggestedQuestion={nextSuggestedQuestion}
+              onAddNote={() => handleAddNote('audio' as InputMode)}
+              onAsk={handleAskAboutContact}
             />
           </Animated.View>
         )}
@@ -794,6 +810,15 @@ export default function ContactDetailScreen() {
         />
       )}
 
+      {showMeetingContextModal && meetingContext && (
+        <MeetingContextEditModal
+          visible={showMeetingContextModal}
+          initialValue={meetingContext.context}
+          onSave={handleSaveMeetingContext}
+          onClose={() => setShowMeetingContextModal(false)}
+        />
+      )}
+
       <GroupsManagementSheet
         ref={groupsSheetRef}
         contactId={contactId}
@@ -1028,12 +1053,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 6,
-    marginTop: 12,
+    marginTop: 16,
   },
   groupChip: {
     backgroundColor: Colors.surface,
-    paddingHorizontal: 11,
-    paddingVertical: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 999,
   },
   groupChipText: {

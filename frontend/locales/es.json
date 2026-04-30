@@ -149,6 +149,8 @@
     "noContactsDescription": "Crea tu primera nota para empezar.",
     "createFirstNote": "Graba tu primera nota",
     "people": "personas",
+    "peopleCount_one": "{{count}} persona",
+    "peopleCount_other": "{{count}} personas",
     "needFollowUp": "necesitan seguimiento",
     "allGroup": "Todos",
     "recentSection": "Recientes",
@@ -157,7 +159,9 @@
     "addContact": "Añadir un contacto",
     "createModal": {
       "title": "Nuevo contacto",
-      "create": "Crear"
+      "create": "Crear",
+      "createdTitle": "Contacto creado",
+      "avatarPendingDescription": "El avatar ilustrado se está generando. Puede tardar hasta un minuto en aparecer."
     }
   },
   "search": {
@@ -194,6 +198,25 @@
       "header": "¿Necesitas una idea para retomar la conversación?",
       "loading": "Preparando ideas...",
       "empty": "Añade notas para obtener ideas de conversación"
+    },
+    "nextAction": {
+      "label": "Próxima acción",
+      "questionTitle": "Retomar con {{firstName}}",
+      "eventDescriptionWithDate": "Hacer seguimiento el {{date}}.",
+      "eventDescription": "Tema para retomar en el próximo intercambio.",
+      "addNote": "Añadir nota",
+      "ask": "Preguntar a la IA"
+    },
+    "meetingContext": {
+      "label": "Contexto del encuentro",
+      "source": "Desde \"{{title}}\"",
+      "edit": "Editar contexto del encuentro"
+    },
+    "firstNotePrompt": {
+      "title": "Empieza con una nota corta",
+      "description": "Añade dónde conociste a {{firstName}}, el contexto o algo que quieras recordar.",
+      "voiceCta": "Voz",
+      "textCta": "Texto"
     },
     "editGroups": "Editar grupos",
     "addGroup": "Añadir grupo",
@@ -360,6 +383,12 @@
       "lastName": "Apellido",
       "firstNamePlaceholder": "Nombre",
       "lastNamePlaceholder": "Apellido (opcional)",
+      "save": "Guardar",
+      "cancel": "Cancelar"
+    },
+    "meetingContextModal": {
+      "title": "Editar contexto",
+      "placeholder": "Ej: Conocido en Web Summit a través de Anna",
       "save": "Guardar",
       "cancel": "Cancelar"
     },
@@ -804,11 +833,13 @@
     "placeholder": "Pregúntame algo...",
     "title": "Preguntar",
     "titleAbout": "Sobre {{firstName}}",
+    "inputLabel": "Tu pregunta",
+    "inputHint": "Elige una sugerencia o pregunta por un detalle preciso ya guardado en tus notas.",
     "inputPlaceholder": "Escribe tu pregunta...",
     "inputPlaceholderAbout": "Pregunta sobre {{firstName}}...",
     "voiceButton": "Hablar",
     "sendButton": "Enviar",
-    "suggestionsTitle": "Sugerencias:",
+    "suggestionsTitle": "Preguntas útiles",
     "suggestions": {
       "recent": "¿De qué hablé con María recientemente?",
       "birthday": "¿Cuándo es el cumpleaños de Lucas?",
@@ -898,6 +929,7 @@
     "body": "{{events}} evento(s), {{contacts}} contacto(s) por reconectar"
   },
   "reminder": {
+    "eventTomorrow": "Mañana: {{name}} — {{title}}",
     "postEvent": "{{title}} de {{name}} fue esta semana, ¿te pones en contacto?"
   },
   "aiConsent": {

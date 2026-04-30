@@ -68,6 +68,7 @@ const extractionSchema = z.object({
       year: z.number().nullable().describe('Année si mentionnée'),
     }).nullable().describe('Date d\'anniversaire si mentionnée'),
   }).describe('Coordonnées de contact détectées'),
+  meetingContext: z.string().nullable().describe('Phrase courte indiquant où/comment l\'utilisateur a rencontré ou connu le contact, si explicitement mentionné. null sinon.'),
   hotTopics: z.array(
     z.object({
       title: z.string().describe('Titre court du sujet (ex: "Entretien Google", "Déménagement Lyon")'),
@@ -1036,6 +1037,47 @@ Beispiel 4 - "Wir haben einen Kaffee getrunken, sie hat mir von ihrem Urlaub erz
   },
 };
 
+const getMeetingContextInstruction = (language: string): string => {
+  switch (language) {
+    case 'en':
+      return `MEETING CONTEXT (meetingContext):
+- If the note explicitly says where, how, or through whom the user met/knew the contact, return one short sentence in English.
+- Include concrete context such as event, place, intermediary, company, school, or community.
+- Do not confuse this with a recent catch-up or ordinary meeting. If it is only "we met yesterday" without first-meeting context, return null.
+- Examples: "Met at Web Summit through Anna", "Met while working at Stripe".
+- If absent, return null.`;
+    case 'es':
+      return `CONTEXTO DEL ENCUENTRO (meetingContext):
+- Si la nota dice explícitamente dónde, cómo o a través de quién el usuario conoció al contacto, devuelve una frase corta en español.
+- Incluye contexto concreto como evento, lugar, intermediario, empresa, escuela o comunidad.
+- No lo confundas con una reunión reciente o un encuentro normal. Si solo dice "nos vimos ayer" sin contexto de primer encuentro, devuelve null.
+- Ejemplos: "Conocido en Web Summit a través de Anna", "Conocido trabajando en Stripe".
+- Si no aparece, devuelve null.`;
+    case 'it':
+      return `CONTESTO DELL'INCONTRO (meetingContext):
+- Se la nota dice esplicitamente dove, come o tramite chi l'utente ha conosciuto il contatto, restituisci una frase breve in italiano.
+- Includi contesto concreto come evento, luogo, intermediario, azienda, scuola o community.
+- Non confonderlo con un incontro recente o un appuntamento normale. Se dice solo "ci siamo visti ieri" senza contesto del primo incontro, restituisci null.
+- Esempi: "Conosciuto al Web Summit tramite Anna", "Conosciuto lavorando da Stripe".
+- Se assente, restituisci null.`;
+    case 'de':
+      return `KONTEXT DES KENNENLERNENS (meetingContext):
+- Wenn die Notiz ausdrücklich sagt, wo, wie oder über wen der Benutzer den Kontakt kennengelernt hat, gib einen kurzen Satz auf Deutsch zurück.
+- Nenne konkreten Kontext wie Ereignis, Ort, Vermittler, Firma, Schule oder Community.
+- Verwechsle das nicht mit einem kürzlichen Treffen oder normalen Wiedersehen. Wenn nur "wir haben uns gestern getroffen" ohne Erstkontakt-Kontext erwähnt wird, gib null zurück.
+- Beispiele: "Beim Web Summit über Anna kennengelernt", "Bei der Arbeit bei Stripe kennengelernt".
+- Wenn nichts dazu erwähnt wird, gib null zurück.`;
+    case 'fr':
+    default:
+      return `CONTEXTE DE RENCONTRE (meetingContext):
+- Si la note dit explicitement où, comment ou via qui l'utilisateur a rencontré/connu le contact, retourne une phrase courte en français.
+- Inclus un contexte concret comme événement, lieu, intermédiaire, entreprise, école ou communauté.
+- Ne confonds pas avec un échange récent ou un rendez-vous normal. Si la note dit seulement "on s'est vus hier" sans contexte de première rencontre, retourne null.
+- Exemples: "Rencontré au Web Summit via Anna", "Rencontré en travaillant chez Stripe".
+- Si absent, retourne null.`;
+  }
+};
+
 export const extractRoutes = new Hono<{ Bindings: Bindings }>();
 
 extractRoutes.use('/*', authMiddleware);
@@ -1133,6 +1175,7 @@ extractRoutes.post('/', async (c) => {
           year: extraction.contactInfo.birthday.year || undefined,
         } : undefined,
       },
+      meetingContext: extraction.meetingContext?.trim() || undefined,
       hotTopics: extraction.hotTopics.map((topic) => {
         // Convert ISO date (YYYY-MM-DD) to DD/MM/YYYY for V1 compatibility (suggestedDate)
         let suggestedDate: string | undefined;
@@ -1294,6 +1337,8 @@ ${template.rules.rule4Content}
 
 ${template.rules.rule5Title}:
 ${template.rules.rule5Content}
+
+${getMeetingContextInstruction(language)}
 
 ${template.absoluteRules}
 

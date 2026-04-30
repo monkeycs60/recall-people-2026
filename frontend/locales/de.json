@@ -149,6 +149,8 @@
     "noContactsDescription": "Erstelle deine erste Notiz, um loszulegen.",
     "createFirstNote": "Erste Notiz aufnehmen",
     "people": "Personen",
+    "peopleCount_one": "{{count}} Person",
+    "peopleCount_other": "{{count}} Personen",
     "needFollowUp": "brauchen ein Follow-up",
     "allGroup": "Alle",
     "recentSection": "Kürzlich",
@@ -157,7 +159,9 @@
     "addContact": "Kontakt hinzufügen",
     "createModal": {
       "title": "Neuer Kontakt",
-      "create": "Erstellen"
+      "create": "Erstellen",
+      "createdTitle": "Kontakt erstellt",
+      "avatarPendingDescription": "Der illustrierte Avatar wird gerade generiert. Es kann bis zu eine Minute dauern, bis er erscheint."
     }
   },
   "search": {
@@ -194,6 +198,25 @@
       "header": "Eine Idee, um das Gespräch wieder aufzunehmen?",
       "loading": "Bereite Ideen vor...",
       "empty": "Füge Notizen hinzu, um Gesprächsideen zu erhalten"
+    },
+    "nextAction": {
+      "label": "Nächste Aktion",
+      "questionTitle": "Bei {{firstName}} nachfassen",
+      "eventDescriptionWithDate": "Am {{date}} nachfassen.",
+      "eventDescription": "Thema für den nächsten Austausch.",
+      "addNote": "Notiz hinzufügen",
+      "ask": "KI fragen"
+    },
+    "meetingContext": {
+      "label": "Kontext des Kennenlernens",
+      "source": "Aus \"{{title}}\"",
+      "edit": "Kontext des Kennenlernens bearbeiten"
+    },
+    "firstNotePrompt": {
+      "title": "Starte mit einer kurzen Notiz",
+      "description": "Füge hinzu, wo du {{firstName}} getroffen hast, den Kontext oder etwas, das du behalten möchtest.",
+      "voiceCta": "Audio",
+      "textCta": "Text"
     },
     "editGroups": "Gruppen bearbeiten",
     "addGroup": "Gruppe hinzufügen",
@@ -360,6 +383,12 @@
       "lastName": "Nachname",
       "firstNamePlaceholder": "Vorname",
       "lastNamePlaceholder": "Nachname (optional)",
+      "save": "Speichern",
+      "cancel": "Abbrechen"
+    },
+    "meetingContextModal": {
+      "title": "Kontext bearbeiten",
+      "placeholder": "Z.B.: Beim Web Summit über Anna kennengelernt",
       "save": "Speichern",
       "cancel": "Abbrechen"
     },
@@ -804,11 +833,13 @@
     "placeholder": "Frag mich etwas...",
     "title": "Fragen",
     "titleAbout": "Über {{firstName}}",
+    "inputLabel": "Deine Frage",
+    "inputHint": "Wähle einen Vorschlag oder frage nach einem konkreten Detail aus deinen Notizen.",
     "inputPlaceholder": "Gib deine Frage ein...",
     "inputPlaceholderAbout": "Frag über {{firstName}}...",
     "voiceButton": "Sprechen",
     "sendButton": "Senden",
-    "suggestionsTitle": "Vorschläge:",
+    "suggestionsTitle": "Nützliche Fragen",
     "suggestions": {
       "recent": "Worüber habe ich kürzlich mit Marie gesprochen?",
       "birthday": "Wann hat Lucas Geburtstag?",
@@ -898,6 +929,7 @@
     "body": "{{events}} Ereignis(se), {{contacts}} Kontakt(e) zum Nachholen"
   },
   "reminder": {
+    "eventTomorrow": "Morgen: {{name}} — {{title}}",
     "postEvent": "{{title}} von {{name}} war diese Woche, melde dich?"
   },
   "aiConsent": {

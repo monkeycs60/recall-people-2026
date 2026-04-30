@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { devtools, persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { normalizeQuestionText } from '@/utils/questionText';
 
 export type QuestionHistoryEntry = {
 	id: string;
@@ -40,7 +41,7 @@ export const useQuestionHistoryStore = create<QuestionHistoryState & QuestionHis
 					set((state) => {
 						const newEntry: QuestionHistoryEntry = {
 							id: generateId(),
-							question: entry.question,
+							question: normalizeQuestionText(entry.question),
 							answerSummary: entry.answerSummary,
 							date: new Date().toISOString(),
 							relatedContactId: entry.relatedContactId,

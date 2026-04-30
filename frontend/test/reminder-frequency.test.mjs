@@ -55,6 +55,15 @@ test('includes default contacts in stale reminders when the account default is e
   assert.match(filter.whereSql, /\?/);
 });
 
+test('uses inclusive thresholds so UI stale state and reminders agree', async () => {
+  const { buildStaleContactReminderFilter } = await loadModule();
+
+  const filter = buildStaleContactReminderFilter(60);
+
+  assert.match(filter.whereSql, />= reminder_frequency_days/);
+  assert.match(filter.whereSql, />= \?/);
+});
+
 test.after(async () => {
   await cleanTsModule(suiteName);
 });

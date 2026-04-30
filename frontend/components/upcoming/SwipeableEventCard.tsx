@@ -10,9 +10,10 @@ import Animated, {
   Extrapolation,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { Calendar, Trash2 } from 'lucide-react-native';
-import { Colors } from '@/constants/theme';
+import { ChevronRight, Trash2 } from 'lucide-react-native';
+import { Colors, Shadows } from '@/constants/theme';
 import { HotTopic, Contact } from '@/types';
+import { ContactAvatar } from '@/components/contact/ContactAvatar';
 
 const SNAP_POINT = -80;
 
@@ -20,12 +21,13 @@ type SwipeableEventCardProps = {
   event: HotTopic & { contact: Contact };
   onPress: (contactId: string) => void;
   onDelete: (eventId: string) => void;
+  isToday?: boolean;
 };
 
-export function SwipeableEventCard({ event, onPress, onDelete }: SwipeableEventCardProps) {
+export function SwipeableEventCard({ event, onPress, onDelete, isToday = false }: SwipeableEventCardProps) {
   const { t } = useTranslation();
   const translateX = useSharedValue(0);
-  const itemHeight = useSharedValue(60);
+  const itemHeight = useSharedValue(68);
   const itemOpacity = useSharedValue(1);
 
   // For birthday events, use translated title instead of stored one
@@ -101,13 +103,24 @@ export function SwipeableEventCard({ event, onPress, onDelete }: SwipeableEventC
       <GestureDetector gesture={panGesture}>
         <Animated.View style={[styles.eventCard, cardAnimatedStyle]}>
           <Pressable style={styles.cardPressable} onPress={handlePress}>
-            <Calendar size={16} color={Colors.calendar} />
+            <View style={[styles.eventAvatarFrame, isToday && styles.eventAvatarFrameToday]}>
+              <ContactAvatar
+                firstName={event.contact.firstName}
+                lastName={event.contact.lastName}
+                gender={event.contact.gender}
+                avatarUrl={event.contact.avatarUrl}
+                cacheKey={event.contact.updatedAt}
+                recyclingKey={`upcoming-${event.id}`}
+                size="tiny"
+              />
+            </View>
             <View style={styles.eventContent}>
               <Text style={styles.eventTitle}>{displayTitle}</Text>
               <Text style={styles.eventContact}>
                 {event.contact.firstName} {event.contact.lastName || ''}
               </Text>
             </View>
+            <ChevronRight size={14} color={Colors.textMuted} />
           </Pressable>
         </Animated.View>
       </GestureDetector>
@@ -132,32 +145,44 @@ const styles = StyleSheet.create({
   deleteButton: {
     backgroundColor: Colors.error,
     width: 60,
-    height: 44,
-    borderRadius: 8,
+    height: 46,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },
   eventCard: {
     backgroundColor: Colors.surface,
-    borderRadius: 8,
+    borderRadius: 16,
+    ...Shadows.card,
   },
   cardPressable: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
+    padding: 14,
+    gap: 12,
+  },
+  eventAvatarFrame: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 14,
+  },
+  eventAvatarFrameToday: {
+    borderWidth: 2,
+    borderColor: Colors.primary,
   },
   eventContent: {
-    marginLeft: 12,
     flex: 1,
   },
   eventTitle: {
-    fontSize: 16,
-    fontWeight: '500',
+    fontSize: 15,
+    fontWeight: '600',
     color: Colors.textPrimary,
+    marginBottom: 2,
   },
   eventContact: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    marginTop: 2,
+    fontSize: 12,
+    color: Colors.textMuted,
   },
 });

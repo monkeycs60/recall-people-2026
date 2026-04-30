@@ -5,7 +5,7 @@ import { Colors, Shadows } from '@/constants/theme';
 import { Gender } from '@/types';
 import { useRef, useCallback } from 'react';
 
-const AVATAR_PALETTE: Array<[string, string]> = [
+const AVATAR_PALETTE: [string, string][] = [
   ['#FFD7C2', '#B03A11'],
   ['#D0E5FF', '#0F3C75'],
   ['#E6D7FF', '#3F18A4'],
@@ -34,9 +34,10 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
-type AvatarSize = 'small' | 'medium' | 'large';
+type AvatarSize = 'tiny' | 'small' | 'medium' | 'large';
 
 const SIZE_MAP: Record<AvatarSize, number> = {
+  tiny: 40,
   small: 48,
   medium: 60,
   large: 72,

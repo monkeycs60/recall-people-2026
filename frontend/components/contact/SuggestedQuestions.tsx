@@ -13,14 +13,30 @@ type SuggestedQuestionsProps = {
 
 export function SuggestedQuestions({ suggestedQuestions, isLoading, isRegenerating, firstName, onRegenerate }: SuggestedQuestionsProps) {
   const { t } = useTranslation();
+  const isBusy = isLoading || isRegenerating;
 
-  if (isLoading) {
+  if (isBusy) {
     return (
-      <View style={styles.loadingContainer}>
-        <View style={styles.loadingContent}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.headerLeft}>
+            <MessageCircle size={16} color={Colors.accent} strokeWidth={2.1} />
+            <Text style={styles.headerText}>{t('contact.suggestedQuestions.header')}</Text>
+          </View>
           <ActivityIndicator size="small" color={Colors.accent} />
-          <Text style={styles.loadingText}>{t('contact.suggestedQuestions.loading')}</Text>
         </View>
+        <View style={styles.skeletonBlock}>
+          {[0, 1, 2].map((item) => (
+            <View key={item} style={styles.skeletonQuestion}>
+              <View style={styles.skeletonIndex} />
+              <View style={styles.skeletonTextGroup}>
+                <View style={[styles.skeletonLine, styles.skeletonLineFull]} />
+                <View style={[styles.skeletonLine, styles.skeletonLineShort]} />
+              </View>
+            </View>
+          ))}
+        </View>
+        <Text style={styles.loadingText}>{t('contact.suggestedQuestions.loading')}</Text>
       </View>
     );
   }
@@ -133,20 +149,41 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     lineHeight: 23,
   },
-  loadingContainer: {
-    backgroundColor: `${Colors.surface}80`,
-    padding: 16,
-    borderRadius: 14,
-    marginBottom: 16,
-  },
-  loadingContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
   loadingText: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    marginLeft: 8,
+    fontSize: 12,
+    color: Colors.textMuted,
+    marginTop: 10,
+  },
+  skeletonBlock: {
+    gap: 12,
+    paddingTop: 2,
+  },
+  skeletonQuestion: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+  },
+  skeletonIndex: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: Colors.accentLight,
+  },
+  skeletonTextGroup: {
+    flex: 1,
+    gap: 7,
+    paddingTop: 3,
+  },
+  skeletonLine: {
+    height: 12,
+    borderRadius: 999,
+    backgroundColor: Colors.surfaceAlt,
+  },
+  skeletonLineFull: {
+    width: '100%',
+  },
+  skeletonLineShort: {
+    width: '68%',
   },
   emptyContainer: {
     backgroundColor: `${Colors.surface}50`,

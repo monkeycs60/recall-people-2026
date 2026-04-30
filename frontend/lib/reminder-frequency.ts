@@ -34,7 +34,7 @@ export const buildStaleContactReminderFilter = (
   accountDefaultDays: number
 ): StaleContactReminderFilter => {
   const explicitContactReminderSql =
-    "(reminder_frequency_days IS NOT NULL AND reminder_frequency_days > 0 AND julianday('now') - julianday(last_contact_at) > reminder_frequency_days)";
+    "(reminder_frequency_days IS NOT NULL AND reminder_frequency_days > 0 AND julianday('now') - julianday(last_contact_at) >= reminder_frequency_days)";
 
   if (accountDefaultDays === ACCOUNT_REMINDER_NEVER_DAYS) {
     return {
@@ -44,7 +44,7 @@ export const buildStaleContactReminderFilter = (
   }
 
   return {
-    whereSql: `(${explicitContactReminderSql} OR (reminder_frequency_days IS NULL AND julianday('now') - julianday(last_contact_at) > ?))`,
+    whereSql: `(${explicitContactReminderSql} OR (reminder_frequency_days IS NULL AND julianday('now') - julianday(last_contact_at) >= ?))`,
     params: [accountDefaultDays],
   };
 };

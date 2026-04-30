@@ -2,7 +2,6 @@ import { Stack, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import '../global.css';
-import '@/lib/i18n';
 import { initDatabase } from '@/lib/db';
 import { Text, View, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
 import { ArrowLeft, BotMessageSquare } from 'lucide-react-native';
@@ -34,6 +33,7 @@ import { reminderService } from '@/services/reminder.service';
 import { revenueCatService } from '@/services/revenuecat.service';
 import { useAuthStore } from '@/stores/auth-store';
 import { useSubscriptionStore } from '@/stores/subscription-store';
+import { getNotificationRoute } from '@/lib/notification-routing';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -96,17 +96,25 @@ export default function RootLayout() {
 
   // Setup notification tap handler to navigate to contact
   useEffect(() => {
-    const cleanup = notificationService.setupNotificationListener(async ({ eventId, contactId }) => {
-      if (contactId) {
-        router.push(`/contact/${contactId}`);
+    const cleanup = notificationService.setupNotificationListener(async (data) => {
+      const route = getNotificationRoute(data);
+      if (!route) return;
+
+      if (route.type === 'contact') {
+        router.push(`/contact/${route.contactId}`);
         return;
       }
 
-      if (eventId) {
-        const hotTopic = await hotTopicService.getById(eventId);
+      if (route.type === 'event') {
+        const hotTopic = await hotTopicService.getById(route.eventId);
         if (hotTopic) {
           router.push(`/contact/${hotTopic.contactId}`);
         }
+        return;
+      }
+
+      if (route.type === 'upcoming') {
+        router.push('/(tabs)/upcoming');
       }
     });
 
@@ -123,34 +131,27 @@ export default function RootLayout() {
 
   // Check server-backed subscription state on every app launch.
   useEffect(() => {
-    if (user?.id && isSubscriptionHydrated) {
+    if (user?.id && isSubscriptionHydrated && isHydrated && dbReady) {
       console.log('[_layout] Checking whitelist status for user:', user.email);
-      const syncSubscriptionState = async () => {
+      const syncAndScheduleReminders = async () => {
         const subscriptionStore = useSubscriptionStore.getState();
         await subscriptionStore.checkWhitelistStatus();
         // Sync server-backed subscription counters in sequence because the store shares one sync lock.
         await subscriptionStore.syncNotesStatus();
         await subscriptionStore.syncQuotas();
+
+        // Launch scheduling should never trigger the OS permission prompt.
+        const scheduleOptions = { requestPermission: false };
+        await reminderService.scheduleNotSeenReminders(scheduleOptions);
+        await reminderService.scheduleWeeklyDigest(scheduleOptions);
+        await reminderService.schedulePostEventFollowUps(scheduleOptions);
       };
 
-      syncSubscriptionState().catch((subscriptionError) => {
-        console.warn('[_layout] Failed to sync subscription state:', subscriptionError);
-      });
-
-      // Schedule not-seen reminders (runs once per app launch)
-      reminderService.scheduleNotSeenReminders().catch((reminderError) => {
-        console.warn('[_layout] Failed to schedule not-seen reminders:', reminderError);
-      });
-      // Schedule weekly digest (premium only)
-      reminderService.scheduleWeeklyDigest().catch((digestError) => {
-        console.warn('[_layout] Failed to schedule weekly digest:', digestError);
-      });
-      // Schedule post-event follow-ups (premium only)
-      reminderService.schedulePostEventFollowUps().catch((followUpError) => {
-        console.warn('[_layout] Failed to schedule post-event follow-ups:', followUpError);
+      syncAndScheduleReminders().catch((error) => {
+        console.warn('[_layout] Failed to sync subscription state or schedule reminders:', error);
       });
     }
-  }, [user?.id, user?.email, isSubscriptionHydrated]);
+  }, [user?.id, user?.email, isSubscriptionHydrated, isHydrated, dbReady]);
 
   if (dbError) {
     return (

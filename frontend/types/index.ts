@@ -74,6 +74,7 @@ export type Contact = {
   aiSummary?: string;
   suggestedQuestions?: string[]; // JSON array of max 3 questions
   highlights?: string[]; // JSON array of key highlights
+  meetingContext?: string; // AI-extracted place/context where the user met the contact
 
   // Reminders
   reminderFrequencyDays?: number;
@@ -228,6 +229,7 @@ export type ExtractionResult = {
   };
   noteTitle: string; // 2-4 words summarizing the note
   contactInfo?: ExtractedContactInfo;
+  meetingContext?: string;
   // V2 property name (matches backend)
   newHotTopics: ExtractedHotTopic[];
   // V1 compatibility - backend returns this name

@@ -22,6 +22,7 @@ import { useAudioRecorder, RecordingPresets, setAudioModeAsync } from 'expo-audi
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { showErrorToast } from '@/lib/error-handler';
+import { normalizeQuestionText } from '@/utils/questionText';
 
 type Suggestion = {
 	id: string;
@@ -51,18 +52,7 @@ export default function AskScreen() {
 	const durationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 	const inputRef = useRef<TextInput>(null);
 
-	useFocusEffect(
-		useCallback(() => {
-			loadSuggestions();
-			return () => {
-				if (durationIntervalRef.current) {
-					clearInterval(durationIntervalRef.current);
-				}
-			};
-		}, [contacts, preselectedContact])
-	);
-
-	const loadSuggestions = async () => {
+	const loadSuggestions = useCallback(() => {
 		const newSuggestions: Suggestion[] = [];
 
 		if (preselectedContact) {
@@ -109,7 +99,18 @@ export default function AskScreen() {
 		}
 
 		setSuggestions(newSuggestions);
-	};
+	}, [contacts, preselectedContact, t]);
+
+	useFocusEffect(
+		useCallback(() => {
+			loadSuggestions();
+			return () => {
+				if (durationIntervalRef.current) {
+					clearInterval(durationIntervalRef.current);
+				}
+			};
+		}, [loadSuggestions])
+	);
 
 	const startRecording = async () => {
 		try {
@@ -180,8 +181,10 @@ export default function AskScreen() {
 	};
 
 	const handleSubmit = async () => {
-		if (!question.trim() || isSubmitting) return;
+		const normalizedQuestion = normalizeQuestionText(question);
+		if (!normalizedQuestion.trim() || isSubmitting) return;
 
+		setQuestion(normalizedQuestion);
 		setIsSubmitting(true);
 
 		try {
@@ -207,7 +210,7 @@ export default function AskScreen() {
 			);
 
 			const response = await askQuestion({
-				question: question.trim(),
+				question: normalizedQuestion.trim(),
 				contacts: allContactsWithNotes,
 			});
 
@@ -218,7 +221,7 @@ export default function AskScreen() {
 			router.push({
 				pathname: '/ask-result',
 				params: {
-					question,
+					question: normalizedQuestion,
 					answer: response.answer,
 					sources: JSON.stringify(response.sources),
 					relatedContactId: response.relatedContactId || undefined,
@@ -273,6 +276,7 @@ export default function AskScreen() {
 					style={styles.content}
 					contentContainerStyle={styles.contentContainer}
 					keyboardShouldPersistTaps="handled">
+					<Text style={styles.inputLabel}>{t('ask.inputLabel')}</Text>
 					<View style={styles.inputContainer}>
 						<TextInput
 							ref={inputRef}
@@ -284,7 +288,7 @@ export default function AskScreen() {
 							}
 							placeholderTextColor={Colors.textMuted}
 							value={question}
-							onChangeText={setQuestion}
+							onChangeText={(value) => setQuestion(normalizeQuestionText(value))}
 							multiline
 							maxLength={500}
 							editable={!isRecording && !isTranscribing}
@@ -292,6 +296,9 @@ export default function AskScreen() {
 							textAlignVertical="top"
 						/>
 					</View>
+					{question.trim().length === 0 && (
+						<Text style={styles.inputHint}>{t('ask.inputHint')}</Text>
+					)}
 
 					<View style={styles.actionButtons}>
 						<Pressable
@@ -426,11 +433,25 @@ const styles = StyleSheet.create({
 		minHeight: 120,
 		...Shadows.card,
 	},
+	inputLabel: {
+		fontSize: 12,
+		fontWeight: '700',
+		color: Colors.textMuted,
+		textTransform: 'uppercase',
+		letterSpacing: 1,
+		marginBottom: Spacing.sm,
+	},
 	input: {
 		fontSize: 16,
 		color: Colors.textPrimary,
 		minHeight: 80,
 		textAlignVertical: 'top',
+	},
+	inputHint: {
+		fontSize: 13,
+		lineHeight: 19,
+		color: Colors.textMuted,
+		marginTop: Spacing.sm,
 	},
 	actionButtons: {
 		flexDirection: 'row',
@@ -537,7 +558,8 @@ const styles = StyleSheet.create({
 		backgroundColor: Colors.surface,
 		borderRadius: 14,
 		padding: Spacing.md,
-		...Shadows.card,
+		borderWidth: 1,
+		borderColor: Colors.hairline,
 	},
 	suggestionText: {
 		fontSize: 15,
