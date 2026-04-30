@@ -33,7 +33,7 @@ module.exports = {
     ios: {
       supportsTablet: false,
       bundleIdentifier: 'com.monkeycs60.recallpeople2026',
-      buildNumber: '23',
+      buildNumber: '24',
     },
     android: {
       adaptiveIcon: {
