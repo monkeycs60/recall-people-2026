@@ -172,7 +172,105 @@ API stateless minimaliste. **Ne stocke jamais le contenu utilisateur**.
 | SEO | `robots.ts`, `sitemap.ts`, FAQ riche en mots-clés (GEO) |
 | Déploiement | **Vercel** (le backend reste sur Cloudflare Workers — règle CLAUDE.md : *"Ne deploy pas le backend sur cloudflare à moins que je te le demande, tu as le droit de deploy sur vercel."*) |
 
-### 4.5 Outils & infrastructure
+### 4.5 Schéma d'architecture
+
+```mermaid
+flowchart TB
+    subgraph Mobile["📱 Mobile App (Expo / React Native)"]
+        UI["UI – expo-router<br/>(tabs, contact, record, ask)"]
+        State["Zustand stores<br/>+ TanStack Query"]
+        Services["services/<br/>(contact, note, hot-topic, group)"]
+        SQLite[("🔒 SQLite locale<br/>contacts · notes<br/>hot_topics · groups")]
+        SecureStore["expo-secure-store<br/>(JWT + refresh)"]
+        Notif["expo-notifications<br/>(events + birthdays)"]
+        Audio["expo-audio<br/>(record / playback)"]
+        i18n["i18next<br/>FR · EN · ES · IT · DE"]
+
+        UI --> State --> Services --> SQLite
+        UI --> Audio
+        UI --> Notif
+        UI --> i18n
+        Services --> SecureStore
+    end
+
+    subgraph Backend["☁️ Backend stateless (Hono · Cloudflare Workers)"]
+        Hono["Hono router<br/>+ middleware<br/>(auth · rate-limit · CORS · security headers)"]
+        Routes["Routes<br/>/auth · /api/transcribe<br/>/api/extract · /api/detect-contact<br/>/api/summary · /api/suggested-questions<br/>/api/search · /api/ask · /api/avatar<br/>/api/subscription · /admin"]
+        AIProvider["lib/ai-provider.ts<br/>+ speech-to-text-provider"]
+        Hono --> Routes --> AIProvider
+    end
+
+    subgraph CFInfra["Cloudflare infra"]
+        Neon[("PostgreSQL Neon<br/>via Prisma<br/>― Better Auth<br/>― quotas & audit logs<br/>❌ aucun contenu user")]
+        KV[("KV<br/>rate-limit")]
+        R2[("R2 bucket<br/>AVATARS_BUCKET")]
+    end
+
+    subgraph AI["🤖 AI providers"]
+        Groq["Groq Whisper v3 Turbo<br/>(transcription)"]
+        Cerebras["Cerebras<br/>gpt-oss-120b · Llama 3.1 8B"]
+        OpenAIText["OpenAI GPT-5 mini<br/>(Structured Outputs)"]
+        OpenAIImg["OpenAI GPT Image 2<br/>(avatars 1024×1024)"]
+        Grok["xAI Grok-4-1-fast<br/>(fallback)"]
+    end
+
+    subgraph Obs["Observabilité & paiements"]
+        LangFuse["LangFuse<br/>(traces · coûts · evals)"]
+        SES["AWS SES<br/>(reset password)"]
+        RC["RevenueCat<br/>(IAP iOS/Android)"]
+    end
+
+    subgraph Web["🌐 Landing (Next.js · Vercel)"]
+        Landing["Hero · Features<br/>Privacy · Pricing · FAQ"]
+        Stores["App Store · Play Store"]
+        Landing --> Stores
+    end
+
+    subgraph Auth["Auth providers"]
+        Google["Google Sign-In"]
+        Apple["Apple Sign-In"]
+    end
+
+    Mobile -- "POST /api/transcribe<br/>POST /api/extract<br/>POST /api/ask · /api/search<br/>POST /api/avatar" --> Hono
+    Mobile -- "OAuth" --> Google
+    Mobile -- "OAuth" --> Apple
+    Mobile -- "IAP / paywall" --> RC
+    Stores -- "install" --> Mobile
+
+    Hono --> Neon
+    Hono --> KV
+    AIProvider --> R2
+    AIProvider --> Groq
+    AIProvider --> Cerebras
+    AIProvider --> OpenAIText
+    AIProvider --> OpenAIImg
+    AIProvider --> Grok
+    AIProvider -. traces .-> LangFuse
+    Routes --> SES
+    RC -. webhook / sync .-> Hono
+
+    classDef mobile fill:#FFF4E6,stroke:#E07A2C,color:#3A2410
+    classDef backend fill:#E8F1FF,stroke:#3B6EE0,color:#0F1F40
+    classDef ai fill:#F1E8FF,stroke:#7E3BE0,color:#1F0F40
+    classDef infra fill:#E8FFEC,stroke:#2EA84A,color:#0F4019
+    classDef obs fill:#FFF7E8,stroke:#C99A1F,color:#403014
+    classDef web fill:#FFE8F1,stroke:#E03B7E,color:#40101F
+    class Mobile,UI,State,Services,SQLite,SecureStore,Notif,Audio,i18n mobile
+    class Backend,Hono,Routes,AIProvider backend
+    class AI,Groq,Cerebras,OpenAIText,OpenAIImg,Grok ai
+    class CFInfra,Neon,KV,R2 infra
+    class Obs,LangFuse,SES,RC obs
+    class Web,Landing,Stores,Auth,Google,Apple web
+```
+
+**Lecture rapide** :
+
+- Le **flux principal** part de l'app mobile : `audio` → `POST /api/transcribe` → `POST /api/extract` → l'app stocke le résultat dans **SQLite locale** (le backend n'écrit rien du contenu).
+- Le **backend** sur Cloudflare Workers ne persiste que **auth + quotas + audit** dans Neon, et utilise **KV** pour le rate-limit + **R2** pour les avatars générés.
+- Les **providers IA** sont commutables via `AI_PROVIDER` / `STT_PROVIDER` ; LangFuse trace tous les appels.
+- La **landing Next.js** (Vercel) renvoie vers les stores ; les paiements transitent par RevenueCat puis sont synchronisés côté backend pour les quotas.
+
+### 4.6 Outils & infrastructure
 
 - **CI/CD mobile** : EAS Build + EAS Update (canal `production`, projet `005eaea1-…`).
 - **Distribution** : App Store + Google Play (badges déjà intégrés à la landing).
