@@ -72,6 +72,7 @@ const PROMPT_TEMPLATES: Record<string, {
 12. Évite les questions génériques qui répètent juste le titre ("Comment avance X ?"). Ancre la question dans un détail, une échéance ou une prochaine action.
 13. N'invente JAMAIS de date, jour, créneau, lieu ou personne. Si aucun créneau précis n'est mentionné, reste général.
 14. Pour caler un moment sans date fournie, écris une question générale du type "Tu serais dispo bientôt pour se voir ?" sans proposer d'options.
+15. Si une actualité fournit une date ISO, ne la transforme jamais en "demain", "aujourd'hui", "la semaine prochaine", etc. Utilise une date naturelle avec jour, mois et année ("3 juin 2026") ou omets la date. N'écris jamais la date au format ISO dans la question.
 
 IMPORTANT: Mieux vaut 1 bonne question que 3 questions artificielles ou répétitives.`,
 		format: 'FORMAT DE RÉPONSE:\nRetourne entre 1 et 3 questions, une par ligne, sans numérotation ni tirets.',
@@ -97,6 +98,7 @@ Tu sais déjà quand tu poses tes cartons à Lyon ?`,
 8. NEVER invent questions about unmentioned topics
 9. Questions should invite sharing, not be yes/no questions
 10. Maximum 15 words per question
+11. If a topic provides an ISO date, never rewrite it as "tomorrow", "today", "next week", etc. Use a natural absolute date with month name ("June 3, 2026") or omit the date. Never output ISO dates in the question.
 
 IMPORTANT: Better 1 good question than 3 artificial or repetitive ones.`,
 		format: 'RESPONSE FORMAT:\nReturn between 1 and 3 questions, one per line, without numbering or dashes.',
@@ -122,6 +124,7 @@ So the move to London, is it set for March?`,
 8. NUNCA inventes preguntas sobre temas no mencionados
 9. Las preguntas deben invitar a compartir, no ser preguntas de sí/no
 10. Máximo 15 palabras por pregunta
+11. Si un tema incluye una fecha ISO, nunca la cambies por "mañana", "hoy", "la semana que viene", etc. Usa una fecha absoluta natural con mes escrito ("3 de junio de 2026") u omite la fecha. Nunca escribas fechas ISO en la pregunta.
 
 IMPORTANTE: Mejor 1 buena pregunta que 3 artificiales o repetitivas.`,
 		format: 'FORMATO DE RESPUESTA:\nDevuelve entre 1 y 3 preguntas, una por línea, sin numeración ni guiones.',
@@ -147,6 +150,7 @@ IMPORTANTE: Mejor 1 buena pregunta que 3 artificiales o repetitivas.`,
 8. MAI inventare domande su argomenti non menzionati
 9. Le domande devono invitare a condividere, non essere domande sì/no
 10. Massimo 15 parole per domanda
+11. Se un argomento include una data ISO, non trasformarla mai in "domani", "oggi", "la prossima settimana", ecc. Usa una data assoluta naturale con il mese scritto ("3 giugno 2026") oppure ometti la data. Non scrivere mai date ISO nella domanda.
 
 IMPORTANTE: Meglio 1 buona domanda che 3 artificiali o ripetitive.`,
 		format: 'FORMATO DI RISPOSTA:\nRestituisci tra 1 e 3 domande, una per riga, senza numerazione né trattini.',
@@ -172,6 +176,7 @@ Allora il trasloco a Milano, è confermato per marzo?`,
 8. ERFINDE NIE Fragen zu nicht erwähnten Themen
 9. Fragen sollten zum Teilen einladen, keine Ja/Nein-Fragen sein
 10. Maximal 15 Wörter pro Frage
+11. Wenn ein Thema ein ISO-Datum enthält, formuliere es niemals als "morgen", "heute", "nächste Woche" usw. Verwende ein natürliches absolutes Datum mit Monatsnamen ("3. Juni 2026") oder lass das Datum weg. Gib in der Frage niemals ISO-Daten aus.
 
 WICHTIG: Lieber 1 gute Frage als 3 künstliche oder repetitive.`,
 		format: 'ANTWORTFORMAT:\nGib zwischen 1 und 3 Fragen zurück, eine pro Zeile, ohne Nummerierung oder Striche.',
@@ -185,6 +190,14 @@ Und der Umzug nach Berlin, steht der für März fest?`,
 type Variables = {
 	user: import('@prisma/client').User;
 };
+
+export const parseSuggestedQuestionsText = (text: string): string[] =>
+	text
+		.trim()
+		.split('\n')
+		.map((line) => line.trim().replace(/^[-•*]?\s*\d+[\).\-\s]+/, '').replace(/^[-•*]\s+/, '').trim())
+		.filter((line) => line.length > 0)
+		.slice(0, 3);
 
 export const suggestedQuestionsRoutes = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
@@ -312,12 +325,7 @@ ${template.noInfo}
 			prompt,
 		});
 
-		const suggestedQuestions = text
-			.trim()
-			.split('\n')
-			.map((line) => line.trim())
-			.filter((line) => line.length > 0 && !line.match(/^[-•*\d\.]/)) // Filter out lines that start with list markers
-			.slice(0, 3); // Maximum 3 questions
+		const suggestedQuestions = parseSuggestedQuestionsText(text);
 
 		// Update Langfuse generation with output
 		generation?.end({ output: suggestedQuestions });

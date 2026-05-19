@@ -1,6 +1,6 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { ArrowUpRight, CalendarDays, MessageCircle } from 'lucide-react-native';
+import { CalendarDays, MessageCircle } from 'lucide-react-native';
 import { HotTopic } from '@/types';
 import { Colors, Fonts, Shadows } from '@/constants/theme';
 import { formatLocalizedDate } from '@/utils/dateLocale';
@@ -9,16 +9,12 @@ type NextActionCardProps = {
   firstName: string;
   topic?: HotTopic | null;
   suggestedQuestion?: string;
-  onAddNote: () => void;
-  onAsk: () => void;
 };
 
 export function NextActionCard({
   firstName,
   topic,
   suggestedQuestion,
-  onAddNote,
-  onAsk,
 }: NextActionCardProps) {
   const { t } = useTranslation();
 
@@ -62,15 +58,6 @@ export function NextActionCard({
         </Text>
       ) : null}
 
-      <View style={styles.actions}>
-        <Pressable style={styles.primaryButton} onPress={onAddNote}>
-          <Text style={styles.primaryButtonText}>{t('contact.nextAction.addNote')}</Text>
-        </Pressable>
-        <Pressable style={styles.secondaryButton} onPress={onAsk}>
-          <Text style={styles.secondaryButtonText}>{t('contact.nextAction.ask')}</Text>
-          <ArrowUpRight size={14} color={Colors.primary} strokeWidth={2.2} />
-        </Pressable>
-      </View>
     </View>
   );
 }
@@ -120,40 +107,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 21,
     color: Colors.textSecondary,
-  },
-  actions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginTop: 14,
-  },
-  primaryButton: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 12,
-    backgroundColor: Colors.primary,
-    paddingVertical: 10,
-  },
-  primaryButtonText: {
-    color: Colors.textInverse,
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  secondaryButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.hairlineStrong,
-    paddingVertical: 10,
-  },
-  secondaryButtonText: {
-    color: Colors.primary,
-    fontSize: 13,
-    fontWeight: '700',
   },
 });

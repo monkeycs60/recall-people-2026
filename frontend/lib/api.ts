@@ -79,6 +79,22 @@ function isNetworkError(error: unknown): boolean {
   return false;
 }
 
+export function isAbortError(error: unknown): boolean {
+  if (error instanceof Error && error.name === 'AbortError') {
+    return true;
+  }
+
+  if (
+    typeof DOMException !== 'undefined' &&
+    error instanceof DOMException &&
+    error.name === 'AbortError'
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
 const apiCall = async <T>(endpoint: string, options: ApiOptions = {}, isRetry = false): Promise<T> => {
   const { showErrorToast = true, timeoutMs = DEFAULT_TIMEOUT_MS, ...fetchOptions } = options;
   const token = await getToken();
@@ -126,7 +142,7 @@ const apiCall = async <T>(endpoint: string, options: ApiOptions = {}, isRetry = 
     if (error instanceof ApiError) {
       throw error;
     }
-    if (error instanceof DOMException && error.name === 'AbortError') {
+    if (isAbortError(error)) {
       const networkError = new NetworkError('Request timeout');
       if (showErrorToast) {
         showApiError(networkError);

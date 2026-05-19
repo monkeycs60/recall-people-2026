@@ -5,7 +5,6 @@ import {
   Dimensions,
   ScrollView,
   StyleSheet,
-  Image,
 } from 'react-native';
 import { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -18,15 +17,12 @@ import Animated, {
   Extrapolation,
   SharedValue,
 } from 'react-native-reanimated';
-import { Globe, Check, Search, Mic, PenLine } from 'lucide-react-native';
+import { Globe, Check } from 'lucide-react-native';
 import { useSettingsStore } from '@/stores/settings-store';
 import { changeLanguage } from '@/lib/i18n';
 import { Language, SUPPORTED_LANGUAGES, LANGUAGE_NAMES, LANGUAGE_FLAGS } from '@/types';
 import { Colors, Spacing, BorderRadius, Fonts, Shadows } from '@/constants/theme';
-
-const SOLUTION_ILLUSTRATION = require('@/assets/ai-assets/onboarding-solution.png');
-const DEMO_ILLUSTRATION = require('@/assets/ai-assets/onboarding-demo.png');
-const PRIVACY_ILLUSTRATION = require('@/assets/ai-assets/onboarding-privacy.png');
+import { ONBOARDING_SLIDES, type OnboardingSlide } from '@/lib/onboarding-flow';
 
 const ONBOARDING_BACKGROUND = Colors.background;
 
@@ -82,14 +78,7 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
     changeLanguage(language);
   };
 
-  const slides = [
-    { id: 0, key: 'language', type: 'language' as const },
-    { id: 1, key: 'solution', type: 'solution' as const },
-    { id: 2, key: 'demo', type: 'demo' as const },
-    { id: 3, key: 'assistant', type: 'assistant' as const },
-    { id: 4, key: 'typing', type: 'typing' as const },
-    { id: 5, key: 'privacy', type: 'privacy' as const },
-  ];
+  const slides = ONBOARDING_SLIDES;
 
   const handleNext = () => {
     if (currentSlide < slides.length - 1) {
@@ -147,168 +136,10 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
     </View>
   );
 
-  const renderSolutionSlide = () => (
-    <View
-      style={[styles.slideContainer, { width: SCREEN_WIDTH, backgroundColor: ONBOARDING_BACKGROUND }]}
-    >
-      <View style={styles.solutionContent}>
-        <View style={styles.illustrationWrapper}>
-          <Image
-            source={SOLUTION_ILLUSTRATION}
-            style={styles.solutionIllustration}
-            resizeMode="cover"
-          />
-        </View>
-
-        <Text style={styles.solutionTitle}>{t('onboarding.solution.title')}</Text>
-
-        <View style={styles.featuresGrid}>
-          {/* Row 1 */}
-          <View style={styles.featuresRow}>
-            <View style={[styles.featureCell, { backgroundColor: Colors.calendarLight }]}>
-              <Text style={styles.featureEmoji}>📂</Text>
-              <Text style={styles.featureCellText}>{t('onboarding.solution.feature1')}</Text>
-            </View>
-            <View style={[styles.featureCell, styles.featureCellOffset, { backgroundColor: Colors.primaryLight }]}>
-              <Text style={styles.featureEmoji}>✨</Text>
-              <Text style={styles.featureCellText}>{t('onboarding.solution.feature2')}</Text>
-            </View>
-          </View>
-          {/* Row 2 - offset left */}
-          <View style={[styles.featuresRow, styles.featuresRowOffset]}>
-            <View style={[styles.featureCell, styles.featureCellOffset, { backgroundColor: Colors.voiceLight }]}>
-              <Text style={styles.featureEmoji}>💬</Text>
-              <Text style={styles.featureCellText}>{t('onboarding.solution.feature3')}</Text>
-            </View>
-            <View style={[styles.featureCell, { backgroundColor: Colors.peche }]}>
-              <Text style={styles.featureEmoji}>📝</Text>
-              <Text style={styles.featureCellText}>{t('onboarding.solution.feature4')}</Text>
-            </View>
-          </View>
-          {/* Row 3 - centered */}
-          <View style={styles.featuresRow}>
-            <View style={[styles.featureCell, styles.featureCellWide, { backgroundColor: Colors.lavande }]}>
-              <Text style={styles.featureEmoji}>🔔</Text>
-              <Text style={styles.featureCellText}>{t('onboarding.solution.feature5')}</Text>
-            </View>
-          </View>
-        </View>
-      </View>
-    </View>
-  );
-
-  const renderDemoSlide = () => (
-    <View
-      style={[styles.slideContainer, { width: SCREEN_WIDTH, backgroundColor: ONBOARDING_BACKGROUND }]}
-    >
-      <View style={styles.demoContent}>
-        <Text style={styles.title}>{t('onboarding.demo.title')}</Text>
-
-        <View style={styles.demoIllustrationWrapper}>
-          <Image
-            source={DEMO_ILLUSTRATION}
-            style={styles.demoIllustration}
-            resizeMode="cover"
-          />
-        </View>
-
-        <Text style={styles.demoDescription}>{t('onboarding.demo.description')}</Text>
-      </View>
-    </View>
-  );
-
-  const assistantExamples = [
-    t('onboarding.assistant.example1'),
-    t('onboarding.assistant.example2'),
-    t('onboarding.assistant.example3'),
-  ];
-
-  const renderAssistantSlide = () => (
-    <View
-      style={[styles.slideContainer, { width: SCREEN_WIDTH, backgroundColor: ONBOARDING_BACKGROUND }]}
-    >
-      <View style={styles.assistantContent}>
-        {/* Search icon with floating question chips around it */}
-        <View style={styles.searchVisualization}>
-          {/* Floating chips positioned around the icon */}
-          <View style={[styles.floatingChip, styles.chipPosition1]}>
-            <Text style={styles.floatingChipText}>{assistantExamples[0]}</Text>
-          </View>
-          <View style={[styles.floatingChip, styles.chipPosition2]}>
-            <Text style={styles.floatingChipText}>{assistantExamples[1]}</Text>
-          </View>
-          <View style={[styles.floatingChip, styles.chipPosition3]}>
-            <Text style={styles.floatingChipText}>{assistantExamples[2]}</Text>
-          </View>
-
-          {/* Central search icon */}
-          <View style={styles.assistantIconContainer}>
-            <Search size={40} color={Colors.primary} />
-          </View>
-        </View>
-
-        <Text style={styles.title}>{t('onboarding.assistant.title')}</Text>
-        <Text style={styles.description}>{t('onboarding.assistant.description')}</Text>
-      </View>
-    </View>
-  );
-
-  const renderTypingSlide = () => (
-    <View
-      style={[styles.slideContainer, { width: SCREEN_WIDTH, backgroundColor: ONBOARDING_BACKGROUND }]}
-    >
-      <View style={styles.typingContent}>
-        <View style={styles.typingIcons}>
-          <View style={[styles.typingIconCircle, { backgroundColor: Colors.primaryLight }]}>
-            <Mic size={28} color={Colors.primary} />
-          </View>
-          <Text style={styles.typingOr}>{t('onboarding.typing.or')}</Text>
-          <View style={[styles.typingIconCircle, { backgroundColor: Colors.surfaceAlt }]}>
-            <PenLine size={28} color={Colors.textSecondary} />
-          </View>
-        </View>
-        <Text style={styles.title}>{t('onboarding.typing.title')}</Text>
-        <Text style={styles.description}>{t('onboarding.typing.description')}</Text>
-      </View>
-    </View>
-  );
-
-  const renderPrivacySlide = () => (
-    <View
-      style={[styles.slideContainer, { width: SCREEN_WIDTH, backgroundColor: ONBOARDING_BACKGROUND }]}
-    >
-      <View style={styles.privacyContent}>
-        <View style={styles.privacyIllustrationWrapper}>
-          <Image
-            source={PRIVACY_ILLUSTRATION}
-            style={styles.privacyIllustration}
-            resizeMode="cover"
-          />
-        </View>
-        <Text style={styles.title}>{t('onboarding.privacy.title')}</Text>
-        <Text style={styles.description}>{t('onboarding.privacy.description')}</Text>
-
-        <View style={styles.privacyBadge}>
-          <Text style={styles.privacyBadgeText}>100% {t('onboarding.privacy.local')}</Text>
-        </View>
-      </View>
-    </View>
-  );
-
-  const renderSlide = (slide: (typeof slides)[0]) => {
+  const renderSlide = (slide: OnboardingSlide) => {
     switch (slide.type) {
       case 'language':
         return renderLanguageSlide();
-      case 'solution':
-        return renderSolutionSlide();
-      case 'demo':
-        return renderDemoSlide();
-      case 'assistant':
-        return renderAssistantSlide();
-      case 'typing':
-        return renderTypingSlide();
-      case 'privacy':
-        return renderPrivacySlide();
       default:
         return null;
     }
@@ -350,14 +181,21 @@ export const Onboarding = ({ onComplete }: OnboardingProps) => {
           ))}
         </View>
 
-        <Pressable
-          onPress={handleNext}
-          style={({ pressed }) => [styles.nextButton, pressed && styles.nextButtonPressed]}
-        >
-          <Text style={styles.nextButtonText}>
-            {currentSlide === slides.length - 1 ? t('onboarding.getStarted') : t('onboarding.next')}
-          </Text>
-        </Pressable>
+        {currentSlide === slides.length - 1 ? (
+          <Pressable
+            onPress={handleNext}
+            style={({ pressed }) => [styles.nextButton, pressed && styles.nextButtonPressed]}
+          >
+            <Text style={styles.nextButtonText}>{t('onboarding.getStarted')}</Text>
+          </Pressable>
+        ) : (
+          <Pressable
+            onPress={handleNext}
+            style={({ pressed }) => [styles.nextButton, pressed && styles.nextButtonPressed]}
+          >
+            <Text style={styles.nextButtonText}>{t('onboarding.next')}</Text>
+          </Pressable>
+        )}
       </View>
     </View>
   );

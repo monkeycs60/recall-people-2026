@@ -5,6 +5,7 @@ import { Check, RotateCcw, Trash2, ChevronDown, ChevronUp, Edit3 } from 'lucide-
 import { HotTopic } from '@/types';
 import { Colors, Shadows } from '@/constants/theme';
 import { formatLocalizedDate } from '@/utils/dateLocale';
+import { sortHotTopicsByEventDateDesc } from '@/utils/hotTopics';
 
 const EMPTY_NEWS_ILLUSTRATION = require('@/assets/ai-assets/empty-hot-topics.png');
 
@@ -40,7 +41,7 @@ export function HotTopicsList({
   const now = Date.now();
   const twoWeeksFromNow = now + TWO_WEEKS_MS;
 
-  const filteredHotTopics = hotTopics.filter((topic) => {
+  const filteredHotTopics = sortHotTopicsByEventDateDesc(hotTopics.filter((topic) => {
     if (topic.birthdayContactId && topic.eventDate) {
       const eventTime = new Date(topic.eventDate).getTime();
 
@@ -60,7 +61,7 @@ export function HotTopicsList({
       return topic.id === sortedBirthdays[0]?.id;
     }
     return true;
-  });
+  }));
 
   const activeTopics = filteredHotTopics.filter((topic) => topic.status === 'active');
   const resolvedTopics = filteredHotTopics.filter((topic) => topic.status === 'resolved');

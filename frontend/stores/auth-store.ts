@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { getToken, getUser, verifyToken, clearAuth } from '@/lib/auth';
+import { getToken, verifyToken, clearAuth } from '@/lib/auth';
+import { clearActiveDatabaseUser } from '@/lib/db';
 import { getUserSettings } from '@/lib/api';
 import { useSettingsStore } from './settings-store';
 import { useSubscriptionStore } from './subscription-store';
@@ -8,12 +9,20 @@ import { changeLanguage } from '@/lib/i18n';
 import { Language, SUPPORTED_LANGUAGES } from '@/types';
 
 const isE2ETest = process.env.EXPO_PUBLIC_E2E_TEST === 'true';
+const isScreenshotMode = process.env.EXPO_PUBLIC_SCREENSHOT_MODE === 'true';
 
 // Mock user for E2E tests
 const E2E_MOCK_USER = {
   id: 'e2e-test-user',
   email: 'e2e@test.com',
   name: 'E2E Test User',
+  provider: 'credentials' as const,
+};
+
+const SCREENSHOT_MOCK_USER = {
+  id: 'screenshot-user',
+  email: 'screenshots@recall.local',
+  name: 'Screenshot User',
   provider: 'credentials' as const,
 };
 
@@ -45,7 +54,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       isLoading: false,
       isInitialized: false,
 
-      setUser: (user) => set({ user }),
+      setUser: (user) => set({ user, isInitialized: true }),
 
       updateUser: (updates) => {
         const currentUser = get().user;
@@ -61,6 +70,11 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         if (state.isInitialized || state.isLoading) return;
 
         set({ isLoading: true });
+
+        if (isScreenshotMode) {
+          set({ user: SCREENSHOT_MOCK_USER, isLoading: false, isInitialized: true });
+          return;
+        }
 
         // E2E mode: bypass auth and use mock user
         if (isE2ETest) {
@@ -113,6 +127,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
       logout: async () => {
         await clearAuth();
+        await clearActiveDatabaseUser();
         set({ user: null, isInitialized: false });
       },
     }),

@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { queryKeys } from '@/lib/query-keys';
 import { Contact, HotTopic } from '@/types';
+import { sortHotTopicsByEventDateDesc } from '@/utils/hotTopics';
 
 type ContactPreview = {
   hotTopics: HotTopic[];
@@ -37,7 +38,7 @@ function filterHotTopicsForCard(hotTopics: HotTopic[]): HotTopic[] {
     result.push(upcomingBirthday);
   }
 
-  return result;
+  return sortHotTopicsByEventDateDesc(result);
 }
 
 export function useContactPreviewsQuery(contacts: Contact[]) {

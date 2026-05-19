@@ -1,9 +1,20 @@
 import { Stack, useRouter } from 'expo-router';
+import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import '../global.css';
-import { initDatabase } from '@/lib/db';
-import { Text, View, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
+import { clearActiveDatabaseUser, configureDatabaseForUser, initDatabase } from '@/lib/db';
+import {
+  Text,
+  View,
+  Pressable,
+  ActivityIndicator,
+  StyleSheet,
+  AppState,
+  LogBox,
+  Platform,
+  StatusBar as NativeStatusBar,
+} from 'react-native';
 import { ArrowLeft, BotMessageSquare } from 'lucide-react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useSettingsStore } from '@/stores/settings-store';
@@ -34,6 +45,15 @@ import { revenueCatService } from '@/services/revenuecat.service';
 import { useAuthStore } from '@/stores/auth-store';
 import { useSubscriptionStore } from '@/stores/subscription-store';
 import { getNotificationRoute } from '@/lib/notification-routing';
+import { useSyncStore } from '@/stores/sync-store';
+
+const hideStatusBarForScreenshots =
+  process.env.EXPO_PUBLIC_HIDE_STATUS_BAR === 'true' ||
+  process.env.EXPO_PUBLIC_SCREENSHOT_MODE === 'true';
+
+if (hideStatusBarForScreenshots) {
+  LogBox.ignoreAllLogs(true);
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -44,17 +64,18 @@ const queryClient = new QueryClient({
   },
 });
 
-// Initialize DB once at module level
-let isDbInitialized = false;
+let initializedDatabaseUserId: string | null = null;
 
 export default function RootLayout() {
   const router = useRouter();
   const { t } = useTranslation();
-  const [dbReady, setDbReady] = useState(isDbInitialized);
+  const [dbReady, setDbReady] = useState(true);
   const [dbError, setDbError] = useState<string | null>(null);
   const language = useSettingsStore((state) => state.language);
   const isHydrated = useSettingsStore((state) => state.isHydrated);
   const user = useAuthStore((state) => state.user);
+  const isAuthInitialized = useAuthStore((state) => state.isInitialized);
+  const initializeAuth = useAuthStore((state) => state.initialize);
   const isSubscriptionHydrated = useSubscriptionStore((state) => state.isHydrated);
 
   const [fontsLoaded] = useFonts({
@@ -68,6 +89,13 @@ export default function RootLayout() {
     PlusJakartaSans_700Bold,
   });
 
+  useEffect(() => {
+    NativeStatusBar.setHidden(hideStatusBarForScreenshots, 'none');
+    if (Platform.OS === 'android' && hideStatusBarForScreenshots) {
+      NativeStatusBar.setTranslucent(true);
+    }
+  }, []);
+
   // Sync language when settings are hydrated
   useEffect(() => {
     if (isHydrated) {
@@ -75,24 +103,59 @@ export default function RootLayout() {
     }
   }, [language, isHydrated]);
 
-  // Initialize database only once
   useEffect(() => {
-    if (!isDbInitialized) {
-      console.log('[_layout] Starting DB initialization...');
-      initDatabase()
-        .then(async () => {
-          console.log('[_layout] DB initialized successfully');
-          isDbInitialized = true;
-          await hotTopicService.cleanupPastBirthdays();
-          setDbReady(true);
-        })
-        .catch((error) => {
-          console.error('[_layout] DB initialization failed:', error);
-          setDbError(error.message);
-          setDbReady(true);
-        });
+    if (!isAuthInitialized) {
+      initializeAuth();
     }
-  }, []);
+  }, [initializeAuth, isAuthInitialized]);
+
+  // Initialize the local SQLite database for the authenticated account only.
+  useEffect(() => {
+    let isCancelled = false;
+
+    if (!isAuthInitialized) return;
+
+    if (!user?.id) {
+      initializedDatabaseUserId = null;
+      clearActiveDatabaseUser().catch((error) => {
+        console.warn('[_layout] Failed to close account database:', error);
+      });
+      setDbReady(true);
+      return;
+    }
+
+    if (initializedDatabaseUserId === user.id) {
+      setDbReady(true);
+      return;
+    }
+
+    setDbReady(false);
+    console.log('[_layout] Starting DB initialization for account:', user.id);
+
+    configureDatabaseForUser(user.id)
+      .then(() => {
+        queryClient.clear();
+        useSyncStore.setState({ lastSyncedAt: null, error: null, isSyncing: false });
+        return initDatabase();
+      })
+      .then(async () => {
+        if (isCancelled) return;
+        console.log('[_layout] DB initialized successfully for account:', user.id);
+        initializedDatabaseUserId = user.id;
+        await hotTopicService.cleanupPastBirthdays();
+        setDbReady(true);
+      })
+      .catch((error) => {
+        if (isCancelled) return;
+        console.error('[_layout] DB initialization failed:', error);
+        setDbError(error.message);
+        setDbReady(true);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [isAuthInitialized, user?.id]);
 
   // Setup notification tap handler to navigate to contact
   useEffect(() => {
@@ -153,6 +216,23 @@ export default function RootLayout() {
     }
   }, [user?.id, user?.email, isSubscriptionHydrated, isHydrated, dbReady]);
 
+  useEffect(() => {
+    if (!user?.id || !dbReady || !isHydrated) return;
+
+    const syncAccountData = () => {
+      useSyncStore.getState().syncNow().catch((error) => {
+        console.warn('[_layout] Failed to sync account data:', error);
+      });
+    };
+
+    syncAccountData();
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') syncAccountData();
+    });
+
+    return () => subscription.remove();
+  }, [dbReady, isHydrated, user?.id]);
+
   if (dbError) {
     return (
       <View style={styles.centerContainer}>
@@ -172,6 +252,7 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={styles.rootContainer}>
+      <ExpoStatusBar hidden={hideStatusBarForScreenshots} />
       <OfflineBanner />
       <BottomSheetModalProvider>
         <QueryClientProvider client={queryClient}>

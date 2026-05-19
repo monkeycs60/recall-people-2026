@@ -197,7 +197,8 @@
     "suggestedQuestions": {
       "header": "Un'idea per riprendere la conversazione?",
       "loading": "Preparazione delle idee...",
-      "empty": "Aggiungi note per ottenere idee di conversazione"
+      "empty": "Aggiungi note per ottenere idee di conversazione",
+      "generate": "Genera idee"
     },
     "nextAction": {
       "label": "Prossima azione",
@@ -440,6 +441,7 @@
       "generate": "Genera",
       "uploading": "Caricamento...",
       "generating": "Generazione avatar...",
+      "generatingShort": "Creazione",
       "uploadingTitle": "Caricamento immagine",
       "uploadingDescription": "Preparazione e salvataggio della foto selezionata.",
       "generatingTitle": "Creazione avatar",
@@ -581,7 +583,7 @@
       "notesUsed": "note questo mese"
     },
     "language": {
-      "appLanguage": "Lingua dell'app",
+      "appLanguage": "Cambia lingua",
       "appLanguageDescription": "App + trascrizione IA"
     },
     "data": {
@@ -593,6 +595,16 @@
       "version": "Versione",
       "feedback": "Invia feedback",
       "legal": "Note legali"
+    },
+    "sync": {
+      "title": "Sincronizzazione sicura",
+      "description": "I tuoi contatti seguono il tuo account su iOS e Android.",
+      "enabled": "Attiva",
+      "syncing": "Sincronizzazione...",
+      "retrying": "Ritenterà",
+      "retryDescription": "La sincronizzazione automatica riproverà quando la connessione tornerà.",
+      "lastSynced": "Sincronizzato {{date}}",
+      "error": "Sincronizzazione non riuscita. Riprova."
     },
     "logout": "Disconnetti",
     "logoutConfirm": "Sei sicuro di volerti disconnettere?",
@@ -679,13 +691,25 @@
       "feature4": "Tutte le registrazioni trascritte e ordinate",
       "feature5": "Notifiche per gli eventi dei tuoi contatti"
     },
+    "remember": {
+      "title": "Ricorda le persone in pochi secondi",
+      "description": "Aggiungi una nota rapida dopo un incontro. Recall conserva i dettagli per te."
+    },
+    "profile": {
+      "title": "Sai cosa dire dopo",
+      "description": "Vedi contesto dell'incontro, essenziale, prossima azione, eventi futuri e idee di conversazione in un solo posto."
+    },
+    "calendar": {
+      "title": "Vedi cosa conta dopo",
+      "description": "Un calendario dei momenti importanti dei tuoi contatti, con promemoria personalizzabili."
+    },
     "demo": {
       "title": "Ecco come funziona",
       "description": "Parla dopo aver incontrato qualcuno. L'IA estrae automaticamente le informazioni chiave e crea la scheda contatto."
     },
     "assistant": {
       "title": "Fai qualsiasi domanda",
-      "description": "L'assistente IA cerca in tutte le tue note per trovare qualsiasi informazione.",
+      "description": "Trova persone per ricordo, contesto, lavoro, luogo o qualsiasi dettaglio annotato.",
       "example1": "\"Chi lavora nel tech?\"",
       "example2": "\"Chi ha bambini piccoli?\"",
       "example3": "\"Dove studia Sarah?\""
@@ -700,7 +724,20 @@
       "description": "Le tue note restano locali. L'IA viene usata solo quando richiedi elaborazione.",
       "local": "locale"
     },
+    "privacySync": {
+      "title": "Sync privata, automatica",
+      "description": "I tuoi contatti si sincronizzano con il tuo account e sono cifrati nel nostro database, così ti seguono su iOS e Android.",
+      "primary": "Inizia con Recall"
+    },
     "redoTour": "Ripeti tour guidato"
+  },
+  "guidedTour": {
+    "title": "Inizia con una nota",
+    "description": "Registra o scrivi ciò che ricordi. Recall People crea profilo, eventi futuri e idee di conversazione.",
+    "stepContacts": "Contatti conserva l'essenziale di ogni persona.",
+    "stepUpcoming": "Prossimi raccoglie compleanni, scadenze, viaggi e follow-up.",
+    "stepAssistant": "Assistant cerca informazioni in tutte le tue note.",
+    "primary": "Capito"
   },
   "subscription": {
     "freePlan": "GRATUITO",
@@ -724,6 +761,22 @@
   },
   "record": {
     "remaining": "rimanenti",
+    "guideTitle": "Parla di una sola persona",
+    "guideBody": "Indica il nome, ciò che sai di questa persona e cosa sta per succedere.",
+    "guideTitleWithContact": "Cosa è cambiato con {{firstName}}?",
+    "guideBodyWithContact": "Racconta l'ultima interazione, cosa ricordare e cosa riprendere.",
+    "guideStepName": "Nome della persona",
+    "guideStepContext": "Ciò che sai di questa persona",
+    "guideStepFuture": "Cosa sta per succedere nella sua vita",
+    "guideStepContactConversation": "Ultima interazione",
+    "guideStepContactRemember": "Cosa ricordare",
+    "guideStepContactFollowUp": "Cosa riprendere",
+    "guideExample": "Lina è una fotografa di prodotto conosciuta a cena da Ana. Si trasferisce a Vancouver a giugno e cerca caffè tranquilli.",
+    "guideExampleWithContact": "{{firstName}} si trasferisce venerdì e cerca un idraulico.",
+    "exampleLabel": "Esempio",
+    "exampleText": "\"Ho incontrato Lina a una cena a Lisbona. Si trasferisce a giugno e cerca bei caffè.\"",
+    "exampleTextWithContact": "\"Abbiamo parlato del nuovo appartamento di {{firstName}}. Si trasferisce venerdì e cerca un idraulico.\"",
+    "tapToStart": "Tocca il microfono per iniziare",
     "helperPrompts": {
       "citeName": "Cita il nome della persona...",
       "talkAbout": "Parla del vostro incontro...",
@@ -741,8 +794,8 @@
     "helperTextWithContact": "Parla di {{firstName}}: novità, aneddoti, dettagli importanti..."
   },
   "textInput": {
-    "placeholder": "Descrivi la persona che hai incontrato, il contesto, i dettagli importanti...",
-    "placeholderWithContact": "Scrivi ciò che sai su {{firstName}}...",
+    "placeholder": "Una sola persona. Indica il nome, ciò che sai di questa persona e cosa sta per succedere...",
+    "placeholderWithContact": "Scrivi cosa è cambiato con {{firstName}}: ultima interazione, cosa ricordare e cosa riprendere...",
     "minCharacters": "Minimo 10 caratteri ({{count}} rimanenti)",
     "pressToSend": "Premi invia per analizzare"
   },

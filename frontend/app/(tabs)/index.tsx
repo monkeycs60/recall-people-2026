@@ -26,6 +26,9 @@ import {
   Mic,
   X,
   Users,
+  CalendarDays,
+  BotMessageSquare,
+  CheckCircle2,
 } from 'lucide-react-native';
 import { Colors, Shadows, Fonts } from '@/constants/theme';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -120,6 +123,8 @@ export default function ContactsScreen() {
   const { data: contactCountByGroupId = {}, refetch: refetchGroupContactCounts } =
     useGroupContactCounts();
   const notSeenThresholdDays = useSettingsStore((state) => state.notSeenThresholdDays);
+  const hasSeenGuidedTour = useSettingsStore((state) => state.hasSeenGuidedTour);
+  const setHasSeenGuidedTour = useSettingsStore((state) => state.setHasSeenGuidedTour);
   const syncQuotas = useSubscriptionStore((state) => state.syncQuotas);
   const canCreateContact = useSubscriptionStore((state) => state.canCreateContact);
   const { addPendingAvatarGeneration, removePendingAvatarGeneration, isAvatarGenerating } = useAppStore();
@@ -518,6 +523,46 @@ export default function ContactsScreen() {
       <Modal visible={showPaywall} animationType="slide" presentationStyle="pageSheet">
         <Paywall onClose={() => setShowPaywall(false)} reason="contact_limit" />
       </Modal>
+
+      <Modal
+        visible={!hasSeenGuidedTour}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setHasSeenGuidedTour(true)}
+      >
+        <View style={styles.guidedTourOverlay}>
+          <View style={styles.guidedTourCard}>
+            <View style={styles.guidedTourIcon}>
+              <Mic size={24} color={Colors.textInverse} strokeWidth={2.5} />
+            </View>
+            <Text style={styles.guidedTourTitle}>{t('guidedTour.title')}</Text>
+            <Text style={styles.guidedTourDescription}>{t('guidedTour.description')}</Text>
+
+            <View style={styles.guidedTourSteps}>
+              <View style={styles.guidedTourStep}>
+                <Users size={17} color={Colors.primary} strokeWidth={2.2} />
+                <Text style={styles.guidedTourStepText}>{t('guidedTour.stepContacts')}</Text>
+              </View>
+              <View style={styles.guidedTourStep}>
+                <CalendarDays size={17} color={Colors.amber} strokeWidth={2.2} />
+                <Text style={styles.guidedTourStepText}>{t('guidedTour.stepUpcoming')}</Text>
+              </View>
+              <View style={styles.guidedTourStep}>
+                <BotMessageSquare size={17} color={Colors.accent} strokeWidth={2.2} />
+                <Text style={styles.guidedTourStepText}>{t('guidedTour.stepAssistant')}</Text>
+              </View>
+            </View>
+
+            <Pressable
+              style={styles.guidedTourButton}
+              onPress={() => setHasSeenGuidedTour(true)}
+            >
+              <CheckCircle2 size={17} color={Colors.textInverse} strokeWidth={2.4} />
+              <Text style={styles.guidedTourButtonText}>{t('guidedTour.primary')}</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -775,5 +820,75 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
     textAlign: 'center',
     marginTop: 16,
+  },
+  guidedTourOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(29, 26, 46, 0.34)',
+    paddingHorizontal: 18,
+    paddingBottom: 26,
+  },
+  guidedTourCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: 24,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: Colors.hairline,
+    ...Shadows.floating,
+  },
+  guidedTourIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.primary,
+    marginBottom: 14,
+  },
+  guidedTourTitle: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 22,
+    lineHeight: 28,
+    letterSpacing: -0.4,
+    color: Colors.textPrimary,
+  },
+  guidedTourDescription: {
+    marginTop: 8,
+    fontSize: 14,
+    lineHeight: 21,
+    color: Colors.textSecondary,
+  },
+  guidedTourSteps: {
+    marginTop: 16,
+    gap: 10,
+  },
+  guidedTourStep: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 2,
+  },
+  guidedTourStepText: {
+    flex: 1,
+    fontSize: 13,
+    lineHeight: 18,
+    color: Colors.textPrimary,
+    fontWeight: '600',
+  },
+  guidedTourButton: {
+    marginTop: 18,
+    height: 48,
+    borderRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: Colors.primary,
+    ...Shadows.fab,
+  },
+  guidedTourButtonText: {
+    color: Colors.textInverse,
+    fontSize: 15,
+    fontWeight: '800',
   },
 });

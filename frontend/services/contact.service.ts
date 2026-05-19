@@ -1,7 +1,65 @@
 import * as Crypto from 'expo-crypto';
 import { getDatabase } from '@/lib/db';
-import { Contact, ContactWithDetails, Note, Gender } from '@/types';
+import { Contact, ContactWithDetails, Gender } from '@/types';
 import { hotTopicService } from './hot-topic.service';
+import { syncQueueService } from './sync-queue.service';
+
+type ContactSyncRow = {
+  id: string;
+  first_name: string;
+  last_name: string | null;
+  nickname: string | null;
+  avatar_url: string | null;
+  gender: string | null;
+  phone: string | null;
+  email: string | null;
+  birthday_day: number | null;
+  birthday_month: number | null;
+  birthday_year: number | null;
+  ai_summary: string | null;
+  suggested_questions: string | null;
+  meeting_context: string | null;
+  reminder_frequency_days: number | null;
+  last_contact_at: string | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+};
+
+const contactRowToSyncPayload = (row: ContactSyncRow) => ({
+  id: row.id,
+  firstName: row.first_name,
+  lastName: row.last_name,
+  nickname: row.nickname,
+  avatarUrl: row.avatar_url,
+  gender: row.gender ?? 'unknown',
+  phone: row.phone,
+  email: row.email,
+  birthdayDay: row.birthday_day,
+  birthdayMonth: row.birthday_month,
+  birthdayYear: row.birthday_year,
+  aiSummary: row.ai_summary,
+  suggestedQuestions: row.suggested_questions ? JSON.parse(row.suggested_questions) : null,
+  meetingContext: row.meeting_context,
+  reminderFrequencyDays: row.reminder_frequency_days,
+  lastContactAt: row.last_contact_at,
+  createdAt: row.created_at,
+  updatedAt: row.updated_at,
+  deletedAt: row.deleted_at,
+});
+
+const enqueueContact = async (id: string, operation: 'upsert' | 'delete'): Promise<void> => {
+  const db = await getDatabase();
+  const row = await db.getFirstAsync<ContactSyncRow>('SELECT * FROM contacts WHERE id = ?', [id]);
+  if (!row) return;
+
+  await syncQueueService.enqueueMutation({
+    entityType: 'contact',
+    entityId: id,
+    operation,
+    payload: contactRowToSyncPayload(row),
+  });
+};
 
 export const contactService = {
   getAll: async (): Promise<Contact[]> => {
@@ -25,7 +83,7 @@ export const contactService = {
       last_contact_at: string | null;
       created_at: string;
       updated_at: string;
-    }>('SELECT * FROM contacts ORDER BY last_contact_at DESC');
+    }>('SELECT * FROM contacts WHERE deleted_at IS NULL ORDER BY last_contact_at DESC');
 
     return result.map((row) => ({
       id: row.id,
@@ -70,7 +128,7 @@ export const contactService = {
       last_contact_at: string | null;
       created_at: string;
       updated_at: string;
-    }>('SELECT * FROM contacts WHERE id = ?', [id]);
+    }>('SELECT * FROM contacts WHERE id = ? AND deleted_at IS NULL', [id]);
 
     if (!contactRow) return null;
 
@@ -84,7 +142,7 @@ export const contactService = {
       transcription: string | null;
       created_at: string;
       updated_at: string | null;
-    }>('SELECT * FROM notes WHERE contact_id = ? ORDER BY created_at DESC', [id]);
+    }>('SELECT * FROM notes WHERE contact_id = ? AND deleted_at IS NULL ORDER BY created_at DESC', [id]);
 
     const hotTopicsRows = await db.getAllAsync<{
       id: string;
@@ -99,7 +157,10 @@ export const contactService = {
       created_at: string;
       updated_at: string;
       resolved_at: string | null;
-    }>('SELECT * FROM hot_topics WHERE contact_id = ? ORDER BY created_at DESC', [id]);
+    }>(
+      'SELECT * FROM hot_topics WHERE contact_id = ? AND deleted_at IS NULL ORDER BY event_date IS NULL ASC, event_date DESC, updated_at DESC',
+      [id]
+    );
 
     const contact: ContactWithDetails = {
       id: contactRow.id,
@@ -158,8 +219,8 @@ export const contactService = {
     const normalizedLastName = lastName?.trim().toLowerCase() || null;
 
     const query = normalizedLastName
-      ? `SELECT * FROM contacts WHERE LOWER(TRIM(first_name)) = ? AND LOWER(TRIM(last_name)) = ? LIMIT 1`
-      : `SELECT * FROM contacts WHERE LOWER(TRIM(first_name)) = ? AND (last_name IS NULL OR TRIM(last_name) = '') LIMIT 1`;
+      ? `SELECT * FROM contacts WHERE deleted_at IS NULL AND LOWER(TRIM(first_name)) = ? AND LOWER(TRIM(last_name)) = ? LIMIT 1`
+      : `SELECT * FROM contacts WHERE deleted_at IS NULL AND LOWER(TRIM(first_name)) = ? AND (last_name IS NULL OR TRIM(last_name) = '') LIMIT 1`;
 
     const params = normalizedLastName
       ? [normalizedFirstName, normalizedLastName]
@@ -219,6 +280,8 @@ export const contactService = {
         now,
       ]
     );
+
+    await enqueueContact(id, 'upsert');
 
     return {
       id,
@@ -326,6 +389,8 @@ export const contactService = {
       values
     );
 
+    await enqueueContact(id, 'upsert');
+
     if (data.birthdayDay !== undefined || data.birthdayMonth !== undefined) {
       const contactRow = await db.getFirstAsync<{
         first_name: string;
@@ -348,6 +413,11 @@ export const contactService = {
 
   delete: async (id: string): Promise<void> => {
     const db = await getDatabase();
-    await db.runAsync('DELETE FROM contacts WHERE id = ?', [id]);
+    const now = new Date().toISOString();
+    await db.runAsync(
+      'UPDATE contacts SET deleted_at = ?, updated_at = ? WHERE id = ?',
+      [now, now, id]
+    );
+    await enqueueContact(id, 'delete');
   },
 };

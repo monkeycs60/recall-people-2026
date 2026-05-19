@@ -11,8 +11,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://recall-people.com"),
   title: "Recall People | The AI Personal CRM for Networking",
-  description: "Stop forgetting the details that matter. Recall People is a voice-first personal CRM with 100% local storage. Build smart contact profiles using AI.",
+  description: "Stop forgetting the details that matter. Recall People is a personal CRM with AI summaries, reminders, assistant search, and secure encrypted sync across devices.",
   keywords: [
     "Personal CRM", "Networking App", "Remember names app", 
     "AI relationship manager", "Voice-to-CRM", "Private contact manager", 
@@ -26,7 +27,7 @@ export const metadata: Metadata = {
     url: "https://recall-people.com",
     siteName: "Recall People",
     title: "Recall People | The AI Personal CRM for Networking",
-    description: "Your social memory, upgraded. Record voice notes, AI extracts the details. 100% private.",
+    description: "Your social memory, upgraded. Record notes, get AI context, and keep your contacts synced securely across iOS and Android.",
     images: [
       {
         url: "/images/og-image.png",
@@ -39,7 +40,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Recall People | The AI Personal CRM for Networking",
-    description: "Stop forgetting details. Voice-first, 100% private personal CRM.",
+    description: "Stop forgetting details. AI personal CRM with secure encrypted sync.",
     images: ["/images/og-image.png"],
   },
   robots: {
@@ -67,7 +68,7 @@ export default function RootLayout({
               "@type": "MobileApplication",
               "name": "Recall People",
               "description":
-                "Recall People is a voice-first personal CRM. Record a quick voice note after any conversation — AI automatically extracts names, facts, and upcoming events into smart contact profiles. All data is stored locally on your device for complete privacy.",
+                "Recall People is a voice-first personal CRM. Record a quick voice note after any conversation — AI automatically extracts names, facts, and upcoming events into smart contact profiles. Contact data is encrypted in our database and synced through your account across iOS and Android.",
               "applicationCategory": "ProductivityApplication",
               "operatingSystem": "iOS, Android",
               "offers": [
@@ -91,7 +92,8 @@ export default function RootLayout({
                 "Event reminders and upcoming events feed",
                 "Semantic search across all contacts",
                 "AI conversation starters",
-                "Privacy-first local storage on device",
+                "Encrypted account sync across devices",
+                "Sensitive contact fields encrypted in our database",
                 "Offline access to all data",
                 "Data export in JSON and CSV",
               ],

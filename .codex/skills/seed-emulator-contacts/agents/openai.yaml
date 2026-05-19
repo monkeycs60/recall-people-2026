@@ -1,4 +1,4 @@
 interface:
   display_name: "Seed Emulator Contacts"
-  short_description: "Seed Recall emulator demo contacts"
-  default_prompt: "Use $seed-emulator-contacts to populate the current Android emulator with rich Recall demo contacts and events."
+  short_description: "Seed Recall through the app UI"
+  default_prompt: "Use $seed-emulator-contacts to create six realistic Recall contacts through the Android emulator UI/API flow."

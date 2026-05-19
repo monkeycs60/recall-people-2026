@@ -39,6 +39,7 @@ export default function TermsOfService() {
               <li>Store and organize contact information, notes, and memories</li>
               <li>Receive reminders about upcoming events related to your contacts</li>
               <li>Search your contacts using natural language</li>
+              <li>Sync relationship data through your account</li>
             </ul>
           </section>
 
@@ -102,7 +103,7 @@ export default function TermsOfService() {
             <ul className="list-disc pl-6 text-text-secondary space-y-2 mt-3">
               <li>The accuracy and legality of your content</li>
               <li>Ensuring you have the right to record and store information about others</li>
-              <li>Backing up your data (since it is stored locally on your device)</li>
+              <li>Maintaining secure access to your account credentials</li>
             </ul>
           </section>
 
@@ -140,7 +141,7 @@ export default function TermsOfService() {
               <li>The App will be uninterrupted or error-free</li>
               <li>Transcriptions or AI-generated content will be accurate</li>
               <li>The App will meet your specific requirements</li>
-              <li>Any data stored on your device will be preserved indefinitely</li>
+              <li>Any synced or cached data will be preserved indefinitely</li>
             </ul>
           </section>
 
@@ -169,7 +170,7 @@ export default function TermsOfService() {
             </p>
             <ul className="list-disc pl-6 text-text-secondary space-y-2 mt-3">
               <li>Your right to use the App will immediately cease</li>
-              <li>Your locally stored data will remain on your device unless you delete it</li>
+              <li>Your account data may be retained or deleted according to our Privacy Policy and legal obligations</li>
               <li>Any active subscription will be cancelled</li>
             </ul>
           </section>

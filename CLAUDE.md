@@ -4,23 +4,89 @@
 
 The app is called **Recall People** (two words, always together). Never shorten to just "Recall" in user-facing copy. In code identifiers, `recall-people` or `recallPeople` is acceptable.
 
+# QA Test Account
+
+Use this shared credentials account for Android emulator and local/dev QA:
+
+- Email: `qa@recall-people.app`
+- Password: `RecallPeopleQA2026`
+- Display name: `QA Recall`
+- Backend user id observed on dev: `cmoyfnukf000bi4vcd1mqqesw`
+
+This account is only for repeatable QA and seed data. Do not put personal contacts, real private notes, or production user data in it.
+
+Because account sync is server-side, keep using this same account when testing the emulator. Once seeded, contacts should come back after logout/login, reinstall, or switching devices, as long as the same account is used and the backend points to the same database.
+
 # Architecture Principles
 
-## User-First Data Privacy (SQLite Local)
+## User-First Data Privacy (SQLite Local + Account Sync)
 
-This app follows a **local-first architecture** for user privacy and data control:
+This app follows a **local-first architecture** with account-based sync for user privacy, continuity, and cross-device usage:
 
-- **User data is stored on the device** in SQLite, not in backend databases
-- The backend is **stateless for user content** — it processes requests (transcription, extraction, AI) but does NOT persist user data
-- Examples: contacts, notes, facts, memories, AI summaries → all stored locally on the phone
-- This gives users **full control** over their data and enables offline access
+- **User data is stored locally** in SQLite for offline access and fast UX.
+- **Each authenticated account has its own local SQLite database** on the device.
+- **Account sync stores encrypted user content on the backend**, so users can restore contacts after reinstalling the app or changing phones.
+- Multiple accounts may exist on the same phone, but their local databases must stay isolated.
+- Logging out must clear auth/session state, not delete the local account database.
 
 When implementing features:
-- New user-facing data fields belong in the **local SQLite schema** (frontend)
-- Backend endpoints should **receive and return data**, not store it
-- Think "API as a service" not "API as a database"
+- New user-facing data fields belong in the **local SQLite schema** and in the **account sync payload/schema** when they need to persist across devices.
+- Backend sync endpoints may persist encrypted user content, but regular AI/transcription endpoints should still avoid storing private user content unless explicitly required.
+- Existing fully local users need migration into their account database and then account sync.
 
 # Mobile Debugging
+
+## ASO Screenshots Sans Barre Android
+
+Pour les captures App Store / ASO, ne pas masquer la barre Android en post-traitement : le rendu est visible et fait cheap dans un mockup iPhone. Utiliser le mode screenshot natif de l'app.
+
+Le code supporte un mode capture via variables d'environnement :
+
+- `EXPO_PUBLIC_SCREENSHOT_MODE=true` : bypass auth avec un utilisateur local de capture.
+- `EXPO_PUBLIC_SCREENSHOT_DB_HASH=3c53b5a3` : ouvre la DB locale seedée pour les contacts ASO (`recall_people_3c53b5a3.db`).
+- `EXPO_PUBLIC_HIDE_STATUS_BAR=true` : masque la status bar Android nativement.
+- `EXPO_PUBLIC_API_URL=http://10.0.2.2:8787` : permet à l'émulateur Android d'appeler le backend local.
+
+Commande de lancement recommandée depuis `frontend/` :
+
+```bash
+EXPO_NO_DOTENV=1 \
+EXPO_PUBLIC_API_URL=http://10.0.2.2:8787 \
+EXPO_PUBLIC_SCREENSHOT_MODE=true \
+EXPO_PUBLIC_SCREENSHOT_DB_HASH=3c53b5a3 \
+EXPO_PUBLIC_HIDE_STATUS_BAR=true \
+npx expo start --android --dev-client --clear
+```
+
+Après le démarrage Metro, forcer un reload (`r` dans Metro ou dev menu Android) pour être certain que les `EXPO_PUBLIC_*` sont bien injectées dans le bundle. Vérifier dans les logs :
+
+```text
+[config] API_URL: http://10.0.2.2:8787
+[_layout] Starting DB initialization for account: screenshot-user
+```
+
+Capture ADB :
+
+```bash
+adb -s emulator-5554 exec-out screencap -p > "/home/clement/Desktop/Recall People ASO native screenshots - no status/full-phone/screen.png"
+```
+
+Gotchas :
+
+- `adb shell settings put global policy_control immersive.status=...` ne suffit pas sur cet émulateur : la status bar reste dans `screencap`.
+- `expo-status-bar` seul ne suffit pas non plus ; le mode capture utilise aussi `NativeStatusBar.setHidden(...)`.
+- Le bandeau dev "Open debugger to view warnings" est masqué par `LogBox.ignoreAllLogs(true)` en mode screenshot.
+- Si l'app revient au login, relancer avec `EXPO_PUBLIC_SCREENSHOT_MODE=true` puis faire un reload Metro.
+- À la fin, supprimer toute policy immersive ADB éventuelle :
+
+```bash
+adb -s emulator-5554 shell settings delete global policy_control
+```
+
+Les derniers dossiers utiles générés sur le Desktop :
+
+- Captures natives propres : `/home/clement/Desktop/Recall People ASO native screenshots - no status`
+- Mockups iPhone 17 propres : `/home/clement/Desktop/Recall People iPhone 17 mockups - native no status`
 
 ## Visualiser l'écran Android dans Chrome
 

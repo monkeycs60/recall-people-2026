@@ -1,0 +1,4 @@
+interface:
+  display_name: "Recall People Deployment"
+  short_description: "Deploy Recall People to stores"
+  default_prompt: "Use $recall-people-deployment to prepare a Recall People iOS or Android testing release."

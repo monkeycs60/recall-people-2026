@@ -50,6 +50,7 @@ export default function ReviewScreen() {
   const audioUri = params.audioUri as string;
   const transcription = params.transcription as string;
   const contactId = params.contactId as string;
+  const skipAvatarGeneration = params.skipAvatarGeneration === '1';
 
   const [selectedFacts, setSelectedFacts] = useState<number[]>(
     extraction.facts?.map((_, index) => index) || []
@@ -586,7 +587,13 @@ export default function ReviewScreen() {
               title: topic.title,
               context: topic.context || '',
               status: topic.status,
+              eventDate: topic.eventDate || undefined,
             })),
+          recentNotes: contactDetails.notes.slice(0, 6).map((noteItem) => ({
+            title: noteItem.title || 'Note',
+            transcription: noteItem.transcription,
+            createdAt: noteItem.createdAt,
+          })),
         };
 
         generateSuggestedQuestions(requestData)
@@ -598,7 +605,7 @@ export default function ReviewScreen() {
           .catch(() => {});
       }
 
-      const shouldGenerateAvatar = !contactDetails?.avatarUrl;
+      const shouldGenerateAvatar = !skipAvatarGeneration && !contactDetails?.avatarUrl;
       if (shouldGenerateAvatar) {
         const gender = extraction.contactIdentified.gender || 'unknown';
         const avatarHints = extraction.contactIdentified.avatarHints || {

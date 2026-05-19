@@ -8,6 +8,8 @@ import { Context } from 'hono';
 export type AuditAction =
   | 'login'
   | 'register'
+  | 'forgot_password'
+  | 'reset_password'
   | 'token_refresh'
   | 'logout'
   | 'account_delete'

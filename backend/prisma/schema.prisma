@@ -33,6 +33,12 @@ model User {
   contacts      Contact[]
   notes         Note[]
   refreshTokens RefreshToken[]
+  syncedContacts      SyncedContact[]
+  syncedNotes         SyncedNote[]
+  syncedGroups        SyncedGroup[]
+  syncedHotTopics     SyncedHotTopic[]
+  syncedContactGroups SyncedContactGroup[]
+  syncChanges         SyncChange[]
 
   @@map("users")
 }
@@ -216,4 +222,136 @@ model UserNotesUsage {
   @@unique([userId, monthKey])
   @@map("user_notes_usage")
   @@index([userId])
+}
+
+enum SyncEntityType {
+  contact
+  note
+  group
+  contact_group
+  hot_topic
+}
+
+enum SyncOperation {
+  upsert
+  delete
+}
+
+model SyncedContact {
+  id                          String    @id
+  userId                      String    @map("user_id")
+  encryptedFirstName          String    @map("encrypted_first_name")
+  encryptedLastName           String?   @map("encrypted_last_name")
+  encryptedNickname           String?   @map("encrypted_nickname")
+  encryptedPhone              String?   @map("encrypted_phone")
+  encryptedEmail              String?   @map("encrypted_email")
+  encryptedAiSummary          String?   @map("encrypted_ai_summary")
+  encryptedSuggestedQuestions String?   @map("encrypted_suggested_questions")
+  encryptedMeetingContext     String?   @map("encrypted_meeting_context")
+  avatarUrl                   String?   @map("avatar_url")
+  gender                      String    @default("unknown")
+  birthdayDay                 Int?      @map("birthday_day")
+  birthdayMonth               Int?      @map("birthday_month")
+  birthdayYear                Int?      @map("birthday_year")
+  reminderFrequencyDays       Int?      @map("reminder_frequency_days")
+  lastContactAt               DateTime? @map("last_contact_at")
+  createdAt                   DateTime  @map("created_at")
+  updatedAt                   DateTime  @map("updated_at")
+  deletedAt                   DateTime? @map("deleted_at")
+
+  user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notes SyncedNote[]
+
+  @@map("synced_contacts")
+  @@index([userId, updatedAt])
+  @@index([userId, deletedAt])
+}
+
+model SyncedNote {
+  id                     String    @id
+  userId                 String    @map("user_id")
+  contactId              String    @map("contact_id")
+  encryptedTitle         String?   @map("encrypted_title")
+  encryptedTranscription String?   @map("encrypted_transcription")
+  audioDurationMs        Int?      @map("audio_duration_ms")
+  createdAt              DateTime  @map("created_at")
+  updatedAt              DateTime  @map("updated_at")
+  deletedAt              DateTime? @map("deleted_at")
+
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contact SyncedContact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@map("synced_notes")
+  @@index([userId, contactId])
+  @@index([userId, updatedAt])
+}
+
+model SyncedGroup {
+  id            String    @id
+  userId        String    @map("user_id")
+  encryptedName String    @map("encrypted_name")
+  createdAt     DateTime  @map("created_at")
+  updatedAt     DateTime  @map("updated_at")
+  deletedAt     DateTime? @map("deleted_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("synced_groups")
+  @@index([userId, updatedAt])
+}
+
+model SyncedContactGroup {
+  id        String    @id @default(cuid())
+  userId    String    @map("user_id")
+  contactId String    @map("contact_id")
+  groupId   String    @map("group_id")
+  createdAt DateTime  @map("created_at")
+  updatedAt DateTime  @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("synced_contact_groups")
+  @@unique([userId, contactId, groupId])
+  @@index([userId, updatedAt])
+}
+
+model SyncedHotTopic {
+  id                  String    @id
+  userId              String    @map("user_id")
+  contactId           String    @map("contact_id")
+  encryptedTitle      String    @map("encrypted_title")
+  encryptedContext    String?   @map("encrypted_context")
+  encryptedResolution String?   @map("encrypted_resolution")
+  status              String    @default("active")
+  sourceNoteId        String?   @map("source_note_id")
+  eventDate           DateTime? @map("event_date")
+  birthdayContactId   String?   @map("birthday_contact_id")
+  notifiedAt          DateTime? @map("notified_at")
+  resolvedAt          DateTime? @map("resolved_at")
+  createdAt           DateTime  @map("created_at")
+  updatedAt           DateTime  @map("updated_at")
+  deletedAt           DateTime? @map("deleted_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("synced_hot_topics")
+  @@index([userId, contactId])
+  @@index([userId, updatedAt])
+  @@index([userId, eventDate])
+}
+
+model SyncChange {
+  sequence   BigInt         @id @default(autoincrement())
+  userId     String         @map("user_id")
+  entityType SyncEntityType @map("entity_type")
+  entityId   String         @map("entity_id")
+  operation  SyncOperation
+  createdAt  DateTime       @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sync_changes")
+  @@index([userId, sequence])
+  @@index([userId, entityType, entityId])
 }

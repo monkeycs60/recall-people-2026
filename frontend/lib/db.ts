@@ -1,17 +1,62 @@
 import * as SQLite from 'expo-sqlite';
-import { documentDirectory, deleteAsync } from 'expo-file-system';
+import { documentDirectory, deleteAsync, getInfoAsync, copyAsync } from 'expo-file-system/legacy';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { seedE2EData } from './e2e-seed';
+import {
+  E2E_LEGACY_DATABASE_NAME,
+  getAccountDatabaseName,
+  LEGACY_DATABASE_NAME,
+} from './account-db';
 
 const isE2ETest = process.env.EXPO_PUBLIC_E2E_TEST === 'true';
+const LEGACY_DATABASE_CLAIM_KEY = 'legacy-local-db-claimed-user-id';
 
 let db: SQLite.SQLiteDatabase | null = null;
+let activeDbName: string | null = null;
+let activeUserId: string | null = null;
 
-const getDbName = () => (isE2ETest ? 'recall_people_test.db' : 'recall_people.db');
+const getLegacyDbName = () => (isE2ETest ? E2E_LEGACY_DATABASE_NAME : LEGACY_DATABASE_NAME);
+
+const getDbName = () => activeDbName ?? getLegacyDbName();
+
+const getDbPath = (dbName: string) => `${documentDirectory}SQLite/${dbName}`;
+
+const deleteDatabaseFiles = async (dbName: string): Promise<void> => {
+  const dbPath = getDbPath(dbName);
+  await deleteAsync(dbPath, { idempotent: true });
+  await deleteAsync(`${dbPath}-wal`, { idempotent: true });
+  await deleteAsync(`${dbPath}-shm`, { idempotent: true });
+};
+
+export const closeDatabase = async (): Promise<void> => {
+  const database = db;
+  db = null;
+
+  if (database) {
+    await database.closeAsync();
+  }
+};
+
+export const configureDatabaseForUser = async (userId: string): Promise<void> => {
+  const nextDbName = getAccountDatabaseName(userId, isE2ETest);
+  if (activeDbName === nextDbName && activeUserId === userId) return;
+
+  await closeDatabase();
+  activeDbName = nextDbName;
+  activeUserId = userId;
+};
+
+export const clearActiveDatabaseUser = async (): Promise<void> => {
+  await closeDatabase();
+  activeDbName = null;
+  activeUserId = null;
+};
+
+export const getActiveDatabaseUserId = (): string | null => activeUserId;
 
 const resetTestDatabase = async (dbName: string) => {
-  const dbPath = `${documentDirectory}SQLite/${dbName}`;
   try {
-    await deleteAsync(dbPath, { idempotent: true });
+    await deleteDatabaseFiles(dbName);
     console.log('[E2E] Test database reset');
   } catch {
     // File doesn't exist, nothing to reset
@@ -19,13 +64,65 @@ const resetTestDatabase = async (dbName: string) => {
 };
 
 export const deleteDatabase = async (): Promise<void> => {
-  if (db) {
-    await db.closeAsync();
-    db = null;
-  }
+  await closeDatabase();
   const dbName = getDbName();
-  const dbPath = `${documentDirectory}SQLite/${dbName}`;
-  await deleteAsync(dbPath, { idempotent: true });
+  await deleteDatabaseFiles(dbName);
+};
+
+export const getLegacyDatabaseClaimUserId = async (): Promise<string | null> => (
+  AsyncStorage.getItem(LEGACY_DATABASE_CLAIM_KEY)
+);
+
+export const markLegacyDatabaseClaimed = async (userId: string): Promise<void> => {
+  await AsyncStorage.setItem(LEGACY_DATABASE_CLAIM_KEY, userId);
+};
+
+export const isLegacyDatabaseNonEmpty = async (): Promise<boolean> => {
+  const legacyDbName = getLegacyDbName();
+  const legacyInfo = await getInfoAsync(getDbPath(legacyDbName));
+  if (!legacyInfo.exists) return false;
+
+  const legacyDb = await SQLite.openDatabaseAsync(legacyDbName);
+  try {
+    const table = await legacyDb.getFirstAsync<{ name: string }>(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='contacts'"
+    );
+    if (!table) return false;
+
+    const columns = await legacyDb.getAllAsync<{ name: string }>('PRAGMA table_info(contacts)');
+    const hasDeletedAt = columns.some((column) => column.name === 'deleted_at');
+    const result = await legacyDb.getFirstAsync<{ count: number }>(
+      hasDeletedAt
+        ? 'SELECT COUNT(*) as count FROM contacts WHERE deleted_at IS NULL'
+        : 'SELECT COUNT(*) as count FROM contacts'
+    );
+    return (result?.count ?? 0) > 0;
+  } finally {
+    await legacyDb.closeAsync();
+  }
+};
+
+export const importLegacyDatabaseForActiveAccount = async (): Promise<void> => {
+  if (!activeDbName || !activeUserId) {
+    throw new Error('Cannot import legacy database before an account database is configured');
+  }
+
+  const legacyDbName = getLegacyDbName();
+  const legacyPath = getDbPath(legacyDbName);
+  const accountPath = getDbPath(activeDbName);
+  const legacyInfo = await getInfoAsync(legacyPath);
+  if (!legacyInfo.exists) return;
+
+  const legacyDb = await SQLite.openDatabaseAsync(legacyDbName);
+  try {
+    await legacyDb.execAsync('PRAGMA wal_checkpoint(FULL)');
+  } finally {
+    await legacyDb.closeAsync();
+  }
+
+  await closeDatabase();
+  await deleteDatabaseFiles(activeDbName);
+  await copyAsync({ from: legacyPath, to: accountPath });
 };
 
 export const getDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
@@ -80,7 +177,8 @@ export const initDatabase = async () => {
       -- Meta
       last_contact_at TEXT,
       created_at TEXT DEFAULT (datetime('now')),
-      updated_at TEXT DEFAULT (datetime('now'))
+      updated_at TEXT DEFAULT (datetime('now')),
+      deleted_at TEXT
     );
 
     -- Notes (V2 Schema - Source of truth)
@@ -99,6 +197,7 @@ export const initDatabase = async () => {
       -- Meta
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now')),
+      deleted_at TEXT,
 
       FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE CASCADE
     );
@@ -124,6 +223,7 @@ export const initDatabase = async () => {
       source_note_id TEXT,
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now')),
+      deleted_at TEXT,
 
       -- Legacy fields for birthday events
       notified_at TEXT,
@@ -138,7 +238,8 @@ export const initDatabase = async () => {
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL UNIQUE COLLATE NOCASE,
       created_at TEXT DEFAULT (datetime('now')),
-      updated_at TEXT DEFAULT (datetime('now'))
+      updated_at TEXT DEFAULT (datetime('now')),
+      deleted_at TEXT
     );
 
     -- Contact-Group relationship
@@ -146,6 +247,8 @@ export const initDatabase = async () => {
       contact_id TEXT NOT NULL,
       group_id TEXT NOT NULL,
       created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now')),
+      deleted_at TEXT,
       PRIMARY KEY (contact_id, group_id),
       FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE CASCADE,
       FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE
@@ -158,6 +261,24 @@ export const initDatabase = async () => {
       created_at TEXT DEFAULT (datetime('now'))
     );
 
+    CREATE TABLE IF NOT EXISTS sync_state (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS sync_queue (
+      id TEXT PRIMARY KEY,
+      entity_type TEXT NOT NULL,
+      entity_id TEXT NOT NULL,
+      operation TEXT NOT NULL,
+      payload_json TEXT NOT NULL,
+      attempts INTEGER NOT NULL DEFAULT 0,
+      last_error TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
     -- Indexes
     CREATE INDEX IF NOT EXISTS idx_contacts_last_contact ON contacts(last_contact_at DESC);
     CREATE INDEX IF NOT EXISTS idx_notes_contact ON notes(contact_id);
@@ -168,6 +289,7 @@ export const initDatabase = async () => {
     CREATE INDEX IF NOT EXISTS idx_hot_topics_birthday ON hot_topics(birthday_contact_id);
     CREATE INDEX IF NOT EXISTS idx_contact_groups_contact ON contact_groups(contact_id);
     CREATE INDEX IF NOT EXISTS idx_contact_groups_group ON contact_groups(group_id);
+    CREATE INDEX IF NOT EXISTS idx_sync_queue_created ON sync_queue(created_at);
   `);
 
   // Run migrations for existing databases
@@ -177,6 +299,58 @@ export const initDatabase = async () => {
   if (isE2ETest) {
     await seedE2EData(database);
   }
+};
+
+export const isLocalDatabaseEmpty = async (): Promise<boolean> => {
+  const database = await getDatabase();
+  const result = await database.getFirstAsync<{ count: number }>(
+    'SELECT COUNT(*) as count FROM contacts WHERE deleted_at IS NULL'
+  );
+
+  return (result?.count ?? 0) === 0;
+};
+
+const addColumnIfMissing = async (
+  database: SQLite.SQLiteDatabase,
+  table: string,
+  column: string,
+  definition: string
+): Promise<void> => {
+  const columns = await database.getAllAsync<{ name: string }>(`PRAGMA table_info(${table})`);
+  if (!columns.some((col) => col.name === column)) {
+    await database.execAsync(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  }
+};
+
+const ensureSyncSchema = async (database: SQLite.SQLiteDatabase): Promise<void> => {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS sync_state (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS sync_queue (
+      id TEXT PRIMARY KEY,
+      entity_type TEXT NOT NULL,
+      entity_id TEXT NOT NULL,
+      operation TEXT NOT NULL,
+      payload_json TEXT NOT NULL,
+      attempts INTEGER NOT NULL DEFAULT 0,
+      last_error TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_sync_queue_created ON sync_queue(created_at);
+  `);
+
+  await addColumnIfMissing(database, 'contacts', 'deleted_at', 'TEXT');
+  await addColumnIfMissing(database, 'notes', 'deleted_at', 'TEXT');
+  await addColumnIfMissing(database, 'groups', 'deleted_at', 'TEXT');
+  await addColumnIfMissing(database, 'hot_topics', 'deleted_at', 'TEXT');
+  await addColumnIfMissing(database, 'contact_groups', 'updated_at', 'TEXT');
+  await addColumnIfMissing(database, 'contact_groups', 'deleted_at', 'TEXT');
 };
 
 const runMigrations = async (database: SQLite.SQLiteDatabase) => {
@@ -401,6 +575,7 @@ const runMigrations = async (database: SQLite.SQLiteDatabase) => {
 
   // V2 Migration: Mark that we've completed V2 migration
   await runV2Migration(database);
+  await ensureSyncSchema(database);
 };
 
 /**
@@ -480,6 +655,7 @@ const runV2Migration = async (database: SQLite.SQLiteDatabase) => {
   const hasHighlights = contactsInfo.some((col) => col.name === 'highlights');
   const hasIceBreakersMigration = contactsInfo.some((col) => col.name === 'ice_breakers');
   const hasMeetingContext = contactsInfo.some((col) => col.name === 'meeting_context');
+  const hasReminderFrequency = contactsInfo.some((col) => col.name === 'reminder_frequency_days');
 
   if (hasTags || hasHighlights || hasIceBreakersMigration) {
     console.log('[Migration V2] Removing deprecated columns from contacts table...');
@@ -504,6 +680,7 @@ const runV2Migration = async (database: SQLite.SQLiteDatabase) => {
         suggested_questions TEXT,
         meeting_context TEXT,
         last_contact_at TEXT,
+        reminder_frequency_days INTEGER,
         created_at TEXT DEFAULT (datetime('now')),
         updated_at TEXT DEFAULT (datetime('now'))
       );
@@ -517,7 +694,7 @@ const runV2Migration = async (database: SQLite.SQLiteDatabase) => {
         phone, email, birthday_day, birthday_month, birthday_year,
         relationship_type, photo_uri, avatar_url,
         ai_summary, suggested_questions, meeting_context,
-        last_contact_at, created_at, updated_at
+        last_contact_at, reminder_frequency_days, created_at, updated_at
       )
       SELECT
         id, first_name, last_name, nickname, gender,
@@ -530,7 +707,7 @@ const runV2Migration = async (database: SQLite.SQLiteDatabase) => {
           ELSE suggested_questions
         END,
         ${hasMeetingContext ? 'meeting_context' : 'NULL'},
-        last_contact_at, created_at, updated_at
+        last_contact_at, ${hasReminderFrequency ? 'reminder_frequency_days' : 'NULL'}, created_at, updated_at
       FROM contacts;
     `);
 

@@ -197,7 +197,8 @@
     "suggestedQuestions": {
       "header": "Need an idea to restart the conversation?",
       "loading": "Preparing ideas...",
-      "empty": "Add notes to get conversation ideas"
+      "empty": "Add notes to get conversation ideas",
+      "generate": "Generate ideas"
     },
     "nextAction": {
       "label": "Next action",
@@ -440,6 +441,7 @@
       "generate": "Generate",
       "uploading": "Uploading...",
       "generating": "Generating avatar...",
+      "generatingShort": "Creating",
       "uploadingTitle": "Uploading image",
       "uploadingDescription": "Preparing and saving the selected photo.",
       "generatingTitle": "Creating avatar",
@@ -581,7 +583,7 @@
       "notesUsed": "notes this month"
     },
     "language": {
-      "appLanguage": "App language",
+      "appLanguage": "Change language",
       "appLanguageDescription": "App + AI transcription"
     },
     "data": {
@@ -593,6 +595,16 @@
       "version": "Version",
       "feedback": "Give feedback",
       "legal": "Legal notices"
+    },
+    "sync": {
+      "title": "Secure sync",
+      "description": "Your contacts follow your account across iOS and Android.",
+      "enabled": "Enabled",
+      "syncing": "Syncing...",
+      "retrying": "Will retry",
+      "retryDescription": "Automatic sync will retry when the connection is back.",
+      "lastSynced": "Synced {{date}}",
+      "error": "Sync failed. Please try again."
     },
     "logout": "Log out",
     "logoutConfirm": "Are you sure you want to log out?",
@@ -679,13 +691,25 @@
       "feature4": "All recordings transcribed and organized",
       "feature5": "Notifications for your contacts' events"
     },
+    "remember": {
+      "title": "Remember people in seconds",
+      "description": "Add one quick note after meeting someone. Recall keeps the details for you."
+    },
+    "profile": {
+      "title": "Know what to say next",
+      "description": "See the meeting context, essentials, next action, upcoming events, and conversation ideas in one place."
+    },
+    "calendar": {
+      "title": "See what matters next",
+      "description": "A calendar of upcoming moments for your contacts, with reminders you can customize."
+    },
     "demo": {
       "title": "Here's how it works",
       "description": "Speak after meeting someone. AI automatically extracts key info and builds the contact card."
     },
     "assistant": {
       "title": "Ask any question",
-      "description": "The AI assistant searches through all your notes to find any information.",
+      "description": "Search your whole network by memory, context, job, location, or anything you noted.",
       "example1": "\"Who works in tech?\"",
       "example2": "\"Who has young kids?\"",
       "example3": "\"Where does Sarah study?\""
@@ -700,7 +724,20 @@
       "description": "Your notes live locally. AI providers process data only when you use AI features.",
       "local": "local-first"
     },
+    "privacySync": {
+      "title": "Private sync, automatic",
+      "description": "Your contacts sync through your account and are encrypted in our database, so they follow you on iOS and Android.",
+      "primary": "Start using Recall"
+    },
     "redoTour": "Redo guided tour"
+  },
+  "guidedTour": {
+    "title": "Start with one note",
+    "description": "Record or type what you remember. Recall People turns it into a profile, upcoming events, and conversation ideas.",
+    "stepContacts": "Contacts keep the essentials for each person.",
+    "stepUpcoming": "Upcoming shows birthdays, deadlines, trips, and follow-ups.",
+    "stepAssistant": "Assistant searches across your notes when you need an answer.",
+    "primary": "Got it"
   },
   "subscription": {
     "freePlan": "FREE",
@@ -724,6 +761,22 @@
   },
   "record": {
     "remaining": "remaining",
+    "guideTitle": "Tell me about one person",
+    "guideBody": "Mention the person's name, what you know, and what is coming up soon.",
+    "guideTitleWithContact": "What changed with {{firstName}}?",
+    "guideBodyWithContact": "Share your latest interaction, what to remember, and what to check in on.",
+    "guideStepName": "Person's name",
+    "guideStepContext": "What you know about this person",
+    "guideStepFuture": "What's coming up in this person's life",
+    "guideStepContactConversation": "Latest interaction",
+    "guideStepContactRemember": "What to remember",
+    "guideStepContactFollowUp": "What to check in on",
+    "guideExample": "Lina is a product photographer I met at Ana's dinner. She moves to Vancouver in June and wants quiet coffee spots.",
+    "guideExampleWithContact": "{{firstName}} moved Friday and needs a plumber.",
+    "exampleLabel": "Example",
+    "exampleText": "\"I met Lina at a dinner in Lisbon. She is moving in June and wants coffee recommendations.\"",
+    "exampleTextWithContact": "\"We talked about {{firstName}}'s new apartment. She moves next Friday and asked for a plumber recommendation.\"",
+    "tapToStart": "Tap the mic to start",
     "helperPrompts": {
       "citeName": "Say the person's name...",
       "talkAbout": "Talk about your meeting...",
@@ -741,8 +794,8 @@
     "helperTextWithContact": "Talk about {{firstName}}: news, stories, important details..."
   },
   "textInput": {
-    "placeholder": "Describe the person you met, the context, important details...",
-    "placeholderWithContact": "Write what you know about {{firstName}}...",
+    "placeholder": "One person only. Mention the name, what you know about this person, and what is coming up soon...",
+    "placeholderWithContact": "Write what changed with {{firstName}}: latest interaction, what to remember, and what to check in on...",
     "minCharacters": "Minimum 10 characters ({{count}} remaining)",
     "pressToSend": "Press send to analyze"
   },

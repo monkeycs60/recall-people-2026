@@ -14,7 +14,6 @@ import {
   MessageSquare,
   FileText,
   LogOut,
-  BookOpen,
   Shield,
   Users,
   Bell,
@@ -22,6 +21,7 @@ import {
   CalendarCheck,
   Newspaper,
   UserRound,
+  Cloud,
 } from 'lucide-react-native';
 import { useAuthStore } from '@/stores/auth-store';
 import { useSettingsStore } from '@/stores/settings-store';
@@ -48,6 +48,8 @@ import { deleteDatabase } from '@/lib/db';
 import { clearAuth } from '@/lib/auth';
 import { ACCOUNT_REMINDER_FREQUENCY_OPTIONS } from '@/lib/reminder-frequency';
 import { reminderService } from '@/services/reminder.service';
+import { formatLocalizedDate } from '@/utils/dateLocale';
+import { useSyncStore } from '@/stores/sync-store';
 
 export default function ProfileScreen() {
   const { t } = useTranslation();
@@ -56,7 +58,6 @@ export default function ProfileScreen() {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const language = useSettingsStore((state) => state.language);
-  const setHasSeenOnboarding = useSettingsStore((state) => state.setHasSeenOnboarding);
   const notSeenThresholdDays = useSettingsStore((state) => state.notSeenThresholdDays);
   const setNotSeenThresholdDays = useSettingsStore((state) => state.setNotSeenThresholdDays);
   const weeklyDigestEnabled = useSettingsStore((state) => state.weeklyDigestEnabled);
@@ -65,6 +66,9 @@ export default function ProfileScreen() {
   const setPostEventFollowUpEnabled = useSettingsStore((state) => state.setPostEventFollowUpEnabled);
   const isTestPro = useSubscriptionStore((state) => state.isTestPro);
   const isPremium = useSubscriptionStore((state) => state.isPremium);
+  const isSyncing = useSyncStore((state) => state.isSyncing);
+  const lastSyncedAt = useSyncStore((state) => state.lastSyncedAt);
+  const syncError = useSyncStore((state) => state.error);
 
   const [showPaywall, setShowPaywall] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
@@ -139,10 +143,6 @@ export default function ProfileScreen() {
     const subject = encodeURIComponent(t('profile.feedback.subject'));
     const body = encodeURIComponent(t('profile.feedback.body'));
     Linking.openURL(`mailto:support@recall.app?subject=${subject}&body=${body}`);
-  };
-
-  const handleRedoTour = () => {
-    setHasSeenOnboarding(false);
   };
 
   const handleLogout = () => {
@@ -343,6 +343,19 @@ export default function ProfileScreen() {
             onPress={handleOpenStatistics}
           />
           <SettingsRow
+            icon={<Cloud size={20} color={Colors.primary} />}
+            label={t('profile.sync.title')}
+            description={syncError ? t('profile.sync.retryDescription') : t('profile.sync.description')}
+            value={isSyncing
+              ? t('profile.sync.syncing')
+              : syncError
+                ? t('profile.sync.retrying')
+                : lastSyncedAt
+                ? t('profile.sync.lastSynced', { date: formatLocalizedDate(lastSyncedAt) })
+                : t('profile.sync.enabled')}
+            showChevron={false}
+          />
+          <SettingsRow
             icon={<Download size={20} color={Colors.primary} />}
             label={t('profile.data.export')}
             onPress={handleOpenExport}
@@ -376,11 +389,6 @@ export default function ProfileScreen() {
             label={t('profile.about.version')}
             value={appVersion}
             showChevron={false}
-          />
-          <SettingsRow
-            icon={<BookOpen size={20} color={Colors.primary} />}
-            label={t('onboarding.redoTour')}
-            onPress={handleRedoTour}
           />
           <SettingsRow
             icon={<MessageSquare size={20} color={Colors.primary} />}

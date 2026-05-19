@@ -10,6 +10,7 @@ type SettingsState = {
   language: Language;
   isHydrated: boolean;
   hasSeenOnboarding: boolean;
+  hasSeenGuidedTour: boolean;
   hasAcceptedAIConsent: boolean;
   notSeenThresholdDays: number;
   weeklyDigestEnabled: boolean;
@@ -20,6 +21,7 @@ type SettingsActions = {
   setLanguage: (language: Language) => void;
   setHydrated: (hydrated: boolean) => void;
   setHasSeenOnboarding: (seen: boolean) => void;
+  setHasSeenGuidedTour: (seen: boolean) => void;
   setHasAcceptedAIConsent: (accepted: boolean) => void;
   setNotSeenThresholdDays: (days: number) => void;
   setWeeklyDigestEnabled: (enabled: boolean) => void;
@@ -46,6 +48,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         language: detectDeviceLanguage(),
         isHydrated: false,
         hasSeenOnboarding: false,
+        hasSeenGuidedTour: false,
         hasAcceptedAIConsent: false,
         notSeenThresholdDays: 60,
         weeklyDigestEnabled: true,
@@ -76,6 +79,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         },
         setHydrated: (isHydrated) => set({ isHydrated }),
         setHasSeenOnboarding: (hasSeenOnboarding) => set({ hasSeenOnboarding }),
+        setHasSeenGuidedTour: (hasSeenGuidedTour) => set({ hasSeenGuidedTour }),
         setHasAcceptedAIConsent: (hasAcceptedAIConsent) => set({ hasAcceptedAIConsent }),
         setNotSeenThresholdDays: (notSeenThresholdDays) => set({ notSeenThresholdDays }),
         setWeeklyDigestEnabled: (weeklyDigestEnabled) => set({ weeklyDigestEnabled }),
@@ -91,6 +95,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         partialize: (state) => ({
           language: state.language,
           hasSeenOnboarding: state.hasSeenOnboarding,
+          hasSeenGuidedTour: state.hasSeenGuidedTour,
           hasAcceptedAIConsent: state.hasAcceptedAIConsent,
           notSeenThresholdDays: state.notSeenThresholdDays,
           weeklyDigestEnabled: state.weeklyDigestEnabled,

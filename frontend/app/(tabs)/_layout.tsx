@@ -1,12 +1,11 @@
 import { Tabs, useRouter, useFocusEffect } from 'expo-router';
 import { Users, User, Calendar, BotMessageSquare } from 'lucide-react-native';
 import { useState, useCallback } from 'react';
-import { isLoggedIn } from '@/lib/auth';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useSettingsStore } from '@/stores/settings-store';
+import { useAuthStore } from '@/stores/auth-store';
 import { Onboarding } from '@/components/Onboarding';
-import { AIConsentModal } from '@/components/AIConsentModal';
 import { Colors } from '@/constants/theme';
 import { CustomTabBar } from '@/components/ui/CustomTabBar';
 
@@ -16,19 +15,20 @@ export default function TabLayout() {
   const { t } = useTranslation();
   const hasSeenOnboarding = useSettingsStore((state) => state.hasSeenOnboarding);
   const setHasSeenOnboarding = useSettingsStore((state) => state.setHasSeenOnboarding);
-  const hasAcceptedAIConsent = useSettingsStore((state) => state.hasAcceptedAIConsent);
-  const setHasAcceptedAIConsent = useSettingsStore((state) => state.setHasAcceptedAIConsent);
+  const user = useAuthStore((state) => state.user);
+  const isAuthInitialized = useAuthStore((state) => state.isInitialized);
 
   useFocusEffect(
     useCallback(() => {
-      isLoggedIn().then((loggedIn) => {
-        if (!loggedIn) {
-          router.replace('/(auth)/login');
-        } else {
-          setChecking(false);
-        }
-      });
-    }, [router])
+      if (!isAuthInitialized) return;
+
+      if (!user) {
+        router.replace('/(auth)/login');
+        return;
+      }
+
+      setChecking(false);
+    }, [isAuthInitialized, router, user])
   );
 
   const handleOnboardingComplete = () => {
@@ -46,10 +46,6 @@ export default function TabLayout() {
 
   if (!hasSeenOnboarding) {
     return <Onboarding onComplete={handleOnboardingComplete} />;
-  }
-
-  if (!hasAcceptedAIConsent) {
-    return <AIConsentModal onAccept={() => setHasAcceptedAIConsent(true)} />;
   }
 
   return (

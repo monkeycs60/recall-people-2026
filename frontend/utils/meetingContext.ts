@@ -22,6 +22,10 @@ function cleanMeetingContext(value: string): string {
   return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
 }
 
+function hasRelativeDateWording(value: string): boolean {
+  return /\b(yesterday|today|tomorrow|last\s+\w+|next\s+\w+|this\s+\w+|ago|hier|demain|aujourd'hui|dernier|derni[eè]re|prochain|prochaine|passado|pasado|ayer|mañana|scorso|scorsa|ieri|domani|letzten|gestern|morgen)\b/i.test(value);
+}
+
 function getLegacyMeetingContext(notes: Note[]): MeetingContext | null {
   const chronologicalNotes = notes
     .filter((note) => note.transcription.trim().length > 0)
@@ -63,5 +67,11 @@ export function shouldApplyExtractedMeetingContext(
   extractedContext?: string | null,
   existingContext?: string | null
 ): boolean {
-  return Boolean(extractedContext?.trim()) && !existingContext?.trim();
+  const extracted = extractedContext?.trim();
+  const existing = existingContext?.trim();
+
+  if (!extracted) return false;
+  if (!existing) return true;
+
+  return hasRelativeDateWording(existing) && !hasRelativeDateWording(extracted);
 }

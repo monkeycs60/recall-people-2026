@@ -73,7 +73,13 @@ D'après le [Redesign V2](/REDESIGN_V2.md), section 9:
    ```bash
    DATABASE_URL=postgresql://user:password@host:5432/recall_people
    JWT_SECRET=your-super-secure-jwt-secret
+   SYNC_ENCRYPTION_KEY=base64-encoded-32-byte-key
    OPENAI_API_KEY=sk-...
+   ```
+
+   `SYNC_ENCRYPTION_KEY` must be a base64-encoded 32-byte key. Generate one with:
+   ```bash
+   node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
    ```
 
    **Optionnel**:

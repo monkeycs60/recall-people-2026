@@ -4,6 +4,54 @@ import { getDatabase } from '@/lib/db';
 import { HotTopic, HotTopicStatus } from '@/types';
 import i18n from '@/lib/i18n';
 import { notificationService } from '@/services/notification.service';
+import { syncQueueService } from './sync-queue.service';
+
+type HotTopicSyncRow = {
+  id: string;
+  contact_id: string;
+  title: string;
+  context: string | null;
+  resolution: string | null;
+  status: string;
+  source_note_id: string | null;
+  event_date: string | null;
+  notified_at: string | null;
+  birthday_contact_id: string | null;
+  created_at: string;
+  updated_at: string;
+  resolved_at: string | null;
+  deleted_at: string | null;
+};
+
+const hotTopicRowToSyncPayload = (row: HotTopicSyncRow) => ({
+  id: row.id,
+  contactId: row.contact_id,
+  title: row.title,
+  context: row.context,
+  resolution: row.resolution,
+  status: row.status,
+  sourceNoteId: row.source_note_id,
+  eventDate: row.event_date,
+  birthdayContactId: row.birthday_contact_id,
+  notifiedAt: row.notified_at,
+  resolvedAt: row.resolved_at,
+  createdAt: row.created_at,
+  updatedAt: row.updated_at,
+  deletedAt: row.deleted_at,
+});
+
+const enqueueHotTopic = async (id: string, operation: 'upsert' | 'delete'): Promise<void> => {
+  const db = await getDatabase();
+  const row = await db.getFirstAsync<HotTopicSyncRow>('SELECT * FROM hot_topics WHERE id = ?', [id]);
+  if (!row) return;
+
+  await syncQueueService.enqueueMutation({
+    entityType: 'hot_topic',
+    entityId: id,
+    operation,
+    payload: hotTopicRowToSyncPayload(row),
+  });
+};
 
 export const hotTopicService = {
   getById: async (id: string): Promise<HotTopic | null> => {
@@ -22,7 +70,7 @@ export const hotTopicService = {
       created_at: string;
       updated_at: string;
       resolved_at: string | null;
-    }>('SELECT * FROM hot_topics WHERE id = ?', [id]);
+    }>('SELECT * FROM hot_topics WHERE id = ? AND deleted_at IS NULL', [id]);
 
     if (!result) return null;
 
@@ -46,8 +94,8 @@ export const hotTopicService = {
   getByContact: async (contactId: string, includeResolved = false): Promise<HotTopic[]> => {
     const db = await getDatabase();
     const query = includeResolved
-      ? 'SELECT * FROM hot_topics WHERE contact_id = ? ORDER BY created_at DESC'
-      : 'SELECT * FROM hot_topics WHERE contact_id = ? AND status = ? ORDER BY created_at DESC';
+      ? 'SELECT * FROM hot_topics WHERE contact_id = ? AND deleted_at IS NULL ORDER BY event_date IS NULL ASC, event_date DESC, updated_at DESC'
+      : 'SELECT * FROM hot_topics WHERE contact_id = ? AND status = ? AND deleted_at IS NULL ORDER BY event_date IS NULL ASC, event_date DESC, updated_at DESC';
     const params = includeResolved ? [contactId] : [contactId, 'active'];
 
     const result = await db.getAllAsync<{
@@ -112,6 +160,8 @@ export const hotTopicService = {
       ]
     );
 
+    await enqueueHotTopic(id, 'upsert');
+
     return {
       id,
       contactId: data.contactId,
@@ -155,6 +205,7 @@ export const hotTopicService = {
     values.push(id);
 
     await db.runAsync(`UPDATE hot_topics SET ${updates.join(', ')} WHERE id = ?`, values);
+    await enqueueHotTopic(id, 'upsert');
   },
 
   resolve: async (id: string, resolution?: string): Promise<void> => {
@@ -164,6 +215,7 @@ export const hotTopicService = {
       'UPDATE hot_topics SET status = ?, resolution = ?, resolved_at = ?, updated_at = ? WHERE id = ?',
       ['resolved', resolution || null, now, now, id]
     );
+    await enqueueHotTopic(id, 'upsert');
   },
 
   reopen: async (id: string): Promise<void> => {
@@ -173,6 +225,7 @@ export const hotTopicService = {
       'UPDATE hot_topics SET status = ?, resolution = NULL, resolved_at = NULL, updated_at = ? WHERE id = ?',
       ['active', now, id]
     );
+    await enqueueHotTopic(id, 'upsert');
   },
 
   updateResolution: async (id: string, resolution: string): Promise<void> => {
@@ -182,12 +235,18 @@ export const hotTopicService = {
       'UPDATE hot_topics SET resolution = ?, updated_at = ? WHERE id = ?',
       [resolution, now, id]
     );
+    await enqueueHotTopic(id, 'upsert');
   },
 
   delete: async (id: string): Promise<void> => {
     const db = await getDatabase();
+    const now = new Date().toISOString();
     await notificationService.cancelEventRemindersByEventId(id);
-    await db.runAsync('DELETE FROM hot_topics WHERE id = ?', [id]);
+    await db.runAsync(
+      'UPDATE hot_topics SET deleted_at = ?, updated_at = ? WHERE id = ?',
+      [now, now, id]
+    );
+    await enqueueHotTopic(id, 'delete');
   },
 
   getPast: async (daysBack: number = 90): Promise<HotTopic[]> => {
@@ -215,6 +274,7 @@ export const hotTopicService = {
        AND event_date < ?
        AND event_date >= ?
        AND birthday_contact_id IS NULL
+       AND deleted_at IS NULL
        ORDER BY event_date DESC`,
       [today, startDate]
     );
@@ -260,6 +320,7 @@ export const hotTopicService = {
        WHERE event_date IS NOT NULL
        AND event_date >= ? AND event_date <= ?
        AND status = 'active'
+       AND deleted_at IS NULL
        ORDER BY event_date ASC`,
       [today, endDate]
     );
@@ -305,6 +366,7 @@ export const hotTopicService = {
        WHERE event_date >= ? AND event_date < ?
        AND notified_at IS NULL
        AND status = 'active'
+       AND deleted_at IS NULL
        ORDER BY event_date ASC`,
       [tomorrow, dayAfterTomorrow]
     );
@@ -329,12 +391,24 @@ export const hotTopicService = {
   markNotified: async (id: string): Promise<void> => {
     const db = await getDatabase();
     const now = new Date().toISOString();
-    await db.runAsync('UPDATE hot_topics SET notified_at = ? WHERE id = ?', [now, id]);
+    await db.runAsync('UPDATE hot_topics SET notified_at = ?, updated_at = ? WHERE id = ?', [now, now, id]);
+    await enqueueHotTopic(id, 'upsert');
   },
 
   deleteByBirthdayContact: async (contactId: string): Promise<void> => {
     const db = await getDatabase();
-    await db.runAsync('DELETE FROM hot_topics WHERE birthday_contact_id = ?', [contactId]);
+    const now = new Date().toISOString();
+    const rows = await db.getAllAsync<{ id: string }>(
+      'SELECT id FROM hot_topics WHERE birthday_contact_id = ? AND deleted_at IS NULL',
+      [contactId]
+    );
+    await db.runAsync(
+      'UPDATE hot_topics SET deleted_at = ?, updated_at = ? WHERE birthday_contact_id = ?',
+      [now, now, contactId]
+    );
+    for (const row of rows) {
+      await enqueueHotTopic(row.id, 'delete');
+    }
   },
 
   syncBirthdayHotTopics: async (
@@ -345,8 +419,7 @@ export const hotTopicService = {
   ): Promise<void> => {
     const db = await getDatabase();
 
-    // Delete existing birthday hot topics for this contact
-    await db.runAsync('DELETE FROM hot_topics WHERE birthday_contact_id = ?', [contactId]);
+    await hotTopicService.deleteByBirthdayContact(contactId);
 
     // Calculate the next 5 birthday occurrences
     const today = new Date();
@@ -378,16 +451,25 @@ export const hotTopicService = {
           now,
         ]
       );
+      await enqueueHotTopic(id, 'upsert');
     }
   },
 
   cleanupPastBirthdays: async (): Promise<void> => {
     const db = await getDatabase();
     const today = startOfDay(new Date()).toISOString();
-    await db.runAsync(
-      'DELETE FROM hot_topics WHERE birthday_contact_id IS NOT NULL AND event_date < ?',
+    const rows = await db.getAllAsync<{ id: string }>(
+      'SELECT id FROM hot_topics WHERE birthday_contact_id IS NOT NULL AND event_date < ? AND deleted_at IS NULL',
       [today]
     );
+    const now = new Date().toISOString();
+    await db.runAsync(
+      'UPDATE hot_topics SET deleted_at = ?, updated_at = ? WHERE birthday_contact_id IS NOT NULL AND event_date < ?',
+      [now, now, today]
+    );
+    for (const row of rows) {
+      await enqueueHotTopic(row.id, 'delete');
+    }
   },
 
   parseExtractedDate: (dateStr: string): string | null => {

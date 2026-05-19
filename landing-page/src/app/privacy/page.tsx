@@ -30,10 +30,10 @@ export default function PrivacyPage() {
                   and being transparent about how we handle your data.
                 </p>
                 <p className="text-text-secondary leading-relaxed">
-                  <strong className="text-text-primary">Key principle:</strong> Your personal data stays on your device.
-                  We use a local-first architecture, meaning contacts, notes, and memories are stored
-                  locally on your phone, not on our servers, except when you explicitly use online features
-                  such as transcription, AI analysis, account login, or subscriptions.
+                  <strong className="text-text-primary">Key principle:</strong> Your relationship data is synced
+                  through your account so the app can work across devices. Sensitive content, including notes,
+                  memories, and relationship context, is encrypted in our database. We do not sell your personal
+                  data or use it to train AI models.
                 </p>
               </section>
 
@@ -43,11 +43,11 @@ export default function PrivacyPage() {
                 </h2>
 
                 <h3 className="text-lg font-medium text-text-primary mb-3 mt-6">
-                  2.1 Data Stored Locally on Your Device
+                  2.1 Relationship Data Synced Through Your Account
                 </h3>
                 <p className="text-text-secondary leading-relaxed mb-3">
-                  The following app content is stored locally on your device and is not uploaded to our
-                  servers as a cloud database:
+                  The following app content is associated with your account and synced so you can access it
+                  across your devices:
                 </p>
                 <ul className="list-disc pl-6 text-text-secondary space-y-2 mb-4">
                   <li>Contact information (names, phone numbers, emails, birthdays)</li>
@@ -59,11 +59,11 @@ export default function PrivacyPage() {
                 </ul>
 
                 <h3 className="text-lg font-medium text-text-primary mb-3 mt-6">
-                  2.2 Account Data (if you create an account)
+                  2.2 Account Data
                 </h3>
                 <p className="text-text-secondary leading-relaxed mb-3">
-                  If you create an account, we store the minimum data needed to provide authentication,
-                  preferences, and paid features:
+                  We store the minimum data needed to provide authentication, secure sync, preferences,
+                  and paid features:
                 </p>
                 <ul className="list-disc pl-6 text-text-secondary space-y-2 mb-4">
                   <li>Email address</li>
@@ -74,10 +74,12 @@ export default function PrivacyPage() {
                 </ul>
 
                 <h3 className="text-lg font-medium text-text-primary mb-3 mt-6">
-                  2.3 Data Processed Temporarily
+                  2.3 Sensitive Data and AI Processing
                 </h3>
                 <p className="text-text-secondary leading-relaxed mb-3">
-                  When you use voice recording or AI features, data is sent temporarily to our AI providers for processing:
+                  Sensitive relationship content is encrypted in our database. When you use voice recording,
+                  avatar generation, or AI features, the relevant content is sent to our providers only as needed
+                  to deliver that feature:
                 </p>
                 <ul className="list-disc pl-6 text-text-secondary space-y-2">
                   <li><strong>Voice recordings:</strong> Sent to Groq for transcription using Whisper. We do not store those recordings on our servers.</li>
@@ -98,7 +100,9 @@ export default function PrivacyPage() {
                   <li>Create custom avatars for your contacts</li>
                   <li>Answer your questions about your contacts via the Assistant</li>
                   <li>Send you notifications about upcoming events (if enabled)</li>
+                  <li>Sync relationship data through your account</li>
                   <li>Manage your account and subscription</li>
+                  <li>Protect the service, prevent abuse, and debug reliability issues</li>
                 </ul>
               </section>
 
@@ -128,10 +132,12 @@ export default function PrivacyPage() {
                   5. Data Storage and Security
                 </h2>
                 <ul className="list-disc pl-6 text-text-secondary space-y-2">
-                  <li>App content is stored locally in the app&apos;s on-device SQLite database and protected by the mobile operating system sandbox</li>
+                  <li>Relationship data is synced through your account</li>
+                  <li>Sensitive content, including notes, memories, and relationship context, is encrypted in our database</li>
                   <li>Authentication tokens are stored securely using your device&apos;s keychain (iOS) or keystore (Android)</li>
                   <li>All communications with our servers use HTTPS encryption</li>
-                  <li>We do not have direct access to your local app database</li>
+                  <li>We limit internal access to personal data to what is needed to operate, secure, and support the service</li>
+                  <li>We do not sell your personal data</li>
                 </ul>
               </section>
 
@@ -169,7 +175,7 @@ export default function PrivacyPage() {
                   <li><strong>Export:</strong> Export your data anytime in JSON or CSV format</li>
                   <li><strong>Delete:</strong> Delete individual contacts, notes, or your entire account</li>
                   <li><strong>Portability:</strong> Your exported data can be used elsewhere</li>
-                  <li><strong>Correction:</strong> Edit your local contact and note data directly in the app</li>
+                  <li><strong>Correction:</strong> Edit your contact and note data directly in the app</li>
                 </ul>
               </section>
 
@@ -178,9 +184,9 @@ export default function PrivacyPage() {
                   8. Data Retention
                 </h2>
                 <ul className="list-disc pl-6 text-text-secondary space-y-2">
-                  <li>Local data remains on your device until you delete it</li>
-                  <li>If you delete the app, all local data is permanently deleted</li>
-                  <li>Account data is retained until you request deletion</li>
+                  <li>Relationship data remains associated with your account until you delete it or request account deletion</li>
+                  <li>Deleting the app from one device does not automatically delete synced account data</li>
+                  <li>Account data is retained until you request deletion or as otherwise required for legal, billing, security, or abuse-prevention reasons</li>
                   <li>Operational logs are retained only as long as needed for security, debugging, abuse prevention, and legal obligations</li>
                   <li>Voice recordings sent for transcription are not stored by Recall People after processing</li>
                 </ul>

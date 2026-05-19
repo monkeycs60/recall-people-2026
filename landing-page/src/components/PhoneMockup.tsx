@@ -36,7 +36,59 @@ export default function PhoneMockup({ src, videoSrc, alt, className = '' }: Phon
                   className="object-cover object-top"
                   priority
                 />
-              ) : null}
+              ) : (
+                <div
+                  className="absolute inset-0 bg-[#fbfaf8] px-4 py-5 text-left text-text-primary"
+                  role="img"
+                  aria-label={alt}
+                >
+                  <div className="mb-5 flex items-center justify-between">
+                    <span className="text-[11px] font-semibold">Recall</span>
+                    <span className="rounded-md bg-primary-light px-2 py-1 text-[10px] font-medium text-primary">
+                      Prepared
+                    </span>
+                  </div>
+
+                  <div className="mb-4 flex items-center gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-lavande text-lg font-bold text-primary">
+                      S
+                    </div>
+                    <div>
+                      <p className="text-lg font-bold leading-tight">Sarah Chen</p>
+                      <p className="text-[11px] text-text-secondary">Met at Product Salon</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="rounded-2xl border border-border bg-white p-3">
+                      <p className="mb-1 text-[10px] font-semibold text-text-muted">AI summary</p>
+                      <p className="text-[12px] leading-snug">
+                        Product lead exploring climate tools. Mentioned she is moving to Lyon and likes practical follow-ups.
+                      </p>
+                    </div>
+
+                    <div className="rounded-2xl bg-surface-alt p-3">
+                      <p className="mb-1 text-[10px] font-semibold text-text-muted">Meeting context</p>
+                      <p className="text-[12px] leading-snug">
+                        Coffee after the meetup. You discussed onboarding research and her hiring plan.
+                      </p>
+                    </div>
+
+                    <div className="rounded-2xl border border-calendar-light bg-calendar-light/45 p-3">
+                      <p className="mb-1 text-[10px] font-semibold text-text-secondary">Upcoming</p>
+                      <p className="text-[12px] font-semibold">Interview panel on Friday</p>
+                      <p className="text-[11px] text-text-secondary">Reminder set for Thursday 9:00</p>
+                    </div>
+
+                    <div className="rounded-2xl border border-primary/20 bg-primary/10 p-3">
+                      <p className="mb-1 text-[10px] font-semibold text-primary">Next conversation idea</p>
+                      <p className="text-[12px] leading-snug">
+                        Ask how the panel went, then send the onboarding article you mentioned.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -49,8 +101,8 @@ export default function PhoneMockup({ src, videoSrc, alt, className = '' }: Phon
 
         {/* "App tour" label below phone */}
         <div className="absolute -bottom-10 left-1/2 -translate-x-1/2">
-          <span className="text-xs font-medium tracking-widest uppercase text-text-muted">
-            App tour
+          <span className="text-xs font-medium text-text-muted">
+            Generated app mockup
           </span>
         </div>
       </div>

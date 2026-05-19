@@ -7,18 +7,18 @@ import PhoneMockup from './PhoneMockup';
 
 export default function Hero() {
   return (
-    <section className="relative min-h-screen pt-20 flex flex-col items-center text-center">
+    <section className="relative min-h-screen pt-20 flex flex-col items-center text-center bg-background">
       
       {/* Main Content - Centered */}
-      <div className="container mx-auto px-6 relative z-10 max-w-5xl flex-1 flex flex-col justify-center pt-32 md:pt-48">
+      <div className="container mx-auto px-6 relative z-10 max-w-5xl flex-1 flex flex-col justify-center pt-28 md:pt-44">
           
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-text-primary leading-[1.1] mb-6"
+            className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-text-primary leading-[1.08] mb-6 text-balance"
           >
-            You forget <span className="bg-primary/10 text-primary px-2 rounded-lg relative inline-block">80%</span> of every conversation.
+            Remember the right detail before the next conversation.
           </motion.h1>
 
           <motion.p 
@@ -27,8 +27,8 @@ export default function Hero() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-lg md:text-xl text-text-secondary max-w-2xl mx-auto leading-relaxed mb-10"
           >
-            Become the person who never forgets a detail. <br className="hidden md:block" />
-            <span className="opacity-80">The privacy-first personal CRM that turns your voice notes into real connections.</span>
+            Recall People turns quick notes into useful contact profiles with AI summaries,
+            meeting context, upcoming moments, and conversation ideas.
           </motion.p>
 
           {/* Bottom section with buttons */}
@@ -48,9 +48,8 @@ export default function Hero() {
                 <Image
                   src="/images/app-store-badge.svg"
                   alt="Download on the App Store"
-                  width={180}
+                  width={182}
                   height={54}
-                  className="h-[54px] w-auto"
                 />
               </Link>
               <Link
@@ -61,16 +60,14 @@ export default function Hero() {
                 <Image
                   src="/images/google-play-badge.svg"
                   alt="Get it on Google Play"
-                  width={180}
+                  width={182}
                   height={54}
-                  className="h-[54px] w-auto"
                 />
               </Link>
             </div>
 
             <p className="text-sm text-text-muted max-w-md mx-auto">
-              Privacy-first: AI processing with 100% local storage. <br className="hidden md:block"/>
-              Your notes stay local unless you choose AI processing.
+              Secure sync across iOS and Android. Sensitive contact fields are encrypted in our database.
             </p>
           </motion.div>
       </div>
@@ -83,8 +80,7 @@ export default function Hero() {
         className="relative z-20 mt-20 -mb-24 md:-mb-40 w-full max-w-[85%] md:max-w-xl px-4"
       >
         <PhoneMockup 
-          videoSrc="/app-tour.webm" 
-          alt="Recall People App Interface"
+          alt="Recall People generated contact profile mockup"
           className="mx-auto"
         />
       </motion.div>

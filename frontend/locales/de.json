@@ -197,7 +197,8 @@
     "suggestedQuestions": {
       "header": "Eine Idee, um das Gespräch wieder aufzunehmen?",
       "loading": "Bereite Ideen vor...",
-      "empty": "Füge Notizen hinzu, um Gesprächsideen zu erhalten"
+      "empty": "Füge Notizen hinzu, um Gesprächsideen zu erhalten",
+      "generate": "Ideen generieren"
     },
     "nextAction": {
       "label": "Nächste Aktion",
@@ -440,6 +441,7 @@
       "generate": "Generieren",
       "uploading": "Hochladen...",
       "generating": "Avatar wird generiert...",
+      "generatingShort": "Erstellen",
       "uploadingTitle": "Bild wird hochgeladen",
       "uploadingDescription": "Das ausgewählte Foto wird vorbereitet und gespeichert.",
       "generatingTitle": "Avatar wird erstellt",
@@ -581,7 +583,7 @@
       "notesUsed": "Notizen diesen Monat"
     },
     "language": {
-      "appLanguage": "App-Sprache",
+      "appLanguage": "Sprache ändern",
       "appLanguageDescription": "App + KI-Transkription"
     },
     "data": {
@@ -593,6 +595,16 @@
       "version": "Version",
       "feedback": "Feedback geben",
       "legal": "Rechtliches"
+    },
+    "sync": {
+      "title": "Sichere Synchronisierung",
+      "description": "Deine Kontakte folgen deinem Konto auf iOS und Android.",
+      "enabled": "Aktiviert",
+      "syncing": "Synchronisierung...",
+      "retrying": "Versucht es erneut",
+      "retryDescription": "Die automatische Synchronisierung versucht es erneut, sobald die Verbindung wieder da ist.",
+      "lastSynced": "Synchronisiert {{date}}",
+      "error": "Synchronisierung fehlgeschlagen. Bitte versuche es erneut."
     },
     "logout": "Abmelden",
     "logoutConfirm": "Möchtest du dich wirklich abmelden?",
@@ -679,13 +691,25 @@
       "feature4": "Alle Aufnahmen transkribiert und geordnet",
       "feature5": "Benachrichtigungen für Events deiner Kontakte"
     },
+    "remember": {
+      "title": "Menschen in Sekunden merken",
+      "description": "Füge nach einem Treffen eine kurze Notiz hinzu. Recall merkt sich die Details für dich."
+    },
+    "profile": {
+      "title": "Wisse, was du als Nächstes sagst",
+      "description": "Sieh Begegnungskontext, Wichtiges, nächste Aktion, kommende Ereignisse und Gesprächsideen an einem Ort."
+    },
+    "calendar": {
+      "title": "Sieh, was als Nächstes zählt",
+      "description": "Ein Kalender wichtiger Momente deiner Kontakte, mit Erinnerungen, die du anpassen kannst."
+    },
     "demo": {
       "title": "So funktioniert es",
       "description": "Sprich nach einem Treffen. Die KI extrahiert automatisch wichtige Infos und erstellt die Kontaktkarte."
     },
     "assistant": {
       "title": "Stelle jede Frage",
-      "description": "Der KI-Assistent durchsucht alle deine Notizen, um jede Information zu finden.",
+      "description": "Finde Menschen nach Erinnerung, Kontext, Beruf, Ort oder jedem notierten Detail.",
       "example1": "«Wer arbeitet im Tech-Bereich?»",
       "example2": "«Wer hat kleine Kinder?»",
       "example3": "«Wo studiert Sarah?»"
@@ -700,7 +724,20 @@
       "description": "Deine Notizen bleiben lokal. KI wird nur genutzt, wenn du Verarbeitung anforderst.",
       "local": "lokal"
     },
+    "privacySync": {
+      "title": "Private Sync, automatisch",
+      "description": "Deine Kontakte synchronisieren sich über dein Konto und sind in unserer Datenbank verschlüsselt, damit sie dir auf iOS und Android folgen.",
+      "primary": "Mit Recall starten"
+    },
     "redoTour": "Geführte Tour wiederholen"
+  },
+  "guidedTour": {
+    "title": "Starte mit einer Notiz",
+    "description": "Nimm auf oder schreibe, woran du dich erinnerst. Recall People erstellt Profil, kommende Ereignisse und Gesprächsideen.",
+    "stepContacts": "Kontakte speichert das Wichtigste zu jeder Person.",
+    "stepUpcoming": "Anstehend sammelt Geburtstage, Fristen, Reisen und Follow-ups.",
+    "stepAssistant": "Assistant sucht Informationen in all deinen Notizen.",
+    "primary": "Verstanden"
   },
   "subscription": {
     "freePlan": "KOSTENLOS",
@@ -724,6 +761,22 @@
   },
   "record": {
     "remaining": "verbleibend",
+    "guideTitle": "Erzähle von einer Person",
+    "guideBody": "Nenne den Namen, was du über diese Person weißt und was bald ansteht.",
+    "guideTitleWithContact": "Was gibt es Neues bei {{firstName}}?",
+    "guideBodyWithContact": "Erzähle von der letzten Begegnung, was wichtig bleibt und worauf du zurückkommen willst.",
+    "guideStepName": "Name der Person",
+    "guideStepContext": "Was du über diese Person weißt",
+    "guideStepFuture": "Was bald im Leben dieser Person ansteht",
+    "guideStepContactConversation": "Letzte Begegnung",
+    "guideStepContactRemember": "Was wichtig bleibt",
+    "guideStepContactFollowUp": "Worauf du zurückkommst",
+    "guideExample": "Lina ist Produktfotografin und ich habe sie bei Anas Abendessen getroffen. Sie zieht im Juni nach Vancouver und sucht ruhige Cafés.",
+    "guideExampleWithContact": "{{firstName}} zieht am Freitag um und sucht einen Klempner.",
+    "exampleLabel": "Beispiel",
+    "exampleText": "\"Ich habe Lina bei einem Abendessen in Lissabon getroffen. Sie zieht im Juni um und sucht gute Cafés.\"",
+    "exampleTextWithContact": "\"Wir haben über {{firstName}}s neue Wohnung gesprochen. Sie zieht am Freitag um und sucht einen Klempner.\"",
+    "tapToStart": "Tippe auf das Mikro, um zu starten",
     "helperPrompts": {
       "citeName": "Nenne den Namen der Person...",
       "talkAbout": "Erzähle von eurem Treffen...",
@@ -741,8 +794,8 @@
     "helperTextWithContact": "Erzähle über {{firstName}}: Neuigkeiten, Geschichten, wichtige Details..."
   },
   "textInput": {
-    "placeholder": "Beschreibe die Person, die du getroffen hast, den Kontext, wichtige Details...",
-    "placeholderWithContact": "Schreibe, was du über {{firstName}} weißt...",
+    "placeholder": "Nur eine Person. Nenne den Namen, was du über diese Person weißt und was bald ansteht...",
+    "placeholderWithContact": "Schreibe, was sich bei {{firstName}} geändert hat: letzte Begegnung, was wichtig bleibt und worauf du zurückkommst...",
     "minCharacters": "Mindestens 10 Zeichen ({{count}} verbleibend)",
     "pressToSend": "Drücke Senden zum Analysieren"
   },

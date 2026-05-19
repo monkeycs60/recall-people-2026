@@ -9,6 +9,7 @@ import {
 } from '@/lib/api';
 import { HotTopicStatus, Gender } from '@/types';
 import { contactService } from './contact.service';
+import { syncQueueService } from './sync-queue.service';
 
 export type ImportResult = {
   success: boolean;
@@ -19,6 +20,83 @@ export type ImportResult = {
     gender: Gender;
     avatarHints: AvatarHints;
   }>;
+};
+
+const enqueueImportedContact = async (contact: SeedContact, now: string): Promise<void> => {
+  await syncQueueService.enqueueMutation({
+    entityType: 'contact',
+    entityId: contact.id,
+    operation: 'upsert',
+    payload: {
+      id: contact.id,
+      firstName: contact.firstName,
+      lastName: contact.lastName ?? null,
+      nickname: contact.nickname ?? null,
+      avatarUrl: null,
+      gender: contact.gender ?? 'unknown',
+      phone: contact.phone ?? null,
+      email: contact.email ?? null,
+      birthdayDay: contact.birthdayDay ?? null,
+      birthdayMonth: contact.birthdayMonth ?? null,
+      birthdayYear: contact.birthdayYear ?? null,
+      aiSummary: contact.aiSummary ?? null,
+      suggestedQuestions: null,
+      meetingContext: null,
+      reminderFrequencyDays: null,
+      lastContactAt: null,
+      createdAt: now,
+      updatedAt: now,
+      deletedAt: null,
+    },
+  });
+};
+
+const enqueueImportedHotTopic = async (
+  topic: SeedContact['hotTopics'][number],
+  now: string
+): Promise<void> => {
+  await syncQueueService.enqueueMutation({
+    entityType: 'hot_topic',
+    entityId: topic.id,
+    operation: 'upsert',
+    payload: {
+      id: topic.id,
+      contactId: topic.contactId,
+      title: topic.title,
+      context: topic.context ?? null,
+      resolution: null,
+      status: topic.status as HotTopicStatus,
+      sourceNoteId: null,
+      eventDate: null,
+      birthdayContactId: null,
+      notifiedAt: null,
+      resolvedAt: null,
+      createdAt: now,
+      updatedAt: now,
+      deletedAt: null,
+    },
+  });
+};
+
+const enqueueImportedNote = async (
+  note: SeedContact['notes'][number],
+  now: string
+): Promise<void> => {
+  await syncQueueService.enqueueMutation({
+    entityType: 'note',
+    entityId: note.id,
+    operation: 'upsert',
+    payload: {
+      id: note.id,
+      contactId: note.contactId,
+      title: note.title ?? null,
+      transcription: note.transcription ?? null,
+      audioDurationMs: null,
+      createdAt: now,
+      updatedAt: now,
+      deletedAt: null,
+    },
+  });
 };
 
 export const importService = {
@@ -134,6 +212,7 @@ export const importService = {
             now,
           ]
         );
+        await enqueueImportedContact(contact, now);
 
         // Insert hot topics
         for (const topic of contact.hotTopics) {
@@ -151,6 +230,7 @@ export const importService = {
               now,
             ]
           );
+          await enqueueImportedHotTopic(topic, now);
         }
 
         // Insert notes (V2 schema - no summary column)
@@ -168,6 +248,7 @@ export const importService = {
               now,
             ]
           );
+          await enqueueImportedNote(note, now);
         }
 
         // Collect info for avatar generation. Every imported contact should start with an avatar.

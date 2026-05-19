@@ -25,6 +25,7 @@ export default function SelectContactScreen() {
   const audioUri = params.audioUri as string;
   const transcription = params.transcription as string;
   const detectionParam = params.detection as string | undefined;
+  const skipAvatarGeneration = params.skipAvatarGeneration as string | undefined;
 
   const detection: DetectionResult | null = useMemo(() => {
     if (!detectionParam) return null;
@@ -137,6 +138,7 @@ export default function SelectContactScreen() {
           audioUri,
           transcription,
           extraction: JSON.stringify(extraction),
+          skipAvatarGeneration,
         },
       });
     } catch (error) {

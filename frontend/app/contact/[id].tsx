@@ -559,8 +559,6 @@ export default function ContactDetailScreen() {
               firstName={contact.firstName}
               topic={nextActionTopic}
               suggestedQuestion={nextSuggestedQuestion}
-              onAddNote={() => handleAddNote('audio' as InputMode)}
-              onAsk={handleAskAboutContact}
             />
           </Animated.View>
         )}

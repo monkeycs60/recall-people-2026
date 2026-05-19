@@ -68,7 +68,7 @@ const extractionSchema = z.object({
       year: z.number().nullable().describe('Année si mentionnée'),
     }).nullable().describe('Date d\'anniversaire si mentionnée'),
   }).describe('Coordonnées de contact détectées'),
-  meetingContext: z.string().nullable().describe('Phrase courte indiquant où/comment l\'utilisateur a rencontré ou connu le contact, si explicitement mentionné. null sinon.'),
+  meetingContext: z.string().nullable().describe('Phrase courte indiquant où/comment l\'utilisateur a rencontré ou connu le contact, si explicitement mentionné. Convertir toute date relative en date absolue avec jour, mois et année. null sinon.'),
   hotTopics: z.array(
     z.object({
       title: z.string().describe('Titre court du sujet (ex: "Entretien Google", "Déménagement Lyon")'),
@@ -1037,43 +1037,48 @@ Beispiel 4 - "Wir haben einen Kaffee getrunken, sie hat mir von ihrem Urlaub erz
   },
 };
 
-const getMeetingContextInstruction = (language: string): string => {
+const getMeetingContextInstruction = (language: string, currentDate: string): string => {
   switch (language) {
     case 'en':
       return `MEETING CONTEXT (meetingContext):
 - If the note explicitly says where, how, or through whom the user met/knew the contact, return one short sentence in English.
 - Include concrete context such as event, place, intermediary, company, school, or community.
+- If this context includes a relative date like "last Thursday", "yesterday", or "two weeks ago", convert it from the reference date (${currentDate}) into an absolute date with day, month, and year. Never keep relative date wording in meetingContext.
 - Do not confuse this with a recent catch-up or ordinary meeting. If it is only "we met yesterday" without first-meeting context, return null.
-- Examples: "Met at Web Summit through Anna", "Met while working at Stripe".
+- Examples: "Met at Web Summit through Anna", "Met while working at Stripe", "Met at a dinner hosted by Ana in Lisbon on May 14, 2026".
 - If absent, return null.`;
     case 'es':
       return `CONTEXTO DEL ENCUENTRO (meetingContext):
 - Si la nota dice explícitamente dónde, cómo o a través de quién el usuario conoció al contacto, devuelve una frase corta en español.
 - Incluye contexto concreto como evento, lugar, intermediario, empresa, escuela o comunidad.
+- Si este contexto incluye una fecha relativa como "el jueves pasado", "ayer" o "hace dos semanas", conviértela desde la fecha de referencia (${currentDate}) en una fecha absoluta con día, mes y año. Nunca conserves fechas relativas en meetingContext.
 - No lo confundas con una reunión reciente o un encuentro normal. Si solo dice "nos vimos ayer" sin contexto de primer encuentro, devuelve null.
-- Ejemplos: "Conocido en Web Summit a través de Anna", "Conocido trabajando en Stripe".
+- Ejemplos: "Conocido en Web Summit a través de Anna", "Conocido trabajando en Stripe", "Conocida en una cena organizada por Ana en Lisboa el 14 de mayo de 2026".
 - Si no aparece, devuelve null.`;
     case 'it':
       return `CONTESTO DELL'INCONTRO (meetingContext):
 - Se la nota dice esplicitamente dove, come o tramite chi l'utente ha conosciuto il contatto, restituisci una frase breve in italiano.
 - Includi contesto concreto come evento, luogo, intermediario, azienda, scuola o community.
+- Se questo contesto include una data relativa come "giovedì scorso", "ieri" o "due settimane fa", convertila dalla data di riferimento (${currentDate}) in una data assoluta con giorno, mese e anno. Non lasciare mai date relative in meetingContext.
 - Non confonderlo con un incontro recente o un appuntamento normale. Se dice solo "ci siamo visti ieri" senza contesto del primo incontro, restituisci null.
-- Esempi: "Conosciuto al Web Summit tramite Anna", "Conosciuto lavorando da Stripe".
+- Esempi: "Conosciuto al Web Summit tramite Anna", "Conosciuto lavorando da Stripe", "Conosciuta a una cena organizzata da Ana a Lisbona il 14 maggio 2026".
 - Se assente, restituisci null.`;
     case 'de':
       return `KONTEXT DES KENNENLERNENS (meetingContext):
 - Wenn die Notiz ausdrücklich sagt, wo, wie oder über wen der Benutzer den Kontakt kennengelernt hat, gib einen kurzen Satz auf Deutsch zurück.
 - Nenne konkreten Kontext wie Ereignis, Ort, Vermittler, Firma, Schule oder Community.
+- Wenn dieser Kontext ein relatives Datum wie "letzten Donnerstag", "gestern" oder "vor zwei Wochen" enthält, rechne es vom Referenzdatum (${currentDate}) in ein absolutes Datum mit Tag, Monat und Jahr um. Behalte in meetingContext niemals relative Datumsangaben bei.
 - Verwechsle das nicht mit einem kürzlichen Treffen oder normalen Wiedersehen. Wenn nur "wir haben uns gestern getroffen" ohne Erstkontakt-Kontext erwähnt wird, gib null zurück.
-- Beispiele: "Beim Web Summit über Anna kennengelernt", "Bei der Arbeit bei Stripe kennengelernt".
+- Beispiele: "Beim Web Summit über Anna kennengelernt", "Bei der Arbeit bei Stripe kennengelernt", "Bei einem von Ana organisierten Abendessen in Lissabon am 14. Mai 2026 kennengelernt".
 - Wenn nichts dazu erwähnt wird, gib null zurück.`;
     case 'fr':
     default:
       return `CONTEXTE DE RENCONTRE (meetingContext):
 - Si la note dit explicitement où, comment ou via qui l'utilisateur a rencontré/connu le contact, retourne une phrase courte en français.
 - Inclus un contexte concret comme événement, lieu, intermédiaire, entreprise, école ou communauté.
+- Si ce contexte inclut une date relative comme "jeudi dernier", "hier" ou "il y a deux semaines", convertis-la depuis la date de référence (${currentDate}) en date absolue avec jour, mois et année. Ne garde jamais de formulation relative dans meetingContext.
 - Ne confonds pas avec un échange récent ou un rendez-vous normal. Si la note dit seulement "on s'est vus hier" sans contexte de première rencontre, retourne null.
-- Exemples: "Rencontré au Web Summit via Anna", "Rencontré en travaillant chez Stripe".
+- Exemples: "Rencontré au Web Summit via Anna", "Rencontré en travaillant chez Stripe", "Rencontrée à un dîner organisé par Ana à Lisbonne le 14 mai 2026".
 - Si absent, retourne null.`;
   }
 };
@@ -1338,7 +1343,7 @@ ${template.rules.rule4Content}
 ${template.rules.rule5Title}:
 ${template.rules.rule5Content}
 
-${getMeetingContextInstruction(language)}
+${getMeetingContextInstruction(language, currentDate)}
 
 ${template.absoluteRules}
 

@@ -2,7 +2,7 @@ import { View, Text, Pressable, Modal, BackHandler, KeyboardAvoidingView, Platfo
 import { useState, useMemo, useCallback, useRef } from 'react';
 import { useRouter, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { X, Mic, Type } from 'lucide-react-native';
+import { X, Mic, Type, UserRound, MessageCircle, CalendarDays } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, Fonts } from '@/constants/theme';
@@ -19,20 +19,6 @@ import Animated, {
   FadeIn,
   FadeOut,
 } from 'react-native-reanimated';
-
-const getHelperPrompts = (translationFn: (key: string) => string) => [
-  translationFn('record.helperPrompts.citeName'),
-  translationFn('record.helperPrompts.talkAbout'),
-  translationFn('record.helperPrompts.mentionDetails'),
-  translationFn('record.helperPrompts.shareKnowledge'),
-];
-
-const getContactPrompts = (translationFn: (key: string, options?: Record<string, string>) => string, firstName: string) => [
-  translationFn('record.contactPrompts.whatsNew', { firstName }),
-  translationFn('record.contactPrompts.shareNews'),
-  translationFn('record.contactPrompts.howIs', { firstName }),
-  translationFn('record.contactPrompts.whatLearned', { firstName }),
-];
 
 export default function RecordScreen() {
   const router = useRouter();
@@ -56,7 +42,6 @@ export default function RecordScreen() {
   const { contacts } = useContactsQuery();
   const preselectedContactId = useAppStore((state) => state.preselectedContactId);
   const resetRecording = useAppStore((state) => state.resetRecording);
-  const [promptIndex, setPromptIndex] = useState(0);
   const [inputMode, setInputMode] = useState<InputMode>(initialMode);
   const [showTestProFirst, setShowTestProFirst] = useState(true);
   const isRecordingRef = useRef(isRecording);
@@ -74,23 +59,20 @@ export default function RecordScreen() {
     return contacts.find((contact) => contact.id === preselectedContactId) || null;
   }, [preselectedContactId, contacts]);
 
-  const currentPrompts = useMemo(() => {
-    if (preselectedContact) {
-      return getContactPrompts(t, preselectedContact.firstName);
-    }
-    return getHelperPrompts(t);
-  }, [preselectedContact, t]);
-
   useFocusEffect(
     useCallback(() => {
-      const promptInterval = setInterval(() => {
-        setPromptIndex((prev) => (prev + 1) % 4);
-      }, 4000);
-
       const onBackPress = () => {
-        if (isRecordingRef.current || isProcessingRef.current) {
+        if (isRecordingRef.current) {
+          void cancelRecordingRef.current();
+          resetRecordingRef.current();
+          router.back();
           return true;
         }
+
+        if (isProcessingRef.current) {
+          return true;
+        }
+
         cancelRecordingRef.current();
         resetRecordingRef.current();
         return false;
@@ -99,14 +81,13 @@ export default function RecordScreen() {
       const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
 
       return () => {
-        clearInterval(promptInterval);
         subscription.remove();
         if (!isProcessingRef.current) {
           cancelRecordingRef.current();
           resetRecordingRef.current();
         }
       };
-    }, [])
+    }, [router])
   );
 
   const formatDuration = (seconds: number) => {
@@ -115,12 +96,12 @@ export default function RecordScreen() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleClose = () => {
-    if (!isRecording && !isProcessing) {
-      cancelRecording();
-      resetRecording();
-      router.back();
-    }
+  const handleClose = async () => {
+    if (isProcessing) return;
+
+    await cancelRecording();
+    resetRecording();
+    router.back();
   };
 
   const handleTextSubmit = (text: string) => {
@@ -156,8 +137,8 @@ export default function RecordScreen() {
           </View>
           <Pressable
             onPress={handleClose}
-            style={styles.closeButton}
-            disabled={isRecording || isProcessing}
+            style={[styles.closeButton, isProcessing && styles.closeButtonDisabled]}
+            disabled={isProcessing}
           >
             <X size={16} color={Colors.textSecondary} />
           </Pressable>
@@ -197,14 +178,49 @@ export default function RecordScreen() {
                   </Text>
                 </Animated.View>
               ) : (
-                <Animated.Text
-                  key={promptIndex}
-                  entering={FadeIn.duration(500)}
-                  exiting={FadeOut.duration(300)}
-                  style={styles.promptText}
+                <Animated.View
+                  entering={FadeIn.duration(300)}
+                  exiting={FadeOut.duration(200)}
+                  style={styles.recordGuide}
                 >
-                  {currentPrompts[promptIndex]}
-                </Animated.Text>
+                  <Text style={styles.guideTitle}>
+                    {preselectedContact
+                      ? t('record.guideTitleWithContact', { firstName: preselectedContact.firstName })
+                      : t('record.guideTitle')}
+                  </Text>
+                  <View style={styles.guideSteps}>
+                    <View style={styles.guideCue}>
+                      <View style={styles.guideCueIcon}>
+                        <UserRound size={14} color={Colors.primary} strokeWidth={2.4} />
+                      </View>
+                      <Text style={styles.guideStepText}>
+                        {preselectedContact
+                          ? t('record.guideStepContactConversation', { firstName: preselectedContact.firstName })
+                          : t('record.guideStepName')}
+                      </Text>
+                    </View>
+                    <View style={styles.guideCue}>
+                      <View style={styles.guideCueIcon}>
+                        <MessageCircle size={14} color={Colors.primary} strokeWidth={2.4} />
+                      </View>
+                      <Text style={styles.guideStepText}>
+                        {preselectedContact
+                          ? t('record.guideStepContactRemember', { firstName: preselectedContact.firstName })
+                          : t('record.guideStepContext')}
+                      </Text>
+                    </View>
+                    <View style={styles.guideCue}>
+                      <View style={styles.guideCueIcon}>
+                        <CalendarDays size={14} color={Colors.primary} strokeWidth={2.4} />
+                      </View>
+                      <Text style={styles.guideStepText}>
+                        {preselectedContact
+                          ? t('record.guideStepContactFollowUp', { firstName: preselectedContact.firstName })
+                          : t('record.guideStepFuture')}
+                      </Text>
+                    </View>
+                  </View>
+                </Animated.View>
               )}
 
               <RecordButton
@@ -212,6 +228,23 @@ export default function RecordScreen() {
                 isRecording={isRecording}
                 isProcessing={isProcessing}
               />
+
+              {!isRecording && (
+                <Text style={styles.startHint}>
+                  {t('record.tapToStart')}
+                </Text>
+              )}
+
+              {!isRecording && (
+                <Animated.View entering={FadeIn.duration(300)} style={styles.exampleCallout}>
+                  <Text style={styles.exampleLabel}>{t('record.exampleLabel')}</Text>
+                  <Text style={styles.exampleText}>
+                    {preselectedContact
+                      ? t('record.guideExampleWithContact', { firstName: preselectedContact.firstName })
+                      : t('record.guideExample')}
+                  </Text>
+                </Animated.View>
+              )}
 
               {isRecording && (
                 <Animated.Text
@@ -238,13 +271,6 @@ export default function RecordScreen() {
 
         {/* Tip footer */}
         <View style={styles.footer}>
-          {!isProcessing && inputMode === 'audio' && (
-            <Text style={styles.tipText}>
-              {preselectedContact
-                ? t('record.helperTextWithContact', { firstName: preselectedContact.firstName })
-                : t('record.helperText')}
-            </Text>
-          )}
         </View>
 
         <Modal visible={showPaywall} animationType="slide" presentationStyle="pageSheet">
@@ -308,6 +334,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  closeButtonDisabled: {
+    opacity: 0.5,
+  },
   titleSection: {
     alignItems: 'center',
     marginTop: 24,
@@ -323,7 +352,7 @@ const styles = StyleSheet.create({
   screenTitle: {
     fontFamily: Fonts.sans.bold,
     fontSize: 32,
-    letterSpacing: -0.8,
+    letterSpacing: 0,
     color: Colors.textPrimary,
     textAlign: 'center',
   },
@@ -335,6 +364,8 @@ const styles = StyleSheet.create({
   },
   audioContent: {
     alignItems: 'center',
+    width: '100%',
+    paddingTop: 12,
   },
   timerContainer: {
     alignItems: 'center',
@@ -353,13 +384,51 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.mono,
     marginTop: 4,
   },
-  promptText: {
+  recordGuide: {
+    width: '100%',
+    maxWidth: 360,
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  guideTitle: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 23,
+    lineHeight: 29,
+    letterSpacing: 0,
+    color: Colors.textPrimary,
+    textAlign: 'center',
+  },
+  guideSteps: {
+    width: '100%',
+    marginTop: 18,
+    gap: 9,
+  },
+  guideCue: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  guideCueIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  guideStepText: {
+    flex: 1,
+    fontFamily: Fonts.sans.medium,
+    fontSize: 15,
+    lineHeight: 21,
+    color: Colors.textPrimary,
+  },
+  startHint: {
     color: Colors.textMuted,
     textAlign: 'center',
-    marginBottom: 32,
-    fontSize: 16,
-    fontStyle: 'italic',
-    minHeight: 24,
+    marginTop: 14,
+    fontSize: 13,
+    fontFamily: Fonts.sans.medium,
   },
   tapHint: {
     color: Colors.textMuted,
@@ -368,14 +437,35 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   footer: {
-    paddingHorizontal: 32,
-    paddingBottom: 40,
-    minHeight: 60,
+    paddingHorizontal: 24,
+    paddingBottom: 18,
+    minHeight: 24,
   },
-  tipText: {
-    color: Colors.textMuted,
-    textAlign: 'center',
-    fontSize: 11.5,
-    lineHeight: 17,
+  exampleCallout: {
+    alignSelf: 'center',
+    width: '100%',
+    maxWidth: 380,
+    marginTop: 24,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: Colors.hairline,
+    backgroundColor: 'rgba(255,255,255,0.72)',
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+  },
+  exampleLabel: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 10,
+    lineHeight: 13,
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    color: Colors.primary,
+    marginBottom: 6,
+  },
+  exampleText: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 13,
+    lineHeight: 19,
+    color: Colors.textSecondary,
   },
 });

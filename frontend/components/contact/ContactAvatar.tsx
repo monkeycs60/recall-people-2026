@@ -1,9 +1,10 @@
-import { View, Text, StyleSheet, Pressable, Animated, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Animated } from 'react-native';
 import { Image } from 'expo-image';
 import { Camera } from 'lucide-react-native';
 import { Colors, Shadows } from '@/constants/theme';
 import { Gender } from '@/types';
-import { useRef, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const AVATAR_PALETTE: [string, string][] = [
   ['#FFD7C2', '#B03A11'],
@@ -68,6 +69,7 @@ export function ContactAvatar({
   recyclingKey,
   isGenerating = false,
 }: ContactAvatarProps) {
+  const { t } = useTranslation();
   const pixelSize = SIZE_MAP[size];
   const needsBadge = showEditBadge && size === 'large';
   const badgeSize = 32;
@@ -78,43 +80,106 @@ export function ContactAvatar({
   const initials = getInitials(fullName);
   const rotation = (hash % 5) - 2;
 
-  const pulseAnim = useRef(new Animated.Value(1)).current;
-
-  const startPulse = useCallback(() => {
-    if (isGenerating) {
-      const animation = Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, { toValue: 0.5, duration: 800, useNativeDriver: true }),
-          Animated.timing(pulseAnim, { toValue: 1, duration: 800, useNativeDriver: true }),
-        ])
-      );
-      animation.start();
-      return () => animation.stop();
-    }
-    pulseAnim.setValue(1);
-    return undefined;
-  }, [isGenerating, pulseAnim]);
-
   const imageUri = avatarUrl
     ? `${avatarUrl}${avatarUrl.includes('?') ? '&' : '?'}v=${cacheKey || ''}`
     : null;
+  const isPendingAvatar = isGenerating && !imageUri;
 
-  if (isGenerating && !avatarUrl) {
+  const dotAnims = useRef([
+    new Animated.Value(0.24),
+    new Animated.Value(0.24),
+    new Animated.Value(0.24),
+  ]).current;
+
+  useEffect(() => {
+    if (!isPendingAvatar) {
+      dotAnims.forEach((dotAnim) => dotAnim.setValue(0.24));
+      return;
+    }
+
+    const dotSequence = Animated.loop(
+      Animated.sequence([
+        Animated.stagger(
+          160,
+          dotAnims.map((dotAnim) =>
+            Animated.sequence([
+              Animated.timing(dotAnim, {
+                toValue: 1,
+                duration: 220,
+                useNativeDriver: true,
+              }),
+              Animated.timing(dotAnim, {
+                toValue: 0.24,
+                duration: 320,
+                useNativeDriver: true,
+              }),
+            ])
+          )
+        ),
+        Animated.delay(260),
+      ])
+    );
+
+    dotSequence.start();
+
+    return () => {
+      dotSequence.stop();
+      dotAnims.forEach((dotAnim) => dotAnim.setValue(0.24));
+    };
+  }, [dotAnims, isPendingAvatar]);
+
+  if (isPendingAvatar) {
+    const dotSize = Math.max(3, pixelSize * 0.07);
+
     const skeletonElement = (
       <Animated.View
+        accessible
+        accessibilityRole="progressbar"
+        accessibilityLabel={t('contact.avatar.generatingTitle')}
+        accessibilityState={{ busy: true }}
         style={{
           width: pixelSize,
           height: pixelSize,
           borderRadius: 14,
           backgroundColor: tileBg,
-          opacity: pulseAnim,
+          overflow: 'hidden',
           alignItems: 'center',
           justifyContent: 'center',
+          gap: Math.max(3, pixelSize * 0.05),
           transform: [{ rotate: `${rotation}deg` }],
         }}
-        ref={() => startPulse()}
       >
-        <ActivityIndicator size={size === 'large' ? 'large' : 'small'} color={tileFg} />
+        <Text
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.82}
+          style={[
+            styles.generatingText,
+            {
+              color: tileFg,
+              fontSize: Math.max(9, pixelSize * 0.16),
+            },
+          ]}
+        >
+          {t('contact.avatar.generatingShort')}
+        </Text>
+        <View style={styles.generatingDots}>
+          {dotAnims.map((dotAnim, dot) => (
+            <Animated.View
+              key={dot}
+              style={[
+                styles.generatingDot,
+                {
+                  backgroundColor: tileFg,
+                  width: dotSize,
+                  height: dotSize,
+                  borderRadius: dotSize / 2,
+                  opacity: dotAnim,
+                },
+              ]}
+            />
+          ))}
+        </View>
       </Animated.View>
     );
 
@@ -187,6 +252,20 @@ export function ContactAvatar({
 const styles = StyleSheet.create({
   wrapper: {
     ...Shadows.floating,
+  },
+  generatingText: {
+    fontWeight: '700',
+    letterSpacing: 0,
+    maxWidth: '86%',
+    textAlign: 'center',
+  },
+  generatingDots: {
+    flexDirection: 'row',
+    gap: 3,
+  },
+  generatingDot: {
+    width: 4,
+    height: 4,
   },
   editBadge: {
     position: 'absolute',

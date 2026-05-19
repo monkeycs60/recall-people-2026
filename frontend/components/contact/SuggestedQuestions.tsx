@@ -47,6 +47,14 @@ export function SuggestedQuestions({ suggestedQuestions, isLoading, isRegenerati
         <Text style={styles.emptyText}>
           {t('contact.suggestedQuestions.empty', { firstName })}
         </Text>
+        {onRegenerate && (
+          <Pressable style={styles.emptyRegenerateButton} onPress={onRegenerate}>
+            <RefreshCw size={14} color={Colors.accent} strokeWidth={2.2} />
+            <Text style={styles.emptyRegenerateText}>
+              {t('contact.suggestedQuestions.generate')}
+            </Text>
+          </Pressable>
+        )}
       </View>
     );
   }
@@ -199,5 +207,21 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
     textAlign: 'center',
     fontStyle: 'italic',
+  },
+  emptyRegenerateButton: {
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+    backgroundColor: Colors.accentLight,
+  },
+  emptyRegenerateText: {
+    color: Colors.textPrimary,
+    fontSize: 13,
+    fontWeight: '700',
   },
 });

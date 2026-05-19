@@ -3,6 +3,7 @@ import { SvgUri } from 'react-native-svg';
 import { Image } from 'expo-image';
 import { Camera } from 'lucide-react-native';
 import { Colors, Shadows } from '@/constants/theme';
+import { getProfileDicebearUrl } from '@/utils/profileAvatar';
 
 type UserAvatarProps = {
   name: string;
@@ -24,7 +25,7 @@ export function UserAvatar({
   const badgeSize = Math.max(24, size * 0.35);
   const hasCustomAvatar = !!avatarUrl;
 
-  const dicebearUrl = getDicebearUrl(name);
+  const dicebearUrl = getProfileDicebearUrl(name);
   const imageUri = hasCustomAvatar
     ? `${avatarUrl}${avatarUrl.includes('?') ? '&' : '?'}v=${cacheKey || ''}`
     : dicebearUrl;
@@ -87,12 +88,6 @@ export function UserAvatar({
   }
 
   return content;
-}
-
-function getDicebearUrl(name: string): string {
-  const bgColor = 'e8ecef';
-  const shirtColor = '6b7d8a';
-  return `https://api.dicebear.com/9.x/micah/svg?seed=${encodeURIComponent(name)}&backgroundColor=${bgColor}&shirtColor=${shirtColor}&baseColor=f9c9b6&backgroundType=solid&radius=50`;
 }
 
 const styles = StyleSheet.create({

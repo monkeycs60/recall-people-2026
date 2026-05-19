@@ -69,12 +69,12 @@ const ensureConfigured = async (userId?: string): Promise<void> => {
     throw new Error(`[RevenueCat] Missing ${Platform.OS} API key`);
   }
 
+  registerLogHandler();
+
   const nativeIsConfigured = await Purchases.isConfigured().catch(() => isConfigured);
 
   if (!nativeIsConfigured && !configurePromise) {
     configurePromise = (async () => {
-      registerLogHandler();
-
       Purchases.configure({
         apiKey,
         appUserID: userId,

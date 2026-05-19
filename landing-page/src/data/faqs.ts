@@ -25,19 +25,19 @@ export const faqs = [
       "Yes! Every note — voice transcription or typed — is saved on each contact's profile. You can read and edit everything anytime, even after the fact. This is also what powers the Assistant: it searches through all your notes to give you accurate, personalized answers.",
   },
   {
-    question: 'Can I use it offline?',
+    question: 'Can I access my data across devices?',
     answer:
-      "Yes! You can browse all your contacts, notes, and information offline. However, recording new notes or asking the AI assistant requires an internet connection. Your data is always accessible on your device.",
+      "Yes. Recall People syncs your relationship data through your account so your contacts, notes, reminders, and context can follow you across devices. Recording new notes and asking the AI assistant require an internet connection.",
   },
   {
     question: 'Where is my data stored?',
     answer:
-      "All your data stays on your phone — we don't store anything. Data is sent to our AI only when you record or ask a question, but nothing is kept. You can export your data anytime (JSON or CSV). Be careful: if you delete the app, your data is gone. Cloud sync coming soon.",
+      "Recall People syncs your contacts, notes, reminders, and relationship context through your account. Sensitive content is encrypted in our database. AI processing happens only when you record or ask a question, your data is not used to train models, and we do not sell your personal data.",
   },
   {
     question: 'Is my data used to train AI models?',
     answer:
-      "No. Your notes are processed by our AI to generate summaries and answer questions, but they are never stored or used for training. Your memories stay yours.",
+      "No. Your notes are processed by our AI providers to generate summaries and answer questions, but they are not used to train AI models. We also do not sell your personal data.",
   },
   {
     question: 'What is the best app to remember people you meet?',
@@ -47,7 +47,7 @@ export const faqs = [
   {
     question: 'How is Recall People different from a regular CRM?',
     answer:
-      "Traditional CRMs like Salesforce or HubSpot are built for sales teams managing business pipelines. Recall People is a personal CRM focused on individual relationships — friends, colleagues, networking contacts. It's voice-first (no manual data entry), privacy-focused (data stored locally on your device, not in the cloud), and designed for personal use, not business workflows.",
+      "Traditional CRMs like Salesforce or HubSpot are built for sales teams managing business pipelines. Recall People is a personal CRM focused on individual relationships — friends, colleagues, networking contacts. It's voice-first, account-synced, and designed for personal context rather than business workflows.",
   },
   {
     question: 'Is Recall People a good app for networking events?',

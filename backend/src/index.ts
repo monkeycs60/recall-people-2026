@@ -16,6 +16,7 @@ import { avatarRoutes } from './routes/avatar';
 import { subscriptionRoutes } from './routes/subscription';
 import { seedRoutes } from './routes/seed';
 import { askRoutes } from './routes/ask';
+import { syncRoutes } from './routes/sync';
 import { rateLimiters } from './middleware/rateLimit';
 import { securityHeaders } from './middleware/securityHeaders';
 import { httpsEnforcement } from './middleware/httpsEnforcement';
@@ -90,6 +91,7 @@ app.route('/api/avatar', avatarRoutes);
 app.route('/api/subscription', subscriptionRoutes);
 app.route('/api/seed', seedRoutes);
 app.route('/api/ask', askRoutes);
+app.route('/api/sync', syncRoutes);
 app.route('/admin', adminRoutes);
 
 export default app;
