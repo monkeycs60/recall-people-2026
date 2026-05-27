@@ -675,62 +675,6 @@
     "title": "Elegir idioma",
     "description": "Este idioma se usará para la interfaz y la transcripción de voz"
   },
-  "onboarding": {
-    "skip": "Omitir",
-    "next": "Siguiente",
-    "getStarted": "Comenzar",
-    "language": {
-      "title": "Elige tu idioma",
-      "description": "Este idioma se usará para la interfaz y para transcribir tus grabaciones de voz."
-    },
-    "solution": {
-      "title": "Convierte tu voz en fichas de contacto inteligentes",
-      "feature1": "Categoriza automáticamente tu información",
-      "feature2": "Resumen IA actualizado con cada nota",
-      "feature3": "Preguntas rompe-hielo para tu próximo encuentro",
-      "feature4": "Todas las grabaciones transcritas y ordenadas",
-      "feature5": "Notificaciones para los eventos de tus contactos"
-    },
-    "remember": {
-      "title": "Recuerda personas en segundos",
-      "description": "Añade una nota rápida después de conocer a alguien. Recall guarda los detalles por ti."
-    },
-    "profile": {
-      "title": "Sabe qué decir después",
-      "description": "Ve el contexto del encuentro, lo esencial, la próxima acción, eventos futuros e ideas de conversación en un solo lugar."
-    },
-    "calendar": {
-      "title": "Mira lo que viene",
-      "description": "Un calendario de momentos importantes de tus contactos, con recordatorios personalizables."
-    },
-    "demo": {
-      "title": "Así es como funciona",
-      "description": "Habla después de conocer a alguien. La IA extrae automáticamente la información clave y crea la ficha de contacto."
-    },
-    "assistant": {
-      "title": "Haz cualquier pregunta",
-      "description": "Encuentra personas por recuerdo, contexto, trabajo, lugar o cualquier detalle que hayas anotado.",
-      "example1": "\"¿Quién trabaja en tecnología?\"",
-      "example2": "\"¿Quién tiene hijos pequeños?\"",
-      "example3": "\"¿Dónde estudia Sarah?\""
-    },
-    "typing": {
-      "title": "¿No te gusta el vocal?",
-      "description": "Escribe tus notas manualmente tocando el icono del lápiz.",
-      "or": "o"
-    },
-    "privacy": {
-      "title": "Tus datos se quedan en tu teléfono",
-      "description": "Tus notas viven localmente. Los proveedores de IA procesan datos solo cuando usas funciones de IA.",
-      "local": "local-first"
-    },
-    "privacySync": {
-      "title": "Sync privada, automática",
-      "description": "Tus contactos se sincronizan con tu cuenta y están cifrados en nuestra base de datos, para acompañarte en iOS y Android.",
-      "primary": "Empezar con Recall"
-    },
-    "redoTour": "Repetir tour guiado"
-  },
   "guidedTour": {
     "title": "Empieza con una nota",
     "description": "Graba o escribe lo que recuerdas. Recall People crea la ficha, eventos próximos e ideas de conversación.",

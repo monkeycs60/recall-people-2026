@@ -675,62 +675,6 @@
     "title": "Sprache wählen",
     "description": "Diese Sprache wird für die Oberfläche und Sprachtranskription verwendet"
   },
-  "onboarding": {
-    "skip": "Überspringen",
-    "next": "Weiter",
-    "getStarted": "Loslegen",
-    "language": {
-      "title": "Wähle deine Sprache",
-      "description": "Diese Sprache wird für die Oberfläche und zur Transkription deiner Sprachaufnahmen verwendet."
-    },
-    "solution": {
-      "title": "Verwandle deine Stimme in intelligente Kontaktkarten",
-      "feature1": "Kategorisiert deine Infos automatisch",
-      "feature2": "KI-Zusammenfassung mit jeder Notiz aktualisiert",
-      "feature3": "Eisbrecher-Fragen fürs nächste Treffen",
-      "feature4": "Alle Aufnahmen transkribiert und geordnet",
-      "feature5": "Benachrichtigungen für Events deiner Kontakte"
-    },
-    "remember": {
-      "title": "Menschen in Sekunden merken",
-      "description": "Füge nach einem Treffen eine kurze Notiz hinzu. Recall merkt sich die Details für dich."
-    },
-    "profile": {
-      "title": "Wisse, was du als Nächstes sagst",
-      "description": "Sieh Begegnungskontext, Wichtiges, nächste Aktion, kommende Ereignisse und Gesprächsideen an einem Ort."
-    },
-    "calendar": {
-      "title": "Sieh, was als Nächstes zählt",
-      "description": "Ein Kalender wichtiger Momente deiner Kontakte, mit Erinnerungen, die du anpassen kannst."
-    },
-    "demo": {
-      "title": "So funktioniert es",
-      "description": "Sprich nach einem Treffen. Die KI extrahiert automatisch wichtige Infos und erstellt die Kontaktkarte."
-    },
-    "assistant": {
-      "title": "Stelle jede Frage",
-      "description": "Finde Menschen nach Erinnerung, Kontext, Beruf, Ort oder jedem notierten Detail.",
-      "example1": "«Wer arbeitet im Tech-Bereich?»",
-      "example2": "«Wer hat kleine Kinder?»",
-      "example3": "«Wo studiert Sarah?»"
-    },
-    "typing": {
-      "title": "Kein Fan von Sprachnotizen?",
-      "description": "Tippe deine Notizen manuell, indem du auf das Stift-Symbol tippst.",
-      "or": "oder"
-    },
-    "privacy": {
-      "title": "Deine Daten bleiben auf deinem Handy",
-      "description": "Deine Notizen bleiben lokal. KI wird nur genutzt, wenn du Verarbeitung anforderst.",
-      "local": "lokal"
-    },
-    "privacySync": {
-      "title": "Private Sync, automatisch",
-      "description": "Deine Kontakte synchronisieren sich über dein Konto und sind in unserer Datenbank verschlüsselt, damit sie dir auf iOS und Android folgen.",
-      "primary": "Mit Recall starten"
-    },
-    "redoTour": "Geführte Tour wiederholen"
-  },
   "guidedTour": {
     "title": "Starte mit einer Notiz",
     "description": "Nimm auf oder schreibe, woran du dich erinnerst. Recall People erstellt Profil, kommende Ereignisse und Gesprächsideen.",

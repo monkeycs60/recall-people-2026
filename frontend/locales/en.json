@@ -675,62 +675,6 @@
     "title": "Choose language",
     "description": "This language will be used for the interface and voice transcription"
   },
-  "onboarding": {
-    "skip": "Skip",
-    "next": "Next",
-    "getStarted": "Get Started",
-    "language": {
-      "title": "Choose your language",
-      "description": "This language will be used for the interface and to transcribe your voice recordings."
-    },
-    "solution": {
-      "title": "Turn your voice into smart contact cards",
-      "feature1": "Auto-categorizes your information",
-      "feature2": "AI summary refreshed with every note",
-      "feature3": "Ice-breaker questions for your next meeting",
-      "feature4": "All recordings transcribed and organized",
-      "feature5": "Notifications for your contacts' events"
-    },
-    "remember": {
-      "title": "Remember people in seconds",
-      "description": "Add one quick note after meeting someone. Recall keeps the details for you."
-    },
-    "profile": {
-      "title": "Know what to say next",
-      "description": "See the meeting context, essentials, next action, upcoming events, and conversation ideas in one place."
-    },
-    "calendar": {
-      "title": "See what matters next",
-      "description": "A calendar of upcoming moments for your contacts, with reminders you can customize."
-    },
-    "demo": {
-      "title": "Here's how it works",
-      "description": "Speak after meeting someone. AI automatically extracts key info and builds the contact card."
-    },
-    "assistant": {
-      "title": "Ask any question",
-      "description": "Search your whole network by memory, context, job, location, or anything you noted.",
-      "example1": "\"Who works in tech?\"",
-      "example2": "\"Who has young kids?\"",
-      "example3": "\"Where does Sarah study?\""
-    },
-    "typing": {
-      "title": "Not a fan of voice notes?",
-      "description": "Type your notes manually by tapping the pencil icon.",
-      "or": "or"
-    },
-    "privacy": {
-      "title": "Your data stays on your phone",
-      "description": "Your notes live locally. AI providers process data only when you use AI features.",
-      "local": "local-first"
-    },
-    "privacySync": {
-      "title": "Private sync, automatic",
-      "description": "Your contacts sync through your account and are encrypted in our database, so they follow you on iOS and Android.",
-      "primary": "Start using Recall"
-    },
-    "redoTour": "Redo guided tour"
-  },
   "guidedTour": {
     "title": "Start with one note",
     "description": "Record or type what you remember. Recall People turns it into a profile, upcoming events, and conversation ideas.",

@@ -10,14 +10,13 @@ import { useAppleAuth } from './useAppleAuth';
 export const useAuth = () => {
   const router = useRouter();
   const { setUser, logout: storeLogout } = useAuthStore();
-  const { setHasSeenOnboarding, setHasAcceptedAIConsent } = useSettingsStore();
+  const { setHasAcceptedAIConsent } = useSettingsStore();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { promptAsync: googlePromptAsync, isReady: isGoogleReady } = useGoogleAuth();
   const { promptAsync: applePromptAsync, isAvailable: isAppleAvailable } = useAppleAuth();
 
   const resetFirstRunSettings = () => {
-    setHasSeenOnboarding(false);
     setHasAcceptedAIConsent(false);
   };
 
