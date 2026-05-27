@@ -88,6 +88,30 @@ Les derniers dossiers utiles générés sur le Desktop :
 - Captures natives propres : `/home/clement/Desktop/Recall People ASO native screenshots - no status`
 - Mockups iPhone 17 propres : `/home/clement/Desktop/Recall People iPhone 17 mockups - native no status`
 
+## Notification réelle pour capture ASO
+
+Une notification Android réelle peut être déclenchée depuis l'app debug avec le deep link suivant :
+
+```bash
+adb -s emulator-5554 shell am start \
+  -a android.intent.action.VIEW \
+  -d "recall-people://debug/notification?ts=$(date +%s)" \
+  com.monkeycs60.recallpeople2026
+```
+
+Le hook est dev-only (`__DEV__`) et passe par `notificationService.scheduleCaptureDemoNotification()`. Il crée un canal Android haute priorité puis planifie la bannière 2 secondes plus tard. Pour capturer la bannière au-dessus du launcher :
+
+```bash
+adb -s emulator-5554 shell input keyevent KEYCODE_HOME
+sleep 2
+adb -s emulator-5554 exec-out screencap -p > /tmp/recall-notification.png
+```
+
+Captures de référence déjà générées :
+
+- Full screen : `/home/clement/Desktop/recall-people-2026/screenshots/notification-capture/recall-people-android-real-notification.png`
+- Crop bannière : `/home/clement/Desktop/recall-people-2026/screenshots/notification-capture/recall-people-android-real-notification-crop.png`
+
 ## Visualiser l'écran Android dans Chrome
 
 Pour débuguer l'app React Native avec un feedback visuel direct, tu peux afficher l'écran du smartphone/émulateur Android dans un onglet Chrome.

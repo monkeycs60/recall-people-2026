@@ -19,6 +19,7 @@ type ContactSyncRow = {
   ai_summary: string | null;
   suggested_questions: string | null;
   meeting_context: string | null;
+  loves: string | null;
   reminder_frequency_days: number | null;
   last_contact_at: string | null;
   created_at: string;
@@ -47,6 +48,19 @@ const contactRowToSyncPayload = (row: ContactSyncRow) => ({
   updatedAt: row.updated_at,
   deletedAt: row.deleted_at,
 });
+
+const parseStringArray = (value: string | null | undefined): string[] | undefined => {
+  if (!value) return undefined;
+
+  try {
+    const parsed = JSON.parse(value);
+    if (!Array.isArray(parsed)) return undefined;
+    const items = parsed.filter((item): item is string => typeof item === 'string' && item.trim().length > 0);
+    return items.length > 0 ? items : undefined;
+  } catch {
+    return undefined;
+  }
+};
 
 const enqueueContact = async (id: string, operation: 'upsert' | 'delete'): Promise<void> => {
   const db = await getDatabase();
@@ -79,6 +93,7 @@ export const contactService = {
       birthday_year: number | null;
       ai_summary: string | null;
       meeting_context: string | null;
+      loves: string | null;
       reminder_frequency_days: number | null;
       last_contact_at: string | null;
       created_at: string;
@@ -99,6 +114,7 @@ export const contactService = {
       birthdayYear: row.birthday_year || undefined,
       aiSummary: row.ai_summary || undefined,
       meetingContext: row.meeting_context || undefined,
+      loves: parseStringArray(row.loves),
       reminderFrequencyDays: row.reminder_frequency_days ?? undefined,
       lastContactAt: row.last_contact_at || undefined,
       createdAt: row.created_at,
@@ -124,6 +140,7 @@ export const contactService = {
       ai_summary: string | null;
       suggested_questions: string | null;
       meeting_context: string | null;
+      loves: string | null;
       reminder_frequency_days: number | null;
       last_contact_at: string | null;
       created_at: string;
@@ -177,6 +194,7 @@ export const contactService = {
       aiSummary: contactRow.ai_summary || undefined,
       suggestedQuestions: contactRow.suggested_questions ? JSON.parse(contactRow.suggested_questions) : undefined,
       meetingContext: contactRow.meeting_context || undefined,
+      loves: parseStringArray(contactRow.loves),
       reminderFrequencyDays: contactRow.reminder_frequency_days ?? undefined,
       lastContactAt: contactRow.last_contact_at || undefined,
       createdAt: contactRow.created_at,
@@ -310,6 +328,7 @@ export const contactService = {
       aiSummary: string;
       suggestedQuestions: string[];
       meetingContext: string | null;
+      loves: string[];
       reminderFrequencyDays: number | null;
       lastContactAt: string;
     }>
@@ -369,6 +388,10 @@ export const contactService = {
     if (data.meetingContext !== undefined) {
       updates.push('meeting_context = ?');
       values.push(data.meetingContext || null);
+    }
+    if (data.loves !== undefined) {
+      updates.push('loves = ?');
+      values.push(data.loves.length > 0 ? JSON.stringify(data.loves) : '[]');
     }
     if (data.reminderFrequencyDays !== undefined) {
       updates.push('reminder_frequency_days = ?');

@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const reviewScreenPath = resolve(__dirname, '../app/review.tsx');
-const contactScreenPath = resolve(__dirname, '../app/contact/[id].tsx');
+const contactScreenPath = resolve(__dirname, '../app/contact/[id]/index.tsx');
 const selectContactScreenPath = resolve(__dirname, '../app/select-contact.tsx');
 
 const contactEditModalPaths = [

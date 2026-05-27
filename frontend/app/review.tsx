@@ -6,8 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { ExtractionResult, HotTopic, ResolvedTopic, ExtractedMemory } from '@/types';
-import { useCreateContact, useUpdateContact } from '@/hooks/useContactsQuery';
-import { useContactsQuery } from '@/hooks/useContactsQuery';
+import { useContactsQuery, useCreateContact, useUpdateContact } from '@/hooks/useContactsQuery';
 import { useGroupsQuery } from '@/hooks/useGroupsQuery';
 import { useNotes } from '@/hooks/useNotes';
 import { hotTopicService } from '@/services/hot-topic.service';
@@ -32,6 +31,7 @@ import { GroupsSection } from '@/components/review/GroupsSection';
 import { getLocaleDateStringLocale } from '@/utils/dateLocale';
 import { Paywall } from '@/components/Paywall';
 import { shouldApplyExtractedMeetingContext } from '@/utils/meetingContext';
+import { mergeLoves } from '@/utils/loves';
 
 export default function ReviewScreen() {
   const { t } = useTranslation();
@@ -101,11 +101,11 @@ export default function ReviewScreen() {
   const [editedTranscription, setEditedTranscription] = useState(transcription);
   const [isReExtracting, setIsReExtracting] = useState(false);
 
-  const [selectedGroups, setSelectedGroups] = useState<Array<{
+  const [selectedGroups, setSelectedGroups] = useState<{
     name: string;
     isNew: boolean;
     existingId?: string;
-  }>>(extraction.suggestedGroups || []);
+  }[]>(extraction.suggestedGroups || []);
 
   const [editableContactInfo, setEditableContactInfo] = useState<{
     phone: string | null;
@@ -119,6 +119,7 @@ export default function ReviewScreen() {
   const [meetingContext, setMeetingContext] = useState<string | undefined>(
     extraction.meetingContext?.trim() || undefined
   );
+  const [extractedLoves, setExtractedLoves] = useState<string[]>(extraction.loves || []);
 
   const [editingContactInfoField, setEditingContactInfoField] = useState<'phone' | 'email' | 'birthday' | null>(null);
 
@@ -382,6 +383,7 @@ export default function ReviewScreen() {
       }
 
       setMeetingContext(newExtraction.meetingContext?.trim() || undefined);
+      setExtractedLoves(newExtraction.loves || []);
       setResolvedTopicsState(newExtraction.resolvedTopics || []);
 
       setIsEditingTranscription(false);
@@ -513,10 +515,15 @@ export default function ReviewScreen() {
       const contactUpdate: {
         lastContactAt: string;
         meetingContext?: string | null;
+        loves?: string[];
       } = { lastContactAt: new Date().toISOString() };
 
       if (shouldApplyExtractedMeetingContext(meetingContext, persistedContact?.meetingContext)) {
         contactUpdate.meetingContext = meetingContext;
+      }
+      const mergedLoves = mergeLoves(persistedContact?.loves ?? [], extractedLoves);
+      if (JSON.stringify(mergedLoves) !== JSON.stringify(persistedContact?.loves ?? [])) {
+        contactUpdate.loves = mergedLoves;
       }
 
       await updateContactMutation.mutateAsync({

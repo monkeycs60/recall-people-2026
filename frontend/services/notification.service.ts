@@ -1,5 +1,6 @@
 import * as Notifications from 'expo-notifications';
 import type { NotificationResponse } from 'expo-notifications';
+import { Platform } from 'react-native';
 import i18n from '@/lib/i18n';
 import {
   getEventReminderTriggerDate,
@@ -33,6 +34,37 @@ export const notificationService = {
   hasPermissions: async (): Promise<boolean> => {
     const { status } = await Notifications.getPermissionsAsync();
     return status === 'granted';
+  },
+
+  scheduleCaptureDemoNotification: async (): Promise<string | null> => {
+    const hasPermission = await notificationService.requestPermissions();
+    if (!hasPermission) return null;
+
+    const channelId = 'capture-demo-reminders-v1';
+
+    if (Platform.OS === 'android') {
+      await Notifications.setNotificationChannelAsync(channelId, {
+        name: 'Capture demo reminders',
+        importance: Notifications.AndroidImportance.MAX,
+        sound: 'default',
+        vibrationPattern: [0, 250, 250, 250],
+        lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+      });
+    }
+
+    return Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Recall People',
+        body: "Romain's school trip is tomorrow. Send a good luck message tonight.",
+        sound: 'default',
+        data: { type: 'capture_demo' },
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+        seconds: 2,
+        channelId,
+      },
+    });
   },
 
   scheduleEventReminder: async (

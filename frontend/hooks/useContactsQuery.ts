@@ -71,6 +71,7 @@ export function useUpdateContact() {
         birthdayYear: number | null;
         highlights: string[];
         meetingContext: string | null;
+        loves: string[];
         reminderFrequencyDays: number | null;
         lastContactAt: string;
       }>;

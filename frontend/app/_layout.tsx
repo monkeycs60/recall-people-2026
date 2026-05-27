@@ -1,6 +1,6 @@
 import { Stack, useRouter } from 'expo-router';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import '../global.css';
 import { clearActiveDatabaseUser, configureDatabaseForUser, initDatabase } from '@/lib/db';
@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   StyleSheet,
   AppState,
+  Linking,
   LogBox,
   Platform,
   StatusBar as NativeStatusBar,
@@ -71,6 +72,7 @@ export default function RootLayout() {
   const { t } = useTranslation();
   const [dbReady, setDbReady] = useState(true);
   const [dbError, setDbError] = useState<string | null>(null);
+  const handledCaptureUrlRef = useRef<string | null>(null);
   const language = useSettingsStore((state) => state.language);
   const isHydrated = useSettingsStore((state) => state.isHydrated);
   const user = useAuthStore((state) => state.user);
@@ -94,6 +96,32 @@ export default function RootLayout() {
     if (Platform.OS === 'android' && hideStatusBarForScreenshots) {
       NativeStatusBar.setTranslucent(true);
     }
+  }, []);
+
+  useEffect(() => {
+    if (!__DEV__) return;
+
+    const maybeScheduleCaptureNotification = (url: string | null) => {
+      if (!url?.startsWith('recall-people://debug/notification')) return;
+      if (handledCaptureUrlRef.current === url) return;
+
+      handledCaptureUrlRef.current = url;
+      notificationService.scheduleCaptureDemoNotification().catch((error) => {
+        console.warn('[_layout] Failed to schedule capture demo notification:', error);
+      });
+    };
+
+    Linking.getInitialURL()
+      .then(maybeScheduleCaptureNotification)
+      .catch((error) => {
+        console.warn('[_layout] Failed to read initial URL:', error);
+      });
+
+    const subscription = Linking.addEventListener('url', ({ url }) => {
+      maybeScheduleCaptureNotification(url);
+    });
+
+    return () => subscription.remove();
   }, []);
 
   // Sync language when settings are hydrated
@@ -305,7 +333,25 @@ export default function RootLayout() {
             />
             <Stack.Screen name="disambiguation" options={{ headerShown: true, title: t('selectContact.title') }} />
             <Stack.Screen
-              name="contact/[id]"
+              name="contact/[id]/index"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="contact/[id]/coming-up"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="contact/[id]/icebreakers"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="contact/[id]/notes"
               options={{
                 headerShown: false,
               }}

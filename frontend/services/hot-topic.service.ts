@@ -53,6 +53,17 @@ const enqueueHotTopic = async (id: string, operation: 'upsert' | 'delete'): Prom
   });
 };
 
+function getNextBirthdayOccurrence(birthdayDay: number, birthdayMonth: number, from = new Date()): Date {
+  const today = startOfDay(from);
+  const birthday = new Date(today.getFullYear(), birthdayMonth - 1, birthdayDay);
+
+  if (birthday < today) {
+    birthday.setFullYear(today.getFullYear() + 1);
+  }
+
+  return birthday;
+}
+
 export const hotTopicService = {
   getById: async (id: string): Promise<HotTopic | null> => {
     const db = await getDatabase();
@@ -421,47 +432,37 @@ export const hotTopicService = {
 
     await hotTopicService.deleteByBirthdayContact(contactId);
 
-    // Calculate the next 5 birthday occurrences
-    const today = new Date();
-    const dates: Date[] = [];
-
-    for (let year = today.getFullYear(); dates.length < 5; year++) {
-      const birthday = new Date(year, birthdayMonth - 1, birthdayDay);
-      if (birthday > today) {
-        dates.push(birthday);
-      }
-    }
-
-    // Create 5 hot topics for upcoming birthdays
+    const nextBirthday = getNextBirthdayOccurrence(birthdayDay, birthdayMonth);
     const now = new Date().toISOString();
-    for (const date of dates) {
-      const id = Crypto.randomUUID();
-      await db.runAsync(
-        `INSERT INTO hot_topics (id, contact_id, title, context, status, event_date, birthday_contact_id, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          id,
-          contactId,
-          i18n.t('upcoming.birthdayTitle', { firstName: contactFirstName }),
-          null,
-          'active',
-          date.toISOString(),
-          contactId,
-          now,
-          now,
-        ]
-      );
-      await enqueueHotTopic(id, 'upsert');
-    }
+    const id = Crypto.randomUUID();
+    await db.runAsync(
+      `INSERT INTO hot_topics (id, contact_id, title, context, status, event_date, birthday_contact_id, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        id,
+        contactId,
+        i18n.t('upcoming.birthdayTitle', { firstName: contactFirstName }),
+        null,
+        'active',
+        nextBirthday.toISOString(),
+        contactId,
+        now,
+        now,
+      ]
+    );
+    await enqueueHotTopic(id, 'upsert');
   },
 
   cleanupPastBirthdays: async (): Promise<void> => {
     const db = await getDatabase();
     const today = startOfDay(new Date()).toISOString();
-    const rows = await db.getAllAsync<{ id: string }>(
-      'SELECT id FROM hot_topics WHERE birthday_contact_id IS NOT NULL AND event_date < ? AND deleted_at IS NULL',
+    const rows = await db.getAllAsync<{ id: string; birthday_contact_id: string | null }>(
+      'SELECT id, birthday_contact_id FROM hot_topics WHERE birthday_contact_id IS NOT NULL AND event_date < ? AND deleted_at IS NULL',
       [today]
     );
+    const contactIds = Array.from(new Set(rows
+      .map((row) => row.birthday_contact_id)
+      .filter((id): id is string => Boolean(id))));
     const now = new Date().toISOString();
     await db.runAsync(
       'UPDATE hot_topics SET deleted_at = ?, updated_at = ? WHERE birthday_contact_id IS NOT NULL AND event_date < ?',
@@ -469,6 +470,26 @@ export const hotTopicService = {
     );
     for (const row of rows) {
       await enqueueHotTopic(row.id, 'delete');
+    }
+
+    for (const contactId of contactIds) {
+      const contactRow = await db.getFirstAsync<{
+        first_name: string;
+        birthday_day: number | null;
+        birthday_month: number | null;
+      }>(
+        'SELECT first_name, birthday_day, birthday_month FROM contacts WHERE id = ? AND deleted_at IS NULL',
+        [contactId]
+      );
+
+      if (contactRow?.birthday_day && contactRow.birthday_month) {
+        await hotTopicService.syncBirthdayHotTopics(
+          contactId,
+          contactRow.first_name,
+          contactRow.birthday_day,
+          contactRow.birthday_month
+        );
+      }
     }
   },
 

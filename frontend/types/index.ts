@@ -75,6 +75,7 @@ export type Contact = {
   suggestedQuestions?: string[]; // JSON array of max 3 questions
   highlights?: string[]; // JSON array of key highlights
   meetingContext?: string; // AI-extracted place/context where the user met the contact
+  loves?: string[]; // JSON array of tastes, preferences, and wishes detected from notes
 
   // Reminders
   reminderFrequencyDays?: number;
@@ -230,6 +231,7 @@ export type ExtractionResult = {
   noteTitle: string; // 2-4 words summarizing the note
   contactInfo?: ExtractedContactInfo;
   meetingContext?: string;
+  loves?: string[];
   // V2 property name (matches backend)
   newHotTopics: ExtractedHotTopic[];
   // V1 compatibility - backend returns this name
@@ -350,27 +352,27 @@ export type SemanticSearchResult = {
 
 export type SearchRequest = {
   query: string;
-  facts: Array<{
+  facts: {
     id: string;
     contactId: string;
     contactName: string;
     factType: FactType;
     factKey: string;
     factValue: string;
-  }>;
-  memories: Array<{
+  }[];
+  memories: {
     id: string;
     contactId: string;
     contactName: string;
     description: string;
     eventDate?: string;
-  }>;
-  notes: Array<{
+  }[];
+  notes: {
     id: string;
     contactId: string;
     contactName: string;
     transcription: string;
-  }>;
+  }[];
 };
 
 export type SearchResponse = {

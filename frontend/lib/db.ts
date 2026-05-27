@@ -173,6 +173,7 @@ export const initDatabase = async () => {
       ai_summary TEXT,
       suggested_questions TEXT,
       meeting_context TEXT,
+      loves TEXT DEFAULT '[]',
 
       -- Meta
       last_contact_at TEXT,
@@ -575,6 +576,7 @@ const runMigrations = async (database: SQLite.SQLiteDatabase) => {
 
   // V2 Migration: Mark that we've completed V2 migration
   await runV2Migration(database);
+  await addColumnIfMissing(database, 'contacts', 'loves', "TEXT DEFAULT '[]'");
   await ensureSyncSchema(database);
 };
 

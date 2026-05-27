@@ -6,6 +6,10 @@ const getTime = (value?: string): number | null => {
   return Number.isFinite(time) ? time : null;
 };
 
+const getStartOfDayTime = (date: Date): number => (
+  Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+);
+
 export function sortHotTopicsByEventDateDesc<T extends Pick<HotTopic, 'eventDate' | 'updatedAt' | 'createdAt'>>(
   hotTopics: T[]
 ): T[] {
@@ -23,4 +27,33 @@ export function sortHotTopicsByEventDateDesc<T extends Pick<HotTopic, 'eventDate
     const secondUpdatedTime = getTime(second.updatedAt) ?? getTime(second.createdAt) ?? 0;
     return secondUpdatedTime - firstUpdatedTime;
   });
+}
+
+export function filterToNextBirthdayTopic<T extends Pick<HotTopic, 'birthdayContactId' | 'eventDate'>>(
+  hotTopics: T[],
+  now = new Date()
+): T[] {
+  const todayTime = getStartOfDayTime(now);
+  const birthdayTopicByContact = new Map<string, { topic: T; time: number }>();
+
+  for (const topic of hotTopics) {
+    if (!topic.birthdayContactId || !topic.eventDate) continue;
+
+    const eventDate = new Date(topic.eventDate);
+    if (!Number.isFinite(eventDate.getTime())) continue;
+
+    const eventTime = getStartOfDayTime(eventDate);
+    if (eventTime < todayTime) continue;
+
+    const current = birthdayTopicByContact.get(topic.birthdayContactId);
+    if (!current || eventTime < current.time) {
+      birthdayTopicByContact.set(topic.birthdayContactId, { topic, time: eventTime });
+    }
+  }
+
+  const birthdaysToKeep = new Set(
+    Array.from(birthdayTopicByContact.values()).map(({ topic }) => topic)
+  );
+
+  return hotTopics.filter((topic) => !topic.birthdayContactId || birthdaysToKeep.has(topic));
 }

@@ -69,6 +69,7 @@ const extractionSchema = z.object({
     }).nullable().describe('Date d\'anniversaire si mentionnée'),
   }).describe('Coordonnées de contact détectées'),
   meetingContext: z.string().nullable().describe('Phrase courte indiquant où/comment l\'utilisateur a rencontré ou connu le contact, si explicitement mentionné. Convertir toute date relative en date absolue avec jour, mois et année. null sinon.'),
+  loves: z.array(z.string()).describe('Goûts, préférences ou envies explicitement attribués au contact. Libellés courts pour chips UI, ex: "Céramique", "Cafés calmes". Vide si absent.'),
   hotTopics: z.array(
     z.object({
       title: z.string().describe('Titre court du sujet (ex: "Entretien Google", "Déménagement Lyon")'),
@@ -1083,6 +1084,57 @@ const getMeetingContextInstruction = (language: string, currentDate: string): st
   }
 };
 
+const getLovesInstruction = (language: string): string => {
+  switch (language) {
+    case 'en':
+      return `LOVES / PREFERENCES (loves):
+- Extract only what the CONTACT explicitly likes, enjoys, appreciates, wants, or is interested in.
+- Return short chip labels, 1-3 words each, not full sentences.
+- Include durable tastes and desires: hobbies, food/drinks, places, culture, gifts, working styles, small preferences.
+- Do NOT extract the app user's preferences. If ambiguous, leave it out.
+- Examples: "Ceramics", "Quiet coffee", "Sci-fi", "Thai food".
+- If absent, return an empty array.
+- The JSON output must include "loves": string[].`;
+    case 'es':
+      return `GUSTOS / PREFERENCIAS (loves):
+- Extrae solo lo que al CONTACTO le gusta, aprecia, desea o le interesa explícitamente.
+- Devuelve etiquetas cortas para chips, 1-3 palabras cada una, no frases completas.
+- Incluye gustos y deseos duraderos: aficiones, comida/bebida, lugares, cultura, ideas de regalo, formas de trabajar.
+- NO extraigas las preferencias del usuario de la app. Si es ambiguo, omítelo.
+- Ejemplos: "Cerámica", "Café tranquilo", "Ciencia ficción", "Comida tailandesa".
+- Si no aparece, devuelve un array vacío.
+- El JSON debe incluir "loves": string[].`;
+    case 'it':
+      return `GUSTI / PREFERENZE (loves):
+- Estrai solo ciò che al CONTATTO piace, apprezza, desidera o interessa esplicitamente.
+- Restituisci etichette brevi per chip, 1-3 parole ciascuna, non frasi complete.
+- Includi gusti e desideri durevoli: hobby, cibo/bevande, luoghi, cultura, idee regalo, modi di lavorare.
+- NON estrarre le preferenze dell'utente dell'app. Se è ambiguo, ometti.
+- Esempi: "Ceramica", "Caffè tranquillo", "Fantascienza", "Cibo thailandese".
+- Se assente, restituisci un array vuoto.
+- Il JSON deve includere "loves": string[].`;
+    case 'de':
+      return `VORLIEBEN / WÜNSCHE (loves):
+- Extrahiere nur, was der KONTAKT ausdrücklich mag, schätzt, möchte oder interessant findet.
+- Gib kurze Chip-Labels zurück, jeweils 1-3 Wörter, keine ganzen Sätze.
+- Dazu zählen dauerhafte Vorlieben und Wünsche: Hobbys, Essen/Getränke, Orte, Kultur, Geschenkideen, Arbeitsstile.
+- Extrahiere NICHT die Vorlieben des App-Benutzers. Wenn es unklar ist, lass es weg.
+- Beispiele: "Keramik", "Ruhiger Kaffee", "Sci-fi", "Thai-Essen".
+- Wenn nichts vorkommt, gib ein leeres Array zurück.
+- Das JSON muss "loves": string[] enthalten.`;
+    case 'fr':
+    default:
+      return `GOÛTS / ENVIES (loves):
+- Extrais uniquement ce que le CONTACT aime, apprécie, veut, désire ou trouve intéressant explicitement.
+- Retourne des libellés courts pour chips, 1-3 mots chacun, pas des phrases complètes.
+- Inclus les goûts et envies durables: hobbies, nourriture/boissons, lieux, culture, idées cadeaux, façons de travailler.
+- N'extrais PAS les préférences de l'utilisateur de l'app. Si c'est ambigu, ignore.
+- Exemples: "Céramique", "Café calme", "Science-fiction", "Cuisine thaï".
+- Si absent, retourne un tableau vide.
+- Le JSON doit inclure "loves": string[].`;
+  }
+};
+
 export const extractRoutes = new Hono<{ Bindings: Bindings }>();
 
 extractRoutes.use('/*', authMiddleware);
@@ -1181,6 +1233,9 @@ extractRoutes.post('/', async (c) => {
         } : undefined,
       },
       meetingContext: extraction.meetingContext?.trim() || undefined,
+      loves: extraction.loves
+        .map((love) => love.trim())
+        .filter((love) => love.length > 0),
       hotTopics: extraction.hotTopics.map((topic) => {
         // Convert ISO date (YYYY-MM-DD) to DD/MM/YYYY for V1 compatibility (suggestedDate)
         let suggestedDate: string | undefined;
@@ -1344,6 +1399,8 @@ ${template.rules.rule5Title}:
 ${template.rules.rule5Content}
 
 ${getMeetingContextInstruction(language, currentDate)}
+
+${getLovesInstruction(language)}
 
 ${template.absoluteRules}
 
