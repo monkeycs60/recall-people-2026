@@ -209,11 +209,31 @@ ${template.summaryLabel}`;
 
 		console.log('[Summary] Calling generateText with Output.object...');
 
-		const { output } = await generateText({
-			model,
-			output: Output.object({ schema: summarySchema }),
-			prompt,
-		});
+		// gpt-oss-120b intermittently returns output that fails schema
+		// validation (NoObjectGeneratedError); retrying makes it reliable.
+		const MAX_GENERATION_ATTEMPTS = 3;
+		let output: z.infer<typeof summarySchema> | undefined;
+		for (let attempt = 1; attempt <= MAX_GENERATION_ATTEMPTS; attempt++) {
+			try {
+				const result = await generateText({
+					model,
+					output: Output.object({ schema: summarySchema }),
+					prompt,
+				});
+				output = result.output;
+				break;
+			} catch (generationError) {
+				if (attempt === MAX_GENERATION_ATTEMPTS) {
+					throw generationError;
+				}
+				console.warn(
+					`[Summary] Structured generation failed (attempt ${attempt}/${MAX_GENERATION_ATTEMPTS}), retrying:`,
+					generationError instanceof Error
+						? generationError.message
+						: String(generationError)
+				);
+			}
+		}
 
 		const summary = output!.text;
 		console.log('[Summary] Success! Generated summary:', summary);

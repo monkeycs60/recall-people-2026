@@ -365,13 +365,36 @@ ${template.examples}`;
 
 		console.log('[Ask] Calling generateText with Output.object...');
 
-		const { output: askResult } = await generateText({
-			model,
-			output: Output.object({ schema: askResponseSchema }),
-			prompt,
-		});
+		// gpt-oss-120b intermittently returns output that fails schema
+		// validation (NoObjectGeneratedError). A single call fails ~20-75% of the
+		// time depending on prompt size; retrying makes it reliable.
+		const MAX_GENERATION_ATTEMPTS = 3;
+		let object: z.infer<typeof askResponseSchema> | undefined;
+		for (let attempt = 1; attempt <= MAX_GENERATION_ATTEMPTS; attempt++) {
+			try {
+				const { output } = await generateText({
+					model,
+					output: Output.object({ schema: askResponseSchema }),
+					prompt,
+				});
+				object = output;
+				break;
+			} catch (generationError) {
+				if (attempt === MAX_GENERATION_ATTEMPTS) {
+					throw generationError;
+				}
+				console.warn(
+					`[Ask] Structured generation failed (attempt ${attempt}/${MAX_GENERATION_ATTEMPTS}), retrying:`,
+					generationError instanceof Error
+						? generationError.message
+						: String(generationError)
+				);
+			}
+		}
 
-		const object = askResult!;
+		if (!object) {
+			throw new Error('No object generated after retries');
+		}
 
 		console.log('[Ask] Success! Generated response:', {
 			answer: object.answer.substring(0, 100) + '...',
