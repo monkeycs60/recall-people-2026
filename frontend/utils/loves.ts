@@ -1,8 +1,18 @@
-const MAX_LOVES = 6;
+export const MAX_LOVES = 6;
 
 const normalizeLoveKey = (value: string): string => value.trim().toLowerCase();
 
 const cleanLove = (value: string): string => value.trim().replace(/\s+/g, ' ');
+
+export function addLove(loves: string[], value: string): string[] {
+  const love = cleanLove(value);
+  if (!love || loves.length >= MAX_LOVES) return loves;
+
+  const key = normalizeLoveKey(love);
+  if (loves.some((existing) => normalizeLoveKey(existing) === key)) return loves;
+
+  return [...loves, love];
+}
 
 export function mergeLoves(existing: string[] = [], extracted: string[] = []): string[] {
   const seen = new Set<string>();

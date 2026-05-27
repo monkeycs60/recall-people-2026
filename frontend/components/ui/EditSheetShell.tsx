@@ -9,6 +9,7 @@ type FieldEditConfig = {
   snapPoint: string;
   editSnapPoint?: string;
   readValue: string | null;
+  readContent?: ReactNode;
   canSave: boolean;
   onStart: () => void;
   onSave: () => void;
@@ -97,7 +98,8 @@ export const EditSheetShell = forwardRef<BottomSheetModal, EditSheetShellProps>(
           {isEditing ? (
             children
           ) : (
-            hasValue && <Text style={styles.readValue}>{config.readValue}</Text>
+            hasValue &&
+            (config.readContent ?? <Text style={styles.readValue}>{config.readValue}</Text>)
           )}
 
           {isEditing ? (

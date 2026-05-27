@@ -19,8 +19,9 @@ import { useAppStore } from '@/stores/app-store';
 import { useSubscriptionStore } from '@/stores/subscription-store';
 import { queryKeys } from '@/lib/query-keys';
 import { Colors, Fonts, Shadows } from '@/constants/theme';
-import { Archive, Edit3, FileText, Info, Lightbulb, Phone, Users, Zap } from 'lucide-react-native';
+import { Archive, Edit3, FileText, Heart, Info, Lightbulb, Phone, Users, Zap } from 'lucide-react-native';
 import { CollapsibleSection } from '@/components/ui/CollapsibleSection';
+import { LovesEditor } from '@/components/contact/LovesEditor';
 import { TranscriptionSection } from '@/components/review/TranscriptionSection';
 import { ContactInfoSection } from '@/components/review/ContactInfoSection';
 import { FactsSection } from '@/components/review/FactsSection';
@@ -833,6 +834,18 @@ export default function ReviewScreen() {
               onUpdateMemory={updateMemory}
               onSetEditingIndex={setEditingMemoryIndex}
             />
+          </CollapsibleSection>
+        )}
+
+        {extractedLoves.length > 0 && (
+          <CollapsibleSection
+            title={t('review.loves')}
+            defaultExpanded={true}
+            badge={t('review.newItems', { count: extractedLoves.length })}
+            badgeColor={Colors.primary}
+            icon={<Heart size={18} color={Colors.error} fill={Colors.error} />}
+          >
+            <LovesEditor loves={extractedLoves} onChange={setExtractedLoves} />
           </CollapsibleSection>
         )}
 

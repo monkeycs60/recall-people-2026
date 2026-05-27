@@ -553,7 +553,9 @@
     "inWeeks_other": "In {{count}} Wochen",
     "inMonths_one": "In {{count}} Monat",
     "inMonths_other": "In {{count}} Monaten",
-    "selectDate": "Datum auswählen"
+    "selectDate": "Datum auswählen",
+    "loves": "Vorlieben",
+    "lovesAddPlaceholder": "Vorliebe hinzufügen"
   },
   "upcoming": {
     "title": "Anstehend",

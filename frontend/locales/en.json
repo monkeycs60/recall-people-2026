@@ -553,7 +553,9 @@
     "inWeeks_other": "In {{count}} weeks",
     "inMonths_one": "In {{count}} month",
     "inMonths_other": "In {{count}} months",
-    "selectDate": "Select date"
+    "selectDate": "Select date",
+    "loves": "Tastes",
+    "lovesAddPlaceholder": "Add a taste"
   },
   "upcoming": {
     "title": "Upcoming",

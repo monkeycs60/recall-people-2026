@@ -553,7 +553,9 @@
     "inWeeks_other": "Tra {{count}} settimane",
     "inMonths_one": "Tra {{count}} mese",
     "inMonths_other": "Tra {{count}} mesi",
-    "selectDate": "Seleziona data"
+    "selectDate": "Seleziona data",
+    "loves": "Gusti",
+    "lovesAddPlaceholder": "Aggiungi un gusto"
   },
   "upcoming": {
     "title": "In arrivo",

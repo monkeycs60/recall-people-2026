@@ -40,6 +40,7 @@ import { BirthdayEditSheet } from '@/components/contact/BirthdayEditSheet';
 import { AvatarEditModal } from '@/components/contact/AvatarEditModal';
 import { NameEditSheet } from '@/components/contact/NameEditSheet';
 import { MeetingContextEditSheet } from '@/components/contact/MeetingContextEditSheet';
+import { LovesEditSheet } from '@/components/contact/LovesEditSheet';
 import { GroupsManagementSheet } from '@/components/contact/GroupsManagementSheet';
 import { Colors, Shadows, Fonts } from '@/constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -135,6 +136,7 @@ export default function ContactDetailScreen() {
   const emailSheetRef = useRef<BottomSheetModal>(null);
   const birthdaySheetRef = useRef<BottomSheetModal>(null);
   const meetingContextSheetRef = useRef<BottomSheetModal>(null);
+  const lovesSheetRef = useRef<BottomSheetModal>(null);
 
   const handleOpenGroupsSheet = useCallback(() => {
     groupsSheetRef.current?.present();
@@ -228,6 +230,13 @@ export default function ContactDetailScreen() {
     await updateContactMutation.mutateAsync({
       id: contact.id,
       data: { meetingContext: value },
+    });
+  };
+
+  const handleSaveLoves = async (value: string[]) => {
+    await updateContactMutation.mutateAsync({
+      id: contactId,
+      data: { loves: value },
     });
   };
 
@@ -633,7 +642,7 @@ export default function ContactDetailScreen() {
               </View>
             </Pressable>
 
-            <Pressable style={styles.smallTile} onPress={handleNavigateNotes}>
+            <Pressable style={styles.smallTile} onPress={() => lovesSheetRef.current?.present()}>
               <Heart size={20} color={Colors.error} fill={Colors.error} strokeWidth={2.2} />
               <Text style={styles.smallTileTitle}>{t('contactProfile.tileLoves')}</Text>
               {loves.length > 0 ? (
@@ -762,6 +771,12 @@ export default function ContactDetailScreen() {
         ref={meetingContextSheetRef}
         initialValue={meetingContext?.context || ''}
         onSave={handleSaveMeetingContext}
+      />
+
+      <LovesEditSheet
+        ref={lovesSheetRef}
+        initialLoves={loves}
+        onSave={handleSaveLoves}
       />
 
       <GroupsManagementSheet

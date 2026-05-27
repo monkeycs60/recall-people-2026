@@ -591,7 +591,9 @@
     "inWeeks_other": "Dans {{count}} semaines",
     "inMonths_one": "Dans {{count}} mois",
     "inMonths_other": "Dans {{count}} mois",
-    "selectDate": "Choisir la date"
+    "selectDate": "Choisir la date",
+    "loves": "Goûts",
+    "lovesAddPlaceholder": "Ajouter un goût"
   },
   "upcoming": {
     "title": "À venir",
