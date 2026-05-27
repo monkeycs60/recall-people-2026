@@ -11,10 +11,14 @@ const selectContactScreenPath = resolve(__dirname, '../app/select-contact.tsx');
 
 const contactEditModalPaths = [
   '../components/contact/CreateContactModal.tsx',
-  '../components/contact/NameEditModal.tsx',
-  '../components/contact/EmailEditModal.tsx',
-  '../components/contact/PhoneEditModal.tsx',
-  '../components/contact/BirthdayEditModal.tsx',
+];
+
+const contactEditSheetPaths = [
+  '../components/contact/NameEditSheet.tsx',
+  '../components/contact/EmailEditSheet.tsx',
+  '../components/contact/PhoneEditSheet.tsx',
+  '../components/contact/BirthdayEditSheet.tsx',
+  '../components/contact/MeetingContextEditSheet.tsx',
 ];
 
 test('review screen adjusts its scrollable content when the keyboard opens', async () => {
@@ -44,5 +48,22 @@ test('contact edit modals avoid covering their inputs with the keyboard', async 
 
     assert.match(source, /KeyboardAvoidingView/, modalPath);
     assert.match(source, /behavior=\{Platform\.OS === 'ios' \? 'padding' : 'height'\}/, modalPath);
+  }
+});
+
+test('contact edit sheets keep inputs above the keyboard via the shared sheet shell', async () => {
+  const shellSource = await readFile(
+    resolve(__dirname, '../components/ui/EditSheetShell.tsx'),
+    'utf8'
+  );
+
+  assert.match(shellSource, /keyboardBehavior="fillParent"/);
+  assert.match(shellSource, /android_keyboardInputMode="adjustResize"/);
+  assert.match(shellSource, /BottomSheetModal/);
+
+  for (const sheetPath of contactEditSheetPaths) {
+    const source = await readFile(resolve(__dirname, sheetPath), 'utf8');
+
+    assert.match(source, /BottomSheetTextInput/, sheetPath);
   }
 });

@@ -34,12 +34,12 @@ import {
 import type { InputMode } from '@/components/InputModeToggle';
 import { ContactAvatar } from '@/components/contact/ContactAvatar';
 import { DeleteContactDialog } from '@/components/contact/DeleteContactDialog';
-import { PhoneEditModal } from '@/components/contact/PhoneEditModal';
-import { EmailEditModal } from '@/components/contact/EmailEditModal';
-import { BirthdayEditModal } from '@/components/contact/BirthdayEditModal';
+import { PhoneEditSheet } from '@/components/contact/PhoneEditSheet';
+import { EmailEditSheet } from '@/components/contact/EmailEditSheet';
+import { BirthdayEditSheet } from '@/components/contact/BirthdayEditSheet';
 import { AvatarEditModal } from '@/components/contact/AvatarEditModal';
-import { NameEditModal } from '@/components/contact/NameEditModal';
-import { MeetingContextEditModal } from '@/components/contact/MeetingContextEditModal';
+import { NameEditSheet } from '@/components/contact/NameEditSheet';
+import { MeetingContextEditSheet } from '@/components/contact/MeetingContextEditSheet';
 import { GroupsManagementSheet } from '@/components/contact/GroupsManagementSheet';
 import { Colors, Shadows, Fonts } from '@/constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -121,20 +121,20 @@ export default function ContactDetailScreen() {
   const { groups: allGroups } = useGroupsQuery();
   const { data: contactGroups = [] } = useGroupsForContact(contactId);
 
-  const [showNameModal, setShowNameModal] = useState(false);
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [showPhoneModal, setShowPhoneModal] = useState(false);
-  const [showEmailModal, setShowEmailModal] = useState(false);
-  const [showBirthdayModal, setShowBirthdayModal] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
-  const [showMeetingContextModal, setShowMeetingContextModal] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
   const [isSummaryClamped, setIsSummaryClamped] = useState(false);
   const [isSummaryExpanded, setIsSummaryExpanded] = useState(false);
 
   const groupsSheetRef = useRef<BottomSheetModal>(null);
   const reminderFrequencySheetRef = useRef<BottomSheetModal>(null);
+  const nameSheetRef = useRef<BottomSheetModal>(null);
+  const phoneSheetRef = useRef<BottomSheetModal>(null);
+  const emailSheetRef = useRef<BottomSheetModal>(null);
+  const birthdaySheetRef = useRef<BottomSheetModal>(null);
+  const meetingContextSheetRef = useRef<BottomSheetModal>(null);
 
   const handleOpenGroupsSheet = useCallback(() => {
     groupsSheetRef.current?.present();
@@ -366,7 +366,7 @@ export default function ContactDetailScreen() {
                 <ChevronLeft size={22} color={Colors.textPrimary} strokeWidth={2.5} />
               </Pressable>
               <View style={styles.heroActions}>
-                <Pressable style={styles.heroActionButton} onPress={() => setShowNameModal(true)}>
+                <Pressable style={styles.heroActionButton} onPress={() => nameSheetRef.current?.present()}>
                   <Edit3 size={14} color={Colors.textSecondary} />
                 </Pressable>
                 <Pressable
@@ -446,7 +446,7 @@ export default function ContactDetailScreen() {
                       styles.infoChip,
                       birthdayLabel ? styles.infoChipFilled : styles.infoChipEmpty,
                     ]}
-                    onPress={() => setShowBirthdayModal(true)}
+                    onPress={() => birthdaySheetRef.current?.present()}
                   >
                     <Text style={styles.infoChipEmoji}>🎂</Text>
                     <Text style={styles.infoChipText}>
@@ -458,7 +458,7 @@ export default function ContactDetailScreen() {
                       styles.iconChip,
                       contact.phone ? styles.infoChipFilled : styles.infoChipEmpty,
                     ]}
-                    onPress={() => setShowPhoneModal(true)}
+                    onPress={() => phoneSheetRef.current?.present()}
                     accessibilityLabel={contact.phone || t('contact.contactCard.addPhone')}
                   >
                     <Phone size={13} color={contact.phone ? Colors.primary : Colors.textMuted} strokeWidth={2.3} />
@@ -468,7 +468,7 @@ export default function ContactDetailScreen() {
                       styles.iconChip,
                       contact.email ? styles.infoChipFilled : styles.infoChipEmpty,
                     ]}
-                    onPress={() => setShowEmailModal(true)}
+                    onPress={() => emailSheetRef.current?.present()}
                     accessibilityLabel={contact.email || t('contact.contactCard.addEmail')}
                   >
                     <Mail size={13} color={contact.email ? Colors.primary : Colors.textMuted} strokeWidth={2.3} />
@@ -621,7 +621,7 @@ export default function ContactDetailScreen() {
           <View style={styles.bentoRow}>
             <Pressable
               style={styles.smallTile}
-              onPress={() => setShowMeetingContextModal(true)}
+              onPress={() => meetingContextSheetRef.current?.present()}
             >
               <MapPin size={20} color={Colors.accent} strokeWidth={2.2} />
               <Text style={styles.smallTileTitle}>{t('contactProfile.tileWhereWeMet')}</Text>
@@ -720,34 +720,25 @@ export default function ContactDetailScreen() {
         }}
       />
 
-      {showPhoneModal && (
-        <PhoneEditModal
-          visible={showPhoneModal}
-          initialValue={contact?.phone}
-          onSave={handleSavePhone}
-          onClose={() => setShowPhoneModal(false)}
-        />
-      )}
+      <PhoneEditSheet
+        ref={phoneSheetRef}
+        initialValue={contact.phone}
+        onSave={handleSavePhone}
+      />
 
-      {showEmailModal && (
-        <EmailEditModal
-          visible={showEmailModal}
-          initialValue={contact?.email}
-          onSave={handleSaveEmail}
-          onClose={() => setShowEmailModal(false)}
-        />
-      )}
+      <EmailEditSheet
+        ref={emailSheetRef}
+        initialValue={contact.email}
+        onSave={handleSaveEmail}
+      />
 
-      {showBirthdayModal && (
-        <BirthdayEditModal
-          visible={showBirthdayModal}
-          initialDay={contact?.birthdayDay}
-          initialMonth={contact?.birthdayMonth}
-          initialYear={contact?.birthdayYear}
-          onSave={handleSaveBirthday}
-          onClose={() => setShowBirthdayModal(false)}
-        />
-      )}
+      <BirthdayEditSheet
+        ref={birthdaySheetRef}
+        initialDay={contact.birthdayDay}
+        initialMonth={contact.birthdayMonth}
+        initialYear={contact.birthdayYear}
+        onSave={handleSaveBirthday}
+      />
 
       {showAvatarModal && (
         <AvatarEditModal
@@ -760,24 +751,18 @@ export default function ContactDetailScreen() {
         />
       )}
 
-      {showNameModal && (
-        <NameEditModal
-          visible={showNameModal}
-          initialFirstName={contact?.firstName || ''}
-          initialLastName={contact?.lastName}
-          onSave={handleSaveName}
-          onClose={() => setShowNameModal(false)}
-        />
-      )}
+      <NameEditSheet
+        ref={nameSheetRef}
+        initialFirstName={contact.firstName}
+        initialLastName={contact.lastName}
+        onSave={handleSaveName}
+      />
 
-      {showMeetingContextModal && (
-        <MeetingContextEditModal
-          visible={showMeetingContextModal}
-          initialValue={meetingContext?.context || ''}
-          onSave={handleSaveMeetingContext}
-          onClose={() => setShowMeetingContextModal(false)}
-        />
-      )}
+      <MeetingContextEditSheet
+        ref={meetingContextSheetRef}
+        initialValue={meetingContext?.context || ''}
+        onSave={handleSaveMeetingContext}
+      />
 
       <GroupsManagementSheet
         ref={groupsSheetRef}
