@@ -357,7 +357,7 @@ export default function ContactDetailScreen() {
     >
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 120 }}
         automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
         keyboardShouldPersistTaps="handled"
       >
@@ -682,38 +682,33 @@ export default function ContactDetailScreen() {
             <ChevronRight size={16} color={Colors.textMuted} strokeWidth={2.4} />
           </Pressable>
 
-          <View style={styles.bentoRow}>
-            <Pressable
-              style={[styles.actionTile, styles.actionTilePrimary]}
-              onPress={() => handleAddNote('audio' as InputMode)}
-            >
-              <View style={styles.actionTileIconWrap}>
-                <Mic size={18} color={Colors.textInverse} strokeWidth={2.4} />
-              </View>
-              <View style={styles.actionTileTextColumn}>
-                <Text style={styles.actionTilePrimaryTitle}>{t('contactProfile.actionNewNote')}</Text>
-                <Text style={styles.actionTilePrimarySubtitle}>{t('contactProfile.actionNewNoteSubtitle')}</Text>
-              </View>
-            </Pressable>
-
-            <Pressable
-              style={[styles.actionTile, styles.actionTileSecondary]}
-              onPress={handleAskAboutContact}
-            >
-              <View style={[styles.actionTileIconWrap, styles.actionTileIconWrapSecondary]}>
-                <Sparkles size={18} color={Colors.primary} strokeWidth={2.4} />
-              </View>
-              <View style={styles.actionTileTextColumn}>
-                <Text style={styles.actionTileSecondaryTitle}>{t('contactProfile.actionAsk')}</Text>
-                <Text style={styles.actionTileSecondarySubtitle}>
-                  {t('contactProfile.actionAskSubtitle', { firstName: contact.firstName })}
-                </Text>
-              </View>
-            </Pressable>
-          </View>
         </Animated.View>
 
       </ScrollView>
+
+      <View
+        pointerEvents="box-none"
+        style={[styles.floatingActions, { bottom: insets.bottom + 18 }]}
+      >
+        <Pressable
+          style={styles.floatingAskButton}
+          onPress={handleAskAboutContact}
+          accessibilityLabel={t('contactProfile.actionAsk')}
+        >
+          <Sparkles size={22} color={Colors.primary} strokeWidth={2.3} />
+        </Pressable>
+
+        <Pressable
+          style={styles.floatingNewNoteButton}
+          onPress={() => handleAddNote('audio' as InputMode)}
+          accessibilityLabel={t('contactProfile.actionNewNote')}
+        >
+          <Mic size={20} color={Colors.textInverse} strokeWidth={2.4} />
+          <Text style={styles.floatingNewNoteText}>
+            {t('contactProfile.actionNewNote')}
+          </Text>
+        </Pressable>
+      </View>
 
       <DeleteContactDialog
         visible={showDeleteDialog}
@@ -1203,6 +1198,51 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: Colors.textMuted,
     marginTop: 1,
+  },
+  floatingActions: {
+    position: 'absolute',
+    right: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  floatingAskButton: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: Colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: Colors.primaryLight,
+    shadowColor: '#1D1A2E',
+    shadowOpacity: 0.18,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 6,
+  },
+  floatingNewNoteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 22,
+    paddingVertical: 16,
+    borderRadius: 999,
+    backgroundColor: Colors.primary,
+    shadowColor: Colors.primary,
+    shadowOpacity: 0.38,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 8,
+  },
+  floatingNewNoteText: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 15,
+    lineHeight: 20,
+    letterSpacing: -0.2,
+    color: Colors.textInverse,
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
   summaryFloatingWrap: {
     paddingHorizontal: 20,

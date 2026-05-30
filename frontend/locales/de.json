@@ -740,6 +740,39 @@
     "helperTextWithContact": "Erzähle über {{firstName}}: Neuigkeiten, Geschichten, wichtige Details...",
     "modeVoice": "Stimme",
     "modeType": "Text",
+    "promiseHello": "Hi 👋",
+    "generalTitleMain": "Sprich über jemanden.",
+    "generalTitleMuted": "Ich speichere 3 Dinge:",
+    "contactChipLabel": "Hinzugefügt zu",
+    "contactTitleMain": "Was gibt's Neues",
+    "contactTitleMuted": "bei {{firstName}}?",
+    "contactSubtitle": "Alles passt: wähle einen Punkt oder sprich über alle drei.",
+    "generalHelper": "Sprich einfach los: erwähne jeden Punkt, den Rest erledige ich.",
+    "contactHelper": "Sprich einfach los: ein Moment, ein Detail oder ein Datum reicht.",
+    "promise": {
+      "keyBadge": "Key",
+      "comingUpKicker": "★ Demnächst",
+      "general": {
+        "profileKicker": "Wer",
+        "profileTitle": "Das Profil",
+        "profileSubtitle": "Name, Rolle, wie ihr euch kennt",
+        "detailsKicker": "Details",
+        "detailsTitle": "Was die Person mag",
+        "detailsSubtitle": "Gewohnheiten, Interessen, Vibe",
+        "comingUpTitle": "Was als Nächstes ansteht",
+        "comingUpSubtitle": "Geburtstage, Umzüge, Pläne"
+      },
+      "contact": {
+        "momentKicker": "Ein Moment",
+        "momentTitle": "Etwas Gesagtes oder Getanes",
+        "momentSubtitle": "Ein Gespräch, eine Geschichte, wie du dich gefühlt hast",
+        "detailKicker": "Ein neues Detail",
+        "detailTitle": "Etwas, das du gelernt hast",
+        "detailSubtitle": "Ein Interesse, eine Gewohnheit, eine erwähnte Person",
+        "comingUpTitle": "Etwas Neues steht an",
+        "comingUpSubtitle": "Ein Datum, ein Plan, eine Deadline"
+      }
+    },
     "eyebrowHello": "Hi 👋",
     "eyebrowWithContact": "Was gibt's Neues?",
     "titleGotSomeoneInMind": "An jemanden gedacht?",
@@ -754,17 +787,22 @@
     "tapToRecord2min": "Tippen zum Aufnehmen · bis zu 2 Min."
   },
   "textInput": {
-    "placeholder": "Nur eine Person. Nenne den Namen, was du über diese Person weißt und was bald ansteht...",
-    "placeholderWithContact": "Schreibe, was sich bei {{firstName}} geändert hat: letzte Begegnung, was wichtig bleibt und worauf du zurückkommst...",
-    "minCharacters": "Mindestens 10 Zeichen ({{count}} verbleibend)",
-    "pressToSend": "Drücke Senden zum Analysieren"
+    "newNoteLabel": "NEUE NOTIZ",
+    "placeholderIntro": "Erzähl mir von einer Person —",
+    "placeholderIntroWithContact": "Erzähl mir von {{firstName}} —",
+    "placeholderBulletName": "Name und wer sie ist",
+    "placeholderBulletLikes": "was sie mag",
+    "placeholderBulletUpcoming": "was bei ihr ansteht",
+    "minCharactersShort": "Mind. {{count}} Zeichen",
+    "pressToSend": "Drücke Senden zum Analysieren",
+    "sendLabel": "Senden"
   },
   "paywall": {
     "title": "Auf Premium upgraden",
     "reason": {
       "aiSearch": "KI-Suche ist eine Premium-Funktion",
       "recordingDuration": "Längere Aufnahmen erfordern Premium",
-      "aiAssistant": "KI-Assistent ist eine Premium-Funktion",
+      "aiAssistant": "Du hast deine 10 monatlichen Assistent-Nachrichten aufgebraucht. Noch Fragen diesen Monat? Upgrade auf Pro für unbegrenzte Nachrichten.",
       "contactLimit": "Du hast das Limit kostenloser Kontakte erreicht",
       "proactiveReminders": "Personalisierte Erinnerungen sind nur für Pro-Mitglieder"
     },
@@ -889,6 +927,11 @@
     "transcribing": "Transkribiere...",
     "suggestionsTitle": "Vorschläge",
     "noSuggestions": "Nimm Notizen auf, um Vorschläge zu sehen",
+    "quickPrompts": {
+      "startup": "Wer arbeitet in einem Startup?",
+      "birthdaySoon": "Wessen Geburtstag ist bald?",
+      "music": "Wer macht Musik?"
+    },
     "suggestions": {
       "recent": "Worüber habe ich kürzlich mit %name% gesprochen?",
       "birthday": "Wann hat %name% Geburtstag?",
@@ -899,12 +942,30 @@
     },
     "emptyState": {
       "title": "Dein KI-Assistent",
-      "description": "Stelle beliebige Fragen über deine Kontakte und ihre Informationen."
+      "titleStart": "Frag mich alles über",
+      "titleAccent": "deine Kontakte",
+      "description": "Ich erinnere mich an jede Notiz, die du gemacht hast."
+    },
+    "chat": {
+      "ready": "Bereit, wenn du es bist",
+      "messageCount_one": "Konversation · {{count}} Nachricht",
+      "messageCount_other": "Konversation · {{count}} Nachrichten",
+      "thinking": "Durchsuche deine Notizen...",
+      "inputPlaceholderEmpty": "Schreib oder tippe zum Sprechen...",
+      "inputPlaceholderFollowUp": "Stelle eine Folgefrage...",
+      "sourcesTitle": "Quellen",
+      "noInfoTitle": "Ich habe nicht genug Details in deinen Notizen gefunden.",
+      "moreSources_one": "+{{count}} weitere Quelle",
+      "moreSources_other": "+{{count}} weitere Quellen"
     },
     "processing": "Denke nach...",
     "newQuestion": "Stelle eine weitere Frage...",
     "quotaExhausted": "Monatliches KI-Kontingent aufgebraucht",
     "quotaRemaining": "{{used}}/{{limit}} diesen Monat",
+    "quotaPaywall": {
+      "title": "Du hast deine {{limit}} monatlichen Assistent-Nachrichten aufgebraucht.",
+      "description": "Noch Fragen diesen Monat? Upgrade auf Pro für unbegrenzte Nachrichten."
+    },
     "upgradeHint": "Upgrade auf Premium für unbegrenzten Zugang",
     "history": {
       "title": "Fragenverlauf",

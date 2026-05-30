@@ -778,6 +778,39 @@
     "helperTextWithContact": "Parle de {{firstName}} : actualités, anecdotes, détails importants...",
     "modeVoice": "Voix",
     "modeType": "Texte",
+    "promiseHello": "Salut 👋",
+    "generalTitleMain": "Parle de quelqu'un.",
+    "generalTitleMuted": "Je sauvegarde 3 choses :",
+    "contactChipLabel": "Ajout à",
+    "contactTitleMain": "Quoi de neuf",
+    "contactTitleMuted": "avec {{firstName}} ?",
+    "contactSubtitle": "Tout fonctionne : choisis un point ou parle des trois.",
+    "generalHelper": "Parle librement : mentionne chaque point, je m'occupe du reste.",
+    "contactHelper": "Parle librement : un moment, un détail ou une date suffit.",
+    "promise": {
+      "keyBadge": "Clé",
+      "comingUpKicker": "★ À venir",
+      "general": {
+        "profileKicker": "Qui",
+        "profileTitle": "Son profil",
+        "profileSubtitle": "Nom, rôle, contexte de rencontre",
+        "detailsKicker": "Détails",
+        "detailsTitle": "Ses goûts",
+        "detailsSubtitle": "Habitudes, intérêts, vibe",
+        "comingUpTitle": "Ce qui arrive pour cette personne",
+        "comingUpSubtitle": "Anniversaires, projets, dates"
+      },
+      "contact": {
+        "momentKicker": "Un moment",
+        "momentTitle": "Ce qui s'est dit ou passé",
+        "momentSubtitle": "Une conversation, une anecdote, ton ressenti",
+        "detailKicker": "Un nouveau détail",
+        "detailTitle": "Ce que tu as appris",
+        "detailSubtitle": "Un intérêt, une habitude, une personne citée",
+        "comingUpTitle": "Quelque chose en approche",
+        "comingUpSubtitle": "Une date, un plan, une échéance"
+      }
+    },
     "eyebrowHello": "Salut 👋",
     "eyebrowWithContact": "Du nouveau ?",
     "titleGotSomeoneInMind": "Tu penses à quelqu'un ?",
@@ -792,17 +825,22 @@
     "tapToRecord2min": "Appuie pour enregistrer · jusqu'à 2 min"
   },
   "textInput": {
-    "placeholder": "Une seule personne. Dis son nom, raconte votre dernière interaction ou ce que tu sais de cette personne, puis ce qui arrive bientôt dans sa vie...",
-    "placeholderWithContact": "Écris ce qui a changé avec {{firstName}} : dernière interaction, choses à retenir, et ce qu'il faudra relancer...",
-    "minCharacters": "Minimum 10 caractères ({{count}} restants)",
-    "pressToSend": "Appuie sur envoyer pour analyser"
+    "newNoteLabel": "NOUVELLE NOTE",
+    "placeholderIntro": "Parle-moi d'une personne —",
+    "placeholderIntroWithContact": "Parle-moi de {{firstName}} —",
+    "placeholderBulletName": "son prénom et qui elle est",
+    "placeholderBulletLikes": "ce qu'elle aime",
+    "placeholderBulletUpcoming": "ce qui arrive pour elle",
+    "minCharactersShort": "Min. {{count}} caractères",
+    "pressToSend": "Appuie sur envoyer pour analyser",
+    "sendLabel": "Envoyer"
   },
   "paywall": {
     "title": "Passer Premium",
     "reason": {
       "aiSearch": "La recherche IA est une fonctionnalité premium",
       "recordingDuration": "Les enregistrements plus longs nécessitent premium",
-      "aiAssistant": "L'assistant IA est une fonctionnalité premium",
+      "aiAssistant": "Vous avez épuisé vos 10 messages mensuels à l'assistant. D'autres questions ce mois-ci ? Passez Pro pour des messages illimités.",
       "contactLimit": "Tu as atteint la limite de contacts gratuits",
       "proactiveReminders": "Les rappels personnalisés sont réservés aux membres Pro"
     },
@@ -891,10 +929,37 @@
     "noSuggestions": "Enregistre des notes pour voir des suggestions",
     "quotaExhausted": "Tu as utilisé ton quota IA du mois",
     "quotaRemaining": "{{used}}/{{limit}} ce mois-ci",
+    "quotaPaywall": {
+      "title": "Vous avez épuisé vos {{limit}} messages mensuels à l'assistant.",
+      "description": "D'autres questions ce mois-ci ? Passez Pro pour des messages illimités."
+    },
+    "quickPrompts": {
+      "startup": "Qui travaille dans une startup ?",
+      "birthdaySoon": "Quel anniversaire arrive bientôt ?",
+      "music": "Qui fait de la musique ?"
+    },
     "suggestions": {
       "recentWith": "De quoi j'ai parlé avec {{firstName}} récemment ?",
       "birthdayOf": "C'est quand l'anniversaire de {{firstName}} ?",
       "newsOf": "Quelles sont les actualités de {{firstName}} ?"
+    },
+    "emptyState": {
+      "title": "Ton assistant IA",
+      "titleStart": "Demande-moi n'importe quoi sur",
+      "titleAccent": "tes personnes",
+      "description": "Je me souviens de chaque note que tu as prise."
+    },
+    "chat": {
+      "ready": "Prêt quand tu veux",
+      "messageCount_one": "Conversation · {{count}} message",
+      "messageCount_other": "Conversation · {{count}} messages",
+      "thinking": "Je parcours tes notes...",
+      "inputPlaceholderEmpty": "Écris ou parle...",
+      "inputPlaceholderFollowUp": "Pose une question de suivi...",
+      "sourcesTitle": "Sources",
+      "noInfoTitle": "Je n'ai pas trouvé assez de détails dans tes notes.",
+      "moreSources_one": "+{{count}} source en plus",
+      "moreSources_other": "+{{count}} sources en plus"
     },
     "history": {
       "title": "Historique des questions",

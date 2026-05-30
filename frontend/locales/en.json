@@ -740,6 +740,39 @@
     "helperTextWithContact": "Talk about {{firstName}}: news, stories, important details...",
     "modeVoice": "Voice",
     "modeType": "Type",
+    "promiseHello": "HI 👋",
+    "generalTitleMain": "Talk about someone.",
+    "generalTitleMuted": "I'll save 3 things:",
+    "contactChipLabel": "Adding to",
+    "contactTitleMain": "What's new",
+    "contactTitleMuted": "about {{firstName}}?",
+    "contactSubtitle": "Anything works - pick one or talk about all three.",
+    "generalHelper": "Just talk - mention each one and I'll do the rest.",
+    "contactHelper": "Just talk - a moment, a detail, or a date is enough.",
+    "promise": {
+      "keyBadge": "Key",
+      "comingUpKicker": "★ Coming up",
+      "general": {
+        "profileKicker": "Who",
+        "profileTitle": "Their profile",
+        "profileSubtitle": "Name, role, how you met",
+        "detailsKicker": "Details",
+        "detailsTitle": "What they like",
+        "detailsSubtitle": "Habits, interests, vibe",
+        "comingUpTitle": "What's next for them",
+        "comingUpSubtitle": "Birthdays, moves, plans"
+      },
+      "contact": {
+        "momentKicker": "A moment",
+        "momentTitle": "Something said or done",
+        "momentSubtitle": "A conversation, a story, how you felt",
+        "detailKicker": "A new detail",
+        "detailTitle": "Something you learned",
+        "detailSubtitle": "A new interest, a habit, a person they mentioned",
+        "comingUpTitle": "Something new on the way",
+        "comingUpSubtitle": "A date, a plan, a deadline"
+      }
+    },
     "eyebrowHello": "Hi 👋",
     "eyebrowWithContact": "What's new?",
     "titleGotSomeoneInMind": "Got someone in mind?",
@@ -754,17 +787,22 @@
     "tapToRecord2min": "Tap to record · up to 2 min"
   },
   "textInput": {
-    "placeholder": "One person only. Mention the name, what you know about this person, and what is coming up soon...",
-    "placeholderWithContact": "Write what changed with {{firstName}}: latest interaction, what to remember, and what to check in on...",
-    "minCharacters": "Minimum 10 characters ({{count}} remaining)",
-    "pressToSend": "Press send to analyze"
+    "newNoteLabel": "NEW NOTE",
+    "placeholderIntro": "Tell me about one person —",
+    "placeholderIntroWithContact": "Tell me about {{firstName}} —",
+    "placeholderBulletName": "their name & who they are",
+    "placeholderBulletLikes": "what they like",
+    "placeholderBulletUpcoming": "what's coming up for them",
+    "minCharactersShort": "Min {{count}} characters",
+    "pressToSend": "Press send to analyze",
+    "sendLabel": "Send"
   },
   "paywall": {
     "title": "Upgrade to Premium",
     "reason": {
       "aiSearch": "AI Search is a premium feature",
       "recordingDuration": "Longer recordings require premium",
-      "aiAssistant": "AI Assistant is a premium feature",
+      "aiAssistant": "You've used your 10 monthly Assistant messages. More questions this month? Upgrade to Pro for unlimited messages.",
       "contactLimit": "You've reached the free contacts limit",
       "proactiveReminders": "Custom reminders are for Pro members only"
     },
@@ -889,6 +927,11 @@
     "transcribing": "Transcribing...",
     "suggestionsTitle": "Suggestions",
     "noSuggestions": "Record notes to see suggestions",
+    "quickPrompts": {
+      "startup": "Who works in a startup?",
+      "birthdaySoon": "Whose birthday is soon?",
+      "music": "Who plays music?"
+    },
     "suggestions": {
       "recent": "What did I talk about recently with %name%?",
       "birthday": "When is %name%'s birthday?",
@@ -899,12 +942,30 @@
     },
     "emptyState": {
       "title": "Your AI assistant",
-      "description": "Ask any question about your contacts and their information."
+      "titleStart": "Ask me anything about",
+      "titleAccent": "your people",
+      "description": "I remember every note you've taken."
+    },
+    "chat": {
+      "ready": "Ready when you are",
+      "messageCount_one": "Conversation · {{count}} message",
+      "messageCount_other": "Conversation · {{count}} messages",
+      "thinking": "Looking through your notes...",
+      "inputPlaceholderEmpty": "Type or tap to speak...",
+      "inputPlaceholderFollowUp": "Ask a follow-up...",
+      "sourcesTitle": "Sources",
+      "noInfoTitle": "I couldn't find enough detail in your notes.",
+      "moreSources_one": "+{{count}} more source",
+      "moreSources_other": "+{{count}} more sources"
     },
     "processing": "Thinking...",
     "newQuestion": "Ask another question...",
     "quotaExhausted": "Monthly AI quota exhausted",
     "quotaRemaining": "{{used}}/{{limit}} this month",
+    "quotaPaywall": {
+      "title": "You've used your {{limit}} monthly Assistant messages.",
+      "description": "More questions this month? Upgrade to Pro for unlimited messages."
+    },
     "upgradeHint": "Upgrade to Premium for unlimited access",
     "history": {
       "title": "Question history",

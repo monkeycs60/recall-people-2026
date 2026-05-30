@@ -2,7 +2,18 @@ import { View, Text, Pressable, Modal, BackHandler, KeyboardAvoidingView, Platfo
 import { useState, useMemo, useCallback, useRef } from 'react';
 import { useRouter, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { X, Mic, Type } from 'lucide-react-native';
+import {
+  CalendarDays,
+  ChevronLeft,
+  Heart,
+  MessageCircle,
+  Mic,
+  Sparkles,
+  Type,
+  UserRound,
+  X,
+} from 'lucide-react-native';
+import type { LucideIcon } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, Fonts } from '@/constants/theme';
@@ -12,10 +23,24 @@ import { TestProActivation } from '@/components/TestProActivation';
 import { TranscriptionLoader } from '@/components/TranscriptionLoader';
 import type { InputMode } from '@/components/InputModeToggle';
 import { TextInputMode } from '@/components/TextInputMode';
+import { ContactAvatar } from '@/components/contact/ContactAvatar';
 import { useRecording } from '@/hooks/useRecording';
 import { useContactsQuery } from '@/hooks/useContactsQuery';
 import { useAppStore } from '@/stores/app-store';
+import { getContactDisplayName } from '@/utils/contactDisplayName';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+
+type PromiseCard = {
+  id: string;
+  Icon: LucideIcon;
+  kicker: string;
+  title: string;
+  subtitle: string;
+  iconBackground: string;
+  iconColor: string;
+  highlighted?: boolean;
+  badge?: string;
+};
 
 export default function RecordScreen() {
   const router = useRouter();
@@ -55,6 +80,78 @@ export default function RecordScreen() {
     if (!preselectedContactId) return null;
     return contacts.find((contact) => contact.id === preselectedContactId) || null;
   }, [preselectedContactId, contacts]);
+
+  const preselectedContactName = useMemo(() => {
+    return preselectedContact ? getContactDisplayName(preselectedContact) : '';
+  }, [preselectedContact]);
+
+  const promiseCards = useMemo<PromiseCard[]>(() => {
+    if (preselectedContact) {
+      return [
+        {
+          id: 'moment',
+          Icon: MessageCircle,
+          kicker: t('record.promise.contact.momentKicker'),
+          title: t('record.promise.contact.momentTitle'),
+          subtitle: t('record.promise.contact.momentSubtitle'),
+          iconBackground: Colors.primaryLight,
+          iconColor: Colors.textPrimary,
+        },
+        {
+          id: 'detail',
+          Icon: Sparkles,
+          kicker: t('record.promise.contact.detailKicker'),
+          title: t('record.promise.contact.detailTitle'),
+          subtitle: t('record.promise.contact.detailSubtitle'),
+          iconBackground: Colors.accentLight,
+          iconColor: Colors.accent,
+        },
+        {
+          id: 'coming-up',
+          Icon: CalendarDays,
+          kicker: t('record.promise.comingUpKicker'),
+          badge: t('record.promise.keyBadge'),
+          title: t('record.promise.contact.comingUpTitle'),
+          subtitle: t('record.promise.contact.comingUpSubtitle'),
+          iconBackground: Colors.surface,
+          iconColor: Colors.amber,
+          highlighted: true,
+        },
+      ];
+    }
+
+    return [
+      {
+        id: 'profile',
+        Icon: UserRound,
+        kicker: t('record.promise.general.profileKicker'),
+        title: t('record.promise.general.profileTitle'),
+        subtitle: t('record.promise.general.profileSubtitle'),
+        iconBackground: '#FFD7C2',
+        iconColor: '#A4471D',
+      },
+      {
+        id: 'details',
+        Icon: Heart,
+        kicker: t('record.promise.general.detailsKicker'),
+        title: t('record.promise.general.detailsTitle'),
+        subtitle: t('record.promise.general.detailsSubtitle'),
+        iconBackground: Colors.accentLight,
+        iconColor: Colors.error,
+      },
+      {
+        id: 'coming-up',
+        Icon: CalendarDays,
+        kicker: t('record.promise.comingUpKicker'),
+        badge: t('record.promise.keyBadge'),
+        title: t('record.promise.general.comingUpTitle'),
+        subtitle: t('record.promise.general.comingUpSubtitle'),
+        iconBackground: Colors.surface,
+        iconColor: Colors.amber,
+        highlighted: true,
+      },
+    ];
+  }, [preselectedContact, t]);
 
   useFocusEffect(
     useCallback(() => {
@@ -107,6 +204,7 @@ export default function RecordScreen() {
 
   const isAudioModeActive = inputMode === 'audio';
   const isTextModeActive = inputMode === 'text';
+  const showContactPromise = !!preselectedContact;
 
   return (
     <KeyboardAvoidingView
@@ -119,8 +217,18 @@ export default function RecordScreen() {
         locations={[0, 0.55]}
         style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
       >
-        <View style={styles.topBar}>
-          <View style={styles.modeTogglePill}>
+        <View style={[styles.topBar, showContactPromise && styles.topBarContact]}>
+          {showContactPromise && (
+            <Pressable
+              onPress={handleClose}
+              style={[styles.backButton, isProcessing && styles.closeButtonDisabled]}
+              disabled={isProcessing}
+            >
+              <ChevronLeft size={18} color={Colors.textPrimary} strokeWidth={2.4} />
+            </Pressable>
+          )}
+
+          <View style={[styles.modeTogglePill, showContactPromise && styles.modeTogglePillCentered]}>
             <Pressable
               style={[styles.modePillItem, isAudioModeActive && styles.modePillItemActive]}
               onPress={() => !isRecording && !isProcessing && setInputMode('audio')}
@@ -140,9 +248,14 @@ export default function RecordScreen() {
               </Text>
             </Pressable>
           </View>
+
           <Pressable
             onPress={handleClose}
-            style={[styles.closeButton, isProcessing && styles.closeButtonDisabled]}
+            style={[
+              styles.closeButton,
+              showContactPromise && styles.closeButtonContact,
+              isProcessing && styles.closeButtonDisabled,
+            ]}
             disabled={isProcessing}
           >
             <X size={14} color={Colors.textSecondary} />
@@ -166,7 +279,10 @@ export default function RecordScreen() {
         ) : (
           <ScrollView
             style={styles.audioScroll}
-            contentContainerStyle={styles.audioContent}
+            contentContainerStyle={[
+              styles.audioContent,
+              showContactPromise && styles.audioContentContact,
+            ]}
             showsVerticalScrollIndicator={false}
           >
             {isRecording ? (
@@ -177,45 +293,109 @@ export default function RecordScreen() {
                 </Text>
               </Animated.View>
             ) : (
-              <Animated.View entering={FadeIn.duration(280)} style={styles.heroBlock}>
-                <Text style={styles.heroEyebrow}>
-                  {preselectedContact ? t('record.eyebrowWithContact') : t('record.eyebrowHello')}
-                </Text>
-                <Text style={styles.heroTitle}>
-                  {preselectedContact
-                    ? t('record.titleWithContact', { firstName: preselectedContact.firstName })
-                    : t('record.titleGotSomeoneInMind')}
-                </Text>
-                <View style={styles.heroBodyRow}>
-                  <Text style={styles.heroBodyText}>
-                    {preselectedContact
-                      ? t('record.bodyWithContactPrefix', { firstName: preselectedContact.firstName })
-                      : t('record.bodyPrefix')}
-                  </Text>
-                  <View style={styles.heroBodyHighlight}>
-                    <Text style={styles.heroBodyHighlightText}>
-                      {t('record.bodyHighlightComingUp')}
+              <Animated.View entering={FadeIn.duration(280)} style={styles.promiseIntro}>
+                {preselectedContact ? (
+                  <>
+                    <View style={styles.addingToChip}>
+                      <ContactAvatar
+                        firstName={preselectedContact.firstName}
+                        lastName={preselectedContact.lastName}
+                        avatarUrl={preselectedContact.avatarUrl}
+                        size="tiny"
+                      />
+                      <View style={styles.addingToTextBlock}>
+                        <Text style={styles.addingToLabel}>{t('record.contactChipLabel')}</Text>
+                        <Text style={styles.addingToName} numberOfLines={1}>
+                          {preselectedContactName}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <Text style={styles.promiseTitle}>
+                      {t('record.contactTitleMain')}
+                      {'\n'}
+                      <Text style={styles.promiseTitleMuted}>
+                        {t('record.contactTitleMuted', { firstName: preselectedContact.firstName })}
+                      </Text>
                     </Text>
-                  </View>
-                  <Text style={styles.heroBodyText}>{t('record.bodySuffix')}</Text>
-                </View>
+                    <Text style={styles.promiseSubtitle}>{t('record.contactSubtitle')}</Text>
+                  </>
+                ) : (
+                  <>
+                    <Text style={styles.promiseEyebrow}>{t('record.promiseHello')}</Text>
+                    <Text style={styles.promiseTitle}>
+                      {t('record.generalTitleMain')}
+                      {'\n'}
+                      <Text style={styles.promiseTitleMuted}>{t('record.generalTitleMuted')}</Text>
+                    </Text>
+                  </>
+                )}
               </Animated.View>
             )}
 
             {!isRecording && (
-              <Animated.View entering={FadeIn.duration(300)} style={styles.exampleCard}>
-                <Text style={styles.exampleLabel}>{t('record.exampleLikeThis')}</Text>
-                <Text style={styles.exampleText}>
-                  <Text style={styles.exampleQuoteText}>
-                    {preselectedContact
-                      ? t('record.exampleQuoteWithContact', { firstName: preselectedContact.firstName })
-                      : t('record.exampleQuote')}
-                  </Text>
-                </Text>
+              <Animated.View entering={FadeIn.duration(300)} style={styles.promiseCards}>
+                {promiseCards.map((card) => {
+                  const Icon = card.Icon;
+                  return (
+                    <View
+                      key={card.id}
+                      style={[styles.promiseCard, card.highlighted && styles.promiseCardHighlighted]}
+                    >
+                      <View
+                        style={[
+                          styles.promiseCardIcon,
+                          { backgroundColor: card.iconBackground },
+                        ]}
+                      >
+                        <Icon size={24} color={card.iconColor} strokeWidth={2.3} />
+                      </View>
+
+                      <View style={styles.promiseCardText}>
+                        <View style={styles.promiseCardKickerRow}>
+                          <Text
+                            style={[
+                              styles.promiseCardKicker,
+                              card.highlighted && styles.promiseCardKickerHighlighted,
+                            ]}
+                          >
+                            {card.kicker}
+                          </Text>
+                          {card.badge && (
+                            <View style={styles.promiseCardBadge}>
+                              <Text style={styles.promiseCardBadgeText}>{card.badge}</Text>
+                            </View>
+                          )}
+                        </View>
+                        <Text
+                          style={[
+                            styles.promiseCardTitle,
+                            card.highlighted && styles.promiseCardTitleHighlighted,
+                          ]}
+                        >
+                          {card.title}
+                        </Text>
+                        <Text
+                          style={[
+                            styles.promiseCardSubtitle,
+                            card.highlighted && styles.promiseCardSubtitleHighlighted,
+                          ]}
+                        >
+                          {card.subtitle}
+                        </Text>
+                      </View>
+                    </View>
+                  );
+                })}
               </Animated.View>
             )}
 
             <View style={styles.recordZone}>
+              {!isRecording && (
+                <Text style={styles.recordLeadIn}>
+                  {showContactPromise ? t('record.contactHelper') : t('record.generalHelper')}
+                </Text>
+              )}
               <RecordButton
                 onPress={toggleRecording}
                 isRecording={isRecording}
@@ -260,6 +440,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingTop: 14,
+    minHeight: 58,
+  },
+  topBarContact: {
+    justifyContent: 'center',
+    position: 'relative',
   },
   modeTogglePill: {
     flexDirection: 'row',
@@ -267,6 +452,9 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     padding: 4,
     gap: 4,
+  },
+  modeTogglePillCentered: {
+    alignSelf: 'center',
   },
   modePillItem: {
     flexDirection: 'row',
@@ -282,10 +470,25 @@ const styles = StyleSheet.create({
   modePillLabel: {
     fontFamily: Fonts.sans.bold,
     fontSize: 12,
+    lineHeight: 16,
+    letterSpacing: 0,
     color: Colors.textMuted,
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
   modePillLabelActive: {
     color: Colors.textInverse,
+  },
+  backButton: {
+    position: 'absolute',
+    left: 20,
+    top: 14,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: Colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   closeButton: {
     width: 38,
@@ -294,6 +497,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  closeButtonContact: {
+    position: 'absolute',
+    right: 20,
+    top: 14,
   },
   closeButtonDisabled: { opacity: 0.5 },
   centerContent: {
@@ -309,10 +517,13 @@ const styles = StyleSheet.create({
   },
   audioScroll: { flex: 1 },
   audioContent: {
-    paddingHorizontal: 22,
-    paddingTop: 36,
+    paddingHorizontal: 26,
+    paddingTop: 24,
     paddingBottom: 40,
     flexGrow: 1,
+  },
+  audioContentContact: {
+    paddingTop: 12,
   },
   timerContainer: {
     alignItems: 'center',
@@ -322,7 +533,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.sans.bold,
     fontSize: 72,
     color: Colors.primary,
-    letterSpacing: -3,
+    letterSpacing: 0,
     lineHeight: 72,
   },
   remainingText: {
@@ -331,87 +542,175 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.mono,
     marginTop: 4,
   },
-  heroBlock: {
-    marginBottom: 24,
+  promiseIntro: {
+    marginBottom: 20,
   },
-  heroEyebrow: {
+  promiseEyebrow: {
     fontFamily: Fonts.sans.bold,
     fontSize: 13,
-    letterSpacing: 0.5,
+    letterSpacing: 0,
     color: Colors.primary,
   },
-  heroTitle: {
+  promiseTitle: {
     fontFamily: Fonts.sans.bold,
-    fontSize: 36,
-    lineHeight: 40,
-    letterSpacing: -0.9,
+    fontSize: 29,
+    lineHeight: 33,
+    letterSpacing: 0,
     color: Colors.textPrimary,
     marginTop: 8,
   },
-  heroBodyRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    marginTop: 14,
-    gap: 4,
+  promiseTitleMuted: {
+    color: Colors.textMuted,
   },
-  heroBodyText: {
+  promiseSubtitle: {
     fontFamily: Fonts.sans.medium,
-    fontSize: 17,
-    lineHeight: 24,
+    fontSize: 13,
+    lineHeight: 19,
     color: Colors.textSecondary,
+    marginTop: 8,
   },
-  heroBodyHighlight: {
-    backgroundColor: Colors.amberLight,
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    borderRadius: 5,
-  },
-  heroBodyHighlightText: {
-    fontFamily: Fonts.sans.bold,
-    fontSize: 17,
-    lineHeight: 24,
-    color: '#7A4F00',
-  },
-  exampleCard: {
+  addingToChip: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
     backgroundColor: Colors.surface,
-    borderRadius: 20,
-    padding: 18,
-    shadowColor: '#1D1A2E',
-    shadowOpacity: 0.06,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
+    borderRadius: 18,
+    paddingVertical: 5,
+    paddingHorizontal: 6,
+    marginBottom: 22,
+    borderWidth: 1,
+    borderColor: Colors.hairline,
   },
-  exampleLabel: {
+  addingToTextBlock: {
+    maxWidth: 160,
+    paddingRight: 6,
+  },
+  addingToLabel: {
     fontFamily: Fonts.sans.bold,
-    fontSize: 10,
-    letterSpacing: 1.2,
+    fontSize: 9,
+    lineHeight: 12,
+    letterSpacing: 0,
+    color: Colors.textMuted,
     textTransform: 'uppercase',
-    color: Colors.primary,
-    marginBottom: 8,
   },
-  exampleText: {
-    fontFamily: Fonts.sans.medium,
-    fontSize: 15,
-    lineHeight: 22,
+  addingToName: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 12,
+    lineHeight: 16,
+    letterSpacing: 0,
     color: Colors.textPrimary,
   },
-  exampleQuoteText: {
-    fontStyle: 'italic',
+  promiseCards: {
+    gap: 10,
+  },
+  promiseCard: {
+    minHeight: 68,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: Colors.surface,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: Colors.hairline,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    shadowColor: '#1D1A2E',
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1,
+  },
+  promiseCardHighlighted: {
+    backgroundColor: Colors.amberLight,
+    borderColor: Colors.amber,
+  },
+  promiseCardIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  promiseCardText: {
+    flex: 1,
+    minWidth: 0,
+  },
+  promiseCardKickerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 1,
+  },
+  promiseCardKicker: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 10,
+    lineHeight: 13,
+    letterSpacing: 0,
+    textTransform: 'uppercase',
+    color: Colors.textMuted,
+  },
+  promiseCardKickerHighlighted: {
+    color: '#8A5C00',
+  },
+  promiseCardBadge: {
+    backgroundColor: Colors.amber,
+    borderRadius: 999,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+  },
+  promiseCardBadgeText: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 8,
+    lineHeight: 10,
+    letterSpacing: 0,
+    color: Colors.textInverse,
+    textTransform: 'uppercase',
+  },
+  promiseCardTitle: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 15,
+    lineHeight: 19,
+    letterSpacing: 0,
+    color: Colors.textPrimary,
+  },
+  promiseCardTitleHighlighted: {
+    color: '#4A3100',
+  },
+  promiseCardSubtitle: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 12,
+    lineHeight: 16,
+    letterSpacing: 0,
+    color: Colors.textMuted,
+  },
+  promiseCardSubtitleHighlighted: {
+    color: '#8A5C00',
   },
   recordZone: {
     flex: 1,
+    minHeight: 260,
     alignItems: 'center',
     justifyContent: 'flex-end',
-    paddingTop: 32,
+    paddingTop: 28,
     paddingBottom: 16,
-    gap: 18,
+  },
+  recordLeadIn: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 13,
+    lineHeight: 18,
+    letterSpacing: 0,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: 48,
   },
   recordHint: {
     fontFamily: Fonts.sans.bold,
     fontSize: 14,
+    lineHeight: 20,
+    letterSpacing: 0,
     color: Colors.textPrimary,
     textAlign: 'center',
+    marginTop: 8,
   },
 });
