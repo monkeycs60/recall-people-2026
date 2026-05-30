@@ -179,7 +179,7 @@ export default function ContactNotesScreen() {
                     <Text style={styles.noteTitle} numberOfLines={2}>
                       {titleText}
                     </Text>
-                    <Text style={styles.noteBody} numberOfLines={3}>
+                    <Text style={styles.noteBody}>
                       {note.transcription}
                     </Text>
                   </View>
@@ -267,8 +267,10 @@ const styles = StyleSheet.create({
     top: 14,
     bottom: 14,
     width: 2,
-    backgroundColor: Colors.primary,
-    opacity: 0.2,
+    borderLeftWidth: 2,
+    borderLeftColor: Colors.primary,
+    borderStyle: 'dashed',
+    opacity: 0.25,
   },
   timelineRow: {
     flexDirection: 'row',
