@@ -536,7 +536,7 @@ Kontakt Inès mit Thema "Date François"
   },
 };
 
-const DEFAULT_MODEL = 'llama3.1-8b';
+const DEFAULT_MODEL = 'gpt-oss-120b';
 
 type DetectionResult = z.infer<typeof detectionSchema>;
 

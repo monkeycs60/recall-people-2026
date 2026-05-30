@@ -379,6 +379,7 @@ export const useRecording = () => {
       }
 
       setRecordingState('processing');
+      setProcessingStep(preselectedContactId ? 'extracting' : 'detecting');
       setCurrentTranscription(text);
       setCurrentAudioUri(null);
 

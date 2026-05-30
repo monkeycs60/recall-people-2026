@@ -265,7 +265,7 @@ export default function RecordScreen() {
         {isProcessing ? (
           <View style={styles.centerContent}>
             <Animated.View entering={FadeIn}>
-              <TranscriptionLoader step={processingStep} hasPreselectedContact={!!preselectedContactId} />
+              <TranscriptionLoader step={processingStep} isTextMode={isTextModeActive} />
             </Animated.View>
           </View>
         ) : isTextModeActive ? (

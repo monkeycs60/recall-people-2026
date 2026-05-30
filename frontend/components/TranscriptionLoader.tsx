@@ -86,17 +86,21 @@ function StepIndicator({ totalSteps, currentStepIndex }: StepIndicatorProps) {
 
 type TranscriptionLoaderProps = {
   step?: ProcessingStep;
-  hasPreselectedContact?: boolean;
+  isTextMode?: boolean;
 };
 
-export function TranscriptionLoader({ step = 'transcribing', hasPreselectedContact = false }: TranscriptionLoaderProps) {
+export function TranscriptionLoader({
+  step = 'transcribing',
+  isTextMode = false,
+}: TranscriptionLoaderProps) {
   const { t } = useTranslation();
 
   const getStepConfig = () => {
-    if (hasPreselectedContact) {
+    // Text mode skips audio transcription, so it only has a single processing step.
+    if (isTextMode) {
       return {
-        totalSteps: 2,
-        currentStepIndex: step === 'transcribing' ? 0 : 1,
+        totalSteps: 1,
+        currentStepIndex: 0,
       };
     }
     return {
@@ -116,7 +120,7 @@ export function TranscriptionLoader({ step = 'transcribing', hasPreselectedConta
       case 'extracting':
         return t('processing.extracting');
       default:
-        return t('processing.transcribing');
+        return isTextMode ? t('processing.detecting') : t('processing.transcribing');
     }
   };
 
