@@ -57,6 +57,36 @@ test('keeps only the next birthday topic per contact', async () => {
   );
 });
 
+test('maps hot topic dates to an urgency color scale with red only for overdue dates', async () => {
+  const { getHotTopicDateTone } = await loadModule();
+  const now = new Date('2026-05-31T12:00:00.000Z');
+
+  assert.equal(getHotTopicDateTone('2026-05-30', now).name, 'urgent');
+  assert.equal(getHotTopicDateTone('2026-05-31', now).name, 'soon');
+  assert.equal(getHotTopicDateTone('2026-06-02', now).name, 'soon');
+  assert.equal(getHotTopicDateTone('2026-06-20', now).name, 'scheduled');
+  assert.equal(getHotTopicDateTone('2026-08-15', now).name, 'distant');
+  assert.equal(getHotTopicDateTone(undefined, now).name, 'unknown');
+  assert.equal(getHotTopicDateTone('not-a-date', now).name, 'unknown');
+});
+
+test('counts only active overdue hot topics', async () => {
+  const { countOverdueHotTopics, isHotTopicOverdue } = await loadModule();
+  const now = new Date('2026-05-31T12:00:00.000Z');
+  const input = [
+    topic('yesterday', '2026-05-30'),
+    topic('today', '2026-05-31'),
+    topic('tomorrow', '2026-06-01'),
+    topic('undated', undefined),
+    { ...topic('resolved-yesterday', '2026-05-30'), status: 'resolved' },
+  ];
+
+  assert.equal(isHotTopicOverdue('2026-05-30', now), true);
+  assert.equal(isHotTopicOverdue('2026-05-31', now), false);
+  assert.equal(isHotTopicOverdue(undefined, now), false);
+  assert.equal(countOverdueHotTopics(input, now), 1);
+});
+
 test.after(async () => {
   await cleanTsModule(suiteName);
 });

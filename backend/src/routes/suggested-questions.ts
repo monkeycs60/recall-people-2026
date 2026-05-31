@@ -52,137 +52,220 @@ const PROMPT_TEMPLATES: Record<string, {
 	noInfo: string;
 }> = {
 	fr: {
-		intro: (firstName) => `Tu génères des questions naturelles à poser à ${firstName} lors de la prochaine rencontre.`,
+		intro: (firstName) => `Tu aides l'utilisateur à préparer sa prochaine conversation avec ${firstName}. Ton job : lui souffler 1 à 3 questions plausibles qu'il pourrait vraiment poser, comme un bon ami qui se souvient des détails. Pas du contenu généré : des questions ancrées dans ce que tu sais, avec un ton humain.`,
 		activeTopics: 'ACTUALITÉS ACTIVES',
-		recentNotes: 'DERNIÈRES NOTES (résumés)',
+		recentNotes: 'DERNIÈRES NOTES (transcription complète)',
 		resolvedTopics: 'ACTUALITÉS RÉCEMMENT RÉSOLUES',
 		profileInfo: 'INFORMATIONS SUR LE PROFIL',
-		rules: `RÈGLES ABSOLUES:
-1. Génère entre 1 et 3 questions MAXIMUM selon la matière disponible
-2. PRIORITÉ : les actualités actives avec dates proches
-3. Si PAS d'actualités : utilise les infos importantes du profil (travail, famille, passions)
-4. Si une actualité est résolue positivement, suggère de féliciter
-5. Formulation naturelle, comme on parlerait à un ami (tutoiement)
-6. NE BRODE PAS : si tu n'as qu'une seule info pertinente, génère UNE seule question
-7. NE RÉPÈTE PAS la même information dans plusieurs questions
-8. N'invente JAMAIS de questions sur des sujets non mentionnés
-9. Les questions doivent inviter à partager, pas être des questions oui/non
-10. Maximum 15 mots par question
-11. Adresse-toi directement à la personne avec "tu"; jamais "a-t-il/elle" ni une formulation de fiche
-12. Évite les questions génériques qui répètent juste le titre ("Comment avance X ?"). Ancre la question dans un détail, une échéance ou une prochaine action.
-13. N'invente JAMAIS de date, jour, créneau, lieu ou personne. Si aucun créneau précis n'est mentionné, reste général.
-14. Pour caler un moment sans date fournie, écris une question générale du type "Tu serais dispo bientôt pour se voir ?" sans proposer d'options.
-15. Si une actualité fournit une date ISO, ne la transforme jamais en "demain", "aujourd'hui", "la semaine prochaine", etc. Utilise une date naturelle avec jour, mois et année ("3 juin 2026") ou omets la date. N'écris jamais la date au format ISO dans la question.
+		rules: `RÈGLES:
+1. Vise 3 questions, une par catégorie : [ask], [followUp], [remember]. Si tu n'as pas assez de matière pour remplir une catégorie naturellement, mieux vaut en donner 1 ou 2 bonnes que 3 bidons.
+2. Définition des catégories :
+   - [ask] : curiosité sur un sujet vivant, un projet en cours, un truc qui arrive bientôt
+   - [followUp] : relancer sur un truc évoqué la dernière fois (un événement passé, un projet en attente, un sujet déjà discuté)
+   - [remember] : montrer qu'on se souvient d'un détail perso (passion, lieu, anecdote) — pas forcément une question, peut être une accroche
+3. PRIORITÉ aux actualités actives avec date proche, puis aux notes récentes, puis aux infos du profil
+4. Si une actualité est résolue positivement, propose de féliciter
+5. Tu en mode ami, naturel, contracté ("t'as", "ça donne quoi", "du coup") — PAS "Comment va ton projet de X ?" qui sonne IA
+6. Ancre chaque question dans un DÉTAIL concret (nom de boîte, lieu, prénom, contexte). Pas de question générique.
+7. Maximum 18 mots par question
+8. Ne répète JAMAIS la même info dans 2 questions
+9. N'invente JAMAIS un sujet, une date, un lieu ou une personne qui n'est pas dans la matière fournie
+10. Les questions doivent inviter à partager (pas oui/non)
+11. Si une actualité fournit une date ISO, ne la transforme jamais en "demain", "aujourd'hui", etc. Utilise une date naturelle ("3 juin") ou omets la date. Jamais de format ISO dans la question.
 
-IMPORTANT: Mieux vaut 1 bonne question que 3 questions artificielles ou répétitives.`,
-		format: 'FORMAT DE RÉPONSE:\nRetourne entre 1 et 3 questions, une par ligne, sans numérotation ni tirets.',
-		examples: `Exemples:
-Qu'est-ce que ça a donné, ton entretien chez Google ?
-Tu sais déjà quand tu poses tes cartons à Lyon ?`,
+❌ À ÉVITER (trop IA, trop bateau) :
+"Comment avance ton projet de X ?"
+"As-tu eu des nouvelles concernant Y ?"
+"Que penses-tu de Z ?"
+"Tu fais quoi en ce moment ?"
+
+✅ STYLE VISÉ :
+"T'as eu le retour de Lumina sur le pilot follow-up de vendredi ?"
+"Du coup le 18 juin avec Pauline, c'est confirmé ?"
+"T'as posé tes cartons à Lyon finalement ?"`,
+		format: `FORMAT DE RÉPONSE:
+Une question par ligne, préfixée par sa catégorie entre crochets. Sans numérotation ni tirets.
+Exemple :
+[ask] Ta question ici
+[followUp] Ta question ici
+[remember] Ta question ici`,
+		examples: `Exemples concrets:
+[ask] T'as eu un retour sur le pilot follow-up pour vendredi ?
+[followUp] Du coup le workshop du 18 juin, t'as bouclé l'agenda ?
+[remember] T'as fini par trouver un coworking sympa près de Part-Dieu ?`,
 		noInfo: "Si aucune info pertinente n'est disponible, retourne une ligne vide.",
 	},
 	en: {
-		intro: (firstName) => `Generate natural questions to ask ${firstName} during your next conversation.`,
+		intro: (firstName) => `Help the user prep their next conversation with ${firstName}. Your job: suggest 1 to 3 plausible questions they could actually ask, like a good friend who remembers the details. Not generated content — questions anchored in what you know, with a human tone.`,
 		activeTopics: 'ACTIVE TOPICS',
-		recentNotes: 'RECENT NOTES (summaries)',
+		recentNotes: 'RECENT NOTES (full transcription)',
 		resolvedTopics: 'RECENTLY RESOLVED TOPICS',
 		profileInfo: 'PROFILE INFORMATION',
-		rules: `ABSOLUTE RULES:
-1. Generate between 1 and 3 questions MAXIMUM based on available information
-2. PRIORITY: active topics with upcoming dates
-3. If NO active topics: use important profile info (work, family, hobbies)
-4. If a topic was resolved positively, suggest congratulating them
-5. Natural wording, like talking to a friend (informal)
-6. DON'T PAD: if you only have one relevant piece of info, generate ONE question
-7. DON'T REPEAT the same information in multiple questions
-8. NEVER invent questions about unmentioned topics
-9. Questions should invite sharing, not be yes/no questions
-10. Maximum 15 words per question
-11. If a topic provides an ISO date, never rewrite it as "tomorrow", "today", "next week", etc. Use a natural absolute date with month name ("June 3, 2026") or omit the date. Never output ISO dates in the question.
+		rules: `RULES:
+1. Aim for 3 questions, one per category: [ask], [followUp], [remember]. If you don't have enough material to fill a category naturally, give 1 or 2 good ones rather than 3 weak ones.
+2. Category definitions:
+   - [ask] : curiosity about a live topic, ongoing project, something coming up soon
+   - [followUp] : circling back on something mentioned last time (a past event, pending project, topic already discussed)
+   - [remember] : showing you remember a personal detail (passion, place, anecdote) — doesn't have to be a question, can be an opener
+3. PRIORITY to active topics with near-term dates, then recent notes, then profile info
+4. If a topic resolved positively, suggest congratulating
+5. Friend mode, natural, contracted ("how'd that go", "what's the deal with", "any update on") — NOT "How is your X project going?" which sounds AI
+6. Anchor every question in a CONCRETE detail (company name, place, first name, context). No generic questions.
+7. Max 18 words per question
+8. NEVER repeat the same info across questions
+9. NEVER invent a topic, date, place, or person not in the provided material
+10. Questions must invite sharing (no yes/no)
+11. If a topic provides an ISO date, never rewrite it as "tomorrow", "today", etc. Use a natural date ("June 3") or omit. Never output ISO format.
 
-IMPORTANT: Better 1 good question than 3 artificial or repetitive ones.`,
-		format: 'RESPONSE FORMAT:\nReturn between 1 and 3 questions, one per line, without numbering or dashes.',
-		examples: `Examples:
-How did your interview at Google go?
-So the move to London, is it set for March?`,
+❌ AVOID (too AI, too bland):
+"How is your X project going?"
+"Have you heard anything about Y?"
+"What do you think about Z?"
+"What have you been up to?"
+
+✅ AIM FOR:
+"Did Lumina get back to you on the pilot follow-up for Friday?"
+"So the June 18 workshop with Pauline, that locked in?"
+"Did you end up finding a place in London?"`,
+		format: `RESPONSE FORMAT:
+One question per line, prefixed with its category in brackets. No numbering or dashes.
+Example:
+[ask] Your question here
+[followUp] Your question here
+[remember] Your question here`,
+		examples: `Concrete examples:
+[ask] Did you hear back on the pilot follow-up for Friday?
+[followUp] So the June 18 workshop, did you lock in the agenda?
+[remember] Did you ever find a decent coworking spot near Part-Dieu?`,
 		noInfo: 'If no relevant info is available, return an empty line.',
 	},
 	es: {
-		intro: (firstName) => `Genera preguntas naturales para hacerle a ${firstName} en tu próximo encuentro.`,
+		intro: (firstName) => `Ayuda al usuario a preparar su próxima conversación con ${firstName}. Tu trabajo: sugerirle 1 a 3 preguntas plausibles que podría hacer de verdad, como un buen amigo que se acuerda de los detalles. Nada de contenido generado: preguntas ancladas en lo que sabes, con tono humano.`,
 		activeTopics: 'TEMAS ACTIVOS',
-		recentNotes: 'NOTAS RECIENTES (resúmenes)',
+		recentNotes: 'NOTAS RECIENTES (transcripción completa)',
 		resolvedTopics: 'TEMAS RECIENTEMENTE RESUELTOS',
 		profileInfo: 'INFORMACIÓN DEL PERFIL',
-		rules: `REGLAS ABSOLUTAS:
-1. Genera entre 1 y 3 preguntas MÁXIMO según la información disponible
-2. PRIORIDAD: temas activos con fechas próximas
-3. Si NO hay temas activos: usa info importante del perfil (trabajo, familia, pasiones)
+		rules: `REGLAS:
+1. Apunta a 3 preguntas, una por categoría: [ask], [followUp], [remember]. Si no tienes suficiente material para llenar una categoría de forma natural, mejor 1 o 2 buenas que 3 flojas.
+2. Definición de categorías:
+   - [ask] : curiosidad sobre un tema vivo, proyecto en curso, algo que viene pronto
+   - [followUp] : retomar algo mencionado la última vez (evento pasado, proyecto pendiente, tema ya hablado)
+   - [remember] : mostrar que recuerdas un detalle personal (pasión, lugar, anécdota) — no tiene que ser pregunta, puede ser apertura
+3. PRIORIDAD a temas activos con fechas cercanas, después notas recientes, después info de perfil
 4. Si un tema se resolvió positivamente, sugiere felicitar
-5. Formulación natural, como hablarías a un amigo (tuteo)
-6. NO RELLENES: si solo tienes una info relevante, genera UNA sola pregunta
-7. NO REPITAS la misma información en varias preguntas
-8. NUNCA inventes preguntas sobre temas no mencionados
-9. Las preguntas deben invitar a compartir, no ser preguntas de sí/no
-10. Máximo 15 palabras por pregunta
-11. Si un tema incluye una fecha ISO, nunca la cambies por "mañana", "hoy", "la semana que viene", etc. Usa una fecha absoluta natural con mes escrito ("3 de junio de 2026") u omite la fecha. Nunca escribas fechas ISO en la pregunta.
+5. Modo amigo, natural, contraído — NO "¿Cómo va tu proyecto de X?" que suena a IA
+6. Ancla cada pregunta en un DETALLE concreto (nombre de empresa, lugar, nombre, contexto). Nada genérico.
+7. Máximo 18 palabras por pregunta
+8. NUNCA repitas la misma info en varias preguntas
+9. NUNCA inventes tema, fecha, lugar o persona que no esté en la materia
+10. Las preguntas deben invitar a compartir (no sí/no)
+11. Si un tema da una fecha ISO, nunca la cambies por "mañana", "hoy", etc. Usa fecha natural ("3 de junio") u omítela. Nunca formato ISO.
 
-IMPORTANTE: Mejor 1 buena pregunta que 3 artificiales o repetitivas.`,
-		format: 'FORMATO DE RESPUESTA:\nDevuelve entre 1 y 3 preguntas, una por línea, sin numeración ni guiones.',
-		examples: `Ejemplos:
-¿Cómo te fue en la entrevista en Google?
-¿Entonces la mudanza a Madrid, ya está confirmada para marzo?`,
+❌ A EVITAR (demasiado IA, demasiado plano):
+"¿Cómo va tu proyecto de X?"
+"¿Has tenido noticias de Y?"
+"¿Qué piensas sobre Z?"
+
+✅ ESTILO BUSCADO:
+"¿Te respondió Lumina sobre el pilot follow-up del viernes?"
+"Entonces el workshop del 18 de junio, ¿está confirmado?"
+"¿Acabaste encontrando un coworking guay cerca de Part-Dieu?"`,
+		format: `FORMATO DE RESPUESTA:
+Una pregunta por línea, prefijada con su categoría entre corchetes. Sin numeración ni guiones.
+Ejemplo:
+[ask] Tu pregunta aquí
+[followUp] Tu pregunta aquí
+[remember] Tu pregunta aquí`,
+		examples: `Ejemplos concretos:
+[ask] ¿Tuviste respuesta sobre el pilot follow-up del viernes?
+[followUp] Entonces el workshop del 18 de junio, ¿cerraste la agenda?
+[remember] ¿Encontraste al final un coworking decente cerca de Part-Dieu?`,
 		noInfo: 'Si no hay info relevante disponible, devuelve una línea vacía.',
 	},
 	it: {
-		intro: (firstName) => `Genera domande naturali da fare a ${firstName} durante il prossimo incontro.`,
+		intro: (firstName) => `Aiuta l'utente a preparare la sua prossima conversazione con ${firstName}. Il tuo compito: suggerire da 1 a 3 domande plausibili che potrebbe davvero porre, come un buon amico che si ricorda i dettagli. Non contenuto generato: domande ancorate a ciò che sai, con tono umano.`,
 		activeTopics: 'ARGOMENTI ATTIVI',
-		recentNotes: 'NOTE RECENTI (riassunti)',
+		recentNotes: 'NOTE RECENTI (trascrizione completa)',
 		resolvedTopics: 'ARGOMENTI RISOLTI DI RECENTE',
 		profileInfo: 'INFORMAZIONI DEL PROFILO',
-		rules: `REGOLE ASSOLUTE:
-1. Genera tra 1 e 3 domande MASSIMO in base alle informazioni disponibili
-2. PRIORITÀ: argomenti attivi con date vicine
-3. Se NON ci sono argomenti attivi: usa info importanti del profilo (lavoro, famiglia, passioni)
+		rules: `REGOLE:
+1. Punta a 3 domande, una per categoria: [ask], [followUp], [remember]. Se non hai abbastanza materiale per riempire una categoria in modo naturale, meglio 1 o 2 buone che 3 deboli.
+2. Definizione delle categorie:
+   - [ask] : curiosità su un argomento vivo, progetto in corso, qualcosa che arriva presto
+   - [followUp] : riprendere qualcosa menzionato l'ultima volta (evento passato, progetto in sospeso, argomento già discusso)
+   - [remember] : mostrare di ricordare un dettaglio personale (passione, luogo, aneddoto) — non deve essere una domanda, può essere un'apertura
+3. PRIORITÀ agli argomenti attivi con date vicine, poi note recenti, poi info del profilo
 4. Se un argomento è stato risolto positivamente, suggerisci di congratularsi
-5. Formulazione naturale, come parleresti a un amico (dare del tu)
-6. NON RIEMPIRE: se hai solo un'info rilevante, genera UNA sola domanda
-7. NON RIPETERE la stessa informazione in più domande
-8. MAI inventare domande su argomenti non menzionati
-9. Le domande devono invitare a condividere, non essere domande sì/no
-10. Massimo 15 parole per domanda
-11. Se un argomento include una data ISO, non trasformarla mai in "domani", "oggi", "la prossima settimana", ecc. Usa una data assoluta naturale con il mese scritto ("3 giugno 2026") oppure ometti la data. Non scrivere mai date ISO nella domanda.
+5. Modalità amico, naturale, contratta — NON "Come va il tuo progetto di X?" che suona IA
+6. Ancora ogni domanda in un DETTAGLIO concreto (nome azienda, luogo, nome, contesto). Niente di generico.
+7. Massimo 18 parole per domanda
+8. MAI ripetere la stessa info in più domande
+9. MAI inventare argomento, data, luogo o persona che non sia nel materiale
+10. Le domande devono invitare a condividere (no sì/no)
+11. Se un argomento dà una data ISO, mai trasformarla in "domani", "oggi", ecc. Usa data naturale ("3 giugno") o omettila. Mai formato ISO.
 
-IMPORTANTE: Meglio 1 buona domanda che 3 artificiali o ripetitive.`,
-		format: 'FORMATO DI RISPOSTA:\nRestituisci tra 1 e 3 domande, una per riga, senza numerazione né trattini.',
-		examples: `Esempi:
-Come è andato il colloquio da Google?
-Allora il trasloco a Milano, è confermato per marzo?`,
-		noInfo: 'Se non ci sono info rilevanti disponibili, restituisci una riga vuota.',
+❌ DA EVITARE (troppo IA, troppo piatto):
+"Come va il tuo progetto di X?"
+"Hai avuto notizie di Y?"
+"Cosa pensi di Z?"
+
+✅ STILE PUNTATO:
+"Ti ha risposto Lumina sul pilot follow-up di venerdì?"
+"Quindi il workshop del 18 giugno, è confermato?"
+"Hai trovato alla fine un coworking decente vicino Part-Dieu?"`,
+		format: `FORMATO DI RISPOSTA:
+Una domanda per riga, preceduta dalla categoria tra parentesi quadre. Senza numerazione né trattini.
+Esempio:
+[ask] La tua domanda qui
+[followUp] La tua domanda qui
+[remember] La tua domanda qui`,
+		examples: `Esempi concreti:
+[ask] Hai avuto risposta sul pilot follow-up per venerdì?
+[followUp] Quindi il workshop del 18 giugno, hai chiuso l'agenda?
+[remember] Hai trovato alla fine un coworking decente vicino Part-Dieu?`,
+		noInfo: 'Se non ci sono info rilevanti, restituisci una riga vuota.',
 	},
 	de: {
-		intro: (firstName) => `Generiere natürliche Fragen, die du ${firstName} bei eurem nächsten Treffen stellen kannst.`,
+		intro: (firstName) => `Hilf dem Nutzer, sein nächstes Gespräch mit ${firstName} vorzubereiten. Deine Aufgabe: 1 bis 3 plausible Fragen vorschlagen, die er wirklich stellen könnte, wie ein guter Freund, der sich an Details erinnert. Kein generierter Content: Fragen, die in dem verankert sind, was du weißt, mit menschlichem Ton.`,
 		activeTopics: 'AKTIVE THEMEN',
-		recentNotes: 'LETZTE NOTIZEN (Zusammenfassungen)',
+		recentNotes: 'LETZTE NOTIZEN (vollständige Transkription)',
 		resolvedTopics: 'KÜRZLICH GELÖSTE THEMEN',
 		profileInfo: 'PROFILINFORMATIONEN',
-		rules: `ABSOLUTE REGELN:
-1. Generiere zwischen 1 und 3 Fragen MAXIMUM basierend auf verfügbaren Informationen
-2. PRIORITÄT: aktive Themen mit nahenden Terminen
-3. Wenn KEINE aktiven Themen: nutze wichtige Profilinfos (Arbeit, Familie, Leidenschaften)
+		rules: `REGELN:
+1. Ziel sind 3 Fragen, eine pro Kategorie: [ask], [followUp], [remember]. Wenn du nicht genug Material hast, um eine Kategorie natürlich zu füllen, lieber 1 oder 2 gute als 3 schwache.
+2. Kategoriedefinitionen:
+   - [ask] : Neugier auf ein lebendiges Thema, laufendes Projekt, etwas das bald ansteht
+   - [followUp] : Auf etwas zurückkommen, was beim letzten Mal erwähnt wurde (vergangenes Ereignis, anhängiges Projekt, schon besprochenes Thema)
+   - [remember] : Zeigen, dass du dich an ein persönliches Detail erinnerst (Leidenschaft, Ort, Anekdote) — muss keine Frage sein, kann ein Aufhänger sein
+3. PRIORITÄT bei aktiven Themen mit nahem Datum, dann letzte Notizen, dann Profilinfos
 4. Wenn ein Thema positiv gelöst wurde, schlage vor zu gratulieren
-5. Natürliche Formulierung, wie man mit einem Freund spricht (duzen)
-6. NICHT AUFFÜLLEN: wenn du nur eine relevante Info hast, generiere EINE Frage
-7. WIEDERHOLE NICHT dieselbe Information in mehreren Fragen
-8. ERFINDE NIE Fragen zu nicht erwähnten Themen
-9. Fragen sollten zum Teilen einladen, keine Ja/Nein-Fragen sein
-10. Maximal 15 Wörter pro Frage
-11. Wenn ein Thema ein ISO-Datum enthält, formuliere es niemals als "morgen", "heute", "nächste Woche" usw. Verwende ein natürliches absolutes Datum mit Monatsnamen ("3. Juni 2026") oder lass das Datum weg. Gib in der Frage niemals ISO-Daten aus.
+5. Freundes-Modus, natürlich, kontrahiert — NICHT "Wie läuft dein X-Projekt?" das klingt nach KI
+6. Verankere jede Frage in einem KONKRETEN Detail (Firmenname, Ort, Name, Kontext). Nichts Generisches.
+7. Max. 18 Wörter pro Frage
+8. NIE die gleiche Info in mehreren Fragen wiederholen
+9. NIE Thema, Datum, Ort oder Person erfinden, die nicht im Material steht
+10. Fragen müssen zum Teilen einladen (kein Ja/Nein)
+11. Wenn ein Thema ein ISO-Datum liefert, formuliere es nie als "morgen", "heute", usw. Verwende ein natürliches Datum ("3. Juni") oder lass es weg. Nie ISO-Format.
 
-WICHTIG: Lieber 1 gute Frage als 3 künstliche oder repetitive.`,
-		format: 'ANTWORTFORMAT:\nGib zwischen 1 und 3 Fragen zurück, eine pro Zeile, ohne Nummerierung oder Striche.',
-		examples: `Beispiele:
-Wie lief dein Vorstellungsgespräch bei Google?
-Und der Umzug nach Berlin, steht der für März fest?`,
+❌ ZU VERMEIDEN (zu KI, zu flach):
+"Wie läuft dein X-Projekt?"
+"Hast du was von Y gehört?"
+"Was hältst du von Z?"
+
+✅ STIL-ZIEL:
+"Hat Lumina sich wegen des Pilot-Follow-ups für Freitag gemeldet?"
+"Also der Workshop am 18. Juni, ist der fix?"
+"Hast du am Ende ein gutes Coworking nahe Part-Dieu gefunden?"`,
+		format: `ANTWORTFORMAT:
+Eine Frage pro Zeile, mit der Kategorie in eckigen Klammern. Ohne Nummerierung oder Striche.
+Beispiel:
+[ask] Deine Frage hier
+[followUp] Deine Frage hier
+[remember] Deine Frage hier`,
+		examples: `Konkrete Beispiele:
+[ask] Hat sich Lumina wegen des Pilot-Follow-ups für Freitag gemeldet?
+[followUp] Also der Workshop am 18. Juni, hast du die Agenda durch?
+[remember] Hast du am Ende ein gutes Coworking nahe Part-Dieu gefunden?`,
 		noInfo: 'Wenn keine relevanten Infos verfügbar sind, gib eine leere Zeile zurück.',
 	},
 };
@@ -191,13 +274,53 @@ type Variables = {
 	user: import('@prisma/client').User;
 };
 
-export const parseSuggestedQuestionsText = (text: string): string[] =>
-	text
+export type SuggestedQuestionCategory = 'ask' | 'followUp' | 'remember';
+
+export type SuggestedQuestion = {
+	category: SuggestedQuestionCategory | null;
+	text: string;
+};
+
+const CATEGORY_ALIASES: Record<string, SuggestedQuestionCategory> = {
+	ask: 'ask',
+	'ask about': 'ask',
+	followup: 'followUp',
+	'follow up': 'followUp',
+	'follow-up': 'followUp',
+	remember: 'remember',
+};
+
+export const parseSuggestedQuestionsText = (text: string): SuggestedQuestion[] => {
+	const lines = text
 		.trim()
 		.split('\n')
 		.map((line) => line.trim().replace(/^[-•*]?\s*\d+[\).\-\s]+/, '').replace(/^[-•*]\s+/, '').trim())
-		.filter((line) => line.length > 0)
-		.slice(0, 3);
+		.filter((line) => line.length > 0);
+
+	const seenCategories = new Set<SuggestedQuestionCategory>();
+	const result: SuggestedQuestion[] = [];
+
+	for (const line of lines) {
+		const match = line.match(/^\[(.+?)\]\s*(.+)$/);
+		let category: SuggestedQuestionCategory | null = null;
+		let body = line;
+
+		if (match) {
+			const tag = match[1].trim().toLowerCase();
+			category = CATEGORY_ALIASES[tag] ?? null;
+			body = match[2].trim();
+		}
+
+		if (!body) continue;
+		if (category && seenCategories.has(category)) continue;
+		if (category) seenCategories.add(category);
+
+		result.push({ category, text: body });
+		if (result.length === 3) break;
+	}
+
+	return result;
+};
 
 export const suggestedQuestionsRoutes = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
@@ -269,9 +392,9 @@ suggestedQuestionsRoutes.post('/', async (c) => {
 		const formatRecentNotes = (notes: typeof recentNotes) =>
 			notes
 				?.map((note) => {
-					return `[${note.createdAt}] ${note.title || 'Note'}: ${note.transcription.substring(0, 150)}...`;
+					return `[${note.createdAt}] ${note.title || 'Note'}:\n${note.transcription}`;
 				})
-				.join('\n\n') || '';
+				.join('\n\n---\n\n') || '';
 
 		const formatFacts = (factsArray: typeof facts) =>
 			factsArray
@@ -325,7 +448,7 @@ ${template.noInfo}
 			prompt,
 		});
 
-		const suggestedQuestions = parseSuggestedQuestionsText(text);
+		const suggestedQuestions: SuggestedQuestion[] = parseSuggestedQuestionsText(text);
 
 		// Update Langfuse generation with output
 		generation?.end({ output: suggestedQuestions });

@@ -41,7 +41,13 @@ const contactPayloadSchema = z.object({
   birthdayMonth: z.number().int().nullable().optional(),
   birthdayYear: z.number().int().nullable().optional(),
   aiSummary: z.string().nullable().optional(),
-  suggestedQuestions: z.array(z.string()).nullable().optional(),
+  suggestedQuestions: z.union([
+    z.array(z.string()),
+    z.array(z.object({
+      category: z.enum(['ask', 'followUp', 'remember']).nullable(),
+      text: z.string(),
+    })),
+  ]).nullable().optional(),
   meetingContext: z.string().nullable().optional(),
   reminderFrequencyDays: z.number().int().nullable().optional(),
   lastContactAt: z.string().datetime().nullable().optional(),
@@ -284,7 +290,7 @@ async function decryptContact(encryptionKey: string | undefined, row: any) {
     birthdayMonth: row.birthdayMonth,
     birthdayYear: row.birthdayYear,
     aiSummary: await decryptNullableString(encryptionKey, row.encryptedAiSummary),
-    suggestedQuestions: row.encryptedSuggestedQuestions ? await decryptJson<string[]>(encryptionKey, row.encryptedSuggestedQuestions) : null,
+    suggestedQuestions: row.encryptedSuggestedQuestions ? await decryptJson<unknown>(encryptionKey, row.encryptedSuggestedQuestions) : null,
     meetingContext: await decryptNullableString(encryptionKey, row.encryptedMeetingContext),
     reminderFrequencyDays: row.reminderFrequencyDays,
     lastContactAt: serializeDate(row.lastContactAt),

@@ -2,9 +2,10 @@ import { View, Text, ActivityIndicator, Pressable, StyleSheet } from 'react-nati
 import { useTranslation } from 'react-i18next';
 import { MessageCircle, RefreshCw } from 'lucide-react-native';
 import { Colors, Fonts } from '@/constants/theme';
+import { SuggestedQuestion } from '@/types';
 
 type SuggestedQuestionsProps = {
-  suggestedQuestions?: string[];
+  suggestedQuestions?: SuggestedQuestion[];
   isLoading?: boolean;
   isRegenerating?: boolean;
   firstName: string;
@@ -84,7 +85,7 @@ export function SuggestedQuestions({ suggestedQuestions, isLoading, isRegenerati
         {suggestedQuestions.map((question, index) => (
           <View key={index} style={styles.questionItem}>
             <Text style={styles.questionIndex}>{index + 1}</Text>
-            <Text style={styles.questionText}>{question}</Text>
+            <Text style={styles.questionText}>{question.text}</Text>
           </View>
         ))}
       </View>

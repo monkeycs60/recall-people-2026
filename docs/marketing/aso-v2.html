@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recall People — ASO V2</title>
+<style>
+  :root {
+    --brand: #6B4FFF;
+    --brand-dark: #4A36C7;
+    --brand-light: #E8DFFF;
+    --bg: #F7F4FF;
+    --ink: #1A1428;
+    --ink-soft: #6B6480;
+    --yellow: #FFD66B;
+    --pink: #FF8FB0;
+    --border: #E5E0F0;
+    --code-bg: #1A1428;
+    --code-ink: #E8DFFF;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+  }
+
+  /* === HEADER === */
+  .hero {
+    background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
+    color: white;
+    padding: 80px 40px 60px;
+    text-align: center;
+  }
+  .hero h1 {
+    font-size: clamp(36px, 5vw, 56px);
+    margin: 0 0 12px;
+    font-weight: 800;
+    letter-spacing: -1px;
+  }
+  .hero .tag {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.18);
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .hero p {
+    font-size: 20px;
+    opacity: 0.9;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  /* === NAV === */
+  nav.sticky {
+    position: sticky;
+    top: 0;
+    background: rgba(247, 244, 255, 0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 40px;
+    z-index: 100;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    justify-content: center;
+  }
+  nav.sticky a {
+    padding: 8px 16px;
+    border-radius: 100px;
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background 0.2s;
+  }
+  nav.sticky a:hover {
+    background: var(--brand-light);
+  }
+
+  /* === SECTIONS === */
+  section {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 60px 40px;
+  }
+  section h2 {
+    font-size: 36px;
+    margin: 0 0 8px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  section .subtitle {
+    color: var(--ink-soft);
+    font-size: 17px;
+    margin: 0 0 40px;
+  }
+  section h3 {
+    font-size: 22px;
+    margin: 32px 0 12px;
+    font-weight: 700;
+  }
+
+  /* === CARDS === */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  .grid-4 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+  .card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+  }
+  .card-brand {
+    background: var(--brand);
+    color: white;
+    border: none;
+  }
+  .card-brand h4, .card-brand .label {
+    color: white;
+  }
+  .card .label {
+    display: block;
+    font-size: 12px;
+    color: var(--ink-soft);
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .card .value {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+  .card .value.large {
+    font-size: 24px;
+  }
+  .card .count {
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .card-brand .count {
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  /* === DIFF (before/after) === */
+  .diff {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 20px 0;
+  }
+  .diff > div {
+    border-radius: 12px;
+    padding: 16px 20px;
+  }
+  .diff .before {
+    background: #FFF1F1;
+    border: 1px solid #FFD1D1;
+  }
+  .diff .after {
+    background: #E9FBE9;
+    border: 1px solid #B9E8B9;
+  }
+  .diff .tag {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .diff .before .tag { color: #C74545; }
+  .diff .after .tag { color: #2D8A2D; }
+  .diff p {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  /* === SCREENS === */
+  .screens-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-top: 24px;
+  }
+  .screen {
+    border-radius: 16px;
+    padding: 24px 20px;
+    border: 1px solid var(--border);
+    position: relative;
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .screen.light { background: var(--bg); }
+  .screen.brand { background: var(--brand); color: white; }
+  .screen.glow {
+    background: radial-gradient(circle at center, var(--brand-light) 0%, var(--bg) 100%);
+  }
+  .screen .num {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    opacity: 0.5;
+  }
+  .screen .role {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    opacity: 0.6;
+    margin-bottom: 12px;
+  }
+  .screen .headline {
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  .screen .subline {
+    font-size: 14px;
+    opacity: 0.75;
+    margin-bottom: 16px;
+    font-style: italic;
+  }
+  .screen .meta {
+    margin-top: auto;
+    font-size: 12px;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    padding-top: 12px;
+    opacity: 0.7;
+  }
+  .screen.brand .meta {
+    border-top-color: rgba(255, 255, 255, 0.2);
+  }
+  .screen .sticker {
+    display: inline-block;
+    background: rgba(0, 0, 0, 0.06);
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+  .screen.brand .sticker {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  .screen.flag-priority::before {
+    content: 'À REFAIRE';
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: var(--yellow);
+    color: var(--ink);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+  }
+
+  /* === COLOR RHYTHM TABLE === */
+  .rhythm {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 4px;
+    margin: 20px 0;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .rhythm > div {
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .rhythm .light { background: var(--bg); color: var(--ink); }
+  .rhythm .brand { background: var(--brand); color: white; }
+  .rhythm .glow {
+    background: radial-gradient(circle, var(--brand-light), var(--bg));
+    color: var(--ink);
+  }
+
+  /* === CODE === */
+  pre.code {
+    background: var(--code-bg);
+    color: var(--code-ink);
+    padding: 20px 24px;
+    border-radius: 12px;
+    overflow-x: auto;
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+  code.inline {
+    background: var(--brand-light);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'SF Mono', Monaco, monospace;
+    font-size: 13px;
+    color: var(--brand-dark);
+  }
+
+  /* === DESC === */
+  .desc-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    margin: 20px 0;
+  }
+  .desc-card pre {
+    margin: 0;
+    white-space: pre-wrap;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  /* === TABS === */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+    background: var(--border);
+    padding: 4px;
+    border-radius: 100px;
+    width: fit-content;
+  }
+  .tabs button {
+    background: transparent;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 100px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--ink-soft);
+    transition: all 0.2s;
+  }
+  .tabs button.active {
+    background: white;
+    color: var(--ink);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* === CAPTIONS TABLE === */
+  table.captions {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  table.captions th, table.captions td {
+    padding: 14px 18px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-size: 15px;
+  }
+  table.captions th {
+    background: var(--brand-light);
+    font-weight: 700;
+    color: var(--brand-dark);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  table.captions td:first-child {
+    font-weight: 800;
+    color: var(--brand);
+    width: 40px;
+  }
+  table.captions td:nth-child(2) {
+    font-weight: 700;
+  }
+  table.captions td:nth-child(3) {
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+  table.captions tr:last-child td { border-bottom: none; }
+
+  /* === KEY DECISION === */
+  .decision {
+    background: var(--brand-light);
+    border-left: 4px solid var(--brand);
+    padding: 20px 24px;
+    border-radius: 0 12px 12px 0;
+    margin: 16px 0;
+  }
+  .decision h4 {
+    margin: 0 0 6px;
+    color: var(--brand-dark);
+    font-size: 16px;
+  }
+  .decision p {
+    margin: 0;
+    font-size: 15px;
+  }
+
+  /* === CHECKLIST === */
+  ul.check {
+    list-style: none;
+    padding: 0;
+  }
+  ul.check li {
+    padding: 10px 0 10px 32px;
+    position: relative;
+    border-bottom: 1px solid var(--border);
+  }
+  ul.check li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 14px;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--brand);
+    border-radius: 4px;
+  }
+  ul.check li:last-child { border-bottom: none; }
+
+  /* === FOOTER === */
+  footer {
+    background: var(--ink);
+    color: rgba(255, 255, 255, 0.7);
+    padding: 40px;
+    text-align: center;
+    font-size: 14px;
+    margin-top: 60px;
+  }
+  footer strong { color: white; }
+
+  @media (max-width: 600px) {
+    section { padding: 40px 20px; }
+    .hero { padding: 60px 20px 40px; }
+    nav.sticky { padding: 12px 20px; }
+    .rhythm { grid-template-columns: repeat(4, 1fr); }
+    .diff { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="tag">ASO V2 · Recall People</span>
+  <h1>Soyez la personne qui se souvient.</h1>
+  <p>Repositionnement émotionnel, notifications en hero, refonte des 8 screenshots. Tout est ici.</p>
+</header>
+
+<nav class="sticky">
+  <a href="#strategy">Stratégie</a>
+  <a href="#identity">Identité</a>
+  <a href="#description">Description</a>
+  <a href="#screenshots">Screenshots</a>
+  <a href="#design">Design</a>
+  <a href="#rhythm">Rythme</a>
+  <a href="#checklist">Checklist</a>
+</nav>
+
+<!-- === STRATEGY === -->
+<section id="strategy">
+  <h2>Le repositionnement</h2>
+  <p class="subtitle">4 décisions structurantes qui guident toute la V2.</p>
+
+  <div class="decision">
+    <h4>1 · CRM Personnel → Friend Memory</h4>
+    <p>Le hero passe de pro/froid à émotionnel/aspirationnel. "CRM personnel" reste dans les <strong>mots-clés</strong> (SEO) mais quitte le nom et le sous-titre.</p>
+  </div>
+  <div class="decision">
+    <h4>2 · Les notifs deviennent un argument central</h4>
+    <p>Timing exact extrait du code (<code class="inline">lib/notification-schedule.ts</code>) : <strong>veille à 19h</strong> + <strong>lendemain à 10h</strong>. Plus crédible que "24h avant".</p>
+  </div>
+  <div class="decision">
+    <h4>3 · Screens 4 & 5 refaits (murs de texte → 1 visuel fort)</h4>
+    <p>Recadrage du mockup phone + overlay notif iOS native (screen 4) ou sticker matinal (screen 5). Fini l'overwhelm.</p>
+  </div>
+  <div class="decision">
+    <h4>4 · Rythme chromatique (3 ruptures violettes)</h4>
+    <p>Screens 2, 5, 8 passent en violet brand plein. L'œil accroche au scroll App Store au lieu de 8 écrans gris-pâle.</p>
+  </div>
+</section>
+
+<!-- === IDENTITY === -->
+<section id="identity" style="background: white; max-width: none; padding-left: 0; padding-right: 0;">
+  <div style="max-width: 1100px; margin: 0 auto; padding: 0 40px;">
+    <h2>Identité</h2>
+    <p class="subtitle">Nom, sous-titre, mots-clés. Comparaison V1 vs V2.</p>
+
+    <h3>Nom de l'app · 30c max</h3>
+    <div class="diff">
+      <div class="before">
+        <span class="tag">Avant</span>
+        <p>Recall People - CRM Personnel</p>
+        <small style="color: var(--ink-soft);">30 caractères</small>
+      </div>
+      <div class="after">
+        <span class="tag">Après</span>
+        <p>Recall People : Mémoire Amis</p>
+        <small style="color: var(--ink-soft);">29 caractères</small>
+      </div>
+    </div>
+
+    <h3>Sous-titre · 30c max</h3>
+    <div class="diff">
+      <div class="before">
+        <span class="tag">Avant</span>
+        <p>N'oubliez plus vos rencontres</p>
+        <small style="color: var(--ink-soft);">29 caractères</small>
+      </div>
+      <div class="after">
+        <span class="tag">Après</span>
+        <p>Soyez celui qui se souvient</p>
+        <small style="color: var(--ink-soft);">27 caractères</small>
+      </div>
+    </div>
+
+    <h3>Mots-clés · 100c max</h3>
+    <pre class="code">crm personnel,memoire,amis,contacts,notes vocales,rappels,ia,anniversaires,relations,networking</pre>
+    <p style="color: var(--ink-soft); font-size: 14px;">99 caractères · ajout : <code class="inline">memoire</code> <code class="inline">amis</code> <code class="inline">anniversaires</code> <code class="inline">rappels</code> · retrait : <code class="inline">noms</code> <code class="inline">conversations</code></p>
+
+    <h3>Texte promotionnel · 170c max</h3>
+    <div class="card" style="background: var(--bg);">
+      <span class="label">FR · 157c</span>
+      <p style="margin: 0; font-size: 16px; line-height: 1.6;">Parlez après une rencontre, l'IA range tout. <strong>Notif la veille de chaque événement</strong> : anniversaire, entretien, voyage. Soyez la personne qui n'oublie rien.</p>
+    </div>
+    <div class="card" style="background: var(--bg); margin-top: 12px;">
+      <span class="label">EN · 132c</span>
+      <p style="margin: 0; font-size: 16px; line-height: 1.6;">Talk after any meet-up — AI files it. <strong>Notified the day before</strong> every birthday, interview, or trip. Be the friend who never forgets.</p>
+    </div>
+  </div>
+</section>
+
+<!-- === DESCRIPTION === -->
+<section id="description">
+  <h2>Description complète</h2>
+  <p class="subtitle">Intro émotionnelle + notifs en hero. ~2900c FR, ~2800c EN (limite 4000c).</p>
+
+  <div class="tabs">
+    <button class="active" onclick="switchTab(event, 'desc-fr')">FR</button>
+    <button onclick="switchTab(event, 'desc-en')">EN</button>
+  </div>
+
+  <div id="desc-fr" class="tab-content active">
+    <div class="desc-card">
+<pre>« Tiens, comment s'est passé ton entretien la semaine dernière ? »
+
+<strong>Soyez cette personne.</strong> Celle qui se souvient. De chaque rendez-vous, voyage, anniversaire, projet de vos proches et collègues.
+
+Recall People vous prévient la veille de ce qui compte pour eux — pour que vous puissiez être là, au bon moment, avec la bonne question.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+<strong>LE PROBLÈME</strong>
+
+On oublie 80% d'une conversation en 24 heures. Le marathon de Marcus, l'entretien de Sarah, le déménagement d'Emma à Lyon — tout disparaît.
+
+Et pourtant, ces petits détails sont exactement ce qui fait qu'on tient à quelqu'un.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+<strong>COMMENT ÇA MARCHE</strong>
+
+Parlez. C'est tout. Après n'importe quel café, dîner ou coup de fil, ouvrez Recall et racontez :
+
+« Je viens de voir Sarah. Elle passe un entretien chez Google la semaine prochaine, et elle déménage enfin dans son nouvel appart à Lyon le 15. »
+
+C'est terminé. Recall fait le reste :
+
+✓ Extrait les noms, infos et dates automatiquement
+✓ Crée ou enrichit la fiche contact de Sarah
+✓ Programme une notif la veille de chaque événement à 19h
+✓ Vous rappelle le lendemain de prendre des nouvelles
+✓ Génère un résumé IA de qui est vraiment cette personne
+
+Pas de saisie. Pas d'organisation. Juste votre voix.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+<strong>POURQUOI C'EST DIFFÉRENT</strong>
+
+◆ <strong>NOTIFS LA VEILLE À 19H</strong>
+La majorité des apps vous rappellent le jour même, trop tard. Recall vous prévient la veille au soir — le moment parfait pour préparer un message, un cadeau, un mot. « Bonne chance pour ton entretien demain, j'y crois ! »
+
+◆ <strong>RELANCE LE LENDEMAIN MATIN</strong>
+Le lendemain d'un événement, Recall vous souffle : « Demande à Sarah comment s'est passé son entretien. » Vous devenez naturellement la personne attentionnée.
+
+◆ <strong>CAPTURE VOCALE</strong>
+Notes en quelques secondes. 5 langues : français, anglais, espagnol, allemand, italien.
+
+◆ <strong>FICHES CONTACT QUI SE REMPLISSENT TOUTES SEULES</strong>
+Métier, famille, hobbies, projets, derniers sujets — tout au même endroit. Plus un résumé IA qui dit en 3 lignes qui est vraiment cette personne.
+
+◆ <strong>RECHERCHE PAR QUESTION</strong>
+« Qui a des enfants ? » « Qui je dois recontacter ce mois-ci ? » — décrivez, Recall trouve.
+
+◆ <strong>DIGEST HEBDO (PRO)</strong>
+Tous les lundis à 9h, Recall vous résume la semaine de vos proches.
+
+◆ <strong>VIE PRIVÉE PAR DÉFAUT</strong>
+Données chiffrées localement. Sync optionnelle entre vos appareils. Pas d'accès tiers, jamais.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Les petits détails font les grandes différences.
+
+Téléchargez Recall People. Soyez la personne dont on dit : « Comment fait-il pour se souvenir de tout ? »</pre>
+    </div>
+  </div>
+
+  <div id="desc-en" class="tab-content">
+    <div class="desc-card">
+<pre>"So — how did your interview go last week?"
+
+<strong>Be that person.</strong> The one who remembers. Every meet-up, trip, birthday, project of the people in your life.
+
+Recall People nudges you the day before what matters to them — so you show up at the right moment, with the right question.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+<strong>THE PROBLEM</strong>
+
+We forget 80% of any conversation within 24 hours. Marcus's marathon, Sarah's Google interview, Emma moving to Brooklyn — gone.
+
+And yet those small details are exactly what makes someone feel cared for.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+<strong>HOW IT WORKS</strong>
+
+Just talk. After any coffee, call, or dinner, open Recall and tell it:
+
+"Just saw Sarah. She's interviewing at Google next week, and she's finally moving to that new apartment in Brooklyn on the 15th."
+
+Done. Recall handles the rest:
+
+✓ Extracts names, facts, and dates automatically
+✓ Creates or updates Sarah's contact profile
+✓ Schedules a reminder the day before each event at 7pm
+✓ Nudges you the next morning to follow up
+✓ Generates an AI summary of who they really are
+
+No typing. No organizing. Just talking.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+<strong>WHY IT'S DIFFERENT</strong>
+
+◆ <strong>NOTIFIED THE DAY BEFORE, AT 7 PM</strong>
+Most apps remind you the day of — too late. Recall pings you the evening before. The perfect moment to draft a message, grab a gift, prepare a thought. "Good luck tomorrow, I'm rooting for you."
+
+◆ <strong>FOLLOW-UP NUDGE THE NEXT MORNING</strong>
+The morning after an event, Recall whispers: "Ask Sarah how her interview went." You naturally become the thoughtful one.
+
+◆ <strong>VOICE-FIRST CAPTURE</strong>
+Notes in seconds. 5 languages — English, French, Spanish, German, Italian.
+
+◆ <strong>CONTACT PROFILES THAT FILL THEMSELVES</strong>
+Job, family, hobbies, projects, latest topics — all in one place. Plus an AI summary that tells you who they really are in 3 lines.
+
+◆ <strong>SEARCH BY QUESTION</strong>
+"Who has kids?" "Who should I reconnect with this month?" — just describe.
+
+◆ <strong>WEEKLY DIGEST (PRO)</strong>
+Every Monday at 9am, Recall sums up the week ahead in your circle.
+
+◆ <strong>PRIVATE BY DEFAULT</strong>
+Your data is stored locally and encrypted. Optional sync across your devices. No third-party access, ever.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Small details make big differences.
+
+Download Recall People. Be the person people say: "How do they remember everything?"</pre>
+    </div>
+  </div>
+</section>
+
+<!-- === SCREENSHOTS === -->
+<section id="screenshots" style="background: white; max-width: none; padding-left: 0; padding-right: 0;">
+  <div style="max-width: 1100px; margin: 0 auto; padding: 0 40px;">
+    <h2>Les 8 screenshots</h2>
+    <p class="subtitle">Aperçu visuel des nouvelles captions et fonds. Cliquez sur un screen pour son détail design.</p>
+
+    <div class="tabs">
+      <button class="active" onclick="switchTab(event, 'cap-en')">EN</button>
+      <button onclick="switchTab(event, 'cap-fr')">FR</button>
+    </div>
+
+    <div id="cap-en" class="tab-content active">
+      <div class="screens-grid">
+
+        <div class="screen light">
+          <span class="num">01</span>
+          <div class="role">Hero · Liste contacts</div>
+          <div class="headline">Be the friend who remembers</div>
+          <div class="subline">every detail, every person</div>
+          <div class="meta">Sticker : <span class="sticker">🎂 Emma — demain</span></div>
+        </div>
+
+        <div class="screen brand">
+          <span class="num">02</span>
+          <div class="role">Voice · Chat IA</div>
+          <div class="headline">Talk. AI files it all</div>
+          <div class="subline">names, dates, plans — extracted in 5s</div>
+          <div class="meta">Bulle : <span class="sticker">"Coffee with Sarah..."</span></div>
+        </div>
+
+        <div class="screen light">
+          <span class="num">03</span>
+          <div class="role">Profil contact</div>
+          <div class="headline">Every friend, one glance</div>
+          <div class="subline">job, family, hobbies, latest topics</div>
+          <div class="meta">Callouts : <span class="sticker" style="background:#FFD66B;">Job</span> <span class="sticker" style="background:#FF8FB0;color:white;">Famille</span></div>
+        </div>
+
+        <div class="screen glow flag-priority">
+          <span class="num">04</span>
+          <div class="role" style="margin-top: 16px;">Events à venir</div>
+          <div class="headline">Notified the day before, at 7pm</div>
+          <div class="subline">birthdays, interviews, trips — never missed</div>
+          <div class="meta">Overlay : <span class="sticker">🔔 Notif iOS native</span></div>
+        </div>
+
+        <div class="screen brand flag-priority">
+          <span class="num">05</span>
+          <div class="role" style="margin-top: 16px;">Questions à poser</div>
+          <div class="headline">We tell you what to ask</div>
+          <div class="subline">day after: nudge to follow up at 10am</div>
+          <div class="meta">Sticker : <span class="sticker">🌅 Tomorrow 10:00 AM</span></div>
+        </div>
+
+        <div class="screen light">
+          <span class="num">06</span>
+          <div class="role">Recherche sémantique</div>
+          <div class="headline">Find anyone by asking</div>
+          <div class="subline">"Who has kids?" "Who I met at the conf?"</div>
+          <div class="meta">Bulle : <span class="sticker">"Who works in tech?"</span></div>
+        </div>
+
+        <div class="screen light">
+          <span class="num">07</span>
+          <div class="role">Notes en contexte</div>
+          <div class="headline">Notes that stick to people</div>
+          <div class="subline">no more orphan notes</div>
+          <div class="meta">Effet : <span class="sticker">flou progressif + avatar</span></div>
+        </div>
+
+        <div class="screen brand">
+          <span class="num">08</span>
+          <div class="role">Langues · Closing</div>
+          <div class="headline">Speak your language</div>
+          <div class="subline">EN · FR · ES · DE · IT</div>
+          <div class="meta">CTA : <span class="sticker">14-day free trial</span></div>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="cap-fr" class="tab-content">
+      <div class="screens-grid">
+
+        <div class="screen light">
+          <span class="num">01</span>
+          <div class="role">Hero · Liste contacts</div>
+          <div class="headline">Soyez celui qui se souvient</div>
+          <div class="subline">de chaque détail, de chaque proche</div>
+          <div class="meta">Sticker : <span class="sticker">🎂 Emma — demain</span></div>
+        </div>
+
+        <div class="screen brand">
+          <span class="num">02</span>
+          <div class="role">Voice · Chat IA</div>
+          <div class="headline">Parlez. L'IA range tout</div>
+          <div class="subline">noms, dates, projets — en 5 secondes</div>
+          <div class="meta">Bulle : <span class="sticker">"Café avec Sarah..."</span></div>
+        </div>
+
+        <div class="screen light">
+          <span class="num">03</span>
+          <div class="role">Profil contact</div>
+          <div class="headline">Chaque ami, en un coup d'œil</div>
+          <div class="subline">job, famille, hobbies, derniers sujets</div>
+          <div class="meta">Callouts : <span class="sticker" style="background:#FFD66B;">Job</span> <span class="sticker" style="background:#FF8FB0;color:white;">Famille</span></div>
+        </div>
+
+        <div class="screen glow flag-priority">
+          <span class="num">04</span>
+          <div class="role" style="margin-top: 16px;">Events à venir</div>
+          <div class="headline">Notif la veille, à 19h</div>
+          <div class="subline">plus jamais d'anniversaire oublié</div>
+          <div class="meta">Overlay : <span class="sticker">🔔 Notif iOS native</span></div>
+        </div>
+
+        <div class="screen brand flag-priority">
+          <span class="num">05</span>
+          <div class="role" style="margin-top: 16px;">Questions à poser</div>
+          <div class="headline">On vous souffle quoi demander</div>
+          <div class="subline">le lendemain matin, prenez des nouvelles</div>
+          <div class="meta">Sticker : <span class="sticker">🌅 Demain 10:00</span></div>
+        </div>
+
+        <div class="screen light">
+          <span class="num">06</span>
+          <div class="role">Recherche sémantique</div>
+          <div class="headline">Trouvez tout avec une question</div>
+          <div class="subline">« Qui a des enfants ? »</div>
+          <div class="meta">Bulle : <span class="sticker">« Qui bosse dans la tech ? »</span></div>
+        </div>
+
+        <div class="screen light">
+          <span class="num">07</span>
+          <div class="role">Notes en contexte</div>
+          <div class="headline">Chaque note collée à la personne</div>
+          <div class="subline">fini les notes orphelines</div>
+          <div class="meta">Effet : <span class="sticker">flou progressif + avatar</span></div>
+        </div>
+
+        <div class="screen brand">
+          <span class="num">08</span>
+          <div class="role">Langues · Closing</div>
+          <div class="headline">Parlez votre langue</div>
+          <div class="subline">FR · EN · ES · DE · IT</div>
+          <div class="meta">CTA : <span class="sticker">14 jours d'essai gratuit</span></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- === DESIGN === -->
+<section id="design">
+  <h2>Design specs</h2>
+  <p class="subtitle">Codes couleurs, typo, et détails par screen.</p>
+
+  <h3>Palette</h3>
+  <div class="grid-4">
+    <div class="card" style="background: var(--brand); color: white;">
+      <span class="label" style="color: rgba(255,255,255,0.7);">Brand</span>
+      <div class="value">#6B4FFF</div>
+      <div class="count" style="color: rgba(255,255,255,0.75);">Hero, ruptures, CTA</div>
+    </div>
+    <div class="card" style="background: var(--bg);">
+      <span class="label">Background clair</span>
+      <div class="value">#F7F4FF</div>
+      <div class="count">Fond principal</div>
+    </div>
+    <div class="card" style="background: var(--brand-light);">
+      <span class="label">Brand light</span>
+      <div class="value">#E8DFFF</div>
+      <div class="count">Dégradé screen 4</div>
+    </div>
+    <div class="card" style="background: var(--yellow);">
+      <span class="label">Yellow accent</span>
+      <div class="value">#FFD66B</div>
+      <div class="count">Sticker matinal, CTA</div>
+    </div>
+  </div>
+
+  <h3>Typo overlay</h3>
+  <div class="card">
+    <p><strong>Headline</strong> · SF Pro Display Bold <code class="inline">96–110pt</code> · max 2 lignes, max 9 mots<br>
+       <strong>Sous-ligne</strong> · SF Pro Text Regular <code class="inline">38–44pt</code> · opacité 70%, max 1 ligne<br>
+       <strong>Marges</strong> · 80px gauche/droite, 100px haut<br>
+       <strong>Mockup phone</strong> · ~60% hauteur canvas, centré, ombre <code class="inline">0 40px 80px rgba(26,20,40,0.18)</code></p>
+  </div>
+</section>
+
+<!-- === RHYTHM === -->
+<section id="rhythm" style="background: white; max-width: none; padding-left: 0; padding-right: 0;">
+  <div style="max-width: 1100px; margin: 0 auto; padding: 0 40px;">
+    <h2>Rythme chromatique</h2>
+    <p class="subtitle">3 ruptures violettes (screens 2, 5, 8) pour casser la monotonie au scroll App Store.</p>
+
+    <div class="rhythm">
+      <div class="light">1</div>
+      <div class="brand">2</div>
+      <div class="light">3</div>
+      <div class="glow">4</div>
+      <div class="brand">5</div>
+      <div class="light">6</div>
+      <div class="light">7</div>
+      <div class="brand">8</div>
+    </div>
+
+    <h3>Funnel narratif</h3>
+    <div class="grid-4">
+      <div class="card"><span class="label">1 · Hero</span><div class="value">Promesse</div></div>
+      <div class="card card-brand"><span class="label">2 · Voice</span><div class="value">Le geste</div></div>
+      <div class="card"><span class="label">3 · Profil</span><div class="value">Résultat</div></div>
+      <div class="card"><span class="label">4 · Notif</span><div class="value">Pic valeur #1</div></div>
+      <div class="card card-brand"><span class="label">5 · Follow-up</span><div class="value">Pic valeur #2</div></div>
+      <div class="card"><span class="label">6 · Search</span><div class="value">Flexibilité</div></div>
+      <div class="card"><span class="label">7 · Notes</span><div class="value">Rigueur</div></div>
+      <div class="card card-brand"><span class="label">8 · Langues</span><div class="value">Close + CTA</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- === SCREEN DETAILS === -->
+<section id="screen-details">
+  <h2>Détail screens 4 & 5</h2>
+  <p class="subtitle">Les deux écrans à refaire en priorité. Brief actionnable.</p>
+
+  <div class="grid-2">
+    <div class="card" style="background: linear-gradient(180deg, var(--brand-light), var(--bg));">
+      <span class="label">Screen 04 · À refaire</span>
+      <h3 style="margin: 8px 0;">Notified the day before, at 7pm</h3>
+      <p><strong>Fond :</strong> clair + dégradé radial violet doux derrière le phone</p>
+      <p><strong>Mockup :</strong> recadré, 1 seule card event en gros, autres cards sortent du cadre bas</p>
+      <p><strong>Overlay clé :</strong> fausse notif iOS native en haut du phone</p>
+      <pre class="code" style="margin-top: 12px; font-size: 12px;">📱 Recall People · now
+Tomorrow: Marcus's marathon 🏃
+Don't forget to wish him good luck</pre>
+      <p style="font-size: 13px; color: var(--ink-soft); margin-top: 8px;">Style notif : <code class="inline">#FFFFFFEE</code> blur, radius 28px, ombre subtile</p>
+    </div>
+
+    <div class="card card-brand">
+      <span class="label">Screen 05 · À refaire</span>
+      <h3 style="margin: 8px 0; color: white;">We tell you what to ask</h3>
+      <p><strong>Fond :</strong> violet brand plein <code style="background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 4px;">#6B4FFF</code></p>
+      <p><strong>Mockup :</strong> recadré, 1 seule question en gros</p>
+      <p><strong>Sticker matinal :</strong> cartouche jaune en haut-droite</p>
+      <pre class="code" style="margin-top: 12px; font-size: 12px; background: rgba(0,0,0,0.3);">🌅 Tomorrow 10:00 AM</pre>
+      <p style="font-size: 13px; color: rgba(255,255,255,0.8); margin-top: 8px;">Horaire tiré de <code style="background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 4px;">getPostEventFollowUpTriggerDate</code></p>
+    </div>
+  </div>
+</section>
+
+<!-- === CHECKLIST === -->
+<section id="checklist" style="background: white; max-width: none; padding-left: 0; padding-right: 0;">
+  <div style="max-width: 1100px; margin: 0 auto; padding: 0 40px;">
+    <h2>Checklist d'exécution</h2>
+    <p class="subtitle">Étapes pour livrer la planche refondue.</p>
+
+    <ul class="check">
+      <li>Créer 8 frames Figma <code class="inline">1290 × 2796</code> (iPhone 16 Pro Max)</li>
+      <li>Appliquer les fonds selon la table rythmique (3 violets, 4 clairs, 1 glow)</li>
+      <li>Importer les mockups depuis <code class="inline">ASO-FINAL-XX.png</code></li>
+      <li>Screen 4 : créer composant overlay notif iOS native + recadrer mockup</li>
+      <li>Screen 5 : recadrer mockup pour 1 question en gros + sticker jaune <code class="inline">🌅 10:00 AM</code></li>
+      <li>Screens 1, 3, 6 : ajouter stickers/callouts colorés</li>
+      <li>Vérifier chaque headline ≤ 2 lignes en preview iPhone</li>
+      <li>Exporter PNG <code class="inline">1290 × 2796</code> ou HEIC pour App Store Connect</li>
+      <li>Test utilisateur : "qu'est-ce que fait cette app ?" après 5s de scroll</li>
+      <li>Mettre à jour App Store Connect (FR + EN) avec wording V2</li>
+      <li>Mettre à jour Google Play Console (FR + EN)</li>
+      <li>Optionnel : A/B test V1 vs V2 sur 2 semaines</li>
+    </ul>
+  </div>
+</section>
+
+<!-- === REFS === -->
+<section id="refs">
+  <h2>Fichiers source</h2>
+  <p class="subtitle">Tout est versionné dans <code class="inline">docs/marketing/</code></p>
+
+  <div class="grid-2">
+    <div class="card">
+      <span class="label">iOS</span>
+      <div class="value">aso-ios-fr-v2.md</div>
+      <div class="count">Version FR complète</div>
+    </div>
+    <div class="card">
+      <span class="label">iOS</span>
+      <div class="value">aso-ios-en-v2.md</div>
+      <div class="count">Version EN complète</div>
+    </div>
+    <div class="card">
+      <span class="label">Android</span>
+      <div class="value">aso-google-fr-v2.md</div>
+      <div class="count">Google Play FR</div>
+    </div>
+    <div class="card">
+      <span class="label">Android</span>
+      <div class="value">aso-google-en-v2.md</div>
+      <div class="count">Google Play EN</div>
+    </div>
+    <div class="card card-brand" style="grid-column: 1 / -1;">
+      <span class="label">Design</span>
+      <div class="value large">aso-screenshots-figma-brief.md</div>
+      <div class="count">Brief Figma détaillé · stickers, recadrages, palette, checklist</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><strong>Recall People — ASO V2</strong> · Soyez la personne qui se souvient.</p>
+  <p>Généré le 2026-05-19 · Branch <code style="background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:4px;">codex/encrypted-sync-onboarding</code></p>
+</footer>
+
+<script>
+  function switchTab(event, tabId) {
+    const tabsContainer = event.target.closest('.tabs');
+    tabsContainer.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+
+    const section = tabsContainer.parentElement;
+    section.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+  }
+</script>
+
+</body>
+</html>

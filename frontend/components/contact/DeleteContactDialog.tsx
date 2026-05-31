@@ -34,8 +34,8 @@ export function DeleteContactDialog({
       animationType="fade"
       onRequestClose={onCancel}
     >
-      <View style={styles.overlay}>
-        <View style={styles.dialog}>
+      <Pressable style={styles.overlay} onPress={onCancel}>
+        <Pressable style={styles.dialog} onPress={(event) => event.stopPropagation()}>
           <View style={styles.avatarContainer}>
             <ContactAvatar
               firstName={contactFirstName}
@@ -62,8 +62,8 @@ export function DeleteContactDialog({
               </Text>
             </Pressable>
           </View>
-        </View>
-      </View>
+        </Pressable>
+      </Pressable>
     </Modal>
   );
 }

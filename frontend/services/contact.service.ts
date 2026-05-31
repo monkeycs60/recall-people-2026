@@ -1,6 +1,6 @@
 import * as Crypto from 'expo-crypto';
 import { getDatabase } from '@/lib/db';
-import { Contact, ContactWithDetails, Gender } from '@/types';
+import { Contact, ContactWithDetails, Gender, SuggestedQuestion, SuggestedQuestionCategory } from '@/types';
 import { hotTopicService } from './hot-topic.service';
 import { syncQueueService } from './sync-queue.service';
 
@@ -40,7 +40,7 @@ const contactRowToSyncPayload = (row: ContactSyncRow) => ({
   birthdayMonth: row.birthday_month,
   birthdayYear: row.birthday_year,
   aiSummary: row.ai_summary,
-  suggestedQuestions: row.suggested_questions ? JSON.parse(row.suggested_questions) : null,
+  suggestedQuestions: parseSuggestedQuestions(row.suggested_questions) ?? null,
   meetingContext: row.meeting_context,
   reminderFrequencyDays: row.reminder_frequency_days,
   lastContactAt: row.last_contact_at,
@@ -48,6 +48,41 @@ const contactRowToSyncPayload = (row: ContactSyncRow) => ({
   updatedAt: row.updated_at,
   deletedAt: row.deleted_at,
 });
+
+const LEGACY_CATEGORY_BY_INDEX: SuggestedQuestionCategory[] = ['ask', 'followUp', 'remember'];
+const VALID_CATEGORIES: SuggestedQuestionCategory[] = ['ask', 'followUp', 'remember'];
+
+const parseSuggestedQuestions = (value: string | null | undefined): SuggestedQuestion[] | undefined => {
+  if (!value) return undefined;
+
+  try {
+    const parsed: unknown = JSON.parse(value);
+    if (!Array.isArray(parsed)) return undefined;
+
+    const items: SuggestedQuestion[] = [];
+    for (let index = 0; index < parsed.length && items.length < 3; index += 1) {
+      const entry = parsed[index];
+      if (typeof entry === 'string') {
+        const text = entry.trim();
+        if (!text) continue;
+        items.push({ category: LEGACY_CATEGORY_BY_INDEX[index] ?? null, text });
+        continue;
+      }
+      if (entry && typeof entry === 'object' && 'text' in entry) {
+        const candidate = entry as { category?: unknown; text?: unknown };
+        const text = typeof candidate.text === 'string' ? candidate.text.trim() : '';
+        if (!text) continue;
+        const category = VALID_CATEGORIES.includes(candidate.category as SuggestedQuestionCategory)
+          ? (candidate.category as SuggestedQuestionCategory)
+          : null;
+        items.push({ category, text });
+      }
+    }
+    return items.length > 0 ? items : undefined;
+  } catch {
+    return undefined;
+  }
+};
 
 const parseStringArray = (value: string | null | undefined): string[] | undefined => {
   if (!value) return undefined;
@@ -192,7 +227,7 @@ export const contactService = {
       birthdayMonth: contactRow.birthday_month || undefined,
       birthdayYear: contactRow.birthday_year || undefined,
       aiSummary: contactRow.ai_summary || undefined,
-      suggestedQuestions: contactRow.suggested_questions ? JSON.parse(contactRow.suggested_questions) : undefined,
+      suggestedQuestions: parseSuggestedQuestions(contactRow.suggested_questions),
       meetingContext: contactRow.meeting_context || undefined,
       loves: parseStringArray(contactRow.loves),
       reminderFrequencyDays: contactRow.reminder_frequency_days ?? undefined,
@@ -326,7 +361,7 @@ export const contactService = {
       birthdayMonth: number | null;
       birthdayYear: number | null;
       aiSummary: string;
-      suggestedQuestions: string[];
+      suggestedQuestions: SuggestedQuestion[];
       meetingContext: string | null;
       loves: string[];
       reminderFrequencyDays: number | null;

@@ -9,8 +9,17 @@ import { ContactAvatar } from '@/components/contact/ContactAvatar';
 import { Colors, Fonts, Shadows } from '@/constants/theme';
 import { ContactDetailSkeleton } from '@/components/skeleton/ContactDetailSkeleton';
 
-const tonePresets: { background: string; textColor: string; labelColor: string; rotation: number; marginRight: number; marginLeft: number }[] = [
-  {
+type TonePreset = {
+  background: string;
+  textColor: string;
+  labelColor: string;
+  rotation: number;
+  marginRight: number;
+  marginLeft: number;
+};
+
+const TONE_BY_CATEGORY: Record<'ask' | 'followUp' | 'remember', TonePreset> = {
+  ask: {
     background: Colors.surface,
     textColor: Colors.textPrimary,
     labelColor: Colors.primary,
@@ -18,7 +27,7 @@ const tonePresets: { background: string; textColor: string; labelColor: string; 
     marginRight: 36,
     marginLeft: 0,
   },
-  {
+  followUp: {
     background: Colors.primary,
     textColor: Colors.textInverse,
     labelColor: 'rgba(255,255,255,0.75)',
@@ -26,7 +35,7 @@ const tonePresets: { background: string; textColor: string; labelColor: string; 
     marginRight: 50,
     marginLeft: 22,
   },
-  {
+  remember: {
     background: Colors.surface,
     textColor: Colors.textPrimary,
     labelColor: Colors.accent,
@@ -34,9 +43,9 @@ const tonePresets: { background: string; textColor: string; labelColor: string; 
     marginRight: 80,
     marginLeft: 0,
   },
-];
+};
 
-const sectionLabels: ('ask' | 'followUp' | 'remember')[] = ['ask', 'followUp', 'remember'];
+const FALLBACK_CATEGORY_BY_INDEX: ('ask' | 'followUp' | 'remember')[] = ['ask', 'followUp', 'remember'];
 
 export default function ContactIcebreakersScreen() {
   const { t } = useTranslation();
@@ -117,11 +126,11 @@ export default function ContactIcebreakersScreen() {
           </View>
         ) : (
           questions.map((question, index) => {
-            const tone = tonePresets[index % tonePresets.length];
-            const sectionKey = sectionLabels[index % sectionLabels.length];
+            const sectionKey = question.category ?? FALLBACK_CATEGORY_BY_INDEX[index % FALLBACK_CATEGORY_BY_INDEX.length];
+            const tone = TONE_BY_CATEGORY[sectionKey];
             return (
               <View
-                key={`${question}-${index}`}
+                key={`${question.text}-${index}`}
                 style={[
                   styles.bubble,
                   {
@@ -135,7 +144,7 @@ export default function ContactIcebreakersScreen() {
                 <Text style={[styles.bubbleLabel, { color: tone.labelColor }]}>
                   ✦ {t(`contactIcebreakers.bucket.${sectionKey}`)}
                 </Text>
-                <Text style={[styles.bubbleText, { color: tone.textColor }]}>{question}</Text>
+                <Text style={[styles.bubbleText, { color: tone.textColor }]}>{question.text}</Text>
               </View>
             );
           })

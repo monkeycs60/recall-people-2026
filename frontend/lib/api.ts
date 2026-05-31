@@ -1,6 +1,6 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import { getToken, refreshAccessToken } from './auth';
-import { ExtractionResult } from '@/types';
+import { ExtractionResult, SuggestedQuestion } from '@/types';
 import { useSettingsStore } from '@/stores/settings-store';
 import { ApiError, NetworkError, showApiError } from './error-handler';
 import { API_URL } from './config';
@@ -291,8 +291,8 @@ export const generateSuggestedQuestions = async (data: {
     transcription: string;
     createdAt: string;
   }>;
-}): Promise<string[]> => {
-  const response = await apiCall<{ success: boolean; suggestedQuestions: string[] }>(
+}): Promise<SuggestedQuestion[]> => {
+  const response = await apiCall<{ success: boolean; suggestedQuestions: SuggestedQuestion[] }>(
     '/api/suggested-questions',
     {
       method: 'POST',
@@ -684,10 +684,14 @@ export type AskResponse = {
   noInfoFound: boolean;
 };
 
-export const askQuestion = async (data: AskRequest): Promise<AskResponse> => {
+export const askQuestion = async (
+  data: AskRequest,
+  options: { showErrorToast?: boolean } = {}
+): Promise<AskResponse> => {
   return apiCall('/api/ask', {
     method: 'POST',
     body: { ...data, language: getCurrentLanguage() },
+    showErrorToast: options.showErrorToast,
   });
 };
 

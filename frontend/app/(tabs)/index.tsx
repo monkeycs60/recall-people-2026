@@ -29,6 +29,8 @@ import {
   CalendarDays,
   BotMessageSquare,
   CheckCircle2,
+  Clock3,
+  ChevronRight,
 } from 'lucide-react-native';
 import { Colors, Shadows, Fonts } from '@/constants/theme';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -48,6 +50,7 @@ import { useAppStore } from '@/stores/app-store';
 import { generateAvatarFromHints } from '@/lib/api';
 import { showErrorToast, showInfoToast } from '@/lib/error-handler';
 import { buildGroupChips } from '@/lib/group-cache';
+import { countOverdueHotTopics, getHotTopicDateTone } from '@/utils/hotTopics';
 
 const FOLLOW_UP_THRESHOLD_DAYS = 14;
 
@@ -87,15 +90,6 @@ function formatHotTopicDate(dateString: string): string {
     return format(parseISO(dateString), 'd MMM', { locale: getDateLocale() });
   } catch {
     return '';
-  }
-}
-
-function isWithinOneMonth(dateString: string | undefined): boolean {
-  if (!dateString) return true;
-  try {
-    return differenceInDays(parseISO(dateString), new Date()) <= 30;
-  } catch {
-    return true;
   }
 }
 
@@ -274,6 +268,26 @@ export default function ContactsScreen() {
     });
   }, [contacts, filterText, selectedGroupId, groupContactIds]);
 
+  const overdueContacts = useMemo(() => {
+    return allContacts
+      .map((contact) => ({
+        contact,
+        overdueCount: countOverdueHotTopics(contactPreviews.get(contact.id)?.hotTopics || []),
+      }))
+      .filter((entry) => entry.overdueCount > 0);
+  }, [allContacts, contactPreviews]);
+
+  const overdueHotTopicCount = useMemo(() => {
+    return overdueContacts.reduce((total, entry) => total + entry.overdueCount, 0);
+  }, [overdueContacts]);
+
+  const handleOpenFirstOverdueContact = () => {
+    const firstOverdueContact = overdueContacts[0]?.contact;
+    if (firstOverdueContact) {
+      router.push(`/contact/${firstOverdueContact.id}`);
+    }
+  };
+
   const handleRefresh = async () => {
     setIsPullRefreshing(true);
     await Promise.all([
@@ -329,30 +343,40 @@ export default function ContactsScreen() {
           {topHotTopics.length > 0 && (
             <View style={styles.topicPillsRow}>
               {topHotTopics.map((topic) => {
-                const isHot = isWithinOneMonth(topic.eventDate);
+                const tone = getHotTopicDateTone(topic.eventDate);
+                const formattedDate = topic.eventDate ? formatHotTopicDate(topic.eventDate) : '';
                 return (
                   <View
                     key={topic.id}
                     style={[
                       styles.topicPill,
-                      { backgroundColor: isHot ? Colors.accentLight : Colors.amberLight },
+                      { backgroundColor: tone.backgroundColor },
                     ]}
                   >
-                    <Text style={styles.topicPillEmoji}>
-                      {isHot ? '\uD83D\uDD25' : '\uD83D\uDCC5'}
-                    </Text>
+                    <View style={[
+                      styles.topicPillIcon,
+                      { backgroundColor: tone.iconBackgroundColor },
+                    ]}>
+                      <Clock3 size={9} color={tone.iconColor} strokeWidth={2.8} />
+                    </View>
                     <Text
                       style={[
                         styles.topicPillText,
-                        { color: isHot ? '#B03A11' : '#6B4B00' },
+                        { color: tone.textColor },
                       ]}
                       numberOfLines={1}
                     >
                       {topic.title}
                     </Text>
-                    {topic.eventDate && (
-                      <Text style={styles.topicPillDate}>
-                        {'· '}{formatHotTopicDate(topic.eventDate)}
+                    {formattedDate && (
+                      <Text style={[
+                        styles.topicPillDate,
+                        {
+                          backgroundColor: tone.dateBackgroundColor,
+                          color: tone.dateTextColor,
+                        },
+                      ]}>
+                        {'· '}{formattedDate}
                       </Text>
                     )}
                   </View>
@@ -458,6 +482,45 @@ export default function ContactsScreen() {
             </Pressable>
           </ScrollView>
         )}
+
+        {overdueHotTopicCount > 0 && (
+          <Pressable
+            style={styles.overdueBanner}
+            onPress={handleOpenFirstOverdueContact}
+          >
+            <View style={styles.overdueAvatarStack}>
+              {overdueContacts.slice(0, 2).map(({ contact }, avatarIndex) => (
+                <View
+                  key={contact.id}
+                  style={[
+                    styles.overdueAvatarFrame,
+                    avatarIndex > 0 && styles.overdueAvatarOffset,
+                  ]}
+                >
+                  <ContactAvatar
+                    firstName={contact.firstName}
+                    lastName={contact.lastName}
+                    gender={contact.gender}
+                    avatarUrl={contact.avatarUrl}
+                    size="tiny"
+                    cacheKey={contact.updatedAt}
+                    recyclingKey={`overdue-${contact.id}`}
+                    isGenerating={isAvatarGenerating(contact.id)}
+                  />
+                </View>
+              ))}
+            </View>
+            <View style={styles.overdueTextColumn}>
+              <Text style={styles.overdueTitle} numberOfLines={1}>
+                {t('contacts.overdueHotTopics', { count: overdueHotTopicCount })}
+              </Text>
+              <Text style={styles.overdueSubtitle} numberOfLines={1}>
+                {t('contacts.overdueHotTopicsSubtitle')}
+              </Text>
+            </View>
+            <ChevronRight size={18} color="#D73524" strokeWidth={2.6} />
+          </Pressable>
+        )}
       </View>
 
       {isLoading ? (
@@ -530,8 +593,8 @@ export default function ContactsScreen() {
         animationType="fade"
         onRequestClose={() => setHasSeenGuidedTour(true)}
       >
-        <View style={styles.guidedTourOverlay}>
-          <View style={styles.guidedTourCard}>
+        <Pressable style={styles.guidedTourOverlay} onPress={() => setHasSeenGuidedTour(true)}>
+          <Pressable style={styles.guidedTourCard} onPress={(event) => event.stopPropagation()}>
             <View style={styles.guidedTourIcon}>
               <Mic size={24} color={Colors.textInverse} strokeWidth={2.5} />
             </View>
@@ -560,8 +623,8 @@ export default function ContactsScreen() {
               <CheckCircle2 size={17} color={Colors.textInverse} strokeWidth={2.4} />
               <Text style={styles.guidedTourButtonText}>{t('guidedTour.primary')}</Text>
             </Pressable>
-          </View>
-        </View>
+          </Pressable>
+        </Pressable>
       </Modal>
     </View>
   );
@@ -692,6 +755,52 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  overdueBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 20,
+    marginBottom: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 18,
+    backgroundColor: '#FFDAD3',
+    gap: 10,
+  },
+  overdueAvatarStack: {
+    width: 58,
+    height: 42,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  overdueAvatarFrame: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    backgroundColor: '#FFC7BA',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: '#FFDAD3',
+  },
+  overdueAvatarOffset: {
+    marginLeft: -26,
+  },
+  overdueTextColumn: {
+    flex: 1,
+    minWidth: 0,
+  },
+  overdueTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#B91C1C',
+    marginBottom: 2,
+  },
+  overdueSubtitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#C2412F',
+  },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -753,28 +862,40 @@ const styles = StyleSheet.create({
   topicPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    gap: 6,
     maxWidth: '100%',
     minWidth: 0,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
+    paddingHorizontal: 7,
+    paddingVertical: 5,
+    borderRadius: 9,
+    shadowColor: '#1D1A2E',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  topicPillEmoji: {
-    fontSize: 11,
+  topicPillIcon: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
     flexShrink: 0,
   },
   topicPillText: {
     fontSize: 11.5,
-    fontWeight: '500',
+    fontWeight: '800',
     flexShrink: 1,
     minWidth: 0,
   },
   topicPillDate: {
     fontSize: 10,
     fontFamily: Fonts.mono,
-    opacity: 0.55,
-    color: Colors.textMuted,
+    fontWeight: '800',
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    borderRadius: 6,
+    overflow: 'hidden',
     flexShrink: 0,
   },
   emptyStateContainer: {

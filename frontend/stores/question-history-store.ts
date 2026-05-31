@@ -2,14 +2,17 @@ import { create } from 'zustand';
 import { devtools, persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { normalizeQuestionText } from '@/utils/questionText';
+import type { AskSource } from '@/lib/api';
 
 export type QuestionHistoryEntry = {
 	id: string;
 	question: string;
 	answerSummary: string;
 	date: string;
+	sources?: AskSource[];
 	relatedContactId?: string;
 	relatedContactName?: string;
+	noInfoFound?: boolean;
 };
 
 type QuestionHistoryState = {
@@ -44,8 +47,10 @@ export const useQuestionHistoryStore = create<QuestionHistoryState & QuestionHis
 							question: normalizeQuestionText(entry.question),
 							answerSummary: entry.answerSummary,
 							date: new Date().toISOString(),
+							sources: entry.sources,
 							relatedContactId: entry.relatedContactId,
 							relatedContactName: entry.relatedContactName,
+							noInfoFound: entry.noInfoFound,
 						};
 
 						const updatedEntries = [newEntry, ...state.entries].slice(0, MAX_HISTORY_ENTRIES);

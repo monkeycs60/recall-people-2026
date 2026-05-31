@@ -180,7 +180,8 @@ export function UserAvatarEditModal({
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.overlay}
       >
-        <View style={styles.modal}>
+        <Pressable style={StyleSheet.absoluteFill} onPress={handleClose} />
+        <Pressable style={styles.modal} onPress={(event) => event.stopPropagation()}>
           <View style={styles.header}>
             <Text style={styles.title}>{t('profile.avatar.title')}</Text>
             <Pressable onPress={handleClose} style={styles.closeButton}>
@@ -275,7 +276,7 @@ export function UserAvatarEditModal({
               <Text style={styles.loadingDescription}>{t('contact.avatar.uploadingDescription')}</Text>
             </View>
           )}
-        </View>
+        </Pressable>
       </KeyboardAvoidingView>
     </Modal>
   );

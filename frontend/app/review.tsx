@@ -867,9 +867,10 @@ export default function ReviewScreen() {
             visible={showDatePicker}
             transparent
             animationType="slide"
+            onRequestClose={closeDatePicker}
           >
-            <View style={styles.datePickerModalOverlay}>
-              <View style={styles.datePickerModalContent}>
+            <Pressable style={styles.datePickerModalOverlay} onPress={closeDatePicker}>
+              <Pressable style={styles.datePickerModalContent} onPress={(event) => event.stopPropagation()}>
                 <View style={styles.datePickerModalHeader}>
                   <Pressable onPress={closeDatePicker}>
                     <Text style={styles.datePickerModalCancel}>{t('common.cancel')}</Text>
@@ -892,8 +893,8 @@ export default function ReviewScreen() {
                     style={styles.iosDatePicker}
                   />
                 )}
-              </View>
-            </View>
+              </Pressable>
+            </Pressable>
           </Modal>
         )}
       </ScrollView>

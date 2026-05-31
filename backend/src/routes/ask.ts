@@ -66,6 +66,30 @@ const askResponseSchema = z.object({
 		.describe("true si aucune information n'a été trouvée dans les notes"),
 });
 
+const getErrorStatus = (error: unknown): number | undefined => {
+	if (!error || typeof error !== 'object') return undefined;
+
+	const candidate = error as {
+		status?: unknown;
+		statusCode?: unknown;
+		response?: { status?: unknown };
+		cause?: unknown;
+	};
+
+	if (typeof candidate.status === 'number') return candidate.status;
+	if (typeof candidate.statusCode === 'number') return candidate.statusCode;
+	if (typeof candidate.response?.status === 'number') return candidate.response.status;
+	return getErrorStatus(candidate.cause);
+};
+
+const isRateLimitError = (error: unknown): boolean => {
+	const status = getErrorStatus(error);
+	if (status === 429) return true;
+
+	const message = error instanceof Error ? error.message : String(error);
+	return /too many requests|rate limit|rate_limit|429/i.test(message);
+};
+
 const PROMPT_TEMPLATES: Record<string, {
 	intro: string;
 	question: string;
@@ -448,6 +472,14 @@ ${template.examples}`;
 
 		const errorMessage =
 			error instanceof Error ? error.message : 'Unknown error';
+
+		if (isRateLimitError(error)) {
+			return c.json(
+				{ error: 'Too many requests', details: errorMessage },
+				429
+			);
+		}
+
 		return c.json(
 			{ error: 'Question answering failed', details: errorMessage },
 			500

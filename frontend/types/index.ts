@@ -14,6 +14,13 @@ export type Gender = 'male' | 'female' | 'unknown';
 
 export type RelationshipType = 'ami' | 'collegue' | 'famille' | 'connaissance';
 
+export type SuggestedQuestionCategory = 'ask' | 'followUp' | 'remember';
+
+export type SuggestedQuestion = {
+  category: SuggestedQuestionCategory | null;
+  text: string;
+};
+
 // ============================================
 // DEPRECATED TYPES (V1 - Will be removed)
 // ============================================
@@ -72,7 +79,7 @@ export type Contact = {
 
   // AI-generated (regenerated after each note)
   aiSummary?: string;
-  suggestedQuestions?: string[]; // JSON array of max 3 questions
+  suggestedQuestions?: SuggestedQuestion[]; // max 3 questions, tagged by category
   highlights?: string[]; // JSON array of key highlights
   meetingContext?: string; // AI-extracted place/context where the user met the contact
   loves?: string[]; // JSON array of tastes, preferences, and wishes detected from notes
