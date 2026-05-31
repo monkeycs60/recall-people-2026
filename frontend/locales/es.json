@@ -784,7 +784,7 @@
     "exampleLikeThis": "👂 ASÍ",
     "exampleQuote": "«Lina, la fotógrafa de producto que conocí en la cena de Ana. Se muda a Vancouver en junio, firma su contrato el 9 de junio y su cumpleaños es el 14 de julio.»",
     "exampleQuoteWithContact": "«Acabo de ver a {{firstName}}, firma su nuevo contrato el 9 de junio y su cumpleaños es el 14 de julio.»",
-    "tapToRecord2min": "Pulsa para grabar · hasta 2 min"
+    "tapToRecordMinutes": "Pulsa para grabar · hasta {{minutes}} min"
   },
   "textInput": {
     "newNoteLabel": "NUEVA NOTA",
@@ -793,6 +793,9 @@
     "placeholderBulletName": "su nombre y quién es",
     "placeholderBulletLikes": "lo que le gusta",
     "placeholderBulletUpcoming": "lo que viene para él/ella",
+    "placeholderBulletContactMoment": "algo dicho o hecho",
+    "placeholderBulletContactDetail": "algo que aprendiste",
+    "placeholderBulletContactUpcoming": "algo nuevo en camino",
     "minCharactersShort": "Mín. {{count}} caracteres",
     "pressToSend": "Pulsa enviar para analizar",
     "sendLabel": "Enviar"

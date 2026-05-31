@@ -784,7 +784,7 @@
     "exampleLikeThis": "👂 LIKE THIS",
     "exampleQuote": "\"Lina, the product photographer I met at Ana's dinner. She's moving to Vancouver in June, signing her lease Jun 9, and her birthday is July 14.\"",
     "exampleQuoteWithContact": "\"We caught up yesterday — {{firstName}} signs her new lease Jun 9 and her birthday is July 14.\"",
-    "tapToRecord2min": "Tap to record · up to 2 min"
+    "tapToRecordMinutes": "Tap to record · up to {{minutes}} min"
   },
   "textInput": {
     "newNoteLabel": "NEW NOTE",
@@ -793,6 +793,9 @@
     "placeholderBulletName": "their name & who they are",
     "placeholderBulletLikes": "what they like",
     "placeholderBulletUpcoming": "what's coming up for them",
+    "placeholderBulletContactMoment": "something said or done",
+    "placeholderBulletContactDetail": "something you learned",
+    "placeholderBulletContactUpcoming": "something new on the way",
     "minCharactersShort": "Min {{count}} characters",
     "pressToSend": "Press send to analyze",
     "sendLabel": "Send"

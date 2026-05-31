@@ -28,6 +28,7 @@ import { useRecording } from '@/hooks/useRecording';
 import { useContactsQuery } from '@/hooks/useContactsQuery';
 import { useAppStore } from '@/stores/app-store';
 import { getContactDisplayName } from '@/utils/contactDisplayName';
+import { getRecordingLimitMinutes } from '@/utils/recordingPromptCopy';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 type PromiseCard = {
@@ -205,6 +206,7 @@ export default function RecordScreen() {
   const isAudioModeActive = inputMode === 'audio';
   const isTextModeActive = inputMode === 'text';
   const showContactPromise = !!preselectedContact;
+  const recordingLimitMinutes = getRecordingLimitMinutes(maxRecordingDuration);
 
   return (
     <KeyboardAvoidingView
@@ -402,7 +404,9 @@ export default function RecordScreen() {
                 isProcessing={isProcessing}
               />
               <Text style={styles.recordHint}>
-                {isRecording ? t('record.pressToFinish') : t('record.tapToRecord2min')}
+                {isRecording
+                  ? t('record.pressToFinish')
+                  : t('record.tapToRecordMinutes', { minutes: recordingLimitMinutes })}
               </Text>
             </View>
           </ScrollView>

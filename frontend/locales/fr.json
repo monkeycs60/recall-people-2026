@@ -822,7 +822,7 @@
     "exampleLikeThis": "👂 COMME ÇA",
     "exampleQuote": "« Lina, la photographe produit rencontrée au dîner d'Ana. Elle déménage à Vancouver en juin, signe son bail le 9 juin, et c'est son anniversaire le 14 juillet. »",
     "exampleQuoteWithContact": "« Je viens de voir {{firstName}}, elle signe son nouveau bail le 9 juin et son anniversaire est le 14 juillet. »",
-    "tapToRecord2min": "Appuie pour enregistrer · jusqu'à 2 min"
+    "tapToRecordMinutes": "Appuie pour enregistrer · jusqu'à {{minutes}} min"
   },
   "textInput": {
     "newNoteLabel": "NOUVELLE NOTE",
@@ -831,6 +831,9 @@
     "placeholderBulletName": "son prénom et qui elle est",
     "placeholderBulletLikes": "ce qu'elle aime",
     "placeholderBulletUpcoming": "ce qui arrive pour elle",
+    "placeholderBulletContactMoment": "ce qui s'est dit ou passé",
+    "placeholderBulletContactDetail": "ce que tu as appris",
+    "placeholderBulletContactUpcoming": "ce qui arrive bientôt",
     "minCharactersShort": "Min. {{count}} caractères",
     "pressToSend": "Appuie sur envoyer pour analyser",
     "sendLabel": "Envoyer"

@@ -8,7 +8,7 @@ import {
   Keyboard,
   Platform,
 } from 'react-native';
-import { ArrowUp, Calendar, Heart, User } from 'lucide-react-native';
+import { ArrowUp, Calendar, Heart, MessageCircle, Sparkles, User } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import Animated, {
   FadeIn,
@@ -19,6 +19,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { Colors, BorderRadius, Fonts } from '@/constants/theme';
+import { getTextInputPlaceholderKeys } from '@/utils/recordingPromptCopy';
 
 interface TextInputModeProps {
   onSubmit: (text: string) => void;
@@ -39,10 +40,12 @@ export function TextInputMode({
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<TextInput>(null);
   const buttonScale = useSharedValue(1);
+  const hasContactContext = Boolean(contactFirstName);
+  const placeholderKeys = getTextInputPlaceholderKeys(hasContactContext ? 'contact' : 'general');
 
-  const introLine = contactFirstName
-    ? t('textInput.placeholderIntroWithContact', { firstName: contactFirstName })
-    : t('textInput.placeholderIntro');
+  const introLine = hasContactContext
+    ? t(placeholderKeys.intro, { firstName: contactFirstName })
+    : t(placeholderKeys.intro);
 
   const handleSubmit = () => {
     if (text.trim().length < MIN_CHARACTERS || isProcessing) return;
@@ -107,19 +110,27 @@ export function TextInputMode({
             <View style={styles.placeholderBullets}>
               <View style={styles.placeholderRow}>
                 <View style={styles.placeholderIconTile}>
-                  <User size={16} color={Colors.textMuted} strokeWidth={2.2} />
+                  {hasContactContext ? (
+                    <MessageCircle size={16} color={Colors.textMuted} strokeWidth={2.2} />
+                  ) : (
+                    <User size={16} color={Colors.textMuted} strokeWidth={2.2} />
+                  )}
                 </View>
                 <Text style={styles.placeholderText}>
-                  {t('textInput.placeholderBulletName')}
+                  {t(placeholderKeys.primary)}
                 </Text>
               </View>
 
               <View style={styles.placeholderRow}>
                 <View style={styles.placeholderIconTile}>
-                  <Heart size={16} color={Colors.error} fill={Colors.error} strokeWidth={2.2} />
+                  {hasContactContext ? (
+                    <Sparkles size={16} color={Colors.accent} strokeWidth={2.2} />
+                  ) : (
+                    <Heart size={16} color={Colors.error} fill={Colors.error} strokeWidth={2.2} />
+                  )}
                 </View>
                 <Text style={styles.placeholderText}>
-                  {t('textInput.placeholderBulletLikes')}
+                  {t(placeholderKeys.secondary)}
                 </Text>
               </View>
 
@@ -129,7 +140,7 @@ export function TextInputMode({
                 </View>
                 <Text style={styles.placeholderTextAccent}>
                   <Text style={styles.placeholderStar}>★ </Text>
-                  {t('textInput.placeholderBulletUpcoming')}
+                  {t(placeholderKeys.upcoming)}
                 </Text>
               </View>
             </View>

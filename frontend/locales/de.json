@@ -784,7 +784,7 @@
     "exampleLikeThis": "👂 SO IN ETWA",
     "exampleQuote": "„Lina, die Produktfotografin, die ich bei Anas Abendessen kennengelernt habe. Sie zieht im Juni nach Vancouver, unterschreibt am 9. Juni ihren Mietvertrag und hat am 14. Juli Geburtstag.\"",
     "exampleQuoteWithContact": "„Ich habe gestern {{firstName}} gesehen, sie unterschreibt am 9. Juni ihren neuen Mietvertrag und hat am 14. Juli Geburtstag.\"",
-    "tapToRecord2min": "Tippen zum Aufnehmen · bis zu 2 Min."
+    "tapToRecordMinutes": "Tippen zum Aufnehmen · bis zu {{minutes}} Min."
   },
   "textInput": {
     "newNoteLabel": "NEUE NOTIZ",
@@ -793,6 +793,9 @@
     "placeholderBulletName": "Name und wer sie ist",
     "placeholderBulletLikes": "was sie mag",
     "placeholderBulletUpcoming": "was bei ihr ansteht",
+    "placeholderBulletContactMoment": "etwas Gesagtes oder Getanes",
+    "placeholderBulletContactDetail": "etwas, das du gelernt hast",
+    "placeholderBulletContactUpcoming": "etwas Neues, das ansteht",
     "minCharactersShort": "Mind. {{count}} Zeichen",
     "pressToSend": "Drücke Senden zum Analysieren",
     "sendLabel": "Senden"
