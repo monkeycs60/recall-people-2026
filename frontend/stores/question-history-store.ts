@@ -9,6 +9,7 @@ export type QuestionHistoryEntry = {
 	question: string;
 	answerSummary: string;
 	date: string;
+	scopeContactId?: string;
 	sources?: AskSource[];
 	relatedContactId?: string;
 	relatedContactName?: string;
@@ -47,6 +48,7 @@ export const useQuestionHistoryStore = create<QuestionHistoryState & QuestionHis
 							question: normalizeQuestionText(entry.question),
 							answerSummary: entry.answerSummary,
 							date: new Date().toISOString(),
+							scopeContactId: entry.scopeContactId,
 							sources: entry.sources,
 							relatedContactId: entry.relatedContactId,
 							relatedContactName: entry.relatedContactName,

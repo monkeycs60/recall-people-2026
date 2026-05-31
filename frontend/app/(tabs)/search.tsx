@@ -26,6 +26,7 @@ import Animated, { FadeIn, FadeOut, FadeInDown } from 'react-native-reanimated';
 import { ApiError, showErrorToast, showInfoToast } from '@/lib/error-handler';
 import { formatLocalizedDate } from '@/utils/dateLocale';
 import { normalizeQuestionText } from '@/utils/questionText';
+import { filterQuestionEntriesForScope } from '@/utils/contactAssistant';
 import { useSubscriptionStore } from '@/stores/subscription-store';
 import { QuestionHistoryEntry, useQuestionHistoryStore } from '@/stores/question-history-store';
 import { Paywall } from '@/components/Paywall';
@@ -87,9 +88,13 @@ export default function AssistantScreen() {
 	const historyEntries = useQuestionHistoryStore((state) => state.entries);
 	const addHistoryEntry = useQuestionHistoryStore((state) => state.addEntry);
 
-	const chatEntries = useMemo(
-		() => [...historyEntries].reverse(),
+	const globalHistoryEntries = useMemo(
+		() => filterQuestionEntriesForScope(historyEntries, null),
 		[historyEntries]
+	);
+	const chatEntries = useMemo(
+		() => [...globalHistoryEntries].reverse(),
+		[globalHistoryEntries]
 	);
 	const hasChat = chatEntries.length > 0 || !!pendingQuestion;
 	const totalMessages = chatEntries.length * 2 + (pendingQuestion ? 2 : 0);
@@ -135,10 +140,10 @@ export default function AssistantScreen() {
 	}, [hasChat, scrollToEnd]);
 
 	useEffect(() => {
-		if (pendingQuestion || historyEntries.length > 0) {
+		if (pendingQuestion || globalHistoryEntries.length > 0) {
 			scrollToEnd();
 		}
-	}, [historyEntries.length, pendingQuestion, scrollToEnd]);
+	}, [globalHistoryEntries.length, pendingQuestion, scrollToEnd]);
 
 	const formatDuration = (seconds: number) => {
 		const mins = Math.floor(seconds / 60);
