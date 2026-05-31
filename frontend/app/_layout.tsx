@@ -331,6 +331,12 @@ export default function RootLayout() {
                 ),
               }}
             />
+            <Stack.Screen
+              name="catch-up"
+              options={{
+                headerShown: false,
+              }}
+            />
             <Stack.Screen name="disambiguation" options={{ headerShown: true, title: t('selectContact.title') }} />
             <Stack.Screen
               name="contact/[id]/index"

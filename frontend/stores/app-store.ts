@@ -9,6 +9,7 @@ type AppState = {
   currentTranscription: string | null;
   currentExtraction: ExtractionResult | null;
   preselectedContactId: string | null;
+  preselectedHotTopicId: string | null;
   pendingAvatarGenerations: Set<string>;
 };
 
@@ -19,6 +20,7 @@ type AppActions = {
   setCurrentTranscription: (text: string | null) => void;
   setCurrentExtraction: (extraction: ExtractionResult | null) => void;
   setPreselectedContactId: (contactId: string | null) => void;
+  setPreselectedHotTopicId: (hotTopicId: string | null) => void;
   resetRecording: () => void;
   addPendingAvatarGeneration: (contactId: string) => void;
   removePendingAvatarGeneration: (contactId: string) => void;
@@ -34,6 +36,7 @@ export const useAppStore = create<AppState & AppActions>()(
       currentTranscription: null,
       currentExtraction: null,
       preselectedContactId: null,
+      preselectedHotTopicId: null,
       pendingAvatarGenerations: new Set<string>(),
 
       setRecordingState: (recordingState) => set({ recordingState }),
@@ -42,6 +45,7 @@ export const useAppStore = create<AppState & AppActions>()(
       setCurrentTranscription: (currentTranscription) => set({ currentTranscription }),
       setCurrentExtraction: (currentExtraction) => set({ currentExtraction }),
       setPreselectedContactId: (preselectedContactId) => set({ preselectedContactId }),
+      setPreselectedHotTopicId: (preselectedHotTopicId) => set({ preselectedHotTopicId }),
       resetRecording: () =>
         set({
           recordingState: 'idle',
@@ -50,6 +54,7 @@ export const useAppStore = create<AppState & AppActions>()(
           currentTranscription: null,
           currentExtraction: null,
           preselectedContactId: null,
+          preselectedHotTopicId: null,
         }),
       addPendingAvatarGeneration: (contactId) =>
         set((state) => ({

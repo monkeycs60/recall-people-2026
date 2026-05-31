@@ -167,6 +167,29 @@
       "avatarPendingDescription": "L'avatar illustrato è in generazione. Può richiedere fino a un minuto prima di apparire."
     }
   },
+  "catchUp": {
+    "title": "Recupera",
+    "subtitle": "{{count}} follow-up sono in ritardo. Chiudili.",
+    "subtitle_one": "{{count}} follow-up è in ritardo. Chiudilo.",
+    "subtitle_other": "{{count}} follow-up sono in ritardo. Chiudili.",
+    "needsYouNow": "Richiede attenzione",
+    "doneToday": "Fatto oggi · {{count}}",
+    "daysOverdue_one": "{{count}} g in ritardo",
+    "daysOverdue_other": "{{count}} g in ritardo",
+    "resolveTitle": "Risolvi questo tema",
+    "outcomeLabel": "Esito · opzionale",
+    "outcomePlaceholder": "Com'è finita?",
+    "quickWentWell": "È andata bene",
+    "quickDidIt": "Fatto",
+    "quickCancelled": "Annullato",
+    "resolveAndSave": "Risolvi e salva",
+    "resolveWithoutNote": "Risolvi senza nota",
+    "recordTopic": "Registra",
+    "allCaughtUpTitle": "Sei in pari",
+    "allCaughtUpBody": "Non ci sono follow-up in ritardo. Ti avviseremo quando qualcuno avrà bisogno di attenzione.",
+    "reconnectedToday": "{{count}} riconnesso oggi",
+    "backToContacts": "Torna ai contatti"
+  },
   "search": {
     "title": "Esplora IA",
     "placeholder": "Descrivi cosa cerchi...",

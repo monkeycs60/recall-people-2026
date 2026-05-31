@@ -167,6 +167,29 @@
       "avatarPendingDescription": "The illustrated avatar is being generated. It can take up to a minute to appear."
     }
   },
+  "catchUp": {
+    "title": "Catch up",
+    "subtitle": "{{count}} follow-ups are past due. Knock them out.",
+    "subtitle_one": "{{count}} follow-up is past due. Knock it out.",
+    "subtitle_other": "{{count}} follow-ups are past due. Knock them out.",
+    "needsYouNow": "Needs you now",
+    "doneToday": "Done today · {{count}}",
+    "daysOverdue_one": "{{count}} d overdue",
+    "daysOverdue_other": "{{count}} d overdue",
+    "resolveTitle": "Resolve this topic",
+    "outcomeLabel": "Outcome · optional",
+    "outcomePlaceholder": "How did it end?",
+    "quickWentWell": "Went well",
+    "quickDidIt": "Did it",
+    "quickCancelled": "Cancelled",
+    "resolveAndSave": "Resolve & save to history",
+    "resolveWithoutNote": "Resolve without a note",
+    "recordTopic": "Record",
+    "allCaughtUpTitle": "You're all caught up",
+    "allCaughtUpBody": "No overdue follow-ups left. We'll nudge you when someone needs you again.",
+    "reconnectedToday": "{{count}} reconnected today",
+    "backToContacts": "Back to contacts"
+  },
   "search": {
     "title": "AI Explore",
     "placeholder": "Describe what you're looking for...",

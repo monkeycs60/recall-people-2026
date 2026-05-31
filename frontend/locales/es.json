@@ -167,6 +167,29 @@
       "avatarPendingDescription": "El avatar ilustrado se está generando. Puede tardar hasta un minuto en aparecer."
     }
   },
+  "catchUp": {
+    "title": "Puesta al día",
+    "subtitle": "{{count}} seguimientos están atrasados. Resuélvelos.",
+    "subtitle_one": "{{count}} seguimiento está atrasado. Resuélvelo.",
+    "subtitle_other": "{{count}} seguimientos están atrasados. Resuélvelos.",
+    "needsYouNow": "Necesita tu atención",
+    "doneToday": "Hecho hoy · {{count}}",
+    "daysOverdue_one": "{{count}} d atrasado",
+    "daysOverdue_other": "{{count}} d atrasados",
+    "resolveTitle": "Resolver este tema",
+    "outcomeLabel": "Resultado · opcional",
+    "outcomePlaceholder": "¿Cómo terminó?",
+    "quickWentWell": "Salió bien",
+    "quickDidIt": "Hecho",
+    "quickCancelled": "Cancelado",
+    "resolveAndSave": "Resolver y guardar",
+    "resolveWithoutNote": "Resolver sin nota",
+    "recordTopic": "Grabar",
+    "allCaughtUpTitle": "Todo al día",
+    "allCaughtUpBody": "No quedan seguimientos atrasados. Te avisaremos cuando alguien necesite atención.",
+    "reconnectedToday": "{{count}} reconectado hoy",
+    "backToContacts": "Volver a contactos"
+  },
   "search": {
     "title": "Explorar IA",
     "placeholder": "Describe lo que buscas...",

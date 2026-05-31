@@ -15,6 +15,7 @@ import { useSubscriptionStore } from '@/stores/subscription-store';
 import { transcribeAudio, extractInfo, detectContact } from '@/lib/api';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { showErrorToast, ApiError } from '@/lib/error-handler';
+import { getRecordingHotTopics } from '@/utils/recordingContext';
 import i18n from '@/lib/i18n';
 
 const isE2ETest = process.env.EXPO_PUBLIC_E2E_TEST === 'true';
@@ -63,7 +64,9 @@ export const useRecording = () => {
     setCurrentTranscription,
     setCurrentExtraction,
     preselectedContactId,
+    preselectedHotTopicId,
     setPreselectedContactId,
+    setPreselectedHotTopicId,
   } = useAppStore();
 
   const toggleRecording = async () => {
@@ -238,6 +241,7 @@ export const useRecording = () => {
           const hotTopics = await hotTopicService.getByContact(preselectedContactId);
 
           const activeHotTopics = hotTopics.filter((topic) => topic.status === 'active');
+          const recordingHotTopics = getRecordingHotTopics(activeHotTopics, preselectedHotTopicId);
 
           const { extraction } = await extractInfo({
             transcription: transcriptionResult.transcript,
@@ -247,7 +251,7 @@ export const useRecording = () => {
               firstName: preselectedContact.firstName,
               lastName: preselectedContact.lastName,
               facts: [],
-              hotTopics: activeHotTopics.map((topic) => ({
+              hotTopics: recordingHotTopics.map((topic) => ({
                 id: topic.id,
                 title: topic.title,
                 context: topic.context,
@@ -261,6 +265,7 @@ export const useRecording = () => {
 
           setCurrentExtraction(extraction);
           setPreselectedContactId(null);
+          setPreselectedHotTopicId(null);
 
           router.replace({
             pathname: '/review',
@@ -279,6 +284,7 @@ export const useRecording = () => {
 
         // If preselected contact not found, clear and continue to normal flow
         setPreselectedContactId(null);
+        setPreselectedHotTopicId(null);
       }
 
       // Detect contact using LLM
@@ -330,6 +336,7 @@ export const useRecording = () => {
       setRecordingState('idle');
       setProcessingStep(null);
       setPreselectedContactId(null);
+      setPreselectedHotTopicId(null);
 
       // Show error toast with backend message if available
       const backendMessage = (error as ApiError).backendMessage;
@@ -402,6 +409,7 @@ export const useRecording = () => {
           const hotTopics = await hotTopicService.getByContact(preselectedContactId);
 
           const activeHotTopics = hotTopics.filter((topic) => topic.status === 'active');
+          const recordingHotTopics = getRecordingHotTopics(activeHotTopics, preselectedHotTopicId);
 
           const { extraction } = await extractInfo({
             transcription: text,
@@ -411,7 +419,7 @@ export const useRecording = () => {
               firstName: preselectedContact.firstName,
               lastName: preselectedContact.lastName,
               facts: [],
-              hotTopics: activeHotTopics.map((topic) => ({
+              hotTopics: recordingHotTopics.map((topic) => ({
                 id: topic.id,
                 title: topic.title,
                 context: topic.context,
@@ -424,6 +432,7 @@ export const useRecording = () => {
 
           setCurrentExtraction(extraction);
           setPreselectedContactId(null);
+          setPreselectedHotTopicId(null);
 
           router.replace({
             pathname: '/review',
@@ -440,6 +449,7 @@ export const useRecording = () => {
         }
 
         setPreselectedContactId(null);
+        setPreselectedHotTopicId(null);
       }
 
       // Detect contact using LLM
@@ -480,6 +490,7 @@ export const useRecording = () => {
       setRecordingState('idle');
       setProcessingStep(null);
       setPreselectedContactId(null);
+      setPreselectedHotTopicId(null);
 
       const backendMessage = (error as ApiError).backendMessage;
       showErrorToast(

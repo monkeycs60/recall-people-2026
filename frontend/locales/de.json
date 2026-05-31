@@ -167,6 +167,29 @@
       "avatarPendingDescription": "Der illustrierte Avatar wird gerade generiert. Es kann bis zu eine Minute dauern, bis er erscheint."
     }
   },
+  "catchUp": {
+    "title": "Aufholen",
+    "subtitle": "{{count}} Follow-ups sind überfällig. Erledige sie.",
+    "subtitle_one": "{{count}} Follow-up ist überfällig. Erledige es.",
+    "subtitle_other": "{{count}} Follow-ups sind überfällig. Erledige sie.",
+    "needsYouNow": "Braucht jetzt Aufmerksamkeit",
+    "doneToday": "Heute erledigt · {{count}}",
+    "daysOverdue_one": "{{count}} T überfällig",
+    "daysOverdue_other": "{{count}} T überfällig",
+    "resolveTitle": "Dieses Thema abschließen",
+    "outcomeLabel": "Ergebnis · optional",
+    "outcomePlaceholder": "Wie ist es ausgegangen?",
+    "quickWentWell": "Lief gut",
+    "quickDidIt": "Erledigt",
+    "quickCancelled": "Abgesagt",
+    "resolveAndSave": "Abschließen und speichern",
+    "resolveWithoutNote": "Ohne Notiz abschließen",
+    "recordTopic": "Aufnehmen",
+    "allCaughtUpTitle": "Alles erledigt",
+    "allCaughtUpBody": "Keine überfälligen Follow-ups mehr. Wir erinnern dich, wenn jemand Aufmerksamkeit braucht.",
+    "reconnectedToday": "{{count}} heute erledigt",
+    "backToContacts": "Zurück zu Kontakten"
+  },
   "search": {
     "title": "KI-Suche",
     "placeholder": "Beschreibe, was du suchst...",

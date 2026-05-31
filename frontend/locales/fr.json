@@ -167,6 +167,29 @@
       "avatarPendingDescription": "L'avatar illustré est en cours de génération. Il peut mettre jusqu'à une minute à apparaître."
     }
   },
+  "catchUp": {
+    "title": "Relance",
+    "subtitle": "{{count}} relances sont en retard. On les boucle.",
+    "subtitle_one": "{{count}} relance est en retard. On la boucle.",
+    "subtitle_other": "{{count}} relances sont en retard. On les boucle.",
+    "needsYouNow": "À traiter maintenant",
+    "doneToday": "Fait aujourd'hui · {{count}}",
+    "daysOverdue_one": "{{count}} j de retard",
+    "daysOverdue_other": "{{count}} j de retard",
+    "resolveTitle": "Résoudre ce sujet",
+    "outcomeLabel": "Résultat · optionnel",
+    "outcomePlaceholder": "Comment ça s'est terminé ?",
+    "quickWentWell": "Ça s'est bien passé",
+    "quickDidIt": "C'est fait",
+    "quickCancelled": "Annulé",
+    "resolveAndSave": "Résoudre et sauvegarder",
+    "resolveWithoutNote": "Résoudre sans note",
+    "recordTopic": "Enregistrer",
+    "allCaughtUpTitle": "Tu es à jour",
+    "allCaughtUpBody": "Plus aucune relance en retard. On te préviendra quand quelqu'un aura besoin de toi.",
+    "reconnectedToday": "{{count}} relance faite aujourd'hui",
+    "backToContacts": "Retour aux contacts"
+  },
   "search": {
     "title": "Explore IA",
     "placeholder": "Décris ce que tu cherches...",

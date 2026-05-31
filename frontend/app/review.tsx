@@ -161,7 +161,8 @@ export default function ReviewScreen() {
 
   const hasContactInfo = !!(editableContactInfo.phone || editableContactInfo.email || editableContactInfo.birthday);
   const contactInfoCount = [editableContactInfo.phone, editableContactInfo.email, editableContactInfo.birthday].filter(Boolean).length;
-  const hasResolvedTopics = resolvedTopicsWithData.length > 0 || (extraction.resolvedTopics?.length ?? 0) > 0;
+  const resolvedTopicsCount = Math.max(resolvedTopicsWithData.length, resolvedTopicsState.length);
+  const hasResolvedTopics = resolvedTopicsCount > 0;
 
   const toggleResolvedTopic = (topicId: string) => {
     setResolvedTopicsState((prev) => {
@@ -771,8 +772,8 @@ export default function ReviewScreen() {
         {hasResolvedTopics && (
           <CollapsibleSection
             title={t('review.topicsToArchive')}
-            defaultExpanded={false}
-            badge={t('review.toConfirm', { count: resolvedTopicsWithData.length })}
+            defaultExpanded={true}
+            badge={t('review.toConfirm', { count: resolvedTopicsCount })}
             badgeColor={Colors.success}
             icon={<Archive size={18} color={Colors.success} />}
           >

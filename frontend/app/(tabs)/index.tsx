@@ -50,7 +50,8 @@ import { useAppStore } from '@/stores/app-store';
 import { generateAvatarFromHints } from '@/lib/api';
 import { showErrorToast, showInfoToast } from '@/lib/error-handler';
 import { buildGroupChips } from '@/lib/group-cache';
-import { countOverdueHotTopics, getHotTopicDateTone } from '@/utils/hotTopics';
+import { getOverdueCatchupItems } from '@/utils/catchup';
+import { getHotTopicDateTone } from '@/utils/hotTopics';
 
 const FOLLOW_UP_THRESHOLD_DAYS = 14;
 
@@ -268,25 +269,25 @@ export default function ContactsScreen() {
     });
   }, [contacts, filterText, selectedGroupId, groupContactIds]);
 
-  const overdueContacts = useMemo(() => {
-    return allContacts
-      .map((contact) => ({
-        contact,
-        overdueCount: countOverdueHotTopics(contactPreviews.get(contact.id)?.hotTopics || []),
-      }))
-      .filter((entry) => entry.overdueCount > 0);
-  }, [allContacts, contactPreviews]);
+  const overdueItems = useMemo(
+    () => getOverdueCatchupItems(allContacts, contactPreviews),
+    [allContacts, contactPreviews]
+  );
 
   const overdueHotTopicCount = useMemo(() => {
-    return overdueContacts.reduce((total, entry) => total + entry.overdueCount, 0);
-  }, [overdueContacts]);
+    return overdueItems.length;
+  }, [overdueItems]);
 
-  const handleOpenFirstOverdueContact = () => {
-    const firstOverdueContact = overdueContacts[0]?.contact;
-    if (firstOverdueContact) {
-      router.push(`/contact/${firstOverdueContact.id}`);
-    }
-  };
+  const overdueContacts = useMemo(() => {
+    const seenContactIds = new Set<string>();
+    return overdueItems
+      .filter((item) => {
+        if (seenContactIds.has(item.contact.id)) return false;
+        seenContactIds.add(item.contact.id);
+        return true;
+      })
+      .map((item) => ({ contact: item.contact }));
+  }, [overdueItems]);
 
   const handleRefresh = async () => {
     setIsPullRefreshing(true);
@@ -486,7 +487,7 @@ export default function ContactsScreen() {
         {overdueHotTopicCount > 0 && (
           <Pressable
             style={styles.overdueBanner}
-            onPress={handleOpenFirstOverdueContact}
+            onPress={() => router.push('/catch-up')}
           >
             <View style={styles.overdueAvatarStack}>
               {overdueContacts.slice(0, 2).map(({ contact }, avatarIndex) => (
