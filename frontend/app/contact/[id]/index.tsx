@@ -425,63 +425,68 @@ export default function ContactDetailScreen() {
                 <Text style={styles.contactName}>
                   {contact.firstName} {contact.lastName || ''}
                 </Text>
-                <View style={styles.groupChipsContainer}>
-                  {contactGroups.length > 0 ? (
-                    <>
-                      <Pressable style={styles.groupChip} onPress={handleOpenGroupsSheet}>
-                        <Text style={styles.groupChipText}>{primaryGroupName}</Text>
-                      </Pressable>
-                      {contactGroups.length > 1 && (
+                <View style={styles.profileMetaRows}>
+                  <View style={styles.groupMetaRow}>
+                    {contactGroups.length > 0 ? (
+                      <>
                         <Pressable style={styles.groupChip} onPress={handleOpenGroupsSheet}>
-                          <Text style={styles.groupChipText}>+{contactGroups.length - 1}</Text>
+                          <Text style={styles.groupChipText}>{primaryGroupName}</Text>
                         </Pressable>
-                      )}
-                      <Pressable
-                        style={styles.manageGroupsButton}
-                        onPress={handleOpenGroupsSheet}
-                        accessibilityLabel={t('contact.groupsSheet.title')}
-                      >
-                        <Users size={13} color={Colors.primary} />
+                        {contactGroups.length > 1 && (
+                          <Pressable style={styles.groupChip} onPress={handleOpenGroupsSheet}>
+                            <Text style={styles.groupChipText}>+{contactGroups.length - 1}</Text>
+                          </Pressable>
+                        )}
+                        <Pressable
+                          style={styles.manageGroupsButton}
+                          onPress={handleOpenGroupsSheet}
+                          accessibilityLabel={t('contact.groupsSheet.title')}
+                        >
+                          <Users size={13} color={Colors.primary} />
+                        </Pressable>
+                      </>
+                    ) : (
+                      <Pressable style={styles.addGroupButton} onPress={handleOpenGroupsSheet}>
+                        <Plus size={12} color={Colors.primary} />
+                        <Text style={styles.addGroupText}>{t('contact.addGroup')}</Text>
                       </Pressable>
-                    </>
-                  ) : (
-                    <Pressable style={styles.addGroupButton} onPress={handleOpenGroupsSheet}>
-                      <Plus size={12} color={Colors.primary} />
-                      <Text style={styles.addGroupText}>{t('contact.addGroup')}</Text>
+                    )}
+                  </View>
+
+                  <View style={styles.contactInfoRow}>
+                    <Pressable
+                      style={[
+                        styles.infoChip,
+                        birthdayLabel ? styles.infoChipFilled : styles.infoChipEmpty,
+                      ]}
+                      onPress={() => birthdaySheetRef.current?.present()}
+                    >
+                      <Text style={styles.infoChipEmoji}>🎂</Text>
+                      <Text style={styles.infoChipText}>
+                        {birthdayLabel || t('contactProfile.tileBirthdayEmpty')}
+                      </Text>
                     </Pressable>
-                  )}
-                  <Pressable
-                    style={[
-                      styles.infoChip,
-                      birthdayLabel ? styles.infoChipFilled : styles.infoChipEmpty,
-                    ]}
-                    onPress={() => birthdaySheetRef.current?.present()}
-                  >
-                    <Text style={styles.infoChipEmoji}>🎂</Text>
-                    <Text style={styles.infoChipText}>
-                      {birthdayLabel || t('contactProfile.tileBirthdayEmpty')}
-                    </Text>
-                  </Pressable>
-                  <Pressable
-                    style={[
-                      styles.iconChip,
-                      contact.phone ? styles.infoChipFilled : styles.infoChipEmpty,
-                    ]}
-                    onPress={() => phoneSheetRef.current?.present()}
-                    accessibilityLabel={contact.phone || t('contact.contactCard.addPhone')}
-                  >
-                    <Phone size={13} color={contact.phone ? Colors.primary : Colors.textMuted} strokeWidth={2.3} />
-                  </Pressable>
-                  <Pressable
-                    style={[
-                      styles.iconChip,
-                      contact.email ? styles.infoChipFilled : styles.infoChipEmpty,
-                    ]}
-                    onPress={() => emailSheetRef.current?.present()}
-                    accessibilityLabel={contact.email || t('contact.contactCard.addEmail')}
-                  >
-                    <Mail size={13} color={contact.email ? Colors.primary : Colors.textMuted} strokeWidth={2.3} />
-                  </Pressable>
+                    <Pressable
+                      style={[
+                        styles.iconChip,
+                        contact.phone ? styles.infoChipFilled : styles.infoChipEmpty,
+                      ]}
+                      onPress={() => phoneSheetRef.current?.present()}
+                      accessibilityLabel={contact.phone || t('contact.contactCard.addPhone')}
+                    >
+                      <Phone size={13} color={contact.phone ? Colors.primary : Colors.textMuted} strokeWidth={2.3} />
+                    </Pressable>
+                    <Pressable
+                      style={[
+                        styles.iconChip,
+                        contact.email ? styles.infoChipFilled : styles.infoChipEmpty,
+                      ]}
+                      onPress={() => emailSheetRef.current?.present()}
+                      accessibilityLabel={contact.email || t('contact.contactCard.addEmail')}
+                    >
+                      <Mail size={13} color={contact.email ? Colors.primary : Colors.textMuted} strokeWidth={2.3} />
+                    </Pressable>
+                  </View>
                 </View>
               </View>
             </View>
@@ -883,11 +888,21 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     lineHeight: 30,
   },
-  groupChipsContainer: {
+  profileMetaRows: {
+    marginTop: 8,
+    gap: 7,
+  },
+  groupMetaRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    alignItems: 'center',
     gap: 6,
-    marginTop: 8,
+  },
+  contactInfoRow: {
+    flexDirection: 'row',
+    flexWrap: 'nowrap',
+    alignItems: 'center',
+    gap: 6,
   },
   groupChip: {
     backgroundColor: Colors.primaryLight,
