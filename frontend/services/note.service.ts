@@ -84,7 +84,7 @@ export const noteService = {
         data.title || null,
         data.audioUri || null,
         data.audioDurationMs || null,
-        data.transcription || null,
+        data.transcription ?? '',
         now,
         now,
       ]

@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { View, Text, Pressable, StyleSheet, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { ChevronDown, ChevronUp } from 'lucide-react-native';
-import { Colors, Shadows, Fonts } from '@/constants/theme';
+import { Colors, Fonts } from '@/constants/theme';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -64,38 +64,35 @@ export function CollapsibleSection({
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 12,
-    borderRadius: 18,
-    backgroundColor: Colors.surface,
-    ...Shadows.card,
-    overflow: 'hidden',
+    marginBottom: 14,
   },
   containerExpanded: {},
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 2,
   },
   headerExpanded: {
-    paddingBottom: 14,
+    paddingBottom: 10,
   },
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
-    gap: 10,
+    gap: 8,
   },
   iconContainer: {
-    width: 24,
+    width: 18,
     alignItems: 'center',
   },
   title: {
     fontFamily: Fonts.sans.bold,
-    fontSize: 15,
-    letterSpacing: -0.2,
-    color: Colors.textPrimary,
+    fontSize: 11,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    color: Colors.textSecondary,
   },
   badge: {
     paddingHorizontal: 8,
@@ -109,7 +106,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   content: {
-    paddingHorizontal: 16,
-    paddingBottom: 16,
+    paddingBottom: 2,
   },
 });

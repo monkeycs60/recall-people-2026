@@ -1,6 +1,6 @@
 import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Edit3, Trash2 } from 'lucide-react-native';
+import { Edit3, Gift, Mail, Phone, Trash2 } from 'lucide-react-native';
 import { Colors, BorderRadius } from '@/constants/theme';
 
 type ContactInfoData = {
@@ -52,6 +52,9 @@ export function ContactInfoSection({
             </View>
           ) : (
             <>
+              <View style={styles.infoIconTile}>
+                <Phone size={18} color={Colors.primary} />
+              </View>
               <View style={styles.content}>
                 <Text style={styles.label}>{t('contact.contactInfoReview.phone')}</Text>
                 <Text style={styles.value}>{contactInfo.phone}</Text>
@@ -91,6 +94,9 @@ export function ContactInfoSection({
             </View>
           ) : (
             <>
+              <View style={styles.infoIconTile}>
+                <Mail size={18} color={Colors.primary} />
+              </View>
               <View style={styles.content}>
                 <Text style={styles.label}>{t('contact.contactInfoReview.email')}</Text>
                 <Text style={styles.value}>{contactInfo.email}</Text>
@@ -113,6 +119,9 @@ export function ContactInfoSection({
 
       {contactInfo.birthday && (
         <View style={styles.row}>
+          <View style={[styles.infoIconTile, styles.birthdayIconTile]}>
+            <Gift size={18} color={Colors.warning} />
+          </View>
           <View style={styles.content}>
             <Text style={styles.label}>{t('contact.contactInfoReview.birthday')}</Text>
             <Text style={styles.value}>
@@ -141,32 +150,49 @@ export function ContactInfoSection({
 const styles = StyleSheet.create({
   row: {
     backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.md,
-    padding: 12,
-    marginBottom: 8,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    borderColor: Colors.hairline,
+    padding: 14,
+    marginBottom: 10,
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
+    gap: 12,
+  },
+  infoIconTile: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  birthdayIconTile: {
+    backgroundColor: Colors.amberLight,
   },
   content: {
     flex: 1,
   },
   label: {
-    fontSize: 12,
+    fontSize: 11,
+    fontWeight: '700',
     color: Colors.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
     marginBottom: 2,
   },
   value: {
-    fontSize: 15,
+    fontSize: 16,
     color: Colors.textPrimary,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   iconActions: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 2,
   },
   iconButton: {
-    padding: 8,
+    padding: 6,
   },
   editContainer: {
     flex: 1,

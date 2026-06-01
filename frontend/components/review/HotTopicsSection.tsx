@@ -37,8 +37,6 @@ export function HotTopicsSection({ state, handlers }: HotTopicsSectionProps) {
 
   return (
     <View>
-      <Text style={styles.reminderExplanation}>{t('review.reminderExplanation')}</Text>
-
       {hotTopics.map((topic, index) => {
         const isEditing = editingHotTopicIndex === index;
 
@@ -123,15 +121,12 @@ export function HotTopicsSection({ state, handlers }: HotTopicsSectionProps) {
 }
 
 const styles = StyleSheet.create({
-  reminderExplanation: {
-    fontSize: 13,
-    color: Colors.textMuted,
-    marginBottom: 12,
-  },
   card: {
     backgroundColor: Colors.surface,
     padding: 16,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    borderColor: Colors.hairline,
     marginBottom: 12,
   },
   cardRow: {
@@ -207,6 +202,7 @@ const styles = StyleSheet.create({
   },
   reminderRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     marginTop: 12,
     gap: 8,
@@ -241,17 +237,19 @@ const styles = StyleSheet.create({
   datePickerButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.background,
-    borderRadius: 8,
+    backgroundColor: Colors.primaryLight,
+    borderRadius: 12,
     paddingHorizontal: 10,
     paddingVertical: 8,
     borderWidth: 1,
-    borderColor: Colors.info,
+    borderColor: Colors.primary,
     gap: 6,
+    maxWidth: '100%',
   },
   datePickerText: {
     fontSize: 14,
-    color: Colors.textPrimary,
+    color: Colors.primary,
+    fontWeight: '700',
   },
   datePickerPlaceholder: {
     fontSize: 14,

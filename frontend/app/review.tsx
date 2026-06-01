@@ -19,7 +19,7 @@ import { useAppStore } from '@/stores/app-store';
 import { useSubscriptionStore } from '@/stores/subscription-store';
 import { queryKeys } from '@/lib/query-keys';
 import { Colors, Fonts, Shadows } from '@/constants/theme';
-import { Archive, Edit3, FileText, Heart, Info, Lightbulb, Phone, Users, Zap } from 'lucide-react-native';
+import { Archive, Edit3, FileText, Heart, Info, Lightbulb, Phone, Sparkles, Users, Zap } from 'lucide-react-native';
 import { CollapsibleSection } from '@/components/ui/CollapsibleSection';
 import { LovesEditor } from '@/components/contact/LovesEditor';
 import { TranscriptionSection } from '@/components/review/TranscriptionSection';
@@ -33,6 +33,19 @@ import { getLocaleDateStringLocale } from '@/utils/dateLocale';
 import { Paywall } from '@/components/Paywall';
 import { shouldApplyExtractedMeetingContext } from '@/utils/meetingContext';
 import { mergeLoves } from '@/utils/loves';
+import { resolveReviewContactId, resolveReviewStringParam } from '@/utils/reviewParams';
+
+const FLOATING_SAVE_RESERVED_SPACE = 144;
+const FLOATING_SAVE_BOTTOM_PADDING = 24;
+
+function getContactInitials(name: string): string {
+  const nameParts = name.trim().split(/\s+/).filter(Boolean);
+  const firstInitial = nameParts[0]?.[0] || '';
+  const secondInitial = nameParts.length > 1 ? nameParts[nameParts.length - 1]?.[0] : nameParts[0]?.[1] || '';
+  const initials = `${firstInitial}${secondInitial}`.toUpperCase();
+
+  return initials || '?';
+}
 
 export default function ReviewScreen() {
   const { t } = useTranslation();
@@ -47,11 +60,11 @@ export default function ReviewScreen() {
   const { createNote } = useNotes();
   const { setRecordingState, addPendingAvatarGeneration, removePendingAvatarGeneration } = useAppStore();
 
-  const extraction: ExtractionResult = JSON.parse(params.extraction as string);
-  const audioUri = params.audioUri as string;
-  const transcription = params.transcription as string;
-  const contactId = params.contactId as string;
-  const skipAvatarGeneration = params.skipAvatarGeneration === '1';
+  const extraction: ExtractionResult = JSON.parse(resolveReviewStringParam(params.extraction));
+  const audioUri = resolveReviewStringParam(params.audioUri);
+  const transcription = resolveReviewStringParam(params.transcription);
+  const contactId = resolveReviewContactId(params.contactId, extraction.contactIdentified.id);
+  const skipAvatarGeneration = resolveReviewStringParam(params.skipAvatarGeneration) === '1';
 
   const [selectedFacts, setSelectedFacts] = useState<number[]>(
     extraction.facts?.map((_, index) => index) || []
@@ -163,6 +176,17 @@ export default function ReviewScreen() {
   const contactInfoCount = [editableContactInfo.phone, editableContactInfo.email, editableContactInfo.birthday].filter(Boolean).length;
   const resolvedTopicsCount = Math.max(resolvedTopicsWithData.length, resolvedTopicsState.length);
   const hasResolvedTopics = resolvedTopicsCount > 0;
+  const capturedDetailCount = contactInfoCount + editableFacts.length + selectedGroups.length + resolvedTopicsCount + editableHotTopics.length + editableMemories.length + extractedLoves.length;
+  const selectedDetailCount = contactInfoCount + selectedFacts.length + selectedGroups.length + resolvedTopicsState.length + selectedHotTopics.length + selectedMemories.length + extractedLoves.length;
+  const selectedReminderCount = selectedHotTopics.filter((hotTopicIndex) => {
+    const dateInfo = hotTopicDates[hotTopicIndex];
+    return !!(dateInfo?.enabled && dateInfo.date);
+  }).length;
+  const saveSummary = t('review.saveSummary', {
+    details: t('review.detailsCount', { count: selectedDetailCount }),
+    reminders: t('review.remindersCount', { count: selectedReminderCount }),
+  });
+  const contactInitials = getContactInitials(editedName);
 
   const toggleResolvedTopic = (topicId: string) => {
     setResolvedTopicsState((prev) => {
@@ -661,11 +685,26 @@ export default function ReviewScreen() {
     >
       <ScrollView
         style={styles.container}
-        contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom + FLOATING_SAVE_RESERVED_SPACE }
+        ]}
         automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="interactive"
       >
+        <View style={styles.summaryCard}>
+          <View style={styles.summaryIconTile}>
+            <Sparkles size={18} color={Colors.primary} />
+          </View>
+          <View style={styles.summaryTextContent}>
+            <Text style={styles.summaryTitle}>
+              {t('review.capturedDetails', { count: capturedDetailCount, name: editedName })}
+            </Text>
+            <Text style={styles.summaryHelp}>{t('review.summaryHelp')}</Text>
+          </View>
+        </View>
+
         {isEditingName ? (
           <View style={styles.editNameContainer}>
             <TextInput
@@ -684,15 +723,20 @@ export default function ReviewScreen() {
           <Pressable
             style={styles.contactNameRow}
             onPress={() => contactId === 'new' && setIsEditingName(true)}
+            disabled={contactId !== 'new'}
           >
-            <Text style={styles.contactName}>{editedName}</Text>
-            {contactId === 'new' && <Edit3 size={18} color={Colors.textMuted} style={{ marginLeft: 8 }} />}
+            <View style={styles.contactAvatar}>
+              <Text style={styles.contactAvatarText}>{contactInitials}</Text>
+            </View>
+            <View style={styles.contactNameContent}>
+              <Text style={styles.contactName} numberOfLines={1}>{editedName}</Text>
+              <Text style={styles.contactStatus}>
+                {contactId === 'new' ? t('review.newContact') : t('review.update')}
+              </Text>
+            </View>
+            {contactId === 'new' && <Edit3 size={18} color={Colors.textMuted} />}
           </Pressable>
         )}
-
-        <Text style={styles.subtitle}>
-          {contactId === 'new' ? t('review.newContact') : t('review.update')}
-        </Text>
 
         <CollapsibleSection
           title={t('review.transcription')}
@@ -718,7 +762,7 @@ export default function ReviewScreen() {
           <CollapsibleSection
             title={t('contact.contactInfoReview.title')}
             defaultExpanded={true}
-            badge={t('review.newItems', { count: contactInfoCount })}
+            badge={`${contactInfoCount}`}
             badgeColor={Colors.primary}
             icon={<Phone size={18} color={Colors.primary} />}
           >
@@ -735,7 +779,7 @@ export default function ReviewScreen() {
           <CollapsibleSection
             title={t('review.extractedInfo')}
             defaultExpanded={true}
-            badge={t('review.newItems', { count: editableFacts.length })}
+            badge={`${editableFacts.length}`}
             badgeColor={Colors.primary}
             icon={<Info size={18} color={Colors.primary} />}
           >
@@ -773,7 +817,7 @@ export default function ReviewScreen() {
           <CollapsibleSection
             title={t('review.topicsToArchive')}
             defaultExpanded={true}
-            badge={t('review.toConfirm', { count: resolvedTopicsCount })}
+            badge={`${resolvedTopicsCount}`}
             badgeColor={Colors.success}
             icon={<Archive size={18} color={Colors.success} />}
           >
@@ -796,7 +840,7 @@ export default function ReviewScreen() {
           <CollapsibleSection
             title={t('review.news')}
             defaultExpanded={true}
-            badge={t('review.newItems', { count: editableHotTopics.length })}
+            badge={`${editableHotTopics.length}`}
             badgeColor={Colors.primary}
             icon={<Zap size={18} color={Colors.warning} />}
           >
@@ -823,7 +867,7 @@ export default function ReviewScreen() {
           <CollapsibleSection
             title={t('review.memories')}
             defaultExpanded={true}
-            badge={t('review.newItems', { count: editableMemories.length })}
+            badge={`${editableMemories.length}`}
             badgeColor={Colors.primary}
             icon={<Lightbulb size={18} color={Colors.primary} />}
           >
@@ -842,7 +886,7 @@ export default function ReviewScreen() {
           <CollapsibleSection
             title={t('review.loves')}
             defaultExpanded={true}
-            badge={t('review.newItems', { count: extractedLoves.length })}
+            badge={`${extractedLoves.length}`}
             badgeColor={Colors.primary}
             icon={<Heart size={18} color={Colors.error} fill={Colors.error} />}
           >
@@ -900,15 +944,22 @@ export default function ReviewScreen() {
         )}
       </ScrollView>
 
-      <View style={[styles.floatingSaveContainer, { paddingBottom: insets.bottom + 24 }]}>
+      <View style={[styles.floatingSaveContainer, { paddingBottom: insets.bottom + FLOATING_SAVE_BOTTOM_PADDING }]}>
         <Pressable
           style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
           onPress={handleSave}
           disabled={isSaving}
         >
-          <Text style={styles.saveButtonText}>
-            {isSaving ? t('review.saving') : t('review.save')}
-          </Text>
+          <View style={styles.saveButtonContent}>
+            <Text style={styles.saveButtonText}>
+              {isSaving ? t('review.saving') : t('review.save')}
+            </Text>
+            {!isSaving && (
+              <View style={styles.saveSummaryBadge}>
+                <Text style={styles.saveSummaryText} numberOfLines={1}>{saveSummary}</Text>
+              </View>
+            )}
+          </View>
         </Pressable>
       </View>
 
@@ -927,14 +978,49 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
+  },
+  scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 12,
+    paddingTop: 14,
+  },
+  summaryCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.primaryLight,
+    borderRadius: 18,
+    padding: 14,
+    gap: 12,
+    marginBottom: 12,
+  },
+  summaryIconTile: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    backgroundColor: Colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  summaryTextContent: {
+    flex: 1,
+  },
+  summaryTitle: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 15,
+    lineHeight: 19,
+    color: Colors.textPrimary,
+  },
+  summaryHelp: {
+    fontSize: 13,
+    lineHeight: 17,
+    color: Colors.textSecondary,
+    marginTop: 2,
   },
   contactName: {
     fontFamily: Fonts.sans.bold,
     fontSize: 18,
     letterSpacing: -0.3,
     color: Colors.textPrimary,
+    flexShrink: 1,
   },
   contactNameRow: {
     flexDirection: 'row',
@@ -944,6 +1030,30 @@ const styles = StyleSheet.create({
     padding: 14,
     gap: 12,
     marginBottom: 16,
+  },
+  contactAvatar: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  contactAvatarText: {
+    color: Colors.textInverse,
+    fontFamily: Fonts.sans.bold,
+    fontSize: 14,
+  },
+  contactNameContent: {
+    flex: 1,
+    gap: 2,
+  },
+  contactStatus: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 11,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    color: Colors.primary,
   },
   editNameContainer: {
     flexDirection: 'row',
@@ -975,15 +1085,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '600',
   },
-  subtitle: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: Colors.primary,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: 16,
-    marginLeft: 4,
-  },
   floatingSaveContainer: {
     position: 'absolute',
     bottom: 0,
@@ -991,11 +1092,17 @@ const styles = StyleSheet.create({
     right: 0,
     paddingHorizontal: 20,
     paddingTop: 14,
+    backgroundColor: Colors.background,
+    borderTopWidth: 1,
+    borderTopColor: Colors.hairline,
   },
   saveButton: {
-    paddingVertical: 16,
+    minHeight: 54,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     borderRadius: 18,
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: Colors.primary,
     ...Shadows.fab,
   },
@@ -1006,6 +1113,25 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontFamily: Fonts.sans.bold,
     fontSize: 16,
+  },
+  saveButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    maxWidth: '100%',
+  },
+  saveSummaryBadge: {
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    flexShrink: 1,
+  },
+  saveSummaryText: {
+    color: Colors.textInverse,
+    fontFamily: Fonts.sans.bold,
+    fontSize: 12,
   },
   datePickerModalOverlay: {
     flex: 1,
