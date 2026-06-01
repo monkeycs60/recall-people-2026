@@ -51,7 +51,7 @@ export const TimelineEventEditSheet = forwardRef<BottomSheetModal, TimelineEvent
     const [date, setDate] = useState(() => cloneDate(event?.date));
     const [showAndroidDatePicker, setShowAndroidDatePicker] = useState(false);
 
-    const snapPoints = useMemo(() => [Platform.OS === 'ios' ? '82%' : '72%'], []);
+    const snapPoints = useMemo(() => [Platform.OS === 'ios' ? '78%' : '58%'], []);
     const canSave = Boolean(event && title.trim().length > 0 && !isSaving);
     const dateLabel = formatLocalizedDate(date, {
       day: 'numeric',
@@ -98,7 +98,7 @@ export const TimelineEventEditSheet = forwardRef<BottomSheetModal, TimelineEvent
         ref={ref}
         snapPoints={snapPoints}
         enableDynamicSizing={false}
-        keyboardBehavior="fillParent"
+        keyboardBehavior="interactive"
         keyboardBlurBehavior="restore"
         android_keyboardInputMode="adjustResize"
         backdropComponent={renderBackdrop}
@@ -126,8 +126,6 @@ export const TimelineEventEditSheet = forwardRef<BottomSheetModal, TimelineEvent
               placeholder={t('contactComingUp.eventTitlePlaceholder')}
               placeholderTextColor={Colors.textMuted}
               autoCapitalize="sentences"
-              autoFocus
-              selectTextOnFocus
             />
           </View>
 

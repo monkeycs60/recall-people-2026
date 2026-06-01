@@ -149,6 +149,15 @@ test('timeline event edit sheet edits title, context, and date', async () => {
   assert.match(source, /contactComingUp\.eventDate/);
 });
 
+test('timeline event edit sheet opens compact instead of expanding for keyboard focus', async () => {
+  const source = await readFile(timelineEventEditSheetPath, 'utf8');
+
+  assert.match(source, /keyboardBehavior="interactive"/);
+  assert.doesNotMatch(source, /keyboardBehavior="fillParent"/);
+  assert.doesNotMatch(source, /\sautoFocus\b/);
+  assert.doesNotMatch(source, /'72%'/);
+});
+
 test('timeline event edit strings are translated in every supported locale', async () => {
   for (const localePath of localePaths) {
     const source = await readFile(localePath, 'utf8');
