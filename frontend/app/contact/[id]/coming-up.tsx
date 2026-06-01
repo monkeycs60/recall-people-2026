@@ -1,18 +1,26 @@
 import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeft } from 'lucide-react-native';
-import { useContactQuery } from '@/hooks/useContactQuery';
+import type { BottomSheetModal } from '@gorhom/bottom-sheet';
+import { Check, ChevronLeft, Edit3 } from 'lucide-react-native';
+import { useContactQuery, useUpdateHotTopic } from '@/hooks/useContactQuery';
 import { ContactAvatar } from '@/components/contact/ContactAvatar';
+import {
+  TimelineEventEditSheet,
+  type TimelineEventEditSheetEvent,
+  type TimelineEventEditValues,
+} from '@/components/contact/TimelineEventEditSheet';
 import { Colors, Fonts, Shadows } from '@/constants/theme';
 import { ContactDetailSkeleton } from '@/components/skeleton/ContactDetailSkeleton';
 import { formatLocalizedDate } from '@/utils/dateLocale';
-import { filterToNextBirthdayTopic } from '@/utils/hotTopics';
-import type { HotTopic } from '@/types';
+import { getContactLifeTimelineSections, type ContactLifeTimelineEntry } from '@/utils/contactLifeTimeline';
+import { notificationService } from '@/services/notification.service';
+import { showErrorToast } from '@/lib/error-handler';
 
 type ToneKey = 'amber' | 'primary' | 'accent' | 'mint';
+type TimelineTranslate = (key: string, options?: Record<string, unknown>) => string;
 
 type TimelineEntry = {
   id: string;
@@ -20,11 +28,23 @@ type TimelineEntry = {
   monthLabel: string;
   dayLabel: string;
   title: string;
+  context?: string;
   subtitle?: string;
   diffDays: number;
   isHighlighted: boolean;
+  isBirthday: boolean;
+  isSyntheticBirthday: boolean;
   emoji: string;
   tone: ToneKey;
+  timelineStatus: 'active' | 'resolved';
+  resolution?: string;
+};
+
+type TimelineEventRowProps = {
+  entry: TimelineEntry;
+  translate: TimelineTranslate;
+  canEdit?: boolean;
+  onEdit?: (entry: TimelineEntry) => void;
 };
 
 const tonePalette: Record<ToneKey, { color: string; background: string; shadowTint: string }> = {
@@ -60,6 +80,137 @@ function getMonthLabel(date: Date, language: string): string {
   return date.toLocaleDateString(language === 'en' ? 'en-US' : `${language}-${language.toUpperCase()}`, { month: 'short' }).replace('.', '').toUpperCase();
 }
 
+function buildTimelineEntry(
+  entry: ContactLifeTimelineEntry,
+  index: number,
+  today: Date,
+  language: string,
+  birthdayYear: number | undefined,
+  birthdayTitle: string,
+  birthdayTurning: string | undefined
+): TimelineEntry {
+  const diffDays = getDayDiff(entry.date, today);
+  const title = entry.isSyntheticBirthday ? birthdayTitle : entry.title;
+  const subtitle = entry.timelineStatus === 'resolved'
+    ? entry.resolution || entry.context
+    : entry.context || (entry.isBirthday && birthdayYear ? birthdayTurning : undefined);
+
+  return {
+    id: entry.id,
+    date: entry.date,
+    monthLabel: getMonthLabel(entry.date, language),
+    dayLabel: String(entry.date.getDate()),
+    title,
+    context: entry.context,
+    subtitle,
+    diffDays,
+    isHighlighted: entry.timelineStatus === 'active' && index === 0,
+    isBirthday: entry.isBirthday,
+    isSyntheticBirthday: entry.isSyntheticBirthday,
+    emoji: entry.timelineStatus === 'resolved' ? '' : pickEmoji(title, entry.isBirthday),
+    tone: entry.timelineStatus === 'resolved' ? 'mint' : toneRotation[index % toneRotation.length],
+    timelineStatus: entry.timelineStatus,
+    resolution: entry.resolution,
+  };
+}
+
+function getTimelineEntryTimeLabel(
+  entry: TimelineEntry,
+  translate: TimelineTranslate
+): string {
+  if (entry.timelineStatus === 'resolved') {
+    const daysAgo = Math.max(0, -entry.diffDays);
+    if (daysAgo === 0) return translate('contactNotes.relativeToday');
+    if (daysAgo === 1) return translate('contactNotes.relativeYesterday');
+    if (daysAgo < 30) return translate('contactNotes.relativeDaysAgo', { count: daysAgo });
+    if (daysAgo < 365) return translate('contactNotes.relativeMonthsAgo', { count: Math.floor(daysAgo / 30) });
+    return translate('contactNotes.relativeYearsAgo', { count: Math.floor(daysAgo / 365) });
+  }
+
+  return entry.diffDays <= 0
+    ? translate('contactComingUp.today')
+    : translate('contactComingUp.inDays', { count: entry.diffDays });
+}
+
+function TimelineEventRow({ entry, translate, canEdit = false, onEdit }: TimelineEventRowProps) {
+  const isResolved = entry.timelineStatus === 'resolved';
+  const palette = isResolved
+    ? { color: Colors.success, background: Colors.successLight }
+    : tonePalette[entry.tone];
+  const cardBackground = isResolved
+    ? Colors.successLight
+    : entry.isHighlighted
+      ? palette.background
+      : Colors.surface;
+
+  return (
+    <View key={entry.id} style={styles.timelineRow}>
+      <View style={styles.dateColumn}>
+        <View
+          style={[
+            styles.dateChip,
+            isResolved && styles.resolvedDateChip,
+            { borderColor: palette.color },
+          ]}
+        >
+          <Text style={[styles.dateDay, { color: palette.color }]}>{entry.dayLabel}</Text>
+          <Text style={[styles.dateMonth, { color: palette.color }]}>{entry.monthLabel}</Text>
+        </View>
+      </View>
+      <View
+        style={[
+          styles.eventCard,
+          { backgroundColor: cardBackground },
+          isResolved && styles.resolvedEventCard,
+          entry.isHighlighted && {
+            borderColor: palette.color,
+            borderWidth: 2,
+            shadowColor: palette.color,
+            shadowOpacity: 0.25,
+            shadowRadius: 14,
+            shadowOffset: { width: 0, height: 8 },
+            elevation: 6,
+          },
+        ]}
+      >
+        <View style={styles.eventCardHeader}>
+          <View style={styles.eventCardTitleRow}>
+            {isResolved ? (
+              <Check style={styles.resolvedTitleCheck} size={16} color={Colors.success} strokeWidth={2.8} />
+            ) : (
+              <Text style={styles.eventCardEmoji}>{entry.emoji}</Text>
+            )}
+            <Text style={styles.eventCardTitle} numberOfLines={2}>
+              {entry.title}
+            </Text>
+          </View>
+          <View style={styles.eventCardTrailing}>
+            <Text style={styles.eventCardSoon} numberOfLines={1}>
+              {getTimelineEntryTimeLabel(entry, translate)}
+            </Text>
+            {canEdit ? (
+              <Pressable
+                style={styles.eventCardEditButton}
+                onPress={() => onEdit?.(entry)}
+                accessibilityRole="button"
+                accessibilityLabel={translate('common.edit')}
+                hitSlop={8}
+              >
+                <Edit3 size={14} color={Colors.primary} strokeWidth={2.5} />
+              </Pressable>
+            ) : null}
+          </View>
+        </View>
+        {entry.subtitle ? (
+          <Text style={styles.eventCardBody} numberOfLines={3}>
+            {entry.subtitle}
+          </Text>
+        ) : null}
+      </View>
+    </View>
+  );
+}
+
 export default function ContactComingUpScreen() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
@@ -67,6 +218,13 @@ export default function ContactComingUpScreen() {
   const params = useLocalSearchParams();
   const contactId = params.id as string;
   const { contact, isLoading } = useContactQuery(contactId);
+  const updateHotTopicMutation = useUpdateHotTopic();
+  const scrollRef = useRef<ScrollView>(null);
+  const editSheetRef = useRef<BottomSheetModal>(null);
+  const hasScrolledToTodayRef = useRef(false);
+  const [todayMarkerY, setTodayMarkerY] = useState<number | null>(null);
+  const [selectedTimelineEntry, setSelectedTimelineEntry] = useState<TimelineEntry | null>(null);
+  const [isSavingTimelineEntry, setIsSavingTimelineEntry] = useState(false);
 
   const today = useMemo(() => new Date(), []);
   const todayLabel = useMemo(
@@ -74,57 +232,100 @@ export default function ContactComingUpScreen() {
     [today]
   );
 
-  const entries: TimelineEntry[] = useMemo(() => {
-    if (!contact) return [];
-    const activeUpcoming: HotTopic[] = filterToNextBirthdayTopic(contact.hotTopics)
-      .filter((topic) => topic.status === 'active' && topic.eventDate)
-      .slice()
-      .sort((a, b) => new Date(a.eventDate!).getTime() - new Date(b.eventDate!).getTime());
-    const hasBirthdayHotTopic = activeUpcoming.some((topic) => topic.birthdayContactId);
+  const timelineSections = useMemo(() => {
+    if (!contact) return { resolved: [], upcoming: [] };
+    return getContactLifeTimelineSections(contact, today);
+  }, [contact, today]);
 
-    const list = activeUpcoming.map<TimelineEntry>((topic, index) => {
-      const eventDate = new Date(topic.eventDate!);
-      const diffDays = getDayDiff(eventDate, today);
-      const isBirthday = Boolean(topic.birthdayContactId);
-      return {
-        id: topic.id,
-        date: eventDate,
-        monthLabel: getMonthLabel(eventDate, i18n.language),
-        dayLabel: String(eventDate.getDate()),
-        title: topic.title,
-        subtitle: topic.context || (isBirthday && contact.birthdayYear
-          ? t('contactComingUp.birthdayTurning', { age: eventDate.getFullYear() - contact.birthdayYear })
-          : undefined),
-        diffDays,
-        isHighlighted: index === 0,
-        emoji: pickEmoji(topic.title, isBirthday),
-        tone: toneRotation[index % toneRotation.length],
-      };
+  const resolvedEntries: TimelineEntry[] = useMemo(() => {
+    if (!contact) return [];
+    return timelineSections.resolved.map((entry, index) => buildTimelineEntry(
+      entry,
+      index,
+      today,
+      i18n.language,
+      contact.birthdayYear,
+      t('contactComingUp.birthdayTitle', { firstName: contact.firstName }),
+      contact.birthdayYear ? t('contactComingUp.birthdayTurning', { age: entry.date.getFullYear() - contact.birthdayYear }) : undefined
+    ));
+  }, [contact, timelineSections.resolved, today, i18n.language, t]);
+
+  const upcomingEntries: TimelineEntry[] = useMemo(() => {
+    if (!contact) return [];
+    return timelineSections.upcoming.map((entry, index) => buildTimelineEntry(
+      entry,
+      index,
+      today,
+      i18n.language,
+      contact.birthdayYear,
+      t('contactComingUp.birthdayTitle', { firstName: contact.firstName }),
+      contact.birthdayYear ? t('contactComingUp.birthdayTurning', { age: entry.date.getFullYear() - contact.birthdayYear }) : undefined
+    ));
+  }, [contact, timelineSections.upcoming, today, i18n.language, t]);
+
+  const hasTimelineEntries = resolvedEntries.length > 0 || upcomingEntries.length > 0;
+
+  const handleEditTimelineEntry = (entry: TimelineEntry) => {
+    if (entry.timelineStatus !== 'active' || entry.isBirthday) return;
+
+    setSelectedTimelineEntry(entry);
+    requestAnimationFrame(() => editSheetRef.current?.present());
+  };
+
+  const handleSaveTimelineEntry = async (
+    entry: TimelineEventEditSheetEvent,
+    values: TimelineEventEditValues
+  ) => {
+    if (!contact) return;
+
+    setIsSavingTimelineEntry(true);
+    try {
+      await updateHotTopicMutation.mutateAsync({
+        id: entry.id,
+        contactId: contact.id,
+        data: {
+          title: values.title,
+          context: values.context,
+          eventDate: values.eventDate,
+        },
+      });
+
+      try {
+        await notificationService.cancelEventRemindersByEventId(entry.id);
+        await notificationService.scheduleEventReminder(
+          entry.id,
+          values.eventDate,
+          values.title,
+          contact.firstName,
+          { requestPermission: false }
+        );
+      } catch (notificationError) {
+        console.warn('Failed to refresh event reminders:', notificationError);
+      }
+    } catch (error) {
+      console.error('Failed to update timeline event:', error);
+      showErrorToast(t('errors.generic'));
+      throw error;
+    } finally {
+      setIsSavingTimelineEntry(false);
+    }
+  };
+
+  useEffect(() => {
+    hasScrolledToTodayRef.current = false;
+    setTodayMarkerY(null);
+  }, [contactId]);
+
+  useEffect(() => {
+    if (todayMarkerY === null || hasScrolledToTodayRef.current) return;
+
+    const frameId = requestAnimationFrame(() => {
+      scrollRef.current?.scrollTo({ y: Math.max(0, todayMarkerY - 8), animated: false });
+      hasScrolledToTodayRef.current = true;
     });
 
-    if (contact.birthdayDay && contact.birthdayMonth && !hasBirthdayHotTopic) {
-      const year = today.getFullYear();
-      const candidate = new Date(year, contact.birthdayMonth - 1, contact.birthdayDay);
-      if (candidate.getTime() < today.getTime()) {
-        candidate.setFullYear(year + 1);
-      }
-      const diffDays = getDayDiff(candidate, today);
-      list.push({
-        id: `birthday-${contact.id}`,
-        date: candidate,
-        monthLabel: getMonthLabel(candidate, i18n.language),
-        dayLabel: String(candidate.getDate()),
-        title: t('contactComingUp.birthdayTitle', { firstName: contact.firstName }),
-        subtitle: contact.birthdayYear ? t('contactComingUp.birthdayTurning', { age: candidate.getFullYear() - contact.birthdayYear }) : undefined,
-        diffDays,
-        isHighlighted: false,
-        emoji: '🎂',
-        tone: 'mint',
-      });
-    }
-
-    return list.sort((a, b) => a.date.getTime() - b.date.getTime());
-  }, [contact, today, i18n.language, t]);
+    return () => cancelAnimationFrame(frameId);
+  }, [todayMarkerY]);
 
   if (isLoading) return <ContactDetailSkeleton />;
 
@@ -158,20 +359,13 @@ export default function ContactComingUpScreen() {
         </View>
       </View>
 
-      <View style={styles.todayMarkerRow}>
-        <View style={styles.todayMarkerLine} />
-        <Text style={styles.todayMarkerLabel}>
-          {t('contactComingUp.todayLabel')} · {todayLabel}
-        </Text>
-        <View style={styles.todayMarkerLine} />
-      </View>
-
       <ScrollView
+        ref={scrollRef}
         style={styles.scroll}
         contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 32 }]}
         showsVerticalScrollIndicator={false}
       >
-        {entries.length === 0 ? (
+        {!hasTimelineEntries ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyEmoji}>🌱</Text>
             <Text style={styles.emptyTitle}>{t('contactComingUp.emptyTitle')}</Text>
@@ -182,57 +376,45 @@ export default function ContactComingUpScreen() {
         ) : (
           <View style={styles.timelineWrapper}>
             <View style={styles.timelineDottedLine} />
-            {entries.map((entry) => {
-              const palette = tonePalette[entry.tone];
-              const cardBackground = entry.isHighlighted ? palette.background : Colors.surface;
-              return (
-                <View key={entry.id} style={styles.timelineRow}>
-                  <View style={styles.dateColumn}>
-                    <View style={[styles.dateChip, { borderColor: palette.color }]}>
-                      <Text style={[styles.dateDay, { color: palette.color }]}>{entry.dayLabel}</Text>
-                      <Text style={[styles.dateMonth, { color: palette.color }]}>{entry.monthLabel}</Text>
-                    </View>
-                  </View>
-                  <View
-                    style={[
-                      styles.eventCard,
-                      { backgroundColor: cardBackground },
-                      entry.isHighlighted && {
-                        borderColor: palette.color,
-                        borderWidth: 2,
-                        shadowColor: palette.color,
-                        shadowOpacity: 0.25,
-                        shadowRadius: 14,
-                        shadowOffset: { width: 0, height: 8 },
-                        elevation: 6,
-                      },
-                    ]}
-                  >
-                    <View style={styles.eventCardHeader}>
-                      <View style={styles.eventCardTitleRow}>
-                        <Text style={styles.eventCardEmoji}>{entry.emoji}</Text>
-                        <Text style={styles.eventCardTitle} numberOfLines={2}>
-                          {entry.title}
-                        </Text>
-                      </View>
-                      <Text style={styles.eventCardSoon} numberOfLines={1}>
-                        {entry.diffDays <= 0
-                          ? t('contactComingUp.today')
-                          : t('contactComingUp.inDays', { count: entry.diffDays })}
-                      </Text>
-                    </View>
-                    {entry.subtitle ? (
-                      <Text style={styles.eventCardBody} numberOfLines={3}>
-                        {entry.subtitle}
-                      </Text>
-                    ) : null}
-                  </View>
-                </View>
-              );
-            })}
+            {resolvedEntries.map((entry) => (
+              <TimelineEventRow
+                key={entry.id}
+                entry={entry}
+                translate={t}
+              />
+            ))}
+
+            <View
+              style={styles.todayMarkerRow}
+              onLayout={(event) => setTodayMarkerY(event.nativeEvent.layout.y)}
+            >
+              <View style={styles.todayMarkerLine} />
+              <Text style={styles.todayMarkerLabel}>
+                {t('contactComingUp.todayLabel')} · {todayLabel}
+              </Text>
+              <View style={styles.todayMarkerLine} />
+            </View>
+
+            {upcomingEntries.map((entry) => (
+              <TimelineEventRow
+                key={entry.id}
+                entry={entry}
+                translate={t}
+                canEdit={entry.timelineStatus === 'active' && !entry.isBirthday}
+                onEdit={handleEditTimelineEntry}
+              />
+            ))}
           </View>
         )}
       </ScrollView>
+      <TimelineEventEditSheet
+        key={selectedTimelineEntry?.id ?? 'timeline-event-edit'}
+        ref={editSheetRef}
+        event={selectedTimelineEntry}
+        isSaving={isSavingTimelineEntry}
+        onSave={handleSaveTimelineEntry}
+        onDismiss={() => setSelectedTimelineEntry(null)}
+      />
     </View>
   );
 }
@@ -281,6 +463,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     gap: 12,
+    marginTop: 2,
     marginBottom: 18,
   },
   todayMarkerLine: { flex: 1, height: 1, backgroundColor: Colors.hairline },
@@ -329,6 +512,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  resolvedDateChip: {
+    backgroundColor: Colors.surface,
+  },
   dateMonth: {
     fontFamily: Fonts.sans.bold,
     fontSize: 9,
@@ -347,6 +533,10 @@ const styles = StyleSheet.create({
     padding: 14,
     ...Shadows.card,
   },
+  resolvedEventCard: {
+    borderWidth: 1,
+    borderColor: `${Colors.success}30`,
+  },
   eventCardHeader: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -364,6 +554,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     lineHeight: 22,
   },
+  resolvedTitleCheck: {
+    marginTop: 2,
+  },
   eventCardTitle: {
     flex: 1,
     flexShrink: 1,
@@ -374,12 +567,22 @@ const styles = StyleSheet.create({
   },
   eventCardSoon: {
     minWidth: 48,
-    marginTop: 3,
-    marginLeft: 'auto',
     fontFamily: Fonts.sans.bold,
     fontSize: 10,
     color: Colors.textMuted,
     textAlign: 'right',
+  },
+  eventCardTrailing: {
+    alignItems: 'flex-end',
+    gap: 8,
+  },
+  eventCardEditButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   eventCardBody: {
     fontFamily: Fonts.sans.medium,

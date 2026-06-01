@@ -1072,10 +1072,10 @@
     "accept": "I Understand and Agree"
   },
   "contactProfile": {
-    "heroTileEyebrow": "★ {{firstName}}'s next 90 days",
+    "heroTileEyebrow": "★ Coming up for {{firstName}}",
     "heroTileTitle": "{{count}} moments coming up",
     "heroTileEmpty": "No upcoming moments yet",
-    "viewAll": "View all",
+    "viewAll": "View timeline",
     "moreUpcoming": "more",
     "tileIcebreakers": "Ice breakers",
     "tileIcebreakersMeta": "{{count}} questions",
@@ -1105,7 +1105,7 @@
   },
   "contactComingUp": {
     "title": "{{firstName}}'s life",
-    "subtitle": "next 90 days",
+    "subtitle": "Coming up",
     "todayLabel": "TODAY",
     "today": "today",
     "inDays_one": "in {{count}} day",
@@ -1115,7 +1115,13 @@
     "birthdayTitle": "{{firstName}}'s birthday",
     "birthdayTurning": "turning {{age}}",
     "emptyTitle": "Nothing planned yet",
-    "emptyBody": "Tell us what's coming up in {{firstName}}'s life and we'll keep track."
+    "emptyBody": "Tell us what's coming up in {{firstName}}'s life and we'll keep track.",
+    "editEventTitle": "Edit event",
+    "eventTitleLabel": "Name",
+    "eventTitlePlaceholder": "Trip to Paris",
+    "eventContextLabel": "Details",
+    "eventContextPlaceholder": "Add useful context",
+    "eventDate": "Date"
   },
   "contactIcebreakers": {
     "headerLabel": "ICEBREAKERS",

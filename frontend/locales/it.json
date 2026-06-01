@@ -1072,10 +1072,10 @@
     "accept": "Capisco e accetto"
   },
   "contactProfile": {
-    "heroTileEyebrow": "★ I prossimi 90 giorni di {{firstName}}",
+    "heroTileEyebrow": "★ In arrivo per {{firstName}}",
     "heroTileTitle": "{{count}} momenti in arrivo",
     "heroTileEmpty": "Nessun momento in programma",
-    "viewAll": "Vedi tutto",
+    "viewAll": "Vedi timeline",
     "moreUpcoming": "altri",
     "tileIcebreakers": "Rompighiaccio",
     "tileIcebreakersMeta": "{{count}} domande",
@@ -1105,7 +1105,7 @@
   },
   "contactComingUp": {
     "title": "La vita di {{firstName}}",
-    "subtitle": "prossimi 90 giorni",
+    "subtitle": "In arrivo",
     "todayLabel": "OGGI",
     "today": "oggi",
     "inDays_one": "tra {{count}} giorno",
@@ -1115,7 +1115,13 @@
     "birthdayTitle": "Compleanno di {{firstName}}",
     "birthdayTurning": "compie {{age}}",
     "emptyTitle": "Nulla in programma per ora",
-    "emptyBody": "Raccontaci cosa aspetta {{firstName}} nella sua vita e lo seguiremo per te."
+    "emptyBody": "Raccontaci cosa aspetta {{firstName}} nella sua vita e lo seguiremo per te.",
+    "editEventTitle": "Modifica evento",
+    "eventTitleLabel": "Nome",
+    "eventTitlePlaceholder": "Viaggio a Parigi",
+    "eventContextLabel": "Dettagli",
+    "eventContextPlaceholder": "Aggiungi contesto utile",
+    "eventDate": "Data"
   },
   "contactIcebreakers": {
     "headerLabel": "ROMPIGHIACCIO",

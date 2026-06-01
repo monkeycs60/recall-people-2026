@@ -1072,10 +1072,10 @@
     "accept": "Entiendo y acepto"
   },
   "contactProfile": {
-    "heroTileEyebrow": "★ Los próximos 90 días de {{firstName}}",
+    "heroTileEyebrow": "★ Lo que viene para {{firstName}}",
     "heroTileTitle": "{{count}} momentos en camino",
     "heroTileEmpty": "Aún no hay momentos previstos",
-    "viewAll": "Ver todo",
+    "viewAll": "Ver cronología",
     "moreUpcoming": "más",
     "tileIcebreakers": "Rompehielos",
     "tileIcebreakersMeta": "{{count}} preguntas",
@@ -1105,7 +1105,7 @@
   },
   "contactComingUp": {
     "title": "La vida de {{firstName}}",
-    "subtitle": "próximos 90 días",
+    "subtitle": "En camino",
     "todayLabel": "HOY",
     "today": "hoy",
     "inDays_one": "en {{count}} día",
@@ -1115,7 +1115,13 @@
     "birthdayTitle": "Cumpleaños de {{firstName}}",
     "birthdayTurning": "cumple {{age}}",
     "emptyTitle": "Aún no hay nada previsto",
-    "emptyBody": "Cuéntanos lo que viene en la vida de {{firstName}} y lo seguiremos por ti."
+    "emptyBody": "Cuéntanos lo que viene en la vida de {{firstName}} y lo seguiremos por ti.",
+    "editEventTitle": "Editar evento",
+    "eventTitleLabel": "Nombre",
+    "eventTitlePlaceholder": "Viaje a París",
+    "eventContextLabel": "Detalles",
+    "eventContextPlaceholder": "Añade contexto útil",
+    "eventDate": "Fecha"
   },
   "contactIcebreakers": {
     "headerLabel": "ROMPEHIELOS",

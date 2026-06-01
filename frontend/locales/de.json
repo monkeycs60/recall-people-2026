@@ -1072,10 +1072,10 @@
     "accept": "Ich verstehe und stimme zu"
   },
   "contactProfile": {
-    "heroTileEyebrow": "★ Die nächsten 90 Tage von {{firstName}}",
+    "heroTileEyebrow": "★ Was bei {{firstName}} ansteht",
     "heroTileTitle": "{{count}} Momente vor uns",
     "heroTileEmpty": "Noch nichts geplant",
-    "viewAll": "Alle ansehen",
+    "viewAll": "Timeline ansehen",
     "moreUpcoming": "weitere",
     "tileIcebreakers": "Eisbrecher",
     "tileIcebreakersMeta": "{{count}} Fragen",
@@ -1105,7 +1105,7 @@
   },
   "contactComingUp": {
     "title": "Das Leben von {{firstName}}",
-    "subtitle": "nächste 90 Tage",
+    "subtitle": "Was ansteht",
     "todayLabel": "HEUTE",
     "today": "heute",
     "inDays_one": "in {{count}} Tag",
@@ -1115,7 +1115,13 @@
     "birthdayTitle": "Geburtstag von {{firstName}}",
     "birthdayTurning": "wird {{age}}",
     "emptyTitle": "Bisher nichts geplant",
-    "emptyBody": "Sag uns, was in {{firstName}}s Leben ansteht, und wir behalten es im Blick."
+    "emptyBody": "Sag uns, was in {{firstName}}s Leben ansteht, und wir behalten es im Blick.",
+    "editEventTitle": "Ereignis bearbeiten",
+    "eventTitleLabel": "Name",
+    "eventTitlePlaceholder": "Reise nach Paris",
+    "eventContextLabel": "Details",
+    "eventContextPlaceholder": "Nützlichen Kontext hinzufügen",
+    "eventDate": "Datum"
   },
   "contactIcebreakers": {
     "headerLabel": "EISBRECHER",

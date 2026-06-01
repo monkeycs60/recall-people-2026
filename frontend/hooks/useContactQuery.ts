@@ -144,7 +144,7 @@ export function useUpdateHotTopic() {
       contactId,
     }: {
       id: string;
-      data: { title?: string; context?: string };
+      data: { title?: string; context?: string; eventDate?: string | null };
       contactId: string;
     }) => {
       await hotTopicService.update(id, data);

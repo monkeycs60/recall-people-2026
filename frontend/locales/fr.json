@@ -1066,10 +1066,10 @@
     "accept": "Je comprends et j'accepte"
   },
   "contactProfile": {
-    "heroTileEyebrow": "★ Les 90 prochains jours de {{firstName}}",
+    "heroTileEyebrow": "★ À venir pour {{firstName}}",
     "heroTileTitle": "{{count}} moments à venir",
     "heroTileEmpty": "Aucun moment prévu pour l'instant",
-    "viewAll": "Voir tout",
+    "viewAll": "Voir la timeline",
     "moreUpcoming": "en plus",
     "tileIcebreakers": "Brise-glace",
     "tileIcebreakersMeta": "{{count}} questions",
@@ -1099,7 +1099,7 @@
   },
   "contactComingUp": {
     "title": "La vie de {{firstName}}",
-    "subtitle": "90 prochains jours",
+    "subtitle": "À venir",
     "todayLabel": "AUJOURD'HUI",
     "today": "aujourd'hui",
     "inDays_one": "dans {{count}} jour",
@@ -1109,7 +1109,13 @@
     "birthdayTitle": "Anniversaire de {{firstName}}",
     "birthdayTurning": "{{age}} ans",
     "emptyTitle": "Rien de prévu pour l'instant",
-    "emptyBody": "Dis-nous ce qui arrive bientôt dans la vie de {{firstName}} et on garde un œil dessus."
+    "emptyBody": "Dis-nous ce qui arrive bientôt dans la vie de {{firstName}} et on garde un œil dessus.",
+    "editEventTitle": "Modifier l'événement",
+    "eventTitleLabel": "Nom",
+    "eventTitlePlaceholder": "Voyage à Paris",
+    "eventContextLabel": "Détails",
+    "eventContextPlaceholder": "Ajoute le contexte utile",
+    "eventDate": "Date"
   },
   "contactIcebreakers": {
     "headerLabel": "BRISE-GLACE",
