@@ -29,4 +29,8 @@ export const queryKeys = {
     all: ['notes'] as const,
     byContact: (contactId: string) => [...queryKeys.notes.all, 'byContact', contactId] as const,
   },
+  preferences: {
+    all: ['preferences'] as const,
+    contactSortMode: () => [...queryKeys.preferences.all, 'contactSortMode'] as const,
+  },
 };

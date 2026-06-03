@@ -164,7 +164,38 @@
       "title": "Neuer Kontakt",
       "create": "Erstellen",
       "createdTitle": "Kontakt erstellt",
-      "avatarPendingDescription": "Der illustrierte Avatar wird gerade generiert. Es kann bis zu eine Minute dauern, bis er erscheint."
+      "avatarPendingDescription": "Der illustrierte Avatar wird gerade generiert. Es kann bis zu eine Minute dauern, bis er erscheint.",
+      "addFirstNoteTitle": "Eine erste Notiz hinzufügen?",
+      "addFirstNoteDescription": "Halte jetzt fest, was du dir über {{name}} merken willst, oder überspringe es für später.",
+      "recordVoice": "Sprachnotiz aufnehmen",
+      "recordType": "Notiz tippen",
+      "skip": "Jetzt überspringen"
+    },
+    "sort": {
+      "title": "Kontakte sortieren",
+      "done": "OK",
+      "options": {
+        "nextDeadline": {
+          "title": "Nächste Frist",
+          "subtitle": "Dringendstes Ereignis zuerst"
+        },
+        "upcomingBirthday": {
+          "title": "Anstehende Geburtstage",
+          "subtitle": "Die nächsten zuerst"
+        },
+        "overdue": {
+          "title": "Überfällig",
+          "subtitle": "Offene Follow-ups zuerst"
+        },
+        "recentContact": {
+          "title": "Kürzlicher Kontakt",
+          "subtitle": "Letzte Interaktion"
+        },
+        "alphabetical": {
+          "title": "Alphabetisch",
+          "subtitle": "A - Z"
+        }
+      }
     }
   },
   "catchUp": {

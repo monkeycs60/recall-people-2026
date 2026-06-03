@@ -268,6 +268,12 @@ export const initDatabase = async () => {
       updated_at TEXT NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS app_preferences (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS sync_queue (
       id TEXT PRIMARY KEY,
       entity_type TEXT NOT NULL,
@@ -326,6 +332,12 @@ const addColumnIfMissing = async (
 const ensureSyncSchema = async (database: SQLite.SQLiteDatabase): Promise<void> => {
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS sync_state (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS app_preferences (
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL,
       updated_at TEXT NOT NULL

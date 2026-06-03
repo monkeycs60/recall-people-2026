@@ -164,7 +164,38 @@
       "title": "New contact",
       "create": "Create",
       "createdTitle": "Contact created",
-      "avatarPendingDescription": "The illustrated avatar is being generated. It can take up to a minute to appear."
+      "avatarPendingDescription": "The illustrated avatar is being generated. It can take up to a minute to appear.",
+      "addFirstNoteTitle": "Add a first note?",
+      "addFirstNoteDescription": "Capture what you want to remember about {{name}} now, or skip for later.",
+      "recordVoice": "Record a voice note",
+      "recordType": "Type a note",
+      "skip": "Skip for now"
+    },
+    "sort": {
+      "title": "Sort contacts",
+      "done": "OK",
+      "options": {
+        "nextDeadline": {
+          "title": "Closest deadline",
+          "subtitle": "Soonest event first"
+        },
+        "upcomingBirthday": {
+          "title": "Upcoming birthdays",
+          "subtitle": "Next birthdays first"
+        },
+        "overdue": {
+          "title": "Overdue",
+          "subtitle": "Late follow-ups first"
+        },
+        "recentContact": {
+          "title": "Recent contact",
+          "subtitle": "Last interaction"
+        },
+        "alphabetical": {
+          "title": "Alphabetical",
+          "subtitle": "A - Z"
+        }
+      }
     }
   },
   "catchUp": {

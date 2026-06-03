@@ -16,11 +16,8 @@ const localePaths = [
   '../locales/de.json',
 ];
 
-const contactEditModalPaths = [
-  '../components/contact/CreateContactModal.tsx',
-];
-
 const contactEditSheetPaths = [
+  '../components/contact/CreateContactSheet.tsx',
   '../components/contact/NameEditSheet.tsx',
   '../components/contact/EmailEditSheet.tsx',
   '../components/contact/PhoneEditSheet.tsx',
@@ -91,15 +88,6 @@ test('contact and contact-selection screens keep focused inputs above the keyboa
     assert.match(source, /behavior=\{Platform\.OS === 'ios' \? 'padding' : 'height'\}/, screenPath);
     assert.match(source, /automaticallyAdjustKeyboardInsets=\{Platform\.OS === 'ios'\}/, screenPath);
     assert.match(source, /keyboardShouldPersistTaps="handled"/, screenPath);
-  }
-});
-
-test('contact edit modals avoid covering their inputs with the keyboard', async () => {
-  for (const modalPath of contactEditModalPaths) {
-    const source = await readFile(resolve(__dirname, modalPath), 'utf8');
-
-    assert.match(source, /KeyboardAvoidingView/, modalPath);
-    assert.match(source, /behavior=\{Platform\.OS === 'ios' \? 'padding' : 'height'\}/, modalPath);
   }
 });
 

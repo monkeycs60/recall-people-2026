@@ -164,7 +164,38 @@
       "title": "Nuovo contatto",
       "create": "Crea",
       "createdTitle": "Contatto creato",
-      "avatarPendingDescription": "L'avatar illustrato è in generazione. Può richiedere fino a un minuto prima di apparire."
+      "avatarPendingDescription": "L'avatar illustrato è in generazione. Può richiedere fino a un minuto prima di apparire.",
+      "addFirstNoteTitle": "Aggiungere una prima nota?",
+      "addFirstNoteDescription": "Salva ora ciò che vuoi ricordare su {{name}}, oppure salta per dopo.",
+      "recordVoice": "Registra una nota vocale",
+      "recordType": "Scrivi una nota",
+      "skip": "Salta per ora"
+    },
+    "sort": {
+      "title": "Ordina contatti",
+      "done": "OK",
+      "options": {
+        "nextDeadline": {
+          "title": "Scadenza più vicina",
+          "subtitle": "Evento più imminente prima"
+        },
+        "upcomingBirthday": {
+          "title": "Compleanni in arrivo",
+          "subtitle": "I prossimi prima"
+        },
+        "overdue": {
+          "title": "In ritardo",
+          "subtitle": "Follow-up scaduti prima"
+        },
+        "recentContact": {
+          "title": "Contatto recente",
+          "subtitle": "Ultima interazione"
+        },
+        "alphabetical": {
+          "title": "Alfabetico",
+          "subtitle": "A - Z"
+        }
+      }
     }
   },
   "catchUp": {

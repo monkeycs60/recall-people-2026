@@ -22,7 +22,7 @@ import { Contact, HotTopic } from '@/types';
 import {
   Search,
   Plus,
-  Settings,
+  ListFilter,
   Mic,
   X,
   Users,
@@ -37,7 +37,8 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { ContactAvatar } from '@/components/contact/ContactAvatar';
 import { getContactDisplayName } from '@/utils/contactDisplayName';
 import { ContactListSkeleton } from '@/components/skeleton/ContactListSkeleton';
-import { CreateContactModal } from '@/components/contact/CreateContactModal';
+import { CreateContactSheet } from '@/components/contact/CreateContactSheet';
+import { ContactSortSheet, getContactSortLabelKey } from '@/components/contact/ContactSortSheet';
 import { GlobalGroupsManagementSheet } from '@/components/contact/GlobalGroupsManagementSheet';
 import { Paywall } from '@/components/Paywall';
 import { queryKeys } from '@/lib/query-keys';
@@ -47,11 +48,13 @@ import { getDateLocale } from '@/utils/dateLocale';
 import { useSettingsStore } from '@/stores/settings-store';
 import { useSubscriptionStore } from '@/stores/subscription-store';
 import { useAppStore } from '@/stores/app-store';
+import { useContactSortPreference } from '@/hooks/useContactSortPreference';
 import { generateAvatarFromHints } from '@/lib/api';
 import { showErrorToast, showInfoToast } from '@/lib/error-handler';
 import { buildGroupChips } from '@/lib/group-cache';
 import { getOverdueCatchupItems } from '@/utils/catchup';
 import { getHotTopicDateTone } from '@/utils/hotTopics';
+import { sortContacts } from '@/utils/contactSort';
 
 const FOLLOW_UP_THRESHOLD_DAYS = 14;
 
@@ -122,15 +125,23 @@ export default function ContactsScreen() {
   const setHasSeenGuidedTour = useSettingsStore((state) => state.setHasSeenGuidedTour);
   const syncQuotas = useSubscriptionStore((state) => state.syncQuotas);
   const canCreateContact = useSubscriptionStore((state) => state.canCreateContact);
-  const { addPendingAvatarGeneration, removePendingAvatarGeneration, isAvatarGenerating } = useAppStore();
+  const {
+    addPendingAvatarGeneration,
+    removePendingAvatarGeneration,
+    isAvatarGenerating,
+    setPreselectedContactId,
+    setPreselectedHotTopicId,
+  } = useAppStore();
+  const { sortMode, setSortMode, isSaving: isSavingSortMode } = useContactSortPreference();
 
-  const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
   const [isPullRefreshing, setIsPullRefreshing] = useState(false);
   const [filterText, setFilterText] = useState('');
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
 
+  const createContactSheetRef = useRef<BottomSheetModal>(null);
   const groupsSheetRef = useRef<BottomSheetModal>(null);
+  const sortSheetRef = useRef<BottomSheetModal>(null);
 
   const { data: groupContactIds, refetch: refetchGroupContactIds } =
     useContactIdsForGroup(selectedGroupId);
@@ -166,16 +177,16 @@ export default function ContactsScreen() {
       return;
     }
 
-    setIsCreateModalVisible(true);
+    createContactSheetRef.current?.present();
   };
 
   const formatPeopleCount = (count: number) => t('contacts.peopleCount', { count });
 
-  const handleCreateContact = async (firstName: string, lastName: string) => {
+  const handleCreateContact = async (firstName: string, lastName: string): Promise<Contact | null> => {
     if (!canCreateContact(contacts.length)) {
-      setIsCreateModalVisible(false);
+      createContactSheetRef.current?.dismiss();
       setShowPaywall(true);
-      return;
+      return null;
     }
 
     const newContact = await contactService.create({
@@ -183,7 +194,6 @@ export default function ContactsScreen() {
       lastName: lastName || undefined,
     });
     queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
-    setIsCreateModalVisible(false);
 
     addPendingAvatarGeneration(newContact.id);
     showInfoToast(
@@ -214,7 +224,20 @@ export default function ContactsScreen() {
         removePendingAvatarGeneration(newContact.id);
       });
 
-    router.push(`/contact/${newContact.id}`);
+    return newContact;
+  };
+
+  const openManualContactRecord = (contact: Contact, initialMode: 'audio' | 'text') => {
+    setPreselectedContactId(contact.id);
+    setPreselectedHotTopicId(null);
+    router.push({
+      pathname: '/record',
+      params: { initialMode },
+    });
+  };
+
+  const handleManualContactSkip = (contact: Contact) => {
+    router.push(`/contact/${contact.id}`);
   };
 
   const viewabilityConfig = useRef({
@@ -262,12 +285,8 @@ export default function ContactsScreen() {
       );
     }
 
-    return filteredContacts.sort((contactA, contactB) => {
-      const dateA = contactA.lastContactAt ? new Date(contactA.lastContactAt).getTime() : 0;
-      const dateB = contactB.lastContactAt ? new Date(contactB.lastContactAt).getTime() : 0;
-      return dateB - dateA;
-    });
-  }, [contacts, filterText, selectedGroupId, groupContactIds]);
+    return sortContacts(filteredContacts, contactPreviews, sortMode);
+  }, [contacts, filterText, selectedGroupId, groupContactIds, contactPreviews, sortMode]);
 
   const overdueItems = useMemo(
     () => getOverdueCatchupItems(allContacts, contactPreviews),
@@ -406,7 +425,7 @@ export default function ContactsScreen() {
         {/* Header */}
         <View style={styles.headerRow}>
           <View style={styles.headerTitleRow}>
-            <Text style={styles.screenTitle}>Recall</Text>
+            <Text style={styles.screenTitle}>Contacts</Text>
             <View style={styles.headerDot} />
           </View>
           <View style={styles.headerActions}>
@@ -417,8 +436,8 @@ export default function ContactsScreen() {
             </Pressable>
             <Pressable
               style={styles.headerActionButton}
-              onPress={() => router.push('/(tabs)/profile')}>
-              <Settings size={16} color={Colors.textSecondary} />
+              onPress={() => sortSheetRef.current?.present()}>
+              <ListFilter size={17} color={Colors.textSecondary} strokeWidth={2.5} />
             </Pressable>
           </View>
         </View>
@@ -545,7 +564,7 @@ export default function ContactsScreen() {
         <>
           {/* Section header */}
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionLabel}>{t('contacts.recentSection')}</Text>
+            <Text style={styles.sectionLabel}>{t(getContactSortLabelKey(sortMode))}</Text>
             <Text style={styles.sectionCount}>{formatPeopleCount(allContacts.length)}</Text>
           </View>
 
@@ -576,10 +595,19 @@ export default function ContactsScreen() {
         </>
       )}
 
-      <CreateContactModal
-        visible={isCreateModalVisible}
-        onClose={() => setIsCreateModalVisible(false)}
+      <CreateContactSheet
+        ref={createContactSheetRef}
         onCreate={handleCreateContact}
+        onRecordVoice={(contact) => openManualContactRecord(contact, 'audio')}
+        onRecordType={(contact) => openManualContactRecord(contact, 'text')}
+        onSkip={handleManualContactSkip}
+      />
+
+      <ContactSortSheet
+        ref={sortSheetRef}
+        selectedMode={sortMode}
+        isSaving={isSavingSortMode}
+        onSelectMode={setSortMode}
       />
 
       <GlobalGroupsManagementSheet ref={groupsSheetRef} />
