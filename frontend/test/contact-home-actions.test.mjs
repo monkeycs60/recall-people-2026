@@ -26,6 +26,15 @@ test('contacts screen header names the current section', async () => {
   assert.doesNotMatch(source, /<Text style=\{styles\.screenTitle\}>Recall<\/Text>/);
 });
 
+test('contact hot topic pills use neutral surfaces with colored deadline accents', async () => {
+  const source = await readFile(resolve(frontendRoot, 'app/(tabs)/index.tsx'), 'utf8');
+
+  assert.match(source, /getHotTopicIcon/);
+  assert.match(source, /borderColor: tone\.borderColor/);
+  assert.match(source, /color=\{tone\.iconColor\}/);
+  assert.doesNotMatch(source, /backgroundColor: tone\.backgroundColor/);
+});
+
 test('manual contact creation sheet offers voice, type, and skip actions', async () => {
   const source = await readFile(resolve(frontendRoot, 'components/contact/CreateContactSheet.tsx'), 'utf8');
 

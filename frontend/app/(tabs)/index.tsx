@@ -26,11 +26,16 @@ import {
   Mic,
   X,
   Users,
+  AlertTriangle,
+  Bell,
   CalendarDays,
   BotMessageSquare,
   CheckCircle2,
-  Clock3,
   ChevronRight,
+  CircleDashed,
+  Flag,
+  Flame,
+  Sunrise,
 } from 'lucide-react-native';
 import { Colors, Shadows, Fonts } from '@/constants/theme';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -53,7 +58,7 @@ import { generateAvatarFromHints } from '@/lib/api';
 import { showErrorToast, showInfoToast } from '@/lib/error-handler';
 import { buildGroupChips } from '@/lib/group-cache';
 import { getOverdueCatchupItems } from '@/utils/catchup';
-import { getHotTopicDateTone } from '@/utils/hotTopics';
+import { getHotTopicDateTone, type HotTopicDateToneName } from '@/utils/hotTopics';
 import { sortContacts } from '@/utils/contactSort';
 
 const FOLLOW_UP_THRESHOLD_DAYS = 14;
@@ -107,6 +112,20 @@ function formatLastContactTime(lastContactAt: string | undefined): string {
   } catch {
     return '';
   }
+}
+
+const hotTopicIcons: Record<HotTopicDateToneName, typeof CalendarDays> = {
+  overdue: AlertTriangle,
+  imminent: Flame,
+  thisWeek: Bell,
+  thisMonth: CalendarDays,
+  thisQuarter: Flag,
+  later: Sunrise,
+  undated: CircleDashed,
+};
+
+function getHotTopicIcon(toneName: HotTopicDateToneName) {
+  return hotTopicIcons[toneName];
 }
 
 export default function ContactsScreen() {
@@ -364,20 +383,21 @@ export default function ContactsScreen() {
             <View style={styles.topicPillsRow}>
               {topHotTopics.map((topic) => {
                 const tone = getHotTopicDateTone(topic.eventDate);
+                const HotTopicIcon = getHotTopicIcon(tone.name);
                 const formattedDate = topic.eventDate ? formatHotTopicDate(topic.eventDate) : '';
                 return (
                   <View
                     key={topic.id}
                     style={[
                       styles.topicPill,
-                      { backgroundColor: tone.backgroundColor },
+                      { borderColor: tone.borderColor },
                     ]}
                   >
                     <View style={[
                       styles.topicPillIcon,
                       { backgroundColor: tone.iconBackgroundColor },
                     ]}>
-                      <Clock3 size={9} color={tone.iconColor} strokeWidth={2.8} />
+                      <HotTopicIcon size={13} color={tone.iconColor} strokeWidth={2.4} />
                     </View>
                     <Text
                       style={[
@@ -894,26 +914,23 @@ const styles = StyleSheet.create({
     gap: 6,
     maxWidth: '100%',
     minWidth: 0,
-    paddingHorizontal: 7,
+    paddingHorizontal: 8,
     paddingVertical: 5,
-    borderRadius: 9,
-    shadowColor: '#1D1A2E',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
+    borderRadius: 10,
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
   },
   topicPillIcon: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
   },
   topicPillText: {
     fontSize: 11.5,
-    fontWeight: '800',
+    fontWeight: '700',
     flexShrink: 1,
     minWidth: 0,
   },
@@ -921,10 +938,6 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontFamily: Fonts.mono,
     fontWeight: '800',
-    paddingHorizontal: 5,
-    paddingVertical: 2,
-    borderRadius: 6,
-    overflow: 'hidden',
     flexShrink: 0,
   },
   emptyStateContainer: {

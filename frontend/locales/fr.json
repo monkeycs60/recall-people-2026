@@ -853,6 +853,7 @@
     "helperTextWithContact": "Parle de {{firstName}} : actualités, anecdotes, détails importants...",
     "modeVoice": "Voix",
     "modeType": "Texte",
+    "promiseListenFor": "Ce que j'écoute",
     "promiseHello": "Salut 👋",
     "generalTitleMain": "Parle de quelqu'un.",
     "generalTitleMuted": "Je sauvegarde 3 choses :",

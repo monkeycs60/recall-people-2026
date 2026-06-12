@@ -815,6 +815,7 @@
     "helperTextWithContact": "Talk about {{firstName}}: news, stories, important details...",
     "modeVoice": "Voice",
     "modeType": "Type",
+    "promiseListenFor": "I'll listen for",
     "promiseHello": "HI 👋",
     "generalTitleMain": "Talk about someone.",
     "generalTitleMuted": "I'll save 3 things:",

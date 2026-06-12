@@ -1,0 +1,4 @@
+interface:
+  display_name: "Recall People Marketing"
+  short_description: "Marketing, copywriting, and ASO for Recall"
+  default_prompt: "Use $recall-people-marketing to improve this Recall People ASO copy for conversion."

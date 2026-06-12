@@ -13,7 +13,7 @@ import { hotTopicService } from '@/services/hot-topic.service';
 import { notificationService } from '@/services/notification.service';
 import { contactService } from '@/services/contact.service';
 import { groupService } from '@/services/group.service';
-import { generateSuggestedQuestions, generateSummary, generateAvatarFromHints, extractInfo } from '@/lib/api';
+import { generateSuggestedQuestions, generateSummary, generateAvatarFromHints, extractInfo, sendExtractionFeedback } from '@/lib/api';
 import { noteService } from '@/services/note.service';
 import { useAppStore } from '@/stores/app-store';
 import { useSubscriptionStore } from '@/stores/subscription-store';
@@ -34,6 +34,7 @@ import { Paywall } from '@/components/Paywall';
 import { shouldApplyExtractedMeetingContext } from '@/utils/meetingContext';
 import { mergeLoves } from '@/utils/loves';
 import { resolveReviewContactId, resolveReviewStringParam } from '@/utils/reviewParams';
+import { computeExtractionFeedback, deriveInitialContactName } from '@/utils/extractionFeedback';
 
 const FLOATING_SAVE_RESERVED_SPACE = 144;
 const FLOATING_SAVE_BOTTOM_PADDING = 24;
@@ -141,19 +142,9 @@ export default function ReviewScreen() {
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const [isEditingName, setIsEditingName] = useState(false);
-  const [editedName, setEditedName] = useState(() => {
-    const first = extraction.contactIdentified.firstName;
-    const last = extraction.contactIdentified.lastName;
-    const nickname = extraction.contactIdentified.suggestedNickname;
-
-    if (last) {
-      return `${first} ${last}`;
-    }
-    if (nickname) {
-      return nickname;
-    }
-    return first;
-  });
+  const [editedName, setEditedName] = useState(() =>
+    deriveInitialContactName(extraction.contactIdentified)
+  );
 
   useEffect(() => {
     const loadHotTopics = async () => {
@@ -668,6 +659,27 @@ export default function ReviewScreen() {
             removePendingAvatarGeneration(finalContactId);
           });
       }
+
+      const reviewFeedback = computeExtractionFeedback(
+        extraction,
+        {
+          facts: editableFacts,
+          selectedFactIndexes: selectedFacts,
+          hotTopics: editableHotTopics,
+          selectedHotTopicIndexes: selectedHotTopics,
+          hotTopicDates,
+          memories: editableMemories,
+          selectedMemoryIndexes: selectedMemories,
+          resolvedTopics: resolvedTopicsState,
+          loves: extractedLoves,
+          groups: selectedGroups,
+          contactInfo: editableContactInfo,
+          name: editedName,
+          transcription: editedTranscription,
+        },
+        transcription
+      );
+      sendExtractionFeedback(reviewFeedback).catch(() => {});
 
       setRecordingState('idle');
       router.dismissTo(`/contact/${finalContactId}`);

@@ -57,17 +57,45 @@ test('keeps only the next birthday topic per contact', async () => {
   );
 });
 
-test('maps hot topic dates to an urgency color scale with red only for overdue dates', async () => {
+test('maps hot topic dates to neutral chips with deadline accents', async () => {
   const { getHotTopicDateTone } = await loadModule();
   const now = new Date('2026-05-31T12:00:00.000Z');
 
-  assert.equal(getHotTopicDateTone('2026-05-30', now).name, 'urgent');
-  assert.equal(getHotTopicDateTone('2026-05-31', now).name, 'soon');
-  assert.equal(getHotTopicDateTone('2026-06-02', now).name, 'soon');
-  assert.equal(getHotTopicDateTone('2026-06-20', now).name, 'scheduled');
-  assert.equal(getHotTopicDateTone('2026-08-15', now).name, 'distant');
-  assert.equal(getHotTopicDateTone(undefined, now).name, 'unknown');
-  assert.equal(getHotTopicDateTone('not-a-date', now).name, 'unknown');
+  assert.equal(getHotTopicDateTone('2026-05-30', now).name, 'overdue');
+  assert.equal(getHotTopicDateTone('2026-05-31', now).name, 'imminent');
+  assert.equal(getHotTopicDateTone('2026-06-02', now).name, 'imminent');
+  assert.equal(getHotTopicDateTone('2026-06-05', now).name, 'thisWeek');
+  assert.equal(getHotTopicDateTone('2026-06-20', now).name, 'thisMonth');
+  assert.equal(getHotTopicDateTone('2026-08-15', now).name, 'thisQuarter');
+  assert.equal(getHotTopicDateTone('2026-09-15', now).name, 'later');
+  assert.equal(getHotTopicDateTone(undefined, now).name, 'undated');
+  assert.equal(getHotTopicDateTone('not-a-date', now).name, 'undated');
+
+  assert.deepEqual(
+    [
+      getHotTopicDateTone(undefined, now).backgroundColor,
+      getHotTopicDateTone('2026-09-15', now).backgroundColor,
+      getHotTopicDateTone('2026-08-15', now).backgroundColor,
+      getHotTopicDateTone('2026-06-20', now).backgroundColor,
+      getHotTopicDateTone('2026-06-05', now).backgroundColor,
+      getHotTopicDateTone('2026-05-31', now).backgroundColor,
+      getHotTopicDateTone('2026-05-30', now).backgroundColor,
+    ],
+    ['#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF']
+  );
+
+  assert.deepEqual(
+    [
+      getHotTopicDateTone('2026-05-30', now).accentColor,
+      getHotTopicDateTone('2026-05-31', now).accentColor,
+      getHotTopicDateTone('2026-06-05', now).accentColor,
+      getHotTopicDateTone('2026-06-20', now).accentColor,
+      getHotTopicDateTone('2026-08-15', now).accentColor,
+      getHotTopicDateTone('2026-09-15', now).accentColor,
+      getHotTopicDateTone(undefined, now).accentColor,
+    ],
+    ['#D9483B', '#F05A3C', '#CF8A12', '#3478C8', '#5A86D9', '#9AA1B5', '#8E8AA3']
+  );
 });
 
 test('counts only active overdue hot topics', async () => {

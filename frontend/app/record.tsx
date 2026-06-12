@@ -34,13 +34,10 @@ import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 type PromiseCard = {
   id: string;
   Icon: LucideIcon;
-  kicker: string;
   title: string;
   subtitle: string;
   iconBackground: string;
   iconColor: string;
-  highlighted?: boolean;
-  badge?: string;
 };
 
 export default function RecordScreen() {
@@ -92,7 +89,6 @@ export default function RecordScreen() {
         {
           id: 'moment',
           Icon: MessageCircle,
-          kicker: t('record.promise.contact.momentKicker'),
           title: t('record.promise.contact.momentTitle'),
           subtitle: t('record.promise.contact.momentSubtitle'),
           iconBackground: Colors.primaryLight,
@@ -101,7 +97,6 @@ export default function RecordScreen() {
         {
           id: 'detail',
           Icon: Sparkles,
-          kicker: t('record.promise.contact.detailKicker'),
           title: t('record.promise.contact.detailTitle'),
           subtitle: t('record.promise.contact.detailSubtitle'),
           iconBackground: Colors.accentLight,
@@ -110,13 +105,10 @@ export default function RecordScreen() {
         {
           id: 'coming-up',
           Icon: CalendarDays,
-          kicker: t('record.promise.comingUpKicker'),
-          badge: t('record.promise.keyBadge'),
           title: t('record.promise.contact.comingUpTitle'),
           subtitle: t('record.promise.contact.comingUpSubtitle'),
-          iconBackground: Colors.surface,
+          iconBackground: Colors.amberLight,
           iconColor: Colors.amber,
-          highlighted: true,
         },
       ];
     }
@@ -125,7 +117,6 @@ export default function RecordScreen() {
       {
         id: 'profile',
         Icon: UserRound,
-        kicker: t('record.promise.general.profileKicker'),
         title: t('record.promise.general.profileTitle'),
         subtitle: t('record.promise.general.profileSubtitle'),
         iconBackground: '#FFD7C2',
@@ -134,7 +125,6 @@ export default function RecordScreen() {
       {
         id: 'details',
         Icon: Heart,
-        kicker: t('record.promise.general.detailsKicker'),
         title: t('record.promise.general.detailsTitle'),
         subtitle: t('record.promise.general.detailsSubtitle'),
         iconBackground: Colors.accentLight,
@@ -143,13 +133,10 @@ export default function RecordScreen() {
       {
         id: 'coming-up',
         Icon: CalendarDays,
-        kicker: t('record.promise.comingUpKicker'),
-        badge: t('record.promise.keyBadge'),
         title: t('record.promise.general.comingUpTitle'),
         subtitle: t('record.promise.general.comingUpSubtitle'),
-        iconBackground: Colors.surface,
+        iconBackground: Colors.amberLight,
         iconColor: Colors.amber,
-        highlighted: true,
       },
     ];
   }, [preselectedContact, t]);
@@ -320,11 +307,9 @@ export default function RecordScreen() {
                         {t('record.contactTitleMuted', { firstName: preselectedContact.firstName })}
                       </Text>
                     </Text>
-                    <Text style={styles.promiseSubtitle}>{t('record.contactSubtitle')}</Text>
                   </>
                 ) : (
                   <>
-                    <Text style={styles.promiseEyebrow}>{t('record.promiseHello')}</Text>
                     <Text style={styles.promiseTitle}>
                       {t('record.generalTitleMain')}
                       {'\n'}
@@ -336,55 +321,25 @@ export default function RecordScreen() {
             )}
 
             {!isRecording && (
-              <Animated.View entering={FadeIn.duration(300)} style={styles.promiseCards}>
-                {promiseCards.map((card) => {
+              <Animated.View entering={FadeIn.duration(300)} style={styles.promiseList}>
+                {promiseCards.map((card, index) => {
                   const Icon = card.Icon;
                   return (
-                    <View
-                      key={card.id}
-                      style={[styles.promiseCard, card.highlighted && styles.promiseCardHighlighted]}
-                    >
-                      <View
-                        style={[
-                          styles.promiseCardIcon,
-                          { backgroundColor: card.iconBackground },
-                        ]}
-                      >
-                        <Icon size={24} color={card.iconColor} strokeWidth={2.3} />
-                      </View>
-
-                      <View style={styles.promiseCardText}>
-                        <View style={styles.promiseCardKickerRow}>
-                          <Text
-                            style={[
-                              styles.promiseCardKicker,
-                              card.highlighted && styles.promiseCardKickerHighlighted,
-                            ]}
-                          >
-                            {card.kicker}
-                          </Text>
-                          {card.badge && (
-                            <View style={styles.promiseCardBadge}>
-                              <Text style={styles.promiseCardBadgeText}>{card.badge}</Text>
-                            </View>
-                          )}
+                    <View key={card.id}>
+                      {index > 0 && <View style={styles.promiseListSeparator} />}
+                      <View style={styles.promiseListRow}>
+                        <View
+                          style={[
+                            styles.promiseListIcon,
+                            { backgroundColor: card.iconBackground },
+                          ]}
+                        >
+                          <Icon size={16} color={card.iconColor} strokeWidth={2.3} />
                         </View>
-                        <Text
-                          style={[
-                            styles.promiseCardTitle,
-                            card.highlighted && styles.promiseCardTitleHighlighted,
-                          ]}
-                        >
-                          {card.title}
-                        </Text>
-                        <Text
-                          style={[
-                            styles.promiseCardSubtitle,
-                            card.highlighted && styles.promiseCardSubtitleHighlighted,
-                          ]}
-                        >
-                          {card.subtitle}
-                        </Text>
+                        <View style={styles.promiseListText}>
+                          <Text style={styles.promiseListTitle}>{card.title}</Text>
+                          <Text style={styles.promiseListSubtitle}>{card.subtitle}</Text>
+                        </View>
                       </View>
                     </View>
                   );
@@ -393,21 +348,20 @@ export default function RecordScreen() {
             )}
 
             <View style={styles.recordZone}>
-              {!isRecording && (
-                <Text style={styles.recordLeadIn}>
-                  {showContactPromise ? t('record.contactHelper') : t('record.generalHelper')}
-                </Text>
-              )}
               <RecordButton
                 onPress={toggleRecording}
                 isRecording={isRecording}
                 isProcessing={isProcessing}
               />
-              <Text style={styles.recordHint}>
-                {isRecording
-                  ? t('record.pressToFinish')
-                  : t('record.tapToRecordMinutes', { minutes: recordingLimitMinutes })}
-              </Text>
+              {isRecording ? (
+                <Text style={styles.recordHint}>{t('record.pressToFinish')}</Text>
+              ) : (
+                <Pressable onPress={toggleRecording} style={styles.recordCta}>
+                  <Text style={styles.recordCtaText}>
+                    {t('record.tapToRecordMinutes', { minutes: recordingLimitMinutes })}
+                  </Text>
+                </Pressable>
+              )}
             </View>
           </ScrollView>
         )}
@@ -549,12 +503,6 @@ const styles = StyleSheet.create({
   promiseIntro: {
     marginBottom: 20,
   },
-  promiseEyebrow: {
-    fontFamily: Fonts.sans.bold,
-    fontSize: 13,
-    letterSpacing: 0,
-    color: Colors.primary,
-  },
   promiseTitle: {
     fontFamily: Fonts.sans.bold,
     fontSize: 29,
@@ -565,13 +513,6 @@ const styles = StyleSheet.create({
   },
   promiseTitleMuted: {
     color: Colors.textMuted,
-  },
-  promiseSubtitle: {
-    fontFamily: Fonts.sans.medium,
-    fontSize: 13,
-    lineHeight: 19,
-    color: Colors.textSecondary,
-    marginTop: 8,
   },
   addingToChip: {
     alignSelf: 'flex-start',
@@ -605,108 +546,53 @@ const styles = StyleSheet.create({
     letterSpacing: 0,
     color: Colors.textPrimary,
   },
-  promiseCards: {
-    gap: 10,
+  promiseList: {
+    paddingHorizontal: 4,
   },
-  promiseCard: {
-    minHeight: 68,
+  promiseListSeparator: {
+    height: 1,
+    backgroundColor: Colors.hairline,
+    marginLeft: 46,
+  },
+  promiseListRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: Colors.surface,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: Colors.hairline,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    shadowColor: '#1D1A2E',
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 1,
+    alignItems: 'flex-start',
+    gap: 14,
+    paddingVertical: 13,
   },
-  promiseCardHighlighted: {
-    backgroundColor: Colors.amberLight,
-    borderColor: Colors.amber,
-  },
-  promiseCardIcon: {
-    width: 46,
-    height: 46,
-    borderRadius: 12,
+  promiseListIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: 1,
   },
-  promiseCardText: {
+  promiseListText: {
     flex: 1,
     minWidth: 0,
   },
-  promiseCardKickerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 1,
-  },
-  promiseCardKicker: {
+  promiseListTitle: {
     fontFamily: Fonts.sans.bold,
-    fontSize: 10,
-    lineHeight: 13,
-    letterSpacing: 0,
-    textTransform: 'uppercase',
-    color: Colors.textMuted,
-  },
-  promiseCardKickerHighlighted: {
-    color: '#8A5C00',
-  },
-  promiseCardBadge: {
-    backgroundColor: Colors.amber,
-    borderRadius: 999,
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-  },
-  promiseCardBadgeText: {
-    fontFamily: Fonts.sans.bold,
-    fontSize: 8,
-    lineHeight: 10,
-    letterSpacing: 0,
-    color: Colors.textInverse,
-    textTransform: 'uppercase',
-  },
-  promiseCardTitle: {
-    fontFamily: Fonts.sans.bold,
-    fontSize: 15,
-    lineHeight: 19,
+    fontSize: 15.5,
+    lineHeight: 20,
     letterSpacing: 0,
     color: Colors.textPrimary,
   },
-  promiseCardTitleHighlighted: {
-    color: '#4A3100',
-  },
-  promiseCardSubtitle: {
+  promiseListSubtitle: {
     fontFamily: Fonts.sans.medium,
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 12.5,
+    lineHeight: 17,
     letterSpacing: 0,
     color: Colors.textMuted,
-  },
-  promiseCardSubtitleHighlighted: {
-    color: '#8A5C00',
+    marginTop: 2,
   },
   recordZone: {
     flex: 1,
     minHeight: 260,
     alignItems: 'center',
-    justifyContent: 'flex-end',
-    paddingTop: 28,
-    paddingBottom: 16,
-  },
-  recordLeadIn: {
-    fontFamily: Fonts.sans.bold,
-    fontSize: 13,
-    lineHeight: 18,
-    letterSpacing: 0,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: 48,
+    justifyContent: 'center',
+    paddingVertical: 28,
   },
   recordHint: {
     fontFamily: Fonts.sans.bold,
@@ -715,6 +601,21 @@ const styles = StyleSheet.create({
     letterSpacing: 0,
     color: Colors.textPrimary,
     textAlign: 'center',
-    marginTop: 8,
+    marginTop: 16,
+  },
+  recordCta: {
+    marginTop: 18,
+    paddingVertical: 11,
+    paddingHorizontal: 22,
+    borderRadius: 999,
+    backgroundColor: Colors.primaryLight,
+  },
+  recordCtaText: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 15,
+    lineHeight: 20,
+    letterSpacing: 0.2,
+    color: Colors.primaryDark,
+    textAlign: 'center',
   },
 });

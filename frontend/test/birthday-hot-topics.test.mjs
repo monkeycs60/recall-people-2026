@@ -144,6 +144,19 @@ test('birthday cleanup regenerates the next occurrence after the current birthda
   assert.equal(insertArgs[0][6], 'contact-1');
 });
 
+test('parseExtractedDate accepts valid past dates for overdue topics', async () => {
+  const { hotTopicService } = await loadModule();
+
+  const parsed = hotTopicService.parseExtractedDate('07/06/2026');
+  assert.ok(parsed);
+
+  const date = new Date(parsed);
+  assert.equal(date.getFullYear(), 2026);
+  assert.equal(date.getMonth(), 5);
+  assert.equal(date.getDate(), 7);
+  assert.equal(hotTopicService.parseExtractedDate('31/02/2026'), null);
+});
+
 test.after(async () => {
   delete globalThis.__birthdayHotTopicDb;
   delete globalThis.__birthdayHotTopicQueue;

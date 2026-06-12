@@ -1,6 +1,7 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import { getToken, refreshAccessToken } from './auth';
 import { ExtractionResult, SuggestedQuestion } from '@/types';
+import { ExtractionFeedback } from '@/utils/extractionFeedback';
 import { useSettingsStore } from '@/stores/settings-store';
 import { ApiError, NetworkError, showApiError } from './error-handler';
 import { API_URL } from './config';
@@ -745,6 +746,16 @@ export const consumeAskQuota = async (): Promise<UseQuotaResponse> => {
 export const deleteAccount = async (): Promise<{ success: boolean }> => {
   return apiCall('/auth/account', {
     method: 'DELETE',
+  });
+};
+
+export const sendExtractionFeedback = async (
+  feedback: ExtractionFeedback
+): Promise<void> => {
+  await apiCall('/api/extraction-feedback', {
+    method: 'POST',
+    body: feedback,
+    showErrorToast: false,
   });
 };
 

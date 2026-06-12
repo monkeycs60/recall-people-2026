@@ -1,5 +1,5 @@
 import * as Crypto from 'expo-crypto';
-import { startOfDay, addDays, isBefore } from 'date-fns';
+import { startOfDay, addDays } from 'date-fns';
 import { getDatabase } from '@/lib/db';
 import { HotTopic, HotTopicStatus } from '@/types';
 import i18n from '@/lib/i18n';
@@ -508,7 +508,6 @@ export const hotTopicService = {
 
     if (isNaN(date.getTime())) return null;
     if (date.getDate() !== dayNum) return null;
-    if (isBefore(date, startOfDay(new Date()))) return null;
 
     return date.toISOString();
   },

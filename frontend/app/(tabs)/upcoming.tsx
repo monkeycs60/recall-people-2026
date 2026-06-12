@@ -50,12 +50,12 @@ export default function UpcomingScreen() {
         return true;
       });
 
-      const topicsWithContacts = await Promise.all(
+      const topicsWithContacts = (await Promise.all(
         filteredTopics.map(async (topic) => {
           const contact = await contactService.getById(topic.contactId);
-          return { ...topic, contact: contact! };
+          return contact ? { ...topic, contact } : null;
         })
-      );
+      )).filter((topic): topic is HotTopic & { contact: Contact } => topic !== null);
 
       const today = startOfDay(new Date());
       const eventsByDate = new Map<string, (HotTopic & { contact: Contact })[]>();

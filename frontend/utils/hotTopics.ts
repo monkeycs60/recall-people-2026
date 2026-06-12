@@ -1,6 +1,7 @@
 import type { HotTopic } from '@/types';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+const HOUR_MS = 60 * 60 * 1000;
 
 const getTime = (value?: string): number | null => {
   if (!value) return null;
@@ -12,11 +13,20 @@ const getStartOfDayTime = (date: Date): number => (
   Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
 );
 
-export type HotTopicDateToneName = 'urgent' | 'soon' | 'scheduled' | 'distant' | 'unknown';
+export type HotTopicDateToneName =
+  | 'overdue'
+  | 'imminent'
+  | 'thisWeek'
+  | 'thisMonth'
+  | 'thisQuarter'
+  | 'later'
+  | 'undated';
 
 export type HotTopicDateTone = {
   name: HotTopicDateToneName;
+  accentColor: string;
   backgroundColor: string;
+  borderColor: string;
   textColor: string;
   iconBackgroundColor: string;
   iconColor: string;
@@ -24,50 +34,84 @@ export type HotTopicDateTone = {
   dateTextColor: string;
 };
 
+const neutralChipBackground = '#FFFFFF';
+
 const hotTopicDateTones: Record<HotTopicDateToneName, HotTopicDateTone> = {
-  urgent: {
-    name: 'urgent',
-    backgroundColor: '#EF4444',
-    textColor: '#FFFFFF',
-    iconBackgroundColor: 'rgba(255,255,255,0.22)',
-    iconColor: '#FFFFFF',
-    dateBackgroundColor: 'rgba(255,255,255,0.22)',
-    dateTextColor: '#FFFFFF',
+  overdue: {
+    name: 'overdue',
+    accentColor: '#D9483B',
+    backgroundColor: neutralChipBackground,
+    borderColor: 'rgba(217,72,59,0.18)',
+    textColor: '#1D1A2E',
+    iconBackgroundColor: 'transparent',
+    iconColor: '#D9483B',
+    dateBackgroundColor: 'transparent',
+    dateTextColor: '#D9483B',
   },
-  soon: {
-    name: 'soon',
-    backgroundColor: '#FF6B4A',
-    textColor: '#FFFFFF',
-    iconBackgroundColor: 'rgba(255,255,255,0.24)',
-    iconColor: '#FFFFFF',
-    dateBackgroundColor: 'rgba(255,255,255,0.24)',
-    dateTextColor: '#FFFFFF',
+  imminent: {
+    name: 'imminent',
+    accentColor: '#F05A3C',
+    backgroundColor: neutralChipBackground,
+    borderColor: 'rgba(240,90,60,0.18)',
+    textColor: '#1D1A2E',
+    iconBackgroundColor: 'transparent',
+    iconColor: '#F05A3C',
+    dateBackgroundColor: 'transparent',
+    dateTextColor: '#F05A3C',
   },
-  scheduled: {
-    name: 'scheduled',
-    backgroundColor: '#F5A623',
-    textColor: '#FFFFFF',
-    iconBackgroundColor: 'rgba(255,255,255,0.24)',
-    iconColor: '#FFFFFF',
-    dateBackgroundColor: 'rgba(255,255,255,0.24)',
-    dateTextColor: '#FFFFFF',
+  thisWeek: {
+    name: 'thisWeek',
+    accentColor: '#CF8A12',
+    backgroundColor: neutralChipBackground,
+    borderColor: 'rgba(207,138,18,0.20)',
+    textColor: '#1D1A2E',
+    iconBackgroundColor: 'transparent',
+    iconColor: '#CF8A12',
+    dateBackgroundColor: 'transparent',
+    dateTextColor: '#CF8A12',
   },
-  distant: {
-    name: 'distant',
-    backgroundColor: '#3B82F6',
-    textColor: '#FFFFFF',
-    iconBackgroundColor: 'rgba(255,255,255,0.22)',
-    iconColor: '#FFFFFF',
-    dateBackgroundColor: 'rgba(255,255,255,0.22)',
-    dateTextColor: '#FFFFFF',
+  thisMonth: {
+    name: 'thisMonth',
+    accentColor: '#3478C8',
+    backgroundColor: neutralChipBackground,
+    borderColor: 'rgba(52,120,200,0.18)',
+    textColor: '#1D1A2E',
+    iconBackgroundColor: 'transparent',
+    iconColor: '#3478C8',
+    dateBackgroundColor: 'transparent',
+    dateTextColor: '#3478C8',
   },
-  unknown: {
-    name: 'unknown',
-    backgroundColor: '#EDEAF4',
-    textColor: '#6D6880',
-    iconBackgroundColor: '#F8F6FC',
+  thisQuarter: {
+    name: 'thisQuarter',
+    accentColor: '#5A86D9',
+    backgroundColor: neutralChipBackground,
+    borderColor: 'rgba(90,134,217,0.18)',
+    textColor: '#1D1A2E',
+    iconBackgroundColor: 'transparent',
+    iconColor: '#5A86D9',
+    dateBackgroundColor: 'transparent',
+    dateTextColor: '#5A86D9',
+  },
+  later: {
+    name: 'later',
+    accentColor: '#9AA1B5',
+    backgroundColor: neutralChipBackground,
+    borderColor: 'rgba(154,161,181,0.22)',
+    textColor: '#1D1A2E',
+    iconBackgroundColor: 'transparent',
+    iconColor: '#9AA1B5',
+    dateBackgroundColor: 'transparent',
+    dateTextColor: '#8E8AA3',
+  },
+  undated: {
+    name: 'undated',
+    accentColor: '#8E8AA3',
+    backgroundColor: neutralChipBackground,
+    borderColor: 'rgba(142,138,163,0.20)',
+    textColor: '#1D1A2E',
+    iconBackgroundColor: 'transparent',
     iconColor: '#8E8AA3',
-    dateBackgroundColor: '#F8F6FC',
+    dateBackgroundColor: 'transparent',
     dateTextColor: '#8E8AA3',
   },
 };
@@ -90,16 +134,18 @@ export function countOverdueHotTopics<T extends Pick<HotTopic, 'eventDate' | 'st
 
 export function getHotTopicDateTone(eventDate?: string, now = new Date()): HotTopicDateTone {
   const eventTime = getTime(eventDate);
-  if (eventTime === null) return hotTopicDateTones.unknown;
+  if (eventTime === null) return hotTopicDateTones.undated;
 
-  const daysUntilEvent = Math.floor(
-    (getStartOfDayTime(new Date(eventTime)) - getStartOfDayTime(now)) / DAY_MS
-  );
+  const hoursUntilEvent = (
+    getStartOfDayTime(new Date(eventTime)) - getStartOfDayTime(now)
+  ) / HOUR_MS;
 
-  if (daysUntilEvent < 0) return hotTopicDateTones.urgent;
-  if (daysUntilEvent <= 7) return hotTopicDateTones.soon;
-  if (daysUntilEvent <= 30) return hotTopicDateTones.scheduled;
-  return hotTopicDateTones.distant;
+  if (hoursUntilEvent < 0) return hotTopicDateTones.overdue;
+  if (hoursUntilEvent <= 48) return hotTopicDateTones.imminent;
+  if (hoursUntilEvent <= 7 * 24) return hotTopicDateTones.thisWeek;
+  if (hoursUntilEvent <= 30 * 24) return hotTopicDateTones.thisMonth;
+  if (hoursUntilEvent <= 90 * 24) return hotTopicDateTones.thisQuarter;
+  return hotTopicDateTones.later;
 }
 
 export function sortHotTopicsByEventDateDesc<T extends Pick<HotTopic, 'eventDate' | 'updatedAt' | 'createdAt'>>(

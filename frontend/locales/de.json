@@ -815,6 +815,7 @@
     "helperTextWithContact": "Erzähle über {{firstName}}: Neuigkeiten, Geschichten, wichtige Details...",
     "modeVoice": "Stimme",
     "modeType": "Text",
+    "promiseListenFor": "Worauf ich höre",
     "promiseHello": "Hi 👋",
     "generalTitleMain": "Sprich über jemanden.",
     "generalTitleMuted": "Ich speichere 3 Dinge:",
