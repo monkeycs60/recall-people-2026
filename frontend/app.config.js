@@ -33,11 +33,11 @@ module.exports = {
     ios: {
       supportsTablet: false,
       bundleIdentifier: 'com.monkeycs60.recallpeople2026',
-      buildNumber: '26',
+      buildNumber: '28',
     },
     android: {
       adaptiveIcon: {
-        backgroundColor: '#FFFFFF',
+        backgroundColor: '#5530E6',
         foregroundImage: './assets/images/android-icon-foreground.png',
         monochromeImage: './assets/images/android-icon-monochrome.png',
       },
@@ -49,7 +49,7 @@ module.exports = {
         'android.permission.MODIFY_AUDIO_SETTINGS',
       ],
       blockedPermissions: ['android.permission.CAMERA'],
-      versionCode: 8,
+      versionCode: 10,
     },
     web: {
       output: 'static',

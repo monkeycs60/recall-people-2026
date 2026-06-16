@@ -36,8 +36,8 @@ export default function Navbar() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <img
-              src="/logo.svg"
+            <Image
+              src="/logo.png"
               alt="Recall People"
               width={32}
               height={32}

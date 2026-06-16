@@ -23,6 +23,11 @@ prepare_react_native_project!
 target 'RecallPeople' do
   use_expo_modules!
 
+  # AppCheckCore is a Swift pod and needs module maps for these transitive pods
+  # when CocoaPods integrates the target as static libraries on EAS.
+  pod 'GoogleUtilities', :modular_headers => true
+  pod 'RecaptchaInterop', :modular_headers => true
+
   if ENV['EXPO_USE_COMMUNITY_AUTOLINKING'] == '1'
     config_command = ['node', '-e', "process.argv=['', '', 'config'];require('@react-native-community/cli').run()"];
   else
