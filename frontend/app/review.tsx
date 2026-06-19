@@ -19,7 +19,7 @@ import { useAppStore } from '@/stores/app-store';
 import { useSubscriptionStore } from '@/stores/subscription-store';
 import { queryKeys } from '@/lib/query-keys';
 import { Colors, Fonts, Shadows } from '@/constants/theme';
-import { Archive, Edit3, FileText, Heart, Info, Lightbulb, Phone, Sparkles, Users, Zap } from 'lucide-react-native';
+import { Archive, Edit3, FileText, Heart, Info, Lightbulb, Phone, Users, Zap } from 'lucide-react-native';
 import { CollapsibleSection } from '@/components/ui/CollapsibleSection';
 import { LovesEditor } from '@/components/contact/LovesEditor';
 import { TranscriptionSection } from '@/components/review/TranscriptionSection';
@@ -167,7 +167,6 @@ export default function ReviewScreen() {
   const contactInfoCount = [editableContactInfo.phone, editableContactInfo.email, editableContactInfo.birthday].filter(Boolean).length;
   const resolvedTopicsCount = Math.max(resolvedTopicsWithData.length, resolvedTopicsState.length);
   const hasResolvedTopics = resolvedTopicsCount > 0;
-  const capturedDetailCount = contactInfoCount + editableFacts.length + selectedGroups.length + resolvedTopicsCount + editableHotTopics.length + editableMemories.length + extractedLoves.length;
   const selectedDetailCount = contactInfoCount + selectedFacts.length + selectedGroups.length + resolvedTopicsState.length + selectedHotTopics.length + selectedMemories.length + extractedLoves.length;
   const selectedReminderCount = selectedHotTopics.filter((hotTopicIndex) => {
     const dateInfo = hotTopicDates[hotTopicIndex];
@@ -705,18 +704,6 @@ export default function ReviewScreen() {
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="interactive"
       >
-        <View style={styles.summaryCard}>
-          <View style={styles.summaryIconTile}>
-            <Sparkles size={18} color={Colors.primary} />
-          </View>
-          <View style={styles.summaryTextContent}>
-            <Text style={styles.summaryTitle}>
-              {t('review.capturedDetails', { count: capturedDetailCount, name: editedName })}
-            </Text>
-            <Text style={styles.summaryHelp}>{t('review.summaryHelp')}</Text>
-          </View>
-        </View>
-
         {isEditingName ? (
           <View style={styles.editNameContainer}>
             <TextInput
@@ -994,38 +981,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 14,
-  },
-  summaryCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.primaryLight,
-    borderRadius: 18,
-    padding: 14,
-    gap: 12,
-    marginBottom: 12,
-  },
-  summaryIconTile: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
-    backgroundColor: Colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  summaryTextContent: {
-    flex: 1,
-  },
-  summaryTitle: {
-    fontFamily: Fonts.sans.bold,
-    fontSize: 15,
-    lineHeight: 19,
-    color: Colors.textPrimary,
-  },
-  summaryHelp: {
-    fontSize: 13,
-    lineHeight: 17,
-    color: Colors.textSecondary,
-    marginTop: 2,
   },
   contactName: {
     fontFamily: Fonts.sans.bold,
