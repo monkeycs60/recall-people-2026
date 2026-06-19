@@ -1079,11 +1079,13 @@
     "postEventFollowUpDescription": "Recibe un recordatorio para ponerte al día después de un evento"
   },
   "digest": {
+    "title": "Tu semana",
     "body": "{{events}} evento(s), {{contacts}} contacto(s) por reconectar"
   },
   "reminder": {
-    "eventTomorrow": "Mañana: {{name}} — {{title}}",
-    "postEvent": "{{title}} de {{name}} fue esta semana, ¿te pones en contacto?"
+    "eventTomorrow": "Mañana — {{title}}",
+    "postEvent": "{{title}} fue esta semana — ¿te pones en contacto?",
+    "notSeen": "{{count}} días sin contacto"
   },
   "aiConsent": {
     "title": "Procesamiento de datos con IA",

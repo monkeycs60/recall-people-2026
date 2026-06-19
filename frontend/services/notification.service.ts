@@ -52,19 +52,40 @@ export const notificationService = {
       });
     }
 
-    return Notifications.scheduleNotificationAsync({
-      content: {
-        title: 'Recall People',
-        body: "Romain's school trip is tomorrow. Send a good luck message tonight.",
-        sound: 'default',
-        data: { type: 'capture_demo' },
+    const demoNotifications = [
+      {
+        title: 'Maya Brooks',
+        body: 'Her solar startup launches tomorrow — send a good luck note.',
       },
-      trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-        seconds: 2,
-        channelId,
+      {
+        title: 'Leo Bennett',
+        body: 'How did the FormFlow investor demo go? Time to follow up.',
       },
-    });
+      {
+        title: 'Sofia Garcia',
+        body: "It's been 3 weeks — reconnect before her gallery opening.",
+      },
+    ];
+
+    const identifiers = await Promise.all(
+      demoNotifications.map((demoNotification, index) =>
+        Notifications.scheduleNotificationAsync({
+          content: {
+            title: demoNotification.title,
+            body: demoNotification.body,
+            sound: 'default',
+            data: { type: 'capture_demo' },
+          },
+          trigger: {
+            type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+            seconds: 2 + index,
+            channelId,
+          },
+        })
+      )
+    );
+
+    return identifiers[identifiers.length - 1] ?? null;
   },
 
   scheduleEventReminder: async (
@@ -84,8 +105,8 @@ export const notificationService = {
 
     const identifier = await Notifications.scheduleNotificationAsync({
       content: {
-        title: 'Recall People',
-        body: i18n.t('reminder.eventTomorrow', { title, name: contactName }),
+        title: contactName,
+        body: i18n.t('reminder.eventTomorrow', { title }),
         data: { eventId },
       },
       trigger: {
@@ -163,8 +184,8 @@ export const notificationService = {
 
     const identifier = await Notifications.scheduleNotificationAsync({
       content: {
-        title: 'Recall People',
-        body: `${contactName} — ${daysSince} jours sans nouvelles`,
+        title: contactName,
+        body: i18n.t('reminder.notSeen', { count: daysSince }),
         data: { contactId, type: 'not_seen' },
       },
       trigger: {
@@ -192,7 +213,7 @@ export const notificationService = {
 
     const identifier = await Notifications.scheduleNotificationAsync({
       content: {
-        title: 'Recall People',
+        title: i18n.t('digest.title'),
         body: i18n.t('digest.body', { events: eventsCount, contacts: staleCount }),
         data: { type: 'weekly_digest', screen: 'upcoming' },
       },
@@ -221,8 +242,8 @@ export const notificationService = {
 
     const identifier = await Notifications.scheduleNotificationAsync({
       content: {
-        title: 'Recall People',
-        body: i18n.t('reminder.postEvent', { title, name: contactName }),
+        title: contactName,
+        body: i18n.t('reminder.postEvent', { title }),
         data: { contactId, hotTopicId, type: 'post_event' },
       },
       trigger: {

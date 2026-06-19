@@ -1079,11 +1079,13 @@
     "postEventFollowUpDescription": "Get reminded to check in after an event has passed"
   },
   "digest": {
+    "title": "Your week ahead",
     "body": "{{events}} event(s), {{contacts}} contact(s) to catch up with"
   },
   "reminder": {
-    "eventTomorrow": "Tomorrow: {{name}} — {{title}}",
-    "postEvent": "{{name}}'s {{title}} was this week, check in with them?"
+    "eventTomorrow": "Tomorrow — {{title}}",
+    "postEvent": "{{title}} was this week — check in?",
+    "notSeen": "{{count}} days without a catch-up"
   },
   "aiConsent": {
     "title": "AI Data Processing",

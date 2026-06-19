@@ -1079,11 +1079,13 @@
     "postEventFollowUpDescription": "Erinnert werden, dich nach einem vergangenen Ereignis zu melden"
   },
   "digest": {
+    "title": "Deine Woche",
     "body": "{{events}} Ereignis(se), {{contacts}} Kontakt(e) zum Nachholen"
   },
   "reminder": {
-    "eventTomorrow": "Morgen: {{name}} — {{title}}",
-    "postEvent": "{{title}} von {{name}} war diese Woche, melde dich?"
+    "eventTomorrow": "Morgen — {{title}}",
+    "postEvent": "{{title}} war diese Woche — melde dich?",
+    "notSeen": "{{count}} Tage ohne Kontakt"
   },
   "aiConsent": {
     "title": "KI-Datenverarbeitung",

@@ -1079,11 +1079,13 @@
     "postEventFollowUpDescription": "Ricevi un promemoria per farti sentire dopo un evento passato"
   },
   "digest": {
+    "title": "La tua settimana",
     "body": "{{events}} evento/i, {{contacts}} contatto/i da ricontattare"
   },
   "reminder": {
-    "eventTomorrow": "Domani: {{name}} — {{title}}",
-    "postEvent": "{{title}} di {{name}} era questa settimana, fatti sentire?"
+    "eventTomorrow": "Domani — {{title}}",
+    "postEvent": "{{title}} era questa settimana — fatti sentire?",
+    "notSeen": "{{count}} giorni senza notizie"
   },
   "aiConsent": {
     "title": "Elaborazione dati con IA",

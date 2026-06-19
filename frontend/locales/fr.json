@@ -1073,11 +1073,13 @@
     "postEventFollowUpDescription": "Être rappelé de prendre des nouvelles après un événement passé"
   },
   "digest": {
+    "title": "Ta semaine",
     "body": "{{events}} événement(s), {{contacts}} contact(s) à recontacter"
   },
   "reminder": {
-    "eventTomorrow": "Demain : {{name}} — {{title}}",
-    "postEvent": "{{title}} de {{name}} c'était cette semaine, prends des nouvelles ?"
+    "eventTomorrow": "Demain — {{title}}",
+    "postEvent": "{{title}} c'était cette semaine — prends des nouvelles ?",
+    "notSeen": "{{count}} jours sans nouvelles"
   },
   "aiConsent": {
     "title": "Traitement IA des données",
