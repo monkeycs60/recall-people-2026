@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tansta
 import { contactService } from '@/services/contact.service';
 import { reminderService } from '@/services/reminder.service';
 import { queryKeys } from '@/lib/query-keys';
-import { Gender } from '@/types';
+import { Contact, Gender } from '@/types';
 
 export function useContactsQuery() {
   const queryClient = useQueryClient();
@@ -76,6 +76,32 @@ export function useUpdateContact() {
         lastContactAt: string;
       }>;
     }) => contactService.update(id, data),
+    onMutate: async ({ id, data }) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.contacts.detail(id) });
+      await queryClient.cancelQueries({ queryKey: queryKeys.contacts.list() });
+
+      const previousDetail = queryClient.getQueryData<Contact>(queryKeys.contacts.detail(id));
+      const previousList = queryClient.getQueryData<Contact[]>(queryKeys.contacts.list());
+
+      queryClient.setQueryData<Contact>(queryKeys.contacts.detail(id), (current) =>
+        current ? ({ ...current, ...data } as Contact) : current
+      );
+      queryClient.setQueryData<Contact[]>(queryKeys.contacts.list(), (current) =>
+        (current ?? []).map((contact) =>
+          contact.id === id ? ({ ...contact, ...data } as Contact) : contact
+        )
+      );
+
+      return { previousDetail, previousList };
+    },
+    onError: (_error, variables, context) => {
+      if (context?.previousDetail) {
+        queryClient.setQueryData(queryKeys.contacts.detail(variables.id), context.previousDetail);
+      }
+      if (context?.previousList) {
+        queryClient.setQueryData(queryKeys.contacts.list(), context.previousList);
+      }
+    },
     onSuccess: async (_, variables) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
       queryClient.invalidateQueries({
@@ -94,6 +120,19 @@ export function useDeleteContact() {
 
   return useMutation({
     mutationFn: (id: string) => contactService.delete(id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.contacts.list() });
+      const previousList = queryClient.getQueryData<Contact[]>(queryKeys.contacts.list());
+      queryClient.setQueryData<Contact[]>(queryKeys.contacts.list(), (current) =>
+        (current ?? []).filter((contact) => contact.id !== id)
+      );
+      return { previousList };
+    },
+    onError: (_error, _id, context) => {
+      if (context?.previousList) {
+        queryClient.setQueryData(queryKeys.contacts.list(), context.previousList);
+      }
+    },
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
       queryClient.removeQueries({ queryKey: queryKeys.contacts.detail(id) });

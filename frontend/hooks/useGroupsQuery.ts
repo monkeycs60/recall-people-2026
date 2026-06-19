@@ -135,6 +135,28 @@ export function useSetContactGroups() {
       contactId: string;
       groupIds: string[];
     }) => groupService.setContactGroups(contactId, groupIds),
+    onMutate: async ({ contactId, groupIds }) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.groups.forContact(contactId) });
+      const previousGroups = queryClient.getQueryData<Group[]>(
+        queryKeys.groups.forContact(contactId)
+      );
+      const cachedGroups = queryClient.getQueryData<Group[]>(queryKeys.groups.list());
+      if (cachedGroups) {
+        queryClient.setQueryData<Group[]>(
+          queryKeys.groups.forContact(contactId),
+          selectContactGroupsFromCache(cachedGroups, groupIds)
+        );
+      }
+      return { previousGroups };
+    },
+    onError: (_error, variables, context) => {
+      if (context?.previousGroups) {
+        queryClient.setQueryData(
+          queryKeys.groups.forContact(variables.contactId),
+          context.previousGroups
+        );
+      }
+    },
     onSuccess: (_, variables) => {
       const cachedGroups = queryClient.getQueryData<Group[]>(queryKeys.groups.list());
       if (cachedGroups) {
