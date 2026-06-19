@@ -35,12 +35,13 @@ function topic(id, status, eventDate, resolvedAt, overrides = {}) {
   };
 }
 
-test('splits resolved topics before today and active upcoming topics after today in timeline order', async () => {
+test('splits past topics before today and active upcoming topics after today in timeline order', async () => {
   const { getContactLifeTimelineSections } = await loadModule();
   const contact = {
     id: 'contact-1',
     firstName: 'Nora',
     hotTopics: [
+      topic('overdue-active', 'active', '2026-05-29', undefined),
       topic('workshop', 'active', '2026-06-18', undefined),
       topic('oldest-resolved', 'resolved', '2026-06-01', '2026-05-13T12:00:00.000Z'),
       topic('latest-resolved', 'resolved', '2026-06-10', '2026-05-26T12:00:00.000Z'),
@@ -53,17 +54,19 @@ test('splits resolved topics before today and active upcoming topics after today
 
   const sections = getContactLifeTimelineSections(contact, new Date('2026-06-01T12:00:00.000Z'));
 
-  assert.deepEqual(sections.resolved.map((entry) => entry.id), [
+  assert.deepEqual(sections.past.map((entry) => entry.id), [
     'oldest-resolved',
     'latest-resolved',
+    'overdue-active',
   ]);
   assert.deepEqual(sections.upcoming.map((entry) => entry.id), [
     'workshop',
     'birthday-contact-1',
   ]);
-  assert.equal(sections.resolved[0].timelineStatus, 'resolved');
+  assert.equal(sections.past[0].timelineStatus, 'resolved');
+  assert.equal(sections.past[2].timelineStatus, 'active');
   assert.equal(sections.upcoming[0].timelineStatus, 'active');
-  assert.equal(sections.resolved[0].date.toISOString(), '2026-05-13T12:00:00.000Z');
+  assert.equal(sections.past[0].date.toISOString(), '2026-05-13T12:00:00.000Z');
 });
 
 test('contact life screen anchors initial scroll on the today marker', async () => {
@@ -126,6 +129,7 @@ test('contact life screen exposes editing only for active non-birthday timeline 
   const source = await readFile(comingUpScreenPath, 'utf8');
 
   assert.match(source, /isBirthday:\s*entry\.isBirthday/);
+  assert.match(source, /timelineSections\.past\.map/);
   assert.match(source, /canEdit=\{entry\.timelineStatus === 'active' && !entry\.isBirthday\}/);
   assert.match(source, /onEdit=\{handleEditTimelineEntry\}/);
   assert.match(source, /TimelineEventEditSheet/);

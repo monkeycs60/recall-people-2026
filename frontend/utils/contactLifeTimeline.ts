@@ -1,5 +1,5 @@
 import type { Contact, HotTopic } from '@/types';
-import { filterToNextBirthdayTopic } from '@/utils/hotTopics';
+import { filterToNextBirthdayTopic, parseHotTopicDate } from '@/utils/hotTopics';
 
 type ContactWithTimeline = Pick<Contact, 'id' | 'firstName' | 'birthdayDay' | 'birthdayMonth' | 'birthdayYear'> & {
   hotTopics: HotTopic[];
@@ -17,7 +17,7 @@ export type ContactLifeTimelineEntry = {
 };
 
 export type ContactLifeTimelineSections = {
-  resolved: ContactLifeTimelineEntry[];
+  past: ContactLifeTimelineEntry[];
   upcoming: ContactLifeTimelineEntry[];
 };
 
@@ -26,15 +26,7 @@ const getStartOfDayTime = (date: Date): number => (
 );
 
 const parseTimelineDate = (value?: string): Date | null => {
-  if (!value) return null;
-  const dateOnlyMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (dateOnlyMatch) {
-    const [, year, month, day] = dateOnlyMatch;
-    return new Date(Number(year), Number(month) - 1, Number(day));
-  }
-
-  const date = new Date(value);
-  return Number.isFinite(date.getTime()) ? date : null;
+  return parseHotTopicDate(value);
 };
 
 const sortByDateAsc = (
@@ -63,7 +55,7 @@ export function getContactLifeTimelineSections(
 ): ContactLifeTimelineSections {
   const todayTime = getStartOfDayTime(now);
 
-  const resolved = contact.hotTopics
+  const resolvedPast = contact.hotTopics
     .filter((topic) => topic.status === 'resolved')
     .map((topic): ContactLifeTimelineEntry | null => {
       const date = parseTimelineDate(topic.resolvedAt) ?? parseTimelineDate(topic.eventDate);
@@ -80,11 +72,31 @@ export function getContactLifeTimelineSections(
         timelineStatus: 'resolved',
       };
     })
-    .filter((entry): entry is ContactLifeTimelineEntry => entry !== null)
-    .sort(sortByDateAsc);
+    .filter((entry): entry is ContactLifeTimelineEntry => entry !== null);
 
-  const upcoming = filterToNextBirthdayTopic(contact.hotTopics)
-    .filter((topic) => topic.status === 'active' && Boolean(topic.eventDate))
+  const timelineActiveTopics = filterToNextBirthdayTopic(contact.hotTopics, now)
+    .filter((topic) => topic.status === 'active' && Boolean(topic.eventDate));
+
+  const activePast = timelineActiveTopics
+    .map((topic): ContactLifeTimelineEntry | null => {
+      const date = parseTimelineDate(topic.eventDate);
+      if (!date || getStartOfDayTime(date) >= todayTime) return null;
+
+      return {
+        id: topic.id,
+        title: topic.title,
+        context: topic.context,
+        date,
+        isBirthday: Boolean(topic.birthdayContactId),
+        isSyntheticBirthday: false,
+        timelineStatus: 'active',
+      };
+    })
+    .filter((entry): entry is ContactLifeTimelineEntry => entry !== null);
+
+  const past = [...resolvedPast, ...activePast].sort(sortByDateAsc);
+
+  const upcoming = timelineActiveTopics
     .map((topic): ContactLifeTimelineEntry | null => {
       const date = parseTimelineDate(topic.eventDate);
       if (!date || getStartOfDayTime(date) < todayTime) return null;
@@ -115,5 +127,5 @@ export function getContactLifeTimelineSections(
     upcoming.sort(sortByDateAsc);
   }
 
-  return { resolved, upcoming };
+  return { past, upcoming };
 }

@@ -53,7 +53,7 @@ import { Paywall } from '@/components/Paywall';
 import { REMINDER_FREQUENCY_PRESETS } from '@/lib/reminder-frequency';
 import { formatLocalizedDate } from '@/utils/dateLocale';
 import { getMeetingContext } from '@/utils/meetingContext';
-import { filterToNextBirthdayTopic } from '@/utils/hotTopics';
+import { filterToNextBirthdayTopic, isHotTopicTodayOrFuture, parseHotTopicDate } from '@/utils/hotTopics';
 import type { HotTopic } from '@/types';
 
 type ToneKey = 'amber' | 'primary' | 'accent' | 'mint';
@@ -67,16 +67,29 @@ const toneAccent: Record<ToneKey, string> = {
 
 const toneRotation: ToneKey[] = ['amber', 'primary', 'accent', 'mint'];
 
-function getNextThreeUpcoming(hotTopics: HotTopic[]): HotTopic[] {
-  return filterToNextBirthdayTopic(hotTopics)
-    .filter((topic) => topic.status === 'active' && topic.eventDate)
+function compareHotTopicEventDateAsc(first: HotTopic, second: HotTopic): number {
+  const firstTime = parseHotTopicDate(first.eventDate)?.getTime() ?? Number.MAX_SAFE_INTEGER;
+  const secondTime = parseHotTopicDate(second.eventDate)?.getTime() ?? Number.MAX_SAFE_INTEGER;
+  return firstTime - secondTime;
+}
+
+function getUpcomingHotTopics(hotTopics: HotTopic[], today: Date): HotTopic[] {
+  return filterToNextBirthdayTopic(hotTopics, today)
+    .filter((topic) =>
+      topic.status === 'active' &&
+      Boolean(topic.eventDate) &&
+      isHotTopicTodayOrFuture(topic.eventDate, today)
+    )
     .slice()
-    .sort((a, b) => new Date(a.eventDate!).getTime() - new Date(b.eventDate!).getTime())
-    .slice(0, 3);
+    .sort(compareHotTopicEventDateAsc);
+}
+
+function getNextThreeUpcoming(hotTopics: HotTopic[], today: Date): HotTopic[] {
+  return getUpcomingHotTopics(hotTopics, today).slice(0, 3);
 }
 
 function formatShortDate(value: string, language: string): string {
-  const date = new Date(value);
+  const date = parseHotTopicDate(value) ?? new Date(value);
   return date.toLocaleDateString(language === 'en' ? 'en-US' : `${language}-${language.toUpperCase()}`, {
     month: 'short',
     day: 'numeric',
@@ -155,14 +168,15 @@ export default function ContactDetailScreen() {
 
   const upcomingPreview = useMemo(() => {
     if (!contact) return [] as { id: string; label: string; dateLabel: string; soonLabel: string; tone: ToneKey }[];
-    const upcoming = getNextThreeUpcoming(contact.hotTopics);
+    const upcoming = getNextThreeUpcoming(contact.hotTopics, today);
     return upcoming.map((topic, index) => {
-      const diff = dayDiff(new Date(topic.eventDate!), today);
+      const eventDate = parseHotTopicDate(topic.eventDate!) ?? new Date(topic.eventDate!);
+      const diff = dayDiff(eventDate, today);
       return {
         id: topic.id,
         label: topic.title,
         dateLabel: formatShortDate(topic.eventDate!, i18n.language),
-        soonLabel: diff <= 0 ? t('contactComingUp.today') : t('contactComingUp.inDays', { count: diff }),
+        soonLabel: diff === 0 ? t('contactComingUp.today') : t('contactComingUp.inDays', { count: diff }),
         tone: toneRotation[index % toneRotation.length],
       };
     });
@@ -170,10 +184,8 @@ export default function ContactDetailScreen() {
 
   const totalUpcoming = useMemo(() => {
     if (!contact) return 0;
-    return filterToNextBirthdayTopic(contact.hotTopics)
-      .filter((topic) => topic.status === 'active' && topic.eventDate)
-      .length;
-  }, [contact]);
+    return getUpcomingHotTopics(contact.hotTopics, today).length;
+  }, [contact, today]);
 
   const remainingUpcoming = Math.max(0, totalUpcoming - upcomingPreview.length);
 

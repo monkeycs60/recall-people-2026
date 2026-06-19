@@ -115,6 +115,16 @@ test('counts only active overdue hot topics', async () => {
   assert.equal(countOverdueHotTopics(input, now), 1);
 });
 
+test('classifies today and future hot topic dates without keeping past dates', async () => {
+  const { isHotTopicTodayOrFuture } = await loadModule();
+  const now = new Date('2026-06-13T12:00:00.000Z');
+
+  assert.equal(isHotTopicTodayOrFuture('2026-06-12', now), false);
+  assert.equal(isHotTopicTodayOrFuture('2026-06-13', now), true);
+  assert.equal(isHotTopicTodayOrFuture('2026-06-14', now), true);
+  assert.equal(isHotTopicTodayOrFuture(undefined, now), false);
+});
+
 test.after(async () => {
   await cleanTsModule(suiteName);
 });

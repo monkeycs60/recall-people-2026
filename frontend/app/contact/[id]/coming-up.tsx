@@ -87,7 +87,8 @@ function buildTimelineEntry(
   language: string,
   birthdayYear: number | undefined,
   birthdayTitle: string,
-  birthdayTurning: string | undefined
+  birthdayTurning: string | undefined,
+  highlightActive = true
 ): TimelineEntry {
   const diffDays = getDayDiff(entry.date, today);
   const title = entry.isSyntheticBirthday ? birthdayTitle : entry.title;
@@ -104,7 +105,7 @@ function buildTimelineEntry(
     context: entry.context,
     subtitle,
     diffDays,
-    isHighlighted: entry.timelineStatus === 'active' && index === 0,
+    isHighlighted: highlightActive && entry.timelineStatus === 'active' && index === 0,
     isBirthday: entry.isBirthday,
     isSyntheticBirthday: entry.isSyntheticBirthday,
     emoji: entry.timelineStatus === 'resolved' ? '' : pickEmoji(title, entry.isBirthday),
@@ -127,7 +128,15 @@ function getTimelineEntryTimeLabel(
     return translate('contactNotes.relativeYearsAgo', { count: Math.floor(daysAgo / 365) });
   }
 
-  return entry.diffDays <= 0
+  if (entry.diffDays < 0) {
+    const daysAgo = Math.abs(entry.diffDays);
+    if (daysAgo === 1) return translate('contactNotes.relativeYesterday');
+    if (daysAgo < 30) return translate('contactNotes.relativeDaysAgo', { count: daysAgo });
+    if (daysAgo < 365) return translate('contactNotes.relativeMonthsAgo', { count: Math.floor(daysAgo / 30) });
+    return translate('contactNotes.relativeYearsAgo', { count: Math.floor(daysAgo / 365) });
+  }
+
+  return entry.diffDays === 0
     ? translate('contactComingUp.today')
     : translate('contactComingUp.inDays', { count: entry.diffDays });
 }
@@ -233,22 +242,23 @@ export default function ContactComingUpScreen() {
   );
 
   const timelineSections = useMemo(() => {
-    if (!contact) return { resolved: [], upcoming: [] };
+    if (!contact) return { past: [], upcoming: [] };
     return getContactLifeTimelineSections(contact, today);
   }, [contact, today]);
 
-  const resolvedEntries: TimelineEntry[] = useMemo(() => {
+  const pastEntries: TimelineEntry[] = useMemo(() => {
     if (!contact) return [];
-    return timelineSections.resolved.map((entry, index) => buildTimelineEntry(
+    return timelineSections.past.map((entry, index) => buildTimelineEntry(
       entry,
       index,
       today,
       i18n.language,
       contact.birthdayYear,
       t('contactComingUp.birthdayTitle', { firstName: contact.firstName }),
-      contact.birthdayYear ? t('contactComingUp.birthdayTurning', { age: entry.date.getFullYear() - contact.birthdayYear }) : undefined
+      contact.birthdayYear ? t('contactComingUp.birthdayTurning', { age: entry.date.getFullYear() - contact.birthdayYear }) : undefined,
+      false
     ));
-  }, [contact, timelineSections.resolved, today, i18n.language, t]);
+  }, [contact, timelineSections.past, today, i18n.language, t]);
 
   const upcomingEntries: TimelineEntry[] = useMemo(() => {
     if (!contact) return [];
@@ -263,7 +273,7 @@ export default function ContactComingUpScreen() {
     ));
   }, [contact, timelineSections.upcoming, today, i18n.language, t]);
 
-  const hasTimelineEntries = resolvedEntries.length > 0 || upcomingEntries.length > 0;
+  const hasTimelineEntries = pastEntries.length > 0 || upcomingEntries.length > 0;
 
   const handleEditTimelineEntry = (entry: TimelineEntry) => {
     if (entry.timelineStatus !== 'active' || entry.isBirthday) return;
@@ -376,11 +386,13 @@ export default function ContactComingUpScreen() {
         ) : (
           <View style={styles.timelineWrapper}>
             <View style={styles.timelineDottedLine} />
-            {resolvedEntries.map((entry) => (
+            {pastEntries.map((entry) => (
               <TimelineEventRow
                 key={entry.id}
                 entry={entry}
                 translate={t}
+                canEdit={entry.timelineStatus === 'active' && !entry.isBirthday}
+                onEdit={handleEditTimelineEntry}
               />
             ))}
 

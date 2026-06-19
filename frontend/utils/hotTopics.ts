@@ -13,6 +13,19 @@ const getStartOfDayTime = (date: Date): number => (
   Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
 );
 
+export function parseHotTopicDate(value?: string): Date | null {
+  if (!value) return null;
+
+  const dateOnlyMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (dateOnlyMatch) {
+    const [, year, month, day] = dateOnlyMatch;
+    return new Date(Number(year), Number(month) - 1, Number(day));
+  }
+
+  const date = new Date(value);
+  return Number.isFinite(date.getTime()) ? date : null;
+}
+
 export type HotTopicDateToneName =
   | 'overdue'
   | 'imminent'
@@ -117,10 +130,17 @@ const hotTopicDateTones: Record<HotTopicDateToneName, HotTopicDateTone> = {
 };
 
 export function isHotTopicOverdue(eventDate?: string, now = new Date()): boolean {
-  const eventTime = getTime(eventDate);
-  if (eventTime === null) return false;
+  const eventDateValue = parseHotTopicDate(eventDate);
+  if (!eventDateValue) return false;
 
-  return getStartOfDayTime(new Date(eventTime)) < getStartOfDayTime(now);
+  return getStartOfDayTime(eventDateValue) < getStartOfDayTime(now);
+}
+
+export function isHotTopicTodayOrFuture(eventDate?: string, now = new Date()): boolean {
+  const eventDateValue = parseHotTopicDate(eventDate);
+  if (!eventDateValue) return false;
+
+  return getStartOfDayTime(eventDateValue) >= getStartOfDayTime(now);
 }
 
 export function countOverdueHotTopics<T extends Pick<HotTopic, 'eventDate' | 'status'>>(
@@ -133,11 +153,11 @@ export function countOverdueHotTopics<T extends Pick<HotTopic, 'eventDate' | 'st
 }
 
 export function getHotTopicDateTone(eventDate?: string, now = new Date()): HotTopicDateTone {
-  const eventTime = getTime(eventDate);
-  if (eventTime === null) return hotTopicDateTones.undated;
+  const eventDateValue = parseHotTopicDate(eventDate);
+  if (!eventDateValue) return hotTopicDateTones.undated;
 
   const hoursUntilEvent = (
-    getStartOfDayTime(new Date(eventTime)) - getStartOfDayTime(now)
+    getStartOfDayTime(eventDateValue) - getStartOfDayTime(now)
   ) / HOUR_MS;
 
   if (hoursUntilEvent < 0) return hotTopicDateTones.overdue;
@@ -152,8 +172,8 @@ export function sortHotTopicsByEventDateDesc<T extends Pick<HotTopic, 'eventDate
   hotTopics: T[]
 ): T[] {
   return hotTopics.slice().sort((first, second) => {
-    const firstEventTime = getTime(first.eventDate);
-    const secondEventTime = getTime(second.eventDate);
+    const firstEventTime = parseHotTopicDate(first.eventDate)?.getTime() ?? null;
+    const secondEventTime = parseHotTopicDate(second.eventDate)?.getTime() ?? null;
 
     if (firstEventTime !== null && secondEventTime !== null && firstEventTime !== secondEventTime) {
       return secondEventTime - firstEventTime;
@@ -177,8 +197,8 @@ export function filterToNextBirthdayTopic<T extends Pick<HotTopic, 'birthdayCont
   for (const topic of hotTopics) {
     if (!topic.birthdayContactId || !topic.eventDate) continue;
 
-    const eventDate = new Date(topic.eventDate);
-    if (!Number.isFinite(eventDate.getTime())) continue;
+    const eventDate = parseHotTopicDate(topic.eventDate);
+    if (!eventDate) continue;
 
     const eventTime = getStartOfDayTime(eventDate);
     if (eventTime < todayTime) continue;
