@@ -75,7 +75,7 @@ function ResetPasswordContent() {
           </button>
           <p className="text-text-muted text-sm mt-4">
             Don&apos;t have the app?{' '}
-            <Link href="/" className="font-semibold text-indigo-600 hover:text-indigo-500">
+            <Link href="/" className="font-semibold text-primary hover:text-primary-hover">
               Back to home
             </Link>
           </p>
@@ -87,7 +87,7 @@ function ResetPasswordContent() {
 
 export default function ResetPasswordPage() {
   return (
-    <main className="min-h-screen bg-background text-foreground flex flex-col">
+    <main className="min-h-screen page-shell text-foreground flex flex-col">
       <div className="flex-1 flex items-center justify-center pt-24">
         <div className="max-w-lg mx-auto w-full">
           <div className="bg-surface rounded-2xl shadow-sm p-8">

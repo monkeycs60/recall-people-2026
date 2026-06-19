@@ -1,23 +1,27 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
-import { faqs } from "@/data/faqs";
 
-const inter = Inter({
+const jakarta = Plus_Jakarta_Sans({
   variable: "--font-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
   display: "swap",
 });
 
+const APP_STORE_URL =
+  "https://apps.apple.com/fr/app/recall-people/id6757320179";
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://recall-people.com"),
-  title: "Recall People | The AI Personal CRM for Networking",
-  description: "Stop forgetting the details that matter. Recall People is a personal CRM with AI summaries, reminders, assistant search, and secure encrypted sync across devices.",
+  title: "Recall People — A personal CRM you talk to",
+  description:
+    "After a call or a coffee, just talk. Recall People turns 30 seconds of voice into a structured profile — who they are, what they love, what's coming up — and reminds you before it counts.",
   keywords: [
-    "Personal CRM", "Networking App", "Remember names app", 
-    "AI relationship manager", "Voice-to-CRM", "Private contact manager", 
-    "Local storage CRM", "Relationship intelligence", "Social memory upgrade"
+    "Personal CRM", "Networking App", "Remember names app",
+    "AI relationship manager", "Voice-to-CRM", "Private contact manager",
+    "Relationship intelligence", "Voice notes CRM", "Social memory upgrade",
   ],
   authors: [{ name: "Recall People" }],
   creator: "Recall People",
@@ -26,22 +30,24 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://recall-people.com",
     siteName: "Recall People",
-    title: "Recall People | The AI Personal CRM for Networking",
-    description: "Your social memory, upgraded. Record notes, get AI context, and keep your contacts synced securely across iOS and Android.",
+    title: "Recall People — A personal CRM you talk to",
+    description:
+      "Talk for 30 seconds after any conversation. Recall People structures it into a profile, dates the upcoming moments, and reminds you before they happen.",
     images: [
       {
-        url: "/images/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Recall People - AI Personal CRM",
+        url: "/images/app-icon.png",
+        width: 1024,
+        height: 1024,
+        alt: "Recall People — A personal CRM you talk to",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Recall People | The AI Personal CRM for Networking",
-    description: "Stop forgetting details. AI personal CRM with secure encrypted sync.",
-    images: ["/images/og-image.png"],
+    title: "Recall People — A personal CRM you talk to",
+    description:
+      "Turn 30 seconds of voice into structured relationship memory, with reminders that actually fire.",
+    images: ["/images/app-icon.png"],
   },
   robots: {
     index: true,
@@ -58,7 +64,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={jakarta.variable}>
       <head>
         <script
           type="application/ld+json"
@@ -68,9 +74,9 @@ export default function RootLayout({
               "@type": "MobileApplication",
               "name": "Recall People",
               "description":
-                "Recall People is a voice-first personal CRM. Record a quick voice note after any conversation — AI automatically extracts names, facts, and upcoming events into smart contact profiles. Contact data is encrypted in our database and synced through your account across iOS and Android.",
+                "Recall People is a voice-first personal CRM. Record a quick voice note after any conversation — AI automatically extracts names, facts, and upcoming events into structured contact profiles, then reminds you before they happen. Data is local-first (SQLite) and synced through your account.",
               "applicationCategory": "ProductivityApplication",
-              "operatingSystem": "iOS, Android",
+              "operatingSystem": "iOS",
               "offers": [
                 {
                   "@type": "Offer",
@@ -88,35 +94,18 @@ export default function RootLayout({
               "featureList": [
                 "Voice-first capture in 5 languages",
                 "AI extraction of names, facts, dates, and events",
-                "Smart contact profiles with AI summaries",
-                "Event reminders and upcoming events feed",
-                "Semantic search across all contacts",
-                "AI conversation starters",
-                "Encrypted account sync across devices",
-                "Sensitive contact fields encrypted in our database",
-                "Offline access to all data",
-                "Data export in JSON and CSV",
+                "Hot topics auto-dated from speech, color-coded by urgency",
+                "Per-contact timeline of past and upcoming moments",
+                "AI-generated icebreakers before you meet",
+                "Assistant that answers questions about your network with cited sources",
+                "Full-text search across all notes",
+                "Groups and flexible sorting",
+                "Event reminders and push notifications",
+                "Local-first storage (SQLite) with encrypted account sync",
               ],
               "url": "https://recall-people.com",
-              "downloadUrl": "https://apps.apple.com/app/recall-people-personal-crm/id6746268382",
-              "inLanguage": ["en", "fr", "es", "it", "pt"],
-            }),
-          }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "FAQPage",
-              "mainEntity": faqs.map((faq) => ({
-                "@type": "Question",
-                "name": faq.question,
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": faq.answer,
-                },
-              })),
+              "downloadUrl": APP_STORE_URL,
+              "inLanguage": ["en", "fr", "es", "it", "de"],
             }),
           }}
         />
@@ -126,7 +115,7 @@ export default function RootLayout({
           data-website-id="16afad82-6cb1-469b-bca1-bbb3916ba913"
         />
       </head>
-      <body className="antialiased font-sans bg-background text-foreground">
+      <body className="antialiased">
         <Navbar />
         {children}
       </body>
