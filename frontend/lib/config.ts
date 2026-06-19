@@ -17,6 +17,12 @@ export const getApiUrl = (): string => {
 
 export const API_URL = getApiUrl();
 
+// Capture mode for App Store / ASO screenshots: hides system chrome and the
+// in-app floating action buttons so the screen reads cleanly inside a mockup.
+export const screenshotMode =
+  process.env.EXPO_PUBLIC_HIDE_STATUS_BAR === 'true' ||
+  process.env.EXPO_PUBLIC_SCREENSHOT_MODE === 'true';
+
 // Debug log en dev
 if (__DEV__) {
   console.log('[config] API_URL:', API_URL);

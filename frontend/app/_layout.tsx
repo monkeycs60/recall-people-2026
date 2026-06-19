@@ -1,5 +1,6 @@
 import { Stack, useRouter } from 'expo-router';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
+import * as NavigationBar from 'expo-navigation-bar';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import '../global.css';
@@ -95,6 +96,8 @@ export default function RootLayout() {
     NativeStatusBar.setHidden(hideStatusBarForScreenshots, 'none');
     if (Platform.OS === 'android' && hideStatusBarForScreenshots) {
       NativeStatusBar.setTranslucent(true);
+      NavigationBar.setBehaviorAsync('overlay-swipe').catch(() => {});
+      NavigationBar.setVisibilityAsync('hidden').catch(() => {});
     }
   }, []);
 

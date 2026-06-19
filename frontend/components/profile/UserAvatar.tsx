@@ -1,9 +1,7 @@
 import { View, StyleSheet, Pressable } from 'react-native';
-import { SvgUri } from 'react-native-svg';
 import { Image } from 'expo-image';
-import { Camera } from 'lucide-react-native';
+import { Camera, User } from 'lucide-react-native';
 import { Colors, Shadows } from '@/constants/theme';
-import { getProfileDicebearUrl } from '@/utils/profileAvatar';
 
 type UserAvatarProps = {
   name: string;
@@ -15,7 +13,6 @@ type UserAvatarProps = {
 };
 
 export function UserAvatar({
-  name,
   size = 64,
   avatarUrl,
   onPress,
@@ -25,10 +22,9 @@ export function UserAvatar({
   const badgeSize = Math.max(24, size * 0.35);
   const hasCustomAvatar = !!avatarUrl;
 
-  const dicebearUrl = getProfileDicebearUrl(name);
   const imageUri = hasCustomAvatar
     ? `${avatarUrl}${avatarUrl.includes('?') ? '&' : '?'}v=${cacheKey || ''}`
-    : dicebearUrl;
+    : undefined;
 
   const containerStyle = [
     styles.container,
@@ -55,7 +51,7 @@ export function UserAvatar({
       placeholderContentFit="cover"
     />
   ) : (
-    <SvgUri width={size} height={size} uri={dicebearUrl} />
+    <User size={size * 0.5} color={Colors.textMuted} strokeWidth={1.8} />
   );
 
   if (!showEditBadge) {

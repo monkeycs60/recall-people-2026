@@ -43,6 +43,7 @@ import { MeetingContextEditSheet } from '@/components/contact/MeetingContextEdit
 import { LovesEditSheet } from '@/components/contact/LovesEditSheet';
 import { GroupsManagementSheet } from '@/components/contact/GroupsManagementSheet';
 import { Colors, Shadows, Fonts } from '@/constants/theme';
+import { screenshotMode } from '@/lib/config';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { useAppStore } from '@/stores/app-store';
@@ -703,29 +704,31 @@ export default function ContactDetailScreen() {
 
       </ScrollView>
 
-      <View
-        pointerEvents="box-none"
-        style={[styles.floatingActions, { bottom: insets.bottom + 18 }]}
-      >
-        <Pressable
-          style={styles.floatingAskButton}
-          onPress={handleAskAboutContact}
-          accessibilityLabel={t('contactProfile.actionAsk')}
+      {!screenshotMode && (
+        <View
+          pointerEvents="box-none"
+          style={[styles.floatingActions, { bottom: insets.bottom + 18 }]}
         >
-          <Sparkles size={22} color={Colors.primary} strokeWidth={2.3} />
-        </Pressable>
+          <Pressable
+            style={styles.floatingAskButton}
+            onPress={handleAskAboutContact}
+            accessibilityLabel={t('contactProfile.actionAsk')}
+          >
+            <Sparkles size={22} color={Colors.primary} strokeWidth={2.3} />
+          </Pressable>
 
-        <Pressable
-          style={styles.floatingNewNoteButton}
-          onPress={() => handleAddNote('audio' as InputMode)}
-          accessibilityLabel={t('contactProfile.actionNewNote')}
-        >
-          <Mic size={20} color={Colors.textInverse} strokeWidth={2.4} />
-          <Text style={styles.floatingNewNoteText}>
-            {t('contactProfile.actionNewNote')}
-          </Text>
-        </Pressable>
-      </View>
+          <Pressable
+            style={styles.floatingNewNoteButton}
+            onPress={() => handleAddNote('audio' as InputMode)}
+            accessibilityLabel={t('contactProfile.actionNewNote')}
+          >
+            <Mic size={20} color={Colors.textInverse} strokeWidth={2.4} />
+            <Text style={styles.floatingNewNoteText}>
+              {t('contactProfile.actionNewNote')}
+            </Text>
+          </Pressable>
+        </View>
+      )}
 
       <DeleteContactDialog
         visible={showDeleteDialog}

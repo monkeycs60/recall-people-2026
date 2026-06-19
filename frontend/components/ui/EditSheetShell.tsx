@@ -1,6 +1,7 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { forwardRef, useCallback, useMemo, useState, type ReactNode } from 'react';
 import { BottomSheetModal, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Edit3, Plus, Trash2 } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Colors, Fonts } from '@/constants/theme';
@@ -26,6 +27,7 @@ type EditSheetShellProps = {
 export const EditSheetShell = forwardRef<BottomSheetModal, EditSheetShellProps>(
   ({ title, icon, config, children }, ref) => {
     const { t } = useTranslation();
+    const insets = useSafeAreaInsets();
     const [isEditing, setIsEditing] = useState(false);
 
     const snapPoints = useMemo(
@@ -89,7 +91,7 @@ export const EditSheetShell = forwardRef<BottomSheetModal, EditSheetShellProps>(
         handleIndicatorStyle={styles.handle}
         onDismiss={() => setIsEditing(false)}
       >
-        <View style={styles.container}>
+        <View style={[styles.container, { paddingBottom: insets.bottom + 28 }]}>
           <View style={styles.header}>
             <View style={styles.iconCircle}>{icon}</View>
             <Text style={styles.title}>{title}</Text>
@@ -173,7 +175,6 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 28,
   },
   header: {
     flexDirection: 'row',

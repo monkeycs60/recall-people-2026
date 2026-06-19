@@ -1,5 +1,5 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { Check, Pencil } from 'lucide-react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { Check } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Colors, Shadows, Fonts } from '@/constants/theme';
 import { UserAvatar } from './UserAvatar';
@@ -55,11 +55,6 @@ export function ProfileHeader({
           </View>
         )}
       </View>
-      {onAvatarPress && (
-        <Pressable style={styles.editButton} onPress={onAvatarPress}>
-          <Pencil size={14} color={Colors.primary} />
-        </Pressable>
-      )}
     </View>
   );
 }
@@ -98,13 +93,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.success,
     marginLeft: 6,
-  },
-  editButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: Colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });

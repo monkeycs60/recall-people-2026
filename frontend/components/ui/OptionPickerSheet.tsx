@@ -1,6 +1,7 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { forwardRef, useCallback } from 'react';
 import { BottomSheetModal, BottomSheetBackdrop, BottomSheetView } from '@gorhom/bottom-sheet';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Check } from 'lucide-react-native';
 import { Colors, Spacing } from '@/constants/theme';
 
@@ -19,6 +20,7 @@ interface OptionPickerSheetProps {
 
 export const OptionPickerSheet = forwardRef<BottomSheetModal, OptionPickerSheetProps>(
   ({ title, description, options, selectedValue, onSelect }, ref) => {
+    const insets = useSafeAreaInsets();
     const renderBackdrop = useCallback(
       (props: React.ComponentProps<typeof BottomSheetBackdrop>) => (
         <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} />
@@ -43,7 +45,7 @@ export const OptionPickerSheet = forwardRef<BottomSheetModal, OptionPickerSheetP
         backgroundStyle={{ backgroundColor: Colors.surface }}
         handleIndicatorStyle={{ backgroundColor: Colors.hairline }}
       >
-        <BottomSheetView style={styles.container}>
+        <BottomSheetView style={[styles.container, { paddingBottom: insets.bottom + 32 }]}>
           <View style={styles.header}>
             <Text style={styles.title}>{title}</Text>
             {description && (
@@ -78,7 +80,6 @@ OptionPickerSheet.displayName = 'OptionPickerSheet';
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: 32,
     backgroundColor: Colors.surface,
   },
   header: {

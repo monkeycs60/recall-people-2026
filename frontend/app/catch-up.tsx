@@ -24,6 +24,7 @@ import { getContactDisplayName } from '@/utils/contactDisplayName';
 import { getOverdueCatchupItems, type OverdueCatchupItem } from '@/utils/catchup';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { queryKeys } from '@/lib/query-keys';
+import { showErrorToast } from '@/lib/error-handler';
 import { useAppStore } from '@/stores/app-store';
 
 export default function CatchUpScreen() {
@@ -39,12 +40,14 @@ export default function CatchUpScreen() {
   const [activeItem, setActiveItem] = useState<OverdueCatchupItem | null>(null);
   const [resolutionText, setResolutionText] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isSavingId, setIsSavingId] = useState<string | null>(null);
+  const [optimisticallyResolvedIds, setOptimisticallyResolvedIds] = useState<Set<string>>(new Set());
   const [resolvedTodayCount, setResolvedTodayCount] = useState(0);
 
   const items = useMemo(() => (
-    getOverdueCatchupItems(contacts, previews)
-  ), [contacts, previews]);
+    getOverdueCatchupItems(contacts, previews).filter(
+      (item) => !optimisticallyResolvedIds.has(item.topic.id)
+    )
+  ), [contacts, previews, optimisticallyResolvedIds]);
 
   const refresh = useCallback(async () => {
     setIsRefreshing(true);
@@ -67,23 +70,34 @@ export default function CatchUpScreen() {
   };
 
   const closeResolveSheet = () => {
-    if (isSavingId) return;
     setActiveItem(null);
     setResolutionText('');
   };
 
   const resolveItem = async (item: OverdueCatchupItem, resolution?: string) => {
-    setIsSavingId(item.topic.id);
+    const topicId = item.topic.id;
+    const contactId = item.contact.id;
+
+    // Optimistic: close the sheet and hide the item immediately so it feels instant.
+    setActiveItem(null);
+    setResolutionText('');
+    setOptimisticallyResolvedIds((previousIds) => new Set(previousIds).add(topicId));
+    setResolvedTodayCount((count) => count + 1);
+
     try {
-      await hotTopicService.resolve(item.topic.id, resolution?.trim() || undefined);
-      setResolvedTodayCount((count) => count + 1);
-      setActiveItem(null);
-      setResolutionText('');
-      await queryClient.invalidateQueries({ queryKey: queryKeys.hotTopics.byContact(item.contact.id) });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(item.contact.id) });
+      await hotTopicService.resolve(topicId, resolution?.trim() || undefined);
+      await queryClient.invalidateQueries({ queryKey: queryKeys.hotTopics.byContact(contactId) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.contacts.detail(contactId) });
       await refetchPreviews();
-    } finally {
-      setIsSavingId(null);
+    } catch (error) {
+      // Rollback: bring the item back and undo the counter.
+      setOptimisticallyResolvedIds((previousIds) => {
+        const nextIds = new Set(previousIds);
+        nextIds.delete(topicId);
+        return nextIds;
+      });
+      setResolvedTodayCount((count) => Math.max(0, count - 1));
+      showErrorToast(t('errors.generic'));
     }
   };
 
@@ -107,8 +121,6 @@ export default function CatchUpScreen() {
   };
 
   const renderTopicRow = (item: OverdueCatchupItem) => {
-    const isSaving = isSavingId === item.topic.id;
-
     return (
       <View key={item.topic.id} style={styles.topicRow}>
         <ContactAvatar
@@ -137,9 +149,8 @@ export default function CatchUpScreen() {
 
         <View style={styles.topicActions}>
           <Pressable
-            style={[styles.iconButton, isSaving && styles.iconButtonDisabled]}
+            style={styles.iconButton}
             onPress={() => openResolveSheet(item)}
-            disabled={isSaving}
           >
             <Check size={16} color={Colors.textSecondary} strokeWidth={2.5} />
           </Pressable>
@@ -268,9 +279,8 @@ export default function CatchUpScreen() {
               </View>
 
               <Pressable
-                style={[styles.resolveButton, isSavingId && styles.resolveButtonDisabled]}
+                style={styles.resolveButton}
                 onPress={handleResolveWithText}
-                disabled={!!isSavingId}
               >
                 <Check size={16} color={Colors.textInverse} strokeWidth={2.6} />
                 <Text style={styles.resolveButtonText}>{t('catchUp.resolveAndSave')}</Text>
@@ -279,7 +289,6 @@ export default function CatchUpScreen() {
               <Pressable
                 style={styles.resolveWithoutNoteButton}
                 onPress={handleResolveWithoutNote}
-                disabled={!!isSavingId}
               >
                 <Text style={styles.resolveWithoutNoteText}>{t('catchUp.resolveWithoutNote')}</Text>
               </Pressable>
@@ -411,9 +420,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
     borderWidth: 1,
     borderColor: Colors.hairline,
-  },
-  iconButtonDisabled: {
-    opacity: 0.5,
   },
   recordButton: {
     width: 34,
@@ -588,9 +594,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     backgroundColor: Colors.success,
-  },
-  resolveButtonDisabled: {
-    opacity: 0.6,
   },
   resolveButtonText: {
     fontFamily: Fonts.sans.bold,

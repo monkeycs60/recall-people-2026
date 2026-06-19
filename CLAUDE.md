@@ -44,8 +44,23 @@ Le code supporte un mode capture via variables d'environnement :
 
 - `EXPO_PUBLIC_SCREENSHOT_MODE=true` : bypass auth avec un utilisateur local de capture.
 - `EXPO_PUBLIC_SCREENSHOT_DB_HASH=3c53b5a3` : ouvre la DB locale seedée pour les contacts ASO (`recall_people_3c53b5a3.db`).
-- `EXPO_PUBLIC_HIDE_STATUS_BAR=true` : masque la status bar Android nativement.
+- `EXPO_PUBLIC_HIDE_STATUS_BAR=true` : masque la status bar Android nativement, ET (via le flag `screenshotMode` de `lib/config.ts`) masque les boutons flottants (New note / sparkle) de la fiche contact. Peut s'utiliser **seul** (sans `SCREENSHOT_MODE`) pour capturer un vrai compte (ex. QA) au lieu de la DB seedée.
 - `EXPO_PUBLIC_API_URL=http://10.0.2.2:8787` : permet à l'émulateur Android d'appeler le backend local.
+
+### Barres : enlever le système, garder notre tab bar
+
+Objectif des captures : supprimer la **status bar** (haut) ET la **barre de navigation Android** (bas), mais **garder notre tab bar in-app** (Contacts / News / Assistant / Profile) et masquer les **FABs flottants** de la fiche contact.
+
+- **Status bar (haut)** : masquée nativement via `NativeStatusBar.setHidden(...)` quand `screenshotMode` est actif. ✅
+- **FABs fiche contact (New note / sparkle)** : masqués via `{!screenshotMode && (...)}` dans `app/contact/[id]/index.tsx`. ✅
+- **Barre de navigation Android (bas)** : ✅ masquée nativement via `expo-navigation-bar` (`NavigationBar.setVisibilityAsync('hidden')` + `setBehaviorAsync('overlay-swipe')`) dans le bloc `screenshotMode` de `app/_layout.tsx`. ⚠️ C'est un **module natif** : après son ajout, le dev-client doit être **rebuild** (`cd android && ./gradlew assembleDebug` puis `adb install -r app/build/outputs/apk/debug/app-debug.apk`). Au 1er lancement, Android affiche un toast système « Viewing full screen » → taper **Got it** une fois (il ne réapparaît plus).
+- `adb shell ... policy_control immersive.*` NE marche PAS sur cet émulateur (status ET nav restent dans `screencap`).
+
+### États par écran (fiche contact)
+
+- Déplier **The Essentials** (bouton « Show more ») avant la capture — tout tient à l'écran.
+- Scroller légèrement vers le bas pour faire apparaître la carte **Loves** en entier et masquer le haut.
+- Pour cliquer précisément (boutons RN petits) : `adb shell uiautomator dump` puis lire les `bounds="[x1,y1][x2,y2]"` du `text="..."` visé.
 
 Commande de lancement recommandée depuis `frontend/` :
 

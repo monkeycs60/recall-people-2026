@@ -642,7 +642,13 @@ export default function ContactsScreen() {
         animationType="fade"
         onRequestClose={() => setHasSeenGuidedTour(true)}
       >
-        <Pressable style={styles.guidedTourOverlay} onPress={() => setHasSeenGuidedTour(true)}>
+        <Pressable
+          style={[
+            styles.guidedTourOverlay,
+            { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 16 },
+          ]}
+          onPress={() => setHasSeenGuidedTour(true)}
+        >
           <Pressable style={styles.guidedTourCard} onPress={(event) => event.stopPropagation()}>
             <View style={styles.guidedTourIcon}>
               <Mic size={24} color={Colors.textInverse} strokeWidth={2.5} />
@@ -986,10 +992,9 @@ const styles = StyleSheet.create({
   },
   guidedTourOverlay: {
     flex: 1,
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
     backgroundColor: 'rgba(29, 26, 46, 0.34)',
     paddingHorizontal: 18,
-    paddingBottom: 26,
   },
   guidedTourCard: {
     backgroundColor: Colors.surface,

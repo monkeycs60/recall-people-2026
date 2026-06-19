@@ -7,7 +7,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import {
   Globe,
-  BarChart3,
   Download,
   Trash2,
   Smartphone,
@@ -32,7 +31,6 @@ import { SettingsSection } from '@/components/profile/SettingsSection';
 import { SettingsRow } from '@/components/profile/SettingsRow';
 import { LanguagePicker } from '@/components/profile/LanguagePicker';
 import { OptionPickerSheet } from '@/components/ui/OptionPickerSheet';
-import { StatisticsSheet } from '@/components/profile/StatisticsSheet';
 import { ExportDataSheet } from '@/components/profile/ExportDataSheet';
 import { LegalNoticesSheet } from '@/components/profile/LegalNoticesSheet';
 import { SubscriptionCard } from '@/components/profile/SubscriptionCard';
@@ -75,17 +73,12 @@ export default function ProfileScreen() {
   const [avatarCacheKey, setAvatarCacheKey] = useState(Date.now().toString());
 
   const languagePickerRef = useRef<BottomSheetModal>(null);
-  const statisticsSheetRef = useRef<BottomSheetModal>(null);
   const exportDataSheetRef = useRef<BottomSheetModal>(null);
   const legalNoticesSheetRef = useRef<BottomSheetModal>(null);
   const notSeenThresholdSheetRef = useRef<BottomSheetModal>(null);
 
   const handleOpenLanguagePicker = useCallback(() => {
     languagePickerRef.current?.present();
-  }, []);
-
-  const handleOpenStatistics = useCallback(() => {
-    statisticsSheetRef.current?.present();
   }, []);
 
   const handleOpenExport = useCallback(() => {
@@ -338,11 +331,6 @@ export default function ProfileScreen() {
 
         <SettingsSection title={t('profile.sections.data')}>
           <SettingsRow
-            icon={<BarChart3 size={20} color={Colors.primary} />}
-            label={t('profile.data.statistics')}
-            onPress={handleOpenStatistics}
-          />
-          <SettingsRow
             icon={<Cloud size={20} color={Colors.primary} />}
             label={t('profile.sync.title')}
             description={syncError ? t('profile.sync.retryDescription') : t('profile.sync.description')}
@@ -424,7 +412,6 @@ export default function ProfileScreen() {
       </ScrollView>
 
       <LanguagePicker ref={languagePickerRef} />
-      <StatisticsSheet ref={statisticsSheetRef} />
       <ExportDataSheet ref={exportDataSheetRef} />
       <LegalNoticesSheet ref={legalNoticesSheetRef} />
       <OptionPickerSheet
