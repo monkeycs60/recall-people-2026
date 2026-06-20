@@ -71,7 +71,14 @@
         }
       ],
       "expo-font",
-      "expo-apple-authentication"
+      "expo-apple-authentication",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/android-icon-monochrome.png",
+          "color": "#5530E6"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
