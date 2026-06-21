@@ -46,12 +46,10 @@ test('review screen reserves bottom scroll space for the floating save button', 
   assert.match(source, /paddingBottom: insets\.bottom \+ FLOATING_SAVE_BOTTOM_PADDING/);
 });
 
-test('review screen summarizes captured details and reminders in every locale', async () => {
+test('review screen summarizes selected details and reminders in every locale', async () => {
   const source = await readFile(reviewScreenPath, 'utf8');
 
-  assert.match(source, /capturedDetailCount/);
   assert.match(source, /selectedReminderCount/);
-  assert.match(source, /t\('review\.capturedDetails'/);
   assert.match(source, /t\('review\.saveSummary'/);
 
   for (const localePath of localePaths) {
@@ -59,9 +57,6 @@ test('review screen summarizes captured details and reminders in every locale', 
     const review = locale.review;
 
     for (const key of [
-      'capturedDetails_one',
-      'capturedDetails_other',
-      'summaryHelp',
       'detailsCount_one',
       'detailsCount_other',
       'remindersCount_one',

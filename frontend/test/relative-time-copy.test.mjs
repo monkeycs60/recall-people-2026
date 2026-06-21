@@ -35,9 +35,12 @@ test('contact notes known-for stats use full time unit words', async () => {
   for (const code of localeCodes) {
     const locale = await loadLocale(code);
     const labels = [
-      locale.contactNotes.statKnownDays,
-      locale.contactNotes.statKnownMonths,
-      locale.contactNotes.statKnownYears,
+      locale.contactNotes.statKnownDays_one,
+      locale.contactNotes.statKnownDays_other,
+      locale.contactNotes.statKnownMonths_one,
+      locale.contactNotes.statKnownMonths_other,
+      locale.contactNotes.statKnownYears_one,
+      locale.contactNotes.statKnownYears_other,
     ];
 
     for (const label of labels) {
