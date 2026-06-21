@@ -15,9 +15,9 @@ const APP_STORE_URL =
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://recall-people.com"),
-  title: "Recall People — A personal CRM you talk to",
+  title: "Recall People: A personal CRM you talk to",
   description:
-    "After a call or a coffee, just talk. Recall People turns 30 seconds of voice into a structured profile — who they are, what they love, what's coming up — and reminds you before it counts.",
+    "After a call or a coffee, just talk. Recall People turns 30 seconds of voice into a structured profile (who they are, what they love, what's coming up) and reminds you before it counts.",
   keywords: [
     "Personal CRM", "Networking App", "Remember names app",
     "AI relationship manager", "Voice-to-CRM", "Private contact manager",
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://recall-people.com",
     siteName: "Recall People",
-    title: "Recall People — A personal CRM you talk to",
+    title: "Recall People: A personal CRM you talk to",
     description:
       "Talk for 30 seconds after any conversation. Recall People structures it into a profile, dates the upcoming moments, and reminds you before they happen.",
     images: [
@@ -38,13 +38,13 @@ export const metadata: Metadata = {
         url: "/images/app-icon.png",
         width: 1024,
         height: 1024,
-        alt: "Recall People — A personal CRM you talk to",
+        alt: "Recall People: A personal CRM you talk to",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Recall People — A personal CRM you talk to",
+    title: "Recall People: A personal CRM you talk to",
     description:
       "Turn 30 seconds of voice into structured relationship memory, with reminders that actually fire.",
     images: ["/images/app-icon.png"],
@@ -74,7 +74,7 @@ export default function RootLayout({
               "@type": "MobileApplication",
               "name": "Recall People",
               "description":
-                "Recall People is a voice-first personal CRM. Record a quick voice note after any conversation — AI automatically extracts names, facts, and upcoming events into structured contact profiles, then reminds you before they happen. Data is local-first (SQLite) and synced through your account.",
+                "Recall People is a voice-first personal CRM. Record a quick voice note after any conversation, and AI automatically extracts names, facts, and upcoming events into structured contact profiles, then reminds you before they happen. Data is local-first (SQLite) and synced through your account.",
               "applicationCategory": "ProductivityApplication",
               "operatingSystem": "iOS",
               "offers": [

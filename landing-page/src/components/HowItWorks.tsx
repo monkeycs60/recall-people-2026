@@ -7,7 +7,7 @@ const STEPS = [
   {
     n: "1",
     t: "Talk about someone",
-    d: "After a call or a coffee, record a quick voice note — or type it.",
+    d: "After a call or a coffee, record a quick voice note, or type it.",
   },
   {
     n: "2",
@@ -17,7 +17,7 @@ const STEPS = [
   {
     n: "3",
     t: "The profile builds itself",
-    d: "Save once and Recall People files everything into a rich profile — essentials, interests, and what’s coming up.",
+    d: "Save once and Recall People files everything into a rich profile: essentials, interests, and what’s coming up.",
   },
 ];
 
@@ -148,7 +148,7 @@ export default function HowItWorks() {
           </span>
           <h3 id="hTitle">Talk about someone</h3>
           <p id="hDesc">
-            After a call or a coffee, record a quick voice note — or type it.
+            After a call or a coffee, record a quick voice note, or type it.
           </p>
         </div>
 

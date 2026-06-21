@@ -36,7 +36,7 @@ export default function Home() {
             </h1>
             <p className="hero-sub">
               After a call or a coffee, just talk. In a few seconds, Recall
-              People turns your voice into a profile — and reminds you before it
+              People turns your voice into a profile, and reminds you before it
               counts.
             </p>
             <StoreBadges />
@@ -69,7 +69,7 @@ export default function Home() {
             <p className="eyebrow">The problem</p>
             <h2>The details slip away between catch-ups.</h2>
             <p className="resolve">
-              Not for lack of caring — just for lack of <b>remembering</b>.
+              Not for lack of caring, just for lack of <b>remembering</b>.
             </p>
           </div>
           <div className="qlist">
@@ -115,16 +115,14 @@ export default function Home() {
             </div>
 
             <div className="bt bt-wide">
-              <div className="bt-k">The essentials</div>
-              <h4>Everyone you know, in one rich profile.</h4>
-              <p className="bt-d" style={{ maxWidth: "none" }}>
-                Who they are, what they love, what&apos;s next — built from your
-                notes.
-              </p>
+              <div className="bt-k">Smart profile</div>
+              <h4>Everything about them, at a glance.</h4>
               <div className="bt-tags">
-                <span className="bt-tag">Founder</span>
-                <span className="bt-tag">Specialty coffee</span>
-                <span className="bt-tag">🎂 Jun 28</span>
+                <span className="bt-tag">AI summary</span>
+                <span className="bt-tag">Tastes</span>
+                <span className="bt-tag">Coming up</span>
+                <span className="bt-tag">Icebreakers</span>
+                <span className="bt-tag">Notes</span>
               </div>
             </div>
 
@@ -155,15 +153,15 @@ export default function Home() {
               <div className="b-topics">
                 <div className="tp">
                   <span className="td td-r" />
-                  Bali trip<span className="tt tt-r">9d</span>
+                  Urgent<span className="tt tt-r">Days</span>
                 </div>
                 <div className="tp">
                   <span className="td td-a" />
-                  Demo<span className="tt tt-a">19d</span>
+                  Soon<span className="tt tt-a">Weeks</span>
                 </div>
                 <div className="tp">
                   <span className="td td-g" />
-                  Birthday<span className="tt tt-g">Jun 28</span>
+                  Later<span className="tt tt-g">Months</span>
                 </div>
               </div>
             </div>
@@ -280,7 +278,7 @@ export default function Home() {
                 </li>
                 <li>
                   <Check color="#5530E6" />
-                  Ask your network — AI assistant
+                  Ask your network (AI assistant)
                 </li>
                 <li>
                   <Check color="#5530E6" />
@@ -302,7 +300,7 @@ export default function Home() {
             </div>
           </div>
           <p className="price-note">
-            Or €39.99 / year — two months free. Cancel anytime.
+            Or €39.99 / year (two months free). Cancel anytime.
           </p>
         </div>
       </section>

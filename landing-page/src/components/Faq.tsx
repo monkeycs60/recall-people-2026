@@ -5,15 +5,15 @@ import { useEffect, useRef } from "react";
 const FAQ_ITEMS: { q: string; a: string }[] = [
   {
     q: "Do I have to fill in forms or fields?",
-    a: "Never. You just talk — or type a few lines. Recall People transcribes it, finds the right person, and structures the details, dates and interests for you.",
+    a: "Never. You just talk, or type a few lines. Recall People transcribes it, finds the right person, and structures the details, dates and interests for you.",
   },
   {
     q: "Where is my data stored?",
-    a: "Locally on your device first, then synced privately to your account so it's there on every login. It's your network — only you can see it.",
+    a: "Locally on your device first, then synced privately to your account so it's there on every login. It's your network. Only you can see it.",
   },
   {
     q: "How do the reminders work?",
-    a: "Recall People reads dates straight from what you say — “his demo's next Tuesday” becomes a real, color-coded event — and sends a push before each moment so nothing slips.",
+    a: "Recall People reads dates straight from what you say (“his demo's next Tuesday” becomes a real, color-coded event) and sends a push before each moment so nothing slips.",
   },
   {
     q: "Which languages are supported?",
@@ -21,11 +21,11 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
   },
   {
     q: "How long can a voice note be?",
-    a: "Up to three minutes per note — plenty to capture everything from a long catch-up. You can also switch to typing anytime.",
+    a: "Up to three minutes per note, plenty to capture everything from a long catch-up. You can also switch to typing anytime.",
   },
   {
     q: "Is there an Android version?",
-    a: "Recall People is live on iPhone today. Android is coming soon — and the same account will carry over.",
+    a: "Recall People is live on iPhone today. Android is coming soon, and the same account will carry over.",
   },
 ];
 
