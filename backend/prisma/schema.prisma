@@ -248,6 +248,7 @@ model SyncedContact {
   encryptedAiSummary          String?   @map("encrypted_ai_summary")
   encryptedSuggestedQuestions String?   @map("encrypted_suggested_questions")
   encryptedMeetingContext     String?   @map("encrypted_meeting_context")
+  encryptedLoves              String?   @map("encrypted_loves")
   avatarUrl                   String?   @map("avatar_url")
   gender                      String    @default("unknown")
   birthdayDay                 Int?      @map("birthday_day")

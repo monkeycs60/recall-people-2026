@@ -45,6 +45,9 @@ const snakeContactToPayload = (row: Record<string, unknown>): Record<string, unk
     ? JSON.parse(row.suggested_questions)
     : null,
   meetingContext: nullable(row.meeting_context),
+  loves: typeof row.loves === 'string' && row.loves
+    ? JSON.parse(row.loves)
+    : [],
   reminderFrequencyDays: nullable(row.reminder_frequency_days),
   lastContactAt: toNullableSyncIsoDate(row.last_contact_at),
   createdAt: toSyncIsoDate(row.created_at),
@@ -210,8 +213,8 @@ async function upsertContact(payload: Record<string, unknown>): Promise<void> {
     `INSERT INTO contacts (
       id, first_name, last_name, nickname, avatar_url, gender, phone, email,
       birthday_day, birthday_month, birthday_year, ai_summary, suggested_questions,
-      meeting_context, reminder_frequency_days, last_contact_at, created_at, updated_at, deleted_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      meeting_context, loves, reminder_frequency_days, last_contact_at, created_at, updated_at, deleted_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(id) DO UPDATE SET
       first_name = excluded.first_name,
       last_name = excluded.last_name,
@@ -226,6 +229,7 @@ async function upsertContact(payload: Record<string, unknown>): Promise<void> {
       ai_summary = excluded.ai_summary,
       suggested_questions = excluded.suggested_questions,
       meeting_context = excluded.meeting_context,
+      loves = excluded.loves,
       reminder_frequency_days = excluded.reminder_frequency_days,
       last_contact_at = excluded.last_contact_at,
       updated_at = excluded.updated_at,
@@ -245,6 +249,7 @@ async function upsertContact(payload: Record<string, unknown>): Promise<void> {
       payload.aiSummary ?? null,
       payload.suggestedQuestions ? JSON.stringify(payload.suggestedQuestions) : null,
       payload.meetingContext ?? null,
+      Array.isArray(payload.loves) && payload.loves.length > 0 ? JSON.stringify(payload.loves) : '[]',
       payload.reminderFrequencyDays ?? null,
       payload.lastContactAt ?? null,
       payload.createdAt,
