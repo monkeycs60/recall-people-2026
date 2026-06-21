@@ -20,7 +20,8 @@ export default function Navbar() {
         <nav className="nav-links">
           <Link href="/#how">How it works</Link>
           <Link href="/#features">Features</Link>
-          <Link href="/#data">Your data</Link>
+          <Link href="/#pricing">Pricing</Link>
+          <Link href="/#faq">FAQ</Link>
         </nav>
         <a
           className="btn btn-mauve"

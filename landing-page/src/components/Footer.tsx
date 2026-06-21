@@ -24,6 +24,8 @@ export default function Footer() {
         <div className="foot-links">
           <Link href="/#how">How it works</Link>
           <Link href="/#features">Features</Link>
+          <Link href="/#pricing">Pricing</Link>
+          <Link href="/#faq">FAQ</Link>
           <Link href="/privacy">Privacy</Link>
           <Link href="/terms">Terms</Link>
           <a href={APP_STORE_URL} target="_blank" rel="noopener">

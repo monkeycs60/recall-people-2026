@@ -1,12 +1,31 @@
 /* eslint-disable @next/next/no-img-element */
 import StoreBadges from "@/components/StoreBadges";
+import HowItWorks from "@/components/HowItWorks";
+import Faq from "@/components/Faq";
 import Footer from "@/components/Footer";
+import { APP_STORE_URL } from "@/components/Navbar";
+
+function Check({ color }: { color: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth="2.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}
 
 export default function Home() {
   return (
     <main className="lp">
-      {/* HERO */}
       <span id="top" />
+
+      {/* HERO */}
       <section className="hero" style={{ paddingTop: 0, paddingBottom: 0 }}>
         <div className="wrap">
           <div className="hero-text">
@@ -16,38 +35,28 @@ export default function Home() {
               <span className="hl">the people who matter.</span>
             </h1>
             <p className="hero-sub">
-              After a call or a coffee, just talk. Recall People turns 30 seconds
-              of voice into a structured profile — who they are, what they love,
-              what&apos;s coming up — and reminds you before it counts.
+              After a call or a coffee, just talk. In a few seconds, Recall
+              People turns your voice into a profile — and reminds you before it
+              counts.
             </p>
-            <div className="hero-cta">
-              <StoreBadges />
-              <p className="hero-note">
-                <span className="dot" /> Live on the App Store · iPhone
-              </p>
-            </div>
+            <StoreBadges />
           </div>
           <div className="hero-art">
             <div
               className="blob"
               style={{
-                width: 440,
-                height: 440,
+                width: 460,
+                height: 460,
                 background:
-                  "radial-gradient(circle,rgba(124,92,255,0.20),transparent 70%)",
-                right: 0,
+                  "radial-gradient(circle,rgba(124,92,255,0.22),transparent 70%)",
+                right: -20,
                 top: 120,
               }}
             />
             <img
-              className="device back"
-              src="/images/landing/04-record.png"
-              alt="Capture a voice note"
-            />
-            <img
               className="device front"
-              src="/images/landing/02-profile.png"
-              alt="A rich contact profile in Recall People"
+              src="/images/landing-hd/coming-up.png"
+              alt="A contact's upcoming timeline in Recall People"
             />
           </div>
         </div>
@@ -59,293 +68,250 @@ export default function Home() {
           <div className="problem-text">
             <p className="eyebrow">The problem</p>
             <h2>The details slip away between catch-ups.</h2>
-            <div className="qs">
-              <div className="q">
-                <span>“</span>What was her son&apos;s name again?”
-              </div>
-              <div className="q">
-                <span>“</span>Wasn&apos;t he interviewing last week?”
-              </div>
-              <div className="q">
-                <span>“</span>Where was she moving to?”
-              </div>
-            </div>
             <p className="resolve">
               Not for lack of caring — just for lack of <b>remembering</b>.
             </p>
           </div>
-          <div className="problem-art">
-            <img
-              className="device"
-              src="/images/landing/05-upcoming.png"
-              alt="Upcoming events feed"
-            />
+          <div className="qlist">
+            <p className="q">What was her son&apos;s name again?</p>
+            <p className="q">Wasn&apos;t he interviewing last week?</p>
+            <p className="q">Where was she moving to?</p>
           </div>
         </div>
       </section>
 
       {/* HOW IT WORKS */}
-      <section id="how">
-        <div className="wrap">
-          <div className="sec-head">
-            <p className="eyebrow">How it works</p>
-            <h2>Talk for 30 seconds. Get a memory that lasts.</h2>
-            <p>
-              No forms, no fields. Say what you remember and the app does the
-              structuring — then keeps you on time.
-            </p>
-          </div>
-          <div className="steps">
-            <div className="step">
-              <div className="n">1</div>
-              <h3>Talk about someone</h3>
-              <p>
-                After a call or a coffee, record a quick voice note — or type it.
-                Mention who they are, what they like, and what&apos;s coming up.
-              </p>
-              <div className="shot">
-                <img
-                  className="device"
-                  src="/images/landing/04-record.png"
-                  alt="Record a voice note"
-                />
-              </div>
-            </div>
-            <div className="step">
-              <div className="n">2</div>
-              <h3>AI builds the profile</h3>
-              <p>
-                It transcribes, finds the right contact, and pulls out the
-                essentials: details, interests, and upcoming events — dates
-                included.
-              </p>
-              <div className="shot">
-                <img
-                  className="device"
-                  src="/images/landing/02-profile.png"
-                  alt="Structured profile"
-                />
-              </div>
-            </div>
-            <div className="step">
-              <div className="n">3</div>
-              <h3>Review &amp; get reminded</h3>
-              <p>
-                Glance over what it caught, adjust anything, and save. Recall
-                schedules the follow-ups so nothing slips.
-              </p>
-              <div className="shot">
-                <img
-                  className="device"
-                  src="/images/landing/05-upcoming.png"
-                  alt="Upcoming reminders"
-                />
-              </div>
-            </div>
-          </div>
-          <div className="pipeline">
-            <span className="pill">Voice note</span>
-            <span className="arrow">→</span>
-            <span className="pill">Transcription</span>
-            <span className="arrow">→</span>
-            <span className="pill">Contact detection</span>
-            <span className="arrow">→</span>
-            <span className="pill">AI extraction</span>
-            <span className="arrow">→</span>
-            <span className="pill">Review &amp; save</span>
-            <span className="arrow">→</span>
-            <span className="pill">Reminders</span>
-          </div>
-        </div>
-      </section>
+      <HowItWorks />
 
-      {/* FEATURES */}
-      <section
-        id="features"
-        style={{
-          background: "var(--lav-soft)",
-          borderTop: "1px solid var(--line)",
-          borderBottom: "1px solid var(--line)",
-        }}
-      >
+      {/* FEATURES: bento */}
+      <section id="features">
         <div className="wrap">
           <div className="sec-head">
-            <p className="eyebrow">What you get</p>
+            <p className="eyebrow" style={{ textAlign: "center" }}>
+              What you get
+            </p>
             <h2>A memory for every relationship.</h2>
-            <p>
-              Everything you&apos;d want to remember about someone — captured
-              once, organized for you, surfaced at the right time.
-            </p>
           </div>
 
-          <div className="feat">
-            <div className="feat-text">
-              <span className="kicker">
-                <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="#5530E6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2v6" />
-                  <path d="M5 8h14l-1.5 12.5a2 2 0 0 1-2 1.5h-7a2 2 0 0 1-2-1.5z" />
-                </svg>
-                Hot topics
-              </span>
-              <h3>The moments worth following, color-coded by urgency.</h3>
-              <p>
-                Interviews, moves, trips, a new baby — Recall pulls the events out
-                of what you say and dates them automatically. “Next Tuesday”
-                becomes a real date, with a color for how soon it is and a push
-                before it happens.
-              </p>
-              <div className="chips">
-                <span className="chip">Auto-dated from speech</span>
-                <span className="chip">Urgency colors</span>
-                <span className="chip">Push notifications</span>
-              </div>
-            </div>
-            <div className="feat-art">
+          <div className="bento">
+            <div className="bt bt-tall shot">
+              <div className="bt-k">Coming up</div>
+              <h4>Every date, dated.</h4>
               <img
-                className="device"
-                src="/images/landing/01-contacts.png"
-                alt="Hot topics on contacts"
+                className="bt-shot"
+                src="/images/landing-hd/upcoming.png"
+                alt="The upcoming events screen"
               />
             </div>
-          </div>
 
-          <div className="feat rev">
-            <div className="feat-text">
-              <span className="kicker">
-                <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="#5530E6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="12" y1="3" x2="12" y2="21" />
-                  <circle cx="12" cy="7" r="2.4" />
-                  <circle cx="12" cy="17" r="2.4" />
-                </svg>
-                Timeline &amp; Upcoming
-              </span>
-              <h3>See a person&apos;s life — past and what&apos;s next.</h3>
-              <p>
-                Every contact gets their own timeline: resolved moments behind,
-                upcoming ones ahead, birthdays in line. One glance and you&apos;re
-                caught up on everything going on with them.
-              </p>
-              <div className="chips">
-                <span className="chip">Per-contact timeline</span>
-                <span className="chip">Birthdays</span>
-                <span className="chip">Past &amp; upcoming</span>
-              </div>
-            </div>
-            <div className="feat-art">
+            <div className="bt bt-tall shot">
+              <div className="bt-k">Icebreakers</div>
+              <h4>Know what to say.</h4>
               <img
-                className="device"
-                src="/images/landing/07-timeline.png"
-                alt="A person's life timeline"
-              />
-            </div>
-          </div>
-
-          <div className="feat">
-            <div className="feat-text">
-              <span className="kicker">
-                <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="#5530E6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 3l1.8 4.6L18 9l-4.2 1.4L12 15l-1.8-4.6L6 9l4.2-1.4z" />
-                </svg>
-                Icebreakers
-              </span>
-              <h3>Always know what to ask next.</h3>
-              <p>
-                Before you see someone, Recall suggests three thoughtful questions
-                — drawn from what it already knows about them. Pick up exactly
-                where you left off, every time.
-              </p>
-              <div className="chips">
-                <span className="chip">3 tailored questions</span>
-                <span className="chip">Generated from your notes</span>
-              </div>
-            </div>
-            <div className="feat-art">
-              <img
-                className="device"
-                src="/images/landing/03-icebreakers.png"
+                className="bt-shot"
+                src="/images/landing-hd/icebreakers.png"
                 alt="Icebreaker suggestions"
               />
             </div>
-          </div>
 
-          <div className="feat rev">
-            <div className="feat-text">
-              <span className="kicker">
-                <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="#5530E6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                </svg>
-                Ask your network
-              </span>
-              <h3>Ask anything about your people.</h3>
-              <p>
-                “Which of my contacts have children?” The assistant answers from
-                your own notes and points you to the right people — with the
-                sources it used.
+            <div className="bt bt-wide">
+              <div className="bt-k">The essentials</div>
+              <h4>Everyone you know, in one rich profile.</h4>
+              <p className="bt-d" style={{ maxWidth: "none" }}>
+                Who they are, what they love, what&apos;s next — built from your
+                notes.
               </p>
-              <div className="chips">
-                <span className="chip">Answers from your notes</span>
-                <span className="chip">Cited sources</span>
-                <span className="chip">AI summary &amp; loves</span>
+              <div className="bt-tags">
+                <span className="bt-tag">Founder</span>
+                <span className="bt-tag">Specialty coffee</span>
+                <span className="bt-tag">🎂 Jun 28</span>
               </div>
             </div>
-            <div className="feat-art">
+
+            <div className="bt bt-wide">
+              <div className="bt-k">AI assistant</div>
+              <h4>Ask anything about your people.</h4>
+              <div className="b-chat">
+                <div className="cb cb-q">Which of my contacts have kids?</div>
+                <div className="cb cb-a">
+                  Elena Rossi has two; Marcus just had his first.
+                </div>
+              </div>
+            </div>
+
+            <div className="bt bt-tall shot">
+              <div className="bt-k">Smart notifications</div>
+              <h4>The right nudge, on time.</h4>
               <img
-                className="device"
-                src="/images/landing/06-assistant.png"
-                alt="Assistant answering"
+                className="bt-shot"
+                src="/images/landing-hd/notifications.png"
+                alt="Smart notifications"
               />
             </div>
-          </div>
 
-          <div className="specs" style={{ marginTop: 64 }}>
-            <div className="spec">
-              <div className="sh">
-                <svg viewBox="0 0 24 24" fill="none" stroke="#5530E6" strokeWidth="2" strokeLinecap="round">
-                  <circle cx="11" cy="11" r="7" />
-                  <line x1="21" y1="21" x2="16.5" y2="16.5" />
-                </svg>
-                <h4>Full-text search</h4>
+            <div className="bt">
+              <div className="bt-k">Hot topics</div>
+              <h4>Color-coded urgency.</h4>
+              <div className="b-topics">
+                <div className="tp">
+                  <span className="td td-r" />
+                  Bali trip<span className="tt tt-r">9d</span>
+                </div>
+                <div className="tp">
+                  <span className="td td-a" />
+                  Demo<span className="tt tt-a">19d</span>
+                </div>
+                <div className="tp">
+                  <span className="td td-g" />
+                  Birthday<span className="tt tt-g">Jun 28</span>
+                </div>
               </div>
-              <p>Find any person or detail instantly across every note you&apos;ve saved.</p>
             </div>
-            <div className="spec">
-              <div className="sh">
-                <svg viewBox="0 0 24 24" fill="none" stroke="#5530E6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="9" cy="8" r="3" />
-                  <circle cx="17" cy="9" r="2.4" />
-                  <path d="M3 20c0-3 2.7-5 6-5s6 2 6 5" />
-                  <path d="M15 20c0-2 1-3.4 3-3.7" />
-                </svg>
-                <h4>Groups &amp; sorting</h4>
+
+            <div className="bt bt-wide">
+              <div className="bt-k">Story &amp; timeline</div>
+              <h4>Their whole life, one scroll.</h4>
+              <div className="b-tl">
+                <div className="tlr">
+                  <span className="tld" />
+                  Met at Sarah&apos;s dinner
+                </div>
+                <div className="tlr">
+                  <span className="tld" />
+                  FormFlow demo · Jul 8
+                </div>
+                <div className="tlr">
+                  <span className="tld" />
+                  Web Summit · Nov
+                </div>
               </div>
-              <p>Organize people into groups; sort by last contact, name, or reminders due.</p>
             </div>
-            <div className="spec">
-              <div className="sh">
-                <svg viewBox="0 0 24 24" fill="none" stroke="#5530E6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+
+            <div className="bt">
+              <div className="bt-k">Five languages</div>
+              <h4>Speak their language.</h4>
+              <div className="b-langs">
+                <span className="lg on">EN</span>
+                <span className="lg">FR</span>
+                <span className="lg">ES</span>
+                <span className="lg">IT</span>
+                <span className="lg">DE</span>
+              </div>
+            </div>
+
+            <div className="bt bt-wide bt-priv">
+              <div className="priv-ic">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#fff"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M12 3l7 3v5c0 4.4-3 8.3-7 9.5C8 19.3 5 15.4 5 11V6z" />
                 </svg>
-                <h4>Local-first &amp; synced</h4>
               </div>
-              <p>Your data lives on your device (SQLite) and syncs to your account.</p>
-            </div>
-            <div className="spec">
-              <div className="sh">
-                <svg viewBox="0 0 24 24" fill="none" stroke="#5530E6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="9" />
-                  <path d="M3 12h18" />
-                  <path d="M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18" />
-                </svg>
-                <h4>Five languages</h4>
+              <div>
+                <div className="bt-k">Private by design</div>
+                <h4>Local-first &amp; yours alone.</h4>
+                <p className="bt-d">
+                  Your network lives on your device and syncs only to you. No
+                  feeds, no sharing.
+                </p>
               </div>
-              <p>Interface and voice transcription in EN, FR, ES, IT and DE.</p>
             </div>
           </div>
         </div>
       </section>
 
+      {/* PRICING */}
+      <section className="pricing" id="pricing">
+        <div className="wrap">
+          <div className="sec-head">
+            <p className="eyebrow" style={{ textAlign: "center" }}>
+              Pricing
+            </p>
+            <h2>Start free. Upgrade when it sticks.</h2>
+          </div>
+          <div className="tiers">
+            <div className="tier">
+              <p className="tname">Free</p>
+              <div className="price">€0</div>
+              <p className="psub">For keeping your closest circle in mind.</p>
+              <ul>
+                <li>
+                  <Check color="#1FB877" />
+                  Up to 25 contacts
+                </li>
+                <li>
+                  <Check color="#1FB877" />
+                  Voice &amp; text notes
+                </li>
+                <li>
+                  <Check color="#1FB877" />
+                  Timelines &amp; reminders
+                </li>
+                <li>
+                  <Check color="#1FB877" />
+                  All five languages
+                </li>
+              </ul>
+              <a
+                className="tbtn ghost"
+                href={APP_STORE_URL}
+                target="_blank"
+                rel="noopener"
+              >
+                Get started
+              </a>
+            </div>
+            <div className="tier featured">
+              <span className="tag">Most popular</span>
+              <p className="tname">Premium</p>
+              <div className="price">
+                €4.99<span> / month</span>
+              </div>
+              <p className="psub">For your whole network, with AI on top.</p>
+              <ul>
+                <li>
+                  <Check color="#5530E6" />
+                  Unlimited contacts
+                </li>
+                <li>
+                  <Check color="#5530E6" />
+                  Ask your network — AI assistant
+                </li>
+                <li>
+                  <Check color="#5530E6" />
+                  Unlimited icebreakers &amp; summaries
+                </li>
+                <li>
+                  <Check color="#5530E6" />
+                  Priority transcription
+                </li>
+              </ul>
+              <a
+                className="tbtn solid"
+                href={APP_STORE_URL}
+                target="_blank"
+                rel="noopener"
+              >
+                Go Premium
+              </a>
+            </div>
+          </div>
+          <p className="price-note">
+            Or €39.99 / year — two months free. Cancel anytime.
+          </p>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <Faq />
+
       {/* CTA */}
-      <section id="data">
+      <section id="data" style={{ paddingTop: 40 }}>
         <div className="wrap">
           <div className="cta">
             <div className="glow" />
@@ -355,9 +321,8 @@ export default function Home() {
               relationship memory.
             </h2>
             <p>
-              A personal CRM you simply talk to — structured profiles, real dates,
-              and reminders that actually fire. Start with the people who matter
-              most.
+              Structured profiles, real dates, and reminders that actually fire.
+              Start with the people who matter most.
             </p>
             <StoreBadges />
           </div>
