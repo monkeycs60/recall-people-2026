@@ -4,30 +4,40 @@ import { useEffect, useRef } from "react";
 
 const FAQ_ITEMS: { q: string; a: string }[] = [
   {
-    q: "Do I have to fill in forms or fields?",
-    a: "Never. You just talk, or type a few lines. Recall People transcribes it, finds the right person, and structures the details, dates and interests for you.",
+    q: "What is a personal CRM?",
+    a: "A personal CRM is a private place to remember the people in your life: who they are, what matters to them, and what's coming up. Recall People is a voice-first personal CRM, so instead of filling in fields you just talk and it builds each profile for you.",
   },
   {
-    q: "Where is my data stored?",
-    a: "Locally on your device first, then synced privately to your account so it's there on every login. It's your network. Only you can see it.",
+    q: "How can I remember details about the people I meet?",
+    a: "Capture them while they're fresh. Right after a call, a coffee or an event, say what you remember and Recall People turns it into a structured profile: names, family, work, interests and dates. It then resurfaces the right details before you see that person again.",
   },
   {
-    q: "How do the reminders work?",
-    a: "Recall People reads dates straight from what you say (“his demo's next Tuesday” becomes a real, color-coded event) and sends a push before each moment so nothing slips.",
+    q: "How is Recall People different from a notes app or a spreadsheet?",
+    a: "Notes and spreadsheets only store text, so you still have to organize it and remember to look. Recall People reads what you say, sorts every detail onto the right person automatically, and reminds you before each important moment, with no manual upkeep.",
   },
   {
-    q: "Which languages are supported?",
-    a: "The interface and voice transcription both work in English, French, Spanish, Italian and German.",
+    q: "Can I use Recall People for networking and client follow-ups?",
+    a: "Yes. It's built for founders, freelancers and anyone who meets a lot of people. Log the context after each conversation and Recall People reminds you to follow up at the right time with a ready-made icebreaker, so you always pick up where you left off.",
   },
   {
-    q: "How long can a voice note be?",
-    a: "Up to three minutes per note, plenty to capture everything from a long catch-up. You can also switch to typing anytime.",
+    q: "Is my data private and secure?",
+    a: "Yes. Your network is stored locally on your device first, then synced privately to your own account, so only you can ever see it. There is no social feed, no sharing, and your contacts are never sold or used for ads.",
   },
   {
-    q: "Is there an Android version?",
-    a: "Recall People is live on iPhone today. Android is coming soon, and the same account will carry over.",
+    q: "Is Recall People free?",
+    a: "Yes. The free plan covers up to 25 contacts with voice and text notes, timelines and reminders. Premium adds unlimited contacts and the AI assistant for €4.99 per month, or €39.99 per year.",
   },
 ];
+
+const FAQ_SCHEMA = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: FAQ_ITEMS.map((item) => ({
+    "@type": "Question",
+    name: item.q,
+    acceptedAnswer: { "@type": "Answer", text: item.a },
+  })),
+};
 
 export default function Faq() {
   const listRef = useRef<HTMLDivElement>(null);
@@ -56,6 +66,10 @@ export default function Faq() {
 
   return (
     <section id="faq">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_SCHEMA) }}
+      />
       <div className="wrap">
         <div className="sec-head">
           <p className="eyebrow" style={{ textAlign: "center" }}>

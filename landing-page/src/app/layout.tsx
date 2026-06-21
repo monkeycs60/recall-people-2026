@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://recall-people.com"),
   title: "Recall People: A personal CRM you talk to",
   description:
-    "After a call or a coffee, just talk. Recall People turns 30 seconds of voice into a structured profile (who they are, what they love, what's coming up) and reminds you before it counts.",
+    "After a call or a coffee, just talk. In seconds, Recall People turns your voice into a structured profile and reminds you before it counts.",
   keywords: [
     "Personal CRM", "Networking App", "Remember names app",
     "AI relationship manager", "Voice-to-CRM", "Private contact manager",
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     siteName: "Recall People",
     title: "Recall People: A personal CRM you talk to",
     description:
-      "Talk for 30 seconds after any conversation. Recall People structures it into a profile, dates the upcoming moments, and reminds you before they happen.",
+      "Just talk after any conversation. In seconds, Recall People structures it into a profile, dates the upcoming moments, and reminds you before they happen.",
     images: [
       {
         url: "/images/app-icon.png",
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Recall People: A personal CRM you talk to",
     description:
-      "Turn 30 seconds of voice into structured relationship memory, with reminders that actually fire.",
+      "Turn your voice into structured relationship memory in seconds, with reminders that actually fire.",
     images: ["/images/app-icon.png"],
   },
   robots: {
@@ -81,14 +81,20 @@ export default function RootLayout({
                 {
                   "@type": "Offer",
                   "price": "0",
-                  "priceCurrency": "USD",
-                  "description": "Free plan: 10 voice notes, 10 AI questions, unlimited AI avatars",
+                  "priceCurrency": "EUR",
+                  "description": "Free: up to 25 contacts, voice & text notes, timelines & reminders, all five languages",
                 },
                 {
                   "@type": "Offer",
-                  "price": "3.99",
-                  "priceCurrency": "USD",
-                  "description": "Pro plan: unlimited voice notes and AI questions",
+                  "price": "4.99",
+                  "priceCurrency": "EUR",
+                  "description": "Premium monthly: unlimited contacts, AI assistant, unlimited icebreakers & summaries, priority transcription",
+                },
+                {
+                  "@type": "Offer",
+                  "price": "39.99",
+                  "priceCurrency": "EUR",
+                  "description": "Premium annual: everything in Premium, two months free",
                 },
               ],
               "featureList": [

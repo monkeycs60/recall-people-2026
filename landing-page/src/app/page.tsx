@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
+import Image from "next/image";
 import StoreBadges from "@/components/StoreBadges";
 import HowItWorks from "@/components/HowItWorks";
 import Faq from "@/components/Faq";
@@ -53,10 +53,14 @@ export default function Home() {
                 top: 120,
               }}
             />
-            <img
+            <Image
               className="device front"
               src="/images/landing-hd/coming-up.png"
               alt="A contact's upcoming timeline in Recall People"
+              width={879}
+              height={1832}
+              sizes="320px"
+              priority
             />
           </div>
         </div>
@@ -97,20 +101,26 @@ export default function Home() {
             <div className="bt bt-tall shot">
               <div className="bt-k">Coming up</div>
               <h4>Every date, dated.</h4>
-              <img
+              <Image
                 className="bt-shot"
                 src="/images/landing-hd/upcoming.png"
                 alt="The upcoming events screen"
+                width={440}
+                height={916}
+                sizes="(max-width: 560px) 85vw, 250px"
               />
             </div>
 
             <div className="bt bt-tall shot">
               <div className="bt-k">Icebreakers</div>
               <h4>Know what to say.</h4>
-              <img
+              <Image
                 className="bt-shot"
                 src="/images/landing-hd/icebreakers.png"
                 alt="Icebreaker suggestions"
+                width={879}
+                height={1832}
+                sizes="(max-width: 560px) 85vw, 250px"
               />
             </div>
 
@@ -140,10 +150,13 @@ export default function Home() {
             <div className="bt bt-tall shot">
               <div className="bt-k">Smart notifications</div>
               <h4>The right nudge, on time.</h4>
-              <img
+              <Image
                 className="bt-shot"
                 src="/images/landing-hd/notifications.png"
                 alt="Smart notifications"
+                width={879}
+                height={1832}
+                sizes="(max-width: 560px) 85vw, 250px"
               />
             </div>
 

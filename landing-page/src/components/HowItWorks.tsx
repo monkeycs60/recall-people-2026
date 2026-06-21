@@ -1,6 +1,6 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef } from "react";
 
 const STEPS = [
@@ -185,17 +185,23 @@ export default function HowItWorks() {
             </div>
           </div>
           <div className="hph">
-            <img
+            <Image
               className="device"
               src="/images/landing-hd/review.png"
               alt="Review screen"
+              width={879}
+              height={1832}
+              sizes="(max-width: 700px) 250px, 296px"
             />
           </div>
           <div className="hph">
-            <img
+            <Image
               className="device"
               src="/images/landing-hd/profile.png"
               alt="Structured profile"
+              width={879}
+              height={1832}
+              sizes="(max-width: 700px) 250px, 296px"
             />
           </div>
         </div>
