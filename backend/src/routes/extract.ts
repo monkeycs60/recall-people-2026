@@ -52,6 +52,16 @@ type ExtractionRequest = {
   language?: 'fr' | 'en' | 'es' | 'it' | 'de';
 };
 
+const COMBINING_DIACRITICS = new RegExp('[\\u0300-\\u036f]', 'g');
+
+const normalizeContactName = (value: string): string =>
+  value
+    .normalize('NFD')
+    .replace(COMBINING_DIACRITICS, '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
+
 const extractionSchema = z.object({
   contactIdentified: z.object({
     firstName: z.string().describe('Prénom extrait de la transcription'),
@@ -1203,9 +1213,9 @@ extractRoutes.post('/', async (c) => {
     const extraction = extractionResult!;
 
     // Server-side matching: find contacts with same first name
-    const extractedFirstName = extraction.contactIdentified.firstName.toLowerCase().trim();
+    const extractedFirstName = normalizeContactName(extraction.contactIdentified.firstName);
     const matchingContacts = existingContacts.filter(
-      (contact) => contact.firstName.toLowerCase().trim() === extractedFirstName
+      (contact) => normalizeContactName(contact.firstName) === extractedFirstName
     );
 
     // Determine if we need disambiguation

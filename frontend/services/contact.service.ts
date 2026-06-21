@@ -1,6 +1,7 @@
 import * as Crypto from 'expo-crypto';
 import { getDatabase } from '@/lib/db';
 import { Contact, ContactWithDetails, Gender, SuggestedQuestion, SuggestedQuestionCategory } from '@/types';
+import { normalizeName } from '@/utils/normalizeName';
 import { hotTopicService } from './hot-topic.service';
 import { syncQueueService } from './sync-queue.service';
 
@@ -268,18 +269,11 @@ export const contactService = {
 
   findByName: async (firstName: string, lastName?: string): Promise<Contact | null> => {
     const db = await getDatabase();
-    const normalizedFirstName = firstName.trim().toLowerCase();
-    const normalizedLastName = lastName?.trim().toLowerCase() || null;
+    const normalizedFirstName = normalizeName(firstName);
+    if (!normalizedFirstName) return null;
+    const normalizedLastName = normalizeName(lastName);
 
-    const query = normalizedLastName
-      ? `SELECT * FROM contacts WHERE deleted_at IS NULL AND LOWER(TRIM(first_name)) = ? AND LOWER(TRIM(last_name)) = ? LIMIT 1`
-      : `SELECT * FROM contacts WHERE deleted_at IS NULL AND LOWER(TRIM(first_name)) = ? AND (last_name IS NULL OR TRIM(last_name) = '') LIMIT 1`;
-
-    const params = normalizedLastName
-      ? [normalizedFirstName, normalizedLastName]
-      : [normalizedFirstName];
-
-    const row = await db.getFirstAsync<{
+    const rows = await db.getAllAsync<{
       id: string;
       first_name: string;
       last_name: string | null;
@@ -287,18 +281,35 @@ export const contactService = {
       gender: string | null;
       created_at: string;
       updated_at: string;
-    }>(query, params);
+    }>(
+      `SELECT id, first_name, last_name, nickname, gender, created_at, updated_at
+       FROM contacts WHERE deleted_at IS NULL`
+    );
 
-    if (!row) return null;
+    const match = rows.find((candidate) => {
+      const candidateFirstName = normalizeName(candidate.first_name);
+      const candidateLastName = normalizeName(candidate.last_name);
+      const candidateNickname = normalizeName(candidate.nickname);
+
+      if (normalizedLastName) {
+        return candidateFirstName === normalizedFirstName && candidateLastName === normalizedLastName;
+      }
+
+      const firstNameMatches = candidateFirstName === normalizedFirstName && candidateLastName === '';
+      const nicknameMatches = candidateNickname !== '' && candidateNickname === normalizedFirstName;
+      return firstNameMatches || nicknameMatches;
+    });
+
+    if (!match) return null;
 
     return {
-      id: row.id,
-      firstName: row.first_name,
-      lastName: row.last_name || undefined,
-      nickname: row.nickname || undefined,
-      gender: (row.gender as Gender) || 'unknown',
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
+      id: match.id,
+      firstName: match.first_name,
+      lastName: match.last_name || undefined,
+      nickname: match.nickname || undefined,
+      gender: (match.gender as Gender) || 'unknown',
+      createdAt: match.created_at,
+      updatedAt: match.updated_at,
     };
   },
 
