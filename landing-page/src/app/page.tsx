@@ -253,7 +253,7 @@ export default function Home() {
               <ul>
                 <li>
                   <Check color="#1FB877" />
-                  Up to 25 contacts
+                  Up to 15 contacts
                 </li>
                 <li>
                   <Check color="#1FB877" />

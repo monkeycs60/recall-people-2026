@@ -35,9 +35,9 @@ export const metadata: Metadata = {
       "Just talk after any conversation. In seconds, Recall People structures it into a profile, dates the upcoming moments, and reminds you before they happen.",
     images: [
       {
-        url: "/images/app-icon.png",
-        width: 1024,
-        height: 1024,
+        url: "/og.png",
+        width: 1200,
+        height: 630,
         alt: "Recall People: A personal CRM you talk to",
       },
     ],
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     title: "Recall People: A personal CRM you talk to",
     description:
       "Turn your voice into structured relationship memory in seconds, with reminders that actually fire.",
-    images: ["/images/app-icon.png"],
+    images: ["/og.png"],
   },
   robots: {
     index: true,
@@ -82,7 +82,7 @@ export default function RootLayout({
                   "@type": "Offer",
                   "price": "0",
                   "priceCurrency": "EUR",
-                  "description": "Free: up to 25 contacts, voice & text notes, timelines & reminders, all five languages",
+                  "description": "Free: up to 15 contacts, voice & text notes, timelines & reminders, all five languages",
                 },
                 {
                   "@type": "Offer",

@@ -25,7 +25,7 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
   },
   {
     q: "Is Recall People free?",
-    a: "Yes. The free plan covers up to 25 contacts with voice and text notes, timelines and reminders. Premium adds unlimited contacts and the AI assistant for €4.99 per month, or €39.99 per year.",
+    a: "Yes. The free plan covers up to 15 contacts with voice and text notes, timelines and reminders. Premium adds unlimited contacts and the AI assistant for €4.99 per month, or €39.99 per year.",
   },
 ];
 
