@@ -8,7 +8,7 @@ import { format, startOfDay, isSameDay } from 'date-fns';
 import { getDateLocale } from '@/utils/dateLocale';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { contactService } from '@/services/contact.service';
-import { HotTopic, Contact } from '@/types';
+import { HotTopic, Contact, ContactWithDetails } from '@/types';
 import { Colors, Shadows, Fonts } from '@/constants/theme';
 import { Calendar, ChevronRight } from 'lucide-react-native';
 import { EventListSkeleton } from '@/components/skeleton/EventListSkeleton';
@@ -55,7 +55,7 @@ export default function UpcomingScreen() {
           const contact = await contactService.getById(topic.contactId);
           return contact ? { ...topic, contact } : null;
         })
-      )).filter((topic): topic is HotTopic & { contact: Contact } => topic !== null);
+      )).filter((topic): topic is HotTopic & { contact: ContactWithDetails } => topic !== null);
 
       const today = startOfDay(new Date());
       const eventsByDate = new Map<string, (HotTopic & { contact: Contact })[]>();
