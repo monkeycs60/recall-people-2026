@@ -34,6 +34,6 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
       },
     ],
-    sitemap: "https://recall-people.com/sitemap.xml",
+    sitemap: "https://recallpeople.com/sitemap.xml",
   };
 }

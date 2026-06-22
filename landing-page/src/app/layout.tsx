@@ -14,7 +14,7 @@ const APP_STORE_URL =
   "https://apps.apple.com/fr/app/recall-people/id6757320179";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://recall-people.com"),
+  metadataBase: new URL("https://recallpeople.com"),
   title: "Recall People: A personal CRM you talk to",
   description:
     "After a call or a coffee, just talk. In seconds, Recall People turns your voice into a structured profile and reminds you before it counts.",
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://recall-people.com",
+    url: "https://recallpeople.com",
     siteName: "Recall People",
     title: "Recall People: A personal CRM you talk to",
     description:
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   alternates: {
-    canonical: "https://recall-people.com",
+    canonical: "https://recallpeople.com",
   },
 };
 
@@ -109,7 +109,7 @@ export default function RootLayout({
                 "Event reminders and push notifications",
                 "Local-first storage (SQLite) with encrypted account sync",
               ],
-              "url": "https://recall-people.com",
+              "url": "https://recallpeople.com",
               "downloadUrl": APP_STORE_URL,
               "inLanguage": ["en", "fr", "es", "it", "de"],
             }),

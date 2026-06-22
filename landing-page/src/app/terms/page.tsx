@@ -198,8 +198,8 @@ export default function TermsOfService() {
               For questions about these Terms, please contact us at:
             </p>
             <p className="text-primary mt-2">
-              <a href="mailto:legal@recall-people.com" className="hover:underline">
-                legal@recall-people.com
+              <a href="mailto:legal@recallpeople.com" className="hover:underline">
+                legal@recallpeople.com
               </a>
             </p>
           </section>

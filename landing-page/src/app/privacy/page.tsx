@@ -245,8 +245,8 @@ export default function PrivacyPage() {
                   access, correct, export, or delete account data, please contact us at:
                 </p>
                 <p className="text-text-secondary mt-3">
-                  <a href="mailto:privacy@recall-people.com" className="text-primary hover:underline">
-                    privacy@recall-people.com
+                  <a href="mailto:privacy@recallpeople.com" className="text-primary hover:underline">
+                    privacy@recallpeople.com
                   </a>
                 </p>
               </section>
