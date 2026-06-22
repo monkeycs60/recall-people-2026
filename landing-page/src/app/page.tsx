@@ -59,7 +59,8 @@ export default function Home() {
               alt="A contact's upcoming timeline in Recall People"
               width={879}
               height={1832}
-              sizes="320px"
+              sizes="360px"
+              quality={90}
               priority
             />
           </div>
@@ -108,6 +109,7 @@ export default function Home() {
                 width={440}
                 height={916}
                 sizes="(max-width: 560px) 85vw, 250px"
+                quality={90}
               />
             </div>
 
@@ -121,6 +123,7 @@ export default function Home() {
                 width={879}
                 height={1832}
                 sizes="(max-width: 560px) 85vw, 250px"
+                quality={90}
               />
             </div>
 
@@ -157,6 +160,7 @@ export default function Home() {
                 width={879}
                 height={1832}
                 sizes="(max-width: 560px) 85vw, 250px"
+                quality={90}
               />
             </div>
 
