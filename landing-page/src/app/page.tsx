@@ -265,7 +265,7 @@ export default function Home() {
                 </li>
                 <li>
                   <Check color="#1FB877" />
-                  Event reminders &amp; nudges to reconnect
+                  AI assistant: 10 questions / month
                 </li>
                 <li>
                   <Check color="#1FB877" />
@@ -273,7 +273,7 @@ export default function Home() {
                 </li>
                 <li>
                   <Check color="#1FB877" />
-                  AI assistant: 10 questions / month
+                  Event reminders &amp; nudges to reconnect
                 </li>
               </ul>
               <a
@@ -299,7 +299,7 @@ export default function Home() {
                 </li>
                 <li>
                   <Check color="#5530E6" />
-                  Weekly digest (your week ahead)
+                  3-minute voice notes
                 </li>
                 <li>
                   <Check color="#5530E6" />
@@ -307,7 +307,7 @@ export default function Home() {
                 </li>
                 <li>
                   <Check color="#5530E6" />
-                  3-minute voice notes
+                  Weekly digest (your week ahead)
                 </li>
                 <li>
                   <Check color="#5530E6" />
