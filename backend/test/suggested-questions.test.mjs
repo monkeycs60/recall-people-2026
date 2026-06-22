@@ -44,15 +44,28 @@ async function loadModule() {
   });
 }
 
-test('parseSuggestedQuestionsText keeps numbered model output', async () => {
+test('parseSuggestedQuestionsText strips numbering and bullets, leaving the category null', async () => {
   const { parseSuggestedQuestionsText } = await loadModule();
 
   assert.deepEqual(
     parseSuggestedQuestionsText('1. How did the Lyon school trip go?\n2) What did the kids enjoy most?\n- Want to compare photos soon?'),
     [
-      'How did the Lyon school trip go?',
-      'What did the kids enjoy most?',
-      'Want to compare photos soon?',
+      { category: null, text: 'How did the Lyon school trip go?' },
+      { category: null, text: 'What did the kids enjoy most?' },
+      { category: null, text: 'Want to compare photos soon?' },
+    ]
+  );
+});
+
+test('parseSuggestedQuestionsText maps bracketed tags to question categories', async () => {
+  const { parseSuggestedQuestionsText } = await loadModule();
+
+  assert.deepEqual(
+    parseSuggestedQuestionsText('[ask] How is the new job?\n[follow-up] Did the Lyon move happen?\n[remember] Still into bouldering?'),
+    [
+      { category: 'ask', text: 'How is the new job?' },
+      { category: 'followUp', text: 'Did the Lyon move happen?' },
+      { category: 'remember', text: 'Still into bouldering?' },
     ]
   );
 });
