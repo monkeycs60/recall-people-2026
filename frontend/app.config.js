@@ -24,7 +24,7 @@ module.exports = {
   expo: {
     name: 'Recall People',
     slug: 'recall-people',
-    version: '1.0.5',
+    version: '1.0.6',
     orientation: 'portrait',
     icon: './assets/images/icon.png',
     scheme: 'recall-people',
@@ -110,7 +110,7 @@ module.exports = {
       localApiUrl: `http://${localIp}:${BACKEND_PORT}`,
     },
     owner: 'clement-serizay',
-    runtimeVersion: '1.0.5',
+    runtimeVersion: '1.0.6',
     updates: {
       url: 'https://u.expo.dev/005eaea1-73bc-47b0-80e8-5e15dee1c600',
     },
