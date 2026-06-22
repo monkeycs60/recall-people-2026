@@ -82,13 +82,13 @@ export default function RootLayout({
                   "@type": "Offer",
                   "price": "0",
                   "priceCurrency": "EUR",
-                  "description": "Free: up to 15 contacts, voice & text notes, timelines & reminders, all five languages",
+                  "description": "Free: up to 15 contacts, voice (up to 1 min) & text notes, event & reconnect reminders, unlimited icebreakers & summaries, 10 AI assistant questions per month",
                 },
                 {
                   "@type": "Offer",
                   "price": "4.99",
                   "priceCurrency": "EUR",
-                  "description": "Premium monthly: unlimited contacts, AI assistant, unlimited icebreakers & summaries, priority transcription",
+                  "description": "Premium monthly: unlimited contacts, weekly digest, unlimited AI assistant, 3-minute voice notes, post-event follow-up reminders",
                 },
                 {
                   "@type": "Offer",

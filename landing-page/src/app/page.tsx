@@ -261,15 +261,19 @@ export default function Home() {
                 </li>
                 <li>
                   <Check color="#1FB877" />
-                  Voice &amp; text notes
+                  Voice (up to 1 min) &amp; text notes
                 </li>
                 <li>
                   <Check color="#1FB877" />
-                  Timelines &amp; reminders
+                  Event reminders &amp; nudges to reconnect
                 </li>
                 <li>
                   <Check color="#1FB877" />
-                  All five languages
+                  Unlimited icebreakers &amp; AI summaries
+                </li>
+                <li>
+                  <Check color="#1FB877" />
+                  AI assistant: 10 questions / month
                 </li>
               </ul>
               <a
@@ -295,15 +299,19 @@ export default function Home() {
                 </li>
                 <li>
                   <Check color="#5530E6" />
-                  Ask your network (AI assistant)
+                  Weekly digest (your week ahead)
                 </li>
                 <li>
                   <Check color="#5530E6" />
-                  Unlimited icebreakers &amp; summaries
+                  Unlimited AI assistant (ask your network)
                 </li>
                 <li>
                   <Check color="#5530E6" />
-                  Priority transcription
+                  3-minute voice notes
+                </li>
+                <li>
+                  <Check color="#5530E6" />
+                  Post-event follow-up reminders
                 </li>
               </ul>
               <a
