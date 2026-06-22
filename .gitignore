@@ -41,6 +41,9 @@ __pycache__/
 .env
 .env.production
 
+# Runbook VPS privé (infra/déploiement, ne pas commit)
+*.local.md
+
 # typescript
 *.tsbuildinfo
 
