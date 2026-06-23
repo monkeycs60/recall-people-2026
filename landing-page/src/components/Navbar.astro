@@ -30,3 +30,20 @@ export const APP_STORE_URL =
     </a>
   </div>
 </header>
+
+<script is:inline>
+  (() => {
+    const header = document.querySelector(".site-header");
+
+    if (!header) {
+      return;
+    }
+
+    const updateHeaderState = () => {
+      header.dataset.scrolled = window.scrollY > 8 ? "true" : "false";
+    };
+
+    updateHeaderState();
+    window.addEventListener("scroll", updateHeaderState, { passive: true });
+  })();
+</script>
