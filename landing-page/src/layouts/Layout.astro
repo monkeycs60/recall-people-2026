@@ -138,6 +138,12 @@ const ldJson = {
       src="https://cloud.umami.is/script.js"
       data-website-id="16afad82-6cb1-469b-bca1-bbb3916ba913"
     ></script>
+
+    {/* PostHog analytics + session replay (bundled by Vite, runs on every page). */}
+    <script>
+      import { initAnalytics } from "../lib/analytics";
+      initAnalytics();
+    </script>
   </head>
   <body class="antialiased">
     <Navbar />

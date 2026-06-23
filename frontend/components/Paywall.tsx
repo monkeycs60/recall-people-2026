@@ -8,6 +8,7 @@ import { revenueCatService } from '@/services/revenuecat.service';
 import { Colors, Fonts, Shadows } from '@/constants/theme';
 import { showErrorToast, showSuccessToast } from '@/lib/error-handler';
 import { useAuthStore } from '@/stores/auth-store';
+import { analytics, AnalyticsEvent } from '@/lib/analytics';
 
 const TERMS_URL = 'https://recall-people-2026.vercel.app/terms';
 const PRIVACY_URL = 'https://recall-people-2026.vercel.app/privacy';
@@ -63,6 +64,12 @@ export function Paywall({ onClose, reason = 'contact_limit' }: PaywallProps) {
     loadOfferings();
   }, [loadOfferings]);
 
+  // Fire once when the paywall is shown, tagged with what triggered it.
+  useEffect(() => {
+    analytics.capture(AnalyticsEvent.PAYWALL_VIEWED, { reason });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     const handleBackPress = () => {
       if (!isPurchasing) {
@@ -83,6 +90,10 @@ export function Paywall({ onClose, reason = 'contact_limit' }: PaywallProps) {
     try {
       const success = await revenueCatService.purchasePackage(selectedPackage);
       if (success) {
+        analytics.capture(AnalyticsEvent.SUBSCRIPTION_STARTED, {
+          package: selectedPackage,
+          reason,
+        });
         showSuccessToast(t('common.success'));
         onClose();
       } else {

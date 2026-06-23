@@ -48,6 +48,8 @@ import { useAuthStore } from '@/stores/auth-store';
 import { useSubscriptionStore } from '@/stores/subscription-store';
 import { getNotificationRoute } from '@/lib/notification-routing';
 import { useSyncStore } from '@/stores/sync-store';
+import { PostHogProvider } from 'posthog-react-native';
+import { posthog } from '@/lib/analytics';
 
 const hideStatusBarForScreenshots =
   process.env.EXPO_PUBLIC_HIDE_STATUS_BAR === 'true' ||
@@ -287,6 +289,15 @@ export default function RootLayout() {
       <OfflineBanner />
       <BottomSheetModalProvider>
         <QueryClientProvider client={queryClient}>
+          <PostHogProvider
+            client={posthog ?? undefined}
+            autocapture={{
+              // expo-router is built on React Navigation v7; the provider
+              // tracks $screen views and touch interactions automatically.
+              captureScreens: true,
+              captureTouches: true,
+            }}
+          >
           <Stack
             screenOptions={{
               headerShown: false,
@@ -395,6 +406,7 @@ export default function RootLayout() {
               }}
             />
           </Stack>
+          </PostHogProvider>
         </QueryClientProvider>
       </BottomSheetModalProvider>
       <Toaster

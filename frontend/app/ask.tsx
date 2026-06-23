@@ -33,6 +33,7 @@ import {
 } from '@/utils/contactAssistant';
 import { QuestionHistoryEntry, useQuestionHistoryStore } from '@/stores/question-history-store';
 import { useSubscriptionStore } from '@/stores/subscription-store';
+import { analytics, AnalyticsEvent } from '@/lib/analytics';
 import { Paywall } from '@/components/Paywall';
 import { TestProActivation } from '@/components/TestProActivation';
 
@@ -394,6 +395,14 @@ export default function AskScreen() {
 				relatedContactId: response.relatedContactId || contact?.id,
 				relatedContactName,
 				noInfoFound: response.noInfoFound,
+			});
+
+			analytics.capture(AnalyticsEvent.ASSISTANT_QUESTION_ASKED, {
+				// Scope: a single contact vs. the whole network. No question text.
+				scope: contact ? 'contact' : 'global',
+				is_premium: isPremium,
+				sources_count: response.sources?.length ?? 0,
+				no_info_found: Boolean(response.noInfoFound),
 			});
 		} catch (error) {
 			const apiMessage = error instanceof ApiError

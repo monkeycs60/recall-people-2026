@@ -16,6 +16,7 @@
     "@fontsource/plus-jakarta-sans": "^5.2.8",
     "@tailwindcss/vite": "^4.1.0",
     "astro": "^5.7.0",
+    "posthog-js": "^1.393.0",
     "tailwindcss": "^4.1.0"
   }
 }
