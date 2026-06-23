@@ -1,6 +1,8 @@
 import { createXai } from '@ai-sdk/xai';
 import { createCerebras } from '@ai-sdk/cerebras';
 import { createOpenAI } from '@ai-sdk/openai';
+import { withTracing } from '@posthog/ai/vercel';
+import { getPostHog, aiTracingOptions, BACKEND_DISTINCT_ID } from './posthog';
 
 /**
  * AI Provider configuration
@@ -95,6 +97,63 @@ export function createAIModel(config: AIProviderConfig) {
 	const provider = createAIProvider(config);
 	const model = getAIModel(config);
 	return provider(model);
+}
+
+/**
+ * Options for PostHog LLM observability tracing.
+ * Passed by route handlers so each $ai_generation carries the right
+ * distinct_id (user) + feature/route context.
+ */
+export type AITracingContext = {
+	/** User id when available, else a stable backend id is used. */
+	distinctId?: string;
+	/** Groups inputs/outputs of a multi-step request under one trace. */
+	traceId?: string;
+	/** Feature-specific props, e.g. { feature: 'ask', route: '/api/ask' }. */
+	properties?: Record<string, unknown>;
+	/** Redact prompt/completion content when true. */
+	privacyMode?: boolean;
+};
+
+/**
+ * Create an AI model wrapped with PostHog observability.
+ *
+ * Same as {@link createAIModel} but the returned model auto-captures a
+ * `$ai_generation` event (model, provider, tokens, latency, cost, input,
+ * output, errors) on every call through the Vercel AI SDK.
+ *
+ * BEST EFFORT : if PostHog is not configured the model is returned untouched,
+ * and any tracing failure must never break the underlying AI call.
+ */
+export function createTracedAIModel(
+	config: AIProviderConfig,
+	tracing: AITracingContext = {}
+) {
+	const model = createAIModel(config);
+
+	const phClient = getPostHog();
+	if (!phClient) {
+		return model;
+	}
+
+	try {
+		return withTracing(
+			model,
+			phClient,
+			aiTracingOptions({
+				distinctId: tracing.distinctId || BACKEND_DISTINCT_ID,
+				traceId: tracing.traceId,
+				properties: {
+					$ai_provider: getAIProviderName(config),
+					...tracing.properties,
+				},
+				privacyMode: tracing.privacyMode,
+			})
+		);
+	} catch (error) {
+		console.error('[PostHog] withTracing failed, falling back to untraced model:', error);
+		return model;
+	}
 }
 
 /**

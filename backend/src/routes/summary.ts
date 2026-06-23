@@ -2,8 +2,10 @@ import { Hono } from 'hono';
 import { generateText, Output } from 'ai';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
-import { createAIModel, AIProviderConfig } from '../lib/ai-provider';
+import { createTracedAIModel, AIProviderConfig } from '../lib/ai-provider';
 import { evaluateSummary } from '../lib/evaluators';
+import { captureServerException } from '../lib/posthog';
+import type { User } from '@prisma/client';
 
 type Bindings = {
 	DATABASE_URL: string;
@@ -15,6 +17,10 @@ type Bindings = {
 	AI_PROVIDER?: 'openai' | 'grok' | 'cerebras';
 	ENABLE_EVALUATION?: string;
 	EVALUATION_SAMPLING_RATE?: string;
+};
+
+type Variables = {
+	user: User;
 };
 
 type SummaryRequest = {
@@ -154,7 +160,7 @@ const PROMPT_TEMPLATES: Record<string, {
 	},
 };
 
-export const summaryRoutes = new Hono<{ Bindings: Bindings }>();
+export const summaryRoutes = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
 summaryRoutes.use('/*', authMiddleware);
 
@@ -205,7 +211,14 @@ ${template.summaryLabel}`;
 		console.log('[Summary] Prompt length:', prompt.length);
 		console.log('[Summary] Creating AI model...');
 
-		const model = createAIModel(providerConfig);
+		const model = createTracedAIModel(providerConfig, {
+			distinctId: c.get('user')?.id,
+			properties: {
+				feature: 'summary',
+				route: '/api/summary',
+				language,
+			},
+		});
 
 		console.log('[Summary] Calling generateText with Output.object...');
 
@@ -281,6 +294,13 @@ ${template.summaryLabel}`;
 			'[Summary] Error stack:',
 			error instanceof Error ? error.stack : 'N/A'
 		);
+
+		captureServerException(error, c.get('user')?.id, {
+			feature: 'summary',
+			route: '/api/summary',
+			provider: c.env.AI_PROVIDER || 'cerebras',
+			stage: 'generate-text',
+		});
 
 		const errorMessage =
 			error instanceof Error ? error.message : 'Unknown error';

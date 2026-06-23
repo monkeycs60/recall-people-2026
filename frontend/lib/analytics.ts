@@ -97,4 +97,59 @@ export const analytics = {
   reset(): void {
     posthog?.reset();
   },
+  /** Manually report a caught error to PostHog error tracking. No-op if disabled. */
+  captureException(error: unknown, properties?: Props): void {
+    posthog?.captureException(error, clean(properties));
+  },
 };
+
+// Error tracking (RN has no built-in JS exception autocapture toggle, so we
+// wire it ourselves). Both handlers are *chained*, not replaced: we forward to
+// the previous handler so we never mask React Native's own error reporting.
+let errorTrackingInstalled = false;
+
+/**
+ * Install global JS error + unhandled-rejection capture that forwards to
+ * PostHog. Best-effort and idempotent; entirely a no-op when analytics is
+ * disabled. Call once at app startup.
+ */
+export function initErrorTracking(): void {
+  if (errorTrackingInstalled || !posthog) return;
+  errorTrackingInstalled = true;
+
+  try {
+    // Uncaught JS errors — chain onto the existing global handler.
+    const errorUtils = (globalThis as { ErrorUtils?: {
+      getGlobalHandler?: () => (error: unknown, isFatal?: boolean) => void;
+      setGlobalHandler?: (handler: (error: unknown, isFatal?: boolean) => void) => void;
+    } }).ErrorUtils;
+
+    if (errorUtils?.setGlobalHandler && errorUtils.getGlobalHandler) {
+      const previousHandler = errorUtils.getGlobalHandler();
+      errorUtils.setGlobalHandler((error: unknown, isFatal?: boolean) => {
+        try {
+          posthog?.captureException(error, { is_fatal: Boolean(isFatal) });
+        } catch {
+          // never let reporting break the app's own crash handling
+        }
+        previousHandler?.(error, isFatal);
+      });
+    }
+
+    // Unhandled promise rejections (Hermes exposes HermesInternal hooks; the
+    // RN promise polyfill also dispatches an 'unhandledrejection' event).
+    const globalAny = globalThis as unknown as {
+      addEventListener?: (type: string, listener: (e: unknown) => void) => void;
+    };
+    globalAny.addEventListener?.('unhandledrejection', (event: unknown) => {
+      const reason = (event as { reason?: unknown })?.reason ?? event;
+      try {
+        posthog?.captureException(reason, { unhandled_rejection: true });
+      } catch {
+        // best-effort
+      }
+    });
+  } catch {
+    // Never throw from error-tracking setup.
+  }
+}

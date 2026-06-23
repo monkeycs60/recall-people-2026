@@ -3,8 +3,9 @@ import { generateText } from 'ai';
 import { authMiddleware } from '../middleware/auth';
 import { suggestedQuestionsRequestSchema } from '../lib/validation';
 import { auditLog } from '../lib/audit';
-import { createAIModel, getAIModel } from '../lib/ai-provider';
+import { createTracedAIModel, getAIModel } from '../lib/ai-provider';
 import { getLangfuseClient } from '../lib/telemetry';
+import { captureServerException } from '../lib/posthog';
 
 type Bindings = {
 	OPENAI_API_KEY?: string;
@@ -433,7 +434,14 @@ ${template.noInfo}
 			ENABLE_LANGFUSE: c.env.ENABLE_LANGFUSE,
 		};
 
-		const model = createAIModel(providerConfig);
+		const model = createTracedAIModel(providerConfig, {
+			distinctId: c.get('user')?.id,
+			properties: {
+				feature: 'suggested-questions',
+				route: '/api/suggested-questions',
+				language,
+			},
+		});
 		const modelName = getAIModel(providerConfig);
 
 		// Create Langfuse generation span
@@ -469,6 +477,12 @@ ${template.noInfo}
 	} catch (error) {
 		console.error('Suggested questions generation error:', error);
 		trace?.update({ output: { error: String(error) } });
+		captureServerException(error, c.get('user')?.id, {
+			feature: 'suggested-questions',
+			route: '/api/suggested-questions',
+			provider: c.env.AI_PROVIDER || 'cerebras',
+			stage: 'generate-text',
+		});
 		await auditLog(c, {
 			userId: c.get('user')?.id,
 			action: 'extract',

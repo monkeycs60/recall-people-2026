@@ -5,10 +5,11 @@ import { authMiddleware } from '../middleware/auth';
 import { wrapUserInput, sanitize, getSecurityInstructions } from '../lib/security';
 import { searchRequestSchema } from '../lib/validation';
 import { auditLog } from '../lib/audit';
-import { createAIModel, getAIProviderName, getAIModel } from '../lib/ai-provider';
+import { createTracedAIModel, getAIProviderName, getAIModel } from '../lib/ai-provider';
 import { measurePerformance } from '../lib/performance-logger';
 import { getLangfuseClient } from '../lib/telemetry';
 import { evaluateSearch } from '../lib/evaluators';
+import { captureServerException } from '../lib/posthog';
 
 type Bindings = {
 	DATABASE_URL: string;
@@ -127,7 +128,15 @@ searchRoutes.post('/', async (c) => {
 			ENABLE_LANGFUSE: c.env.ENABLE_LANGFUSE,
 		};
 
-		const model = createAIModel(providerConfig);
+		const userId = c.get('user')?.id;
+		const model = createTracedAIModel(providerConfig, {
+			distinctId: userId,
+			properties: {
+				feature: 'search',
+				route: '/api/search',
+				language,
+			},
+		});
 		const modelName = getAIModel(providerConfig);
 
 		// Create Langfuse generation span
@@ -177,6 +186,7 @@ searchRoutes.post('/', async (c) => {
 						XAI_API_KEY: c.env.XAI_API_KEY,
 						enableEvaluation: c.env.ENABLE_EVALUATION === 'true',
 						samplingRate: parseFloat(c.env.EVALUATION_SAMPLING_RATE || '0.25'),
+						distinctId: userId,
 					}
 				).then((evaluation) => {
 					if (evaluation && trace) {
@@ -205,6 +215,12 @@ searchRoutes.post('/', async (c) => {
 	} catch (error) {
 		console.error('Search error:', error);
 		trace?.update({ output: { error: String(error) } });
+		captureServerException(error, c.get('user')?.id, {
+			feature: 'search',
+			route: '/api/search',
+			provider: c.env.AI_PROVIDER || 'cerebras',
+			stage: 'generate-text',
+		});
 		await auditLog(c, {
 			userId: c.get('user')?.id,
 			action: 'search',

@@ -1,7 +1,53 @@
 import { Hono } from 'hono';
 import { authMiddleware } from '../middleware/auth';
 import type { User } from '@prisma/client';
-import { buildAvatarGenerationPrompt, generateAvatarImage } from '../lib/avatar-image';
+import {
+  buildAvatarGenerationPrompt,
+  generateAvatarImage,
+  OPENAI_IMAGE_MODEL,
+} from '../lib/avatar-image';
+import { captureAiGeneration, captureServerException } from '../lib/posthog';
+
+/**
+ * Run an avatar image generation while emitting a $ai_generation event to
+ * PostHog (avatar generation is an OpenAI image-gen call made via raw fetch,
+ * outside the Vercel AI SDK, so it is captured manually). Best-effort: tracing
+ * never changes the generation behavior; on failure we capture and re-throw.
+ */
+async function generateAvatarImageTraced(
+  args: Parameters<typeof generateAvatarImage>[0] & {
+    distinctId?: string;
+    surface: string;
+  }
+): Promise<Awaited<ReturnType<typeof generateAvatarImage>>> {
+  const { distinctId, surface, ...genArgs } = args;
+  const start = Date.now();
+  try {
+    const result = await generateAvatarImage(genArgs);
+    captureAiGeneration({
+      distinctId,
+      model: OPENAI_IMAGE_MODEL,
+      provider: 'openai',
+      spanName: 'avatar-image',
+      latencySeconds: (Date.now() - start) / 1000,
+      output: { bytes: result.imageBuffer.length, mimeType: result.mimeType },
+      extra: { feature: 'avatar-generation', surface },
+    });
+    return result;
+  } catch (error) {
+    captureAiGeneration({
+      distinctId,
+      model: OPENAI_IMAGE_MODEL,
+      provider: 'openai',
+      spanName: 'avatar-image',
+      latencySeconds: (Date.now() - start) / 1000,
+      isError: true,
+      error,
+      extra: { feature: 'avatar-generation', surface },
+    });
+    throw error;
+  }
+}
 
 type Bindings = {
   DATABASE_URL: string;
@@ -87,9 +133,10 @@ avatarRoutes.post('/generate-placeholders', async (c) => {
           imageBuffer,
           mimeType,
           extension,
-        } = await generateAvatarImage({
+        } = await generateAvatarImageTraced({
           apiKey: c.env.OPENAI_API_KEY,
           prompt: fullPrompt,
+          surface: 'placeholder',
         });
 
         const filename = `placeholders/avatar-${gender}.${extension}`;
@@ -276,9 +323,11 @@ avatarRoutes.post('/generate', async (c) => {
       imageBuffer,
       mimeType,
       extension,
-    } = await generateAvatarImage({
+    } = await generateAvatarImageTraced({
       apiKey: c.env.OPENAI_API_KEY,
       prompt: fullPrompt,
+      distinctId: c.get('user')?.id,
+      surface: 'contact',
     });
 
     const filename = `${contactId}/avatar-generated-${Date.now()}.${extension}`;
@@ -302,6 +351,12 @@ avatarRoutes.post('/generate', async (c) => {
     });
   } catch (error) {
     console.error('Avatar generation error:', error);
+    captureServerException(error, c.get('user')?.id, {
+      feature: 'avatar-generation',
+      route: '/api/avatar/generate',
+      provider: 'openai',
+      model: OPENAI_IMAGE_MODEL,
+    });
     return c.json({ error: 'Failed to generate avatar' }, 500);
   }
 });
@@ -384,9 +439,11 @@ avatarRoutes.post('/generate-from-hints', async (c) => {
       imageBuffer,
       mimeType,
       extension,
-    } = await generateAvatarImage({
+    } = await generateAvatarImageTraced({
       apiKey: c.env.OPENAI_API_KEY,
       prompt: fullPrompt,
+      distinctId: c.get('user')?.id,
+      surface: 'contact-auto',
     });
 
     const filename = `${contactId}/avatar-auto-${Date.now()}.${extension}`;
@@ -411,6 +468,12 @@ avatarRoutes.post('/generate-from-hints', async (c) => {
     });
   } catch (error) {
     console.error('[Avatar Auto] Generation error:', error);
+    captureServerException(error, c.get('user')?.id, {
+      feature: 'avatar-generation',
+      route: '/api/avatar/generate-from-hints',
+      provider: 'openai',
+      model: OPENAI_IMAGE_MODEL,
+    });
     return c.json({ error: 'Failed to generate avatar' }, 500);
   }
 });
@@ -526,9 +589,11 @@ avatarRoutes.post('/user/generate', async (c) => {
       imageBuffer,
       mimeType,
       extension,
-    } = await generateAvatarImage({
+    } = await generateAvatarImageTraced({
       apiKey: c.env.OPENAI_API_KEY,
       prompt: fullPrompt,
+      distinctId: user.id,
+      surface: 'user',
     });
 
     const timestamp = Date.now();
@@ -552,6 +617,12 @@ avatarRoutes.post('/user/generate', async (c) => {
     });
   } catch (error) {
     console.error('User avatar generation error:', error);
+    captureServerException(error, c.get('user')?.id, {
+      feature: 'avatar-generation',
+      route: '/api/avatar/user/generate',
+      provider: 'openai',
+      model: OPENAI_IMAGE_MODEL,
+    });
     return c.json({ error: 'Failed to generate avatar' }, 500);
   }
 });

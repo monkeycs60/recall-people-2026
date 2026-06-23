@@ -22,6 +22,12 @@ import { rateLimiters } from './middleware/rateLimit';
 import { securityHeaders } from './middleware/securityHeaders';
 import { httpsEnforcement } from './middleware/httpsEnforcement';
 import { langfuseMiddleware } from './middleware/langfuse';
+import { posthogMiddleware } from './middleware/posthog';
+import {
+  captureServerException,
+  isPostHogEnabled,
+  flushPostHog,
+} from './lib/posthog';
 
 type Bindings = {
   DATABASE_URL: string;
@@ -37,6 +43,8 @@ type Bindings = {
   LANGFUSE_PUBLIC_KEY?: string;
   LANGFUSE_BASE_URL?: string;
   ENABLE_LANGFUSE?: string;
+  POSTHOG_KEY?: string;
+  POSTHOG_HOST?: string;
   PRO_WHITELIST?: string;
 };
 
@@ -51,6 +59,9 @@ app.use('*', logger());
 
 // LangFuse observability (before routes)
 app.use('*', langfuseMiddleware);
+
+// PostHog observability + error tracking (before routes)
+app.use('*', posthogMiddleware);
 
 // CORS
 app.use(
@@ -95,5 +106,27 @@ app.route('/api/seed', seedRoutes);
 app.route('/api/ask', askRoutes);
 app.route('/api/sync', syncRoutes);
 app.route('/admin', adminRoutes);
+
+// Global error handler — capture unhandled server exceptions to PostHog
+// (error tracking) before returning a generic 500. Best-effort: the capture
+// never throws and never changes the response shape.
+app.onError((err, c) => {
+  // The base app has no typed `user` variable, but auth middleware sets one on
+  // protected routes — read it defensively for attribution.
+  const user = (c.get as (key: string) => unknown)('user') as
+    | { id?: string }
+    | undefined;
+  captureServerException(err, user?.id, {
+    route: c.req.path,
+    method: c.req.method,
+    handled: 'onError',
+  });
+  if (isPostHogEnabled() && c.executionCtx) {
+    c.executionCtx.waitUntil(flushPostHog());
+  }
+
+  console.error('[onError]', c.req.method, c.req.path, err);
+  return c.json({ error: 'Internal server error' }, 500);
+});
 
 export default app;

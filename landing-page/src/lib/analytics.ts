@@ -30,6 +30,9 @@ export function initAnalytics(): void {
     autocapture: true,
     capture_pageview: true,
     capture_pageleave: true,
+    // Error tracking: auto-capture uncaught exceptions + unhandled rejections
+    // as $exception events. Best-effort, never blocks rendering.
+    capture_exceptions: true,
     person_profiles: "identified_only",
     session_recording: {
       maskAllInputs: false,

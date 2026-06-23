@@ -49,7 +49,11 @@ import { useSubscriptionStore } from '@/stores/subscription-store';
 import { getNotificationRoute } from '@/lib/notification-routing';
 import { useSyncStore } from '@/stores/sync-store';
 import { PostHogProvider } from 'posthog-react-native';
-import { posthog } from '@/lib/analytics';
+import { posthog, initErrorTracking } from '@/lib/analytics';
+
+// Wire global JS error + unhandled-rejection capture to PostHog (best-effort,
+// no-op when analytics is disabled). Installed once at module load.
+initErrorTracking();
 
 const hideStatusBarForScreenshots =
   process.env.EXPO_PUBLIC_HIDE_STATUS_BAR === 'true' ||
