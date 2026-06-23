@@ -14,7 +14,14 @@ const HOST = import.meta.env.PUBLIC_POSTHOG_HOST ?? "https://eu.i.posthog.com";
  * the page still renders identically.
  */
 export function initAnalytics(): void {
-  if (!KEY) return;
+  // Guard against double-init: the bundled script can be evaluated more than
+  // once, and a second posthog.init() reloads remote config and can stall the
+  // event pipeline (no requests ever reach the ingestion host). Window-scoped
+  // so the guard holds across separate module instances.
+  if (typeof window === "undefined") return;
+  const w = window as unknown as { __recallPHInit?: boolean };
+  if (!KEY || w.__recallPHInit) return;
+  w.__recallPHInit = true;
 
   posthog.init(KEY, {
     api_host: HOST,
