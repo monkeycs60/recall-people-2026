@@ -1,4 +1,12 @@
 ---
+// Self-hosted Plus Jakarta Sans (weights 400–800) — replaces the Google CDN.
+// The @fontsource non-variable family is named exactly 'Plus Jakarta Sans',
+// so --font-sans stays unchanged.
+import "@fontsource/plus-jakarta-sans/400.css";
+import "@fontsource/plus-jakarta-sans/500.css";
+import "@fontsource/plus-jakarta-sans/600.css";
+import "@fontsource/plus-jakarta-sans/700.css";
+import "@fontsource/plus-jakarta-sans/800.css";
 import "../styles/globals.css";
 import Navbar from "../components/Navbar.astro";
 
@@ -89,14 +97,6 @@ const ldJson = {
 
     <title>{title}</title>
     <meta name="description" content={description} />
-
-    {/* Plus Jakarta Sans — matches the next/font setup (weights 400–800, swap). */}
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
 
     {home && (
       <>
