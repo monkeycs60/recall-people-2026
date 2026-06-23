@@ -10,6 +10,7 @@
     "deploy": "dotenv -e .env.production -- prisma migrate deploy && prisma generate && wrangler deploy",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
+    "db:refresh-dev": "bash ../scripts/dev/refresh-dev-db.sh",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "typecheck": "tsc --noEmit",
