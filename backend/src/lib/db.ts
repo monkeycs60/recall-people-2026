@@ -1,16 +1,12 @@
 import { PrismaClient } from '@prisma/client';
-import { PrismaNeon } from '@prisma/adapter-neon';
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import ws from 'ws';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { Pool } from 'pg';
 
-// Sur Node (serveur long-running), le driver Neon serverless a besoin d'une
-// implémentation WebSocket pour Pool. Sur Workers c'était le WebSocket natif.
-if (!neonConfig.webSocketConstructor) {
-  neonConfig.webSocketConstructor = ws as unknown as typeof WebSocket;
-}
-
+// Postgres standard (driver `pg`) — l'API tourne sur un vrai runtime Node et la
+// base est désormais le Postgres Coolify (VPS). Avant, on utilisait le driver
+// Neon serverless (WebSocket) parce que la base était sur Neon.
 export const getPrisma = (databaseUrl: string) => {
   const pool = new Pool({ connectionString: databaseUrl });
-  const adapter = new PrismaNeon(pool);
+  const adapter = new PrismaPg(pool);
   return new PrismaClient({ adapter });
 };
