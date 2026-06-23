@@ -1,0 +1,327 @@
+---
+import Layout from "../layouts/Layout.astro";
+import StoreBadges from "../components/StoreBadges.astro";
+import HowItWorks from "../components/HowItWorks.astro";
+import Faq from "../components/Faq.astro";
+import Footer from "../components/Footer.astro";
+import Check from "../components/Check.astro";
+
+const APP_STORE_URL =
+  "https://apps.apple.com/fr/app/recall-people/id6757320179";
+---
+
+<Layout home={true}>
+  <main class="lp">
+    <span id="top"></span>
+
+    {/* HERO */}
+    <section class="hero" style="padding-top: 0; padding-bottom: 0;">
+      <div class="wrap">
+        <div class="hero-text">
+          <p class="eyebrow">Personal CRM · by voice</p>
+          <h1>
+            Never forget what matters to{" "}
+            <span class="hl">the people who matter.</span>
+          </h1>
+          <p class="hero-sub">
+            After a call or a coffee, just talk. In a few seconds, Recall
+            People turns your voice into a profile, and reminds you before it
+            counts.
+          </p>
+          <StoreBadges />
+        </div>
+        <div class="hero-art">
+          <div
+            class="blob"
+            style="width: 460px; height: 460px; background: radial-gradient(circle,rgba(124,92,255,0.22),transparent 70%); right: -20px; top: 120px;"
+          >
+          </div>
+          <img
+            class="device front"
+            src="/images/landing-hd/coming-up.png"
+            alt="A contact's upcoming timeline in Recall People"
+            width="879"
+            height="1832"
+          />
+        </div>
+      </div>
+    </section>
+
+    {/* PROBLEM */}
+    <section class="problem">
+      <div class="wrap">
+        <div class="problem-text">
+          <p class="eyebrow">The problem</p>
+          <h2>The details slip away between catch-ups.</h2>
+          <p class="resolve">
+            Not for lack of caring, just for lack of <b>remembering</b>.
+          </p>
+        </div>
+        <div class="qlist">
+          <p class="q">What was her son&apos;s name again?</p>
+          <p class="q">Wasn&apos;t he interviewing last week?</p>
+          <p class="q">Where was she moving to?</p>
+        </div>
+      </div>
+    </section>
+
+    {/* HOW IT WORKS */}
+    <HowItWorks />
+
+    {/* FEATURES: bento */}
+    <section id="features">
+      <div class="wrap">
+        <div class="sec-head">
+          <p class="eyebrow" style="text-align: center;">What you get</p>
+          <h2>A memory for every relationship.</h2>
+        </div>
+
+        <div class="bento">
+          <div class="bt bt-tall shot">
+            <div class="bt-k">Coming up</div>
+            <h4>Every date, dated.</h4>
+            <img
+              class="bt-shot"
+              src="/images/landing-hd/upcoming.png"
+              alt="The upcoming events screen"
+              width="440"
+              height="916"
+            />
+          </div>
+
+          <div class="bt bt-tall shot">
+            <div class="bt-k">Icebreakers</div>
+            <h4>Know what to say.</h4>
+            <img
+              class="bt-shot"
+              src="/images/landing-hd/icebreakers.png"
+              alt="Icebreaker suggestions"
+              width="879"
+              height="1832"
+            />
+          </div>
+
+          <div class="bt bt-wide">
+            <div class="bt-k">Smart profile</div>
+            <h4>Everything about them, at a glance.</h4>
+            <div class="bt-tags">
+              <span class="bt-tag">AI summary</span>
+              <span class="bt-tag">Tastes</span>
+              <span class="bt-tag">Coming up</span>
+              <span class="bt-tag">Icebreakers</span>
+              <span class="bt-tag">Notes</span>
+            </div>
+          </div>
+
+          <div class="bt bt-wide">
+            <div class="bt-k">AI assistant</div>
+            <h4>Ask anything about your people.</h4>
+            <div class="b-chat">
+              <div class="cb cb-q">Which of my contacts have kids?</div>
+              <div class="cb cb-a">
+                Elena Rossi has two; Marcus just had his first.
+              </div>
+            </div>
+          </div>
+
+          <div class="bt bt-tall shot">
+            <div class="bt-k">Smart notifications</div>
+            <h4>The right nudge, on time.</h4>
+            <img
+              class="bt-shot"
+              src="/images/landing-hd/notifications.png"
+              alt="Smart notifications"
+              width="879"
+              height="1832"
+            />
+          </div>
+
+          <div class="bt">
+            <div class="bt-k">Hot topics</div>
+            <h4>Color-coded urgency.</h4>
+            <div class="b-topics">
+              <div class="tp">
+                <span class="td td-r"></span>
+                Urgent<span class="tt tt-r">Days</span>
+              </div>
+              <div class="tp">
+                <span class="td td-a"></span>
+                Soon<span class="tt tt-a">Weeks</span>
+              </div>
+              <div class="tp">
+                <span class="td td-g"></span>
+                Later<span class="tt tt-g">Months</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="bt bt-wide">
+            <div class="bt-k">Story &amp; timeline</div>
+            <h4>Their whole life, one scroll.</h4>
+            <div class="b-tl">
+              <div class="tlr">
+                <span class="tld"></span>
+                Met at Sarah&apos;s dinner
+              </div>
+              <div class="tlr">
+                <span class="tld"></span>
+                FormFlow demo · Jul 8
+              </div>
+              <div class="tlr">
+                <span class="tld"></span>
+                Web Summit · Nov
+              </div>
+            </div>
+          </div>
+
+          <div class="bt">
+            <div class="bt-k">Five languages</div>
+            <h4>Speak their language.</h4>
+            <div class="b-langs">
+              <span class="lg on">EN</span>
+              <span class="lg">FR</span>
+              <span class="lg">ES</span>
+              <span class="lg">IT</span>
+              <span class="lg">DE</span>
+            </div>
+          </div>
+
+          <div class="bt bt-wide bt-priv">
+            <div class="priv-ic">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#fff"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M12 3l7 3v5c0 4.4-3 8.3-7 9.5C8 19.3 5 15.4 5 11V6z"></path>
+              </svg>
+            </div>
+            <div>
+              <div class="bt-k">Private by design</div>
+              <h4>Local-first &amp; yours alone.</h4>
+              <p class="bt-d">
+                Your network lives on your device and syncs only to you. No
+                feeds, no sharing.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* PRICING */}
+    <section class="pricing" id="pricing">
+      <div class="wrap">
+        <div class="sec-head">
+          <p class="eyebrow" style="text-align: center;">Pricing</p>
+          <h2>Start free. Upgrade when it sticks.</h2>
+        </div>
+        <div class="tiers">
+          <div class="tier">
+            <p class="tname">Free</p>
+            <div class="price">€0</div>
+            <p class="psub">For keeping your closest circle in mind.</p>
+            <ul>
+              <li>
+                <Check color="#1FB877" />
+                Up to 15 contacts
+              </li>
+              <li>
+                <Check color="#1FB877" />
+                Voice (up to 1 min) &amp; text notes
+              </li>
+              <li>
+                <Check color="#1FB877" />
+                AI assistant: 10 questions / month
+              </li>
+              <li>
+                <Check color="#1FB877" />
+                Unlimited icebreakers &amp; AI summaries
+              </li>
+              <li>
+                <Check color="#1FB877" />
+                Event reminders &amp; nudges to reconnect
+              </li>
+            </ul>
+            <a
+              class="tbtn ghost"
+              href={APP_STORE_URL}
+              target="_blank"
+              rel="noopener"
+            >
+              Get started
+            </a>
+          </div>
+          <div class="tier featured">
+            <span class="tag">Most popular</span>
+            <p class="tname">Premium</p>
+            <div class="price">
+              €4.99<span> / month</span>
+            </div>
+            <p class="psub">For your whole network, with AI on top.</p>
+            <ul>
+              <li>
+                <Check color="#5530E6" />
+                Unlimited contacts
+              </li>
+              <li>
+                <Check color="#5530E6" />
+                3-minute voice notes
+              </li>
+              <li>
+                <Check color="#5530E6" />
+                Unlimited AI assistant (ask your network)
+              </li>
+              <li>
+                <Check color="#5530E6" />
+                Weekly digest (your week ahead)
+              </li>
+              <li>
+                <Check color="#5530E6" />
+                Post-event follow-up reminders
+              </li>
+            </ul>
+            <a
+              class="tbtn solid"
+              href={APP_STORE_URL}
+              target="_blank"
+              rel="noopener"
+            >
+              Go Premium
+            </a>
+          </div>
+        </div>
+        <p class="price-note">
+          Or €39.99 / year (two months free). Cancel anytime.
+        </p>
+      </div>
+    </section>
+
+    {/* FAQ */}
+    <Faq />
+
+    {/* CTA */}
+    <section id="data" style="padding-top: 40px;">
+      <div class="wrap">
+        <div class="cta">
+          <div class="glow"></div>
+          <h2>
+            Your voice, turned into
+            <br />
+            relationship memory.
+          </h2>
+          <p>
+            Structured profiles, real dates, and reminders that actually fire.
+            Start with the people who matter most.
+          </p>
+          <StoreBadges />
+        </div>
+      </div>
+    </section>
+
+    <Footer />
+  </main>
+</Layout>

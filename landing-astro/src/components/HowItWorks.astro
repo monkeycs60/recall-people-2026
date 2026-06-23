@@ -1,0 +1,192 @@
+---
+// Static markup mirrors the Next.js HowItWorks component exactly.
+// The coverflow carousel, waveform, caption cycling and IntersectionObserver
+// auto-advance are reimplemented verbatim in the client <script> below.
+---
+
+<section class="how" id="how">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow" style="text-align: center;">How it works</p>
+      <h2>Talk for a few seconds. Get a memory that lasts.</h2>
+    </div>
+
+    <div class="how-head" id="howHead">
+      <span class="hnum" id="hNum">1</span>
+      <h3 id="hTitle">Talk about someone</h3>
+      <p id="hDesc">
+        After a call or a coffee, record a quick voice note, or type it.
+      </p>
+    </div>
+
+    <div class="how-cf" id="howCf">
+      <div class="hph">
+        <div class="cap-card">
+          <div class="cap-pill">
+            <span class="on">🎙 Voice</span>
+            <span>Type</span>
+          </div>
+          <h4>
+            What's new
+            <br />
+            <span class="dim">with Leo?</span>
+          </h4>
+          <div class="cap-wave" id="capWave"></div>
+          <div class="cap-cap" id="capCap">Listening…</div>
+          <div class="cap-mic">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#fff"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="9" y="2" width="6" height="12" rx="3"></rect>
+              <path d="M5 10a7 7 0 0 0 14 0"></path>
+              <line x1="12" y1="19" x2="12" y2="22"></line>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="hph">
+        <img
+          class="device"
+          src="/images/landing-hd/review.png"
+          alt="Review screen"
+          width="879"
+          height="1832"
+        />
+      </div>
+      <div class="hph">
+        <img
+          class="device"
+          src="/images/landing-hd/profile.png"
+          alt="Structured profile"
+          width="879"
+          height="1832"
+        />
+      </div>
+    </div>
+
+    <div class="how-dots" id="howDots">
+      <button type="button" class="gdot" aria-label="Step 1"></button>
+      <button type="button" class="gdot" aria-label="Step 2"></button>
+      <button type="button" class="gdot" aria-label="Step 3"></button>
+    </div>
+  </div>
+</section>
+
+<script>
+  const STEPS = [
+    {
+      n: "1",
+      t: "Talk about someone",
+      d: "After a call or a coffee, record a quick voice note, or type it.",
+    },
+    {
+      n: "2",
+      t: "Review & set reminders",
+      d: "Glance over what it caught, confirm the dates, and let the reminders fire before each moment.",
+    },
+    {
+      n: "3",
+      t: "The profile builds itself",
+      d: "Save once and Recall People files everything into a rich profile: essentials, interests, and what’s coming up.",
+    },
+  ];
+
+  const root = document.getElementById("how");
+  if (root) {
+    /* ---- capture-card waveform ---- */
+    const cw = root.querySelector<HTMLElement>("#capWave");
+    if (cw && !cw.childElementCount) {
+      for (let i = 0; i < 22; i++) {
+        const s = document.createElement("span");
+        s.style.animationDelay = ((i * 60) % 880) / 1000 + "s";
+        cw.appendChild(s);
+      }
+    }
+
+    /* ---- capture caption cycling ---- */
+    const capCap = root.querySelector<HTMLElement>("#capCap");
+    const capStates = ["Listening…", "Transcribing…", "Saved ✓"];
+    let ci = 0;
+    if (capCap) {
+      window.setInterval(() => {
+        ci = (ci + 1) % capStates.length;
+        capCap.textContent = capStates[ci];
+      }, 2100);
+    }
+
+    /* ---- coverflow + crossfade text ---- */
+    const hPh = Array.from(root.querySelectorAll<HTMLElement>("#howCf .hph"));
+    const H = hPh.length;
+    const hHead = root.querySelector<HTMLElement>("#howHead");
+    const hNum = root.querySelector<HTMLElement>("#hNum");
+    const hTitle = root.querySelector<HTMLElement>("#hTitle");
+    const hDesc = root.querySelector<HTMLElement>("#hDesc");
+    const hDots = Array.from(
+      root.querySelectorAll<HTMLElement>("#howDots .gdot"),
+    );
+
+    let hCur = -1;
+    let hTimer: number | undefined;
+    const H_DUR = 4000;
+
+    function hPlace(c: number) {
+      hPh.forEach((p, k) => {
+        const d = (k - c + H) % H;
+        p.className = "hph";
+        if (d === 0) p.classList.add("hcf-c");
+        else if (d === 1) p.classList.add("hcf-r");
+        else p.classList.add("hcf-l");
+      });
+      hDots.forEach((dn, k) => dn.classList.toggle("on", k === c));
+      if (hCur !== -1 && hHead) hHead.classList.add("fade");
+      const prev = hCur;
+      window.setTimeout(
+        () => {
+          if (hNum) hNum.textContent = STEPS[c].n;
+          if (hTitle) hTitle.textContent = STEPS[c].t;
+          if (hDesc) hDesc.textContent = STEPS[c].d;
+          if (hHead) hHead.classList.remove("fade");
+        },
+        prev === -1 ? 0 : 280,
+      );
+      hCur = c;
+    }
+    function hStart() {
+      hStop();
+      hTimer = window.setInterval(() => hPlace((hCur + 1) % H), H_DUR);
+    }
+    function hStop() {
+      if (hTimer) {
+        clearInterval(hTimer);
+        hTimer = undefined;
+      }
+    }
+
+    hDots.forEach((dn, k) => {
+      dn.addEventListener("click", () => {
+        hPlace(k);
+        hStart();
+      });
+    });
+
+    hPlace(0);
+
+    const howCf = root.querySelector("#howCf");
+    if ("IntersectionObserver" in window && howCf) {
+      const io = new IntersectionObserver(
+        (ents) => {
+          ents.forEach((e) => (e.isIntersecting ? hStart() : hStop()));
+        },
+        { threshold: 0.3 },
+      );
+      io.observe(howCf);
+    } else {
+      hStart();
+    }
+  }
+</script>
