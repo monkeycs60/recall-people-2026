@@ -1,6 +1,6 @@
 import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
-import { useMemo } from 'react';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useMemo, useCallback, useRef } from 'react';
+import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, RefreshCcw } from 'lucide-react-native';
@@ -8,6 +8,7 @@ import { useContactQuery, useRegenerateSuggestedQuestions } from '@/hooks/useCon
 import { ContactAvatar } from '@/components/contact/ContactAvatar';
 import { Colors, Fonts, Shadows } from '@/constants/theme';
 import { ContactDetailSkeleton } from '@/components/skeleton/ContactDetailSkeleton';
+import { analytics, AnalyticsEvent } from '@/lib/analytics';
 
 type TonePreset = {
   background: string;
@@ -60,6 +61,21 @@ export default function ContactIcebreakersScreen() {
     if (!contact?.suggestedQuestions) return [];
     return contact.suggestedQuestions.slice(0, 3);
   }, [contact?.suggestedQuestions]);
+
+  // Track icebreaker screen views (counts only — never the question content).
+  // Latest-value ref so the count is fresh even if questions finish loading
+  // after the screen focuses. Fires once per focus.
+  const viewProps = useRef({ count: 0, waiting: false });
+  viewProps.current = { count: questions.length, waiting: isWaitingForSuggestedQuestions };
+  useFocusEffect(
+    useCallback(() => {
+      analytics.capture(AnalyticsEvent.ICEBREAKER_VIEWED, {
+        contact_id: contactId,
+        question_count: viewProps.current.count,
+        is_waiting: viewProps.current.waiting,
+      });
+    }, [contactId]),
+  );
 
   if (isLoading) return <ContactDetailSkeleton />;
 

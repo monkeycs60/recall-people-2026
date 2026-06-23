@@ -32,7 +32,7 @@ Init : `landing-page/src/lib/analytics.ts` (appelé depuis `Layout.astro`).
 ### App mobile — surface `mobile` (`frontend/`, Expo / React Native)
 Init : `frontend/lib/analytics.ts` + `PostHogProvider` dans `frontend/app/_layout.tsx` ; identify dans `frontend/stores/auth-store.ts` (+ `hooks/useAuth.ts`).
 - Autocapture (**screens** + touches), **identify/reset**, **error tracking** (`ErrorUtils.setGlobalHandler` + `unhandledrejection`).
-- Events custom (18), tous via le helper `analytics` (no-op si désactivé), avec super-props `product`/`surface` :
+- Events custom (19), tous via le helper `analytics` (no-op si désactivé), avec super-props `product`/`surface` :
   - **Auth** : `sign_up`, `login`, `logout` (`hooks/useAuth.ts`, `stores/auth-store.ts`).
   - **Capture funnel** : `voice_recording_started`, `capture_processed` (`hooks/useRecording.ts`),
     **`note_created`**, **`contact_created`**, `reminder_set` (`app/review.tsx`).
@@ -42,6 +42,7 @@ Init : `frontend/lib/analytics.ts` + `PostHogProvider` dans `frontend/app/_layou
   - **Hot topics** : **`hot_topic_resolved`** (`has_resolution`) — `services/hot-topic.service.ts`.
   - **Découverte** : **`search_performed`** (`scope`, `has_results`, `results_count` — **jamais le texte de la requête**) — `hooks/useSemanticSearch.ts`.
   - **Assistant IA** : `assistant_question_asked` (`app/ask.tsx`).
+  - **Icebreakers** : **`icebreaker_viewed`** (`question_count`, `is_waiting` — jamais le contenu des questions), capté sur focus de l'écran — `app/contact/[id]/icebreakers.tsx`.
   - **Monétisation** : `paywall_viewed`, `subscription_started` (`components/Paywall.tsx`).
   → mesure **notes / contacts créés & édités par utilisateur**, funnels d'activation, rétention, usage recherche.
 - ⚠️ Vie privée : les events portent **uniquement des compteurs / booléens** (longueurs, nombres de champs), **jamais de contenu** (nom, transcription, requête, résolution).

@@ -44,6 +44,8 @@ export const AnalyticsEvent = {
   SEARCH_PERFORMED: 'search_performed',
   // AI assistant
   ASSISTANT_QUESTION_ASKED: 'assistant_question_asked',
+  // Icebreakers (AI-suggested conversation starters for a contact)
+  ICEBREAKER_VIEWED: 'icebreaker_viewed',
   // Monetisation
   PAYWALL_VIEWED: 'paywall_viewed',
   SUBSCRIPTION_STARTED: 'subscription_started',
