@@ -5,7 +5,8 @@
   "scripts": {
     "start": "tsx src/server.ts",
     "dev:node": "tsx watch src/server.ts",
-    "dev": "wrangler dev --ip 0.0.0.0",
+    "dev": "bash ../scripts/dev/ensure-dev-postgres.sh && tsx watch --env-file=.dev.vars src/server.ts",
+    "dev:workers": "wrangler dev --ip 0.0.0.0",
     "deploy": "dotenv -e .env.production -- prisma migrate deploy && prisma generate && wrangler deploy",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
