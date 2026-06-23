@@ -3,6 +3,7 @@ import { useContactsStore } from '@/stores/contacts-store';
 import { contactService } from '@/services/contact.service';
 import { searchService } from '@/services/search.service';
 import { SemanticSearchResult, SearchRequest, FactType } from '@/types';
+import { analytics, AnalyticsEvent } from '@/lib/analytics';
 
 type UseSemanticSearchResult = {
   results: SemanticSearchResult[];
@@ -79,6 +80,13 @@ export const useSemanticSearch = (): UseSemanticSearchResult => {
 
         const searchResults = await searchService.semanticSearch(searchRequest);
         setResults(searchResults);
+
+        // Privacy: never send the query text — only scope + outcome.
+        analytics.capture(AnalyticsEvent.SEARCH_PERFORMED, {
+          scope: 'semantic',
+          has_results: searchResults.length > 0,
+          results_count: searchResults.length,
+        });
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Erreur lors de la recherche');
         setResults([]);

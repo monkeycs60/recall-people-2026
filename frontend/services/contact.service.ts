@@ -4,6 +4,7 @@ import { Contact, ContactWithDetails, Gender, SuggestedQuestion, SuggestedQuesti
 import { normalizeName } from '@/utils/normalizeName';
 import { hotTopicService } from './hot-topic.service';
 import { syncQueueService } from './sync-queue.service';
+import { analytics, AnalyticsEvent } from '@/lib/analytics';
 
 type ContactSyncRow = {
   id: string;
@@ -460,6 +461,12 @@ export const contactService = {
 
     await enqueueContact(id, 'upsert');
 
+    // Optimistic client event. `updates` always includes `updated_at`, so the
+    // real field count is `updates.length - 1`. No personal data, only a count.
+    analytics.capture(AnalyticsEvent.CONTACT_EDITED, {
+      fields_changed: Math.max(0, updates.length - 1),
+    });
+
     if (data.birthdayDay !== undefined || data.birthdayMonth !== undefined) {
       const contactRow = await db.getFirstAsync<{
         first_name: string;
@@ -488,5 +495,6 @@ export const contactService = {
       [now, now, id]
     );
     await enqueueContact(id, 'delete');
+    analytics.capture(AnalyticsEvent.CONTACT_DELETED);
   },
 };

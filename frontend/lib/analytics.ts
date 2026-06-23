@@ -30,6 +30,18 @@ export const AnalyticsEvent = {
   NOTE_CREATED: 'note_created',
   CONTACT_CREATED: 'contact_created',
   REMINDER_SET: 'reminder_set',
+  // Contact lifecycle (edits/deletes — creation lives in the capture funnel)
+  CONTACT_EDITED: 'contact_edited',
+  CONTACT_DELETED: 'contact_deleted',
+  // Note lifecycle (edits/deletes — creation lives in the capture funnel)
+  NOTE_EDITED: 'note_edited',
+  NOTE_DELETED: 'note_deleted',
+  // Groups & organisation
+  GROUP_CREATED: 'group_created',
+  // Hot topics (follow-up reminders surfaced from notes)
+  HOT_TOPIC_RESOLVED: 'hot_topic_resolved',
+  // Discovery
+  SEARCH_PERFORMED: 'search_performed',
   // AI assistant
   ASSISTANT_QUESTION_ASKED: 'assistant_question_asked',
   // Monetisation
