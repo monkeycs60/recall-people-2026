@@ -110,6 +110,44 @@ export async function shutdownPostHog(): Promise<void> {
 }
 
 /**
+ * Capture an authoritative product event from the server.
+ *
+ * The mobile app is local-first and sends its own "optimistic" product events
+ * (e.g. `contact_created`), but those can be lost (offline, ad-blockers,
+ * app killed before flush). The sync endpoint is the single source of truth for
+ * what actually lands in the database, so it emits the SAME logical events here
+ * with `surface: 'api'` — these are the ones to trust for reliable counts.
+ *
+ * ⚠️ Content is end-to-end encrypted on the backend: NEVER pass decrypted
+ * personal data in `properties`. Counters and technical ids only.
+ *
+ * Best-effort, never throws; no-op when PostHog is disabled.
+ *
+ * @param event       Event name, e.g. 'contact_created', 'note_created'.
+ * @param distinctId  Authenticated user id (groups every event per user).
+ * @param properties  Non-personal context (counts, entity_id, source, …).
+ */
+export function captureServerEvent(
+	event: string,
+	distinctId: string,
+	properties?: Record<string, unknown>
+): void {
+	if (!client) return;
+	try {
+		client.capture({
+			distinctId,
+			event,
+			properties: {
+				...BASE_PROPERTIES,
+				...properties,
+			},
+		});
+	} catch (captureError) {
+		console.error('[PostHog] captureServerEvent failed:', captureError);
+	}
+}
+
+/**
  * Capture a server-side exception. Best-effort, never throws.
  * Used by the Hono `onError` handler and AI call sites.
  *

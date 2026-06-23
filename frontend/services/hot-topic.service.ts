@@ -5,6 +5,7 @@ import { HotTopic, HotTopicStatus } from '@/types';
 import i18n from '@/lib/i18n';
 import { notificationService } from '@/services/notification.service';
 import { syncQueueService } from './sync-queue.service';
+import { analytics, AnalyticsEvent } from '@/lib/analytics';
 
 type HotTopicSyncRow = {
   id: string;
@@ -227,6 +228,10 @@ export const hotTopicService = {
       ['resolved', resolution || null, now, now, id]
     );
     await enqueueHotTopic(id, 'upsert');
+    // Optimistic client event. Boolean only — never the resolution text.
+    analytics.capture(AnalyticsEvent.HOT_TOPIC_RESOLVED, {
+      has_resolution: Boolean(resolution),
+    });
   },
 
   reopen: async (id: string): Promise<void> => {

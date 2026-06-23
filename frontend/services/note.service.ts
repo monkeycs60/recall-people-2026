@@ -2,6 +2,7 @@ import * as Crypto from 'expo-crypto';
 import { getDatabase } from '@/lib/db';
 import { Note } from '@/types';
 import { syncQueueService } from './sync-queue.service';
+import { analytics, AnalyticsEvent } from '@/lib/analytics';
 
 type NoteSyncRow = {
   id: string;
@@ -112,6 +113,7 @@ export const noteService = {
       [now, now, id]
     );
     await enqueueNote(id, 'delete');
+    analytics.capture(AnalyticsEvent.NOTE_DELETED);
   },
 
   update: async (id: string, data: { transcription?: string; title?: string }): Promise<void> => {
@@ -139,5 +141,11 @@ export const noteService = {
     );
 
     await enqueueNote(id, 'upsert');
+
+    // Optimistic client event. No note content, only which fields were touched.
+    analytics.capture(AnalyticsEvent.NOTE_EDITED, {
+      edited_transcription: data.transcription !== undefined,
+      edited_title: data.title !== undefined,
+    });
   },
 };

@@ -2,6 +2,7 @@ import * as Crypto from 'expo-crypto';
 import { getDatabase } from '@/lib/db';
 import { Group } from '@/types';
 import { syncQueueService } from './sync-queue.service';
+import { analytics, AnalyticsEvent } from '@/lib/analytics';
 
 type GroupRow = {
   id: string;
@@ -120,6 +121,9 @@ export const groupService = {
     );
 
     await enqueueGroup(id, 'upsert');
+
+    // Single creation point for groups (getOrCreate routes here too). No name.
+    analytics.capture(AnalyticsEvent.GROUP_CREATED);
 
     return { id, name: name.trim(), createdAt: now, updatedAt: now };
   },

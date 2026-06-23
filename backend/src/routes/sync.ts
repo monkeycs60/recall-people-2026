@@ -10,6 +10,7 @@ import {
   encryptNullableString,
   encryptString,
 } from '../lib/sync-encryption';
+import { captureServerEvent } from '../lib/posthog';
 
 type Bindings = {
   DATABASE_URL: string;
@@ -355,7 +356,13 @@ async function decryptHotTopic(encryptionKey: string | undefined, row: any) {
   };
 }
 
-async function assertAbsentOrOwned(model: any, id: string, userId: string) {
+/**
+ * Verify the target row is either absent or owned by `userId`, and report
+ * whether it already exists. The boolean lets callers distinguish a real INSERT
+ * from an update of an existing row (the upsert itself doesn't tell us which
+ * branch it took) so we can emit `*_created` events only on genuine creations.
+ */
+async function assertAbsentOrOwned(model: any, id: string, userId: string): Promise<{ exists: boolean }> {
   const existing = await model.findFirst({
     where: { id },
     select: { userId: true },
@@ -364,6 +371,8 @@ async function assertAbsentOrOwned(model: any, id: string, userId: string) {
   if (existing && existing.userId !== userId) {
     throw new SyncRouteError('Cannot mutate another user row', 403);
   }
+
+  return { exists: existing !== null };
 }
 
 async function assertContactOwned(tx: any, contactId: string, userId: string) {
@@ -386,43 +395,52 @@ async function assertGroupOwned(tx: any, groupId: string, userId: string) {
   }
 }
 
-async function upsertContact(tx: any, encryptionKey: string | undefined, userId: string, payload: ContactPayload) {
-  await assertAbsentOrOwned(tx.syncedContact, payload.id, userId);
+/** Result of applying one mutation: the resolved id + whether it was a true INSERT. */
+type ApplyResult = { entityId: string; wasInsert: boolean };
+
+async function upsertContact(tx: any, encryptionKey: string | undefined, userId: string, payload: ContactPayload): Promise<ApplyResult> {
+  const { exists } = await assertAbsentOrOwned(tx.syncedContact, payload.id, userId);
   const data = await encryptContactPayload(encryptionKey, userId, payload);
   await tx.syncedContact.upsert({
     where: { id: payload.id },
     create: data,
     update: withoutImmutable(data),
   });
-  return payload.id;
+  return { entityId: payload.id, wasInsert: !exists };
 }
 
-async function upsertNote(tx: any, encryptionKey: string | undefined, userId: string, payload: NotePayload) {
+async function upsertNote(tx: any, encryptionKey: string | undefined, userId: string, payload: NotePayload): Promise<ApplyResult> {
   await assertContactOwned(tx, payload.contactId, userId);
-  await assertAbsentOrOwned(tx.syncedNote, payload.id, userId);
+  const { exists } = await assertAbsentOrOwned(tx.syncedNote, payload.id, userId);
   const data = await encryptNotePayload(encryptionKey, userId, payload);
   await tx.syncedNote.upsert({
     where: { id: payload.id },
     create: data,
     update: withoutImmutable(data),
   });
-  return payload.id;
+  return { entityId: payload.id, wasInsert: !exists };
 }
 
-async function upsertGroup(tx: any, encryptionKey: string | undefined, userId: string, payload: GroupPayload) {
-  await assertAbsentOrOwned(tx.syncedGroup, payload.id, userId);
+async function upsertGroup(tx: any, encryptionKey: string | undefined, userId: string, payload: GroupPayload): Promise<ApplyResult> {
+  const { exists } = await assertAbsentOrOwned(tx.syncedGroup, payload.id, userId);
   const data = await encryptGroupPayload(encryptionKey, userId, payload);
   await tx.syncedGroup.upsert({
     where: { id: payload.id },
     create: data,
     update: withoutImmutable(data),
   });
-  return payload.id;
+  return { entityId: payload.id, wasInsert: !exists };
 }
 
-async function upsertContactGroup(tx: any, userId: string, entityId: string, payload: ContactGroupPayload) {
+async function upsertContactGroup(tx: any, userId: string, entityId: string, payload: ContactGroupPayload): Promise<ApplyResult> {
   await assertContactOwned(tx, payload.contactId, userId);
   await assertGroupOwned(tx, payload.groupId, userId);
+  // contact_group has a composite unique key (not the row id) so it can't reuse
+  // assertAbsentOrOwned — probe the unique tuple directly to detect a new link.
+  const existingLink = await tx.syncedContactGroup.findFirst({
+    where: { userId, contactId: payload.contactId, groupId: payload.groupId },
+    select: { id: true },
+  });
   const data = mapContactGroupPayload(userId, entityId, payload);
   const row = await tx.syncedContactGroup.upsert({
     where: {
@@ -435,22 +453,22 @@ async function upsertContactGroup(tx: any, userId: string, entityId: string, pay
     create: data,
     update: withoutImmutable(data),
   });
-  return row.id;
+  return { entityId: row.id, wasInsert: existingLink === null };
 }
 
-async function upsertHotTopic(tx: any, encryptionKey: string | undefined, userId: string, payload: HotTopicPayload) {
+async function upsertHotTopic(tx: any, encryptionKey: string | undefined, userId: string, payload: HotTopicPayload): Promise<ApplyResult> {
   await assertContactOwned(tx, payload.contactId, userId);
-  await assertAbsentOrOwned(tx.syncedHotTopic, payload.id, userId);
+  const { exists } = await assertAbsentOrOwned(tx.syncedHotTopic, payload.id, userId);
   const data = await encryptHotTopicPayload(encryptionKey, userId, payload);
   await tx.syncedHotTopic.upsert({
     where: { id: payload.id },
     create: data,
     update: withoutImmutable(data),
   });
-  return payload.id;
+  return { entityId: payload.id, wasInsert: !exists };
 }
 
-async function applyMutation(tx: any, encryptionKey: string | undefined, userId: string, mutation: SyncMutation) {
+async function applyMutation(tx: any, encryptionKey: string | undefined, userId: string, mutation: SyncMutation): Promise<ApplyResult> {
   switch (mutation.entityType) {
     case 'contact':
       return upsertContact(tx, encryptionKey, userId, mutation.payload);
@@ -465,12 +483,62 @@ async function applyMutation(tx: any, encryptionKey: string | undefined, userId:
   }
 }
 
+/**
+ * An authoritative product event to emit to PostHog AFTER the sync transaction
+ * commits. Collected during apply so we never fire on a rolled-back insert and
+ * never touch decrypted content (counts/ids only).
+ */
+type AuthoritativeEvent = { event: string; properties: Record<string, unknown> };
+
+/**
+ * Map a committed sync mutation to its authoritative product event, or null
+ * when this entity/operation isn't worth a server-side count.
+ *
+ * Only `upsert` operations that were a real INSERT become `*_created`; updates
+ * of existing rows become `*_updated`; `delete` operations become `*_deleted`.
+ * `contact_group` / `hot_topic` get a generic created/updated/deleted so the
+ * server can still corroborate group membership and hot-topic activity.
+ */
+function toAuthoritativeEvent(
+  entityType: SyncMutation['entityType'],
+  operation: z.infer<typeof syncOperationSchema>,
+  wasInsert: boolean
+): AuthoritativeEvent | null {
+  // Soft-deletes arrive as `upsert` with a non-null deletedAt; an explicit
+  // `delete` operation is the unambiguous signal, so we key off that.
+  if (operation === 'delete') {
+    const deletedName: Partial<Record<SyncMutation['entityType'], string>> = {
+      contact: 'contact_deleted',
+      note: 'note_deleted',
+      group: 'group_deleted',
+    };
+    const name = deletedName[entityType];
+    return name ? { event: name, properties: { authoritative: true } } : null;
+  }
+
+  // upsert → created on a genuine insert, updated otherwise.
+  const names: Record<SyncMutation['entityType'], { created: string; updated: string } | null> = {
+    contact: { created: 'contact_created', updated: 'contact_updated' },
+    note: { created: 'note_created', updated: 'note_updated' },
+    group: { created: 'group_created', updated: 'group_updated' },
+    contact_group: { created: 'contact_added_to_group', updated: 'contact_group_updated' },
+    hot_topic: { created: 'hot_topic_created', updated: 'hot_topic_updated' },
+  };
+  const pair = names[entityType];
+  if (!pair) return null;
+  return {
+    event: wasInsert ? pair.created : pair.updated,
+    properties: { authoritative: true },
+  };
+}
+
 async function applyMutations(tx: any, encryptionKey: string | undefined, userId: string, mutations: SyncMutation[]) {
   const appliedMutationIds: string[] = [];
+  const events: AuthoritativeEvent[] = [];
   let cursor = 0n;
 
   for (const mutation of mutations) {
-    const entityId = await applyMutation(tx, encryptionKey, userId, mutation);
+    const { entityId, wasInsert } = await applyMutation(tx, encryptionKey, userId, mutation);
     const change = await tx.syncChange.create({
       data: {
         userId,
@@ -482,12 +550,29 @@ async function applyMutations(tx: any, encryptionKey: string | undefined, userId
 
     cursor = change.sequence;
     appliedMutationIds.push(mutation.id);
+
+    const authoritative = toAuthoritativeEvent(mutation.entityType, mutation.operation, wasInsert);
+    if (authoritative) {
+      events.push(authoritative);
+    }
   }
 
   return {
     cursor: cursor.toString(),
     appliedMutationIds,
+    events,
   };
+}
+
+/**
+ * Emit authoritative product events to PostHog after a sync transaction has
+ * committed. Best-effort (each capture is itself a no-op-safe try/catch); never
+ * blocks the response. No decrypted content ever reaches PostHog here.
+ */
+function emitAuthoritativeEvents(userId: string, events: AuthoritativeEvent[]): void {
+  for (const { event, properties } of events) {
+    captureServerEvent(event, userId, properties);
+  }
 }
 
 async function getEntityPayload(prisma: any, encryptionKey: string | undefined, userId: string, entityType: z.infer<typeof syncEntityTypeSchema>, entityId: string) {
@@ -563,9 +648,12 @@ syncRoutes.post('/initialize', async (c) => {
       return c.json({ error: 'Server sync state already exists' }, 409);
     }
 
-    const result = await prisma.$transaction((tx: any) =>
+    const { events, ...result } = await prisma.$transaction((tx: any) =>
       applyMutations(tx, c.env.SYNC_ENCRYPTION_KEY, user.id, validation.data.mutations)
     );
+
+    // Transaction committed → fire authoritative product events (best-effort).
+    emitAuthoritativeEvents(user.id, events);
 
     return c.json(result);
   } catch (error) {
@@ -583,9 +671,12 @@ syncRoutes.post('/push', async (c) => {
     }
 
     const prisma = getPrisma(c.env.DATABASE_URL);
-    const result = await prisma.$transaction((tx: any) =>
+    const { events, ...result } = await prisma.$transaction((tx: any) =>
       applyMutations(tx, c.env.SYNC_ENCRYPTION_KEY, user.id, validation.data.mutations)
     );
+
+    // Transaction committed → fire authoritative product events (best-effort).
+    emitAuthoritativeEvents(user.id, events);
 
     return c.json(result);
   } catch (error) {
