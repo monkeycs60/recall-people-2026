@@ -4,10 +4,12 @@ import { z } from 'zod';
 import { format } from 'date-fns';
 import { authMiddleware } from '../middleware/auth';
 import { wrapUserInput, getSecurityInstructions } from '../lib/security';
-import { createAIModel, getAIProviderName, getAIModel } from '../lib/ai-provider';
+import { createTracedAIModel, getAIProviderName, getAIModel } from '../lib/ai-provider';
 import { measurePerformance } from '../lib/performance-logger';
 import { getLangfuseClient } from '../lib/telemetry';
 import { evaluateExtraction } from '../lib/evaluators';
+import { captureServerException } from '../lib/posthog';
+import type { User } from '@prisma/client';
 
 type Bindings = {
   DATABASE_URL: string;
@@ -1145,7 +1147,11 @@ const getLovesInstruction = (language: string): string => {
   }
 };
 
-export const extractRoutes = new Hono<{ Bindings: Bindings }>();
+type Variables = {
+  user: User;
+};
+
+export const extractRoutes = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
 extractRoutes.use('/*', authMiddleware);
 
@@ -1177,7 +1183,15 @@ extractRoutes.post('/', async (c) => {
       ENABLE_LANGFUSE: c.env.ENABLE_LANGFUSE,
     };
 
-    const model = createAIModel(providerConfig);
+    const userId = c.get('user')?.id;
+    const model = createTracedAIModel(providerConfig, {
+      distinctId: userId,
+      properties: {
+        feature: 'extract',
+        route: '/api/extract',
+        language,
+      },
+    });
     const modelName = getAIModel(providerConfig);
 
     // Create Langfuse generation span
@@ -1283,6 +1297,7 @@ extractRoutes.post('/', async (c) => {
             XAI_API_KEY: c.env.XAI_API_KEY,
             enableEvaluation: c.env.ENABLE_EVALUATION === 'true',
             samplingRate: parseFloat(c.env.EVALUATION_SAMPLING_RATE || '0.25'),
+            distinctId: userId,
           }
         ).then((evaluation) => {
           if (evaluation && trace) {
@@ -1303,6 +1318,12 @@ extractRoutes.post('/', async (c) => {
   } catch (error) {
     console.error('Extraction error:', error);
     trace?.update({ output: { error: String(error) } });
+    captureServerException(error, c.get('user')?.id, {
+      feature: 'extract',
+      route: '/api/extract',
+      provider: c.env.AI_PROVIDER || 'cerebras',
+      stage: 'generate-text',
+    });
     return c.json({ error: 'Extraction failed' }, 500);
   }
 });

@@ -7,6 +7,9 @@ import { wrapUserInput, getSecurityInstructions } from '../lib/security';
 import { measurePerformance } from '../lib/performance-logger';
 import { evaluateDetection } from '../lib/evaluators';
 import { getLangfuseClient } from '../lib/telemetry';
+import { withTracing } from '@posthog/ai/vercel';
+import { getPostHog, aiTracingOptions, captureServerException } from '../lib/posthog';
+import type { User } from '@prisma/client';
 
 type Bindings = {
   CEREBRAS_API_KEY: string;
@@ -664,7 +667,11 @@ function validateDetection(
   return detection;
 }
 
-export const detectContactRoutes = new Hono<{ Bindings: Bindings }>();
+type Variables = {
+  user: User;
+};
+
+export const detectContactRoutes = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
 detectContactRoutes.use('/*', authMiddleware);
 
@@ -697,7 +704,26 @@ detectContactRoutes.post('/', async (c) => {
       apiKey: c.env.CEREBRAS_API_KEY,
     });
 
-    const model = cerebras(modelName);
+    const userId = c.get('user')?.id;
+
+    // PostHog LLM observability: wrap the model so the generateText call below
+    // auto-emits a $ai_generation event. No-op when PostHog is disabled.
+    const baseModel = cerebras(modelName);
+    const phClient = getPostHog();
+    const model = phClient
+      ? withTracing(
+          baseModel,
+          phClient,
+          aiTracingOptions({
+            distinctId: userId,
+            properties: {
+              feature: 'detect-contact',
+              route: '/api/detect-contact',
+              language,
+            },
+          })
+        )
+      : baseModel;
 
     // Create Langfuse generation span
     const generation = trace?.generation({
@@ -739,6 +765,13 @@ detectContactRoutes.post('/', async (c) => {
         model: modelName,
         transcriptionLength: transcription.length,
         contactsCount: contacts.length,
+      });
+      captureServerException(llmError, userId, {
+        feature: 'detect-contact',
+        route: '/api/detect-contact',
+        provider: 'cerebras',
+        model: modelName,
+        stage: 'llm-call',
       });
       trace?.update({ output: { error: `LLM error: ${errorMessage}` } });
       return c.json({ error: `LLM call failed: ${errorMessage}` }, 500);

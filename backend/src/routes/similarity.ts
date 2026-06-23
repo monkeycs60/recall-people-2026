@@ -4,9 +4,10 @@ import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
 import { similarityRequestSchema } from '../lib/validation';
 import { auditLog } from '../lib/audit';
-import { createAIModel, getAIProviderName, getAIModel } from '../lib/ai-provider';
+import { createTracedAIModel, getAIProviderName, getAIModel } from '../lib/ai-provider';
 import { measurePerformance } from '../lib/performance-logger';
 import { getLangfuseClient } from '../lib/telemetry';
+import { captureServerException } from '../lib/posthog';
 
 type Bindings = {
 	DATABASE_URL: string;
@@ -105,7 +106,13 @@ similarityRoutes.post('/batch', async (c) => {
 			ENABLE_LANGFUSE: c.env.ENABLE_LANGFUSE,
 		};
 
-		const model = createAIModel(providerConfig);
+		const model = createTracedAIModel(providerConfig, {
+			distinctId: c.get('user')?.id,
+			properties: {
+				feature: 'similarity',
+				route: '/api/similarity/batch',
+			},
+		});
 		const modelName = getAIModel(providerConfig);
 
 		// Create Langfuse generation span
@@ -153,6 +160,12 @@ similarityRoutes.post('/batch', async (c) => {
 	} catch (error) {
 		console.error('Similarity calculation error:', error);
 		trace?.update({ output: { error: String(error) } });
+		captureServerException(error, c.get('user')?.id, {
+			feature: 'similarity',
+			route: '/api/similarity/batch',
+			provider: c.env.AI_PROVIDER || 'cerebras',
+			stage: 'generate-text',
+		});
 		await auditLog(c, {
 			userId: c.get('user')?.id,
 			action: 'extract',

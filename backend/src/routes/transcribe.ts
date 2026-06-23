@@ -4,6 +4,7 @@ import { authMiddleware } from '../middleware/auth';
 import { auditLog } from '../lib/audit';
 import { transcribeAudio, getSTTProviderName, getSTTModelName } from '../lib/speech-to-text-provider';
 import { measurePerformance } from '../lib/performance-logger';
+import { captureAiGeneration, captureServerException } from '../lib/posthog';
 
 type Bindings = {
   DATABASE_URL: string;
@@ -84,21 +85,62 @@ transcribeRoutes.post('/', async (c) => {
       ENABLE_PERFORMANCE_LOGGING: c.env.ENABLE_PERFORMANCE_LOGGING,
     };
 
-    // Use the speech-to-text provider wrapper with performance logging
-    const result = await measurePerformance(
-      () => transcribeAudio(providerConfig, audioBuffer, transcriptionLanguage),
-      {
-        route: '/transcribe',
-        provider: getSTTProviderName(providerConfig),
-        model: getSTTModelName(providerConfig),
-        operationType: 'speech-to-text',
-        inputSize: audioBuffer.byteLength,
-        metadata: { language: transcriptionLanguage },
-        enabled: String(c.env.ENABLE_PERFORMANCE_LOGGING) === 'true',
-      }
-    );
+    const userId = c.get('user')?.id;
+    const sttModel = getSTTModelName(providerConfig);
+
+    // Transcription goes through Groq directly (not the Vercel AI SDK), so we
+    // emit the $ai_generation event manually. Best-effort, never blocks.
+    const sttStart = Date.now();
+    let result;
+    try {
+      // Use the speech-to-text provider wrapper with performance logging
+      result = await measurePerformance(
+        () => transcribeAudio(providerConfig, audioBuffer, transcriptionLanguage),
+        {
+          route: '/transcribe',
+          provider: getSTTProviderName(providerConfig),
+          model: sttModel,
+          operationType: 'speech-to-text',
+          inputSize: audioBuffer.byteLength,
+          metadata: { language: transcriptionLanguage },
+          enabled: String(c.env.ENABLE_PERFORMANCE_LOGGING) === 'true',
+        }
+      );
+    } catch (sttError) {
+      captureAiGeneration({
+        distinctId: userId,
+        model: sttModel,
+        provider: 'groq',
+        spanName: 'transcribe',
+        latencySeconds: (Date.now() - sttStart) / 1000,
+        isError: true,
+        error: sttError,
+        extra: {
+          feature: 'transcription',
+          route: '/api/transcribe',
+          language: transcriptionLanguage,
+        },
+      });
+      throw sttError;
+    }
 
     const { transcript, confidence, duration } = result;
+
+    captureAiGeneration({
+      distinctId: userId,
+      model: sttModel,
+      provider: 'groq',
+      spanName: 'transcribe',
+      latencySeconds: (Date.now() - sttStart) / 1000,
+      output: { length: transcript.length },
+      extra: {
+        feature: 'transcription',
+        route: '/api/transcribe',
+        language: transcriptionLanguage,
+        audio_duration_seconds: duration,
+        audio_bytes: audioBuffer.byteLength,
+      },
+    });
 
     await auditLog(c, {
       userId: c.get('user')?.id,
@@ -116,6 +158,11 @@ transcribeRoutes.post('/', async (c) => {
     });
   } catch (error) {
     console.error('Transcription error:', error);
+    captureServerException(error, c.get('user')?.id, {
+      feature: 'transcription',
+      route: '/api/transcribe',
+      provider: 'groq',
+    });
     await auditLog(c, {
       userId: c.get('user')?.id,
       action: 'transcribe',

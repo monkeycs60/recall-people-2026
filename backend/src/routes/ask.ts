@@ -2,9 +2,10 @@ import { Hono } from 'hono';
 import { generateText, Output } from 'ai';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
-import { createAIModel, AIProviderConfig } from '../lib/ai-provider';
+import { createTracedAIModel, AIProviderConfig } from '../lib/ai-provider';
 import { auditLog } from '../lib/audit';
 import { getLangfuseClient } from '../lib/telemetry';
+import { captureServerException } from '../lib/posthog';
 
 type Bindings = {
 	DATABASE_URL: string;
@@ -378,7 +379,14 @@ ${template.examples}`;
 		console.log('[Ask] Prompt length:', prompt.length);
 		console.log('[Ask] Creating AI model...');
 
-		const model = createAIModel(providerConfig);
+		const model = createTracedAIModel(providerConfig, {
+			distinctId: c.get('user')?.id,
+			properties: {
+				feature: 'ask',
+				route: '/api/ask',
+				language,
+			},
+		});
 
 		// Create Langfuse generation span
 		const generation = trace?.generation({
@@ -461,6 +469,13 @@ ${template.examples}`;
 		);
 
 		trace?.update({ output: { error: String(error) } });
+
+		captureServerException(error, c.get('user')?.id, {
+			feature: 'ask',
+			route: '/api/ask',
+			provider: c.env.AI_PROVIDER || 'cerebras',
+			stage: 'generate-text',
+		});
 
 		await auditLog(c, {
 			userId: c.get('user')?.id,

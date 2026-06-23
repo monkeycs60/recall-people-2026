@@ -1,6 +1,43 @@
 import { generateText, Output } from 'ai';
 import { z } from 'zod';
 import { createXai } from '@ai-sdk/xai';
+import { withTracing } from '@posthog/ai/vercel';
+import { getPostHog, aiTracingOptions, captureServerException } from './posthog';
+
+const EVALUATOR_MODEL = 'grok-4-1-fast';
+
+/**
+ * Build the Grok evaluator model, wrapped with PostHog tracing when enabled so
+ * each LLM-as-judge call emits a $ai_generation event. No-op when PostHog is
+ * disabled. Best-effort: tracing failure falls back to the untraced model.
+ */
+function createEvaluatorModel(config: EvaluatorConfig, evaluator: string) {
+	const grok = createXai({ apiKey: config.XAI_API_KEY });
+	const baseModel = grok(EVALUATOR_MODEL);
+
+	const phClient = getPostHog();
+	if (!phClient) {
+		return baseModel;
+	}
+
+	try {
+		return withTracing(
+			baseModel,
+			phClient,
+			aiTracingOptions({
+				distinctId: config.distinctId,
+				properties: {
+					feature: 'evaluator',
+					evaluator,
+					$ai_provider: 'xai',
+				},
+			})
+		);
+	} catch (error) {
+		console.error('[PostHog] evaluator withTracing failed:', error);
+		return baseModel;
+	}
+}
 
 /**
  * LLM-as-a-Judge Evaluators for Quality Measurement
@@ -35,6 +72,7 @@ export type EvaluatorConfig = {
 	XAI_API_KEY: string;
 	samplingRate?: number; // 0-1, default 0.25 (25%)
 	enableEvaluation?: boolean; // default false
+	distinctId?: string; // user id for PostHog $ai_generation attribution
 };
 
 /**
@@ -79,11 +117,7 @@ export async function evaluateExtraction(
 
 	try {
 		// Use Grok 4.1 Fast (very cheap) for evaluation
-		const grok = createXai({
-			apiKey: config.XAI_API_KEY,
-		});
-
-		const evaluatorModel = grok('grok-4-1-fast');
+		const evaluatorModel = createEvaluatorModel(config, 'extraction');
 
 		const prompt = `Tu es un évaluateur de qualité pour un système d'extraction d'informations.
 
@@ -128,6 +162,12 @@ Sois strict et objectif.`;
 		return evaluation!;
 	} catch (error) {
 		console.error('Evaluation failed:', error);
+		captureServerException(error, config.distinctId, {
+			feature: 'evaluator',
+			evaluator: 'extraction',
+			provider: 'xai',
+			model: EVALUATOR_MODEL,
+		});
 		return null;
 	}
 }
@@ -168,11 +208,7 @@ export async function evaluateSearch(
 	}
 
 	try {
-		const grok = createXai({
-			apiKey: config.XAI_API_KEY,
-		});
-
-		const evaluatorModel = grok('grok-4-1-fast');
+		const evaluatorModel = createEvaluatorModel(config, 'search');
 
 		const prompt = `Tu es un évaluateur de qualité pour un moteur de recherche dans une base de contacts.
 
@@ -210,6 +246,12 @@ Sois strict et objectif.`;
 		return evaluation!;
 	} catch (error) {
 		console.error('Search evaluation failed:', error);
+		captureServerException(error, config.distinctId, {
+			feature: 'evaluator',
+			evaluator: 'search',
+			provider: 'xai',
+			model: EVALUATOR_MODEL,
+		});
 		return null;
 	}
 }
@@ -261,11 +303,7 @@ export async function evaluateDetection(
 	}
 
 	try {
-		const grok = createXai({
-			apiKey: config.XAI_API_KEY,
-		});
-
-		const evaluatorModel = grok('grok-4-1-fast');
+		const evaluatorModel = createEvaluatorModel(config, 'detection');
 
 		const contactsSummary = contacts.map((contact) => {
 			const name = `${contact.firstName}${contact.lastName ? ` ${contact.lastName}` : ''}${contact.nickname ? ` (${contact.nickname})` : ''}`;
@@ -307,6 +345,12 @@ Sois strict et objectif.`;
 		return evaluation!;
 	} catch (error) {
 		console.error('Detection evaluation failed:', error);
+		captureServerException(error, config.distinctId, {
+			feature: 'evaluator',
+			evaluator: 'detection',
+			provider: 'xai',
+			model: EVALUATOR_MODEL,
+		});
 		return null;
 	}
 }
@@ -343,11 +387,7 @@ export async function evaluateSummary(
 	}
 
 	try {
-		const grok = createXai({
-			apiKey: config.XAI_API_KEY,
-		});
-
-		const evaluatorModel = grok('grok-4-1-fast');
+		const evaluatorModel = createEvaluatorModel(config, 'summary');
 
 		const allTranscriptions = transcriptions
 			.map((t, i) => `[Note ${i + 1}]\n${t}`)
@@ -395,6 +435,12 @@ Sois TRÈS strict sur les hallucinations et les adjectifs.`;
 		return evaluation!;
 	} catch (error) {
 		console.error('Summary evaluation failed:', error);
+		captureServerException(error, config.distinctId, {
+			feature: 'evaluator',
+			evaluator: 'summary',
+			provider: 'xai',
+			model: EVALUATOR_MODEL,
+		});
 		return null;
 	}
 }
