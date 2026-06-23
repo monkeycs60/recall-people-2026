@@ -1,0 +1,270 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Footer from "../components/Footer.astro";
+---
+
+<Layout
+  title="Privacy Policy - Recall People"
+  description="Privacy Policy for Recall People app. Learn how we handle your data."
+>
+  <main class="min-h-screen page-shell text-foreground">
+    <div class="pt-24 pb-16">
+      <div class="container mx-auto px-4">
+        <div class="max-w-3xl mx-auto">
+          <h1 class="text-3xl md:text-4xl font-bold text-text-primary mb-4">
+            Privacy Policy
+          </h1>
+          <p class="text-text-secondary mb-8">
+            Last updated: April 2026
+          </p>
+
+          <div class="prose prose-stone max-w-none">
+            <section class="mb-10">
+              <h2 class="text-xl font-semibold text-text-primary mb-4">
+                1. Overview
+              </h2>
+              <p class="text-text-secondary leading-relaxed mb-4">
+                Recall People (&quot;we&quot;, &quot;our&quot;, or &quot;the app&quot;) is a privacy-first personal CRM
+                that helps you remember the people you meet. We are committed to protecting your privacy
+                and being transparent about how we handle your data.
+              </p>
+              <p class="text-text-secondary leading-relaxed">
+                <strong class="text-text-primary">Key principle:</strong> Your relationship data is synced
+                through your account so the app can work across devices. Sensitive content, including notes,
+                memories, and relationship context, is encrypted in our database. We do not sell your personal
+                data or use it to train AI models.
+              </p>
+            </section>
+
+            <section class="mb-10">
+              <h2 class="text-xl font-semibold text-text-primary mb-4">
+                2. Data We Collect
+              </h2>
+
+              <h3 class="text-lg font-medium text-text-primary mb-3 mt-6">
+                2.1 Relationship Data Synced Through Your Account
+              </h3>
+              <p class="text-text-secondary leading-relaxed mb-3">
+                The following app content is associated with your account and synced so you can access it
+                across your devices:
+              </p>
+              <ul class="list-disc pl-6 text-text-secondary space-y-2 mb-4">
+                <li>Contact information (names, phone numbers, emails, birthdays)</li>
+                <li>Notes and memories about your contacts</li>
+                <li>Voice recordings and their transcriptions</li>
+                <li>AI-generated summaries and conversation starters</li>
+                <li>Groups, tags, and events you create</li>
+                <li>Custom avatars generated for contacts</li>
+              </ul>
+
+              <h3 class="text-lg font-medium text-text-primary mb-3 mt-6">
+                2.2 Account Data
+              </h3>
+              <p class="text-text-secondary leading-relaxed mb-3">
+                We store the minimum data needed to provide authentication, secure sync, preferences,
+                and paid features:
+              </p>
+              <ul class="list-disc pl-6 text-text-secondary space-y-2 mb-4">
+                <li>Email address</li>
+                <li>Name (if provided)</li>
+                <li>Authentication tokens for secure login</li>
+                <li>Preferred language, subscription status, and usage counters for plan limits</li>
+                <li>Operational security logs such as IP address, user agent, action type, and success or failure status</li>
+              </ul>
+
+              <h3 class="text-lg font-medium text-text-primary mb-3 mt-6">
+                2.3 Sensitive Data and AI Processing
+              </h3>
+              <p class="text-text-secondary leading-relaxed mb-3">
+                Sensitive relationship content is encrypted in our database. When you use voice recording,
+                avatar generation, or AI features, the relevant content is sent to our providers only as needed
+                to deliver that feature:
+              </p>
+              <ul class="list-disc pl-6 text-text-secondary space-y-2">
+                <li><strong>Voice recordings:</strong> Sent to Groq for transcription using Whisper. We do not store those recordings on our servers.</li>
+                <li><strong>Text for AI analysis:</strong> Sent to Cerebras to extract contacts, generate summaries, run semantic search, and answer your questions via the Assistant.</li>
+                <li><strong>Avatar generation:</strong> Text descriptions such as gender, age range, and style are sent to OpenAI GPT Image 2 to generate illustrated contact avatars. No real photos are required for this feature.</li>
+                <li><strong>Website analytics:</strong> Our public website uses Umami analytics to understand aggregate page usage without building advertising profiles.</li>
+              </ul>
+            </section>
+
+            <section class="mb-10">
+              <h2 class="text-xl font-semibold text-text-primary mb-4">
+                3. How We Use Your Data
+              </h2>
+              <ul class="list-disc pl-6 text-text-secondary space-y-2">
+                <li>Transcribe your voice recordings into text</li>
+                <li>Extract contact information and events from your notes</li>
+                <li>Generate AI summaries and conversation starters</li>
+                <li>Create custom avatars for your contacts</li>
+                <li>Answer your questions about your contacts via the Assistant</li>
+                <li>Send you notifications about upcoming events (if enabled)</li>
+                <li>Sync relationship data through your account</li>
+                <li>Manage your account and subscription</li>
+                <li>Protect the service, prevent abuse, and debug reliability issues</li>
+              </ul>
+            </section>
+
+            <section class="mb-10">
+              <h2 class="text-xl font-semibold text-text-primary mb-4">
+                4. Third-Party Services
+              </h2>
+              <p class="text-text-secondary leading-relaxed mb-4">
+                We use the following third-party services to provide app functionality:
+              </p>
+              <ul class="list-disc pl-6 text-text-secondary space-y-2">
+                <li><strong>Groq:</strong> Speech-to-text transcription using Whisper</li>
+                <li><strong>Cerebras:</strong> AI analysis, contact extraction, summaries, and AI assistant</li>
+                <li><strong>OpenAI GPT Image 2:</strong> AI avatar generation from text descriptions</li>
+                <li><strong>RevenueCat:</strong> Subscription and payment management via App Store / Google Play</li>
+                <li><strong>Google Sign-In / Apple Sign-In:</strong> Optional authentication methods</li>
+                <li><strong>Umami:</strong> Privacy-friendly analytics for the public website</li>
+              </ul>
+              <p class="text-text-secondary leading-relaxed mt-4">
+                These services process data only as needed to provide their functionality and are bound by
+                their own privacy policies and data processing terms.
+              </p>
+            </section>
+
+            <section class="mb-10">
+              <h2 class="text-xl font-semibold text-text-primary mb-4">
+                5. Data Storage and Security
+              </h2>
+              <ul class="list-disc pl-6 text-text-secondary space-y-2">
+                <li>Relationship data is synced through your account</li>
+                <li>Sensitive content, including notes, memories, and relationship context, is encrypted in our database</li>
+                <li>Authentication tokens are stored securely using your device&apos;s keychain (iOS) or keystore (Android)</li>
+                <li>All communications with our servers use HTTPS encryption</li>
+                <li>We limit internal access to personal data to what is needed to operate, secure, and support the service</li>
+                <li>We do not sell your personal data</li>
+              </ul>
+            </section>
+
+            <section class="mb-10">
+              <h2 class="text-xl font-semibold text-text-primary mb-4">
+                6. AI and Your Data
+              </h2>
+              <p class="text-text-secondary leading-relaxed mb-4">
+                <strong class="text-text-primary">Your data is never used to train AI models.</strong>
+              </p>
+              <p class="text-text-secondary leading-relaxed mb-3">
+                When you record a note or ask the Assistant a question, your data is sent to our AI providers
+                for processing. We configure these services so your inputs and outputs are not used for
+                model training, except where you separately choose to share data with a provider outside
+                Recall People.
+              </p>
+              <p class="text-text-secondary leading-relaxed">
+                Providers may retain limited operational, safety, abuse-prevention, billing, or usage
+                metrics under their own terms. For example, Cerebras states that it does not retain prompt
+                content, API requests or responses, chat logs, user input, or model output. OpenAI may retain
+                API inputs and outputs for a limited period for safety, abuse prevention, and service operation
+                according to its API data controls.
+              </p>
+            </section>
+
+            <section class="mb-10">
+              <h2 class="text-xl font-semibold text-text-primary mb-4">
+                7. Your Rights
+              </h2>
+              <p class="text-text-secondary leading-relaxed mb-3">
+                You have full control over your data:
+              </p>
+              <ul class="list-disc pl-6 text-text-secondary space-y-2">
+                <li><strong>Access:</strong> View all your data directly in the app</li>
+                <li><strong>Export:</strong> Export your data anytime in JSON or CSV format</li>
+                <li><strong>Delete:</strong> Delete individual contacts, notes, or your entire account</li>
+                <li><strong>Portability:</strong> Your exported data can be used elsewhere</li>
+                <li><strong>Correction:</strong> Edit your contact and note data directly in the app</li>
+              </ul>
+            </section>
+
+            <section class="mb-10">
+              <h2 class="text-xl font-semibold text-text-primary mb-4">
+                8. Data Retention
+              </h2>
+              <ul class="list-disc pl-6 text-text-secondary space-y-2">
+                <li>Relationship data remains associated with your account until you delete it or request account deletion</li>
+                <li>Deleting the app from one device does not automatically delete synced account data</li>
+                <li>Account data is retained until you request deletion or as otherwise required for legal, billing, security, or abuse-prevention reasons</li>
+                <li>Operational logs are retained only as long as needed for security, debugging, abuse prevention, and legal obligations</li>
+                <li>Voice recordings sent for transcription are not stored by Recall People after processing</li>
+              </ul>
+            </section>
+
+            <section class="mb-10">
+              <h2 class="text-xl font-semibold text-text-primary mb-4">
+                9. International Transfers
+              </h2>
+              <p class="text-text-secondary leading-relaxed">
+                Our service providers may process data in countries outside your country of residence,
+                including the United States. When this happens, processing is governed by the provider&apos;s
+                contractual and legal safeguards.
+              </p>
+            </section>
+
+            <section class="mb-10">
+              <h2 class="text-xl font-semibold text-text-primary mb-4">
+                10. Legal Basis
+              </h2>
+              <p class="text-text-secondary leading-relaxed">
+                Where applicable privacy laws require a legal basis, we process data to provide the app
+                and your account, with your consent for AI processing, to comply with legal obligations,
+                and for our legitimate interests in security, abuse prevention, debugging, and improving
+                service reliability.
+              </p>
+            </section>
+
+            <section class="mb-10">
+              <h2 class="text-xl font-semibold text-text-primary mb-4">
+                11. Children&apos;s Privacy
+              </h2>
+              <p class="text-text-secondary leading-relaxed">
+                Recall People is not intended for children under 13 years of age. We do not knowingly
+                collect personal information from children under 13. If you believe we have collected
+                such information, please contact us immediately.
+              </p>
+            </section>
+
+            <section class="mb-10">
+              <h2 class="text-xl font-semibold text-text-primary mb-4">
+                12. Changes to This Policy
+              </h2>
+              <p class="text-text-secondary leading-relaxed">
+                We may update this privacy policy from time to time. We will notify you of any changes
+                by posting the new policy on this page and updating the &quot;Last updated&quot; date.
+              </p>
+            </section>
+
+            <section class="mb-10">
+              <h2 class="text-xl font-semibold text-text-primary mb-4">
+                13. Contact Us
+              </h2>
+              <p class="text-text-secondary leading-relaxed">
+                If you have any questions about this Privacy Policy, our data practices, or a request to
+                access, correct, export, or delete account data, please contact us at:
+              </p>
+              <p class="text-text-secondary mt-3">
+                <a href="mailto:privacy@recallpeople.com" class="text-primary hover:underline">
+                  privacy@recallpeople.com
+                </a>
+              </p>
+            </section>
+          </div>
+
+          <div class="mt-12 pt-8 border-t border-border-light">
+            <a
+              href="/"
+              class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-primary text-text-primary hover:text-white font-semibold rounded-xl border-2 border-border transition-all duration-200 hover:-translate-y-0.5"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+              </svg>
+              Back to Home
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <Footer />
+  </main>
+</Layout>

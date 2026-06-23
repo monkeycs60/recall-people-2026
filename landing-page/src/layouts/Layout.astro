@@ -1,0 +1,146 @@
+---
+// Self-hosted Plus Jakarta Sans (weights 400–800) — replaces the Google CDN.
+// The @fontsource non-variable family is named exactly 'Plus Jakarta Sans',
+// so --font-sans stays unchanged.
+import "@fontsource/plus-jakarta-sans/400.css";
+import "@fontsource/plus-jakarta-sans/500.css";
+import "@fontsource/plus-jakarta-sans/600.css";
+import "@fontsource/plus-jakarta-sans/700.css";
+import "@fontsource/plus-jakarta-sans/800.css";
+import "../styles/globals.css";
+import Navbar from "../components/Navbar.astro";
+
+export interface Props {
+  title?: string;
+  description?: string;
+  /** When true, emit the rich SEO/OG/JSON-LD head used by the home page. */
+  home?: boolean;
+  /** Canonical URL override. Defaults to the site root for the home page. */
+  canonical?: string;
+}
+
+const APP_STORE_URL =
+  "https://apps.apple.com/fr/app/recall-people/id6757320179";
+
+const {
+  title = "Recall People: A personal CRM you talk to",
+  description =
+    "After a call or a coffee, just talk. In seconds, Recall People turns your voice into a structured profile and reminds you before it counts.",
+  home = false,
+  canonical,
+} = Astro.props;
+
+const ogTitle = "Recall People: A personal CRM you talk to";
+const ogDescription =
+  "Just talk after any conversation. In seconds, Recall People structures it into a profile, dates the upcoming moments, and reminds you before they happen.";
+const twitterDescription =
+  "Turn your voice into structured relationship memory in seconds, with reminders that actually fire.";
+
+const keywords = [
+  "Personal CRM", "Networking App", "Remember names app",
+  "AI relationship manager", "Voice-to-CRM", "Private contact manager",
+  "Relationship intelligence", "Voice notes CRM", "Social memory upgrade",
+].join(", ");
+
+const ldJson = {
+  "@context": "https://schema.org",
+  "@type": "MobileApplication",
+  "name": "Recall People",
+  "description":
+    "Recall People is a voice-first personal CRM. Record a quick voice note after any conversation, and AI automatically extracts names, facts, and upcoming events into structured contact profiles, then reminds you before they happen. Data is local-first (SQLite) and synced through your account.",
+  "applicationCategory": "ProductivityApplication",
+  "operatingSystem": "iOS",
+  "offers": [
+    {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "EUR",
+      "description": "Free: up to 15 contacts, voice (up to 1 min) & text notes, event & reconnect reminders, unlimited icebreakers & summaries, 10 AI assistant questions per month",
+    },
+    {
+      "@type": "Offer",
+      "price": "4.99",
+      "priceCurrency": "EUR",
+      "description": "Premium monthly: unlimited contacts, weekly digest, unlimited AI assistant, 3-minute voice notes, post-event follow-up reminders",
+    },
+    {
+      "@type": "Offer",
+      "price": "39.99",
+      "priceCurrency": "EUR",
+      "description": "Premium annual: everything in Premium, two months free",
+    },
+  ],
+  "featureList": [
+    "Voice-first capture in 5 languages",
+    "AI extraction of names, facts, dates, and events",
+    "Hot topics auto-dated from speech, color-coded by urgency",
+    "Per-contact timeline of past and upcoming moments",
+    "AI-generated icebreakers before you meet",
+    "Assistant that answers questions about your network with cited sources",
+    "Full-text search across all notes",
+    "Groups and flexible sorting",
+    "Event reminders and push notifications",
+    "Local-first storage (SQLite) with encrypted account sync",
+  ],
+  "url": "https://recallpeople.com",
+  "downloadUrl": APP_STORE_URL,
+  "inLanguage": ["en", "fr", "es", "it", "de"],
+};
+---
+
+<!doctype html>
+<html lang="en" style="--font-sans: 'Plus Jakarta Sans';">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+
+    {home && (
+      <>
+        <meta name="keywords" content={keywords} />
+        <meta name="author" content="Recall People" />
+        <meta name="creator" content="Recall People" />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href={canonical ?? "https://recallpeople.com"} />
+
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:locale" content="en_US" />
+        <meta property="og:url" content="https://recallpeople.com" />
+        <meta property="og:site_name" content="Recall People" />
+        <meta property="og:title" content={ogTitle} />
+        <meta property="og:description" content={ogDescription} />
+        <meta property="og:image" content="https://recallpeople.com/og.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="Recall People: A personal CRM you talk to" />
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={ogTitle} />
+        <meta name="twitter:description" content={twitterDescription} />
+        <meta name="twitter:image" content="https://recallpeople.com/og.png" />
+
+        <script
+          type="application/ld+json"
+          set:html={JSON.stringify(ldJson)}
+        />
+      </>
+    )}
+
+    {canonical && !home && <link rel="canonical" href={canonical} />}
+
+    <script
+      defer
+      src="https://cloud.umami.is/script.js"
+      data-website-id="16afad82-6cb1-469b-bca1-bbb3916ba913"
+    ></script>
+  </head>
+  <body class="antialiased">
+    <Navbar />
+    <slot />
+  </body>
+</html>

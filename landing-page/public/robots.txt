@@ -1,0 +1,23 @@
+User-Agent: *
+Allow: /
+Disallow: /reset-password
+
+User-Agent: OAI-SearchBot
+Allow: /
+
+User-Agent: ChatGPT-User
+Allow: /
+
+User-Agent: PerplexityBot
+Allow: /
+
+User-Agent: ClaudeBot
+Allow: /
+
+User-Agent: Google-Extended
+Allow: /
+
+User-Agent: Applebot-Extended
+Allow: /
+
+Sitemap: https://recallpeople.com/sitemap.xml

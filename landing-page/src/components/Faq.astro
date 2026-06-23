@@ -1,7 +1,4 @@
-"use client";
-
-import { useEffect, useRef } from "react";
-
+---
 const FAQ_ITEMS: { q: string; a: string }[] = [
   {
     q: "What is a personal CRM?",
@@ -42,59 +39,45 @@ const FAQ_SCHEMA = {
     acceptedAnswer: { "@type": "Answer", text: item.a },
   })),
 };
+---
 
-export default function Faq() {
-  const listRef = useRef<HTMLDivElement>(null);
+<section id="faq">
+  <script
+    type="application/ld+json"
+    set:html={JSON.stringify(FAQ_SCHEMA)}
+  />
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow" style="text-align: center;">FAQ</p>
+      <h2>Good questions, answered.</h2>
+    </div>
+    <div class="faq" id="faqList">
+      {FAQ_ITEMS.map((item) => (
+        <div class="fq">
+          <button type="button">
+            {item.q}
+            <span class="plus"></span>
+          </button>
+          <div class="ans">
+            <p>{item.a}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
 
-  useEffect(() => {
-    const root = listRef.current;
-    if (!root) return;
+<script>
+  const root = document.getElementById("faqList");
+  if (root) {
     const fqs = Array.from(root.querySelectorAll<HTMLElement>(".fq"));
-    const handlers = fqs.map((fq) => {
-      const handler = () => {
+    fqs.forEach((fq) => {
+      const btn = fq.querySelector("button");
+      btn?.addEventListener("click", () => {
         const wasOpen = fq.classList.contains("open");
         fqs.forEach((o) => o.classList.remove("open"));
         if (!wasOpen) fq.classList.add("open");
-      };
-      const btn = fq.querySelector("button");
-      btn?.addEventListener("click", handler);
-      return handler;
-    });
-    return () => {
-      fqs.forEach((fq, i) => {
-        const btn = fq.querySelector("button");
-        btn?.removeEventListener("click", handlers[i]);
       });
-    };
-  }, []);
-
-  return (
-    <section id="faq">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_SCHEMA) }}
-      />
-      <div className="wrap">
-        <div className="sec-head">
-          <p className="eyebrow" style={{ textAlign: "center" }}>
-            FAQ
-          </p>
-          <h2>Good questions, answered.</h2>
-        </div>
-        <div className="faq" id="faqList" ref={listRef}>
-          {FAQ_ITEMS.map((item) => (
-            <div className="fq" key={item.q}>
-              <button type="button">
-                {item.q}
-                <span className="plus" />
-              </button>
-              <div className="ans">
-                <p>{item.a}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
+    });
+  }
+</script>
