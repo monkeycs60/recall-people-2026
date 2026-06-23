@@ -15,6 +15,7 @@ import { contactService } from '@/services/contact.service';
 import { groupService } from '@/services/group.service';
 import { generateSuggestedQuestions, generateSummary, generateAvatarFromHints, extractInfo, sendExtractionFeedback } from '@/lib/api';
 import { noteService } from '@/services/note.service';
+import { analytics, AnalyticsEvent } from '@/lib/analytics';
 import { useAppStore } from '@/stores/app-store';
 import { useSubscriptionStore } from '@/stores/subscription-store';
 import { queryKeys } from '@/lib/query-keys';
@@ -439,6 +440,11 @@ export default function ReviewScreen() {
         });
         finalContactId = newContact.id;
 
+        analytics.capture(AnalyticsEvent.CONTACT_CREATED, {
+          has_last_name: Boolean(lastName),
+          groups_count: selectedGroups.length,
+        });
+
         if (selectedGroups.length > 0) {
           const groupIds: string[] = [];
           for (const group of selectedGroups) {
@@ -486,6 +492,12 @@ export default function ReviewScreen() {
         transcription: editedTranscription,
       });
 
+      analytics.capture(AnalyticsEvent.NOTE_CREATED, {
+        is_new_contact: contactId === 'new',
+        has_audio: Boolean(audioUri),
+        transcription_length: editedTranscription?.length ?? 0,
+      });
+
       if (editableHotTopics.length > 0) {
         for (const index of selectedHotTopics) {
           const topic = editableHotTopics[index];
@@ -514,6 +526,9 @@ export default function ReviewScreen() {
               topic.title,
               contactName
             );
+            analytics.capture(AnalyticsEvent.REMINDER_SET, {
+              source: 'hot_topic_event',
+            });
           }
         }
       }

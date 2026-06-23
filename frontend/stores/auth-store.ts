@@ -6,6 +6,7 @@ import { getUserSettings } from '@/lib/api';
 import { useSettingsStore } from './settings-store';
 import { useSubscriptionStore } from './subscription-store';
 import { changeLanguage } from '@/lib/i18n';
+import { analytics, AnalyticsEvent } from '@/lib/analytics';
 import { Language, SUPPORTED_LANGUAGES } from '@/types';
 
 const isE2ETest = process.env.EXPO_PUBLIC_E2E_TEST === 'true';
@@ -54,7 +55,19 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       isLoading: false,
       isInitialized: false,
 
-      setUser: (user) => set({ user, isInitialized: true }),
+      setUser: (user) => {
+        // Tie all subsequent events (and session replays) to this account.
+        // Covers credential/Google/Apple login, registration, and silent
+        // token restore on launch — every path funnels through setUser.
+        if (user) {
+          analytics.identify(user.id, {
+            email: user.email,
+            name: user.name,
+            provider: user.provider,
+          });
+        }
+        set({ user, isInitialized: true });
+      },
 
       updateUser: (updates) => {
         const currentUser = get().user;
@@ -126,6 +139,9 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       },
 
       logout: async () => {
+        analytics.capture(AnalyticsEvent.LOGOUT);
+        // Detach the device from the account so the next user starts clean.
+        analytics.reset();
         await clearAuth();
         await clearActiveDatabaseUser();
         set({ user: null, isInitialized: false });

@@ -4,6 +4,7 @@ import { login as authLogin, register as authRegister, loginWithGoogle as authLo
 import { shouldResetFirstRunSettings } from '@/lib/auth-onboarding';
 import { useAuthStore } from '@/stores/auth-store';
 import { useSettingsStore } from '@/stores/settings-store';
+import { analytics, AnalyticsEvent } from '@/lib/analytics';
 import { useGoogleAuth } from './useGoogleAuth';
 import { useAppleAuth } from './useAppleAuth';
 
@@ -27,6 +28,7 @@ export const useAuth = () => {
     try {
       const result = await authLogin(email, password);
       setUser(result.user);
+      analytics.capture(AnalyticsEvent.LOGIN, { method: 'credentials' });
       router.replace('/(tabs)');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
@@ -46,6 +48,7 @@ export const useAuth = () => {
         resetFirstRunSettings();
       }
       setUser(result.user);
+      analytics.capture(AnalyticsEvent.SIGN_UP, { method: 'credentials' });
       router.replace('/(tabs)');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed');
@@ -72,10 +75,15 @@ export const useAuth = () => {
       }
 
       const result = await authLoginWithGoogle(googleResult.idToken);
-      if (shouldResetFirstRunSettings(result)) {
+      const isNewUser = shouldResetFirstRunSettings(result);
+      if (isNewUser) {
         resetFirstRunSettings();
       }
       setUser(result.user);
+      analytics.capture(
+        isNewUser ? AnalyticsEvent.SIGN_UP : AnalyticsEvent.LOGIN,
+        { method: 'google' },
+      );
       router.replace('/(tabs)');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Google login failed');
@@ -97,10 +105,15 @@ export const useAuth = () => {
       }
 
       const result = await authLoginWithApple(appleResult.identityToken, appleResult.fullName);
-      if (shouldResetFirstRunSettings(result)) {
+      const isNewUser = shouldResetFirstRunSettings(result);
+      if (isNewUser) {
         resetFirstRunSettings();
       }
       setUser(result.user);
+      analytics.capture(
+        isNewUser ? AnalyticsEvent.SIGN_UP : AnalyticsEvent.LOGIN,
+        { method: 'apple' },
+      );
       router.replace('/(tabs)');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Apple login failed');

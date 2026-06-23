@@ -16,6 +16,7 @@ import { transcribeAudio, extractInfo, detectContact } from '@/lib/api';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { showErrorToast, ApiError } from '@/lib/error-handler';
 import { getRecordingHotTopics } from '@/utils/recordingContext';
+import { analytics, AnalyticsEvent } from '@/lib/analytics';
 import i18n from '@/lib/i18n';
 
 const isE2ETest = process.env.EXPO_PUBLIC_E2E_TEST === 'true';
@@ -133,6 +134,10 @@ export const useRecording = () => {
 
       setRecordingState('recording');
       setRecordingDuration(0);
+
+      analytics.capture(AnalyticsEvent.VOICE_RECORDING_STARTED, {
+        preselected_contact: Boolean(preselectedContactId),
+      });
 
       durationIntervalRef.current = setInterval(() => {
         setRecordingDuration((prev) => {
@@ -277,6 +282,10 @@ export const useRecording = () => {
             },
           });
 
+          analytics.capture(AnalyticsEvent.CAPTURE_PROCESSED, {
+            input_method: 'voice',
+            preselected_contact: true,
+          });
           incrementNotesCount();
 
           return { uri, transcription: transcriptionResult.transcript };
@@ -313,6 +322,10 @@ export const useRecording = () => {
         },
       });
 
+      analytics.capture(AnalyticsEvent.CAPTURE_PROCESSED, {
+        input_method: 'voice',
+        preselected_contact: false,
+      });
       incrementNotesCount();
 
       return { uri, transcription: transcriptionResult.transcript };
@@ -444,6 +457,10 @@ export const useRecording = () => {
             },
           });
 
+          analytics.capture(AnalyticsEvent.CAPTURE_PROCESSED, {
+            input_method: 'text',
+            preselected_contact: true,
+          });
           incrementNotesCount();
           return;
         }
@@ -477,6 +494,10 @@ export const useRecording = () => {
         },
       });
 
+      analytics.capture(AnalyticsEvent.CAPTURE_PROCESSED, {
+        input_method: 'text',
+        preselected_contact: false,
+      });
       incrementNotesCount();
     } catch (error) {
       const errorDetails = {
