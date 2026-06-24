@@ -10,8 +10,8 @@ import { showErrorToast, showSuccessToast } from '@/lib/error-handler';
 import { useAuthStore } from '@/stores/auth-store';
 import { analytics, AnalyticsEvent } from '@/lib/analytics';
 
-const TERMS_URL = 'https://recall-people-2026.vercel.app/terms';
-const PRIVACY_URL = 'https://recall-people-2026.vercel.app/privacy';
+const TERMS_URL = 'https://recallpeople.com/terms';
+const PRIVACY_URL = 'https://recallpeople.com/privacy';
 
 type PaywallReason = 'ai_search' | 'recording_duration' | 'ai_assistant' | 'contact_limit' | 'proactive_reminders';
 

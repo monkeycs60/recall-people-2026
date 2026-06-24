@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Shield, ExternalLink } from 'lucide-react-native';
 import { Colors, Fonts } from '@/constants/theme';
 
-const PRIVACY_URL = 'https://recall-people-2026.vercel.app/privacy';
+const PRIVACY_URL = 'https://recallpeople.com/privacy';
 
 type AIConsentModalProps = {
   onAccept: () => void;
