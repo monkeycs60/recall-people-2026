@@ -2,6 +2,7 @@ import { View, StyleSheet, Pressable } from 'react-native';
 import { Image } from 'expo-image';
 import { Camera, User } from 'lucide-react-native';
 import { Colors, Shadows } from '@/constants/theme';
+import { normalizeAvatarUrl } from '@/lib/avatar-url';
 
 type UserAvatarProps = {
   name: string;
@@ -20,10 +21,11 @@ export function UserAvatar({
   cacheKey,
 }: UserAvatarProps) {
   const badgeSize = Math.max(24, size * 0.35);
-  const hasCustomAvatar = !!avatarUrl;
+  const normalizedAvatarUrl = normalizeAvatarUrl(avatarUrl);
+  const hasCustomAvatar = !!normalizedAvatarUrl;
 
-  const imageUri = hasCustomAvatar
-    ? `${avatarUrl}${avatarUrl.includes('?') ? '&' : '?'}v=${cacheKey || ''}`
+  const imageUri = normalizedAvatarUrl
+    ? `${normalizedAvatarUrl}${normalizedAvatarUrl.includes('?') ? '&' : '?'}v=${cacheKey || ''}`
     : undefined;
 
   const containerStyle = [

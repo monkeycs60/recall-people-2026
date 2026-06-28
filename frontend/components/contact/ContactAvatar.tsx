@@ -3,6 +3,7 @@ import { Image } from 'expo-image';
 import { Camera } from 'lucide-react-native';
 import { Colors, Shadows } from '@/constants/theme';
 import { Gender } from '@/types';
+import { normalizeAvatarUrl } from '@/lib/avatar-url';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -80,8 +81,9 @@ export function ContactAvatar({
   const initials = getInitials(fullName);
   const rotation = (hash % 5) - 2;
 
-  const imageUri = avatarUrl
-    ? `${avatarUrl}${avatarUrl.includes('?') ? '&' : '?'}v=${cacheKey || ''}`
+  const normalizedAvatarUrl = normalizeAvatarUrl(avatarUrl);
+  const imageUri = normalizedAvatarUrl
+    ? `${normalizedAvatarUrl}${normalizedAvatarUrl.includes('?') ? '&' : '?'}v=${cacheKey || ''}`
     : null;
   const isPendingAvatar = isGenerating && !imageUri;
 
