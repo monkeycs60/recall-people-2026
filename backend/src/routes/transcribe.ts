@@ -5,6 +5,7 @@ import { auditLog } from '../lib/audit';
 import { transcribeAudio, getSTTProviderName, getSTTModelName } from '../lib/speech-to-text-provider';
 import { measurePerformance } from '../lib/performance-logger';
 import { captureAiGeneration, captureServerException } from '../lib/posthog';
+import { whisperCostUsd } from '../lib/ai-pricing';
 
 type Bindings = {
   DATABASE_URL: string;
@@ -132,6 +133,7 @@ transcribeRoutes.post('/', async (c) => {
       provider: 'groq',
       spanName: 'transcribe',
       latencySeconds: (Date.now() - sttStart) / 1000,
+      costUsd: whisperCostUsd(sttModel, duration),
       output: { length: transcript.length },
       extra: {
         feature: 'transcription',

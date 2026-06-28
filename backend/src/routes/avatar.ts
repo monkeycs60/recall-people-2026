@@ -5,8 +5,12 @@ import {
   buildAvatarGenerationPrompt,
   generateAvatarImage,
   OPENAI_IMAGE_MODEL,
+  AVATAR_IMAGE_SIZE,
+  AVATAR_IMAGE_QUALITY,
 } from '../lib/avatar-image';
 import { captureAiGeneration, captureServerException } from '../lib/posthog';
+import { imageCostUsd } from '../lib/ai-pricing';
+import { resolvePublicBaseUrl } from '../lib/public-url';
 
 /**
  * Run an avatar image generation while emitting a $ai_generation event to
@@ -30,6 +34,7 @@ async function generateAvatarImageTraced(
       provider: 'openai',
       spanName: 'avatar-image',
       latencySeconds: (Date.now() - start) / 1000,
+      costUsd: imageCostUsd(OPENAI_IMAGE_MODEL, AVATAR_IMAGE_SIZE, AVATAR_IMAGE_QUALITY),
       output: { bytes: result.imageBuffer.length, mimeType: result.mimeType },
       extra: { feature: 'avatar-generation', surface },
     });
@@ -286,8 +291,11 @@ avatarRoutes.post('/upload', async (c) => {
     });
 
     // Build avatar URL using the API endpoint that serves from R2
-    const requestUrl = new URL(c.req.url);
-    const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
+    const baseUrl = resolvePublicBaseUrl({
+      requestUrl: c.req.url,
+      forwardedProto: c.req.header('X-Forwarded-Proto'),
+      configuredBaseUrl: c.env.AVATARS_PUBLIC_URL,
+    });
     const avatarUrl = `${baseUrl}/api/avatar/${filename}`;
 
     return c.json({
@@ -340,8 +348,11 @@ avatarRoutes.post('/generate', async (c) => {
     });
 
     // Build avatar URL using the API endpoint that serves from R2
-    const requestUrl = new URL(c.req.url);
-    const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
+    const baseUrl = resolvePublicBaseUrl({
+      requestUrl: c.req.url,
+      forwardedProto: c.req.header('X-Forwarded-Proto'),
+      configuredBaseUrl: c.env.AVATARS_PUBLIC_URL,
+    });
     const avatarUrl = `${baseUrl}/api/avatar/${filename}`;
 
     return c.json({
@@ -455,8 +466,11 @@ avatarRoutes.post('/generate-from-hints', async (c) => {
       },
     });
 
-    const requestUrl = new URL(c.req.url);
-    const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
+    const baseUrl = resolvePublicBaseUrl({
+      requestUrl: c.req.url,
+      forwardedProto: c.req.header('X-Forwarded-Proto'),
+      configuredBaseUrl: c.env.AVATARS_PUBLIC_URL,
+    });
     const avatarUrl = `${baseUrl}/api/avatar/${filename}`;
 
     console.log(`[Avatar Auto] Successfully generated for ${contactId}: ${avatarUrl}`);
@@ -550,8 +564,11 @@ avatarRoutes.post('/user/upload', async (c) => {
       },
     });
 
-    const requestUrl = new URL(c.req.url);
-    const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
+    const baseUrl = resolvePublicBaseUrl({
+      requestUrl: c.req.url,
+      forwardedProto: c.req.header('X-Forwarded-Proto'),
+      configuredBaseUrl: c.env.AVATARS_PUBLIC_URL,
+    });
     const avatarUrl = `${baseUrl}/api/avatar/users/${user.id}/avatar-${timestamp}.${extension}`;
 
     return c.json({
@@ -606,8 +623,11 @@ avatarRoutes.post('/user/generate', async (c) => {
       },
     });
 
-    const requestUrl = new URL(c.req.url);
-    const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
+    const baseUrl = resolvePublicBaseUrl({
+      requestUrl: c.req.url,
+      forwardedProto: c.req.header('X-Forwarded-Proto'),
+      configuredBaseUrl: c.env.AVATARS_PUBLIC_URL,
+    });
     const avatarUrl = `${baseUrl}/api/avatar/users/${user.id}/avatar-generated-${timestamp}.${extension}`;
 
     return c.json({

@@ -194,6 +194,12 @@ export type AiGenerationEvent = {
 	output?: unknown;
 	inputTokens?: number;
 	outputTokens?: number;
+	/**
+	 * Total cost of the call in USD. Set this for providers PostHog can't
+	 * auto-price (Groq Whisper, OpenAI image gen) — see lib/ai-pricing.ts.
+	 * Omit it for AI-SDK calls, where `withTracing` computes cost itself.
+	 */
+	costUsd?: number;
 	/** Latency in SECONDS (PostHog convention). */
 	latencySeconds?: number;
 	httpStatus?: number;
@@ -224,6 +230,9 @@ export function captureAiGeneration(event: AiGenerationEvent): void {
 				: {}),
 			...(event.outputTokens !== undefined
 				? { $ai_output_tokens: event.outputTokens }
+				: {}),
+			...(event.costUsd !== undefined
+				? { $ai_total_cost_usd: event.costUsd }
 				: {}),
 			...(event.latencySeconds !== undefined
 				? { $ai_latency: event.latencySeconds }
