@@ -39,7 +39,7 @@ Recall People helps you remember everyone you meet. After a conversation, you re
 
 ## Links
 
-- Website: https://recall-people.com
-- App Store: https://apps.apple.com/app/recall-people-personal-crm/id6746268382
-- Privacy Policy: https://recall-people.com/privacy
-- Support: support@recall-people.com
+- Website: https://recallpeople.com
+- App Store: https://apps.apple.com/app/recall-people/id6757320179
+- Privacy Policy: https://recallpeople.com/privacy
+- Support: support@recallpeople.com
