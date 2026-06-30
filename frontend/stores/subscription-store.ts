@@ -1,12 +1,7 @@
 import { create } from 'zustand';
 import { devtools, persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-  checkProWhitelist,
-  getNotesStatus,
-  incrementNoteCount,
-  getQuotas,
-} from '@/lib/api';
+import { checkProWhitelist, getQuotas } from '@/lib/api';
 
 type SubscriptionState = {
   isPremium: boolean;
@@ -19,9 +14,6 @@ type SubscriptionState = {
   avatarLimit: number;
   askUsed: number;
   askLimit: number;
-
-  notesCreatedThisMonth: number;
-  currentMonthKey: string;
 };
 
 type SubscriptionActions = {
@@ -29,22 +21,13 @@ type SubscriptionActions = {
   activateTestPro: () => void;
   deactivateTestPro: () => void;
   checkWhitelistStatus: () => Promise<void>;
-  incrementNotesCount: () => Promise<void>;
-  canCreateNote: () => boolean;
   getMaxRecordingDuration: () => number;
-  resetMonthlyCountIfNeeded: () => void;
   setHydrated: (hydrated: boolean) => void;
-  syncNotesStatus: () => Promise<void>;
 
   syncQuotas: () => Promise<void>;
   canCreateContact: (currentCount: number) => boolean;
   canGenerateAvatar: () => boolean;
   canUseAsk: () => boolean;
-};
-
-const getCurrentMonthKey = (): string => {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 };
 
 const FREE_CONTACTS_LIMIT = 15;
@@ -57,8 +40,6 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
       (set, get) => ({
         isPremium: false,
         isTestPro: false,
-        notesCreatedThisMonth: 0,
-        currentMonthKey: getCurrentMonthKey(),
         isHydrated: false,
         isSyncing: false,
 
@@ -87,58 +68,6 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
           } else if (state.isTestPro) {
             set({ isTestPro: false, isPremium: false });
           }
-        },
-
-        syncNotesStatus: async () => {
-          const state = get();
-          if (state.isSyncing) return;
-
-          set({ isSyncing: true });
-
-          try {
-            const status = await getNotesStatus();
-            if (status) {
-              if (__DEV__) {
-                console.log('[subscription] Synced notes status from server:', status);
-              }
-              set({
-                notesCreatedThisMonth: status.used,
-                currentMonthKey: status.monthKey,
-              });
-            }
-          } catch (error) {
-            if (__DEV__) {
-              console.error('[subscription] Failed to sync notes status:', error);
-            }
-          } finally {
-            set({ isSyncing: false });
-          }
-        },
-
-        incrementNotesCount: async () => {
-          const state = get();
-          state.resetMonthlyCountIfNeeded();
-
-          const newCount = get().notesCreatedThisMonth + 1;
-          set({ notesCreatedThisMonth: newCount });
-
-          try {
-            const result = await incrementNoteCount();
-            if (result) {
-              set({ notesCreatedThisMonth: result.used });
-              if (__DEV__) {
-                console.log('[subscription] Note count incremented on server:', result);
-              }
-            }
-          } catch (error) {
-            if (__DEV__) {
-              console.error('[subscription] Failed to increment on server, keeping local count:', error);
-            }
-          }
-        },
-
-        canCreateNote: () => {
-          return true;
         },
 
         canCreateContact: (currentCount: number) => {
@@ -195,17 +124,6 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
             : FREE_MAX_DURATION_SECONDS;
         },
 
-        resetMonthlyCountIfNeeded: () => {
-          const currentMonth = getCurrentMonthKey();
-          const state = get();
-          if (state.currentMonthKey !== currentMonth) {
-            set({
-              currentMonthKey: currentMonth,
-              notesCreatedThisMonth: 0,
-            });
-          }
-        },
-
         setHydrated: (isHydrated) => set({ isHydrated }),
       }),
       {
@@ -213,13 +131,10 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
         storage: createJSONStorage(() => AsyncStorage),
         onRehydrateStorage: () => (state) => {
           state?.setHydrated(true);
-          state?.resetMonthlyCountIfNeeded();
         },
         partialize: (state) => ({
           isPremium: state.isPremium,
           isTestPro: state.isTestPro,
-          notesCreatedThisMonth: state.notesCreatedThisMonth,
-          currentMonthKey: state.currentMonthKey,
           avatarUsed: state.avatarUsed,
           avatarLimit: state.avatarLimit,
           askUsed: state.askUsed,

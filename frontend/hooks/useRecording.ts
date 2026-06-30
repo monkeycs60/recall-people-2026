@@ -49,7 +49,6 @@ export const useRecording = () => {
   const router = useRouter();
   const { contacts, loadContacts, isInitialized } = useContactsStore();
   const getMaxRecordingDuration = useSubscriptionStore((state) => state.getMaxRecordingDuration);
-  const incrementNotesCount = useSubscriptionStore((state) => state.incrementNotesCount);
   const maxDuration = getMaxRecordingDuration();
   const [showPaywall, setShowPaywall] = useState(false);
   const [paywallReason, setPaywallReason] = useState<'recording_duration'>('recording_duration');
@@ -286,8 +285,6 @@ export const useRecording = () => {
             input_method: 'voice',
             preselected_contact: true,
           });
-          incrementNotesCount();
-
           return { uri, transcription: transcriptionResult.transcript };
         }
 
@@ -326,8 +323,6 @@ export const useRecording = () => {
         input_method: 'voice',
         preselected_contact: false,
       });
-      incrementNotesCount();
-
       return { uri, transcription: transcriptionResult.transcript };
     } catch (error) {
       // Log detailed error info for debugging
@@ -461,7 +456,6 @@ export const useRecording = () => {
             input_method: 'text',
             preselected_contact: true,
           });
-          incrementNotesCount();
           return;
         }
 
@@ -498,7 +492,6 @@ export const useRecording = () => {
         input_method: 'text',
         preselected_contact: false,
       });
-      incrementNotesCount();
     } catch (error) {
       const errorDetails = {
         name: error instanceof Error ? error.name : 'Unknown',

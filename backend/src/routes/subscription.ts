@@ -72,66 +72,8 @@ subscriptionRoutes.get('/check-whitelist', async (c) => {
   });
 });
 
-// Get notes usage status for the current month
-subscriptionRoutes.get('/notes-status', async (c) => {
-  const user = c.get('user');
-  const prisma = getPrisma(c.env.DATABASE_URL);
-  const monthKey = getCurrentMonthKey();
-
-  const usage = await prisma.userNotesUsage.findUnique({
-    where: {
-      userId_monthKey: {
-        userId: user.id,
-        monthKey,
-      },
-    },
-  });
-
-  const notesCount = usage?.notesCount ?? 0;
-
-  return c.json({
-    success: true,
-    used: notesCount,
-    limit: -1,
-    remaining: -1,
-    canCreate: true,
-    monthKey,
-  });
-});
-
-// Increment notes count after a note is successfully created
-subscriptionRoutes.post('/increment-note', async (c) => {
-  const user = c.get('user');
-  const prisma = getPrisma(c.env.DATABASE_URL);
-  const monthKey = getCurrentMonthKey();
-
-  const usage = await prisma.userNotesUsage.upsert({
-    where: {
-      userId_monthKey: {
-        userId: user.id,
-        monthKey,
-      },
-    },
-    update: {
-      notesCount: { increment: 1 },
-    },
-    create: {
-      userId: user.id,
-      monthKey,
-      notesCount: 1,
-    },
-  });
-
-  return c.json({
-    success: true,
-    used: usage.notesCount,
-    remaining: -1,
-    canCreate: true,
-  });
-});
-
 // ============================================
-// NEW: Monthly quotas endpoint
+// Monthly quotas endpoint
 // ============================================
 
 // GET /quotas — Returns monthly quota status with auto-reset on month change

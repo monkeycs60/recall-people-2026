@@ -236,8 +236,6 @@ export default function RootLayout() {
       const syncAndScheduleReminders = async () => {
         const subscriptionStore = useSubscriptionStore.getState();
         await subscriptionStore.checkWhitelistStatus();
-        // Sync server-backed subscription counters in sequence because the store shares one sync lock.
-        await subscriptionStore.syncNotesStatus();
         await subscriptionStore.syncQuotas();
 
         // Launch scheduling should never trigger the OS permission prompt.
