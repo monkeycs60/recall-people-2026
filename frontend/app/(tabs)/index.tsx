@@ -783,7 +783,7 @@ const styles = StyleSheet.create({
   },
   chipActive: {
     backgroundColor: Colors.primary,
-    ...Shadows.fab,
+    ...Shadows.elevated,
   },
   chipText: {
     fontSize: 13,

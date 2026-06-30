@@ -98,9 +98,12 @@
     "tapToEdit": "Zum Bearbeiten tippen",
     "today": "Heute",
     "yesterday": "Gestern",
-    "daysAgo": "Vor {{count}} Tagen",
-    "weeksAgo": "Vor {{count}} Wochen",
-    "monthsAgo": "Vor {{count}} Monaten",
+    "daysAgo_one": "Vor {{count}} Tag",
+    "daysAgo_other": "Vor {{count}} Tagen",
+    "weeksAgo_one": "Vor {{count}} Woche",
+    "weeksAgo_other": "Vor {{count}} Wochen",
+    "monthsAgo_one": "Vor {{count}} Monat",
+    "monthsAgo_other": "Vor {{count}} Monaten",
     "unsavedChanges": "Nicht gespeicherte Änderungen",
     "discardChangesQuestion": "Möchtest du deine Änderungen verwerfen?",
     "discard": "Verwerfen",
@@ -218,7 +221,8 @@
     "recordTopic": "Aufnehmen",
     "allCaughtUpTitle": "Alles erledigt",
     "allCaughtUpBody": "Keine überfälligen Follow-ups mehr. Wir erinnern dich, wenn jemand Aufmerksamkeit braucht.",
-    "reconnectedToday": "{{count}} heute erledigt",
+    "reconnectedToday_one": "{{count}} heute erledigt",
+    "reconnectedToday_other": "{{count}} heute erledigt",
     "backToContacts": "Zurück zu Kontakten"
   },
   "search": {
@@ -527,7 +531,8 @@
     "reminderQuarter": "Alle 3 Monate",
     "reminderSixMonths": "Alle 6 Monate",
     "reminderYear": "Jedes Jahr",
-    "reminderCustomDays": "Alle {{count}} Tage",
+    "reminderCustomDays_one": "Jeden Tag",
+    "reminderCustomDays_other": "Alle {{count}} Tage",
     "reminderNever": "Nie"
   },
   "selectContact": {
@@ -760,7 +765,8 @@
   "subscription": {
     "freePlan": "KOSTENLOS",
     "contactsUsed": "Kontakte",
-    "contactsRemaining": "{{count}} Kontakte verbleibend",
+    "contactsRemaining_one": "{{count}} Kontakt verbleibend",
+    "contactsRemaining_other": "{{count}} Kontakte verbleibend",
     "noContactsRemaining": "Keine Kontakte mehr verfügbar",
     "upgradeToPro": "Auf Pro upgraden",
     "unlockWith": "Mit Pro freischalten:",
@@ -869,7 +875,8 @@
     "placeholderBulletContactMoment": "etwas Gesagtes oder Getanes",
     "placeholderBulletContactDetail": "etwas, das du gelernt hast",
     "placeholderBulletContactUpcoming": "etwas Neues, das ansteht",
-    "minCharactersShort": "Mind. {{count}} Zeichen",
+    "minCharactersShort_one": "Mind. {{count}} Zeichen",
+    "minCharactersShort_other": "Mind. {{count}} Zeichen",
     "pressToSend": "Drücke Senden zum Analysieren",
     "sendLabel": "Senden"
   },
@@ -1047,7 +1054,8 @@
       "title": "Fragenverlauf",
       "today": "Heute",
       "yesterday": "Gestern",
-      "daysAgo": "Vor {{count}} Tagen"
+      "daysAgo_one": "Vor {{count}} Tag",
+      "daysAgo_other": "Vor {{count}} Tagen"
     }
   },
   "disambiguation": {
@@ -1060,15 +1068,18 @@
     "suggestedNickname": "Vorgeschlagener Spitzname: {{nickname}}",
     "lastContact": "Letzter Kontakt: {{date}}",
     "contextLabel": "Kontext",
-    "contextFacts": "{{count}} Infos",
-    "contextTopics": "{{count}} aktive Themen",
+    "contextFacts_one": "{{count}} Info",
+    "contextFacts_other": "{{count}} Infos",
+    "contextTopics_one": "{{count}} aktives Thema",
+    "contextTopics_other": "{{count}} aktive Themen",
     "dontKnow": "Weiß ich nicht",
     "noActiveTopics": "Keine aktiven Themen"
   },
   "settings": {
     "notSeenThreshold": "Erinnerung inaktiver Kontakt",
     "notSeenDescription": "Benachrichtigung erhalten, wenn du dich lange nicht bei einem Kontakt gemeldet hast. Individuell pro Kontakt einstellbar.",
-    "notSeenDays": "{{count}} Tage",
+    "notSeenDays_one": "{{count}} Tag",
+    "notSeenDays_other": "{{count}} Tage",
     "notSeenNever": "Nie",
     "weeklyDigest": "Wöchentliche Zusammenfassung",
     "weeklyDigestDescription": "Jeden Montag ein Überblick deiner Woche: kommende Ereignisse und Kontakte zum Nachholen",
@@ -1082,7 +1093,8 @@
   "reminder": {
     "eventTomorrow": "Morgen — {{title}}",
     "postEvent": "{{title}} war diese Woche — melde dich?",
-    "notSeen": "{{count}} Tage ohne Kontakt"
+    "notSeen_one": "{{count}} Tag ohne Kontakt",
+    "notSeen_other": "{{count}} Tage ohne Kontakt"
   },
   "aiConsent": {
     "title": "KI-Datenverarbeitung",
@@ -1104,14 +1116,17 @@
   },
   "contactProfile": {
     "heroTileEyebrow": "★ Was bei {{firstName}} ansteht",
-    "heroTileTitle": "{{count}} Momente vor uns",
+    "heroTileTitle_one": "{{count}} Moment vor uns",
+    "heroTileTitle_other": "{{count}} Momente vor uns",
     "heroTileEmpty": "Noch nichts geplant",
     "viewAll": "Timeline ansehen",
     "moreUpcoming": "weitere",
     "tileIcebreakers": "Eisbrecher",
-    "tileIcebreakersMeta": "{{count}} Fragen",
+    "tileIcebreakersMeta_one": "{{count}} Frage",
+    "tileIcebreakersMeta_other": "{{count}} Fragen",
     "tileAllNotes": "Alle Notizen",
-    "tileAllNotesMeta": "{{count}} Notizen",
+    "tileAllNotesMeta_one": "{{count}} Notiz",
+    "tileAllNotesMeta_other": "{{count}} Notizen",
     "tileWhereWeMet": "Wo wir uns getroffen haben",
     "tileWhereWeMetEmpty": "Ort hinzufügen",
     "tileBirthday": "Geburtstag",
@@ -1157,7 +1172,8 @@
   "contactIcebreakers": {
     "headerLabel": "EISBRECHER",
     "heroTitle": "Mit {{firstName}} sprechen",
-    "heroSubtitle": "{{count}} Themen, die du mit {{firstName}} ansprechen kannst",
+    "heroSubtitle_one": "{{count}} Thema, das du mit {{firstName}} ansprechen kannst",
+    "heroSubtitle_other": "{{count}} Themen, die du mit {{firstName}} ansprechen kannst",
     "bucket": {
       "ask": "FRAGE STELLEN",
       "followUp": "NACHFASSEN",
@@ -1172,7 +1188,8 @@
   },
   "contactNotes": {
     "eyebrow": "DEINE GESCHICHTE MIT",
-    "statNotes": "NOTIZEN",
+    "statNotes_one": "NOTIZ",
+    "statNotes_other": "NOTIZEN",
     "statKnown": "SEIT",
     "statKnownDays_one": "{{count}} Tag",
     "statKnownDays_other": "{{count}} Tage",
@@ -1183,9 +1200,12 @@
     "statUpcoming": "GEPLANT",
     "relativeToday": "Heute",
     "relativeYesterday": "Gestern",
-    "relativeDaysAgo": "vor {{count}} Tagen",
-    "relativeMonthsAgo": "vor {{count}} Monaten",
-    "relativeYearsAgo": "vor {{count}} Jahren",
+    "relativeDaysAgo_one": "vor {{count}} Tag",
+    "relativeDaysAgo_other": "vor {{count}} Tagen",
+    "relativeMonthsAgo_one": "vor {{count}} Monat",
+    "relativeMonthsAgo_other": "vor {{count}} Monaten",
+    "relativeYearsAgo_one": "vor {{count}} Jahr",
+    "relativeYearsAgo_other": "vor {{count}} Jahren",
     "emptyTitle": "Noch keine Notizen",
     "emptyBody": "Nimm deine erste Notiz zu {{firstName}} auf.",
     "untitledNote": "Notiz ohne Titel"

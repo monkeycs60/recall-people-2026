@@ -125,7 +125,7 @@ export default function ContactNotesScreen() {
       <View style={styles.statRow}>
         <View style={styles.statPill}>
           <Text style={[styles.statValue, { color: Colors.primary }]}>{stats.notes}</Text>
-          <Text style={styles.statLabel}>{t('contactNotes.statNotes')}</Text>
+          <Text style={styles.statLabel}>{t('contactNotes.statNotes', { count: stats.notes })}</Text>
         </View>
         <View style={styles.statPill}>
           <Text style={[styles.statValue, { color: Colors.accent }]}>{stats.knownFor}</Text>

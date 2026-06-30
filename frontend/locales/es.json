@@ -98,9 +98,12 @@
     "tapToEdit": "Pulsa para editar",
     "today": "Hoy",
     "yesterday": "Ayer",
-    "daysAgo": "Hace {{count}} días",
-    "weeksAgo": "Hace {{count}} semanas",
-    "monthsAgo": "Hace {{count}} meses",
+    "daysAgo_one": "Hace {{count}} día",
+    "daysAgo_other": "Hace {{count}} días",
+    "weeksAgo_one": "Hace {{count}} semana",
+    "weeksAgo_other": "Hace {{count}} semanas",
+    "monthsAgo_one": "Hace {{count}} mes",
+    "monthsAgo_other": "Hace {{count}} meses",
     "unsavedChanges": "Cambios sin guardar",
     "discardChangesQuestion": "¿Deseas descartar tus cambios?",
     "discard": "Descartar",
@@ -218,7 +221,8 @@
     "recordTopic": "Grabar",
     "allCaughtUpTitle": "Todo al día",
     "allCaughtUpBody": "No quedan seguimientos atrasados. Te avisaremos cuando alguien necesite atención.",
-    "reconnectedToday": "{{count}} reconectado hoy",
+    "reconnectedToday_one": "{{count}} reconectado hoy",
+    "reconnectedToday_other": "{{count}} reconectados hoy",
     "backToContacts": "Volver a contactos"
   },
   "search": {
@@ -527,7 +531,8 @@
     "reminderQuarter": "Cada 3 meses",
     "reminderSixMonths": "Cada 6 meses",
     "reminderYear": "Cada año",
-    "reminderCustomDays": "Cada {{count}} días",
+    "reminderCustomDays_one": "Cada día",
+    "reminderCustomDays_other": "Cada {{count}} días",
     "reminderNever": "Nunca"
   },
   "selectContact": {
@@ -760,7 +765,8 @@
   "subscription": {
     "freePlan": "GRATIS",
     "contactsUsed": "contactos",
-    "contactsRemaining": "{{count}} contactos restantes",
+    "contactsRemaining_one": "{{count}} contacto restante",
+    "contactsRemaining_other": "{{count}} contactos restantes",
     "noContactsRemaining": "No quedan contactos disponibles",
     "upgradeToPro": "Pasar a Pro",
     "unlockWith": "Desbloquea con Pro:",
@@ -869,7 +875,8 @@
     "placeholderBulletContactMoment": "algo dicho o hecho",
     "placeholderBulletContactDetail": "algo que aprendiste",
     "placeholderBulletContactUpcoming": "algo nuevo en camino",
-    "minCharactersShort": "Mín. {{count}} caracteres",
+    "minCharactersShort_one": "Mín. {{count}} carácter",
+    "minCharactersShort_other": "Mín. {{count}} caracteres",
     "pressToSend": "Pulsa enviar para analizar",
     "sendLabel": "Enviar"
   },
@@ -1047,7 +1054,8 @@
       "title": "Historial de preguntas",
       "today": "Hoy",
       "yesterday": "Ayer",
-      "daysAgo": "Hace {{count}} días"
+      "daysAgo_one": "Hace {{count}} día",
+      "daysAgo_other": "Hace {{count}} días"
     }
   },
   "disambiguation": {
@@ -1060,15 +1068,18 @@
     "suggestedNickname": "Apodo sugerido: {{nickname}}",
     "lastContact": "Último contacto: {{date}}",
     "contextLabel": "Contexto",
-    "contextFacts": "{{count}} datos",
-    "contextTopics": "{{count}} temas activos",
+    "contextFacts_one": "{{count}} dato",
+    "contextFacts_other": "{{count}} datos",
+    "contextTopics_one": "{{count}} tema activo",
+    "contextTopics_other": "{{count}} temas activos",
     "dontKnow": "No lo sé",
     "noActiveTopics": "Sin temas activos"
   },
   "settings": {
     "notSeenThreshold": "Recordatorio de contacto inactivo",
     "notSeenDescription": "Recibir notificaciones cuando llevas tiempo sin contactar a alguien. Ajustable individualmente en cada ficha de contacto.",
-    "notSeenDays": "{{count}} dias",
+    "notSeenDays_one": "{{count}} día",
+    "notSeenDays_other": "{{count}} días",
     "notSeenNever": "Nunca",
     "weeklyDigest": "Resumen semanal",
     "weeklyDigestDescription": "Cada lunes, un resumen de tu semana: eventos próximos y contactos por reconectar",
@@ -1082,7 +1093,8 @@
   "reminder": {
     "eventTomorrow": "Mañana — {{title}}",
     "postEvent": "{{title}} fue esta semana — ¿te pones en contacto?",
-    "notSeen": "{{count}} días sin contacto"
+    "notSeen_one": "{{count}} día sin contacto",
+    "notSeen_other": "{{count}} días sin contacto"
   },
   "aiConsent": {
     "title": "Procesamiento de datos con IA",
@@ -1104,14 +1116,17 @@
   },
   "contactProfile": {
     "heroTileEyebrow": "★ Lo que viene para {{firstName}}",
-    "heroTileTitle": "{{count}} momentos en camino",
+    "heroTileTitle_one": "{{count}} momento en camino",
+    "heroTileTitle_other": "{{count}} momentos en camino",
     "heroTileEmpty": "Aún no hay momentos previstos",
     "viewAll": "Ver cronología",
     "moreUpcoming": "más",
     "tileIcebreakers": "Rompehielos",
-    "tileIcebreakersMeta": "{{count}} preguntas",
+    "tileIcebreakersMeta_one": "{{count}} pregunta",
+    "tileIcebreakersMeta_other": "{{count}} preguntas",
     "tileAllNotes": "Todas las notas",
-    "tileAllNotesMeta": "{{count}} notas",
+    "tileAllNotesMeta_one": "{{count}} nota",
+    "tileAllNotesMeta_other": "{{count}} notas",
     "tileWhereWeMet": "Dónde nos conocimos",
     "tileWhereWeMetEmpty": "Añadir el lugar",
     "tileBirthday": "Cumpleaños",
@@ -1157,7 +1172,8 @@
   "contactIcebreakers": {
     "headerLabel": "ROMPEHIELOS",
     "heroTitle": "Hablar con {{firstName}}",
-    "heroSubtitle": "{{count}} temas para hablar con {{firstName}}",
+    "heroSubtitle_one": "{{count}} tema para hablar con {{firstName}}",
+    "heroSubtitle_other": "{{count}} temas para hablar con {{firstName}}",
     "bucket": {
       "ask": "PREGUNTAR",
       "followUp": "SEGUIR",
@@ -1172,7 +1188,8 @@
   },
   "contactNotes": {
     "eyebrow": "TU HISTORIA CON",
-    "statNotes": "NOTAS",
+    "statNotes_one": "NOTA",
+    "statNotes_other": "NOTAS",
     "statKnown": "DESDE HACE",
     "statKnownDays_one": "{{count}} día",
     "statKnownDays_other": "{{count}} días",
@@ -1183,9 +1200,12 @@
     "statUpcoming": "PRÓXIMOS",
     "relativeToday": "Hoy",
     "relativeYesterday": "Ayer",
-    "relativeDaysAgo": "hace {{count}} días",
-    "relativeMonthsAgo": "hace {{count}} meses",
-    "relativeYearsAgo": "hace {{count}} años",
+    "relativeDaysAgo_one": "hace {{count}} día",
+    "relativeDaysAgo_other": "hace {{count}} días",
+    "relativeMonthsAgo_one": "hace {{count}} mes",
+    "relativeMonthsAgo_other": "hace {{count}} meses",
+    "relativeYearsAgo_one": "hace {{count}} año",
+    "relativeYearsAgo_other": "hace {{count}} años",
     "emptyTitle": "Aún no hay notas",
     "emptyBody": "Graba tu primera nota sobre {{firstName}}.",
     "untitledNote": "Nota sin título"

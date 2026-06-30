@@ -98,9 +98,12 @@
     "tapToEdit": "Tap to edit",
     "today": "Today",
     "yesterday": "Yesterday",
-    "daysAgo": "{{count}} days ago",
-    "weeksAgo": "{{count}} weeks ago",
-    "monthsAgo": "{{count}} months ago",
+    "daysAgo_one": "{{count}} day ago",
+    "daysAgo_other": "{{count}} days ago",
+    "weeksAgo_one": "{{count}} week ago",
+    "weeksAgo_other": "{{count}} weeks ago",
+    "monthsAgo_one": "{{count}} month ago",
+    "monthsAgo_other": "{{count}} months ago",
     "unsavedChanges": "Unsaved changes",
     "discardChangesQuestion": "Do you want to discard your changes?",
     "discard": "Discard",
@@ -218,7 +221,8 @@
     "recordTopic": "Record",
     "allCaughtUpTitle": "You're all caught up",
     "allCaughtUpBody": "No overdue follow-ups left. We'll nudge you when someone needs you again.",
-    "reconnectedToday": "{{count}} reconnected today",
+    "reconnectedToday_one": "{{count}} reconnected today",
+    "reconnectedToday_other": "{{count}} reconnected today",
     "backToContacts": "Back to contacts"
   },
   "search": {
@@ -527,7 +531,8 @@
     "reminderQuarter": "Every 3 months",
     "reminderSixMonths": "Every 6 months",
     "reminderYear": "Every year",
-    "reminderCustomDays": "Every {{count}} days",
+    "reminderCustomDays_one": "Every day",
+    "reminderCustomDays_other": "Every {{count}} days",
     "reminderNever": "Never"
   },
   "selectContact": {
@@ -760,7 +765,8 @@
   "subscription": {
     "freePlan": "FREE",
     "contactsUsed": "contacts",
-    "contactsRemaining": "{{count}} contacts remaining",
+    "contactsRemaining_one": "{{count}} contact remaining",
+    "contactsRemaining_other": "{{count}} contacts remaining",
     "noContactsRemaining": "No contacts remaining",
     "upgradeToPro": "Upgrade to Pro",
     "unlockWith": "Unlock with Pro:",
@@ -869,7 +875,8 @@
     "placeholderBulletContactMoment": "something said or done",
     "placeholderBulletContactDetail": "something you learned",
     "placeholderBulletContactUpcoming": "something new on the way",
-    "minCharactersShort": "Min {{count}} characters",
+    "minCharactersShort_one": "Min {{count}} character",
+    "minCharactersShort_other": "Min {{count}} characters",
     "pressToSend": "Press send to analyze",
     "sendLabel": "Send"
   },
@@ -1047,7 +1054,8 @@
       "title": "Question history",
       "today": "Today",
       "yesterday": "Yesterday",
-      "daysAgo": "{{count}} days ago"
+      "daysAgo_one": "{{count}} day ago",
+      "daysAgo_other": "{{count}} days ago"
     }
   },
   "disambiguation": {
@@ -1060,15 +1068,18 @@
     "suggestedNickname": "Suggested nickname based on: {{nickname}}",
     "lastContact": "Last contact: {{date}}",
     "contextLabel": "Context",
-    "contextFacts": "{{count}} facts",
-    "contextTopics": "{{count}} active topics",
+    "contextFacts_one": "{{count}} fact",
+    "contextFacts_other": "{{count}} facts",
+    "contextTopics_one": "{{count}} active topic",
+    "contextTopics_other": "{{count}} active topics",
     "dontKnow": "I don't know",
     "noActiveTopics": "No active topics"
   },
   "settings": {
     "notSeenThreshold": "Inactive contact reminder",
     "notSeenDescription": "Get notified when you haven't caught up with a contact in a while. Can be customized per contact.",
-    "notSeenDays": "{{count}} days",
+    "notSeenDays_one": "{{count}} day",
+    "notSeenDays_other": "{{count}} days",
     "notSeenNever": "Never",
     "weeklyDigest": "Weekly digest",
     "weeklyDigestDescription": "Every Monday, a recap of your week: upcoming events and contacts to reach out to",
@@ -1082,7 +1093,8 @@
   "reminder": {
     "eventTomorrow": "Tomorrow — {{title}}",
     "postEvent": "{{title}} was this week — check in?",
-    "notSeen": "{{count}} days without a catch-up"
+    "notSeen_one": "{{count}} day without a catch-up",
+    "notSeen_other": "{{count}} days without a catch-up"
   },
   "aiConsent": {
     "title": "AI Data Processing",
@@ -1104,14 +1116,17 @@
   },
   "contactProfile": {
     "heroTileEyebrow": "★ Coming up for {{firstName}}",
-    "heroTileTitle": "{{count}} moments coming up",
+    "heroTileTitle_one": "{{count}} moment coming up",
+    "heroTileTitle_other": "{{count}} moments coming up",
     "heroTileEmpty": "No upcoming moments yet",
     "viewAll": "View timeline",
     "moreUpcoming": "more",
     "tileIcebreakers": "Ice breakers",
-    "tileIcebreakersMeta": "{{count}} questions",
+    "tileIcebreakersMeta_one": "{{count}} question",
+    "tileIcebreakersMeta_other": "{{count}} questions",
     "tileAllNotes": "All notes",
-    "tileAllNotesMeta": "{{count}} notes",
+    "tileAllNotesMeta_one": "{{count}} note",
+    "tileAllNotesMeta_other": "{{count}} notes",
     "tileWhereWeMet": "Where we met",
     "tileWhereWeMetEmpty": "Add the place",
     "tileBirthday": "Birthday",
@@ -1157,7 +1172,8 @@
   "contactIcebreakers": {
     "headerLabel": "ICEBREAKERS",
     "heroTitle": "Talk to {{firstName}}",
-    "heroSubtitle": "{{count}} things to discuss with {{firstName}}",
+    "heroSubtitle_one": "{{count}} thing to discuss with {{firstName}}",
+    "heroSubtitle_other": "{{count}} things to discuss with {{firstName}}",
     "bucket": {
       "ask": "ASK ABOUT",
       "followUp": "FOLLOW UP",
@@ -1172,7 +1188,8 @@
   },
   "contactNotes": {
     "eyebrow": "YOUR STORY WITH",
-    "statNotes": "NOTES",
+    "statNotes_one": "NOTE",
+    "statNotes_other": "NOTES",
     "statKnown": "KNOWN FOR",
     "statKnownDays_one": "{{count}} day",
     "statKnownDays_other": "{{count}} days",
@@ -1183,9 +1200,12 @@
     "statUpcoming": "UPCOMING",
     "relativeToday": "Today",
     "relativeYesterday": "Yesterday",
-    "relativeDaysAgo": "{{count}} days ago",
-    "relativeMonthsAgo": "{{count}} months ago",
-    "relativeYearsAgo": "{{count}} years ago",
+    "relativeDaysAgo_one": "{{count}} day ago",
+    "relativeDaysAgo_other": "{{count}} days ago",
+    "relativeMonthsAgo_one": "{{count}} month ago",
+    "relativeMonthsAgo_other": "{{count}} months ago",
+    "relativeYearsAgo_one": "{{count}} year ago",
+    "relativeYearsAgo_other": "{{count}} years ago",
     "emptyTitle": "No notes yet",
     "emptyBody": "Record your first note about {{firstName}}.",
     "untitledNote": "Untitled note"
