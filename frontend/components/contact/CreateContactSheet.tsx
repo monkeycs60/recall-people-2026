@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Platform, Keyboard as RNKeyboard } from 'react-native';
 import { forwardRef, useCallback, useMemo, useState } from 'react';
 import { BottomSheetBackdrop, BottomSheetModal, BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import { ArrowRight, Keyboard, Mic, UserPlus } from 'lucide-react-native';
@@ -21,8 +21,20 @@ export const CreateContactSheet = forwardRef<BottomSheetModal, CreateContactShee
     const [createdContact, setCreatedContact] = useState<Contact | null>(null);
     const [isCreating, setIsCreating] = useState(false);
 
-    const snapPoints = useMemo(() => ['56%'], []);
+    const isIOS = Platform.OS === 'ios';
+    // Android resizes the window for the keyboard, so the sheet must be tall to
+    // keep both inputs above it; iOS keeps the full screen and lifts the sheet,
+    // so it stays compact. Snap points must be ascending.
+    const snapPoints = useMemo(() => (isIOS ? ['42%', '56%'] : ['56%', '90%']), [isIOS]);
+    const formSnapIndex = isIOS ? 0 : 1;
+    const nextStepSnapIndex = isIOS ? 1 : 0;
     const isValid = firstName.trim().length > 0 && !isCreating;
+
+    const goToNextStepSnap = () => {
+      if (ref && typeof ref !== 'function') {
+        ref.current?.snapToIndex(nextStepSnapIndex);
+      }
+    };
 
     const renderBackdrop = useCallback(
       (props: React.ComponentProps<typeof BottomSheetBackdrop>) => (
@@ -52,6 +64,8 @@ export const CreateContactSheet = forwardRef<BottomSheetModal, CreateContactShee
         const contact = await onCreate(firstName.trim(), lastName.trim());
         if (contact) {
           setCreatedContact(contact);
+          RNKeyboard.dismiss();
+          goToNextStepSnap();
         }
       } finally {
         setIsCreating(false);
@@ -83,6 +97,7 @@ export const CreateContactSheet = forwardRef<BottomSheetModal, CreateContactShee
     return (
       <BottomSheetModal
         ref={ref}
+        index={formSnapIndex}
         snapPoints={snapPoints}
         enableDynamicSizing={false}
         keyboardBehavior="interactive"
@@ -267,7 +282,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     gap: 12,
-    marginTop: 4,
+    marginTop: 20,
   },
   cancelButton: {
     paddingVertical: 12,
