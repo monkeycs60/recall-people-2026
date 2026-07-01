@@ -20,7 +20,7 @@ Use this shared credentials account for Android emulator and local/dev QA:
 - Email: `qa@recall-people.app`
 - Password: `RecallPeopleQA2026`
 - Display name: `QA Recall`
-- Backend user id observed on dev: `cmoyfnukf000bi4vcd1mqqesw`
+- Backend user id (local dev DB): `cmr18f4ie0006ixuwmxzbcska` (recreated 2026-07-01 via `POST /auth/register`; the id is regenerated whenever the local dev DB is refreshed and the account recreated)
 
 This account is only for repeatable QA and seed data. Do not put personal contacts, real private notes, or production user data in it.
 
