@@ -945,7 +945,9 @@
       "permissionDeniedDescription": "Consenti l'accesso al microfono per registrare audio",
       "recordingFailed": "Registrazione fallita",
       "recordingFailedDescription": "Si e verificato un errore durante la registrazione. Riprova.",
-      "noteSafeRetry": "La tua nota è al sicuro, puoi riprovare senza registrare di nuovo."
+      "noteSafeRetry": "La tua nota è al sicuro, puoi riprovare senza registrare di nuovo.",
+      "processingFailed": "Elaborazione non riuscita",
+      "processingFailedDescription": "Controlla la connessione e riprova."
     },
     "retry": {
       "title": "Analisi non riuscita",

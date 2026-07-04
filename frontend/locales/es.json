@@ -945,7 +945,9 @@
       "permissionDeniedDescription": "Por favor permite el acceso al micrófono para grabar audio",
       "recordingFailed": "Error en la grabación",
       "recordingFailedDescription": "Ocurrió un error durante la grabación. Por favor, inténtalo de nuevo.",
-      "noteSafeRetry": "Tu nota está guardada, puedes reintentar sin volver a grabar."
+      "noteSafeRetry": "Tu nota está guardada, puedes reintentar sin volver a grabar.",
+      "processingFailed": "El procesamiento falló",
+      "processingFailedDescription": "Por favor, verifica tu conexión e inténtalo de nuevo."
     },
     "retry": {
       "title": "El análisis falló",

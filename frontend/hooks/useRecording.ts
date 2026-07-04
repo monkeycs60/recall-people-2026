@@ -47,6 +47,8 @@ const getE2EFixtureUri = async (): Promise<string> => {
 type FailedProcessing = {
   audioUri: string | null;
   transcription: string;
+  preselectedContactId: string | null;
+  preselectedHotTopicId: string | null;
 };
 
 export const useRecording = () => {
@@ -274,7 +276,11 @@ export const useRecording = () => {
     });
   };
 
-  const handleProcessingFailure = (error: unknown, audioUri: string | null) => {
+  const handleProcessingFailure = (
+    error: unknown,
+    audioUri: string | null,
+    transcript: string
+  ) => {
     const errorDetails = {
       name: error instanceof Error ? error.name : 'Unknown',
       message: error instanceof Error ? error.message : String(error),
@@ -283,11 +289,15 @@ export const useRecording = () => {
     };
     console.error('[useRecording] Processing error:', errorDetails);
 
-    const transcriptSoFar = useAppStore.getState().currentTranscription;
-    const didSaveNote = Boolean(transcriptSoFar) || Boolean(audioUri);
+    const didSaveNote = Boolean(transcript) || Boolean(audioUri);
 
     if (didSaveNote) {
-      setFailedProcessing({ audioUri, transcription: transcriptSoFar ?? '' });
+      setFailedProcessing({
+        audioUri,
+        transcription: transcript,
+        preselectedContactId: useAppStore.getState().preselectedContactId,
+        preselectedHotTopicId: useAppStore.getState().preselectedHotTopicId,
+      });
     }
 
     setRecordingState('idle');
@@ -346,8 +356,11 @@ export const useRecording = () => {
     }
 
     let capturedAudioUri: string | null = null;
+    let capturedTranscript = '';
 
     try {
+      setCurrentTranscription(null);
+      setCurrentAudioUri(null);
       setRecordingState('processing');
       setProcessingStep('transcribing');
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -368,6 +381,7 @@ export const useRecording = () => {
       setCurrentAudioUri(uri);
 
       const transcriptionResult = await transcribeAudio(uri);
+      capturedTranscript = transcriptionResult.transcript;
       setCurrentTranscription(transcriptionResult.transcript);
 
       await processTranscription(uri, transcriptionResult.transcript);
@@ -381,7 +395,7 @@ export const useRecording = () => {
       } catch {
         // Ignore errors from released recorder
       }
-      handleProcessingFailure(error, capturedAudioUri);
+      handleProcessingFailure(error, capturedAudioUri, capturedTranscript);
     }
   };
 
@@ -429,7 +443,7 @@ export const useRecording = () => {
 
       await processTranscription(null, text);
     } catch (error) {
-      handleProcessingFailure(error, null);
+      handleProcessingFailure(error, null, text);
     }
   };
 
@@ -440,22 +454,30 @@ export const useRecording = () => {
     setFailedProcessing(null);
     setRecordingState('processing');
 
+    setPreselectedContactId(failed.preselectedContactId);
+    setPreselectedHotTopicId(failed.preselectedHotTopicId);
+
+    let capturedTranscript = failed.transcription;
+
     try {
       if (!failed.transcription && failed.audioUri) {
         setProcessingStep('transcribing');
         const transcriptionResult = await transcribeAudio(failed.audioUri);
+        capturedTranscript = transcriptionResult.transcript;
         setCurrentTranscription(transcriptionResult.transcript);
         await processTranscription(failed.audioUri, transcriptionResult.transcript);
       } else {
         await processTranscription(failed.audioUri, failed.transcription);
       }
     } catch (error) {
-      handleProcessingFailure(error, failed.audioUri);
+      handleProcessingFailure(error, failed.audioUri, capturedTranscript);
     }
   };
 
   const discardFailedProcessing = () => {
     setFailedProcessing(null);
+    setCurrentTranscription(null);
+    setCurrentAudioUri(null);
     setPreselectedContactId(null);
     setPreselectedHotTopicId(null);
   };

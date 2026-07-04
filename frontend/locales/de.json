@@ -945,7 +945,9 @@
       "permissionDeniedDescription": "Bitte erlaube den Mikrofonzugriff, um Audio aufzunehmen",
       "recordingFailed": "Aufnahme fehlgeschlagen",
       "recordingFailedDescription": "Ein Fehler ist während der Aufnahme aufgetreten. Bitte versuche es erneut.",
-      "noteSafeRetry": "Deine Notiz ist gesichert – du kannst es erneut versuchen, ohne neu aufzunehmen."
+      "noteSafeRetry": "Deine Notiz ist gesichert – du kannst es erneut versuchen, ohne neu aufzunehmen.",
+      "processingFailed": "Verarbeitung fehlgeschlagen",
+      "processingFailedDescription": "Bitte überprüfe deine Verbindung und versuche es erneut."
     },
     "retry": {
       "title": "Analyse fehlgeschlagen",

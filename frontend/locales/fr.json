@@ -983,7 +983,9 @@
       "permissionDeniedDescription": "Autorise l'accès au micro pour enregistrer",
       "recordingFailed": "Échec de l'enregistrement",
       "recordingFailedDescription": "Une erreur est survenue. Réessaie.",
-      "noteSafeRetry": "Ta note est sauvegardée, tu peux réessayer sans ré-enregistrer."
+      "noteSafeRetry": "Ta note est sauvegardée, tu peux réessayer sans ré-enregistrer.",
+      "processingFailed": "Le traitement a échoué",
+      "processingFailedDescription": "Vérifie ta connexion et réessaie."
     },
     "retry": {
       "title": "L'analyse a échoué",

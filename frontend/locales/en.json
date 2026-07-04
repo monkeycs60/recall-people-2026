@@ -945,7 +945,9 @@
       "permissionDeniedDescription": "Please allow microphone access to record audio",
       "recordingFailed": "Recording failed",
       "recordingFailedDescription": "An error occurred while recording. Please try again.",
-      "noteSafeRetry": "Your note is safe — you can retry without recording again."
+      "noteSafeRetry": "Your note is safe — you can retry without recording again.",
+      "processingFailed": "Processing failed",
+      "processingFailedDescription": "Please check your connection and try again."
     },
     "retry": {
       "title": "Analysis failed",
