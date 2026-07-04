@@ -944,7 +944,14 @@
       "permissionDenied": "Permiso de micrófono denegado",
       "permissionDeniedDescription": "Por favor permite el acceso al micrófono para grabar audio",
       "recordingFailed": "Error en la grabación",
-      "recordingFailedDescription": "Ocurrió un error durante la grabación. Por favor, inténtalo de nuevo."
+      "recordingFailedDescription": "Ocurrió un error durante la grabación. Por favor, inténtalo de nuevo.",
+      "noteSafeRetry": "Tu nota está guardada, puedes reintentar sin volver a grabar."
+    },
+    "retry": {
+      "title": "El análisis falló",
+      "subtitle": "Tu nota está guardada. Reintenta sin volver a grabar.",
+      "retryButton": "Reintentar",
+      "discardButton": "Descartar"
     }
   },
   "testPro": {

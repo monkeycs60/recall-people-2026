@@ -944,7 +944,14 @@
       "permissionDenied": "Mikrofonberechtigung verweigert",
       "permissionDeniedDescription": "Bitte erlaube den Mikrofonzugriff, um Audio aufzunehmen",
       "recordingFailed": "Aufnahme fehlgeschlagen",
-      "recordingFailedDescription": "Ein Fehler ist während der Aufnahme aufgetreten. Bitte versuche es erneut."
+      "recordingFailedDescription": "Ein Fehler ist während der Aufnahme aufgetreten. Bitte versuche es erneut.",
+      "noteSafeRetry": "Deine Notiz ist gesichert – du kannst es erneut versuchen, ohne neu aufzunehmen."
+    },
+    "retry": {
+      "title": "Analyse fehlgeschlagen",
+      "subtitle": "Deine Notiz ist gesichert. Versuche es erneut, ohne neu aufzunehmen.",
+      "retryButton": "Erneut versuchen",
+      "discardButton": "Verwerfen"
     }
   },
   "testPro": {

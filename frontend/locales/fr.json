@@ -982,7 +982,14 @@
       "permissionDenied": "Permission micro refusée",
       "permissionDeniedDescription": "Autorise l'accès au micro pour enregistrer",
       "recordingFailed": "Échec de l'enregistrement",
-      "recordingFailedDescription": "Une erreur est survenue. Réessaie."
+      "recordingFailedDescription": "Une erreur est survenue. Réessaie.",
+      "noteSafeRetry": "Ta note est sauvegardée, tu peux réessayer sans ré-enregistrer."
+    },
+    "retry": {
+      "title": "L'analyse a échoué",
+      "subtitle": "Ta note est sauvegardée. Réessaie sans ré-enregistrer.",
+      "retryButton": "Réessayer",
+      "discardButton": "Abandonner"
     }
   },
   "testPro": {

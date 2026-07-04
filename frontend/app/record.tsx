@@ -21,6 +21,7 @@ import { RecordButton } from '@/components/RecordButton';
 import { Paywall } from '@/components/Paywall';
 import { TestProActivation } from '@/components/TestProActivation';
 import { TranscriptionLoader } from '@/components/TranscriptionLoader';
+import { RetryProcessingCard } from '@/components/RetryProcessingCard';
 import type { InputMode } from '@/components/InputModeToggle';
 import { TextInputMode } from '@/components/TextInputMode';
 import { ContactAvatar } from '@/components/contact/ContactAvatar';
@@ -50,6 +51,9 @@ export default function RecordScreen() {
     toggleRecording,
     cancelRecording,
     processText,
+    failedProcessing,
+    retryProcessing,
+    discardFailedProcessing,
     isRecording,
     isProcessing,
     processingStep,
@@ -251,7 +255,13 @@ export default function RecordScreen() {
           </Pressable>
         </View>
 
-        {isProcessing ? (
+        {failedProcessing ? (
+          <View style={styles.failedWrapper}>
+            <Animated.View entering={FadeIn}>
+              <RetryProcessingCard onRetry={retryProcessing} onDiscard={discardFailedProcessing} />
+            </Animated.View>
+          </View>
+        ) : isProcessing ? (
           <View style={styles.centerContent}>
             <Animated.View entering={FadeIn}>
               <TranscriptionLoader step={processingStep} isTextMode={isTextModeActive} />
@@ -467,6 +477,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 24,
+  },
+  failedWrapper: {
+    flex: 1,
+    justifyContent: 'center',
   },
   textModeWrapper: {
     flex: 1,

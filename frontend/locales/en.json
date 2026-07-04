@@ -944,7 +944,14 @@
       "permissionDenied": "Microphone permission denied",
       "permissionDeniedDescription": "Please allow microphone access to record audio",
       "recordingFailed": "Recording failed",
-      "recordingFailedDescription": "An error occurred while recording. Please try again."
+      "recordingFailedDescription": "An error occurred while recording. Please try again.",
+      "noteSafeRetry": "Your note is safe — you can retry without recording again."
+    },
+    "retry": {
+      "title": "Analysis failed",
+      "subtitle": "Your note is safe. Retry without recording again.",
+      "retryButton": "Retry",
+      "discardButton": "Discard"
     }
   },
   "testPro": {

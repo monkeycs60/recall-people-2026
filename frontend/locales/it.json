@@ -944,7 +944,14 @@
       "permissionDenied": "Permesso microfono negato",
       "permissionDeniedDescription": "Consenti l'accesso al microfono per registrare audio",
       "recordingFailed": "Registrazione fallita",
-      "recordingFailedDescription": "Si e verificato un errore durante la registrazione. Riprova."
+      "recordingFailedDescription": "Si e verificato un errore durante la registrazione. Riprova.",
+      "noteSafeRetry": "La tua nota è al sicuro, puoi riprovare senza registrare di nuovo."
+    },
+    "retry": {
+      "title": "Analisi non riuscita",
+      "subtitle": "La tua nota è al sicuro. Riprova senza registrare di nuovo.",
+      "retryButton": "Riprova",
+      "discardButton": "Annulla"
     }
   },
   "testPro": {

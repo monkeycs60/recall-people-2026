@@ -44,6 +44,11 @@ const getE2EFixtureUri = async (): Promise<string> => {
   return asset.localUri;
 };
 
+type FailedProcessing = {
+  audioUri: string | null;
+  transcription: string;
+};
+
 export const useRecording = () => {
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const router = useRouter();
@@ -53,6 +58,7 @@ export const useRecording = () => {
   const [showPaywall, setShowPaywall] = useState(false);
   const [paywallReason, setPaywallReason] = useState<'recording_duration'>('recording_duration');
   const [recordingDuration, setRecordingDuration] = useState(0);
+  const [failedProcessing, setFailedProcessing] = useState<FailedProcessing | null>(null);
   const durationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const stopRecordingRef = useRef<(() => Promise<{ uri: string; transcription: string } | null | undefined>) | null>(null);
   const {
@@ -163,6 +169,145 @@ export const useRecording = () => {
     }
   };
 
+  const processTranscription = async (
+    audioUri: string | null,
+    transcript: string
+  ): Promise<void> => {
+    const inputMethod = audioUri ? 'voice' : 'text';
+    const navigationAudioUri = audioUri ?? '';
+
+    await loadContacts();
+    const freshContacts = useContactsStore.getState().contacts;
+
+    const currentPreselectedContactId = useAppStore.getState().preselectedContactId;
+    const currentPreselectedHotTopicId = useAppStore.getState().preselectedHotTopicId;
+
+    if (currentPreselectedContactId) {
+      const preselectedContact = freshContacts.find(
+        (contact) => contact.id === currentPreselectedContactId
+      );
+
+      if (preselectedContact) {
+        const contactsForExtraction = freshContacts.map((contact) => ({
+          id: contact.id,
+          firstName: contact.firstName,
+          lastName: contact.lastName,
+        }));
+
+        setProcessingStep('extracting');
+        const hotTopics = await hotTopicService.getByContact(currentPreselectedContactId);
+
+        const activeHotTopics = hotTopics.filter((topic) => topic.status === 'active');
+        const recordingHotTopics = getRecordingHotTopics(activeHotTopics, currentPreselectedHotTopicId);
+
+        const { extraction } = await extractInfo({
+          transcription: transcript,
+          existingContacts: contactsForExtraction,
+          currentContact: {
+            id: preselectedContact.id,
+            firstName: preselectedContact.firstName,
+            lastName: preselectedContact.lastName,
+            facts: [],
+            hotTopics: recordingHotTopics.map((topic) => ({
+              id: topic.id,
+              title: topic.title,
+              context: topic.context,
+            })),
+          },
+        });
+
+        extraction.contactIdentified.id = preselectedContact.id;
+        extraction.contactIdentified.needsDisambiguation = false;
+
+        setCurrentExtraction(extraction);
+        setPreselectedContactId(null);
+        setPreselectedHotTopicId(null);
+
+        router.replace({
+          pathname: '/review',
+          params: {
+            contactId: preselectedContact.id,
+            audioUri: navigationAudioUri,
+            transcription: transcript,
+            extraction: JSON.stringify(extraction),
+          },
+        });
+
+        analytics.capture(AnalyticsEvent.CAPTURE_PROCESSED, {
+          input_method: inputMethod,
+          preselected_contact: true,
+        });
+        return;
+      }
+
+      setPreselectedContactId(null);
+      setPreselectedHotTopicId(null);
+    }
+
+    setProcessingStep('detecting');
+    const contactsForDetection = freshContacts.map((contact) => ({
+      id: contact.id,
+      firstName: contact.firstName,
+      lastName: contact.lastName,
+      nickname: contact.nickname,
+      aiSummary: contact.aiSummary,
+      hotTopics: [] as Array<{ title: string; context?: string }>,
+    }));
+
+    const { detection } = await detectContact({
+      transcription: transcript,
+      contacts: contactsForDetection,
+    });
+
+    router.push({
+      pathname: '/select-contact',
+      params: {
+        audioUri: navigationAudioUri,
+        transcription: transcript,
+        detection: JSON.stringify(detection),
+      },
+    });
+
+    analytics.capture(AnalyticsEvent.CAPTURE_PROCESSED, {
+      input_method: inputMethod,
+      preselected_contact: false,
+    });
+  };
+
+  const handleProcessingFailure = (error: unknown, audioUri: string | null) => {
+    const errorDetails = {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : String(error),
+      status: (error as ApiError).status,
+      backendMessage: (error as ApiError).backendMessage,
+    };
+    console.error('[useRecording] Processing error:', errorDetails);
+
+    const transcriptSoFar = useAppStore.getState().currentTranscription;
+    const didSaveNote = Boolean(transcriptSoFar) || Boolean(audioUri);
+
+    if (didSaveNote) {
+      setFailedProcessing({ audioUri, transcription: transcriptSoFar ?? '' });
+    }
+
+    setRecordingState('idle');
+    setProcessingStep(null);
+
+    const backendMessage = (error as ApiError).backendMessage;
+    const description = backendMessage
+      ? backendMessage
+      : didSaveNote
+        ? i18n.t('recording.errors.noteSafeRetry')
+        : i18n.t('recording.errors.processingFailedDescription', {
+            defaultValue: 'Please check your connection and try again.',
+          });
+
+    showErrorToast(
+      i18n.t('recording.errors.processingFailed', { defaultValue: 'Processing failed' }),
+      description
+    );
+  };
+
   const stopRecording = async () => {
     // In E2E mode, we don't require actual recording
     if (!isE2ETest) {
@@ -200,6 +345,8 @@ export const useRecording = () => {
       return null;
     }
 
+    let capturedAudioUri: string | null = null;
+
     try {
       setRecordingState('processing');
       setProcessingStep('transcribing');
@@ -217,123 +364,16 @@ export const useRecording = () => {
 
       if (!uri) throw new Error('No audio URI');
 
+      capturedAudioUri = uri;
       setCurrentAudioUri(uri);
 
-      // Reload contacts to ensure we have the latest data
-      await loadContacts();
-
-      // Get fresh contacts from store after reload (avoid stale closure)
-      const freshContacts = useContactsStore.getState().contacts;
-
-      // Transcribe audio
       const transcriptionResult = await transcribeAudio(uri);
       setCurrentTranscription(transcriptionResult.transcript);
 
-      // If a contact is preselected, skip selection and go directly to review
-      if (preselectedContactId) {
-        const preselectedContact = freshContacts.find((contact) => contact.id === preselectedContactId);
+      await processTranscription(uri, transcriptionResult.transcript);
 
-        if (preselectedContact) {
-          const contactsForExtraction = freshContacts.map((contact) => ({
-            id: contact.id,
-            firstName: contact.firstName,
-            lastName: contact.lastName,
-          }));
-
-          // Load hot topics for the preselected contact
-          setProcessingStep('extracting');
-          const hotTopics = await hotTopicService.getByContact(preselectedContactId);
-
-          const activeHotTopics = hotTopics.filter((topic) => topic.status === 'active');
-          const recordingHotTopics = getRecordingHotTopics(activeHotTopics, preselectedHotTopicId);
-
-          const { extraction } = await extractInfo({
-            transcription: transcriptionResult.transcript,
-            existingContacts: contactsForExtraction,
-            currentContact: {
-              id: preselectedContact.id,
-              firstName: preselectedContact.firstName,
-              lastName: preselectedContact.lastName,
-              facts: [],
-              hotTopics: recordingHotTopics.map((topic) => ({
-                id: topic.id,
-                title: topic.title,
-                context: topic.context,
-              })),
-            },
-          });
-
-          // Override the contact ID with preselected contact
-          extraction.contactIdentified.id = preselectedContact.id;
-          extraction.contactIdentified.needsDisambiguation = false;
-
-          setCurrentExtraction(extraction);
-          setPreselectedContactId(null);
-          setPreselectedHotTopicId(null);
-
-          router.replace({
-            pathname: '/review',
-            params: {
-              contactId: preselectedContact.id,
-              audioUri: uri,
-              transcription: transcriptionResult.transcript,
-              extraction: JSON.stringify(extraction),
-            },
-          });
-
-          analytics.capture(AnalyticsEvent.CAPTURE_PROCESSED, {
-            input_method: 'voice',
-            preselected_contact: true,
-          });
-          return { uri, transcription: transcriptionResult.transcript };
-        }
-
-        // If preselected contact not found, clear and continue to normal flow
-        setPreselectedContactId(null);
-        setPreselectedHotTopicId(null);
-      }
-
-      // Detect contact using LLM
-      setProcessingStep('detecting');
-      const contactsForDetection = freshContacts.map((contact) => ({
-        id: contact.id,
-        firstName: contact.firstName,
-        lastName: contact.lastName,
-        nickname: contact.nickname,
-        aiSummary: contact.aiSummary,
-        hotTopics: [] as Array<{ title: string; context?: string }>,
-      }));
-
-      const { detection } = await detectContact({
-        transcription: transcriptionResult.transcript,
-        contacts: contactsForDetection,
-      });
-
-      // Navigate to contact selection screen with detection result
-      router.push({
-        pathname: '/select-contact',
-        params: {
-          audioUri: uri,
-          transcription: transcriptionResult.transcript,
-          detection: JSON.stringify(detection),
-        },
-      });
-
-      analytics.capture(AnalyticsEvent.CAPTURE_PROCESSED, {
-        input_method: 'voice',
-        preselected_contact: false,
-      });
       return { uri, transcription: transcriptionResult.transcript };
     } catch (error) {
-      // Log detailed error info for debugging
-      const errorDetails = {
-        name: error instanceof Error ? error.name : 'Unknown',
-        message: error instanceof Error ? error.message : String(error),
-        status: (error as ApiError).status,
-        backendMessage: (error as ApiError).backendMessage,
-      };
-      console.error('[useRecording] Stop error:', errorDetails);
-
       try {
         if (audioRecorder.isRecording) {
           await audioRecorder.stop();
@@ -341,17 +381,7 @@ export const useRecording = () => {
       } catch {
         // Ignore errors from released recorder
       }
-      setRecordingState('idle');
-      setProcessingStep(null);
-      setPreselectedContactId(null);
-      setPreselectedHotTopicId(null);
-
-      // Show error toast with backend message if available
-      const backendMessage = (error as ApiError).backendMessage;
-      showErrorToast(
-        i18n.t('recording.errors.processingFailed', { defaultValue: 'Processing failed' }),
-        backendMessage || i18n.t('recording.errors.processingFailedDescription', { defaultValue: 'Please check your connection and try again.' })
-      );
+      handleProcessingFailure(error, capturedAudioUri);
     }
   };
 
@@ -388,7 +418,6 @@ export const useRecording = () => {
     }
 
     try {
-      // Load contacts if not initialized
       if (!isInitialized) {
         await loadContacts();
       }
@@ -398,120 +427,37 @@ export const useRecording = () => {
       setCurrentTranscription(text);
       setCurrentAudioUri(null);
 
-      // Reload contacts to ensure we have the latest data
-      await loadContacts();
-      const freshContacts = useContactsStore.getState().contacts;
-
-      // If a contact is preselected, skip selection and go directly to review
-      if (preselectedContactId) {
-        const preselectedContact = freshContacts.find((contact) => contact.id === preselectedContactId);
-
-        if (preselectedContact) {
-          const contactsForExtraction = freshContacts.map((contact) => ({
-            id: contact.id,
-            firstName: contact.firstName,
-            lastName: contact.lastName,
-          }));
-
-          setProcessingStep('extracting');
-          const hotTopics = await hotTopicService.getByContact(preselectedContactId);
-
-          const activeHotTopics = hotTopics.filter((topic) => topic.status === 'active');
-          const recordingHotTopics = getRecordingHotTopics(activeHotTopics, preselectedHotTopicId);
-
-          const { extraction } = await extractInfo({
-            transcription: text,
-            existingContacts: contactsForExtraction,
-            currentContact: {
-              id: preselectedContact.id,
-              firstName: preselectedContact.firstName,
-              lastName: preselectedContact.lastName,
-              facts: [],
-              hotTopics: recordingHotTopics.map((topic) => ({
-                id: topic.id,
-                title: topic.title,
-                context: topic.context,
-              })),
-            },
-          });
-
-          extraction.contactIdentified.id = preselectedContact.id;
-          extraction.contactIdentified.needsDisambiguation = false;
-
-          setCurrentExtraction(extraction);
-          setPreselectedContactId(null);
-          setPreselectedHotTopicId(null);
-
-          router.replace({
-            pathname: '/review',
-            params: {
-              contactId: preselectedContact.id,
-              audioUri: '',
-              transcription: text,
-              extraction: JSON.stringify(extraction),
-            },
-          });
-
-          analytics.capture(AnalyticsEvent.CAPTURE_PROCESSED, {
-            input_method: 'text',
-            preselected_contact: true,
-          });
-          return;
-        }
-
-        setPreselectedContactId(null);
-        setPreselectedHotTopicId(null);
-      }
-
-      // Detect contact using LLM
-      setProcessingStep('detecting');
-      const contactsForDetection = freshContacts.map((contact) => ({
-        id: contact.id,
-        firstName: contact.firstName,
-        lastName: contact.lastName,
-        nickname: contact.nickname,
-        aiSummary: contact.aiSummary,
-        hotTopics: [] as Array<{ title: string; context?: string }>,
-      }));
-
-      const { detection } = await detectContact({
-        transcription: text,
-        contacts: contactsForDetection,
-      });
-
-      router.push({
-        pathname: '/select-contact',
-        params: {
-          audioUri: '',
-          transcription: text,
-          detection: JSON.stringify(detection),
-        },
-      });
-
-      analytics.capture(AnalyticsEvent.CAPTURE_PROCESSED, {
-        input_method: 'text',
-        preselected_contact: false,
-      });
+      await processTranscription(null, text);
     } catch (error) {
-      const errorDetails = {
-        name: error instanceof Error ? error.name : 'Unknown',
-        message: error instanceof Error ? error.message : String(error),
-        status: (error as ApiError).status,
-        backendMessage: (error as ApiError).backendMessage,
-      };
-      console.error('[useRecording] Text processing error:', errorDetails);
-
-      setRecordingState('idle');
-      setProcessingStep(null);
-      setPreselectedContactId(null);
-      setPreselectedHotTopicId(null);
-
-      const backendMessage = (error as ApiError).backendMessage;
-      showErrorToast(
-        i18n.t('recording.errors.processingFailed', { defaultValue: 'Processing failed' }),
-        backendMessage || i18n.t('recording.errors.processingFailedDescription', { defaultValue: 'Please check your connection and try again.' })
-      );
+      handleProcessingFailure(error, null);
     }
+  };
+
+  const retryProcessing = async () => {
+    const failed = failedProcessing;
+    if (!failed) return;
+
+    setFailedProcessing(null);
+    setRecordingState('processing');
+
+    try {
+      if (!failed.transcription && failed.audioUri) {
+        setProcessingStep('transcribing');
+        const transcriptionResult = await transcribeAudio(failed.audioUri);
+        setCurrentTranscription(transcriptionResult.transcript);
+        await processTranscription(failed.audioUri, transcriptionResult.transcript);
+      } else {
+        await processTranscription(failed.audioUri, failed.transcription);
+      }
+    } catch (error) {
+      handleProcessingFailure(error, failed.audioUri);
+    }
+  };
+
+  const discardFailedProcessing = () => {
+    setFailedProcessing(null);
+    setPreselectedContactId(null);
+    setPreselectedHotTopicId(null);
   };
 
   return {
@@ -522,6 +468,9 @@ export const useRecording = () => {
     toggleRecording,
     cancelRecording,
     processText,
+    failedProcessing,
+    retryProcessing,
+    discardFailedProcessing,
     isRecording: recordingState === 'recording',
     isProcessing: recordingState === 'processing',
     showPaywall,
