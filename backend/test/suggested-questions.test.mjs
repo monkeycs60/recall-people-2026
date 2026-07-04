@@ -28,7 +28,7 @@ async function loadModule() {
           }));
           build.onLoad({ filter: /^ai-provider-mock$/, namespace: 'suggested-questions-test' }, () => ({
             loader: 'js',
-            contents: 'export const createAIModel = () => ({}); export const getAIModel = () => "test-model";',
+            contents: 'export const createTracedAIModel = () => ({}); export const getAIModel = () => "test-model";',
           }));
           build.onLoad({ filter: /^telemetry-mock$/, namespace: 'suggested-questions-test' }, () => ({
             loader: 'js',
