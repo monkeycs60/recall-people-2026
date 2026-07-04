@@ -4,8 +4,10 @@ import { z } from 'zod';
 import { format } from 'date-fns';
 import { authMiddleware } from '../middleware/auth';
 import { wrapUserInput, getSecurityInstructions } from '../lib/security';
-import { createTracedAIModel, getAIProviderName, getAIModel } from '../lib/ai-provider';
+import { createTracedAIModel, getAIProviderName, getAIModel, getStructuredOutputSettings } from '../lib/ai-provider';
 import { measurePerformance } from '../lib/performance-logger';
+import { generateWithRetries } from '../lib/generation-retry';
+import { sanitizeEventDate } from '../lib/event-date-guard';
 import { getLangfuseClient } from '../lib/telemetry';
 import { evaluateExtraction } from '../lib/evaluators';
 import { captureServerException } from '../lib/posthog';
@@ -1201,16 +1203,29 @@ extractRoutes.post('/', async (c) => {
       input: { transcription: transcription.slice(0, 500), hasCurrentContact: !!currentContact },
     });
 
-    const extractionController = new AbortController();
-    const extractionTimeout = setTimeout(() => extractionController.abort(), 15000);
-
     const { output: extractionResult } = await measurePerformance(
-      () => generateText({
-        model,
-        output: Output.object({ schema: extractionSchema }),
-        prompt,
-        abortSignal: extractionController.signal,
-      }),
+      () =>
+        generateWithRetries(
+          async () => {
+            const extractionController = new AbortController();
+            const extractionTimeout = setTimeout(
+              () => extractionController.abort(),
+              15000
+            );
+            try {
+              return await generateText({
+                model,
+                output: Output.object({ schema: extractionSchema }),
+                prompt,
+                abortSignal: extractionController.signal,
+                ...getStructuredOutputSettings(),
+              });
+            } finally {
+              clearTimeout(extractionTimeout);
+            }
+          },
+          { label: 'Extract' }
+        ),
       {
         route: '/extract',
         provider: getAIProviderName(providerConfig),
@@ -1221,8 +1236,6 @@ extractRoutes.post('/', async (c) => {
         enabled: !!c.env.ENABLE_PERFORMANCE_LOGGING as boolean,
       }
     );
-
-    clearTimeout(extractionTimeout);
 
     const extraction = extractionResult!;
 
@@ -1261,18 +1274,17 @@ extractRoutes.post('/', async (c) => {
         .map((love) => love.trim())
         .filter((love) => love.length > 0),
       hotTopics: extraction.hotTopics.map((topic) => {
+        const safeEventDate = sanitizeEventDate(topic.eventDate, new Date());
         // Convert ISO date (YYYY-MM-DD) to DD/MM/YYYY for V1 compatibility (suggestedDate)
         let suggestedDate: string | undefined;
-        if (topic.eventDate) {
-          const [year, month, day] = topic.eventDate.split('-');
-          if (year && month && day) {
-            suggestedDate = `${day}/${month}/${year}`;
-          }
+        if (safeEventDate) {
+          const [year, month, day] = safeEventDate.split('-');
+          suggestedDate = `${day}/${month}/${year}`;
         }
         return {
           title: topic.title,
           context: topic.context,
-          eventDate: topic.eventDate || undefined,
+          eventDate: safeEventDate,
           suggestedDate, // V1 compatibility: DD/MM/YYYY format
         };
       }),
