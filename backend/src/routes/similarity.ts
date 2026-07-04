@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
 import { similarityRequestSchema } from '../lib/validation';
 import { auditLog } from '../lib/audit';
-import { createTracedAIModel, getAIProviderName, getAIModel } from '../lib/ai-provider';
+import { createTracedAIModel, getAIProviderName, getAIModel, getStructuredOutputSettings } from '../lib/ai-provider';
 import { measurePerformance } from '../lib/performance-logger';
 import { getLangfuseClient } from '../lib/telemetry';
 import { captureServerException } from '../lib/posthog';
@@ -127,6 +127,7 @@ similarityRoutes.post('/batch', async (c) => {
 				model,
 				output: Output.object({ schema: similaritySchema }),
 				prompt,
+				...getStructuredOutputSettings(),
 			}),
 			{
 				route: '/similarity',

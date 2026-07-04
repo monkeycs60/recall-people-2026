@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { generateText, Output } from 'ai';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
-import { createTracedAIModel, AIProviderConfig } from '../lib/ai-provider';
+import { createTracedAIModel, AIProviderConfig, getStructuredOutputSettings } from '../lib/ai-provider';
 import { evaluateSummary } from '../lib/evaluators';
 import { captureServerException } from '../lib/posthog';
 import type { User } from '@prisma/client';
@@ -232,6 +232,7 @@ ${template.summaryLabel}`;
 					model,
 					output: Output.object({ schema: summarySchema }),
 					prompt,
+					...getStructuredOutputSettings(),
 				});
 				output = result.output;
 				break;

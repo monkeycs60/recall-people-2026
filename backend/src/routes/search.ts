@@ -5,7 +5,7 @@ import { authMiddleware } from '../middleware/auth';
 import { wrapUserInput, sanitize, getSecurityInstructions } from '../lib/security';
 import { searchRequestSchema } from '../lib/validation';
 import { auditLog } from '../lib/audit';
-import { createTracedAIModel, getAIProviderName, getAIModel } from '../lib/ai-provider';
+import { createTracedAIModel, getAIProviderName, getAIModel, getStructuredOutputSettings } from '../lib/ai-provider';
 import { measurePerformance } from '../lib/performance-logger';
 import { getLangfuseClient } from '../lib/telemetry';
 import { evaluateSearch } from '../lib/evaluators';
@@ -151,6 +151,7 @@ searchRoutes.post('/', async (c) => {
 				model,
 				output: Output.object({ schema: searchResultSchema }),
 				prompt,
+				...getStructuredOutputSettings(),
 			}),
 			{
 				route: '/search',

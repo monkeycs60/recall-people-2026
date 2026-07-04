@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { generateText, Output } from 'ai';
 import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth';
-import { createTracedAIModel, AIProviderConfig } from '../lib/ai-provider';
+import { createTracedAIModel, AIProviderConfig, getStructuredOutputSettings } from '../lib/ai-provider';
 import { auditLog } from '../lib/audit';
 import { getLangfuseClient } from '../lib/telemetry';
 import { captureServerException } from '../lib/posthog';
@@ -408,6 +408,7 @@ ${template.examples}`;
 					model,
 					output: Output.object({ schema: askResponseSchema }),
 					prompt,
+					...getStructuredOutputSettings(),
 				});
 				object = output;
 				break;
