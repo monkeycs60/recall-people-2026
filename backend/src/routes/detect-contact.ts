@@ -1,8 +1,10 @@
 import { Hono } from 'hono';
-import { generateText } from 'ai';
+import { generateText, Output } from 'ai';
 import { z } from 'zod';
 import { createCerebras } from '@ai-sdk/cerebras';
 import { authMiddleware } from '../middleware/auth';
+import { generateWithRetries } from '../lib/generation-retry';
+import { getStructuredOutputSettings } from '../lib/ai-provider';
 import { wrapUserInput, getSecurityInstructions } from '../lib/security';
 import { measurePerformance } from '../lib/performance-logger';
 import { evaluateDetection } from '../lib/evaluators';
@@ -543,29 +545,6 @@ const DEFAULT_MODEL = 'gpt-oss-120b';
 
 type DetectionResult = z.infer<typeof detectionSchema>;
 
-function parseDetectionResponse(rawResponse: string): DetectionResult {
-  // Try to extract JSON from the response
-  const jsonMatch = rawResponse.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) {
-    throw new Error(`No JSON found in response: ${rawResponse.slice(0, 200)}`);
-  }
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(jsonMatch[0]);
-  } catch {
-    throw new Error(`Invalid JSON in response: ${jsonMatch[0].slice(0, 200)}`);
-  }
-
-  // Validate and coerce with Zod
-  const result = detectionSchema.safeParse(parsed);
-  if (!result.success) {
-    throw new Error(`Schema validation failed: ${result.error.message}`);
-  }
-
-  return result.data;
-}
-
 function normalizeFirstName(name: string): string {
   return name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
@@ -732,32 +711,39 @@ detectContactRoutes.post('/', async (c) => {
       input: { transcription, contactsCount: contacts.length },
     });
 
-    let rawResponse: string;
+    let detection: DetectionResult;
     try {
       const result = await measurePerformance(
-        () => generateText({
-          model,
-          prompt,
-          experimental_telemetry: {
-            isEnabled: c.env.ENABLE_LANGFUSE === 'true',
-            metadata: {
-              route: '/detect-contact',
-              language,
-              contactsCount: contacts.length,
-            },
-          },
-        }),
+        () =>
+          generateWithRetries(
+            () =>
+              generateText({
+                model,
+                output: Output.object({ schema: detectionSchema }),
+                prompt,
+                ...getStructuredOutputSettings(),
+                experimental_telemetry: {
+                  isEnabled: c.env.ENABLE_LANGFUSE === 'true',
+                  metadata: {
+                    route: '/detect-contact',
+                    language,
+                    contactsCount: contacts.length,
+                  },
+                },
+              }),
+            { label: 'DetectContact' }
+          ),
         {
           route: '/detect-contact',
           provider: 'cerebras',
           model: modelName,
-          operationType: 'text-generation',
+          operationType: 'object-generation',
           inputSize: new TextEncoder().encode(prompt).length,
           metadata: { language, contactsCount: contacts.length },
           enabled: c.env.ENABLE_PERFORMANCE_LOGGING === 'true' || c.env.ENABLE_PERFORMANCE_LOGGING === true,
         }
       );
-      rawResponse = result.text;
+      detection = result.output!;
     } catch (llmError) {
       const errorMessage = llmError instanceof Error ? llmError.message : String(llmError);
       console.error('[detect-contact] LLM call failed:', {
@@ -775,20 +761,6 @@ detectContactRoutes.post('/', async (c) => {
       });
       trace?.update({ output: { error: `LLM error: ${errorMessage}` } });
       return c.json({ error: `LLM call failed: ${errorMessage}` }, 500);
-    }
-
-    // Parse JSON from response
-    let detection;
-    try {
-      detection = parseDetectionResponse(rawResponse);
-    } catch (parseError) {
-      const errorMessage = parseError instanceof Error ? parseError.message : String(parseError);
-      console.error('[detect-contact] JSON parsing failed:', {
-        error: errorMessage,
-        rawResponse: rawResponse.slice(0, 500),
-      });
-      trace?.update({ output: { error: `Parse error: ${errorMessage}`, rawResponse: rawResponse.slice(0, 500) } });
-      return c.json({ error: `Failed to parse LLM response: ${errorMessage}` }, 500);
     }
 
     // Validate and correct hallucinated IDs
