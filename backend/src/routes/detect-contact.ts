@@ -55,7 +55,7 @@ const detectionSchema = z.object({
   confidence: z.enum(['high', 'medium', 'low']).describe('Niveau de confiance dans la détection'),
   isNew: z.boolean().describe('true si le contact n\'existe pas dans la liste'),
   candidateIds: z.array(z.string()).describe('IDs des contacts candidats en cas d\'ambiguïté'),
-  avatarHints: avatarHintsSchema.optional().describe('Indices pour générer un avatar personnalisé'),
+  avatarHints: avatarHintsSchema.nullable().describe('Indices pour générer un avatar personnalisé'),
 });
 
 const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
@@ -129,8 +129,6 @@ const PROMPT_TEMPLATES: Record<string, {
    - Ne génère un nickname QUE si lastName est null et isNew est true
 
 RÈGLE CRITIQUE: Ne JAMAIS inventer un contactId. Si le prénom n'existe pas dans la liste → isNew = true et contactId = null.
-
-IMPORTANT: Réponds UNIQUEMENT avec un objet JSON valide, sans aucun texte avant ou après.
 
 7. DÉTECTION DU GENRE:
    - Déduis le genre à partir du prénom (male/female/unknown)
@@ -223,8 +221,6 @@ Contact Inès avec sujet "Date François"
 
 CRITICAL RULE: NEVER invent a contactId. If the first name doesn't exist in the list → isNew = true and contactId = null.
 
-IMPORTANT: Respond ONLY with a valid JSON object, without any text before or after.
-
 7. GENDER DETECTION:
    - Deduce gender from the first name (male/female/unknown)
    - Use your knowledge of French and international first names
@@ -315,8 +311,6 @@ Contact Inès with topic "Date François"
    - Solo genera un nickname SI lastName es null Y isNew es true
 
 REGLA CRÍTICA: NUNCA inventar un contactId. Si el nombre no existe en la lista → isNew = true y contactId = null.
-
-IMPORTANTE: Responde ÚNICAMENTE con un objeto JSON válido, sin ningún texto antes o después.
 
 7. DETECCIÓN DE GÉNERO:
    - Deduce el género a partir del nombre (male/female/unknown)
@@ -409,8 +403,6 @@ Contacto Inès con tema "Cita François"
 
 REGOLA CRITICA: NON inventare MAI un contactId. Se il nome non esiste nella lista → isNew = true e contactId = null.
 
-IMPORTANTE: Rispondi SOLO con un oggetto JSON valido, senza alcun testo prima o dopo.
-
 7. RILEVAMENTO DEL GENERE:
    - Deduci il genere dal nome (male/female/unknown)
    - Usa la tua conoscenza dei nomi francesi e internazionali
@@ -501,8 +493,6 @@ Contatto Inès con argomento "Appuntamento François"
    - Generiere einen Nickname NUR WENN lastName null ist UND isNew true ist
 
 KRITISCHE REGEL: NIEMALS eine contactId erfinden. Wenn der Vorname nicht in der Liste existiert → isNew = true und contactId = null.
-
-WICHTIG: Antworte NUR mit einem gültigen JSON-Objekt, ohne Text davor oder danach.
 
 7. GESCHLECHTSERKENNUNG:
    - Leite das Geschlecht vom Vornamen ab (male/female/unknown)
