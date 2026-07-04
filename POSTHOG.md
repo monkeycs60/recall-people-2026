@@ -71,6 +71,9 @@ Le mobile est **local-first + sync chiffré** : ses events sont *optimistes* et 
   - via `withTracing` (`@posthog/ai`) : `ask`, `summary`, `extract`, `search`, `similarity`, `suggested-questions`, `detect-contact` + les 4 **évaluateurs** LLM-as-judge (Grok/xAI).
   - capture **manuelle** : `transcribe` (Groq Whisper), génération d'avatar (OpenAI `gpt-image-2`, 4 endpoints).
   - distinct_id = user id si dispo, sinon `recall-backend`.
+- ⚠️ **Retries structurés** : `extract` et `detect-contact` réessaient jusqu'à **3×** en cas d'échec de génération structurée → **plusieurs `$ai_generation` peuvent apparaître pour une seule note** (compter les tentatives, pas les notes). `detect-contact` produit désormais une **sortie structurée** (`Output.object`, operationType `object-generation` dans les logs de perf) au lieu d'une génération de texte brut (`text-generation`).
+- ⚠️ **`temperature: 0`** appliquée à toutes les routes à sortie structurée (`extract`, `detect-contact`, `summary`, `ask`, `similarity`, `search`) pour un résultat déterministe.
+- ⚠️ **Retry côté client** : en cas d'échec d'extraction / transcription, la note est **conservée localement** avec une carte de retry ; le retry (déclenché par l'user) **rappelle le même endpoint avec le même transcript** → attendre des `$ai_generation` répétés sur un input identique.
 - **Error tracking** : `app.onError` (`backend/src/index.ts`) + `captureException` sur chaque catch d'appel IA (provider/modèle/route en contexte).
 - ⚠️ **`backend/.npmrc` (`legacy-peer-deps=true`)** est requis : `@posthog/ai` a un peer `@anthropic-ai/sdk` incompatible avec la version du projet. Ne pas le supprimer (sinon build Nixpacks KO).
 - (Note : `@anthropic-ai/sdk`, Deepgram, Gemini sont dans package.json mais **pas appelés** → rien instrumenté dessus.)
