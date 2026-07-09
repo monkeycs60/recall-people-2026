@@ -8,6 +8,7 @@ import { createTracedAIModel, getAIProviderName, getAIModel, getStructuredOutput
 import { measurePerformance } from '../lib/performance-logger';
 import { generateWithRetries } from '../lib/generation-retry';
 import { sanitizeEventDate } from '../lib/event-date-guard';
+import { buildCalendarContext } from '../lib/date-context';
 import { getLangfuseClient } from '../lib/telemetry';
 import { evaluateExtraction } from '../lib/evaluators';
 import { captureServerException } from '../lib/posthog';
@@ -1149,6 +1150,27 @@ const getLovesInstruction = (language: string): string => {
   }
 };
 
+const getLanguageComplianceReminder = (language: string): string => {
+  switch (language) {
+    case 'en':
+      return `FINAL REMINDER - LANGUAGE:
+You MUST respond in English only. ALL text fields (noteTitle, hotTopics title and context, loves, meetingContext, resolution) must be written in English, even if the transcription contains words in another language.`;
+    case 'es':
+      return `RECORDATORIO FINAL - IDIOMA:
+DEBES responder solo en español. TODOS los campos de texto (noteTitle, title y context de los hotTopics, loves, meetingContext, resolution) deben estar redactados en español, incluso si la transcripción contiene palabras en otro idioma.`;
+    case 'it':
+      return `PROMEMORIA FINALE - LINGUA:
+DEVI rispondere solo in italiano. TUTTI i campi di testo (noteTitle, title e context degli hotTopics, loves, meetingContext, resolution) devono essere scritti in italiano, anche se la trascrizione contiene parole in un'altra lingua.`;
+    case 'de':
+      return `LETZTE ERINNERUNG - SPRACHE:
+Du MUSST nur auf Deutsch antworten. ALLE Textfelder (noteTitle, title und context der hotTopics, loves, meetingContext, resolution) müssen auf Deutsch verfasst sein, auch wenn die Transkription Wörter in einer anderen Sprache enthält.`;
+    case 'fr':
+    default:
+      return `RAPPEL FINAL - LANGUE:
+Tu DOIS répondre en français uniquement. TOUS les champs texte (noteTitle, title et context des hotTopics, loves, meetingContext, resolution) doivent être rédigés en français, même si la transcription contient des mots dans une autre langue.`;
+  }
+};
+
 type Variables = {
   user: User;
 };
@@ -1401,13 +1423,16 @@ ${currentContact.hotTopics.map((topic) => `  - [ID: ${topic.id}] "${topic.title}
     }
   }
 
-  const currentDate = format(new Date(), 'yyyy-MM-dd');
-  const nextWeekDate = format(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd');
-  const twoMonthsDate = format(new Date(new Date().setMonth(new Date().getMonth() + 2)), 'yyyy-MM-dd');
+  const now = new Date();
+  const currentDate = format(now, 'yyyy-MM-dd');
+  const nextWeekDate = format(new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd');
+  const twoMonthsDate = format(new Date(new Date(now).setMonth(now.getMonth() + 2)), 'yyyy-MM-dd');
 
   return `${template.intro}
 
 ${template.dateReference(currentDate)}
+
+${buildCalendarContext(now, language)}
 
 ${getSecurityInstructions(language)}
 ${currentContactContext}
@@ -1457,5 +1482,7 @@ ${template.noteTitleRules.badExamples}
 
 ${template.noteTitleRules.priority}
 
-${template.concreteExamples(nextWeekDate, twoMonthsDate)}`;
+${template.concreteExamples(nextWeekDate, twoMonthsDate)}
+
+${getLanguageComplianceReminder(language)}`;
 };

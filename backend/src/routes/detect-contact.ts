@@ -51,7 +51,7 @@ const detectionSchema = z.object({
   firstName: z.string().describe('Prénom du protagoniste principal'),
   lastName: z.string().nullable().describe('Nom de famille si mentionné explicitement'),
   gender: z.enum(['male', 'female', 'unknown']).describe('Genre de la personne déduit du prénom'),
-  suggestedNickname: z.string().nullable().describe('Surnom suggéré si pas de nom de famille (ex: "Paul Google", "Marie running")'),
+  suggestedNickname: z.string().nullable().describe('Surnom suggéré si pas de nom de famille, dans la langue de réponse, uniquement à partir d\'une info durable et distinctive (ex: "Paul Google", "Marie yoga"), null si rien de distinctif'),
   confidence: z.enum(['high', 'medium', 'low']).describe('Niveau de confiance dans la détection'),
   isNew: z.boolean().describe('true si le contact n\'existe pas dans la liste'),
   candidateIds: z.array(z.string()).describe('IDs des contacts candidats en cas d\'ambiguïté'),
@@ -120,12 +120,15 @@ const PROMPT_TEMPLATES: Record<string, {
    - candidateIds = [] (vide)
    - Si le nom de famille est mentionné: lastName = le nom
    - Sinon: génère un suggestedNickname intelligent basé sur l'info principale
-     Exemples: "Paul Google" (entreprise), "Marie running" (hobby), "Sophie RH" (métier)
+     Exemples: "Paul Google" (entreprise), "Marie yoga" (hobby), "Sophie RH" (métier)
 
 6. GÉNÉRATION DU NICKNAME:
    - Combine le prénom avec l'info la plus distinctive
    - Priorise: entreprise > métier > hobby/sport > lieu
    - Format court: "Prénom Info" (2-3 mots max)
+   - Le nickname doit être rédigé en français (ex: "Sophie RH", PAS "Sophie HR")
+   - UNIQUEMENT une info DURABLE (entreprise, métier, hobby régulier, lieu de vie)
+   - Si la seule info disponible est anecdotique ou situationnelle (hôte de la soirée, a conduit la voiture, a un chien) → suggestedNickname = null. Un prénom seul vaut mieux qu'un descripteur faible.
    - Ne génère un nickname QUE si lastName est null et isNew est true
 
 RÈGLE CRITIQUE: Ne JAMAIS inventer un contactId. Si le prénom n'existe pas dans la liste → isNew = true et contactId = null.
@@ -217,6 +220,9 @@ Contact Inès avec sujet "Date François"
    - Combine the first name with the most distinctive info
    - Prioritize: company > job > hobby/sport > location
    - Short format: "FirstName Info" (2-3 words max)
+   - The nickname must be written in English
+   - ONLY use DURABLE info (company, job, regular hobby, place of residence)
+   - If the only available info is anecdotal or situational (host of the party, drove the car, has a dog) → suggestedNickname = null. A plain first name beats a weak descriptor.
    - Only generate a nickname IF lastName is null AND isNew is true
 
 CRITICAL RULE: NEVER invent a contactId. If the first name doesn't exist in the list → isNew = true and contactId = null.
@@ -302,12 +308,15 @@ Contact Inès with topic "Date François"
    - candidateIds = [] (vacío)
    - Si se menciona el apellido: lastName = el apellido
    - Si no: genera un suggestedNickname inteligente basado en la info principal
-     Ejemplos: "Paul Google" (empresa), "Marie running" (hobby), "Sophie RRHH" (trabajo)
+     Ejemplos: "Paul Google" (empresa), "Marie yoga" (hobby), "Sophie RRHH" (trabajo)
 
 6. GENERACIÓN DEL NICKNAME:
    - Combina el nombre con la info más distintiva
    - Prioriza: empresa > trabajo > hobby/deporte > lugar
    - Formato corto: "Nombre Info" (2-3 palabras máx)
+   - El nickname debe estar redactado en español (ej: "Sophie RRHH", NO "Sophie HR")
+   - ÚNICAMENTE info DURADERA (empresa, trabajo, hobby regular, lugar de residencia)
+   - Si la única info disponible es anecdótica o situacional (anfitrión de la fiesta, condujo el coche, tiene un perro) → suggestedNickname = null. Un nombre solo vale más que un descriptor débil.
    - Solo genera un nickname SI lastName es null Y isNew es true
 
 REGLA CRÍTICA: NUNCA inventar un contactId. Si el nombre no existe en la lista → isNew = true y contactId = null.
@@ -393,12 +402,15 @@ Contacto Inès con tema "Cita François"
    - candidateIds = [] (vuoto)
    - Se il cognome è menzionato: lastName = il cognome
    - Altrimenti: genera un suggestedNickname intelligente basato sull'info principale
-     Esempi: "Paul Google" (azienda), "Marie running" (hobby), "Sophie HR" (lavoro)
+     Esempi: "Paul Google" (azienda), "Marie yoga" (hobby), "Sophie HR" (lavoro)
 
 6. GENERAZIONE DEL NICKNAME:
    - Combina il nome con l'info più distintiva
    - Priorità: azienda > lavoro > hobby/sport > luogo
    - Formato breve: "Nome Info" (2-3 parole max)
+   - Il nickname deve essere scritto in italiano
+   - SOLO info DURATURA (azienda, lavoro, hobby regolare, luogo di residenza)
+   - Se l'unica info disponibile è aneddotica o situazionale (padrone di casa della serata, ha guidato l'auto, ha un cane) → suggestedNickname = null. Un nome da solo vale più di un descrittore debole.
    - Genera un nickname SOLO SE lastName è null E isNew è true
 
 REGOLA CRITICA: NON inventare MAI un contactId. Se il nome non esiste nella lista → isNew = true e contactId = null.
@@ -484,12 +496,15 @@ Contatto Inès con argomento "Appuntamento François"
    - candidateIds = [] (leer)
    - Wenn der Nachname erwähnt wird: lastName = der Name
    - Sonst: generiere einen intelligenten suggestedNickname basierend auf der Hauptinfo
-     Beispiele: "Paul Google" (Firma), "Marie running" (Hobby), "Sophie HR" (Job)
+     Beispiele: "Paul Google" (Firma), "Marie Yoga" (Hobby), "Sophie HR" (Job)
 
 6. NICKNAME-GENERIERUNG:
    - Kombiniere den Vornamen mit der markantesten Info
    - Priorität: Firma > Job > Hobby/Sport > Ort
    - Kurzes Format: "Vorname Info" (max. 2-3 Wörter)
+   - Der Nickname muss auf Deutsch verfasst sein
+   - NUR DAUERHAFTE Infos (Firma, Job, regelmäßiges Hobby, Wohnort)
+   - Wenn die einzige verfügbare Info anekdotisch oder situativ ist (Gastgeber des Abends, ist Auto gefahren, hat einen Hund) → suggestedNickname = null. Ein Vorname allein ist besser als ein schwacher Deskriptor.
    - Generiere einen Nickname NUR WENN lastName null ist UND isNew true ist
 
 KRITISCHE REGEL: NIEMALS eine contactId erfinden. Wenn der Vorname nicht in der Liste existiert → isNew = true und contactId = null.
