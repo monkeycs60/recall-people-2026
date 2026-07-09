@@ -49,6 +49,9 @@ export const AnalyticsEvent = {
   // Monetisation
   PAYWALL_VIEWED: 'paywall_viewed',
   SUBSCRIPTION_STARTED: 'subscription_started',
+  // Notifications & reminders (all local, no server push)
+  NOTIFICATION_SNOOZED: 'notification_snoozed',
+  REMINDER_TIME_CHANGED: 'reminder_time_changed',
 } as const;
 
 export type AnalyticsEventName =

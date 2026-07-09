@@ -13,6 +13,7 @@ import {
   DEFAULT_MORNING_REMINDER_TIME,
   type ReminderTime,
 } from '@/lib/notification-schedule';
+import { analytics, AnalyticsEvent } from '@/lib/analytics';
 import { Colors } from '@/constants/theme';
 
 function reminderTimeToDate(value: string, fallback: ReminderTime): Date {
@@ -107,6 +108,7 @@ export function ReminderTimeRows() {
 
   const handleEveningTimeChange = useCallback((time: string) => {
     setEveningReminderTime(time);
+    analytics.capture(AnalyticsEvent.REMINDER_TIME_CHANGED, { slot: 'evening' });
     reminderService.rescheduleEventReminders().catch((error) => {
       console.warn('[profile] Failed to reschedule event reminders:', error);
     });
@@ -114,6 +116,7 @@ export function ReminderTimeRows() {
 
   const handleMorningTimeChange = useCallback((time: string) => {
     setMorningReminderTime(time);
+    analytics.capture(AnalyticsEvent.REMINDER_TIME_CHANGED, { slot: 'morning' });
     Promise.all([
       reminderService.rescheduleEventReminders(),
       reminderService.scheduleNotSeenReminders(),

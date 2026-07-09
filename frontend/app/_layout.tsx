@@ -49,7 +49,7 @@ import { useSubscriptionStore } from '@/stores/subscription-store';
 import { getNotificationRoute } from '@/lib/notification-routing';
 import { useSyncStore } from '@/stores/sync-store';
 import { PostHogProvider } from 'posthog-react-native';
-import { posthog, initErrorTracking } from '@/lib/analytics';
+import { posthog, initErrorTracking, analytics, AnalyticsEvent } from '@/lib/analytics';
 
 // Wire global JS error + unhandled-rejection capture to PostHog (best-effort,
 // no-op when analytics is disabled). Installed once at module load.
@@ -203,6 +203,7 @@ export default function RootLayout() {
         const contactName = typeof data.contactName === 'string' ? data.contactName : '';
         if (eventId) {
           await notificationService.snoozeEventReminderToMorning(eventId, title, contactName);
+          analytics.capture(AnalyticsEvent.NOTIFICATION_SNOOZED, { type: 'event_evening' });
         }
         return;
       }
