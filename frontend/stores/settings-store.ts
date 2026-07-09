@@ -14,6 +14,8 @@ type SettingsState = {
   notSeenThresholdDays: number;
   weeklyDigestEnabled: boolean;
   postEventFollowUpEnabled: boolean;
+  eveningReminderTime: string;
+  morningReminderTime: string;
 };
 
 type SettingsActions = {
@@ -24,6 +26,8 @@ type SettingsActions = {
   setNotSeenThresholdDays: (days: number) => void;
   setWeeklyDigestEnabled: (enabled: boolean) => void;
   setPostEventFollowUpEnabled: (enabled: boolean) => void;
+  setEveningReminderTime: (time: string) => void;
+  setMorningReminderTime: (time: string) => void;
   detectDeviceLanguage: () => Language;
 };
 
@@ -50,6 +54,8 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         notSeenThresholdDays: 60,
         weeklyDigestEnabled: true,
         postEventFollowUpEnabled: true,
+        eveningReminderTime: '19:00',
+        morningReminderTime: '08:30',
 
         setLanguage: async (language) => {
           set({ language });
@@ -80,6 +86,8 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         setNotSeenThresholdDays: (notSeenThresholdDays) => set({ notSeenThresholdDays }),
         setWeeklyDigestEnabled: (weeklyDigestEnabled) => set({ weeklyDigestEnabled }),
         setPostEventFollowUpEnabled: (postEventFollowUpEnabled) => set({ postEventFollowUpEnabled }),
+        setEveningReminderTime: (eveningReminderTime) => set({ eveningReminderTime }),
+        setMorningReminderTime: (morningReminderTime) => set({ morningReminderTime }),
         detectDeviceLanguage,
       }),
       {
@@ -95,6 +103,8 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
           notSeenThresholdDays: state.notSeenThresholdDays,
           weeklyDigestEnabled: state.weeklyDigestEnabled,
           postEventFollowUpEnabled: state.postEventFollowUpEnabled,
+          eveningReminderTime: state.eveningReminderTime,
+          morningReminderTime: state.morningReminderTime,
         }),
       }
     ),
