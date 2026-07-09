@@ -1087,7 +1087,11 @@
     "weeklyDigest": "Résumé hebdomadaire",
     "weeklyDigestDescription": "Chaque lundi, un récap de ta semaine : événements à venir et contacts à recontacter",
     "postEventFollowUp": "Suivi post-événement",
-    "postEventFollowUpDescription": "Être rappelé de prendre des nouvelles après un événement passé"
+    "postEventFollowUpDescription": "Être rappelé de prendre des nouvelles après un événement passé",
+    "eveningReminderTime": "Rappels du soir",
+    "eveningReminderTimeDescription": "La veille d'un événement",
+    "morningReminderTime": "Rappels du matin",
+    "morningReminderTimeDescription": "Le jour J et les relances"
   },
   "digest": {
     "title": "Ta semaine",

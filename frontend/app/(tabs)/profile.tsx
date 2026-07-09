@@ -29,6 +29,7 @@ import { LANGUAGE_NAMES } from '@/types';
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { SettingsSection } from '@/components/profile/SettingsSection';
 import { SettingsRow } from '@/components/profile/SettingsRow';
+import { ReminderTimeRows } from '@/components/profile/ReminderTimeRows';
 import { LanguagePicker } from '@/components/profile/LanguagePicker';
 import { OptionPickerSheet } from '@/components/ui/OptionPickerSheet';
 import { ExportDataSheet } from '@/components/profile/ExportDataSheet';
@@ -302,6 +303,7 @@ export default function ProfileScreen() {
         )}
 
         <SettingsSection title={t('profile.sections.notifications')}>
+          <ReminderTimeRows />
           <SettingsRow
             icon={<Bell size={20} color={Colors.primary} />}
             label={t('settings.notSeenThreshold')}

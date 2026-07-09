@@ -1093,7 +1093,11 @@
     "weeklyDigest": "Riepilogo settimanale",
     "weeklyDigestDescription": "Ogni lunedì, un riepilogo della settimana: eventi in arrivo e contatti da risentire",
     "postEventFollowUp": "Follow-up post-evento",
-    "postEventFollowUpDescription": "Ricevi un promemoria per farti sentire dopo un evento passato"
+    "postEventFollowUpDescription": "Ricevi un promemoria per farti sentire dopo un evento passato",
+    "eveningReminderTime": "Promemoria serali",
+    "eveningReminderTimeDescription": "La sera prima di un evento",
+    "morningReminderTime": "Promemoria mattutini",
+    "morningReminderTimeDescription": "Il giorno stesso e i follow-up"
   },
   "digest": {
     "title": "La tua settimana",

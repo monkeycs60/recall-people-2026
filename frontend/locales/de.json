@@ -1093,7 +1093,11 @@
     "weeklyDigest": "Wöchentliche Zusammenfassung",
     "weeklyDigestDescription": "Jeden Montag ein Überblick deiner Woche: kommende Ereignisse und Kontakte zum Nachholen",
     "postEventFollowUp": "Nachfassen nach Ereignis",
-    "postEventFollowUpDescription": "Erinnert werden, dich nach einem vergangenen Ereignis zu melden"
+    "postEventFollowUpDescription": "Erinnert werden, dich nach einem vergangenen Ereignis zu melden",
+    "eveningReminderTime": "Abenderinnerungen",
+    "eveningReminderTimeDescription": "Am Vorabend eines Ereignisses",
+    "morningReminderTime": "Morgenerinnerungen",
+    "morningReminderTimeDescription": "Am Tag selbst und Nachfassen"
   },
   "digest": {
     "title": "Deine Woche",

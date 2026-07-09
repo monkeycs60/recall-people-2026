@@ -1093,7 +1093,11 @@
     "weeklyDigest": "Weekly digest",
     "weeklyDigestDescription": "Every Monday, a recap of your week: upcoming events and contacts to reach out to",
     "postEventFollowUp": "Post-event follow-up",
-    "postEventFollowUpDescription": "Get reminded to check in after an event has passed"
+    "postEventFollowUpDescription": "Get reminded to check in after an event has passed",
+    "eveningReminderTime": "Evening reminders",
+    "eveningReminderTimeDescription": "The evening before an event",
+    "morningReminderTime": "Morning reminders",
+    "morningReminderTimeDescription": "On the day and follow-ups"
   },
   "digest": {
     "title": "Your week ahead",

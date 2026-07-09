@@ -1093,7 +1093,11 @@
     "weeklyDigest": "Resumen semanal",
     "weeklyDigestDescription": "Cada lunes, un resumen de tu semana: eventos próximos y contactos por reconectar",
     "postEventFollowUp": "Seguimiento post-evento",
-    "postEventFollowUpDescription": "Recibe un recordatorio para ponerte al día después de un evento"
+    "postEventFollowUpDescription": "Recibe un recordatorio para ponerte al día después de un evento",
+    "eveningReminderTime": "Recordatorios de la tarde",
+    "eveningReminderTimeDescription": "La víspera de un evento",
+    "morningReminderTime": "Recordatorios de la mañana",
+    "morningReminderTimeDescription": "El día del evento y seguimientos"
   },
   "digest": {
     "title": "Tu semana",
