@@ -28,6 +28,17 @@ type PostEventHotTopic = {
   last_name: string | null;
 };
 
+type UpcomingDatedHotTopic = {
+  id: string;
+  title: string;
+  event_date: string;
+  birthday_contact_id: string | null;
+  first_name: string;
+  last_name: string | null;
+};
+
+const EVENT_RESCHEDULE_LIMIT = 15;
+
 type CountResult = {
   count: number;
 };
@@ -64,6 +75,49 @@ export const reminderService = {
         daysSince,
         options
       );
+    }
+  },
+
+  rescheduleEventReminders: async (options: ScheduleOptions = {}) => {
+    const db = await getDatabase();
+    await notificationService.cancelAllEventReminders();
+
+    const todayIso = startOfDay(new Date()).toISOString();
+    const upcomingTopics = await db.getAllAsync<UpcomingDatedHotTopic>(
+      `SELECT ht.id, ht.title, ht.event_date, ht.birthday_contact_id, c.first_name, c.last_name
+       FROM hot_topics ht
+       JOIN contacts c ON c.id = ht.contact_id
+       WHERE ht.status = 'active'
+         AND ht.event_date IS NOT NULL
+         AND ht.event_date >= ?
+         AND ht.deleted_at IS NULL
+         AND c.deleted_at IS NULL
+       ORDER BY ht.event_date ASC
+       LIMIT ${EVENT_RESCHEDULE_LIMIT}`,
+      [todayIso]
+    );
+
+    for (const topic of upcomingTopics) {
+      const contactName = topic.last_name
+        ? `${topic.first_name} ${topic.last_name}`
+        : topic.first_name;
+
+      await notificationService.scheduleEventReminder(
+        topic.id,
+        topic.event_date,
+        topic.title,
+        contactName,
+        options
+      );
+
+      if (topic.birthday_contact_id) {
+        await notificationService.scheduleBirthdayWeekAheadReminder(
+          topic.id,
+          topic.event_date,
+          topic.first_name,
+          options
+        );
+      }
     }
   },
 

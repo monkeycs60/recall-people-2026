@@ -40,7 +40,7 @@ import {
 import { Colors } from '@/constants/theme';
 import { Toaster } from 'sonner-native';
 import { OfflineBanner } from '@/components/ui/OfflineBanner';
-import { notificationService } from '@/services/notification.service';
+import { notificationService, SNOOZE_TOMORROW_MORNING_ACTION } from '@/services/notification.service';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { reminderService } from '@/services/reminder.service';
 import { revenueCatService } from '@/services/revenuecat.service';
@@ -196,7 +196,17 @@ export default function RootLayout() {
 
   // Setup notification tap handler to navigate to contact
   useEffect(() => {
-    const cleanup = notificationService.setupNotificationListener(async (data) => {
+    const cleanup = notificationService.setupNotificationListener(async (data, actionIdentifier) => {
+      if (actionIdentifier === SNOOZE_TOMORROW_MORNING_ACTION) {
+        const eventId = typeof data.eventId === 'string' ? data.eventId : null;
+        const title = typeof data.title === 'string' ? data.title : '';
+        const contactName = typeof data.contactName === 'string' ? data.contactName : '';
+        if (eventId) {
+          await notificationService.snoozeEventReminderToMorning(eventId, title, contactName);
+        }
+        return;
+      }
+
       const route = getNotificationRoute(data);
       if (!route) return;
 
@@ -243,6 +253,8 @@ export default function RootLayout() {
         await reminderService.scheduleNotSeenReminders(scheduleOptions);
         await reminderService.scheduleWeeklyDigest(scheduleOptions);
         await reminderService.schedulePostEventFollowUps(scheduleOptions);
+        await reminderService.rescheduleEventReminders(scheduleOptions);
+        await notificationService.registerNotificationCategories();
       };
 
       syncAndScheduleReminders().catch((error) => {
