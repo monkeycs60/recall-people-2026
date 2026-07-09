@@ -297,7 +297,7 @@ export const notificationService = {
       : await notificationService.requestPermissions();
     if (!hasPermission) return null;
 
-    const triggerDate = getNotSeenReminderTriggerDate();
+    const triggerDate = getNotSeenReminderTriggerDate(new Date(), getMorningTime());
 
     const identifier = await Notifications.scheduleNotificationAsync({
       content: {
@@ -355,7 +355,7 @@ export const notificationService = {
       : await notificationService.requestPermissions();
     if (!hasPermission) return null;
 
-    const triggerDate = getPostEventFollowUpTriggerDate();
+    const triggerDate = getPostEventFollowUpTriggerDate(new Date(), getMorningTime());
 
     const identifier = await Notifications.scheduleNotificationAsync({
       content: {
