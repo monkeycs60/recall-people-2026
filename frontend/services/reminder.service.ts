@@ -2,7 +2,7 @@ import { getDatabase } from '@/lib/db';
 import { notificationService } from './notification.service';
 import { useSettingsStore } from '@/stores/settings-store';
 import { useSubscriptionStore } from '@/stores/subscription-store';
-import { addDays, differenceInDays, startOfDay } from 'date-fns';
+import { addDays, differenceInDays, format, startOfDay } from 'date-fns';
 import {
   buildStaleContactReminderFilter,
   CONTACT_REMINDER_NEVER_DAYS,
@@ -82,19 +82,19 @@ export const reminderService = {
     const db = await getDatabase();
     await notificationService.cancelAllEventReminders();
 
-    const todayIso = startOfDay(new Date()).toISOString();
+    const todayLocal = format(new Date(), 'yyyy-MM-dd');
     const upcomingTopics = await db.getAllAsync<UpcomingDatedHotTopic>(
       `SELECT ht.id, ht.title, ht.event_date, ht.birthday_contact_id, c.first_name, c.last_name
        FROM hot_topics ht
        JOIN contacts c ON c.id = ht.contact_id
        WHERE ht.status = 'active'
          AND ht.event_date IS NOT NULL
-         AND date(ht.event_date) >= date(?)
+         AND date(ht.event_date) >= ?
          AND ht.deleted_at IS NULL
          AND c.deleted_at IS NULL
        ORDER BY ht.event_date ASC
        LIMIT ${EVENT_RESCHEDULE_LIMIT}`,
-      [todayIso]
+      [todayLocal]
     );
 
     for (const topic of upcomingTopics) {
@@ -173,15 +173,15 @@ export const reminderService = {
 
     const db = await getDatabase();
     const today = startOfDay(new Date());
-    const digestWindowStart = today.toISOString();
-    const digestWindowEnd = addDays(today, 8).toISOString();
+    const digestWindowStart = format(today, 'yyyy-MM-dd');
+    const digestWindowEnd = format(addDays(today, 8), 'yyyy-MM-dd');
 
     const eventsResult = await db.getFirstAsync<CountResult>(
       `SELECT COUNT(*) as count FROM hot_topics
        WHERE status = 'active'
          AND event_date IS NOT NULL
-         AND event_date >= ?
-         AND event_date < ?`,
+         AND date(event_date) >= ?
+         AND date(event_date) < ?`,
       [digestWindowStart, digestWindowEnd]
     );
 
@@ -224,8 +224,8 @@ export const reminderService = {
 
     const db = await getDatabase();
     const today = startOfDay(new Date());
-    const followUpWindowStart = addDays(today, -4).toISOString();
-    const followUpWindowEnd = today.toISOString();
+    const followUpWindowStart = format(addDays(today, -4), 'yyyy-MM-dd');
+    const followUpWindowEnd = format(today, 'yyyy-MM-dd');
 
     const hotTopics = await db.getAllAsync<PostEventHotTopic>(
       `SELECT ht.id, ht.title, ht.contact_id, c.first_name, c.last_name
@@ -233,8 +233,8 @@ export const reminderService = {
        JOIN contacts c ON c.id = ht.contact_id
        WHERE ht.status = 'active'
          AND ht.event_date IS NOT NULL
-         AND ht.event_date >= ?
-         AND ht.event_date < ?
+         AND date(ht.event_date) >= ?
+         AND date(ht.event_date) < ?
          AND ht.notified_at IS NULL
          AND ht.birthday_contact_id IS NULL
        LIMIT 3`,

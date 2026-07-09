@@ -22,43 +22,71 @@ function reminderTimeToDate(value: string, fallback: ReminderTime): Date {
   return date;
 }
 
+function dateToReminderTime(date: Date): string {
+  return formatReminderTime({ hour: date.getHours(), minute: date.getMinutes() });
+}
+
 type ReminderTimePickerProps = {
   value: Date;
   visible: boolean;
   title: string;
-  onChange: (event: DateTimePickerEvent, selectedDate?: Date) => void;
+  onCommit: (time: string) => void;
   onClose: () => void;
 };
 
-function ReminderTimePicker({ value, visible, title, onChange, onClose }: ReminderTimePickerProps) {
+function ReminderTimePicker({ value, visible, title, onCommit, onClose }: ReminderTimePickerProps) {
   const { t } = useTranslation();
+  const [pendingDate, setPendingDate] = useState<Date | null>(null);
 
   if (Platform.OS === 'android') {
     if (!visible) return null;
+    const handleAndroidChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
+      onClose();
+      if (event.type === 'set' && selectedDate) {
+        onCommit(dateToReminderTime(selectedDate));
+      }
+    };
     return (
-      <DateTimePicker value={value} mode="time" is24Hour display="default" onChange={onChange} />
+      <DateTimePicker value={value} mode="time" is24Hour display="default" onChange={handleAndroidChange} />
     );
   }
 
+  const displayedDate = pendingDate ?? value;
+
+  const handleSpinnerChange = (_event: DateTimePickerEvent, selectedDate?: Date) => {
+    if (selectedDate) setPendingDate(selectedDate);
+  };
+
+  const handleCancel = () => {
+    setPendingDate(null);
+    onClose();
+  };
+
+  const handleConfirm = () => {
+    onCommit(dateToReminderTime(displayedDate));
+    setPendingDate(null);
+    onClose();
+  };
+
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable style={styles.modalOverlay} onPress={onClose}>
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={handleCancel}>
+      <Pressable style={styles.modalOverlay} onPress={handleCancel}>
         <Pressable style={styles.modalContent} onPress={(event) => event.stopPropagation()}>
           <View style={styles.modalHeader}>
-            <Pressable onPress={onClose}>
+            <Pressable onPress={handleCancel}>
               <Text style={styles.modalCancel}>{t('common.cancel')}</Text>
             </Pressable>
             <Text style={styles.modalTitle}>{title}</Text>
-            <Pressable onPress={onClose}>
+            <Pressable onPress={handleConfirm}>
               <Text style={styles.modalDone}>{t('common.confirm')}</Text>
             </Pressable>
           </View>
           <DateTimePicker
-            value={value}
+            value={displayedDate}
             mode="time"
             is24Hour
             display="spinner"
-            onChange={onChange}
+            onChange={handleSpinnerChange}
             style={styles.iosPicker}
           />
         </Pressable>
@@ -95,24 +123,6 @@ export function ReminderTimeRows() {
     });
   }, [setMorningReminderTime]);
 
-  const handleEveningPickerChange = useCallback((event: DateTimePickerEvent, selectedDate?: Date) => {
-    if (Platform.OS === 'android') setShowEveningPicker(false);
-    if (event.type === 'set' && selectedDate) {
-      handleEveningTimeChange(
-        formatReminderTime({ hour: selectedDate.getHours(), minute: selectedDate.getMinutes() })
-      );
-    }
-  }, [handleEveningTimeChange]);
-
-  const handleMorningPickerChange = useCallback((event: DateTimePickerEvent, selectedDate?: Date) => {
-    if (Platform.OS === 'android') setShowMorningPicker(false);
-    if (event.type === 'set' && selectedDate) {
-      handleMorningTimeChange(
-        formatReminderTime({ hour: selectedDate.getHours(), minute: selectedDate.getMinutes() })
-      );
-    }
-  }, [handleMorningTimeChange]);
-
   const openEveningPicker = useCallback(() => setShowEveningPicker(true), []);
   const openMorningPicker = useCallback(() => setShowMorningPicker(true), []);
   const closeEveningPicker = useCallback(() => setShowEveningPicker(false), []);
@@ -138,14 +148,14 @@ export function ReminderTimeRows() {
         value={reminderTimeToDate(eveningReminderTime, DEFAULT_EVENING_REMINDER_TIME)}
         visible={showEveningPicker}
         title={t('settings.eveningReminderTime')}
-        onChange={handleEveningPickerChange}
+        onCommit={handleEveningTimeChange}
         onClose={closeEveningPicker}
       />
       <ReminderTimePicker
         value={reminderTimeToDate(morningReminderTime, DEFAULT_MORNING_REMINDER_TIME)}
         visible={showMorningPicker}
         title={t('settings.morningReminderTime')}
-        onChange={handleMorningPickerChange}
+        onCommit={handleMorningTimeChange}
         onClose={closeMorningPicker}
       />
     </>
