@@ -1101,6 +1101,9 @@
   },
   "reminder": {
     "eventTomorrow": "Mañana — {{title}}",
+    "eventToday": "Es hoy: {{title}}. Mándale un mensaje 💬",
+    "birthdayWeekAhead": "El cumpleaños de {{firstName}} es en una semana 🎁",
+    "snoozeTomorrowMorning": "Recuérdamelo mañana por la mañana",
     "postEvent": "{{title}} fue esta semana — ¿te pones en contacto?",
     "notSeen_one": "{{count}} día sin contacto",
     "notSeen_other": "{{count}} días sin contacto"

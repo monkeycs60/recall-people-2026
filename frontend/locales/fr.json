@@ -1095,6 +1095,9 @@
   },
   "reminder": {
     "eventTomorrow": "Demain — {{title}}",
+    "eventToday": "C'est aujourd'hui : {{title}}. Envoie un petit mot 💬",
+    "birthdayWeekAhead": "Anniversaire de {{firstName}} dans une semaine 🎁",
+    "snoozeTomorrowMorning": "Me le rappeler demain matin",
     "postEvent": "{{title}} c'était cette semaine — prends des nouvelles ?",
     "notSeen_one": "{{count}} jour sans nouvelles",
     "notSeen_other": "{{count}} jours sans nouvelles"

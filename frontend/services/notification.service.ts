@@ -2,11 +2,18 @@ import * as Notifications from 'expo-notifications';
 import type { NotificationResponse } from 'expo-notifications';
 import { Platform } from 'react-native';
 import i18n from '@/lib/i18n';
+import { useSettingsStore } from '@/stores/settings-store';
 import {
   getEventReminderTriggerDate,
+  getEventDayMorningTriggerDate,
+  getBirthdayWeekAheadTriggerDate,
+  getNextMorningOccurrence,
   getNotSeenReminderTriggerDate,
   getPostEventFollowUpTriggerDate,
   getWeeklyDigestTriggerDate,
+  parseReminderTime,
+  DEFAULT_EVENING_REMINDER_TIME,
+  DEFAULT_MORNING_REMINDER_TIME,
 } from '@/lib/notification-schedule';
 
 Notifications.setNotificationHandler({
@@ -19,7 +26,25 @@ Notifications.setNotificationHandler({
   }),
 });
 
+export const EVENT_EVENING_CATEGORY = 'event_evening_reminder';
+export const SNOOZE_TOMORROW_MORNING_ACTION = 'snooze_tomorrow_morning';
+
+const getEveningTime = () =>
+  parseReminderTime(useSettingsStore.getState().eveningReminderTime, DEFAULT_EVENING_REMINDER_TIME);
+const getMorningTime = () =>
+  parseReminderTime(useSettingsStore.getState().morningReminderTime, DEFAULT_MORNING_REMINDER_TIME);
+
 export const notificationService = {
+  registerNotificationCategories: async (): Promise<void> => {
+    await Notifications.setNotificationCategoryAsync(EVENT_EVENING_CATEGORY, [
+      {
+        identifier: SNOOZE_TOMORROW_MORNING_ACTION,
+        buttonTitle: i18n.t('reminder.snoozeTomorrowMorning'),
+        options: { opensAppToForeground: false },
+      },
+    ]);
+  },
+
   requestPermissions: async (): Promise<boolean> => {
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
 
@@ -100,14 +125,63 @@ export const notificationService = {
       : await notificationService.requestPermissions();
     if (!hasPermission) return null;
 
-    const triggerDate = getEventReminderTriggerDate(eventDate);
+    const now = new Date();
+    const eveningTriggerDate = getEventReminderTriggerDate(eventDate, now, getEveningTime());
+    const morningTriggerDate = getEventDayMorningTriggerDate(eventDate, now, getMorningTime());
+
+    let eveningIdentifier: string | null = null;
+    if (eveningTriggerDate) {
+      eveningIdentifier = await Notifications.scheduleNotificationAsync({
+        content: {
+          title: contactName,
+          body: i18n.t('reminder.eventTomorrow', { title }),
+          categoryIdentifier: EVENT_EVENING_CATEGORY,
+          data: { eventId, type: 'event_evening', title, contactName },
+        },
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.DATE,
+          date: eveningTriggerDate,
+        },
+      });
+    }
+
+    let morningIdentifier: string | null = null;
+    if (morningTriggerDate) {
+      morningIdentifier = await Notifications.scheduleNotificationAsync({
+        content: {
+          title: contactName,
+          body: i18n.t('reminder.eventToday', { title }),
+          data: { eventId, type: 'event_morning' },
+        },
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.DATE,
+          date: morningTriggerDate,
+        },
+      });
+    }
+
+    return eveningIdentifier ?? morningIdentifier;
+  },
+
+  scheduleBirthdayWeekAheadReminder: async (
+    eventId: string,
+    eventDate: string,
+    contactFirstName: string,
+    options: { requestPermission?: boolean } = {}
+  ): Promise<string | null> => {
+    const hasPermission = options.requestPermission === false
+      ? await notificationService.hasPermissions()
+      : await notificationService.requestPermissions();
+    if (!hasPermission) return null;
+
+    const triggerDate = getBirthdayWeekAheadTriggerDate(eventDate, new Date(), getMorningTime());
     if (!triggerDate) return null;
 
     const identifier = await Notifications.scheduleNotificationAsync({
       content: {
-        title: contactName,
-        body: i18n.t('reminder.eventTomorrow', { title }),
-        data: { eventId },
+        title: contactFirstName,
+        body: i18n.t('reminder.birthdayWeekAhead', { firstName: contactFirstName }),
+        data: { eventId, type: 'birthday_week_ahead' },
       },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DATE,
@@ -116,6 +190,49 @@ export const notificationService = {
     });
 
     return identifier;
+  },
+
+  snoozeEventReminderToMorning: async (
+    eventId: string,
+    title: string,
+    contactName: string
+  ): Promise<void> => {
+    const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+    const morningDuplicates = scheduled.filter(
+      (notification) =>
+        notification.content.data?.eventId === eventId &&
+        notification.content.data?.type === 'event_morning'
+    );
+    await Promise.all(
+      morningDuplicates.map((notification) =>
+        Notifications.cancelScheduledNotificationAsync(notification.identifier)
+      )
+    );
+
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: contactName,
+        body: i18n.t('reminder.eventToday', { title }),
+        data: { eventId, type: 'event_morning' },
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        date: getNextMorningOccurrence(new Date(), getMorningTime()),
+      },
+    });
+  },
+
+  cancelAllEventReminders: async (): Promise<void> => {
+    const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+    const eventReminders = scheduled.filter((notification) => {
+      const data = notification.content.data;
+      return typeof data?.eventId === 'string' && data.eventId.length > 0;
+    });
+    await Promise.all(
+      eventReminders.map((notification) =>
+        Notifications.cancelScheduledNotificationAsync(notification.identifier)
+      )
+    );
   },
 
   cancelEventReminder: async (notificationId: string): Promise<void> => {
@@ -259,11 +376,13 @@ export const notificationService = {
     await Notifications.cancelAllScheduledNotificationsAsync();
   },
 
-  setupNotificationListener: (onNotificationTap: (data: Record<string, unknown>) => void): (() => void) => {
+  setupNotificationListener: (
+    onNotificationTap: (data: Record<string, unknown>, actionIdentifier: string) => void
+  ): (() => void) => {
     const subscription = Notifications.addNotificationResponseReceivedListener((response: NotificationResponse) => {
       const data = response.notification.request.content.data;
 
-      onNotificationTap(data);
+      onNotificationTap(data, response.actionIdentifier);
     });
 
     return () => subscription.remove();
