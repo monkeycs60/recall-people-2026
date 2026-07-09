@@ -30,12 +30,20 @@ export const buildDateNotificationTrigger = (date: Date): DateNotificationTrigge
   date,
 });
 
+export const parseEventDate = (eventDate: string): Date => {
+  const dateOnlyMatch = eventDate.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (dateOnlyMatch) {
+    return new Date(Number(dateOnlyMatch[1]), Number(dateOnlyMatch[2]) - 1, Number(dateOnlyMatch[3]));
+  }
+  return new Date(eventDate);
+};
+
 export const getEventReminderTriggerDate = (
   eventDate: string,
   now: Date = new Date(),
   eveningTime: ReminderTime = DEFAULT_EVENING_REMINDER_TIME
 ): Date | null => {
-  const eventDateObj = new Date(eventDate);
+  const eventDateObj = parseEventDate(eventDate);
   const triggerDate = atTime(addDays(eventDateObj, -1), eveningTime.hour, eveningTime.minute);
 
   if (isBefore(triggerDate, now)) return null;
@@ -48,7 +56,7 @@ export const getEventDayMorningTriggerDate = (
   now: Date = new Date(),
   morningTime: ReminderTime = DEFAULT_MORNING_REMINDER_TIME
 ): Date | null => {
-  const eventDateObj = new Date(eventDate);
+  const eventDateObj = parseEventDate(eventDate);
   const triggerDate = atTime(eventDateObj, morningTime.hour, morningTime.minute);
 
   if (isBefore(triggerDate, now)) return null;
@@ -61,7 +69,7 @@ export const getBirthdayWeekAheadTriggerDate = (
   now: Date = new Date(),
   morningTime: ReminderTime = DEFAULT_MORNING_REMINDER_TIME
 ): Date | null => {
-  const eventDateObj = new Date(eventDate);
+  const eventDateObj = parseEventDate(eventDate);
   const triggerDate = atTime(addDays(eventDateObj, -7), morningTime.hour, morningTime.minute);
 
   if (isBefore(triggerDate, now)) return null;

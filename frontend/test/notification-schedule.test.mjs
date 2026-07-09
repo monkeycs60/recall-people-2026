@@ -135,6 +135,19 @@ test('schedules a birthday week-ahead reminder 7 days before at morning time', a
   );
 });
 
+test('parses date-only event dates as local calendar days', async () => {
+  const { parseEventDate } = await loadModule();
+
+  const dateOnly = parseEventDate('2026-05-07');
+  assert.equal(dateOnly.getFullYear(), 2026);
+  assert.equal(dateOnly.getMonth(), 4);
+  assert.equal(dateOnly.getDate(), 7);
+  assert.equal(dateOnly.getHours(), 0);
+
+  const fullIso = parseEventDate('2026-05-07T12:00:00+02:00');
+  assert.equal(fullIso.toISOString(), new Date('2026-05-07T12:00:00+02:00').toISOString());
+});
+
 test('next morning occurrence is today before the slot, tomorrow after', async () => {
   const { getNextMorningOccurrence } = await loadModule();
 

@@ -89,7 +89,7 @@ export const reminderService = {
        JOIN contacts c ON c.id = ht.contact_id
        WHERE ht.status = 'active'
          AND ht.event_date IS NOT NULL
-         AND ht.event_date >= ?
+         AND date(ht.event_date) >= date(?)
          AND ht.deleted_at IS NULL
          AND c.deleted_at IS NULL
        ORDER BY ht.event_date ASC
