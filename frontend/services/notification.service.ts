@@ -376,13 +376,21 @@ export const notificationService = {
     await Notifications.cancelAllScheduledNotificationsAsync();
   },
 
+  dismissNotification: async (notificationIdentifier: string): Promise<void> => {
+    await Notifications.dismissNotificationAsync(notificationIdentifier);
+  },
+
   setupNotificationListener: (
-    onNotificationTap: (data: Record<string, unknown>, actionIdentifier: string) => void
+    onNotificationTap: (
+      data: Record<string, unknown>,
+      actionIdentifier: string,
+      notificationIdentifier: string
+    ) => void
   ): (() => void) => {
     const subscription = Notifications.addNotificationResponseReceivedListener((response: NotificationResponse) => {
       const data = response.notification.request.content.data;
 
-      onNotificationTap(data, response.actionIdentifier);
+      onNotificationTap(data, response.actionIdentifier, response.notification.request.identifier);
     });
 
     return () => subscription.remove();

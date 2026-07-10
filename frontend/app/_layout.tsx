@@ -196,13 +196,14 @@ export default function RootLayout() {
 
   // Setup notification tap handler to navigate to contact
   useEffect(() => {
-    const cleanup = notificationService.setupNotificationListener(async (data, actionIdentifier) => {
+    const cleanup = notificationService.setupNotificationListener(async (data, actionIdentifier, notificationIdentifier) => {
       if (actionIdentifier === SNOOZE_TOMORROW_MORNING_ACTION) {
         const eventId = typeof data.eventId === 'string' ? data.eventId : null;
         const title = typeof data.title === 'string' ? data.title : '';
         const contactName = typeof data.contactName === 'string' ? data.contactName : '';
         if (eventId) {
           await notificationService.snoozeEventReminderToMorning(eventId, title, contactName);
+          await notificationService.dismissNotification(notificationIdentifier);
           analytics.capture(AnalyticsEvent.NOTIFICATION_SNOOZED, { type: 'event_evening' });
         }
         return;
