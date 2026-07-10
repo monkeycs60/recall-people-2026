@@ -79,7 +79,11 @@
 - Filtrage par jour
 
 ### Notifications des evenements
-- Notifications push pour les evenements a venir
+- Double rappel pour chaque evenement : la veille au soir et le matin du jour J
+- Snooze "Me le rappeler demain matin" en un tap
+- Heures de rappel reglables (soir et matin) depuis le profil
+- Rappel d'anniversaire une semaine avant (J-7)
+- Relance post-evenement GRATUITE : notification le lendemain d'un moment fort (lancement, voyage, entretien...), plus une carte "Resolu / Raconter" en tete de fiche contact pour cloturer ou raconter le denouement
 
 ### Filtres temporels
 - Vue "A venir" : evenements futurs
