@@ -52,6 +52,8 @@ export const AnalyticsEvent = {
   // Notifications & reminders (all local, no server push)
   NOTIFICATION_SNOOZED: 'notification_snoozed',
   REMINDER_TIME_CHANGED: 'reminder_time_changed',
+  // Post-event loop: user taps "Tell the story" on the follow-up card
+  POST_EVENT_STORY_STARTED: 'post_event_story_started',
 } as const;
 
 export type AnalyticsEventName =

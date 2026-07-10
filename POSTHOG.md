@@ -32,7 +32,7 @@ Init : `landing-page/src/lib/analytics.ts` (appelé depuis `Layout.astro`).
 ### App mobile — surface `mobile` (`frontend/`, Expo / React Native)
 Init : `frontend/lib/analytics.ts` + `PostHogProvider` dans `frontend/app/_layout.tsx` ; identify dans `frontend/stores/auth-store.ts` (+ `hooks/useAuth.ts`).
 - Autocapture (**screens** + touches), **identify/reset**, **error tracking** (`ErrorUtils.setGlobalHandler` + `unhandledrejection`).
-- Events custom (21), tous via le helper `analytics` (no-op si désactivé), avec super-props `product`/`surface` :
+- Events custom (22), tous via le helper `analytics` (no-op si désactivé), avec super-props `product`/`surface` :
   - **Auth** : `sign_up`, `login`, `logout` (`hooks/useAuth.ts`, `stores/auth-store.ts`).
   - **Capture funnel** : `voice_recording_started`, `capture_processed` (`hooks/useRecording.ts`),
     **`note_created`**, **`contact_created`**, `reminder_set` (`app/review.tsx`).
@@ -44,9 +44,10 @@ Init : `frontend/lib/analytics.ts` + `PostHogProvider` dans `frontend/app/_layou
   - **Assistant IA** : `assistant_question_asked` (`app/ask.tsx`).
   - **Icebreakers** : **`icebreaker_viewed`** (`question_count`, `is_waiting` — jamais le contenu des questions), capté sur focus de l'écran — `app/contact/[id]/icebreakers.tsx`.
   - **Monétisation** : `paywall_viewed`, `subscription_started` (`components/Paywall.tsx`).
-  - **Notifications & rappels** : **`notification_snoozed`** (`type: 'event_evening'`) — snooze « demain matin » depuis la notification de la veille (`app/_layout.tsx`) ; **`reminder_time_changed`** (`slot: 'evening' | 'morning'` — **jamais l'heure exacte**) — réglage global des heures de rappel dans Profile (`components/profile/ReminderTimeRows.tsx`).
-  → mesure **notes / contacts créés & édités par utilisateur**, funnels d'activation, rétention, usage recherche.
+  - **Notifications & rappels** : **`notification_snoozed`** (`type: 'event_evening'`) — snooze « demain matin » depuis la notification de la veille (`app/_layout.tsx`) ; **`reminder_time_changed`** (`slot: 'evening' | 'morning'` — **jamais l'heure exacte**) — réglage global des heures de rappel dans Profile (`components/profile/ReminderTimeRows.tsx`) ; **`post_event_story_started`** (**aucune propriété** — ni id, ni titre de topic) — tap « Raconter » sur la carte post-événement en tête de fiche contact (`app/contact/[id]/index.tsx`). Le tap « Résolu 🎉 » de la même carte réutilise **`hot_topic_resolved`** (via `hotTopicService.resolve`, `has_resolution: false` pour une résolution générique) — pas d'event dédié.
+  → mesure **notes / contacts créés & édités par utilisateur**, funnels d'activation, rétention, usage recherche, engagement sur la boucle post-événement.
 - ℹ️ **Rappels 100 % locaux** (expo-notifications, **aucun push serveur**) : un hot topic daté programme désormais **2 notifications locales** (veille au soir + jour J au matin), **3 pour un anniversaire** (+ rappel J-7). Replanifiées à l'ouverture de l'app, donc pas d'event serveur associé.
+- ℹ️ **Relance post-événement désormais GRATUITE** (le gate premium a sauté ; seul le toggle opt-out `postEventFollowUpEnabled` subsiste) : la notif lendemain-matin `reminder.postEvent` cible tous les utilisateurs, pas seulement les Premium → **le volume de notifs `post_event` va augmenter**. Nouveau wording social (« Demande-lui comment ça s'est passé : {{title}} 💬 » et équivalents 5 langues) — le corps contient le titre du topic **côté device uniquement**, jamais envoyé à PostHog. Le digest hebdo, lui, **reste premium**.
 - ⚠️ Vie privée : les events portent **uniquement des compteurs / booléens** (longueurs, nombres de champs), **jamais de contenu** (nom, transcription, requête, résolution).
 - ⚠️ Ces events sont **optimistes** (envoyés côté client) : ils peuvent se perdre (offline / app tuée avant flush / ad-blocker). Pour des **comptes fiables**, voir la section *Events autoritatifs backend* ci-dessous.
 - ⚠️ Actif au **prochain build EAS** (committé, pas dans les builds déjà en review).
@@ -75,6 +76,7 @@ Le mobile est **local-first + sync chiffré** : ses events sont *optimistes* et 
   - distinct_id = user id si dispo, sinon `recall-backend`.
 - ⚠️ **Retries structurés** : `extract` et `detect-contact` réessaient jusqu'à **3×** en cas d'échec de génération structurée → **plusieurs `$ai_generation` peuvent apparaître pour une seule note** (compter les tentatives, pas les notes). `detect-contact` produit désormais une **sortie structurée** (`Output.object`, operationType `object-generation` dans les logs de perf) au lieu d'une génération de texte brut (`text-generation`).
 - ⚠️ **`temperature: 0`** appliquée à toutes les routes à sortie structurée (`extract`, `detect-contact`, `summary`, `ask`, `similarity`, `search`) pour un résultat déterministe.
+- ℹ️ **Préambule `respondingToTopic` (mode « Raconter »)** : quand l'utilisateur répond à un topic ciblé, `/api/extract` préfixe le prompt d'un préambule (id + titre + date de l'événement du topic) pour rattacher la note à l'actualité existante. C'est un **changement de contenu du prompt** capturé dans l'`input` du `$ai_generation` `extract` existant — **aucun nouvel event ni nouvelle propriété d'instrumentation**.
 - ⚠️ **Retry côté client** : en cas d'échec d'extraction / transcription, la note est **conservée localement** avec une carte de retry ; le retry (déclenché par l'user) **rappelle le même endpoint avec le même transcript** → attendre des `$ai_generation` répétés sur un input identique.
 - **Error tracking** : `app.onError` (`backend/src/index.ts`) + `captureException` sur chaque catch d'appel IA (provider/modèle/route en contexte).
 - ⚠️ **`backend/.npmrc` (`legacy-peer-deps=true`)** est requis : `@posthog/ai` a un peer `@anthropic-ai/sdk` incompatible avec la version du projet. Ne pas le supprimer (sinon build Nixpacks KO).

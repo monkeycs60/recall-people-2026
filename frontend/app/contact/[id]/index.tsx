@@ -57,6 +57,7 @@ import { formatLocalizedDate } from '@/utils/dateLocale';
 import { getMeetingContext } from '@/utils/meetingContext';
 import { filterToNextBirthdayTopic, getPastUnresolvedHotTopics, isHotTopicTodayOrFuture, parseHotTopicDate } from '@/utils/hotTopics';
 import { PostEventFollowUpCard } from '@/components/contact/PostEventFollowUpCard';
+import { analytics, AnalyticsEvent } from '@/lib/analytics';
 import type { HotTopic } from '@/types';
 
 type ToneKey = 'amber' | 'primary' | 'accent' | 'mint';
@@ -276,6 +277,7 @@ export default function ContactDetailScreen() {
   };
 
   const handleTellPostEventStory = (topicId: string) => {
+    analytics.capture(AnalyticsEvent.POST_EVENT_STORY_STARTED);
     setPreselectedContactId(contactId);
     setPreselectedHotTopicId(topicId);
     router.push({
