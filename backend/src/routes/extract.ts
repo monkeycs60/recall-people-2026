@@ -9,6 +9,7 @@ import { measurePerformance } from '../lib/performance-logger';
 import { generateWithRetries } from '../lib/generation-retry';
 import { sanitizeEventDate } from '../lib/event-date-guard';
 import { buildCalendarContext } from '../lib/date-context';
+import { buildRespondingToTopicPreamble } from '../lib/responding-topic';
 import { getLangfuseClient } from '../lib/telemetry';
 import { evaluateExtraction } from '../lib/evaluators';
 import { captureServerException } from '../lib/posthog';
@@ -54,6 +55,7 @@ type ExtractionRequest = {
       context?: string;
     }>;
   };
+  respondingToTopic?: { id: string; title: string; eventDate?: string | null };
   language?: 'fr' | 'en' | 'es' | 'it' | 'de';
 };
 
@@ -1196,7 +1198,7 @@ extractRoutes.post('/', async (c) => {
     }
 
     const language = body.language || 'fr';
-    const prompt = buildExtractionPrompt(transcription, currentContact, language);
+    const prompt = buildExtractionPrompt(transcription, currentContact, language, body.respondingToTopic);
 
     const providerConfig = {
       OPENAI_API_KEY: c.env.OPENAI_API_KEY,
@@ -1401,7 +1403,8 @@ const normalizeTranscriptionEmails = (text: string): string => {
 const buildExtractionPrompt = (
   transcription: string,
   currentContact?: ExtractionRequest['currentContact'],
-  language: string = 'fr'
+  language: string = 'fr',
+  respondingToTopic?: ExtractionRequest['respondingToTopic']
 ): string => {
   const normalizedTranscription = normalizeTranscriptionEmails(transcription);
   const { wrapped: wrappedTranscription } = wrapUserInput(normalizedTranscription, 'TRANSCRIPTION');
@@ -1428,11 +1431,15 @@ ${currentContact.hotTopics.map((topic) => `  - [ID: ${topic.id}] "${topic.title}
   const nextWeekDate = format(new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd');
   const twoMonthsDate = format(new Date(new Date(now).setMonth(now.getMonth() + 2)), 'yyyy-MM-dd');
 
+  const respondingToTopicPreamble = respondingToTopic
+    ? `\n\n${buildRespondingToTopicPreamble(respondingToTopic, language)}`
+    : '';
+
   return `${template.intro}
 
 ${template.dateReference(currentDate)}
 
-${buildCalendarContext(now, language)}
+${buildCalendarContext(now, language)}${respondingToTopicPreamble}
 
 ${getSecurityInstructions(language)}
 ${currentContactContext}
