@@ -259,6 +259,11 @@ export const extractInfo = async (data: {
       context?: string;
     }>;
   };
+  respondingToTopic?: {
+    id: string;
+    title: string;
+    eventDate?: string | null;
+  };
 }): Promise<{
   extraction: ExtractionResult;
 }> => {

@@ -15,7 +15,7 @@ import { useSubscriptionStore } from '@/stores/subscription-store';
 import { transcribeAudio, extractInfo, detectContact } from '@/lib/api';
 import { hotTopicService } from '@/services/hot-topic.service';
 import { showErrorToast, ApiError } from '@/lib/error-handler';
-import { getRecordingHotTopics } from '@/utils/recordingContext';
+import { getRecordingHotTopics, getRespondingToTopic } from '@/utils/recordingContext';
 import { analytics, AnalyticsEvent } from '@/lib/analytics';
 import i18n from '@/lib/i18n';
 
@@ -201,6 +201,7 @@ export const useRecording = () => {
 
         const activeHotTopics = hotTopics.filter((topic) => topic.status === 'active');
         const recordingHotTopics = getRecordingHotTopics(activeHotTopics, currentPreselectedHotTopicId);
+        const respondingToTopic = getRespondingToTopic(activeHotTopics, currentPreselectedHotTopicId);
 
         const { extraction } = await extractInfo({
           transcription: transcript,
@@ -216,6 +217,7 @@ export const useRecording = () => {
               context: topic.context,
             })),
           },
+          respondingToTopic,
         });
 
         extraction.contactIdentified.id = preselectedContact.id;
