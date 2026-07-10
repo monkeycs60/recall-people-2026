@@ -264,6 +264,7 @@ export default function ContactDetailScreen() {
 
   const handleAddNote = (mode: InputMode) => {
     setPreselectedContactId(contactId);
+    setPreselectedHotTopicId(null);
     router.push({
       pathname: '/record',
       params: { initialMode: mode },
