@@ -28,6 +28,6 @@ export function getRespondingToTopic(
   return {
     id: focusedTopic.id,
     title: focusedTopic.title,
-    eventDate: focusedTopic.eventDate,
+    eventDate: focusedTopic.eventDate ? focusedTopic.eventDate.slice(0, 10) : focusedTopic.eventDate,
   };
 }
