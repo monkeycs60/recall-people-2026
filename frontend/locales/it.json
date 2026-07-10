@@ -225,6 +225,13 @@
     "reconnectedToday_other": "{{count}} riconnessi oggi",
     "backToContacts": "Torna ai contatti"
   },
+  "postEvent": {
+    "cardTitle": "Com'è andata: {{title}}?",
+    "cardDaysAgo_one": "{{count}} giorno fa",
+    "cardDaysAgo_other": "{{count}} giorni fa",
+    "resolveButton": "Risolto 🎉",
+    "tellButton": "Racconta"
+  },
   "search": {
     "title": "Esplora IA",
     "placeholder": "Descrivi cosa cerchi...",

@@ -225,6 +225,13 @@
     "reconnectedToday_other": "{{count}} heute erledigt",
     "backToContacts": "Zurück zu Kontakten"
   },
+  "postEvent": {
+    "cardTitle": "Wie ist es gelaufen: {{title}}?",
+    "cardDaysAgo_one": "vor {{count}} Tag",
+    "cardDaysAgo_other": "vor {{count}} Tagen",
+    "resolveButton": "Erledigt 🎉",
+    "tellButton": "Erzählen"
+  },
   "search": {
     "title": "KI-Suche",
     "placeholder": "Beschreibe, was du suchst...",

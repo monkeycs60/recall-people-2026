@@ -125,6 +125,65 @@ test('classifies today and future hot topic dates without keeping past dates', a
   assert.equal(isHotTopicTodayOrFuture(undefined, now), false);
 });
 
+test('keeps only active past dated hot topics that are not birthdays', async () => {
+  const { getPastUnresolvedHotTopics } = await loadModule();
+  const now = new Date('2026-07-10T12:00:00.000Z');
+  const input = [
+    topic('yesterday', '2026-07-09'),
+    topic('week-ago', '2026-07-03'),
+    topic('stale', '2026-06-20'),
+    topic('today', '2026-07-10'),
+    topic('future', '2026-07-15'),
+    topic('undated', undefined),
+    { ...topic('resolved', '2026-07-01'), status: 'resolved' },
+    { ...topic('birthday', '2026-07-01'), birthdayContactId: 'contact-1' },
+  ];
+
+  assert.deepEqual(
+    getPastUnresolvedHotTopics(input, now).map((item) => item.id),
+    ['yesterday', 'week-ago', 'stale']
+  );
+});
+
+test('computes daysPast and staleness for past dated hot topics', async () => {
+  const { getPastUnresolvedHotTopics } = await loadModule();
+  const now = new Date('2026-07-10T12:00:00.000Z');
+  const input = [
+    topic('yesterday', '2026-07-09'),
+    topic('week-ago', '2026-07-03'),
+    topic('stale', '2026-06-20'),
+  ];
+
+  assert.deepEqual(
+    getPastUnresolvedHotTopics(input, now).map((item) => ({
+      id: item.id,
+      title: item.title,
+      eventDate: item.eventDate,
+      daysPast: item.daysPast,
+      isStale: item.isStale,
+    })),
+    [
+      { id: 'yesterday', title: 'yesterday', eventDate: '2026-07-09', daysPast: 1, isStale: false },
+      { id: 'week-ago', title: 'week-ago', eventDate: '2026-07-03', daysPast: 7, isStale: false },
+      { id: 'stale', title: 'stale', eventDate: '2026-06-20', daysPast: 20, isStale: true },
+    ]
+  );
+});
+
+test('marks a topic exactly 14 days past as not yet stale', async () => {
+  const { getPastUnresolvedHotTopics } = await loadModule();
+  const now = new Date('2026-07-10T12:00:00.000Z');
+  const input = [
+    topic('two-weeks', '2026-06-26'),
+    topic('fifteen-days', '2026-06-25'),
+  ];
+
+  const result = getPastUnresolvedHotTopics(input, now);
+  assert.equal(result.find((item) => item.id === 'two-weeks')?.daysPast, 14);
+  assert.equal(result.find((item) => item.id === 'two-weeks')?.isStale, false);
+  assert.equal(result.find((item) => item.id === 'fifteen-days')?.isStale, true);
+});
+
 test.after(async () => {
   await cleanTsModule(suiteName);
 });

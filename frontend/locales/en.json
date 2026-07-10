@@ -225,6 +225,13 @@
     "reconnectedToday_other": "{{count}} reconnected today",
     "backToContacts": "Back to contacts"
   },
+  "postEvent": {
+    "cardTitle": "How did it go: {{title}}?",
+    "cardDaysAgo_one": "{{count}} day ago",
+    "cardDaysAgo_other": "{{count}} days ago",
+    "resolveButton": "Resolved 🎉",
+    "tellButton": "Tell the story"
+  },
   "search": {
     "title": "AI Explore",
     "placeholder": "Describe what you're looking for...",

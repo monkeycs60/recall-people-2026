@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import {
   useContactQuery,
   useRegenerateSummary,
+  useResolveHotTopic,
 } from '@/hooks/useContactQuery';
 import { useUpdateContact, useDeleteContact } from '@/hooks/useContactsQuery';
 import { useGroupsForContact, useGroupsQuery } from '@/hooks/useGroupsQuery';
@@ -54,7 +55,8 @@ import { Paywall } from '@/components/Paywall';
 import { REMINDER_FREQUENCY_PRESETS } from '@/lib/reminder-frequency';
 import { formatLocalizedDate } from '@/utils/dateLocale';
 import { getMeetingContext } from '@/utils/meetingContext';
-import { filterToNextBirthdayTopic, isHotTopicTodayOrFuture, parseHotTopicDate } from '@/utils/hotTopics';
+import { filterToNextBirthdayTopic, getPastUnresolvedHotTopics, isHotTopicTodayOrFuture, parseHotTopicDate } from '@/utils/hotTopics';
+import { PostEventFollowUpCard } from '@/components/contact/PostEventFollowUpCard';
 import type { HotTopic } from '@/types';
 
 type ToneKey = 'amber' | 'primary' | 'accent' | 'mint';
@@ -117,7 +119,7 @@ export default function ContactDetailScreen() {
   const params = useLocalSearchParams();
   const insets = useSafeAreaInsets();
   const contactId = params.id as string;
-  const { setPreselectedContactId, isAvatarGenerating } = useAppStore();
+  const { setPreselectedContactId, setPreselectedHotTopicId, isAvatarGenerating } = useAppStore();
   const isPremium = useSubscriptionStore((state) => state.isPremium);
   const notSeenThresholdDays = useSettingsStore((state) => state.notSeenThresholdDays);
 
@@ -132,6 +134,7 @@ export default function ContactDetailScreen() {
   const updateContactMutation = useUpdateContact();
   const deleteContactMutation = useDeleteContact();
   const regenerateSummaryMutation = useRegenerateSummary();
+  const resolveHotTopicMutation = useResolveHotTopic();
 
   const { groups: allGroups } = useGroupsQuery();
   const { data: contactGroups = [] } = useGroupsForContact(contactId);
@@ -189,6 +192,12 @@ export default function ContactDetailScreen() {
   }, [contact, today]);
 
   const remainingUpcoming = Math.max(0, totalUpcoming - upcomingPreview.length);
+
+  const pastUnresolvedTopics = useMemo(() => {
+    if (!contact) return [];
+    return getPastUnresolvedHotTopics(contact.hotTopics, today);
+  }, [contact, today]);
+  const firstPastUnresolvedTopic = pastUnresolvedTopics[0];
 
   const meetingContext = useMemo(() => {
     if (!contact) return null;
@@ -258,6 +267,19 @@ export default function ContactDetailScreen() {
     router.push({
       pathname: '/record',
       params: { initialMode: mode },
+    });
+  };
+
+  const handleResolvePostEventTopic = (topicId: string) => {
+    resolveHotTopicMutation.mutate({ id: topicId, contactId });
+  };
+
+  const handleTellPostEventStory = (topicId: string) => {
+    setPreselectedContactId(contactId);
+    setPreselectedHotTopicId(topicId);
+    router.push({
+      pathname: '/record',
+      params: { initialMode: 'audio' },
     });
   };
 
@@ -507,6 +529,14 @@ export default function ContactDetailScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(80).duration(300)} style={styles.bentoSection}>
+          {firstPastUnresolvedTopic && (
+            <PostEventFollowUpCard
+              topic={firstPastUnresolvedTopic}
+              onResolve={() => handleResolvePostEventTopic(firstPastUnresolvedTopic.id)}
+              onTellStory={() => handleTellPostEventStory(firstPastUnresolvedTopic.id)}
+            />
+          )}
+
           <Pressable style={styles.heroTile} onPress={handleNavigateComingUp}>
             <LinearGradient
               colors={[Colors.primary, Colors.primaryDark]}

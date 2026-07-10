@@ -187,6 +187,43 @@ export function sortHotTopicsByEventDateDesc<T extends Pick<HotTopic, 'eventDate
   });
 }
 
+export type PastUnresolvedTopic = {
+  id: string;
+  title: string;
+  eventDate: string;
+  daysPast: number;
+  isStale: boolean;
+};
+
+const STALE_THRESHOLD_DAYS = 14;
+
+export function getPastUnresolvedHotTopics(
+  hotTopics: HotTopic[],
+  now: Date = new Date()
+): PastUnresolvedTopic[] {
+  const nowStartOfDay = getStartOfDayTime(now);
+
+  return hotTopics
+    .filter((topic) =>
+      topic.status === 'active' &&
+      Boolean(topic.eventDate) &&
+      !topic.birthdayContactId &&
+      isHotTopicOverdue(topic.eventDate, now)
+    )
+    .map((topic) => {
+      const eventDateValue = parseHotTopicDate(topic.eventDate)!;
+      const daysPast = Math.round((nowStartOfDay - getStartOfDayTime(eventDateValue)) / DAY_MS);
+      return {
+        id: topic.id,
+        title: topic.title,
+        eventDate: topic.eventDate!,
+        daysPast,
+        isStale: daysPast > STALE_THRESHOLD_DAYS,
+      };
+    })
+    .sort((first, second) => first.daysPast - second.daysPast);
+}
+
 export function filterToNextBirthdayTopic<T extends Pick<HotTopic, 'birthdayContactId' | 'eventDate'>>(
   hotTopics: T[],
   now = new Date()
