@@ -311,23 +311,21 @@ export default function ProfileScreen() {
             value={getNotSeenThresholdLabel(notSeenThresholdDays)}
             onPress={handleChangeNotSeenThreshold}
           />
+          <SettingsRow
+            icon={<CalendarCheck size={20} color={Colors.primary} />}
+            label={t('settings.postEventFollowUp')}
+            description={t('settings.postEventFollowUpDescription')}
+            toggleValue={postEventFollowUpEnabled}
+            onToggle={handlePostEventFollowUpToggle}
+          />
           {isPremium && (
-            <>
-              <SettingsRow
-                icon={<Newspaper size={20} color={Colors.primary} />}
-                label={t('settings.weeklyDigest')}
-                description={t('settings.weeklyDigestDescription')}
-                toggleValue={weeklyDigestEnabled}
-                onToggle={handleWeeklyDigestToggle}
-              />
-              <SettingsRow
-                icon={<CalendarCheck size={20} color={Colors.primary} />}
-                label={t('settings.postEventFollowUp')}
-                description={t('settings.postEventFollowUpDescription')}
-                toggleValue={postEventFollowUpEnabled}
-                onToggle={handlePostEventFollowUpToggle}
-              />
-            </>
+            <SettingsRow
+              icon={<Newspaper size={20} color={Colors.primary} />}
+              label={t('settings.weeklyDigest')}
+              description={t('settings.weeklyDigestDescription')}
+              toggleValue={weeklyDigestEnabled}
+              onToggle={handleWeeklyDigestToggle}
+            />
           )}
         </SettingsSection>
 

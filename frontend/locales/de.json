@@ -1108,7 +1108,7 @@
     "eventToday": "Heute ist es so weit: {{title}}. Schreib eine Nachricht 💬",
     "birthdayWeekAhead": "{{firstName}} hat in einer Woche Geburtstag 🎁",
     "snoozeTomorrowMorning": "Morgen früh erinnern",
-    "postEvent": "{{title}} war diese Woche — melde dich?",
+    "postEvent": "Frag nach, wie es gelaufen ist: {{title}} 💬",
     "notSeen_one": "{{count}} Tag ohne Kontakt",
     "notSeen_other": "{{count}} Tage ohne Kontakt"
   },

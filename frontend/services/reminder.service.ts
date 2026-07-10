@@ -210,12 +210,6 @@ export const reminderService = {
   },
 
   schedulePostEventFollowUps: async (options: ScheduleOptions = {}) => {
-    const { isPremium } = useSubscriptionStore.getState();
-    if (!isPremium) {
-      await notificationService.cancelRemindersByType('post_event');
-      return;
-    }
-
     const { postEventFollowUpEnabled } = useSettingsStore.getState();
     if (!postEventFollowUpEnabled) {
       await notificationService.cancelRemindersByType('post_event');
