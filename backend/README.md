@@ -33,6 +33,7 @@ npm run dev:node        # API Node seule, sans bootstrap de la base
 npm run typecheck       # Vérification TypeScript
 npm test                # Tests Node
 npm run db:generate     # Générer le client Prisma
+npm run db:deploy       # Appliquer les migrations en attente (production)
 npm run db:push         # Appliquer le schéma à la base ciblée
 npm run db:refresh-dev  # Rafraîchir la base locale depuis le snapshot VPS
 npm run db:studio       # Ouvrir Prisma Studio
@@ -81,6 +82,11 @@ Ne jamais lancer une migration ou un déploiement de production depuis la machin
 npm install
 npm start
 ```
+
+`npm start` exécute automatiquement `prisma migrate deploy` avant de lancer
+l'API. Une migration en attente ne peut donc plus être oubliée lors d'un
+redéploiement Coolify ; si une migration échoue, le service ne démarre pas avec
+un schéma incohérent.
 
 ## Endpoints principaux
 
