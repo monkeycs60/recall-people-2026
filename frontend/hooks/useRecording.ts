@@ -18,6 +18,7 @@ import { showErrorToast, ApiError } from '@/lib/error-handler';
 import { getRecordingHotTopics, getRespondingToTopic } from '@/utils/recordingContext';
 import { analytics, AnalyticsEvent } from '@/lib/analytics';
 import i18n from '@/lib/i18n';
+import { isAIConsentRequiredError } from '@/lib/ai-consent';
 
 const isE2ETest = process.env.EXPO_PUBLIC_E2E_TEST === 'true';
 const e2eFixtureName = process.env.EXPO_PUBLIC_E2E_FIXTURE || 'brenda';
@@ -283,6 +284,14 @@ export const useRecording = () => {
     audioUri: string | null,
     transcript: string
   ) => {
+    if (isAIConsentRequiredError(error)) {
+      setCurrentAudioUri(null);
+      setCurrentTranscription(null);
+      setRecordingState('idle');
+      setProcessingStep(null);
+      return;
+    }
+
     const errorDetails = {
       name: error instanceof Error ? error.name : 'Unknown',
       message: error instanceof Error ? error.message : String(error),

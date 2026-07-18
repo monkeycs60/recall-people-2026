@@ -49,6 +49,7 @@ import { ACCOUNT_REMINDER_FREQUENCY_OPTIONS } from '@/lib/reminder-frequency';
 import { reminderService } from '@/services/reminder.service';
 import { formatLocalizedDate } from '@/utils/dateLocale';
 import { useSyncStore } from '@/stores/sync-store';
+import { useAppleAuth } from '@/hooks/useAppleAuth';
 
 export default function ProfileScreen() {
   const { t } = useTranslation();
@@ -63,11 +64,14 @@ export default function ProfileScreen() {
   const setWeeklyDigestEnabled = useSettingsStore((state) => state.setWeeklyDigestEnabled);
   const postEventFollowUpEnabled = useSettingsStore((state) => state.postEventFollowUpEnabled);
   const setPostEventFollowUpEnabled = useSettingsStore((state) => state.setPostEventFollowUpEnabled);
+  const aiConsentStatus = useSettingsStore((state) => state.aiConsentStatus);
+  const requestAIConsent = useSettingsStore((state) => state.requestAIConsent);
   const isTestPro = useSubscriptionStore((state) => state.isTestPro);
   const isPremium = useSubscriptionStore((state) => state.isPremium);
   const isSyncing = useSyncStore((state) => state.isSyncing);
   const lastSyncedAt = useSyncStore((state) => state.lastSyncedAt);
   const syncError = useSyncStore((state) => state.error);
+  const { promptAsync: applePromptAsync } = useAppleAuth();
 
   const [showPaywall, setShowPaywall] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
@@ -136,7 +140,7 @@ export default function ProfileScreen() {
   const handleFeedback = () => {
     const subject = encodeURIComponent(t('profile.feedback.subject'));
     const body = encodeURIComponent(t('profile.feedback.body'));
-    Linking.openURL(`mailto:support@recall.app?subject=${subject}&body=${body}`);
+    Linking.openURL(`mailto:support@recallpeople.com?subject=${subject}&body=${body}`);
   };
 
   const handleLogout = () => {
@@ -157,7 +161,30 @@ export default function ProfileScreen() {
     );
   };
 
-  const handleDeleteAccount = () => {
+  const performAccountDeletion = async () => {
+    try {
+      let appleAuthorizationCode: string | undefined;
+      if (user?.provider === 'apple') {
+        const appleResult = await applePromptAsync();
+        if (!appleResult?.authorizationCode) {
+          Alert.alert(t('common.error'), t('profile.deleteAccountAppleReauthRequired'));
+          return;
+        }
+        appleAuthorizationCode = appleResult.authorizationCode;
+      }
+
+      await deleteAccount({ appleAuthorizationCode });
+      await clearAuth();
+      await AsyncStorage.clear();
+      await deleteDatabase();
+      useAuthStore.setState({ user: null, isInitialized: false });
+      router.replace('/(auth)/login');
+    } catch {
+      Alert.alert(t('common.error'), t('profile.deleteAccountError'));
+    }
+  };
+
+  const showFinalDeleteConfirmation = () => {
     Alert.alert(
       t('profile.deleteAccount'),
       t('profile.deleteAccountWarning'),
@@ -175,22 +202,32 @@ export default function ProfileScreen() {
                 {
                   text: t('common.delete'),
                   style: 'destructive',
-                  onPress: async () => {
-                    try {
-                      await deleteAccount();
-                      await clearAuth();
-                      await AsyncStorage.clear();
-                      await deleteDatabase();
-                      useAuthStore.setState({ user: null, isInitialized: false });
-                      router.replace('/(auth)/login');
-                    } catch {
-                      Alert.alert(t('common.error'), t('profile.deleteAccountError'));
-                    }
-                  },
+                  onPress: performAccountDeletion,
                 },
               ]
             );
           },
+        },
+      ]
+    );
+  };
+
+  const handleDeleteAccount = () => {
+    if (!isPremium) {
+      showFinalDeleteConfirmation();
+      return;
+    }
+
+    Alert.alert(
+      t('profile.deleteAccountSubscriptionTitle'),
+      t('profile.deleteAccountSubscriptionWarning'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('subscription.manageTitle'), onPress: handleManageSubscription },
+        {
+          text: t('profile.deleteAccountContinue'),
+          style: 'destructive',
+          onPress: showFinalDeleteConfirmation,
         },
       ]
     );
@@ -330,6 +367,15 @@ export default function ProfileScreen() {
         </SettingsSection>
 
         <SettingsSection title={t('profile.sections.data')}>
+          <SettingsRow
+            icon={<Shield size={20} color={Colors.primary} />}
+            label={t('profile.data.aiProcessing')}
+            description={t('profile.data.aiProcessingDescription')}
+            value={aiConsentStatus === 'accepted'
+              ? t('profile.data.aiEnabled')
+              : t('profile.data.aiDisabled')}
+            onPress={requestAIConsent}
+          />
           <SettingsRow
             icon={<Cloud size={20} color={Colors.primary} />}
             label={t('profile.sync.title')}

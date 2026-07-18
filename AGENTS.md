@@ -1,3 +1,10 @@
+## Brand name — mandatory
+
+- The app and brand name is **Recall People**: two words, always written together.
+- In every user-facing string, translation, notification, email, legal or privacy text, store listing, screenshot, marketing asset, and product-facing assistant response, always write **Recall People**.
+- Never shorten the brand to **Recall** alone.
+- Internal code identifiers such as `recall-people`, `recallPeople`, database names, package names, and analytics property values may keep their technical form.
+
 <!-- OPENSPEC:START -->
 # OpenSpec Instructions
 

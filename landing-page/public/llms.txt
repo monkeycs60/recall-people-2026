@@ -1,6 +1,6 @@
 # Recall People
 
-> Recall People is a voice-first personal CRM for iOS and Android. Record a quick voice note after any conversation — AI automatically extracts names, facts, and upcoming events into smart contact profiles. All data is stored locally on your device for complete privacy.
+> Recall People is a voice-first personal CRM for iOS and Android. Record a quick voice note after any conversation — with your permission, AI extracts names, facts, and upcoming events into smart contact profiles. Relationship data is available locally and syncs securely through your account.
 
 ## What it does
 
@@ -14,7 +14,7 @@ Recall People helps you remember everyone you meet. After a conversation, you re
 - Event reminders: never miss a birthday, meeting, or follow-up
 - Semantic search: ask questions like "Who works in tech?" or "Who has kids?"
 - AI conversation starters: get personalized ice breakers before your next meeting
-- Privacy-first: all data stored locally on your device using SQLite, never on our servers
+- Privacy-first: local-first access, encrypted account sync, export and in-app account deletion; personal data is never sold or used for advertising
 - Offline access: browse contacts and notes without internet
 - Data export: JSON and CSV export anytime
 

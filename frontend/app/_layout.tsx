@@ -15,6 +15,7 @@ import {
   Linking,
   LogBox,
   Platform,
+  Modal,
   StatusBar as NativeStatusBar,
 } from 'react-native';
 import { ArrowLeft, BotMessageSquare } from 'lucide-react-native';
@@ -50,6 +51,8 @@ import { getNotificationRoute } from '@/lib/notification-routing';
 import { useSyncStore } from '@/stores/sync-store';
 import { PostHogProvider } from 'posthog-react-native';
 import { posthog, initErrorTracking, analytics, AnalyticsEvent } from '@/lib/analytics';
+import { AIConsentModal } from '@/components/AIConsentModal';
+import { resolveAIConsentRequest } from '@/lib/ai-consent';
 
 // Wire global JS error + unhandled-rejection capture to PostHog (best-effort,
 // no-op when analytics is disabled). Installed once at module load.
@@ -86,6 +89,12 @@ export default function RootLayout() {
   const isAuthInitialized = useAuthStore((state) => state.isInitialized);
   const initializeAuth = useAuthStore((state) => state.initialize);
   const isSubscriptionHydrated = useSubscriptionStore((state) => state.isHydrated);
+  const aiConsentPromptVisible = useSettingsStore((state) => state.aiConsentPromptVisible);
+  const acceptAIConsent = useSettingsStore((state) => state.acceptAIConsent);
+  const declineAIConsent = useSettingsStore((state) => state.declineAIConsent);
+  const dismissAIConsentPrompt = useSettingsStore((state) => state.dismissAIConsentPrompt);
+
+  const shouldShowAIConsent = Boolean(user?.id && isHydrated && aiConsentPromptVisible);
 
   const [fontsLoaded] = useFonts({
     PlayfairDisplay_400Regular,
@@ -309,9 +318,10 @@ export default function RootLayout() {
             client={posthog ?? undefined}
             autocapture={{
               // expo-router is built on React Navigation v7; the provider
-              // tracks $screen views and touch interactions automatically.
+              // tracks screen views only. Touch autocapture is disabled so UI
+              // labels containing relationship data never become event props.
               captureScreens: true,
-              captureTouches: true,
+              captureTouches: false,
             }}
           >
           <Stack
@@ -423,6 +433,33 @@ export default function RootLayout() {
             />
           </Stack>
           </PostHogProvider>
+          <Modal
+            visible={shouldShowAIConsent}
+            animationType="fade"
+            transparent
+            statusBarTranslucent
+            onRequestClose={() => {
+              dismissAIConsentPrompt();
+              resolveAIConsentRequest(false);
+            }}
+          >
+            {shouldShowAIConsent ? (
+              <AIConsentModal
+                onAccept={() => {
+                  if (user?.id) acceptAIConsent(user.id);
+                  resolveAIConsentRequest(true);
+                }}
+                onDecline={() => {
+                  if (user?.id) declineAIConsent(user.id);
+                  resolveAIConsentRequest(false);
+                }}
+                onDismiss={() => {
+                  dismissAIConsentPrompt();
+                  resolveAIConsentRequest(false);
+                }}
+              />
+            ) : null}
+          </Modal>
         </QueryClientProvider>
       </BottomSheetModalProvider>
       <Toaster

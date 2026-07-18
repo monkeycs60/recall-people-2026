@@ -9,7 +9,7 @@
 - **PostHog Cloud EU**, projet `Default project` (ID **207475**). Dashboard : https://eu.posthog.com/project/207475
 - Clé **publique** (write-only, safe côté client) : `phc_Dh77ytMUJjDvZUyD2oZJ4SUa2ivrBuuXgAmvUNw2CBL5`
 - Host d'ingestion : `https://eu.i.posthog.com` · `defaults: '2026-05-30'`
-- Réglages projet ON : **Session replay**, **Exception autocapture**.
+- Le projet PostHog peut proposer Session Replay, mais **l'enregistrement est explicitement désactivé dans le landing et le mobile**. L'error tracking reste actif.
 - Projet **partagé** avec Coworker Malin → on distingue via la super-property `product`.
 - Clés via env (jamais de secret réel ici ; la clé est publique) :
   - landing : `PUBLIC_POSTHOG_KEY` / `PUBLIC_POSTHOG_HOST` (build-time Coolify)
@@ -17,21 +17,21 @@
   - backend : `POSTHOG_KEY` / `POSTHOG_HOST` (Coolify, service recall-people-api)
 
 ## Principes (tout le projet)
-- Chaque event porte les super-properties **`product: 'recall'`** + **`surface`** (`landing` | `mobile` | `api`).
-- **`identify(user.id, {...})`** au login, **`reset()`** au logout → toutes les métriques sont **par utilisateur**.
-- `person_profiles: 'identified_only'`. Autocapture + pageviews/screens + session replay partout.
+- Chaque event porte les super-properties **`product: 'recall'`** + **`surface`** (`landing` | `mobile` | `api`) et **`$geoip_disable: true`** pour désactiver l'enrichissement géographique dérivé de l'adresse IP.
+- **`identify(user.id, { provider })`** au login, **`reset()`** au logout → toutes les métriques sont **par utilisateur**, sans envoyer le nom ni l'adresse email à PostHog.
+- `person_profiles: 'identified_only'`. Pageviews/screens + events explicites, **sans autocapture de clics/touches ni session replay**.
 - **Best-effort absolu** : aucune capture PostHog ne casse une action user (try/catch, no-op sans clé).
 
 ## Ce qui est observé, par surface
 
 ### Landing — surface `landing` (`landing-page/`, Astro)
 Init : `landing-page/src/lib/analytics.ts` (appelé depuis `Layout.astro`).
-- Autocapture (clics/forms), `$pageview` / `$pageleave`, **session replay**, **error tracking** (`capture_exceptions`).
+- `$pageview` / `$pageleave`, events CTA/FAQ explicites, **error tracking** (`capture_exceptions`). Autocapture, session replay et enrichissement géographique désactivés.
 - Events custom : `cta_get_the_app_click`, `cta_app_store_click`, `faq_item_open`.
 
 ### App mobile — surface `mobile` (`frontend/`, Expo / React Native)
 Init : `frontend/lib/analytics.ts` + `PostHogProvider` dans `frontend/app/_layout.tsx` ; identify dans `frontend/stores/auth-store.ts` (+ `hooks/useAuth.ts`).
-- Autocapture (**screens** + touches), **identify/reset**, **error tracking** (`ErrorUtils.setGlobalHandler` + `unhandledrejection`).
+- Capture automatique des **screens uniquement** (pas des touches), **identify/reset**, **error tracking** (`ErrorUtils.setGlobalHandler` + `unhandledrejection`). Session replay désactivé (`enableSessionReplay: false`).
 - Events custom (22), tous via le helper `analytics` (no-op si désactivé), avec super-props `product`/`surface` :
   - **Auth** : `sign_up`, `login`, `logout` (`hooks/useAuth.ts`, `stores/auth-store.ts`).
   - **Capture funnel** : `voice_recording_started`, `capture_processed` (`hooks/useRecording.ts`),
@@ -70,13 +70,13 @@ Le mobile est **local-first + sync chiffré** : ses events sont *optimistes* et 
 - ⚠️ **Contenu chiffré** côté backend : on ne logge **aucune** donnée perso, **uniquement** des ids techniques / flags. Best-effort absolu (no-op sans clé, jamais d'exception qui casse la sync).
 
 #### Observabilité IA
-- **Observabilité IA** : un **`$ai_generation`** par appel LLM (modèle, provider, tokens in/out, **coût**, latence, input/output, erreur) :
+- **Observabilité IA** : un **`$ai_generation`** par appel LLM (modèle, provider, tokens in/out, **coût**, latence, erreur), avec **privacy mode activé par défaut** : les prompts et outputs sont masqués :
   - via `withTracing` (`@posthog/ai`) : `ask`, `summary`, `extract`, `search`, `similarity`, `suggested-questions`, `detect-contact` + les 4 **évaluateurs** LLM-as-judge (Grok/xAI).
-  - capture **manuelle** : `transcribe` (Groq Whisper), génération d'avatar (OpenAI `gpt-image-2`, 4 endpoints).
+  - capture **manuelle** : `transcribe` (Groq Whisper), génération d'avatar (OpenAI `gpt-image-2`, 4 endpoints) ; uniquement métadonnées opérationnelles (longueur, durée, taille, modèle), jamais le contenu.
   - distinct_id = user id si dispo, sinon `recall-backend`.
 - ⚠️ **Retries structurés** : `extract` et `detect-contact` réessaient jusqu'à **3×** en cas d'échec de génération structurée → **plusieurs `$ai_generation` peuvent apparaître pour une seule note** (compter les tentatives, pas les notes). `detect-contact` produit désormais une **sortie structurée** (`Output.object`, operationType `object-generation` dans les logs de perf) au lieu d'une génération de texte brut (`text-generation`).
 - ⚠️ **`temperature: 0`** appliquée à toutes les routes à sortie structurée (`extract`, `detect-contact`, `summary`, `ask`, `similarity`, `search`) pour un résultat déterministe.
-- ℹ️ **Préambule `respondingToTopic` (mode « Raconter »)** : quand l'utilisateur répond à un topic ciblé, `/api/extract` préfixe le prompt d'un préambule (id + titre + date de l'événement du topic) pour rattacher la note à l'actualité existante. C'est un **changement de contenu du prompt** capturé dans l'`input` du `$ai_generation` `extract` existant — **aucun nouvel event ni nouvelle propriété d'instrumentation**.
+- ℹ️ **Préambule `respondingToTopic` (mode « Raconter »)** : quand l'utilisateur répond à un topic ciblé, `/api/extract` préfixe le prompt d'un préambule (id + titre + date de l'événement du topic) pour rattacher la note à l'actualité existante. Ce contenu est traité par le fournisseur IA après consentement, mais **reste masqué dans PostHog** par le privacy mode.
 - ⚠️ **Retry côté client** : en cas d'échec d'extraction / transcription, la note est **conservée localement** avec une carte de retry ; le retry (déclenché par l'user) **rappelle le même endpoint avec le même transcript** → attendre des `$ai_generation` répétés sur un input identique.
 - **Error tracking** : `app.onError` (`backend/src/index.ts`) + `captureException` sur chaque catch d'appel IA (provider/modèle/route en contexte).
 - ⚠️ **`backend/.npmrc` (`legacy-peer-deps=true`)** est requis : `@posthog/ai` a un peer `@anthropic-ai/sdk` incompatible avec la version du projet. Ne pas le supprimer (sinon build Nixpacks KO).
@@ -84,7 +84,7 @@ Le mobile est **local-first + sync chiffré** : ses events sont *optimistes* et 
 
 ## Où regarder dans PostHog
 - **Product / Web analytics** : pageviews, funnels, events produit (par user via identify).
-- **Session replay** : rejouer les sessions (web + mobile).
+- **Session replay** : volontairement désactivé sur le web et le mobile pour protéger les données relationnelles.
 - **AI observability** : coût / tokens / latence / erreurs par modèle & feature. ⚠️ se peuple au **1er appel IA réel** (enregistre une note dans l'app pour tester).
 - **Error tracking** : exceptions groupées (front + back) + stack traces.
 

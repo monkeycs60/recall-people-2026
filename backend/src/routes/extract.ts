@@ -24,7 +24,6 @@ type Bindings = {
   CEREBRAS_API_KEY?: string;
   AI_PROVIDER?: 'openai' | 'grok' | 'cerebras';
   ENABLE_PERFORMANCE_LOGGING?: boolean;
-  ENABLE_LANGFUSE?: string;
   ENABLE_EVALUATION?: string;
   EVALUATION_SAMPLING_RATE?: string;
 };
@@ -1206,7 +1205,6 @@ extractRoutes.post('/', async (c) => {
       CEREBRAS_API_KEY: c.env.CEREBRAS_API_KEY,
       AI_PROVIDER: c.env.AI_PROVIDER,
       ENABLE_PERFORMANCE_LOGGING: c.env.ENABLE_PERFORMANCE_LOGGING,
-      ENABLE_LANGFUSE: c.env.ENABLE_LANGFUSE,
     };
 
     const userId = c.get('user')?.id;

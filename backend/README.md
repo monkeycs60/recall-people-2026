@@ -9,7 +9,7 @@ Backend API pour l'application Recall People, construit avec Hono et déployé s
 - **Base de données**: PostgreSQL (Neon) via Prisma
 - **AI Providers**: OpenAI GPT-5 mini (recommandé), xAI Grok, Cerebras
 - **Transcription**: Groq Whisper v3 Turbo
-- **Observabilité**: LangFuse (optionnel)
+- **Observabilité**: PostHog Cloud EU, prompts et réponses masqués
 
 ## Migration vers OpenAI GPT-5 mini (Redesign V2)
 
@@ -91,10 +91,9 @@ D'après le [Redesign V2](/REDESIGN_V2.md), section 9:
    # Transcription
    GROQ_API_KEY=your-groq-key
 
-   # Observabilité
-   ENABLE_LANGFUSE=true
-   LANGFUSE_SECRET_KEY=sk-lf-...
-   LANGFUSE_PUBLIC_KEY=pk-lf-...
+   # Observabilité sans contenu
+   POSTHOG_KEY=phc_...
+   POSTHOG_HOST=https://eu.i.posthog.com
    ```
 
 3. **Installer les dépendances**:
@@ -142,7 +141,7 @@ backend/
 │   ├── lib/
 │   │   ├── ai-provider.ts        # Configuration AI (OpenAI, xAI, Cerebras)
 │   │   ├── security.ts           # Sécurité et validation
-│   │   ├── telemetry.ts          # LangFuse integration
+│   │   ├── posthog.ts            # Observabilité sans prompts/outputs
 │   │   └── performance-logger.ts # Logs de performance
 │   ├── middleware/
 │   │   └── auth.ts               # Authentification JWT
@@ -235,19 +234,17 @@ AI_PROVIDER=cerebras
 
 ## Observabilité
 
-### LangFuse
+### PostHog
 
-Pour monitorer les appels LLM, les coûts, et la qualité:
+Pour monitorer les appels LLM, les coûts et la fiabilité sans envoyer les prompts ni les réponses:
 
 ```bash
 # .env
-ENABLE_LANGFUSE=true
-LANGFUSE_SECRET_KEY=sk-lf-...
-LANGFUSE_PUBLIC_KEY=pk-lf-...
-LANGFUSE_BASE_URL=https://cloud.langfuse.com
+POSTHOG_KEY=phc_...
+POSTHOG_HOST=https://eu.i.posthog.com
 ```
 
-Dashboard: https://cloud.langfuse.com
+Dashboard: https://eu.posthog.com
 
 ### Performance Logging
 

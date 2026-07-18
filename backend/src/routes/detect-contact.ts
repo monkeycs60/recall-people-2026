@@ -18,7 +18,6 @@ type Bindings = {
   DETECT_CONTACT_MODEL?: string;
   XAI_API_KEY?: string;
   ENABLE_PERFORMANCE_LOGGING?: string | boolean;
-  ENABLE_LANGFUSE?: string;
   ENABLE_EVALUATION?: string;
   EVALUATION_SAMPLING_RATE?: string;
 };
@@ -727,14 +726,6 @@ detectContactRoutes.post('/', async (c) => {
                 output: Output.object({ schema: detectionSchema }),
                 prompt,
                 ...getStructuredOutputSettings(),
-                experimental_telemetry: {
-                  isEnabled: c.env.ENABLE_LANGFUSE === 'true',
-                  metadata: {
-                    route: '/detect-contact',
-                    language,
-                    contactsCount: contacts.length,
-                  },
-                },
               }),
             { label: 'DetectContact' }
           ),

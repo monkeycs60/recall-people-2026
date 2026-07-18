@@ -2,7 +2,7 @@
 
 # Analytics / PostHog
 
-Recall est instrumenté avec **PostHog** : analytics produit (events **par utilisateur** : `contact_created`,
+Recall People est instrumenté avec **PostHog** : analytics produit (events **par utilisateur** : `contact_created`,
 `note_created`, etc.), **observabilité IA** (`$ai_generation` sur tous les appels LLM du backend — coût/tokens/latence/erreur),
 session replay, error tracking.
 **Avant de modifier une feature user-facing OU un appel LLM, lis [`POSTHOG.md`](./POSTHOG.md)** : il décrit

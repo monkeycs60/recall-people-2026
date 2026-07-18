@@ -44,7 +44,7 @@ FRAMES = [
          sub="Birthdays, trips, plans — reminded in time"),
     dict(img="22-overdue-topics-view.png", bg="purple",
          head=["Follow up before", "it's too late"],
-         sub="Recall nudges the people you owe a reply"),
+         sub="Recall People nudges the people you owe a reply"),
     dict(img="09-contact-icebreakers.png", bg="light",
          head=["Always know", "what to ask"],
          sub="Smart talking points drawn from your notes"),

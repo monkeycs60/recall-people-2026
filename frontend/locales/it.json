@@ -675,7 +675,11 @@
     "data": {
       "statistics": "Statistiche",
       "export": "Esporta i miei dati",
-      "clearCache": "Svuota cache"
+      "clearCache": "Svuota cache",
+      "aiProcessing": "Elaborazione dei dati con IA",
+      "aiProcessingDescription": "Rivedi i fornitori o modifica la tua scelta",
+      "aiEnabled": "Attivata",
+      "aiDisabled": "Disattivata"
     },
     "about": {
       "version": "Versione",
@@ -698,6 +702,10 @@
     "deleteAccountWarning": "Questo eliminera permanentemente il tuo account e tutti i tuoi dati. Questa azione non puo essere annullata.",
     "deleteAccountConfirm": "Sei assolutamente sicuro? Tutti i tuoi contatti, note e ricordi verranno eliminati permanentemente.",
     "deleteAccountError": "Eliminazione dell'account fallita. Riprova.",
+    "deleteAccountAppleReauthRequired": "Per eliminare questo account in sicurezza devi accedere di nuovo con Apple. Riprova.",
+    "deleteAccountSubscriptionTitle": "Annullare prima l'abbonamento?",
+    "deleteAccountSubscriptionWarning": "Eliminare il tuo account Recall People non annulla la fatturazione Apple. Puoi gestire ora l'abbonamento oppure continuare ed eliminare subito l'account.",
+    "deleteAccountContinue": "Continua",
     "statistics": {
       "title": "Statistiche",
       "contacts": "Contatti",
@@ -718,8 +726,8 @@
       "success": "Cache svuotata con successo"
     },
     "feedback": {
-      "subject": "Feedback per Recall",
-      "body": "Ciao,\n\nHo un feedback su Recall:\n\n"
+      "subject": "Feedback per Recall People",
+      "body": "Ciao,\n\nHo un feedback su Recall People:\n\n"
     },
     "avatar": {
       "title": "Foto profilo",
@@ -736,25 +744,27 @@
       "title": "Note legali",
       "privacyFirst": {
         "title": "Privacy prima di tutto",
-        "description": "Recall e costruito con la privacy come principio fondamentale. Crediamo che le tue relazioni personali e le informazioni che registri debbano rimanere private e sotto il tuo controllo."
+        "description": "Recall People e costruito con la privacy come principio fondamentale. Crediamo che le tue relazioni personali e le informazioni che registri debbano rimanere private e sotto il tuo controllo."
       },
       "localStorage": {
-        "title": "Archiviazione 100% locale",
-        "description": "I tuoi dati di contatto, note, fatti e ricordi sono archiviati localmente sul tuo dispositivo. Lasciano il telefono solo quando usi funzioni online come IA, accesso o abbonamenti."
+        "title": "Local-first e sincronizzazione crittografata",
+        "description": "Contatti, note, fatti e ricordi restano disponibili sul dispositivo e si sincronizzano in sicurezza tramite il tuo account. I contenuti personali sensibili sono crittografati nel database e trasmessi via HTTPS."
       },
       "dataSovereignty": {
         "title": "Sovranita dei dati",
-        "description": "Hai la proprieta completa dei tuoi dati. Esportali in qualsiasi momento in formato JSON o CSV. Eliminali quando vuoi. Nessun cloud dei contatti, nessun data mining."
+        "description": "Mantieni il controllo dei tuoi dati. Esportali quando vuoi in JSON o CSV ed elimina l'account dall'app. Non vendiamo dati personali e non li usiamo per la pubblicità."
       },
       "aiProcessing": {
         "title": "Elaborazione IA",
-        "description": "La trascrizione vocale (Groq Whisper) e l'analisi del testo (Cerebras) vengono elaborate tramite API sicure solo durante la registrazione o le domande. La generazione di avatar utilizza OpenAI GPT Image 2. Configuriamo i fornitori IA affinche il tuo contenuto non venga usato per addestrare modelli."
+        "description": "Con il tuo consenso, le funzioni IA richieste inviano solo i dati necessari a Groq, Cerebras, OpenAI o xAI tramite API sicure. Puoi continuare senza IA. I contenuti non addestrano i loro modelli e input e output sono nascosti nell'osservabilità IA."
       },
       "contact": {
         "title": "Contattaci",
         "description": "Domande sulla tua privacy o sui tuoi dati? Siamo qui per aiutarti."
       },
-      "lastUpdated": "Ultimo aggiornamento: Aprile 2026"
+      "privacyPolicy": "Informativa sulla privacy",
+      "termsOfService": "Condizioni d'uso",
+      "lastUpdated": "Ultimo aggiornamento: 17 luglio 2026"
     }
   },
   "languagePicker": {
@@ -1120,22 +1130,27 @@
     "notSeen_other": "{{count}} giorni senza notizie"
   },
   "aiConsent": {
-    "title": "Elaborazione dati con IA",
-    "subtitle": "Recall People utilizza servizi di IA di terze parti per trascrivere le registrazioni vocali, estrarre informazioni sui contatti e generare avatar. Ecco cosa devi sapere.",
+    "title": "Prima di usare l'IA",
+    "subtitle": "Recall People utilizza l'IA per trascrivere, organizzare e arricchire le tue informazioni.",
     "whatWeShare": "Quali dati vengono elaborati",
     "voiceData": "Le registrazioni vocali vengono inviate per la trascrizione audio-testo",
-    "textData": "Il testo trascritto viene analizzato per estrarre contatti, fatti e rispondere alle tue domande",
+    "textData": "Il testo trascritto, i nomi dei contatti, le note e le domande vengono analizzati per estrarre informazioni, creare riepiloghi, suggerire domande e risponderti",
     "avatarData": "Descrizioni testuali (genere, età, stile) vengono usate per generare avatar illustrati",
-    "whoReceives": "Fornitori di IA esterni",
-    "providerTranscription": "Trascrizione",
-    "providerAnalysis": "Analisi del testo",
-    "providerAvatar": "Generazione avatar",
+    "whoReceives": "Dati condivisi per la funzione richiesta",
+    "providerTranscription": "Registrazione vocale — trascrizione",
+    "providerAnalysis": "Nomi, note e domande — funzioni IA",
+    "providerAvatar": "Descrizione avatar — generazione immagine",
+    "providerEvaluation": "Risposte IA campionate — controllo qualità",
     "protections": "Le tue protezioni",
     "noTraining": "I tuoi dati non vengono mai usati per addestrare modelli di IA",
-    "noStorage": "I fornitori IA elaborano i dati per restituire risultati, non per addestrare modelli",
-    "localFirst": "Tutti i tuoi contatti e note restano sul tuo dispositivo",
+    "noStorage": "I fornitori elaborano i dati secondo le loro regole di sicurezza e conservazione, senza addestrare i loro modelli",
+    "localFirst": "Solo i dati necessari per l'azione richiesta vengono inviati, dopo il tuo consenso",
+    "learnMore": "Scopri di più",
+    "showLess": "Mostra meno",
     "readPrivacyPolicy": "Leggi la nostra informativa sulla privacy",
-    "accept": "Capisco e accetto"
+    "accept": "Consenti e continua",
+    "decline": "Non ora",
+    "close": "Chiudi"
   },
   "contactProfile": {
     "heroTileEyebrow": "★ In arrivo per {{firstName}}",

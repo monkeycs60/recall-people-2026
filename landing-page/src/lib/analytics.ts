@@ -27,20 +27,25 @@ export function initAnalytics(): void {
     api_host: HOST,
     ui_host: "https://eu.posthog.com",
     defaults: "2026-05-30",
-    autocapture: true,
-    capture_pageview: true,
+    autocapture: false,
+    // Capture manually after privacy super-properties have been registered.
+    capture_pageview: false,
     capture_pageleave: true,
     // Error tracking: auto-capture uncaught exceptions + unhandled rejections
     // as $exception events. Best-effort, never blocks rendering.
     capture_exceptions: true,
     person_profiles: "identified_only",
-    session_recording: {
-      maskAllInputs: false,
-    },
+    disable_session_recording: true,
   });
 
   // Tag every event with product + surface so the EU project can slice cleanly.
-  posthog.register({ product: "recall", surface: "landing" });
+  posthog.register({
+    product: "recall",
+    surface: "landing",
+    // Prevent PostHog from enriching events with IP-derived location data.
+    $geoip_disable: true,
+  });
+  posthog.capture("$pageview");
 
   wireCustomEvents();
 }

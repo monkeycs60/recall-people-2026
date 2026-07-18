@@ -172,8 +172,8 @@ summaryRoutes.post('/', async (c) => {
 		const { contactName, transcriptions, language = 'fr' } = body;
 
 		console.log('[Summary] Request received:', {
-			contactName,
 			transcriptionsCount: transcriptions?.length || 0,
+			transcriptionsLength: transcriptions?.reduce((total, value) => total + value.length, 0) || 0,
 			language,
 		});
 
@@ -250,7 +250,7 @@ ${template.summaryLabel}`;
 		}
 
 		const summary = output!.text;
-		console.log('[Summary] Success! Generated summary:', summary);
+		console.log('[Summary] Success! Generated summary:', { summaryLength: summary.length });
 
 		// Run evaluation in background (non-blocking)
 		if (c.env.XAI_API_KEY && c.executionCtx) {

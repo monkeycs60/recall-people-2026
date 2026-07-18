@@ -56,13 +56,12 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       isInitialized: false,
 
       setUser: (user) => {
-        // Tie all subsequent events (and session replays) to this account.
+        // Tie all subsequent events to this account without sending direct identifiers.
         // Covers credential/Google/Apple login, registration, and silent
         // token restore on launch — every path funnels through setUser.
         if (user) {
+          useSettingsStore.getState().prepareAIConsentForUser(user.id);
           analytics.identify(user.id, {
-            email: user.email,
-            name: user.name,
             provider: user.provider,
           });
         }
@@ -85,6 +84,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         set({ isLoading: true });
 
         if (isScreenshotMode) {
+          useSettingsStore.getState().acceptAIConsent(SCREENSHOT_MOCK_USER.id);
           set({ user: SCREENSHOT_MOCK_USER, isLoading: false, isInitialized: true });
           return;
         }
@@ -92,6 +92,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         // E2E mode: bypass auth and use mock user
         if (isE2ETest) {
           console.log('[E2E] Using mock user, bypassing authentication');
+          useSettingsStore.getState().acceptAIConsent(E2E_MOCK_USER.id);
           set({ user: E2E_MOCK_USER, isLoading: false, isInitialized: true });
           useSubscriptionStore.getState().checkWhitelistStatus();
           return;
@@ -106,6 +107,10 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           }
 
           const user = await verifyToken();
+          if (user) {
+            useSettingsStore.getState().prepareAIConsentForUser(user.id);
+            analytics.identify(user.id, { provider: user.provider });
+          }
           set({ user, isLoading: false, isInitialized: true });
 
           // Check if user is in Pro whitelist (wait for subscription store to be hydrated first)

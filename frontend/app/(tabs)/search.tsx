@@ -20,6 +20,7 @@ import { ContactAvatar } from '@/components/contact/ContactAvatar';
 import { useContactsQuery } from '@/hooks/useContactsQuery';
 import { noteService } from '@/services/note.service';
 import { transcribeAudio, askQuestion, consumeAskQuota } from '@/lib/api';
+import { isAIConsentRequiredError } from '@/lib/ai-consent';
 import { useAudioRecorder, RecordingPresets, setAudioModeAsync } from 'expo-audio';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeIn, FadeOut, FadeInDown } from 'react-native-reanimated';
@@ -248,6 +249,10 @@ export default function AssistantScreen() {
 
 			inputRef.current?.focus();
 		} catch (error) {
+			if (isAIConsentRequiredError(error)) {
+				setIsTranscribing(false);
+				return;
+			}
 			console.error('[Assistant] Transcription error:', error);
 			setIsTranscribing(false);
 		}
@@ -366,6 +371,8 @@ export default function AssistantScreen() {
 				noInfoFound: response.noInfoFound,
 			});
 		} catch (error) {
+			if (isAIConsentRequiredError(error)) return;
+
 			const apiMessage = error instanceof ApiError
 				? `${error.status ?? 'unknown'} ${error.backendMessage ?? error.message}`
 				: error instanceof Error

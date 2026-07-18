@@ -12,7 +12,6 @@ type Bindings = {
 	XAI_API_KEY: string;
 	CEREBRAS_API_KEY?: string;
 	AI_PROVIDER?: 'openai' | 'grok' | 'cerebras';
-	ENABLE_LANGFUSE?: string;
 };
 
 type SuggestedQuestionsRequest = {
@@ -431,7 +430,6 @@ ${template.noInfo}
 			XAI_API_KEY: c.env.XAI_API_KEY,
 			CEREBRAS_API_KEY: c.env.CEREBRAS_API_KEY,
 			AI_PROVIDER: c.env.AI_PROVIDER,
-			ENABLE_LANGFUSE: c.env.ENABLE_LANGFUSE,
 		};
 
 		const model = createTracedAIModel(providerConfig, {
@@ -467,7 +465,7 @@ ${template.noInfo}
 			action: 'extract',
 			resource: 'extract',
 			success: true,
-			details: { language, contact: contact.firstName, count: suggestedQuestions.length },
+			details: { language, count: suggestedQuestions.length },
 		});
 
 		return c.json({

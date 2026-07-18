@@ -27,8 +27,8 @@ const env = {
 } as unknown as Parameters<typeof app.fetch>[1];
 
 // ExecutionContext minimal. waitUntil laisse tourner les tâches de fond
-// (flush LangFuse, side-tasks IA) sans bloquer la réponse — sinon c.executionCtx
-// throw sur Node et casserait search/summary/detect-contact/langfuse.
+// (flush observability, side-tasks IA) sans bloquer la réponse — sinon
+// c.executionCtx throw sur Node et casserait les routes IA.
 const executionCtx = {
   waitUntil: (promise: Promise<unknown>) => {
     Promise.resolve(promise).catch((err) =>

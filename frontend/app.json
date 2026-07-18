@@ -2,7 +2,7 @@
   "expo": {
     "name": "Recall People",
     "slug": "recall-people",
-    "version": "1.0.6",
+    "version": "1.0.7",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "recall-people",
@@ -37,11 +37,12 @@
     },
     "plugins": [
       "expo-router",
+      "expo-asset",
       [
         "expo-image-picker",
         {
           "photosPermission": "Recall People needs access to your photo library to let you choose profile pictures for your contacts, helping you remember and recognize them easily.",
-          "cameraPermission": "Recall People needs camera access to take photos for your contacts' profile pictures."
+          "cameraPermission": false
         }
       ],
       [
@@ -72,6 +73,8 @@
       ],
       "expo-font",
       "expo-apple-authentication",
+      "expo-localization",
+      "expo-web-browser",
       [
         "expo-notifications",
         {
@@ -91,7 +94,7 @@
       }
     },
     "owner": "clement-serizay",
-    "runtimeVersion": "1.0.6",
+    "runtimeVersion": "1.0.7",
     "updates": {
       "url": "https://u.expo.dev/005eaea1-73bc-47b0-80e8-5e15dee1c600"
     }

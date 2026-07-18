@@ -14,6 +14,13 @@ const stubPlugin = {
           return globalThis.__noteServiceDb;
         }
       `],
+      ['@/lib/analytics', `
+        export const analytics = { capture() {} };
+        export const AnalyticsEvent = {
+          NOTE_DELETED: 'note_deleted',
+          NOTE_EDITED: 'note_edited',
+        };
+      `],
       ['./sync-queue.service', `
         export const syncQueueService = {
           async enqueueMutation(payload) {

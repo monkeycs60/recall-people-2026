@@ -67,25 +67,20 @@ export const posthog: PostHog | null =
   POSTHOG_KEY && !analyticsDisabled
     ? new PostHog(POSTHOG_KEY, {
         host: POSTHOG_HOST,
-        // PostHog RN handles app lifecycle + screen tracking; we enable
-        // session replay here and rely on PostHogProvider for autocapture.
-        enableSessionReplay: true,
-        sessionReplayConfig: {
-          // The app holds personal data about the user's contacts. Be
-          // conservative: mask every text + text input and all images so no
-          // names / phone numbers / notes leak into replays.
-          maskAllTextInputs: true,
-          maskAllImages: true,
-          // Slightly longer throttle to reduce overhead on lower-end devices.
-          androidDebouncerDelayMs: 1000,
-          iOSdebouncerDelayMs: 1000,
-        },
+        // Relationship data is too sensitive for session replay. Product
+        // analytics remains event-based and contains no note/contact content.
+        enableSessionReplay: false,
       })
     : null;
 
 // Tag every event with product + surface so the EU project can slice cleanly.
 // Safe to register at module load since the client (if any) exists by now.
-posthog?.register({ product: 'recall', surface: 'mobile' });
+posthog?.register({
+  product: 'recall',
+  surface: 'mobile',
+  // Prevent PostHog from enriching events with IP-derived location data.
+  $geoip_disable: true,
+});
 
 // Property values must be JSON-serialisable for PostHog. Callers may pass
 // `undefined` (e.g. an optional user field); those keys are stripped below.

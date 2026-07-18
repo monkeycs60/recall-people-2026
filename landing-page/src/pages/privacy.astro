@@ -15,7 +15,7 @@ import Footer from "../components/Footer.astro";
             Privacy Policy
           </h1>
           <p class="text-text-secondary mb-8">
-            Last updated: April 2026
+            Last updated: July 17, 2026
           </p>
 
           <div class="prose prose-stone max-w-none">
@@ -51,7 +51,7 @@ import Footer from "../components/Footer.astro";
               <ul class="list-disc pl-6 text-text-secondary space-y-2 mb-4">
                 <li>Contact information (names, phone numbers, emails, birthdays)</li>
                 <li>Notes and memories about your contacts</li>
-                <li>Voice recordings and their transcriptions</li>
+                <li>Transcriptions of voice recordings (the audio itself is not stored by Recall People after transcription)</li>
                 <li>AI-generated summaries and conversation starters</li>
                 <li>Groups, tags, and events you create</li>
                 <li>Custom avatars generated for contacts</li>
@@ -76,16 +76,34 @@ import Footer from "../components/Footer.astro";
                 2.3 Sensitive Data and AI Processing
               </h3>
               <p class="text-text-secondary leading-relaxed mb-3">
-                Sensitive relationship content is encrypted in our database. When you use voice recording,
-                avatar generation, or AI features, the relevant content is sent to our providers only as needed
-                to deliver that feature:
+                Sensitive relationship content is encrypted in our database. AI features remain disabled until
+                you give explicit permission in the app. If you consent and request an AI feature, only the
+                relevant content is sent to the provider needed to deliver it:
               </p>
               <ul class="list-disc pl-6 text-text-secondary space-y-2">
                 <li><strong>Voice recordings:</strong> Sent to Groq for transcription using Whisper. We do not store those recordings on our servers.</li>
                 <li><strong>Text for AI analysis:</strong> Sent to Cerebras to extract contacts, generate summaries, run semantic search, and answer your questions via the Assistant.</li>
                 <li><strong>Avatar generation:</strong> Text descriptions such as gender, age range, and style are sent to OpenAI GPT Image 2 to generate illustrated contact avatars. No real photos are required for this feature.</li>
-                <li><strong>Website analytics:</strong> Our public website uses Umami analytics to understand aggregate page usage without building advertising profiles.</li>
+                <li><strong>Quality evaluation:</strong> If server-side quality evaluation is enabled, a sampled subset of AI inputs and responses may be sent to xAI Grok to assess result quality.</li>
               </ul>
+
+              <h3 class="text-lg font-medium text-text-primary mb-3 mt-6">
+                2.4 Product Analytics, Reliability, and AI Observability
+              </h3>
+              <p class="text-text-secondary leading-relaxed mb-3">
+                Recall People uses PostHog Cloud EU on the public website, in the mobile app, and on the backend
+                to understand feature usage, diagnose errors, secure the service, and monitor AI cost and reliability.
+                Depending on the surface, PostHog receives an internal user identifier, authentication provider type,
+                product-interaction events, counters and booleans, device or technical context, and error diagnostics.
+              </p>
+              <p class="text-text-secondary leading-relaxed">
+                We do not send contact names, note text, transcriptions, search queries, or relationship content in
+                product analytics events. Click/touch autocapture, session replay, and IP-derived location enrichment
+                are disabled on both the website and mobile app. AI prompts
+                and outputs are redacted from automated AI observability; manual transcription and avatar telemetry
+                contains operational metadata such as model, latency, duration, byte count, or output length, not content.
+                We do not use PostHog for advertising or cross-app tracking.
+              </p>
             </section>
 
             <section class="mb-10">
@@ -116,9 +134,10 @@ import Footer from "../components/Footer.astro";
                 <li><strong>Groq:</strong> Speech-to-text transcription using Whisper</li>
                 <li><strong>Cerebras:</strong> AI analysis, contact extraction, summaries, and AI assistant</li>
                 <li><strong>OpenAI GPT Image 2:</strong> AI avatar generation from text descriptions</li>
+                <li><strong>xAI Grok:</strong> Sampled AI response quality evaluation when enabled</li>
                 <li><strong>RevenueCat:</strong> Subscription and payment management via App Store / Google Play</li>
                 <li><strong>Google Sign-In / Apple Sign-In:</strong> Optional authentication methods</li>
-                <li><strong>Umami:</strong> Privacy-friendly analytics for the public website</li>
+                <li><strong>PostHog Cloud EU:</strong> Product analytics, error diagnostics, service reliability, and redacted AI operational telemetry</li>
               </ul>
               <p class="text-text-secondary leading-relaxed mt-4">
                 These services process data only as needed to provide their functionality and are bound by
@@ -148,17 +167,20 @@ import Footer from "../components/Footer.astro";
                 <strong class="text-text-primary">Your data is never used to train AI models.</strong>
               </p>
               <p class="text-text-secondary leading-relaxed mb-3">
-                When you record a note or ask the Assistant a question, your data is sent to our AI providers
-                for processing. We configure these services so your inputs and outputs are not used for
-                model training, except where you separately choose to share data with a provider outside
-                Recall People.
+                Before any AI feature shares personal data with Groq, Cerebras, OpenAI, or xAI, the app explains
+                what is processed, names the providers, and asks for your permission. You can decline and
+                continue using non-AI features. If you later request an AI feature, the app asks again.
+                Once enabled, your data is sent only when you request AI processing. We configure these
+                services so your inputs and outputs are not used for model training, except where you separately
+                choose to share data with a provider outside Recall People.
               </p>
               <p class="text-text-secondary leading-relaxed">
                 Providers may retain limited operational, safety, abuse-prevention, billing, or usage
-                metrics under their own terms. For example, Cerebras states that it does not retain prompt
-                content, API requests or responses, chat logs, user input, or model output. OpenAI may retain
-                API inputs and outputs for a limited period for safety, abuse prevention, and service operation
-                according to its API data controls.
+                metrics under their own terms. Cerebras states that it does not retain inference inputs and
+                outputs. Groq does not retain inference content by default, but may keep it temporarily for
+                reliability or abuse review. xAI states that API requests and responses are retained for up to
+                30 days unless Zero Data Retention applies. OpenAI may retain API inputs and outputs for a
+                limited period for safety, abuse prevention, and service operation according to its API data controls.
               </p>
             </section>
 
@@ -173,6 +195,7 @@ import Footer from "../components/Footer.astro";
                 <li><strong>Access:</strong> View all your data directly in the app</li>
                 <li><strong>Export:</strong> Export your data anytime in JSON or CSV format</li>
                 <li><strong>Delete:</strong> Delete individual contacts, notes, or your entire account</li>
+                <li><strong>AI choice:</strong> Decline third-party AI processing, continue using non-AI features, or change your choice under Profile → Data → AI data processing</li>
                 <li><strong>Portability:</strong> Your exported data can be used elsewhere</li>
                 <li><strong>Correction:</strong> Edit your contact and note data directly in the app</li>
               </ul>
@@ -187,8 +210,15 @@ import Footer from "../components/Footer.astro";
                 <li>Deleting the app from one device does not automatically delete synced account data</li>
                 <li>Account data is retained until you request deletion or as otherwise required for legal, billing, security, or abuse-prevention reasons</li>
                 <li>Operational logs are retained only as long as needed for security, debugging, abuse prevention, and legal obligations</li>
+                <li>Analytics and reliability events are retained according to our PostHog configuration and deleted or anonymized when no longer needed for those purposes</li>
                 <li>Voice recordings sent for transcription are not stored by Recall People after processing</li>
               </ul>
+              <p class="text-text-secondary leading-relaxed mt-4">
+                You can delete your account inside the app. For accounts linked to Sign in with Apple, Recall People
+                asks you to reauthenticate and revokes the Apple authorization before deleting the account. Deleting
+                your Recall People account does not cancel an App Store or Google Play subscription; subscriptions
+                must be managed through the relevant store.
+              </p>
             </section>
 
             <section class="mb-10">

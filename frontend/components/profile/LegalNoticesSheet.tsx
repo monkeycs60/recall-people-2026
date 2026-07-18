@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Linking, Pressable } from 'react-native';
+import { View, Text, Linking, Pressable } from 'react-native';
 import { forwardRef, useCallback } from 'react';
 import { BottomSheetModal, BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { Shield, Database, Lock, Server, Mail, ExternalLink } from 'lucide-react-native';
@@ -16,7 +16,15 @@ export const LegalNoticesSheet = forwardRef<BottomSheetModal>((_, ref) => {
   );
 
   const handleEmailPress = () => {
-    Linking.openURL('mailto:support@recall.app');
+    Linking.openURL('mailto:support@recallpeople.com');
+  };
+
+  const handlePrivacyPress = () => {
+    Linking.openURL('https://recallpeople.com/privacy');
+  };
+
+  const handleTermsPress = () => {
+    Linking.openURL('https://recallpeople.com/terms');
   };
 
   return (
@@ -113,7 +121,22 @@ export const LegalNoticesSheet = forwardRef<BottomSheetModal>((_, ref) => {
               onPress={handleEmailPress}
             >
               <Text className="text-primary text-sm font-medium mr-1">
-                support@recall.app
+                support@recallpeople.com
+              </Text>
+              <ExternalLink size={14} color="#8b5cf6" />
+            </Pressable>
+          </View>
+
+          <View className="gap-3 py-4 border-t border-surfaceHover">
+            <Pressable className="flex-row items-center justify-between" onPress={handlePrivacyPress}>
+              <Text className="text-primary text-sm font-medium">
+                {t('profile.legal.privacyPolicy')}
+              </Text>
+              <ExternalLink size={14} color="#8b5cf6" />
+            </Pressable>
+            <Pressable className="flex-row items-center justify-between" onPress={handleTermsPress}>
+              <Text className="text-primary text-sm font-medium">
+                {t('profile.legal.termsOfService')}
               </Text>
               <ExternalLink size={14} color="#8b5cf6" />
             </Pressable>

@@ -15,7 +15,6 @@ type Bindings = {
 	XAI_API_KEY: string;
 	CEREBRAS_API_KEY?: string;
 	AI_PROVIDER?: 'openai' | 'grok' | 'cerebras';
-	ENABLE_LANGFUSE?: string;
 };
 
 type Contact = {
@@ -300,7 +299,7 @@ askRoutes.post('/', async (c) => {
 		const { question, contacts, language = 'fr' } = body;
 
 		console.log('[Ask] Request received:', {
-			question,
+			questionLength: question?.length || 0,
 			contactsCount: contacts?.length || 0,
 			language,
 		});
@@ -430,7 +429,7 @@ ${template.examples}`;
 		}
 
 		console.log('[Ask] Success! Generated response:', {
-			answer: object.answer.substring(0, 100) + '...',
+			answerLength: object.answer.length,
 			sourcesCount: object.sources.length,
 			noInfoFound: object.noInfoFound,
 		});

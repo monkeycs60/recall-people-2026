@@ -50,16 +50,10 @@ test('throws provider-specific errors when required API keys are missing', async
   );
 });
 
-test('getTelemetryOptions enables Langfuse only for the explicit true string', async () => {
+test('getTelemetryOptions never enables content-bearing AI SDK telemetry', async () => {
   const { getTelemetryOptions } = await loadModule();
 
   assert.deepEqual(getTelemetryOptions({}), {});
-  assert.deepEqual(getTelemetryOptions({ ENABLE_LANGFUSE: 'false' }), {});
-  assert.deepEqual(getTelemetryOptions({ ENABLE_LANGFUSE: 'true' }), {
-    experimental_telemetry: {
-      isEnabled: true,
-    },
-  });
 });
 
 test('getStructuredOutputSettings keeps structured generation deterministic', async () => {

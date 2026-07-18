@@ -26,6 +26,8 @@ export type PostHogConfig = {
 const BASE_PROPERTIES = {
 	product: 'recall',
 	surface: 'api',
+	// Prevent PostHog from enriching events with IP-derived location data.
+	$geoip_disable: true,
 } as const;
 
 const DEFAULT_HOST = 'https://eu.i.posthog.com';
@@ -272,7 +274,6 @@ export function aiTracingOptions(args: {
 	distinctId?: string;
 	traceId?: string;
 	properties?: Record<string, unknown>;
-	privacyMode?: boolean;
 }) {
 	return {
 		posthogDistinctId: args.distinctId || BACKEND_DISTINCT_ID,
@@ -281,8 +282,8 @@ export function aiTracingOptions(args: {
 			...BASE_PROPERTIES,
 			...args.properties,
 		},
-		...(args.privacyMode !== undefined
-			? { posthogPrivacyMode: args.privacyMode }
-			: {}),
+		// Relationship prompts can contain names, notes and private context.
+		// This is intentionally not configurable at call sites.
+		posthogPrivacyMode: true,
 	};
 }

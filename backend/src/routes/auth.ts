@@ -8,6 +8,7 @@ import { rateLimiters } from '../middleware/rateLimit';
 import { generateTokenPair, refreshAccessToken, revokeRefreshToken, revokeAllUserTokens } from '../lib/tokens';
 import { auditLog, getClientInfo } from '../lib/audit';
 import { authMiddleware } from '../middleware/auth';
+import { revokeAppleAuthorizationCode } from '../lib/apple-authorization';
 
 type Bindings = {
 	DATABASE_URL: string;
@@ -15,6 +16,10 @@ type Bindings = {
 	GOOGLE_CLIENT_ID_WEB: string;
 	GOOGLE_CLIENT_ID_IOS: string;
 	GOOGLE_CLIENT_ID_ANDROID: string;
+	APPLE_TEAM_ID?: string;
+	APPLE_KEY_ID?: string;
+	APPLE_PRIVATE_KEY?: string;
+	APPLE_CLIENT_ID?: string;
 	RATE_LIMIT: KVNamespace;
 };
 
@@ -44,6 +49,10 @@ const appleAuthSchema = z.object({
 
 const refreshTokenSchema = z.object({
 	refreshToken: z.string().min(1, 'Refresh token is required'),
+});
+
+const deleteAccountSchema = z.object({
+	appleAuthorizationCode: z.string().min(1).optional(),
 });
 
 const APPLE_JWKS = createRemoteJWKSet(new URL('https://appleid.apple.com/auth/keys'));
@@ -212,8 +221,11 @@ authRoutes.post('/login', rateLimiters.login, async (c) => {
 			return c.json({ error: 'Invalid credentials' }, 401);
 		}
 
-		// Get the provider from the first account (credentials or google)
-		const provider = user.accounts[0]?.providerId || 'credentials';
+		// Keep the strongest linked identity visible to the client so account deletion
+		// can request the matching provider reauthentication when required.
+		const hasApple = user.accounts.some((account) => account.providerId === 'apple');
+		const hasGoogle = user.accounts.some((account) => account.providerId === 'google');
+		const provider = hasApple ? 'apple' : hasGoogle ? 'google' : 'credentials';
 
 		// Generate token pair (1h access + 30d refresh)
 		const clientInfo = getClientInfo(c);
@@ -733,18 +745,60 @@ authRoutes.delete('/account', authMiddleware, async (c) => {
 	try {
 		const user = c.get('user');
 		const prisma = getPrisma(c.env.DATABASE_URL);
+		const body = await c.req.json().catch(() => ({}));
+		const validation = deleteAccountSchema.safeParse(body);
+		if (!validation.success) {
+			return c.json({ error: 'Invalid account deletion request' }, 400);
+		}
+
+		const account = await prisma.account.findFirst({
+			where: { userId: user.id, providerId: 'apple' },
+			select: { id: true },
+		});
+
+		if (account) {
+			const authorizationCode = validation.data.appleAuthorizationCode;
+			const supportsAppleRevocation = c.req.header('X-Recall-People-Apple-Revocation') === '1';
+			if (!authorizationCode && supportsAppleRevocation) {
+				return c.json({
+					error: 'Sign in with Apple is required before deleting this account',
+					code: 'APPLE_REAUTH_REQUIRED',
+				}, 400);
+			}
+
+			if (authorizationCode) {
+				const { APPLE_TEAM_ID, APPLE_KEY_ID, APPLE_PRIVATE_KEY } = c.env;
+				if (!APPLE_TEAM_ID || !APPLE_KEY_ID || !APPLE_PRIVATE_KEY) {
+					console.error('Apple account deletion is not configured');
+					return c.json({
+						error: 'Apple account deletion is temporarily unavailable',
+						code: 'APPLE_REVOCATION_UNAVAILABLE',
+					}, 503);
+				}
+
+				await revokeAppleAuthorizationCode(authorizationCode, {
+					teamId: APPLE_TEAM_ID,
+					keyId: APPLE_KEY_ID,
+					privateKey: APPLE_PRIVATE_KEY,
+					clientId: c.env.APPLE_CLIENT_ID || 'com.monkeycs60.recallpeople2026',
+				});
+			}
+		}
+
+		// Cascade delete handles: accounts, sessions, refresh tokens, contacts, notes, etc.
+		await prisma.user.delete({
+			where: { id: user.id },
+		});
 
 		await auditLog(c, {
 			userId: user.id,
 			action: 'account_delete',
 			resource: 'auth',
 			success: true,
-			details: { email: user.email },
-		});
-
-		// Cascade delete handles: accounts, sessions, refresh tokens, contacts, notes, etc.
-		await prisma.user.delete({
-			where: { id: user.id },
+			details: {
+				appleAuthorizationRevoked: Boolean(account && validation.data.appleAuthorizationCode),
+				legacyAppleDeletion: Boolean(account && !validation.data.appleAuthorizationCode),
+			},
 		});
 
 		return c.json({ success: true });

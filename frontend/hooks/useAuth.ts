@@ -3,7 +3,6 @@ import { useRouter } from 'expo-router';
 import { login as authLogin, register as authRegister, loginWithGoogle as authLoginWithGoogle, loginWithApple as authLoginWithApple } from '@/lib/auth';
 import { shouldResetFirstRunSettings } from '@/lib/auth-onboarding';
 import { useAuthStore } from '@/stores/auth-store';
-import { useSettingsStore } from '@/stores/settings-store';
 import { analytics, AnalyticsEvent } from '@/lib/analytics';
 import { useGoogleAuth } from './useGoogleAuth';
 import { useAppleAuth } from './useAppleAuth';
@@ -11,15 +10,10 @@ import { useAppleAuth } from './useAppleAuth';
 export const useAuth = () => {
   const router = useRouter();
   const { setUser, logout: storeLogout } = useAuthStore();
-  const { setHasAcceptedAIConsent } = useSettingsStore();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { promptAsync: googlePromptAsync, isReady: isGoogleReady } = useGoogleAuth();
   const { promptAsync: applePromptAsync, isAvailable: isAppleAvailable } = useAppleAuth();
-
-  const resetFirstRunSettings = () => {
-    setHasAcceptedAIConsent(false);
-  };
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
@@ -44,9 +38,6 @@ export const useAuth = () => {
 
     try {
       const result = await authRegister(email, password, name);
-      if (shouldResetFirstRunSettings(result, { assumeNewUserWhenMissing: true })) {
-        resetFirstRunSettings();
-      }
       setUser(result.user);
       analytics.capture(AnalyticsEvent.SIGN_UP, { method: 'credentials' });
       router.replace('/(tabs)');
@@ -76,9 +67,6 @@ export const useAuth = () => {
 
       const result = await authLoginWithGoogle(googleResult.idToken);
       const isNewUser = shouldResetFirstRunSettings(result);
-      if (isNewUser) {
-        resetFirstRunSettings();
-      }
       setUser(result.user);
       analytics.capture(
         isNewUser ? AnalyticsEvent.SIGN_UP : AnalyticsEvent.LOGIN,
@@ -106,9 +94,6 @@ export const useAuth = () => {
 
       const result = await authLoginWithApple(appleResult.identityToken, appleResult.fullName);
       const isNewUser = shouldResetFirstRunSettings(result);
-      if (isNewUser) {
-        resetFirstRunSettings();
-      }
       setUser(result.user);
       analytics.capture(
         isNewUser ? AnalyticsEvent.SIGN_UP : AnalyticsEvent.LOGIN,

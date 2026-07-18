@@ -8,7 +8,9 @@ Use this checklist when submitting the account-based secure sync release. It ali
 - Sensitive relationship content is encrypted in the database and transmitted over HTTPS.
 - Personal data is not sold.
 - Personal data is not used to train AI models.
+- Third-party AI processing is disabled until the user gives explicit, versioned consent; declining leaves non-AI features available.
 - AI providers process content only as needed for requested features such as transcription, extraction, summaries, assistant answers, semantic search, and avatar generation.
+- Product analytics and error diagnostics use PostHog Cloud EU. Session replay is disabled and product events do not contain relationship content.
 - Deleting the app from one device does not automatically delete synced account data; account deletion must remove account-associated data subject to legal, billing, security, and abuse-prevention retention needs.
 
 ## App Store Connect Privacy Nutrition Label
@@ -33,7 +35,7 @@ Use this checklist when submitting the account-based secure sync release. It ali
 - Confirm the app collects usage data and diagnostics where applicable:
   - Feature usage counters and plan-limit usage
   - Security, abuse-prevention, debugging, and reliability logs
-  - Website analytics for the marketing site, if included in web disclosures
+  - Product and website interaction analytics through PostHog Cloud EU
 - For each collected category, mark purposes that apply:
   - App functionality
   - Analytics, only for aggregate product or website usage where implemented
@@ -46,9 +48,10 @@ Use this checklist when submitting the account-based secure sync release. It ali
   - Groq for speech-to-text transcription
   - Cerebras for AI analysis, extraction, summaries, search, and assistant features
   - OpenAI GPT Image 2 for avatar generation
+  - xAI Grok for sampled AI response quality evaluation when enabled
   - RevenueCat for subscription entitlement management
   - Apple Sign-In / Google Sign-In for authentication where enabled
-  - Umami for public website analytics
+  - PostHog Cloud EU for product analytics, error diagnostics, reliability, and redacted AI operational telemetry
 
 ## Google Play Data Safety
 
@@ -87,6 +90,7 @@ Use this checklist when submitting the account-based secure sync release. It ali
 ## Release Verification
 
 - Backend deployment has `SYNC_ENCRYPTION_KEY` configured as a base64-encoded 32-byte secret before the first synced user writes data.
+- Backend deployment has `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY`, and `APPLE_CLIENT_ID` configured so Sign in with Apple authorization is revoked during account deletion.
 - Prisma migration `20260509000000_add_account_sync` has been applied before releasing clients that call `/api/sync/*`.
 - iOS app version/build and Android version/versionCode are bumped for this release.
 - No new OS permissions are required for account sync; it uses authenticated HTTPS API calls.
@@ -94,6 +98,9 @@ Use this checklist when submitting the account-based secure sync release. It ali
 - Privacy Policy says sensitive data is encrypted in the database.
 - Privacy Policy says personal data is not sold.
 - Privacy Policy says personal data is not used to train AI models.
+- Privacy Policy identifies PostHog and all third-party AI providers, describes the data sent, and explains the explicit AI choice.
+- Mobile and landing PostHog session replay remain disabled; AI observability keeps prompt and output content redacted.
+- Account deletion is tested with credentials, Google-linked, and Apple-linked accounts; active subscribers receive a billing warning without being prevented from deleting immediately.
 - Terms do not tell users they are solely responsible for preserving single-device data.
 - Landing page and FAQ do not mention single-device storage, unsupported restore methods, or stronger encryption claims than implemented.
 - Store screenshots, onboarding copy, paywall copy, and support macros match this account-sync position before submission.

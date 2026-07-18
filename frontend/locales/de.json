@@ -675,7 +675,11 @@
     "data": {
       "statistics": "Statistiken",
       "export": "Meine Daten exportieren",
-      "clearCache": "Cache leeren"
+      "clearCache": "Cache leeren",
+      "aiProcessing": "KI-Datenverarbeitung",
+      "aiProcessingDescription": "Anbieter prüfen oder deine Auswahl ändern",
+      "aiEnabled": "Aktiviert",
+      "aiDisabled": "Deaktiviert"
     },
     "about": {
       "version": "Version",
@@ -698,6 +702,10 @@
     "deleteAccountWarning": "Dein Konto und alle Daten werden dauerhaft gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.",
     "deleteAccountConfirm": "Bist du dir absolut sicher? Alle deine Kontakte, Notizen und Erinnerungen werden dauerhaft gelöscht.",
     "deleteAccountError": "Konto konnte nicht gelöscht werden. Bitte versuche es erneut.",
+    "deleteAccountAppleReauthRequired": "Für die sichere Kontolöschung musst du dich erneut mit Apple anmelden. Bitte versuche es erneut.",
+    "deleteAccountSubscriptionTitle": "Abonnement zuerst kündigen?",
+    "deleteAccountSubscriptionWarning": "Das Löschen deines Recall People-Kontos beendet die Abrechnung über Apple nicht. Du kannst das Abo jetzt verwalten oder fortfahren und dein Konto sofort löschen.",
+    "deleteAccountContinue": "Fortfahren",
     "statistics": {
       "title": "Statistiken",
       "contacts": "Kontakte",
@@ -718,8 +726,8 @@
       "success": "Cache erfolgreich geleert"
     },
     "feedback": {
-      "subject": "Feedback für Recall",
-      "body": "Hallo,\n\nIch habe Feedback zu Recall:\n\n"
+      "subject": "Feedback für Recall People",
+      "body": "Hallo,\n\nIch habe Feedback zu Recall People:\n\n"
     },
     "avatar": {
       "title": "Profilbild",
@@ -736,25 +744,27 @@
       "title": "Rechtliches",
       "privacyFirst": {
         "title": "Datenschutz zuerst",
-        "description": "Recall wurde mit Datenschutz als Kernprinzip entwickelt. Wir glauben, dass deine persönlichen Beziehungen und die Informationen, die du aufzeichnest, privat bleiben und unter deiner Kontrolle sein sollten."
+        "description": "Recall People wurde mit Datenschutz als Kernprinzip entwickelt. Wir glauben, dass deine persönlichen Beziehungen und die Informationen, die du aufzeichnest, privat bleiben und unter deiner Kontrolle sein sollten."
       },
       "localStorage": {
-        "title": "100% lokale Speicherung",
-        "description": "Deine Kontaktdaten, Notizen, Fakten und Erinnerungen werden lokal auf deinem Gerät gespeichert. Sie verlassen dein Telefon nur, wenn du Online-Funktionen wie KI-Verarbeitung, Anmeldung oder Abos nutzt."
+        "title": "Local-first und verschlüsselte Synchronisierung",
+        "description": "Kontakte, Notizen, Fakten und Erinnerungen bleiben auf deinem Gerät verfügbar und werden sicher über dein Konto synchronisiert. Sensible persönliche Inhalte sind in unserer Datenbank verschlüsselt und werden per HTTPS übertragen."
       },
       "dataSovereignty": {
         "title": "Datensouveränität",
-        "description": "Du hast das vollständige Eigentum an deinen Daten. Exportiere sie jederzeit im JSON- oder CSV-Format. Lösche sie wann du willst. Keine Kontakt-Cloud, kein Data Mining."
+        "description": "Du behältst die Kontrolle über deine Daten. Exportiere sie jederzeit als JSON oder CSV und lösche dein Konto in der App. Wir verkaufen keine personenbezogenen Daten und nutzen sie nicht für Werbung."
       },
       "aiProcessing": {
         "title": "KI-Verarbeitung",
-        "description": "Sprachtranskription (Groq Whisper) und Textanalyse (Cerebras) werden nur bei Aufnahmen oder Fragen über sichere APIs verarbeitet. Die Avatar-Erstellung nutzt OpenAI GPT Image 2. Wir konfigurieren KI-Anbieter so, dass deine Inhalte nicht zum Trainieren von Modellen verwendet werden."
+        "description": "Mit deiner Zustimmung senden angeforderte KI-Funktionen nur notwendige Daten über sichere APIs an Groq, Cerebras, OpenAI oder xAI. Du kannst ohne KI fortfahren. Inhalte werden nicht zum Training ihrer Modelle genutzt; Ein- und Ausgaben sind in der KI-Beobachtung ausgeblendet."
       },
       "contact": {
         "title": "Kontaktiere uns",
         "description": "Fragen zu deinem Datenschutz oder deinen Daten? Wir sind hier, um zu helfen."
       },
-      "lastUpdated": "Zuletzt aktualisiert: April 2026"
+      "privacyPolicy": "Datenschutzrichtlinie",
+      "termsOfService": "Nutzungsbedingungen",
+      "lastUpdated": "Zuletzt aktualisiert: 17. Juli 2026"
     }
   },
   "languagePicker": {
@@ -1120,22 +1130,27 @@
     "notSeen_other": "{{count}} Tage ohne Kontakt"
   },
   "aiConsent": {
-    "title": "KI-Datenverarbeitung",
-    "subtitle": "Recall People nutzt KI-Dienste von Drittanbietern, um deine Sprachaufnahmen zu transkribieren, Kontaktinformationen zu extrahieren und Avatare zu erstellen. Hier ist, was du wissen musst.",
+    "title": "Bevor du KI nutzt",
+    "subtitle": "Recall People nutzt KI, um deine Informationen zu transkribieren, zu organisieren und zu ergänzen.",
     "whatWeShare": "Welche Daten verarbeitet werden",
     "voiceData": "Sprachaufnahmen werden zur Sprach-zu-Text-Transkription gesendet",
-    "textData": "Transkribierter Text wird analysiert, um Kontakte, Fakten zu extrahieren und deine Fragen zu beantworten",
+    "textData": "Transkribierter Text, Kontaktnamen, Notizen und Fragen werden analysiert, um Informationen zu extrahieren, Zusammenfassungen zu erstellen, Fragen vorzuschlagen und dir zu antworten",
     "avatarData": "Textbeschreibungen (Geschlecht, Alter, Stil) werden zur Erstellung illustrierter Avatare verwendet",
-    "whoReceives": "Externe KI-Anbieter",
-    "providerTranscription": "Transkription",
-    "providerAnalysis": "Textanalyse",
-    "providerAvatar": "Avatar-Erstellung",
+    "whoReceives": "Geteilte Daten für die angeforderte Funktion",
+    "providerTranscription": "Sprachaufnahme — Transkription",
+    "providerAnalysis": "Namen, Notizen und Fragen — KI-Funktionen",
+    "providerAvatar": "Avatar-Beschreibung — Bilderzeugung",
+    "providerEvaluation": "Stichproben von KI-Antworten — Qualitätsprüfung",
     "protections": "Dein Schutz",
     "noTraining": "Deine Daten werden niemals zum Training von KI-Modellen verwendet",
-    "noStorage": "KI-Anbieter verarbeiten Daten, um Ergebnisse zu liefern, nicht um Modelle zu trainieren",
-    "localFirst": "Alle deine Kontakte und Notizen bleiben auf deinem Gerät",
+    "noStorage": "KI-Anbieter verarbeiten Daten nach ihren Sicherheits- und Aufbewahrungsregeln, ohne ihre Modelle damit zu trainieren",
+    "localFirst": "Erst nach deiner Zustimmung werden nur die für die gewünschte Aktion nötigen Daten gesendet",
+    "learnMore": "Mehr erfahren",
+    "showLess": "Weniger anzeigen",
     "readPrivacyPolicy": "Unsere vollständige Datenschutzrichtlinie lesen",
-    "accept": "Ich verstehe und stimme zu"
+    "accept": "Erlauben und fortfahren",
+    "decline": "Nicht jetzt",
+    "close": "Schließen"
   },
   "contactProfile": {
     "heroTileEyebrow": "★ Was bei {{firstName}} ansteht",

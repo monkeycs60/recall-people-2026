@@ -675,7 +675,11 @@
     "data": {
       "statistics": "Statistics",
       "export": "Export my data",
-      "clearCache": "Clear cache"
+      "clearCache": "Clear cache",
+      "aiProcessing": "AI data processing",
+      "aiProcessingDescription": "Review providers or change your choice",
+      "aiEnabled": "Enabled",
+      "aiDisabled": "Disabled"
     },
     "about": {
       "version": "Version",
@@ -698,6 +702,10 @@
     "deleteAccountWarning": "This will permanently delete your account and all your data. This action cannot be undone.",
     "deleteAccountConfirm": "Are you absolutely sure? All your contacts, notes, and memories will be permanently deleted.",
     "deleteAccountError": "Failed to delete account. Please try again.",
+    "deleteAccountAppleReauthRequired": "Sign in with Apple is required to securely delete this account. Please try again.",
+    "deleteAccountSubscriptionTitle": "Cancel your subscription first?",
+    "deleteAccountSubscriptionWarning": "Deleting your Recall People account does not cancel billing through Apple. You can manage the subscription now, or continue and delete your account immediately.",
+    "deleteAccountContinue": "Continue",
     "statistics": {
       "title": "Statistics",
       "contacts": "Contacts",
@@ -718,8 +726,8 @@
       "success": "Cache cleared successfully"
     },
     "feedback": {
-      "subject": "Feedback for Recall",
-      "body": "Hi,\n\nI have some feedback about Recall:\n\n"
+      "subject": "Feedback for Recall People",
+      "body": "Hi,\n\nI have some feedback about Recall People:\n\n"
     },
     "avatar": {
       "title": "Profile Picture",
@@ -736,25 +744,27 @@
       "title": "Legal Notices",
       "privacyFirst": {
         "title": "Privacy First",
-        "description": "Recall is built with privacy as a core principle. We believe your personal relationships and the information you record about them should remain private and under your control."
+        "description": "Recall People is built with privacy as a core principle. We believe your personal relationships and the information you record about them should remain private and under your control."
       },
       "localStorage": {
-        "title": "Local-first storage",
-        "description": "Your contact data, notes, facts, and memories are stored locally on your device. They only leave your phone when you use online features such as AI processing, login, or subscriptions."
+        "title": "Local-first, encrypted sync",
+        "description": "Your contacts, notes, facts, and memories remain available on your device and sync securely through your account. Sensitive relationship content is encrypted in our database and sent over HTTPS."
       },
       "dataSovereignty": {
         "title": "Data Sovereignty",
-        "description": "You have complete ownership of your data. Export it anytime in JSON or CSV format. Delete it whenever you want. No contact cloud, no data mining."
+        "description": "You stay in control of your data. Export it anytime in JSON or CSV and delete your account from the app. We do not sell personal data or use it for advertising."
       },
       "aiProcessing": {
         "title": "AI Processing",
-        "description": "Voice transcription (Groq Whisper) and text analysis (Cerebras) are processed through secure APIs only when you record or ask questions. Avatar generation uses OpenAI GPT Image 2. We configure AI providers so your content is not used to train models."
+        "description": "With your permission, requested AI features send the data they need to Groq, Cerebras, OpenAI, or xAI through secure APIs. You can continue without AI. Provider content is not used to train their models, and AI observability redacts prompts and outputs."
       },
       "contact": {
         "title": "Contact Us",
         "description": "Questions about your privacy or data? We're here to help."
       },
-      "lastUpdated": "Last updated: April 2026"
+      "privacyPolicy": "Privacy Policy",
+      "termsOfService": "Terms of Service",
+      "lastUpdated": "Last updated: July 17, 2026"
     }
   },
   "languagePicker": {
@@ -1120,22 +1130,27 @@
     "notSeen_other": "{{count}} days without a catch-up"
   },
   "aiConsent": {
-    "title": "AI Data Processing",
-    "subtitle": "Recall People uses third-party AI services to transcribe your voice recordings, extract contact information, answer questions, and generate avatars. Here's what you need to know.",
+    "title": "Before using AI",
+    "subtitle": "Recall People uses AI to transcribe, organize, and enrich your information.",
     "whatWeShare": "What data is processed",
     "voiceData": "Voice recordings are sent for speech-to-text transcription",
     "textData": "Transcribed text, contact names, notes, and question text are analyzed to extract information, create summaries, suggest questions, and answer you",
     "avatarData": "Text descriptions (gender, age, style) are used to generate illustrated avatars",
-    "whoReceives": "Third-party AI providers",
-    "providerTranscription": "Transcription",
-    "providerAnalysis": "Text analysis",
-    "providerAvatar": "Avatar generation",
+    "whoReceives": "Data shared for the requested feature",
+    "providerTranscription": "Voice recording — transcription",
+    "providerAnalysis": "Contact names, notes and questions — AI features",
+    "providerAvatar": "Avatar description — image generation",
+    "providerEvaluation": "Sampled AI responses — quality check",
     "protections": "Your protections",
     "noTraining": "Your data is never used to train AI models",
-    "noStorage": "AI providers process data to return results, not to train models",
-    "localFirst": "Your app database is stored on your device; AI data is sent only for requested processing",
+    "noStorage": "AI providers process data under their security and retention policies, not to train their models",
+    "localFirst": "Only the data needed for the requested action is sent, after you give permission",
+    "learnMore": "Learn more",
+    "showLess": "Show less",
     "readPrivacyPolicy": "Read our full Privacy Policy",
-    "accept": "I Understand and Agree"
+    "accept": "Allow and continue",
+    "decline": "Not now",
+    "close": "Close"
   },
   "contactProfile": {
     "heroTileEyebrow": "★ Coming up for {{firstName}}",

@@ -30,6 +30,10 @@ const stubPlugin = {
         };
       `],
       ['@/services/notification.service', 'export const notificationService = {};'],
+      ['@/lib/analytics', `
+        export const analytics = { capture() {} };
+        export const AnalyticsEvent = { HOT_TOPIC_RESOLVED: 'hot_topic_resolved' };
+      `],
       ['./sync-queue.service', `
         export const syncQueueService = {
           async enqueueMutation(payload) {

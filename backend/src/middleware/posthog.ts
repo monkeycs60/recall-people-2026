@@ -4,7 +4,7 @@ import { initPostHog, flushPostHog, isPostHogEnabled } from '../lib/posthog';
 /**
  * PostHog middleware (server-side observability + error tracking).
  *
- * Mirrors the LangFuse middleware:
+ * Serverless observability middleware:
  *  1. Initializes the shared PostHog client on first request (reads
  *     POSTHOG_KEY / POSTHOG_HOST from the request env / process.env).
  *  2. Flushes pending events after each request via `executionCtx.waitUntil`

@@ -22,7 +22,6 @@ export type AIProviderConfig = {
 	CEREBRAS_API_KEY?: string;
 	AI_PROVIDER?: AIProviderType;
 	ENABLE_PERFORMANCE_LOGGING?: boolean;
-	ENABLE_LANGFUSE?: string; // 'true' or 'false'
 };
 
 /**
@@ -111,8 +110,6 @@ export type AITracingContext = {
 	traceId?: string;
 	/** Feature-specific props, e.g. { feature: 'ask', route: '/api/ask' }. */
 	properties?: Record<string, unknown>;
-	/** Redact prompt/completion content when true. */
-	privacyMode?: boolean;
 };
 
 /**
@@ -147,7 +144,6 @@ export function createTracedAIModel(
 					$ai_provider: getAIProviderName(config),
 					...tracing.properties,
 				},
-				privacyMode: tracing.privacyMode,
 			})
 		);
 	} catch (error) {
@@ -161,14 +157,9 @@ export function createTracedAIModel(
  * @param config - Provider configuration
  * @returns Telemetry options object or undefined
  */
-export function getTelemetryOptions(config: AIProviderConfig) {
-	if (config.ENABLE_LANGFUSE === 'true') {
-		return {
-			experimental_telemetry: {
-				isEnabled: true,
-			},
-		};
-	}
+export function getTelemetryOptions(_config: AIProviderConfig) {
+	// Content-bearing AI SDK telemetry is intentionally disabled. PostHog's
+	// privacy-mode tracing retains operational metrics without prompts/outputs.
 	return {};
 }
 

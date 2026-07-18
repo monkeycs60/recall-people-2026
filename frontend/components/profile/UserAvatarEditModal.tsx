@@ -22,6 +22,7 @@ import { uploadUserAvatar, generateUserAvatar, deleteUserAvatar } from '@/lib/ap
 import { useAuthStore } from '@/stores/auth-store';
 import { setUser } from '@/lib/auth';
 import { showErrorToast, showInfoToast, showSuccessToast } from '@/lib/error-handler';
+import { isAIConsentRequiredError, requireAIConsent } from '@/lib/ai-consent';
 
 type UserAvatarEditModalProps = {
   visible: boolean;
@@ -123,10 +124,17 @@ export function UserAvatarEditModal({
     }
   };
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!prompt.trim()) {
       Alert.alert(t('common.error'), t('contact.avatar.promptRequired'));
       return;
+    }
+
+    try {
+      await requireAIConsent();
+    } catch (error) {
+      if (isAIConsentRequiredError(error)) return;
+      throw error;
     }
 
     const avatarPrompt = prompt.trim();
@@ -148,6 +156,7 @@ export function UserAvatarEditModal({
         showSuccessToast(t('contact.avatar.generateSuccess'));
       })
       .catch((error) => {
+        if (isAIConsentRequiredError(error)) return;
         console.error('Generate error:', error);
         showErrorToast(t('contact.avatar.generateError'));
       });

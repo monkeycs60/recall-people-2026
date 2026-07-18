@@ -53,10 +53,6 @@
       <key>NSAllowsLocalNetworking</key>
       <true/>
     </dict>
-    <key>NSCameraUsageDescription</key>
-    <string>Recall People needs camera access to take photos for your contacts' profile pictures.</string>
-    <key>NSFaceIDUsageDescription</key>
-    <string>Allow $(PRODUCT_NAME) to access your Face ID biometric data.</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>Recall People needs microphone access to record voice notes about your contacts. These recordings are transcribed to help you remember important details about the people you meet.</string>
     <key>NSPhotoLibraryUsageDescription</key>

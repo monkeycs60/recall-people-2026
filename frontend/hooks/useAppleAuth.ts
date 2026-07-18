@@ -4,6 +4,7 @@ import * as AppleAuthentication from 'expo-apple-authentication';
 
 type AppleAuthResult = {
   identityToken: string;
+  authorizationCode: string | null;
   fullName: {
     givenName: string | null;
     familyName: string | null;
@@ -48,6 +49,7 @@ export const useAppleAuth = (): UseAppleAuthReturn => {
 
       return {
         identityToken: credential.identityToken,
+        authorizationCode: credential.authorizationCode,
         fullName: credential.fullName
           ? {
               givenName: credential.fullName.givenName,

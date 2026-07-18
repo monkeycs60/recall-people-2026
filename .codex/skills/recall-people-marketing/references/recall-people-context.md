@@ -6,7 +6,7 @@ Use this as concise product context. Prefer current repository docs and code whe
 
 Recall People helps users remember people they meet. The high-conversion explanation is:
 
-`Say who you met. Recall turns quick voice notes into names, context, reminders, and follow-up prompts.`
+`Say who you met. Recall People turns quick voice notes into names, context, reminders, and follow-up prompts.`
 
 The app should feel useful for friends, colleagues, clients, conference contacts, family, neighbors, and casual acquaintances. Do not reduce the main category to "friends" unless the task is specifically social/friendship copy.
 
@@ -16,7 +16,7 @@ From `docs/marketing/aso-competitive-positioning-2026-05-20.md`:
 
 - Main category: `AI people memory`.
 - Main promise: `Never blank on a person again.`
-- Support promise: `Say who you met. Recall turns it into names, notes, reminders, and follow-ups.`
+- Support promise: `Say who you met. Recall People turns it into names, notes, reminders, and follow-ups.`
 - Product enemy: the blank moment, forgotten details, missed follow-ups, and walking into conversations cold.
 - First screenshot story: pain -> voice capture -> AI extraction -> prepared profile -> timely follow-up.
 
@@ -43,7 +43,7 @@ Be careful with claims like `no third-party access ever`. The project has noted 
 Safer copy patterns:
 
 - `Your data is stored locally on your device.`
-- `You review what Recall saves.`
+- `You review what Recall People saves.`
 - `Optional encrypted sync keeps your memory available across devices.`
 - `AI helps extract details from your notes; you stay in control.`
 

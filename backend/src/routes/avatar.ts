@@ -443,7 +443,7 @@ avatarRoutes.post('/generate-from-hints', async (c) => {
       context: null,
     });
 
-    console.log(`[Avatar Auto] Generating for ${contactId} with prompt: ${description}`);
+    console.log('[Avatar Auto] Starting contact avatar generation');
 
     const fullPrompt = buildAvatarGenerationPrompt(description);
     const {
@@ -473,7 +473,7 @@ avatarRoutes.post('/generate-from-hints', async (c) => {
     });
     const avatarUrl = `${baseUrl}/api/avatar/${filename}`;
 
-    console.log(`[Avatar Auto] Successfully generated for ${contactId}: ${avatarUrl}`);
+    console.log('[Avatar Auto] Contact avatar generated successfully');
 
     return c.json({
       success: true,

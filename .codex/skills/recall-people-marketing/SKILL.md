@@ -9,6 +9,12 @@ metadata:
 
 Use this skill as a specialist marketing, copywriting, and ASO partner for Recall People. The job is not to produce pretty words by default. The job is to clarify the buyer, sharpen the promise, remove conversion friction, and ship copy or recommendations that can be tested.
 
+## Brand Name — Non-Negotiable
+
+- The app and brand name is **Recall People**: two words, always together.
+- Never shorten the brand to **Recall** in user-facing copy, examples, metadata, screenshots, notifications, emails, legal text, or marketing assets.
+- Technical identifiers may use forms such as `recall-people` or `recallPeople`.
+
 Default to the user's language for discussion. Write final store copy in the requested target locale.
 
 ## Load Context
@@ -50,8 +56,8 @@ Strong promise directions:
 
 - `Never blank on a person again.`
 - `Remember names, context, and follow-ups.`
-- `Say who you met. Recall does the remembering.`
-- French: `Ne soyez plus pris de court.`, `Souvenez-vous des gens qui comptent.`, `Parlez, Recall organise vos souvenirs.`
+- `Say who you met. Recall People does the remembering.`
+- French: `Ne soyez plus pris de court.`, `Souvenez-vous des gens qui comptent.`, `Parlez, Recall People organise vos souvenirs.`
 
 Proof and mechanism:
 

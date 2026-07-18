@@ -21,7 +21,6 @@ import { syncRoutes } from './routes/sync';
 import { rateLimiters } from './middleware/rateLimit';
 import { securityHeaders } from './middleware/securityHeaders';
 import { httpsEnforcement } from './middleware/httpsEnforcement';
-import { langfuseMiddleware } from './middleware/langfuse';
 import { posthogMiddleware } from './middleware/posthog';
 import {
   captureServerException,
@@ -39,10 +38,6 @@ type Bindings = {
   AVATARS_BUCKET: R2Bucket;
   OPENAI_API_KEY?: string;
   AVATARS_PUBLIC_URL?: string;
-  LANGFUSE_SECRET_KEY?: string;
-  LANGFUSE_PUBLIC_KEY?: string;
-  LANGFUSE_BASE_URL?: string;
-  ENABLE_LANGFUSE?: string;
   POSTHOG_KEY?: string;
   POSTHOG_HOST?: string;
   PRO_WHITELIST?: string;
@@ -56,9 +51,6 @@ app.use('*', securityHeaders);
 
 // Logger
 app.use('*', logger());
-
-// LangFuse observability (before routes)
-app.use('*', langfuseMiddleware);
 
 // PostHog observability + error tracking (before routes)
 app.use('*', posthogMiddleware);

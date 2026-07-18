@@ -5,6 +5,8 @@ import { ExtractionFeedback } from '@/utils/extractionFeedback';
 import { useSettingsStore } from '@/stores/settings-store';
 import { ApiError, NetworkError, showApiError } from './error-handler';
 import { API_URL } from './config';
+import { requireAIConsent } from './ai-consent';
+import { endpointRequiresAIConsent } from './ai-consent-policy';
 
 const getCurrentLanguage = () => useSettingsStore.getState().language;
 
@@ -97,6 +99,10 @@ export function isAbortError(error: unknown): boolean {
 }
 
 const apiCall = async <T>(endpoint: string, options: ApiOptions = {}, isRetry = false): Promise<T> => {
+  if (endpointRequiresAIConsent(endpoint)) {
+    await requireAIConsent();
+  }
+
   const { showErrorToast = true, timeoutMs = DEFAULT_TIMEOUT_MS, ...fetchOptions } = options;
   const token = await getToken();
 
@@ -171,6 +177,7 @@ const transcribeAudioInternal = async (
   confidence: number;
   duration: number;
 }> => {
+  await requireAIConsent();
   const token = await getToken();
 
   const formData = new FormData();
@@ -682,9 +689,16 @@ export const consumeAskQuota = async (): Promise<UseQuotaResponse> => {
   return apiCall('/api/subscription/use-ask-quota', { method: 'POST', showErrorToast: false });
 };
 
-export const deleteAccount = async (): Promise<{ success: boolean }> => {
+export const deleteAccount = async (options: {
+  appleAuthorizationCode?: string;
+} = {}): Promise<{ success: boolean }> => {
   return apiCall('/auth/account', {
     method: 'DELETE',
+    body: options,
+    headers: {
+      // Capability marker lets the API keep older store builds working during rollout.
+      'X-Recall-People-Apple-Revocation': '1',
+    },
   });
 };
 

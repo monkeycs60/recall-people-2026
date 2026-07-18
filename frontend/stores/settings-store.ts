@@ -5,12 +5,17 @@ import { getLocales } from 'expo-localization';
 import { Language, SUPPORTED_LANGUAGES, DEFAULT_LANGUAGE } from '@/types';
 import { getToken } from '@/lib/auth';
 import { API_URL } from '@/lib/config';
+import { AI_CONSENT_VERSION, type AIConsentStatus } from '@/lib/ai-consent-policy';
 
 type SettingsState = {
   language: Language;
   isHydrated: boolean;
   hasSeenGuidedTour: boolean;
   hasAcceptedAIConsent: boolean;
+  aiConsentStatus: AIConsentStatus;
+  aiConsentUserId: string | null;
+  aiConsentVersion: string | null;
+  aiConsentPromptVisible: boolean;
   notSeenThresholdDays: number;
   weeklyDigestEnabled: boolean;
   postEventFollowUpEnabled: boolean;
@@ -22,7 +27,11 @@ type SettingsActions = {
   setLanguage: (language: Language) => void;
   setHydrated: (hydrated: boolean) => void;
   setHasSeenGuidedTour: (seen: boolean) => void;
-  setHasAcceptedAIConsent: (accepted: boolean) => void;
+  prepareAIConsentForUser: (userId: string) => void;
+  acceptAIConsent: (userId: string) => void;
+  declineAIConsent: (userId: string) => void;
+  requestAIConsent: () => void;
+  dismissAIConsentPrompt: () => void;
   setNotSeenThresholdDays: (days: number) => void;
   setWeeklyDigestEnabled: (enabled: boolean) => void;
   setPostEventFollowUpEnabled: (enabled: boolean) => void;
@@ -46,11 +55,15 @@ const detectDeviceLanguage = (): Language => {
 export const useSettingsStore = create<SettingsState & SettingsActions>()(
   devtools(
     persist(
-      (set) => ({
+      (set, get) => ({
         language: detectDeviceLanguage(),
         isHydrated: false,
         hasSeenGuidedTour: false,
         hasAcceptedAIConsent: false,
+        aiConsentStatus: 'pending',
+        aiConsentUserId: null,
+        aiConsentVersion: null,
+        aiConsentPromptVisible: false,
         notSeenThresholdDays: 60,
         weeklyDigestEnabled: true,
         postEventFollowUpEnabled: true,
@@ -82,7 +95,41 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         },
         setHydrated: (isHydrated) => set({ isHydrated }),
         setHasSeenGuidedTour: (hasSeenGuidedTour) => set({ hasSeenGuidedTour }),
-        setHasAcceptedAIConsent: (hasAcceptedAIConsent) => set({ hasAcceptedAIConsent }),
+        prepareAIConsentForUser: (userId) => {
+          const state = get();
+          const isCurrentDecision =
+            state.aiConsentUserId === userId &&
+            state.aiConsentVersion === AI_CONSENT_VERSION &&
+            state.aiConsentStatus !== 'pending';
+
+          if (isCurrentDecision) return;
+
+          set({
+            hasAcceptedAIConsent: false,
+            aiConsentStatus: 'pending',
+            aiConsentUserId: userId,
+            aiConsentVersion: AI_CONSENT_VERSION,
+            aiConsentPromptVisible: false,
+          });
+        },
+        acceptAIConsent: (userId) => set({
+          hasAcceptedAIConsent: true,
+          aiConsentStatus: 'accepted',
+          aiConsentUserId: userId,
+          aiConsentVersion: AI_CONSENT_VERSION,
+          aiConsentPromptVisible: false,
+        }),
+        declineAIConsent: (userId) => set({
+          hasAcceptedAIConsent: false,
+          aiConsentStatus: 'declined',
+          aiConsentUserId: userId,
+          aiConsentVersion: AI_CONSENT_VERSION,
+          aiConsentPromptVisible: false,
+        }),
+        requestAIConsent: () => set({
+          aiConsentPromptVisible: true,
+        }),
+        dismissAIConsentPrompt: () => set({ aiConsentPromptVisible: false }),
         setNotSeenThresholdDays: (notSeenThresholdDays) => set({ notSeenThresholdDays }),
         setWeeklyDigestEnabled: (weeklyDigestEnabled) => set({ weeklyDigestEnabled }),
         setPostEventFollowUpEnabled: (postEventFollowUpEnabled) => set({ postEventFollowUpEnabled }),
@@ -100,6 +147,9 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
           language: state.language,
           hasSeenGuidedTour: state.hasSeenGuidedTour,
           hasAcceptedAIConsent: state.hasAcceptedAIConsent,
+          aiConsentStatus: state.aiConsentStatus,
+          aiConsentUserId: state.aiConsentUserId,
+          aiConsentVersion: state.aiConsentVersion,
           notSeenThresholdDays: state.notSeenThresholdDays,
           weeklyDigestEnabled: state.weeklyDigestEnabled,
           postEventFollowUpEnabled: state.postEventFollowUpEnabled,
