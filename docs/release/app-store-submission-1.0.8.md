@@ -61,7 +61,7 @@ Confirm these against the production configuration immediately before submission
 - [x] Confirm Privacy Policy and Terms links are reachable without authentication.
 - [ ] Verify all in-app purchases are in the correct App Store Connect state and attached to the submitted version when required.
 - [ ] Add a functioning review account and test it on a clean device.
-- [ ] Create the App Store version 1.0.8 and select Recall People 1.0.8 build 35.
+- [ ] Create the App Store version 1.0.8 and select Recall People 1.0.8 build 36.
 - [ ] Confirm the archive contains required third-party SDK privacy manifests and signatures in Xcode Organizer validation.
 - [ ] Run the account-deletion paths for credentials, Google-linked, Apple-linked, free, and active-subscriber accounts.
 - [ ] Verify “Not now” cancels the pending AI request while leaving contacts, reminders, export, sync, and account deletion usable.

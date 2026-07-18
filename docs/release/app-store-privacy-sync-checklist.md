@@ -92,7 +92,7 @@ Use this checklist when submitting the account-based secure sync release. It ali
 - Backend deployment has `SYNC_ENCRYPTION_KEY` configured as a base64-encoded 32-byte secret before the first synced user writes data.
 - Backend deployment has `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY`, and `APPLE_CLIENT_ID` configured so Sign in with Apple authorization is revoked during account deletion.
 - Prisma migration `20260509000000_add_account_sync` has been applied before releasing clients that call `/api/sync/*`.
-- Release counters are aligned to iOS 1.0.8 build 35 and Android 1.0.8 versionCode 14.
+- Release counters are aligned to iOS 1.0.8 build 36 and Android 1.0.8 versionCode 14.
 - No new OS permissions are required for account sync; it uses authenticated HTTPS API calls.
 - Privacy Policy says relationship data syncs through the account.
 - Privacy Policy says sensitive data is encrypted in the database.
