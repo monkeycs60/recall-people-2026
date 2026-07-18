@@ -11,7 +11,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.monkeycs60.recallpeople2026",
-      "buildNumber": "33"
+      "buildNumber": "35"
     },
     "android": {
       "adaptiveIcon": {
