@@ -11,7 +11,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.monkeycs60.recallpeople2026",
-      "buildNumber": "32"
+      "buildNumber": "33"
     },
     "android": {
       "adaptiveIcon": {
@@ -29,7 +29,7 @@
       "blockedPermissions": [
         "android.permission.CAMERA"
       ],
-      "versionCode": 12
+      "versionCode": 13
     },
     "web": {
       "output": "static",

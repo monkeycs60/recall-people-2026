@@ -54,14 +54,14 @@ Confirm these against the production configuration immediately before submission
 
 ## Manual release checklist
 
-- [ ] Deploy backend with `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY`, and `APPLE_CLIENT_ID` configured.
+- [x] Deploy backend with `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY`, and `APPLE_CLIENT_ID` configured.
 - [ ] Exercise Apple-linked account deletion in production or a production-equivalent environment and confirm authorization revocation succeeds.
-- [ ] Publish the updated Privacy Policy and Terms before submitting the binary.
+- [x] Publish the updated Privacy Policy and Terms before submitting the binary.
 - [ ] Update App Privacy answers using the table above and save the new privacy responses.
-- [ ] Confirm Privacy Policy and Terms links are reachable without authentication.
+- [x] Confirm Privacy Policy and Terms links are reachable without authentication.
 - [ ] Verify all in-app purchases are in the correct App Store Connect state and attached to the submitted version when required.
 - [ ] Add a functioning review account and test it on a clean device.
-- [ ] Select the new build generated from version 1.0.7; EAS auto-increment must produce a build number greater than 32.
+- [ ] In App Store Connect, select the uploaded Recall People 1.0.7 build 33 for submission.
 - [ ] Confirm the archive contains required third-party SDK privacy manifests and signatures in Xcode Organizer validation.
 - [ ] Run the account-deletion paths for credentials, Google-linked, Apple-linked, free, and active-subscriber accounts.
 - [ ] Verify “Not now” cancels the pending AI request while leaving contacts, reminders, export, sync, and account deletion usable.
