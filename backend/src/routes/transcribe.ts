@@ -71,7 +71,7 @@ transcribeRoutes.post('/', async (c) => {
       return c.json({ error: `File too large. Maximum upload size is ${MAX_UPLOAD_SIZE / (1024 * 1024)}MB.` }, 413);
     }
 
-    // audioFile is Blob (File extends Blob in Workers)
+    // audioFile is a Blob (File extends Blob in the Fetch API).
     const audioBuffer = await (audioFile as Blob).arrayBuffer();
 
     // Validate language parameter

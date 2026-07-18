@@ -1,367 +1,128 @@
-# Recall People - Backend
+# Recall People API
 
-Backend API pour l'application Recall People, construit avec Hono et déployé sur Cloudflare Workers.
+API Node.js de Recall People, construite avec Hono et hébergée sur le VPS de production via Coolify.
 
-## Architecture
+## Production
 
-- **Framework**: Hono
-- **Runtime**: Cloudflare Workers
-- **Base de données**: PostgreSQL (Neon) via Prisma
-- **AI Providers**: OpenAI GPT-5 mini (recommandé), xAI Grok, Cerebras
-- **Transcription**: Groq Whisper v3 Turbo
-- **Observabilité**: PostHog Cloud EU, prompts et réponses masqués
+- Runtime : Node.js sur le service Coolify `recall-people-api`
+- URL publique : `https://api.recallpeople.com`
+- Base de données : PostgreSQL sur le VPS
+- Stockage des avatars : Cloudflare R2, appelé depuis Node via son API S3 compatible
+- IA texte : Cerebras par défaut, avec OpenAI et xAI selon les fonctionnalités/configurations
+- Transcription : Groq Whisper
+- Observabilité : PostHog Cloud EU, sans prompts ni réponses IA
 
-## Migration vers OpenAI GPT-5 mini (Redesign V2)
+## Développement local
 
-Le backend a été migré pour utiliser OpenAI GPT-5 mini avec Structured Outputs par défaut.
-
-### Quick Start
-
-**Documentation rapide**: [QUICK_START_OPENAI.md](QUICK_START_OPENAI.md)
+Prérequis : Node.js 20+, npm et Docker.
 
 ```bash
-# 1. Installer les dépendances
+cd backend
 npm install
-
-# 2. Configurer les variables d'environnement
-cp .env.example .env
-# Éditer .env et ajouter OPENAI_API_KEY=sk-...
-
-# 3. Démarrer le serveur de dev
+cp .env.example .dev.vars
 npm run dev
 ```
 
-### Documentation complète
+`npm run dev` démarre le PostgreSQL local, applique le schéma Prisma et lance l'API Node en mode watch. Le port par défaut est `3000`; les scripts de développement du projet peuvent définir `PORT=8787` pour l'app mobile locale.
 
-1. **[QUICK_START_OPENAI.md](QUICK_START_OPENAI.md)** - Guide de démarrage rapide (5 minutes)
-2. **[OPENAI_MIGRATION.md](OPENAI_MIGRATION.md)** - Guide complet de migration
-3. **[STRUCTURED_OUTPUTS_EXAMPLE.md](STRUCTURED_OUTPUTS_EXAMPLE.md)** - Exemples pratiques avec Zod
-4. **[REDESIGN_V2_INTEGRATION.md](REDESIGN_V2_INTEGRATION.md)** - Intégration avec le Redesign V2
-5. **[MIGRATION_SUMMARY.md](MIGRATION_SUMMARY.md)** - Résumé des changements effectués
-
-### Recommandations techniques
-
-D'après le [Redesign V2](/REDESIGN_V2.md), section 9:
-
-| Tâche | Provider recommandé | Modèle | Raison |
-|-------|---------------------|--------|--------|
-| **Extraction (review)** | **OpenAI** | **GPT-5 mini + Structured Outputs** | **Garantie schéma 100%** |
-| Questions / Résumé | OpenAI | GPT-5 mini | Bon rapport qualité/prix |
-| Transcription | Groq | Whisper v3 Turbo | Rapide, bon français |
-| Détection contact | Cerebras | Llama 8B | Rapide, économique |
-
-## Installation
-
-### Prérequis
-
-- Node.js 20+
-- npm ou pnpm
-- Compte Cloudflare Workers
-- Compte OpenAI (pour GPT-5 mini)
-- Base de données PostgreSQL (Neon recommandé)
-
-### Configuration
-
-1. **Copier le fichier d'environnement**:
-   ```bash
-   cp .env.example .env
-   ```
-
-2. **Configurer les variables d'environnement** dans `.env`:
-
-   **Obligatoire**:
-   ```bash
-   DATABASE_URL=postgresql://user:password@host:5432/recall_people
-   JWT_SECRET=your-super-secure-jwt-secret
-   SYNC_ENCRYPTION_KEY=base64-encoded-32-byte-key
-   OPENAI_API_KEY=sk-...
-   ```
-
-   `SYNC_ENCRYPTION_KEY` must be a base64-encoded 32-byte key. Generate one with:
-   ```bash
-   node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
-   ```
-
-   **Optionnel**:
-   ```bash
-   # Autres AI providers (fallback)
-   XAI_API_KEY=your-xai-key
-   CEREBRAS_API_KEY=your-cerebras-key
-
-   # Transcription
-   GROQ_API_KEY=your-groq-key
-
-   # Observabilité sans contenu
-   POSTHOG_KEY=phc_...
-   POSTHOG_HOST=https://eu.i.posthog.com
-   ```
-
-3. **Installer les dépendances**:
-   ```bash
-   npm install
-   ```
-
-4. **Configurer la base de données**:
-   ```bash
-   npm run db:generate
-   npm run db:push
-   ```
-
-## Développement
-
-### Démarrer le serveur de dev
+Commandes utiles :
 
 ```bash
-npm run dev
+npm run dev             # PostgreSQL local + API Node en watch
+npm run dev:node        # API Node seule, sans bootstrap de la base
+npm run typecheck       # Vérification TypeScript
+npm test                # Tests Node
+npm run db:generate     # Générer le client Prisma
+npm run db:push         # Appliquer le schéma à la base ciblée
+npm run db:refresh-dev  # Rafraîchir la base locale depuis le snapshot VPS
+npm run db:studio       # Ouvrir Prisma Studio
 ```
 
-Le serveur démarre sur `http://localhost:8787` (ou le port configuré).
+## Variables d'environnement
 
-### Scripts disponibles
+La liste de référence est dans [`.env.example`](./.env.example). Les variables de production sont configurées dans Coolify sur le service `recall-people-api`.
 
-```bash
-# Développement
-npm run dev              # Démarrer le serveur de dev avec Wrangler
+Variables essentielles :
 
-# Base de données
-npm run db:generate      # Générer le client Prisma
-npm run db:push          # Push le schéma vers la DB
-npm run db:migrate       # Créer une migration
-npm run db:studio        # Ouvrir Prisma Studio
-
-# Déploiement
-npm run deploy           # Déployer sur Cloudflare Workers
-```
-
-## Structure du projet
-
-```
-backend/
-├── src/
-│   ├── lib/
-│   │   ├── ai-provider.ts        # Configuration AI (OpenAI, xAI, Cerebras)
-│   │   ├── security.ts           # Sécurité et validation
-│   │   ├── posthog.ts            # Observabilité sans prompts/outputs
-│   │   └── performance-logger.ts # Logs de performance
-│   ├── middleware/
-│   │   └── auth.ts               # Authentification JWT
-│   ├── routes/
-│   │   ├── extract.ts            # Extraction de données (Redesign V2)
-│   │   ├── summary.ts            # Génération de résumés
-│   │   ├── ice-breakers.ts       # Questions "À demander"
-│   │   ├── ask.ts                # Recherche sémantique
-│   │   ├── transcribe.ts         # Transcription audio
-│   │   └── ...
-│   └── index.ts                  # Point d'entrée
-├── prisma/
-│   └── schema.prisma             # Schéma de base de données
-├── .env.example                  # Template de variables d'environnement
-├── wrangler.toml                 # Config Cloudflare Workers
-├── package.json
-└── README.md                     # Ce fichier
-```
-
-## API Endpoints
-
-### Authentification
-
-- `POST /api/auth/register` - Créer un compte
-- `POST /api/auth/login` - Se connecter
-- `GET /api/auth/me` - Récupérer l'utilisateur actuel
-
-### Notes et extraction
-
-- `POST /api/transcribe` - Transcrire un audio en texte
-- `POST /api/extract` - Extraire les données d'une transcription (Redesign V2)
-- `POST /api/summary` - Générer un résumé de contact
-- `POST /api/ice-breakers` - Générer des questions "À demander"
-
-### Recherche
-
-- `POST /api/ask` - Poser une question sur les contacts
-- `POST /api/search` - Rechercher dans les notes
-
-### Autres
-
-- `GET /api/health` - Health check
-- `POST /api/avatar` - Générer un avatar
-
-## Configuration des AI Providers
-
-### OpenAI (Recommandé)
-
-```bash
-# .env
-OPENAI_API_KEY=sk-...
-AI_PROVIDER=openai
-```
-
-**Avantages**:
-- Structured Outputs: garantie de conformité au schéma Zod à 100%
-- Déterminisme avec `temperature: 0`
-- Meilleur rapport qualité/prix
-- Pas d'erreurs de parsing JSON
-
-**Utilisation**:
-```typescript
-import { generateObject } from 'ai';
-import { createAIModel, getStructuredOutputSettings } from './lib/ai-provider';
-
-const model = createAIModel(providerConfig);
-const { object } = await generateObject({
-  model,
-  schema: myZodSchema,
-  prompt: '...',
-  ...getStructuredOutputSettings(),
-});
-```
-
-### xAI (Grok) - Fallback
-
-```bash
-# .env
-XAI_API_KEY=your-xai-key
-AI_PROVIDER=grok
-```
-
-### Cerebras - Fallback
-
-```bash
-# .env
-CEREBRAS_API_KEY=your-cerebras-key
-AI_PROVIDER=cerebras
-```
-
-## Observabilité
-
-### PostHog
-
-Pour monitorer les appels LLM, les coûts et la fiabilité sans envoyer les prompts ni les réponses:
-
-```bash
-# .env
-POSTHOG_KEY=phc_...
-POSTHOG_HOST=https://eu.i.posthog.com
-```
-
-Dashboard: https://eu.posthog.com
-
-### Performance Logging
-
-Pour activer les logs de performance dans la console:
-
-```bash
-# .env
-ENABLE_PERFORMANCE_LOGGING=true
-```
-
-Logs les métriques:
-- Provider utilisé
-- Modèle
-- Durée de l'appel
-- Taille input/output
-- Métadonnées
-
-## Déploiement
-
-### Cloudflare Workers
-
-1. **Installer Wrangler CLI**:
-   ```bash
-   npm install -g wrangler
-   ```
-
-2. **Se connecter à Cloudflare**:
-   ```bash
-   wrangler login
-   ```
-
-3. **Configurer les secrets**:
-   ```bash
-   wrangler secret put OPENAI_API_KEY
-   wrangler secret put DATABASE_URL
-   wrangler secret put JWT_SECRET
-   ```
-
-4. **Déployer**:
-   ```bash
-   npm run deploy
-   ```
-
-### Variables d'environnement en production
-
-Configurer dans le dashboard Cloudflare Workers:
-- `OPENAI_API_KEY`
 - `DATABASE_URL`
 - `JWT_SECRET`
-- Autres clés optionnelles
+- `SYNC_ENCRYPTION_KEY`
+- `GROQ_API_KEY`
+- `CEREBRAS_API_KEY`
+- `OPENAI_API_KEY`
+- `XAI_API_KEY`
+- identifiants Google OAuth
+- accès R2 : `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`
 
-## Tests
+Pour la révocation Sign in with Apple lors d'une suppression de compte :
+
+- `APPLE_TEAM_ID`
+- `APPLE_KEY_ID`
+- `APPLE_PRIVATE_KEY`
+- `APPLE_CLIENT_ID=com.monkeycs60.recallpeople2026`
+
+`APPLE_PRIVATE_KEY` accepte soit un PEM multiligne, soit des retours à la ligne encodés sous forme de `\\n`.
+
+## Déploiement VPS
+
+Le déploiement de production se fait exclusivement avec Coolify :
+
+1. pousser le commit validé sur `master` ;
+2. ouvrir le service Coolify `recall-people-api` ;
+3. vérifier les variables d'environnement ;
+4. lancer **Deploy** pour construire le dernier commit de `master` ;
+5. vérifier `https://api.recallpeople.com/` et les parcours critiques.
+
+Le push GitHub et le déploiement Coolify sont deux opérations distinctes tant que l'auto-deploy Coolify n'est pas activé.
+
+Ne jamais lancer une migration ou un déploiement de production depuis la machine locale sans demande explicite. Coolify exécute l'installation et le démarrage du service à partir de ce dossier avec :
 
 ```bash
-# Tester l'endpoint d'extraction
-curl -X POST https://your-worker.workers.dev/api/extract \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_TOKEN" \
-  -d '{
-    "transcription": "J'\''ai vu Marie hier.",
-    "existingContacts": []
-  }'
+npm install
+npm start
 ```
 
-## Coûts estimés
+## Endpoints principaux
 
-### OpenAI GPT-5 mini
+- `GET /` — état de l'API
+- `POST /auth/register`, `/auth/login`, `/auth/google`, `/auth/apple`
+- `DELETE /auth/account`
+- `POST /api/transcribe`
+- `POST /api/extract`
+- `POST /api/detect-contact`
+- `POST /api/summary`
+- `POST /api/search`
+- `POST /api/ask`
+- `/api/sync/*` — synchronisation chiffrée du compte
+- `/api/avatar/*` — avatars stockés sur R2
 
-- **Input**: ~$0.15 / 1M tokens
-- **Output**: ~$0.60 / 1M tokens
+## Validation avant déploiement
 
-**Estimation pour Recall People**:
-- Extraction: ~$0.0003 par note
-- Questions: ~$0.0001 par génération
-- Résumé: ~$0.0004 par contact
+```bash
+cd backend
+npm run typecheck
+npm test
+```
 
-**Total**: ~$0.0008 par note complète
+Après déploiement :
 
-Pour 1000 notes/jour: ~$24/mois
+```bash
+curl -fsS https://api.recallpeople.com/
+```
 
-### Groq Whisper (Transcription)
+Réponse attendue :
 
-- **Gratuit** jusqu'à 10M requêtes/jour
-- Puis ~$0.111 / 1000 minutes
+```json
+{"status":"ok","service":"recall-people-api","version":"1.0.0"}
+```
 
-## Support
+## Sécurité et confidentialité
 
-### Erreurs communes
+- Le contenu synchronisé est chiffré avec `SYNC_ENCRYPTION_KEY`.
+- Les prompts et réponses IA sont masqués dans PostHog.
+- Les fichiers audio sont traités pour transcription et ne sont pas conservés par Recall People.
+- Les secrets de production restent dans Coolify et ne doivent jamais être commités.
 
-1. **"OPENAI_API_KEY is required"**
-   - Vérifier que `.env` contient la clé OpenAI
-   - Format: `OPENAI_API_KEY=sk-...`
+## Licence
 
-2. **"Invalid API key"**
-   - Vérifier que la clé est valide sur https://platform.openai.com
-   - S'assurer qu'elle commence par `sk-`
-
-3. **Erreurs de schéma Zod**
-   - Avec Structured Outputs, cela ne devrait jamais arriver
-   - Si ça arrive, vérifier que `AI_PROVIDER=openai`
-
-### Documentation
-
-- [Quick Start](QUICK_START_OPENAI.md)
-- [Migration OpenAI](OPENAI_MIGRATION.md)
-- [Structured Outputs](STRUCTURED_OUTPUTS_EXAMPLE.md)
-- [Redesign V2](REDESIGN_V2_INTEGRATION.md)
-- [Résumé Migration](MIGRATION_SUMMARY.md)
-
-### Ressources externes
-
-- [OpenAI Platform](https://platform.openai.com)
-- [Vercel AI SDK](https://sdk.vercel.ai)
-- [Cloudflare Workers](https://workers.cloudflare.com)
-- [Hono Framework](https://hono.dev)
-- [Prisma](https://www.prisma.io)
-
-## License
-
-Propriétaire - Recall People
+Propriétaire — Recall People.

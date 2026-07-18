@@ -100,13 +100,13 @@ rm -rf /tmp/recall-aab-check
 mkdir -p /tmp/recall-aab-check
 unzip -q /home/clement/Desktop/recall-people-2026-builds/recall-people-android-<version>-vc<versionCode>.aab -d /tmp/recall-aab-check
 strings /tmp/recall-aab-check/base/manifest/AndroidManifest.xml | rg "versionCode|versionName|<version>|<versionCode>|com.monkeycs60.recallpeople2026"
-grep -aohE 'https://recall-people-api\.clement-serizay\.workers\.dev|http://192\.168\.[0-9.]+:8787|http://localhost:8787' /tmp/recall-aab-check/base/assets/index.android.bundle | sort | uniq -c
+grep -aohE 'https://api\.recallpeople\.com|http://192\.168\.[0-9.]+:8787|http://localhost:8787' /tmp/recall-aab-check/base/assets/index.android.bundle | sort | uniq -c
 ```
 
 Expected API result for a store build:
 
 ```text
-1 https://recall-people-api.clement-serizay.workers.dev
+1 https://api.recallpeople.com
 ```
 
 No `192.168.x.x:8787` or `localhost:8787` should be embedded in the store bundle.

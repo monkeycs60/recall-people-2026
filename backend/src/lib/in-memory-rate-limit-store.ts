@@ -1,11 +1,10 @@
-// In-memory KV shim — implémente le sous-ensemble de Workers KVNamespace utilisé
-// par l'app (get / put avec expirationTtl, + delete). Mono-instance : l'état n'est
-// pas partagé entre process. Suffisant pour le rate-limiting d'une API mono-conteneur.
-// Si on passe un jour en multi-instance, remplacer par un backend Redis.
+import type { RateLimitStore } from '../types/runtime';
 
 type Entry = { value: string; expiresAt: number | null };
 
-export class InMemoryKV {
+// Mono-instance store used by the Node API for rate limiting. If the API is
+// scaled to multiple replicas, replace it with a shared Redis-backed store.
+export class InMemoryRateLimitStore implements RateLimitStore {
   private store = new Map<string, Entry>();
 
   async get(key: string): Promise<string | null> {
@@ -21,7 +20,7 @@ export class InMemoryKV {
   async put(
     key: string,
     value: string,
-    options?: { expirationTtl?: number }
+    options?: { expirationTtl?: number },
   ): Promise<void> {
     const ttl = options?.expirationTtl;
     const expiresAt = ttl ? Date.now() + ttl * 1000 : null;

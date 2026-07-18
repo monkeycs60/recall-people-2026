@@ -10,17 +10,15 @@ import { Context, Next } from 'hono';
  * Redirects HTTP requests to HTTPS or rejects them
  */
 export const httpsEnforcement = async (c: Context, next: Next) => {
-  // Get protocol from various headers
-  const proto = c.req.header('X-Forwarded-Proto') || c.req.header('CF-Visitor') || 'https';
+  // Traefik terminates TLS on the VPS and forwards the original protocol.
+  const proto = c.req.header('X-Forwarded-Proto') || 'https';
 
-  // Cloudflare Workers typically use CF-Visitor header
   let isHttps = proto === 'https';
   if (proto && proto.includes('https')) {
     isHttps = true;
   }
 
-  // Check if we're in production (Cloudflare Workers)
-  // In development, we allow HTTP
+  // In development, we allow HTTP.
   const url = new URL(c.req.url);
   const isDevelopment = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
 

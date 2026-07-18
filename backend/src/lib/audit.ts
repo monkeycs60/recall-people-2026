@@ -69,7 +69,7 @@ export async function createAuditLog(
  */
 export function getClientInfo(c: Context): { ipAddress?: string; userAgent?: string } {
   return {
-    ipAddress: c.req.header('CF-Connecting-IP') || c.req.header('X-Forwarded-For') || c.req.header('X-Real-IP'),
+    ipAddress: c.req.header('X-Forwarded-For')?.split(',')[0]?.trim() || c.req.header('X-Real-IP'),
     userAgent: c.req.header('User-Agent'),
   };
 }

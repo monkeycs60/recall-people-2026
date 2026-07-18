@@ -1,10 +1,10 @@
-- Ne deploy pas le backend sur cloudflare à moins que je te le demande, tu as le droit de deploy sur vercel.
+- Le backend de production tourne en Node sur le VPS via Coolify. Tout déploiement Coolify ou toute autre mutation de la production nécessite une demande explicite.
 
 # Analytics / PostHog
 
 Recall People est instrumenté avec **PostHog** : analytics produit (events **par utilisateur** : `contact_created`,
 `note_created`, etc.), **observabilité IA** (`$ai_generation` sur tous les appels LLM du backend — coût/tokens/latence/erreur),
-session replay, error tracking.
+error tracking. Le session replay et l'autocapture des interactions sont désactivés.
 **Avant de modifier une feature user-facing OU un appel LLM, lis [`POSTHOG.md`](./POSTHOG.md)** : il décrit
 ce qui est observé (landing / mobile / backend) + la règle — si tu modifies le produit, mets à jour
 l'instrumentation (events / `$ai_generation`) **ET** `POSTHOG.md`.

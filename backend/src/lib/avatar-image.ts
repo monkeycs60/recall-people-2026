@@ -128,7 +128,7 @@ export async function generateAvatarImage({
 
 async function parseJsonResponse(response: Response): Promise<OpenAIImageGenerationResponse> {
   try {
-    return await response.json<OpenAIImageGenerationResponse>();
+    return await response.json() as OpenAIImageGenerationResponse;
   } catch {
     return {};
   }

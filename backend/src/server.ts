@@ -1,12 +1,11 @@
-// Point d'entrée Node (remplace le handler Workers `export default app`).
-// On reconstruit l'objet `env` style Workers (process.env + shims KV/R2) et on
-// l'injecte via app.fetch(request, env, executionCtx) : TOUT le code des routes
-// (c.env.*, c.executionCtx.waitUntil) continue de marcher sans modification.
+// Point d'entrée Node de l'API hébergée sur le VPS via Coolify.
+// Les variables d'environnement et services runtime sont injectés dans Hono à
+// chaque requête. Les tâches d'observabilité peuvent continuer en arrière-plan.
 
 import { serve } from '@hono/node-server';
 import app from './index';
-import { InMemoryKV } from './lib/kv-shim';
-import { R2OnS3 } from './lib/r2-shim';
+import { InMemoryRateLimitStore } from './lib/in-memory-rate-limit-store';
+import { R2ObjectStore } from './lib/r2-object-store';
 
 function requireEnv(name: string): string {
   const v = process.env[name];
@@ -14,11 +13,11 @@ function requireEnv(name: string): string {
   return v;
 }
 
-// Bindings injectés à chaque requête (équivalent des bindings Workers).
+// Services runtime injectés à chaque requête.
 const env = {
   ...process.env,
-  RATE_LIMIT: new InMemoryKV(),
-  AVATARS_BUCKET: new R2OnS3({
+  RATE_LIMIT: new InMemoryRateLimitStore(),
+  AVATARS_BUCKET: new R2ObjectStore({
     accountId: requireEnv('R2_ACCOUNT_ID'),
     accessKeyId: requireEnv('R2_ACCESS_KEY_ID'),
     secretAccessKey: requireEnv('R2_SECRET_ACCESS_KEY'),
@@ -26,9 +25,8 @@ const env = {
   }),
 } as unknown as Parameters<typeof app.fetch>[1];
 
-// ExecutionContext minimal. waitUntil laisse tourner les tâches de fond
-// (flush observability, side-tasks IA) sans bloquer la réponse — sinon
-// c.executionCtx throw sur Node et casserait les routes IA.
+// Contexte minimal pour laisser les flushs d'observabilité se terminer sans
+// retarder la réponse HTTP.
 const executionCtx = {
   waitUntil: (promise: Promise<unknown>) => {
     Promise.resolve(promise).catch((err) =>
@@ -36,7 +34,7 @@ const executionCtx = {
     );
   },
   passThroughOnException: () => {},
-} as unknown as ExecutionContext;
+} as Parameters<typeof app.fetch>[2];
 
 const port = Number(process.env.PORT) || 3000;
 

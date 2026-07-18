@@ -27,7 +27,7 @@ Replace the "Réseau" (Network) tab with a "Recherche" (Search) tab that allows 
                            │
                            ▼
 ┌─────────────────────────────────────────────────────────┐
-│                    BACKEND (Hono/CF Workers)             │
+│                  BACKEND (Hono/Node/Coolify)             │
 ├─────────────────────────────────────────────────────────┤
 │  POST /api/search                                        │
 │  ├── Reçoit: query + facts[] + memories[] + notes[]     │

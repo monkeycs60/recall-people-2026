@@ -2,13 +2,13 @@ import { Context, Next } from 'hono';
 import { initializeLangfuse, flushLangfuse, isLangfuseEnabled } from '../lib/telemetry';
 
 /**
- * LangFuse Middleware for Cloudflare Workers
+ * LangFuse middleware for the Node API.
  *
  * This middleware:
  * 1. Initializes LangFuse on first request
  * 2. Flushes traces after each request using executionCtx.waitUntil
  *
- * CRITICAL for serverless environments to ensure traces are sent before worker terminates
+ * Traces are flushed after each request without delaying the response.
  */
 
 let initialized = false;
@@ -29,7 +29,7 @@ export async function langfuseMiddleware(c: Context, next: Next) {
 	await next();
 
 	// Flush traces in background (don't block response)
-	// executionCtx.waitUntil ensures traces are sent even after response is returned
+	// The background context lets traces finish after the response is returned.
 	if (isLangfuseEnabled() && c.executionCtx) {
 		c.executionCtx.waitUntil(flushLangfuse());
 	}

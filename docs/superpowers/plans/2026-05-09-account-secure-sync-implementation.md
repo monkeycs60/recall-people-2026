@@ -1930,7 +1930,7 @@ Expected: no new native permissions are added.
 In `frontend/eas.json`, confirm production env still includes:
 
 ```json
-"EXPO_PUBLIC_API_URL": "https://recall-people-api.clement-serizay.workers.dev"
+"EXPO_PUBLIC_API_URL": "https://api.recallpeople.com"
 ```
 
 Do not add encryption secrets to frontend EAS env. `SYNC_ENCRYPTION_KEY` belongs only to backend runtime secrets.

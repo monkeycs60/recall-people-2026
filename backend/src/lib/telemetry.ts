@@ -1,10 +1,7 @@
 import { Langfuse } from 'langfuse';
 
 /**
- * LangFuse Observability Setup for Cloudflare Workers
- *
- * This module uses the Langfuse SDK directly (not OpenTelemetry)
- * to be compatible with Cloudflare Workers edge runtime.
+ * LangFuse observability setup for the Node API.
  */
 
 export type TelemetryConfig = {
@@ -38,8 +35,8 @@ export function initializeLangfuse(config: TelemetryConfig): Langfuse | null {
 			secretKey: config.LANGFUSE_SECRET_KEY,
 			publicKey: config.LANGFUSE_PUBLIC_KEY,
 			baseUrl: config.LANGFUSE_BASE_URL || 'https://cloud.langfuse.com',
-			flushAt: 1, // Flush immediately for serverless
-			flushInterval: 0, // Disable interval-based flushing
+			flushAt: 1,
+			flushInterval: 0,
 		});
 
 		isInitialized = true;
@@ -61,7 +58,7 @@ export function getLangfuseClient(): Langfuse | null {
 
 /**
  * Flush pending traces to LangFuse
- * CRITICAL for Cloudflare Workers to ensure traces are sent before worker terminates
+ * Flush pending traces before the process shuts down or after a request.
  *
  * @returns Promise that resolves when flush completes
  */

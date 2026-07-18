@@ -1,4 +1,5 @@
 import { Context, Next } from 'hono';
+import type { RateLimitStore } from '../types/runtime';
 
 type RateLimitOptions = {
 	limit: number;       // Max requests
@@ -9,7 +10,7 @@ type RateLimitOptions = {
 };
 
 type Bindings = {
-	RATE_LIMIT: KVNamespace;
+	RATE_LIMIT: RateLimitStore;
 };
 
 type Variables = {
@@ -17,11 +18,10 @@ type Variables = {
 };
 
 /**
- * Get client IP from Cloudflare headers
+ * Get client IP from the trusted reverse-proxy headers added by Traefik.
  */
 const getClientIP = (c: Context): string => {
 	return (
-		c.req.header('cf-connecting-ip') ||
 		c.req.header('x-forwarded-for')?.split(',')[0]?.trim() ||
 		c.req.header('x-real-ip') ||
 		'unknown'

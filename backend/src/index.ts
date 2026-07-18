@@ -27,6 +27,7 @@ import {
   isPostHogEnabled,
   flushPostHog,
 } from './lib/posthog';
+import type { AvatarObjectStore, RateLimitStore } from './types/runtime';
 
 type Bindings = {
   DATABASE_URL: string;
@@ -34,8 +35,8 @@ type Bindings = {
   XAI_API_KEY: string;
   CEREBRAS_API_KEY?: string;
   AI_PROVIDER?: string;
-  RATE_LIMIT: KVNamespace;
-  AVATARS_BUCKET: R2Bucket;
+  RATE_LIMIT: RateLimitStore;
+  AVATARS_BUCKET: AvatarObjectStore;
   OPENAI_API_KEY?: string;
   AVATARS_PUBLIC_URL?: string;
   POSTHOG_KEY?: string;

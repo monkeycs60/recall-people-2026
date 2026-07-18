@@ -6,7 +6,7 @@ import { sign } from 'hono/jwt';
 import { getPrisma } from './db';
 
 /**
- * Generate random bytes using Web Crypto API (Cloudflare Workers compatible)
+ * Generate cryptographically secure random bytes using the Web Crypto API.
  */
 function generateRandomHex(byteLength: number): string {
 	const bytes = new Uint8Array(byteLength);

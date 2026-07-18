@@ -11,6 +11,7 @@ import {
 import { captureAiGeneration, captureServerException } from '../lib/posthog';
 import { imageCostUsd } from '../lib/ai-pricing';
 import { resolvePublicBaseUrl } from '../lib/public-url';
+import type { AvatarObjectStore } from '../types/runtime';
 
 /**
  * Run an avatar image generation while emitting a $ai_generation event to
@@ -59,7 +60,7 @@ type Bindings = {
   BETTER_AUTH_SECRET: string;
   BETTER_AUTH_URL: string;
   OPENAI_API_KEY: string;
-  AVATARS_BUCKET: R2Bucket;
+  AVATARS_BUCKET: AvatarObjectStore;
   AVATARS_PUBLIC_URL?: string;
   ADMIN_EMAIL?: string;
 };

@@ -2,8 +2,7 @@
  * Resolve the public base URL (`scheme://host`) to embed in URLs we hand back to
  * clients (e.g. avatar image URLs).
  *
- * ⚠️ Why this exists: since the Workers→Node/Coolify migration (2026-06-22), the
- * API runs behind a TLS-terminating reverse proxy (Traefik). The proxy forwards
+ * The API runs behind Coolify's TLS-terminating reverse proxy (Traefik), which forwards
  * plain HTTP to Node, so `new URL(c.req.url).protocol` is `http:`. Building an
  * absolute URL from that yields `http://api.recallpeople.com/...`, which iOS ATS
  * and Android cleartext policy block on release builds → the image silently fails

@@ -9,6 +9,7 @@ import { generateTokenPair, refreshAccessToken, revokeRefreshToken, revokeAllUse
 import { auditLog, getClientInfo } from '../lib/audit';
 import { authMiddleware } from '../middleware/auth';
 import { revokeAppleAuthorizationCode } from '../lib/apple-authorization';
+import type { RateLimitStore } from '../types/runtime';
 
 type Bindings = {
 	DATABASE_URL: string;
@@ -20,7 +21,7 @@ type Bindings = {
 	APPLE_KEY_ID?: string;
 	APPLE_PRIVATE_KEY?: string;
 	APPLE_CLIENT_ID?: string;
-	RATE_LIMIT: KVNamespace;
+	RATE_LIMIT: RateLimitStore;
 };
 
 // Validation schemas

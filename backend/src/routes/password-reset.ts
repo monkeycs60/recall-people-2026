@@ -7,6 +7,7 @@ import { auditLog } from '../lib/audit';
 import { createSESClient } from '../lib/ses';
 import { buildPasswordResetEmailHtml, buildPasswordResetEmailText } from '../templates/password-reset';
 import { revokeAllUserTokens } from '../lib/tokens';
+import type { RateLimitStore } from '../types/runtime';
 
 type Bindings = {
   DATABASE_URL: string;
@@ -16,7 +17,7 @@ type Bindings = {
   AWS_REGION: string;
   SES_FROM_EMAIL: string;
   APP_URL: string;
-  RATE_LIMIT: KVNamespace;
+  RATE_LIMIT: RateLimitStore;
 };
 
 const TOKEN_EXPIRY_MINUTES = 30;

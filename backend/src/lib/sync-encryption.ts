@@ -15,7 +15,7 @@ function normalizeBase64(value: string): string {
   return padded.padEnd(padded.length + ((4 - (padded.length % 4)) % 4), '=');
 }
 
-function base64ToBytes(value: string): Uint8Array {
+function base64ToBytes(value: string): Uint8Array<ArrayBuffer> {
   const binary = atob(normalizeBase64(value));
   const bytes = new Uint8Array(binary.length);
   for (let index = 0; index < binary.length; index += 1) {
@@ -34,7 +34,7 @@ function bytesToBase64Url(bytes: Uint8Array): string {
   return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
 }
 
-function getRawKey(rawKey: string | undefined): Uint8Array {
+function getRawKey(rawKey: string | undefined): Uint8Array<ArrayBuffer> {
   if (!rawKey) {
     throw new Error('SYNC_ENCRYPTION_KEY is required');
   }
