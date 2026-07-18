@@ -2,7 +2,7 @@
   "expo": {
     "name": "Recall People",
     "slug": "recall-people",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "recall-people",
@@ -29,7 +29,7 @@
       "blockedPermissions": [
         "android.permission.CAMERA"
       ],
-      "versionCode": 13
+      "versionCode": 14
     },
     "web": {
       "output": "static",
@@ -94,7 +94,7 @@
       }
     },
     "owner": "clement-serizay",
-    "runtimeVersion": "1.0.7",
+    "runtimeVersion": "1.0.8",
     "updates": {
       "url": "https://u.expo.dev/005eaea1-73bc-47b0-80e8-5e15dee1c600"
     }
