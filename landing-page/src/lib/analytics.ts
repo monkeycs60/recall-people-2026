@@ -7,6 +7,28 @@ import posthog from "posthog-js";
 
 const KEY = import.meta.env.PUBLIC_POSTHOG_KEY;
 const HOST = import.meta.env.PUBLIC_POSTHOG_HOST ?? "https://eu.i.posthog.com";
+const INTERNAL_STORAGE_KEY = "recall_people_posthog_internal";
+const INTERNAL_QUERY_PARAM = "posthog_internal";
+
+function applyInternalOrTestMarker(): void {
+  try {
+    const url = new URL(window.location.href);
+    const requested = url.searchParams.get(INTERNAL_QUERY_PARAM);
+    if (requested === "1") localStorage.setItem(INTERNAL_STORAGE_KEY, "1");
+    if (requested === "0") localStorage.removeItem(INTERNAL_STORAGE_KEY);
+    if (requested === "1" || requested === "0") {
+      url.searchParams.delete(INTERNAL_QUERY_PARAM);
+      window.history.replaceState(window.history.state, "", url);
+    }
+
+    if (localStorage.getItem(INTERNAL_STORAGE_KEY) === "1") {
+      posthog.register({ $internal_or_test_user: true });
+      posthog.setInternalOrTestUser();
+    }
+  } catch {
+    // Analytics must never break navigation when storage is unavailable.
+  }
+}
 
 /**
  * Initialise PostHog once, register super-properties, and wire the custom
@@ -45,6 +67,7 @@ export function initAnalytics(): void {
     // Prevent PostHog from enriching events with IP-derived location data.
     $geoip_disable: true,
   });
+  applyInternalOrTestMarker();
   posthog.capture("$pageview");
 
   wireCustomEvents();

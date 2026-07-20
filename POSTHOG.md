@@ -6,11 +6,11 @@
 > jamais diverger du produit.
 
 ## Projet PostHog
-- **PostHog Cloud EU**, projet `Default project` (ID **207475**). Dashboard : https://eu.posthog.com/project/207475
+- **PostHog Cloud EU**, projet `recall-people` (ID **207475**). Dashboard : https://eu.posthog.com/project/207475
 - Clé **publique** (write-only, safe côté client) : `phc_Dh77ytMUJjDvZUyD2oZJ4SUa2ivrBuuXgAmvUNw2CBL5`
 - Host d'ingestion : `https://eu.i.posthog.com` · `defaults: '2026-05-30'`
 - Le projet PostHog peut proposer Session Replay, mais **l'enregistrement est explicitement désactivé dans le landing et le mobile**. L'error tracking reste actif.
-- Projet **partagé** avec Coworker Malin → on distingue via la super-property `product`.
+- Coworker Malin utilise désormais son propre projet PostHog (ID 228077). Les événements historiques Coworker Malin restent présents ici, car PostHog ne permet pas leur suppression sélective ; les analyses Recall People gardent donc le filtre `product = 'recall'`.
 - Clés via env (jamais de secret réel ici ; la clé est publique) :
   - landing : `PUBLIC_POSTHOG_KEY` / `PUBLIC_POSTHOG_HOST` (build-time Coolify)
   - mobile : `EXPO_PUBLIC_POSTHOG_KEY` / `EXPO_PUBLIC_POSTHOG_HOST` (en clair dans `frontend/eas.json`, comme RevenueCat/Google)
@@ -19,7 +19,8 @@
 ## Principes (tout le projet)
 - Chaque event porte les super-properties **`product: 'recall'`** + **`surface`** (`landing` | `mobile` | `api`) et **`$geoip_disable: true`** pour désactiver l'enrichissement géographique dérivé de l'adresse IP.
 - **`identify(user.id, { provider })`** au login, **`reset()`** au logout → toutes les métriques sont **par utilisateur**, sans envoyer le nom ni l'adresse email à PostHog.
-- `person_profiles: 'identified_only'`. Pageviews/screens + events explicites, **sans autocapture de clics/touches ni session replay**.
+- Cohort dynamique **Internal / Test users** : propriété personne `$internal_or_test_user = true`. Le compte propriétaire connu est marqué dans PostHog ; les builds EAS internes portent `EXPO_PUBLIC_POSTHOG_INTERNAL_BUILD=true`. Sur la landing, `?posthog_internal=1` persiste le marquage dans le navigateur (`?posthog_internal=0` le retire).
+- `person_profiles: 'identified_only'`. Pageviews/screens + events explicites, **sans autocapture de clics/touches ni session replay**. Les anciens `$autocapture` visibles dans PostHog viennent de builds antérieurs et ne décrivent pas la configuration actuelle.
 - **Best-effort absolu** : aucune capture PostHog ne casse une action user (try/catch, no-op sans clé).
 
 ## Ce qui est observé, par surface

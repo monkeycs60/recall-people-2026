@@ -11,6 +11,7 @@ import PostHog from 'posthog-react-native';
 
 const POSTHOG_KEY = process.env.EXPO_PUBLIC_POSTHOG_KEY;
 const POSTHOG_HOST = process.env.EXPO_PUBLIC_POSTHOG_HOST ?? 'https://eu.i.posthog.com';
+const analyticsInternalBuild = process.env.EXPO_PUBLIC_POSTHOG_INTERNAL_BUILD === 'true';
 
 // Don't send analytics from automated runs (E2E / ASO screenshots).
 const analyticsDisabled =
@@ -78,6 +79,7 @@ export const posthog: PostHog | null =
 posthog?.register({
   product: 'recall',
   surface: 'mobile',
+  ...(analyticsInternalBuild ? { $internal_or_test_user: true } : {}),
   // Prevent PostHog from enriching events with IP-derived location data.
   $geoip_disable: true,
 });
@@ -106,7 +108,13 @@ export const analytics = {
     posthog?.capture(event, clean(properties));
   },
   identify(distinctId: string, properties?: Props): void {
-    posthog?.identify(distinctId, clean(properties));
+    posthog?.identify(
+      distinctId,
+      clean({
+        ...properties,
+        ...(analyticsInternalBuild ? { $internal_or_test_user: true } : {}),
+      }),
+    );
   },
   reset(): void {
     posthog?.reset();

@@ -7,6 +7,9 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_POSTHOG_INTERNAL_BUILD": "true"
+      },
       "ios": {
         "simulator": false
       },
@@ -17,6 +20,9 @@
     },
     "preview": {
       "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_POSTHOG_INTERNAL_BUILD": "true"
+      },
       "ios": {
         "simulator": false
       },
@@ -26,6 +32,9 @@
       "channel": "preview"
     },
     "preview-simulator": {
+      "env": {
+        "EXPO_PUBLIC_POSTHOG_INTERNAL_BUILD": "true"
+      },
       "ios": {
         "simulator": true
       },
@@ -58,6 +67,9 @@
     "local-android": {
       "developmentClient": false,
       "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_POSTHOG_INTERNAL_BUILD": "true"
+      },
       "android": {
         "buildType": "apk",
         "gradleCommand": ":app:assembleRelease"
