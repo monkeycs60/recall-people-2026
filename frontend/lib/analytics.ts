@@ -83,6 +83,9 @@ posthog?.register({
   // Prevent PostHog from enriching events with IP-derived location data.
   $geoip_disable: true,
 });
+if (analyticsInternalBuild) {
+  posthog?.setPersonProperties({ $internal_or_test_user: true });
+}
 
 // Property values must be JSON-serialisable for PostHog. Callers may pass
 // `undefined` (e.g. an optional user field); those keys are stripped below.
