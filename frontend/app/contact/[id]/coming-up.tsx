@@ -331,13 +331,15 @@ export default function ContactComingUpScreen() {
 
       try {
         await notificationService.cancelEventRemindersByEventId(entry.id);
-        await notificationService.scheduleEventReminder(
-          entry.id,
-          values.eventDate,
-          values.title,
-          contact.firstName,
-          { requestPermission: false }
-        );
+        if (values.eventDate) {
+          await notificationService.scheduleEventReminder(
+            entry.id,
+            values.eventDate,
+            values.title,
+            contact.firstName,
+            { requestPermission: false }
+          );
+        }
       } catch (notificationError) {
         console.warn('Failed to refresh event reminders:', notificationError);
       }

@@ -77,8 +77,9 @@ function compareHotTopicEventDateAsc(first: HotTopic, second: HotTopic): number 
   return firstTime - secondTime;
 }
 
-function getUpcomingHotTopics(hotTopics: HotTopic[], today: Date): HotTopic[] {
-  return filterToNextBirthdayTopic(hotTopics, today)
+function getVisibleUpcomingHotTopics(hotTopics: HotTopic[], today: Date): HotTopic[] {
+  const canonicalTopics = filterToNextBirthdayTopic(hotTopics, today);
+  const datedTopics = canonicalTopics
     .filter((topic) =>
       topic.status === 'active' &&
       Boolean(topic.eventDate) &&
@@ -86,11 +87,7 @@ function getUpcomingHotTopics(hotTopics: HotTopic[], today: Date): HotTopic[] {
     )
     .slice()
     .sort(compareHotTopicEventDateAsc);
-}
-
-function getUpcomingPreviewHotTopics(hotTopics: HotTopic[], today: Date): HotTopic[] {
-  const datedTopics = getUpcomingHotTopics(hotTopics, today);
-  const undatedTopics = hotTopics
+  const undatedTopics = canonicalTopics
     .filter((topic) => topic.status === 'active' && !parseHotTopicDate(topic.eventDate))
     .slice()
     .sort((first, second) => {
@@ -99,7 +96,11 @@ function getUpcomingPreviewHotTopics(hotTopics: HotTopic[], today: Date): HotTop
       return secondTime - firstTime;
     });
 
-  return [...datedTopics, ...undatedTopics].slice(0, 3);
+  return [...datedTopics, ...undatedTopics];
+}
+
+function getUpcomingPreviewHotTopics(hotTopics: HotTopic[], today: Date): HotTopic[] {
+  return getVisibleUpcomingHotTopics(hotTopics, today).slice(0, 3);
 }
 
 function formatShortDate(value: string, language: string): string {
@@ -203,11 +204,7 @@ export default function ContactDetailScreen() {
 
   const totalUpcoming = useMemo(() => {
     if (!contact) return 0;
-    return contact.hotTopics.filter((topic) =>
-      topic.status === 'active' && (
-        !parseHotTopicDate(topic.eventDate) || isHotTopicTodayOrFuture(topic.eventDate, today)
-      )
-    ).length;
+    return getVisibleUpcomingHotTopics(contact.hotTopics, today).length;
   }, [contact, today]);
 
   const remainingUpcoming = Math.max(0, totalUpcoming - upcomingPreview.length);

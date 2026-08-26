@@ -23,3 +23,11 @@ test('upcoming preview fills remaining slots with active undated topics', async 
   assert.match(source, /topic\.eventDate\s*\?\s*formatShortDate/);
   assert.match(source, /contactComingUp\.undated/);
 });
+
+test('upcoming total uses the same canonical birthday filtering as the preview', async () => {
+  const source = await readFile(contactProfilePath, 'utf8');
+
+  assert.match(source, /function getVisibleUpcomingHotTopics/);
+  assert.match(source, /const canonicalTopics = filterToNextBirthdayTopic\(hotTopics, today\)/);
+  assert.match(source, /getVisibleUpcomingHotTopics\(contact\.hotTopics, today\)\.length/);
+});

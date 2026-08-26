@@ -167,7 +167,7 @@ test('contact life screen saves edited events and refreshes their reminders', as
 
   assert.match(source, /useUpdateHotTopic\(/);
   assert.match(source, /notificationService\.cancelEventRemindersByEventId\(entry\.id\)/);
-  assert.match(source, /notificationService\.scheduleEventReminder\(\s*entry\.id,\s*values\.eventDate,\s*values\.title,/s);
+  assert.match(source, /if \(values\.eventDate\) \{\s*await notificationService\.scheduleEventReminder\(\s*entry\.id,\s*values\.eventDate,\s*values\.title,/s);
 });
 
 test('timeline event edit sheet edits title, context, and date', async () => {
@@ -178,6 +178,15 @@ test('timeline event edit sheet edits title, context, and date', async () => {
   assert.match(source, /DateTimePicker/);
   assert.match(source, /contactComingUp\.editEventTitle/);
   assert.match(source, /contactComingUp\.eventDate/);
+});
+
+test('timeline event edit sheet preserves an absent date until the user selects one', async () => {
+  const source = await readFile(timelineEventEditSheetPath, 'utf8');
+
+  assert.match(source, /eventDate\?: string/);
+  assert.match(source, /useState\(\(\) => cloneDate\(event\?\.date\)\)/);
+  assert.match(source, /eventDate: date \? formatDateForStorage\(date\) : undefined/);
+  assert.match(source, /contactComingUp\.undated/);
 });
 
 test('timeline event edit sheet opens compact instead of expanding for keyboard focus', async () => {

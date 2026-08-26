@@ -11,7 +11,7 @@ import { formatLocalizedDate } from '@/utils/dateLocale';
 export type TimelineEventEditValues = {
   title: string;
   context: string;
-  eventDate: string;
+  eventDate?: string;
 };
 
 export type TimelineEventEditSheetEvent = {
@@ -31,8 +31,8 @@ type TimelineEventEditSheetProps = {
   ) => Promise<void> | void;
 };
 
-function cloneDate(date: Date | undefined): Date {
-  if (!date || Number.isNaN(date.getTime())) return new Date();
+function cloneDate(date: Date | undefined): Date | undefined {
+  if (!date || Number.isNaN(date.getTime())) return undefined;
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
@@ -53,11 +53,13 @@ export const TimelineEventEditSheet = forwardRef<BottomSheetModal, TimelineEvent
 
     const snapPoints = useMemo(() => [Platform.OS === 'ios' ? '78%' : '58%'], []);
     const canSave = Boolean(event && title.trim().length > 0 && !isSaving);
-    const dateLabel = formatLocalizedDate(date, {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
+    const dateLabel = date
+      ? formatLocalizedDate(date, {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        })
+      : t('contactComingUp.undated');
 
     const renderBackdrop = useCallback(
       (props: React.ComponentProps<typeof BottomSheetBackdrop>) => (
@@ -88,7 +90,7 @@ export const TimelineEventEditSheet = forwardRef<BottomSheetModal, TimelineEvent
       await onSave(event, {
         title: title.trim(),
         context: context.trim(),
-        eventDate: formatDateForStorage(date),
+        eventDate: date ? formatDateForStorage(date) : undefined,
       });
       dismiss();
     };
@@ -131,7 +133,23 @@ export const TimelineEventEditSheet = forwardRef<BottomSheetModal, TimelineEvent
 
           <View style={styles.field}>
             <Text style={styles.label}>{t('contactComingUp.eventDate')}</Text>
-            {Platform.OS === 'android' ? (
+            {!date ? (
+              <Pressable
+                style={styles.dateButton}
+                onPress={() => {
+                  if (Platform.OS === 'android') {
+                    setShowAndroidDatePicker(true);
+                  } else {
+                    setDate(new Date());
+                  }
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={t('contactComingUp.eventDate')}
+              >
+                <CalendarDays size={18} color={Colors.primary} strokeWidth={2.4} />
+                <Text style={styles.dateButtonText}>{dateLabel}</Text>
+              </Pressable>
+            ) : Platform.OS === 'android' ? (
               <Pressable
                 style={styles.dateButton}
                 onPress={() => setShowAndroidDatePicker(true)}
@@ -183,7 +201,7 @@ export const TimelineEventEditSheet = forwardRef<BottomSheetModal, TimelineEvent
 
           {Platform.OS === 'android' && showAndroidDatePicker ? (
             <DateTimePicker
-              value={date}
+              value={date ?? new Date()}
               mode="date"
               display="default"
               onChange={handleDateChange}
