@@ -1205,7 +1205,9 @@
     "eventTitlePlaceholder": "Viaggio a Parigi",
     "eventContextLabel": "Dettagli",
     "eventContextPlaceholder": "Aggiungi contesto utile",
-    "eventDate": "Data"
+    "eventDate": "Data",
+    "undated": "Senza data",
+    "undatedSection": "SENZA DATA"
   },
   "contactIcebreakers": {
     "headerLabel": "ROMPIGHIACCIO",

@@ -18,19 +18,21 @@ import { formatLocalizedDate } from '@/utils/dateLocale';
 import { getContactLifeTimelineSections, type ContactLifeTimelineEntry } from '@/utils/contactLifeTimeline';
 import { notificationService } from '@/services/notification.service';
 import { showErrorToast } from '@/lib/error-handler';
+import type { HotTopic } from '@/types';
 
 type ToneKey = 'amber' | 'primary' | 'accent' | 'mint';
 type TimelineTranslate = (key: string, options?: Record<string, unknown>) => string;
 
 type TimelineEntry = {
   id: string;
-  date: Date;
+  date?: Date;
   monthLabel: string;
   dayLabel: string;
   title: string;
   context?: string;
   subtitle?: string;
-  diffDays: number;
+  diffDays?: number;
+  isUndated: boolean;
   isHighlighted: boolean;
   isBirthday: boolean;
   isSyntheticBirthday: boolean;
@@ -105,6 +107,7 @@ function buildTimelineEntry(
     context: entry.context,
     subtitle,
     diffDays,
+    isUndated: false,
     isHighlighted: highlightActive && entry.timelineStatus === 'active' && index === 0,
     isBirthday: entry.isBirthday,
     isSyntheticBirthday: entry.isSyntheticBirthday,
@@ -115,12 +118,32 @@ function buildTimelineEntry(
   };
 }
 
+function buildUndatedTimelineEntry(topic: HotTopic, index: number): TimelineEntry {
+  return {
+    id: topic.id,
+    monthLabel: '',
+    dayLabel: '—',
+    title: topic.title,
+    context: topic.context,
+    subtitle: topic.context,
+    isHighlighted: false,
+    isUndated: true,
+    isBirthday: false,
+    isSyntheticBirthday: false,
+    emoji: pickEmoji(topic.title, false),
+    tone: toneRotation[index % toneRotation.length],
+    timelineStatus: 'active',
+  };
+}
+
 function getTimelineEntryTimeLabel(
   entry: TimelineEntry,
   translate: TimelineTranslate
 ): string {
+  if (entry.isUndated) return translate('contactComingUp.undated');
+
   if (entry.timelineStatus === 'resolved') {
-    const daysAgo = Math.max(0, -entry.diffDays);
+    const daysAgo = Math.max(0, -(entry.diffDays ?? 0));
     if (daysAgo === 0) return translate('contactNotes.relativeToday');
     if (daysAgo === 1) return translate('contactNotes.relativeYesterday');
     if (daysAgo < 30) return translate('contactNotes.relativeDaysAgo', { count: daysAgo });
@@ -128,8 +151,8 @@ function getTimelineEntryTimeLabel(
     return translate('contactNotes.relativeYearsAgo', { count: Math.floor(daysAgo / 365) });
   }
 
-  if (entry.diffDays < 0) {
-    const daysAgo = Math.abs(entry.diffDays);
+  if ((entry.diffDays ?? 0) < 0) {
+    const daysAgo = Math.abs(entry.diffDays ?? 0);
     if (daysAgo === 1) return translate('contactNotes.relativeYesterday');
     if (daysAgo < 30) return translate('contactNotes.relativeDaysAgo', { count: daysAgo });
     if (daysAgo < 365) return translate('contactNotes.relativeMonthsAgo', { count: Math.floor(daysAgo / 30) });
@@ -242,7 +265,7 @@ export default function ContactComingUpScreen() {
   );
 
   const timelineSections = useMemo(() => {
-    if (!contact) return { past: [], upcoming: [] };
+    if (!contact) return { past: [], upcoming: [], undated: [] };
     return getContactLifeTimelineSections(contact, today);
   }, [contact, today]);
 
@@ -273,7 +296,13 @@ export default function ContactComingUpScreen() {
     ));
   }, [contact, timelineSections.upcoming, today, i18n.language, t]);
 
-  const hasTimelineEntries = pastEntries.length > 0 || upcomingEntries.length > 0;
+  const undatedEntries: TimelineEntry[] = useMemo(() => (
+    timelineSections.undated.map((topic, index) => buildUndatedTimelineEntry(topic, index))
+  ), [timelineSections.undated]);
+
+  const hasTimelineEntries = (
+    pastEntries.length > 0 || upcomingEntries.length > 0 || undatedEntries.length > 0
+  );
 
   const handleEditTimelineEntry = (entry: TimelineEntry) => {
     if (entry.timelineStatus !== 'active' || entry.isBirthday) return;
@@ -416,6 +445,25 @@ export default function ContactComingUpScreen() {
                 onEdit={handleEditTimelineEntry}
               />
             ))}
+
+            {undatedEntries.length > 0 ? (
+              <>
+                <View style={styles.undatedMarkerRow}>
+                  <View style={styles.todayMarkerLine} />
+                  <Text style={styles.undatedMarkerLabel}>{t('contactComingUp.undatedSection')}</Text>
+                  <View style={styles.todayMarkerLine} />
+                </View>
+                {undatedEntries.map((entry) => (
+                  <TimelineEventRow
+                    key={entry.id}
+                    entry={entry}
+                    translate={t}
+                    canEdit
+                    onEdit={handleEditTimelineEntry}
+                  />
+                ))}
+              </>
+            ) : null}
           </View>
         )}
       </ScrollView>
@@ -485,6 +533,24 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     color: Colors.textInverse,
     backgroundColor: Colors.textPrimary,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  undatedMarkerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    gap: 12,
+    marginTop: 2,
+    marginBottom: 18,
+  },
+  undatedMarkerLabel: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 11,
+    letterSpacing: 1,
+    color: Colors.textSecondary,
+    backgroundColor: Colors.surface,
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 999,

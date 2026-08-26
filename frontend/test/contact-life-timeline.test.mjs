@@ -69,6 +69,31 @@ test('splits past topics before today and active upcoming topics after today in 
   assert.equal(sections.past[0].date.toISOString(), '2026-05-13T12:00:00.000Z');
 });
 
+test('keeps active undated topics visible in their own timeline section', async () => {
+  const { getContactLifeTimelineSections } = await loadModule();
+  const contact = {
+    id: 'contact-1',
+    firstName: 'Nora',
+    hotTopics: [
+      topic('dated', 'active', '2026-06-18', undefined),
+      topic('older-undated', 'active', undefined, undefined, {
+        createdAt: '2026-05-01T09:00:00.000Z',
+        updatedAt: '2026-05-02T09:00:00.000Z',
+      }),
+      topic('recent-undated', 'active', undefined, undefined, {
+        createdAt: '2026-05-03T09:00:00.000Z',
+        updatedAt: '2026-05-04T09:00:00.000Z',
+      }),
+      topic('resolved-undated', 'resolved', undefined, undefined),
+    ],
+  };
+
+  const sections = getContactLifeTimelineSections(contact, new Date('2026-06-01T12:00:00.000Z'));
+
+  assert.deepEqual(sections.upcoming.map((entry) => entry.id), ['dated']);
+  assert.deepEqual(sections.undated.map((entry) => entry.id), ['recent-undated', 'older-undated']);
+});
+
 test('contact life screen anchors initial scroll on the today marker', async () => {
   const source = await readFile(comingUpScreenPath, 'utf8');
 
@@ -130,6 +155,8 @@ test('contact life screen exposes editing only for active non-birthday timeline 
 
   assert.match(source, /isBirthday:\s*entry\.isBirthday/);
   assert.match(source, /timelineSections\.past\.map/);
+  assert.match(source, /timelineSections\.undated\.map/);
+  assert.match(source, /contactComingUp\.undatedSection/);
   assert.match(source, /canEdit=\{entry\.timelineStatus === 'active' && !entry\.isBirthday\}/);
   assert.match(source, /onEdit=\{handleEditTimelineEntry\}/);
   assert.match(source, /TimelineEventEditSheet/);
@@ -174,6 +201,8 @@ test('timeline event edit strings are translated in every supported locale', asy
       'eventContextLabel',
       'eventContextPlaceholder',
       'eventDate',
+      'undated',
+      'undatedSection',
     ]) {
       assert.equal(typeof translations.contactComingUp[key], 'string', `${localePath} missing ${key}`);
     }

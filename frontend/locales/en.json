@@ -1205,7 +1205,9 @@
     "eventTitlePlaceholder": "Trip to Paris",
     "eventContextLabel": "Details",
     "eventContextPlaceholder": "Add useful context",
-    "eventDate": "Date"
+    "eventDate": "Date",
+    "undated": "No date",
+    "undatedSection": "NO DATE"
   },
   "contactIcebreakers": {
     "headerLabel": "ICEBREAKERS",

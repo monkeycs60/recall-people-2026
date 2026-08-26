@@ -19,6 +19,7 @@ export type ContactLifeTimelineEntry = {
 export type ContactLifeTimelineSections = {
   past: ContactLifeTimelineEntry[];
   upcoming: ContactLifeTimelineEntry[];
+  undated: HotTopic[];
 };
 
 const getStartOfDayTime = (date: Date): number => (
@@ -127,5 +128,14 @@ export function getContactLifeTimelineSections(
     upcoming.sort(sortByDateAsc);
   }
 
-  return { past, upcoming };
+  const undated = contact.hotTopics
+    .filter((topic) => topic.status === 'active' && !parseTimelineDate(topic.eventDate))
+    .slice()
+    .sort((first, second) => {
+      const firstTime = new Date(first.updatedAt || first.createdAt).getTime();
+      const secondTime = new Date(second.updatedAt || second.createdAt).getTime();
+      return secondTime - firstTime;
+    });
+
+  return { past, upcoming, undated };
 }

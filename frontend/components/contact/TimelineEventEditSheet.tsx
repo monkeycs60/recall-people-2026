@@ -18,7 +18,7 @@ export type TimelineEventEditSheetEvent = {
   id: string;
   title: string;
   context?: string;
-  date: Date;
+  date?: Date;
 };
 
 type TimelineEventEditSheetProps = {

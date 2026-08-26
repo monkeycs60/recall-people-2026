@@ -15,3 +15,11 @@ test('essentials summary expands inline instead of opening a modal', async () =>
   assert.doesNotMatch(source, /showSummaryModal/);
   assert.doesNotMatch(source, /summaryModal/);
 });
+
+test('upcoming preview fills remaining slots with active undated topics', async () => {
+  const source = await readFile(contactProfilePath, 'utf8');
+
+  assert.match(source, /getUpcomingPreviewHotTopics/);
+  assert.match(source, /topic\.eventDate\s*\?\s*formatShortDate/);
+  assert.match(source, /contactComingUp\.undated/);
+});

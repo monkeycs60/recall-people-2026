@@ -88,8 +88,18 @@ function getUpcomingHotTopics(hotTopics: HotTopic[], today: Date): HotTopic[] {
     .sort(compareHotTopicEventDateAsc);
 }
 
-function getNextThreeUpcoming(hotTopics: HotTopic[], today: Date): HotTopic[] {
-  return getUpcomingHotTopics(hotTopics, today).slice(0, 3);
+function getUpcomingPreviewHotTopics(hotTopics: HotTopic[], today: Date): HotTopic[] {
+  const datedTopics = getUpcomingHotTopics(hotTopics, today);
+  const undatedTopics = hotTopics
+    .filter((topic) => topic.status === 'active' && !parseHotTopicDate(topic.eventDate))
+    .slice()
+    .sort((first, second) => {
+      const firstTime = new Date(first.updatedAt || first.createdAt).getTime();
+      const secondTime = new Date(second.updatedAt || second.createdAt).getTime();
+      return secondTime - firstTime;
+    });
+
+  return [...datedTopics, ...undatedTopics].slice(0, 3);
 }
 
 function formatShortDate(value: string, language: string): string {
@@ -173,15 +183,19 @@ export default function ContactDetailScreen() {
 
   const upcomingPreview = useMemo(() => {
     if (!contact) return [] as { id: string; label: string; dateLabel: string; soonLabel: string; tone: ToneKey }[];
-    const upcoming = getNextThreeUpcoming(contact.hotTopics, today);
+    const upcoming = getUpcomingPreviewHotTopics(contact.hotTopics, today);
     return upcoming.map((topic, index) => {
-      const eventDate = parseHotTopicDate(topic.eventDate!) ?? new Date(topic.eventDate!);
-      const diff = dayDiff(eventDate, today);
+      const eventDate = parseHotTopicDate(topic.eventDate);
+      const diff = eventDate ? dayDiff(eventDate, today) : null;
       return {
         id: topic.id,
         label: topic.title,
-        dateLabel: formatShortDate(topic.eventDate!, i18n.language),
-        soonLabel: diff === 0 ? t('contactComingUp.today') : t('contactComingUp.inDays', { count: diff }),
+        dateLabel: topic.eventDate ? formatShortDate(topic.eventDate, i18n.language) : '—',
+        soonLabel: diff === null
+          ? t('contactComingUp.undated')
+          : diff === 0
+            ? t('contactComingUp.today')
+            : t('contactComingUp.inDays', { count: diff }),
         tone: toneRotation[index % toneRotation.length],
       };
     });
@@ -189,7 +203,11 @@ export default function ContactDetailScreen() {
 
   const totalUpcoming = useMemo(() => {
     if (!contact) return 0;
-    return getUpcomingHotTopics(contact.hotTopics, today).length;
+    return contact.hotTopics.filter((topic) =>
+      topic.status === 'active' && (
+        !parseHotTopicDate(topic.eventDate) || isHotTopicTodayOrFuture(topic.eventDate, today)
+      )
+    ).length;
   }, [contact, today]);
 
   const remainingUpcoming = Math.max(0, totalUpcoming - upcomingPreview.length);

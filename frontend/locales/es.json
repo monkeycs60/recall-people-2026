@@ -1205,7 +1205,9 @@
     "eventTitlePlaceholder": "Viaje a París",
     "eventContextLabel": "Detalles",
     "eventContextPlaceholder": "Añade contexto útil",
-    "eventDate": "Fecha"
+    "eventDate": "Fecha",
+    "undated": "Sin fecha",
+    "undatedSection": "SIN FECHA"
   },
   "contactIcebreakers": {
     "headerLabel": "ROMPEHIELOS",

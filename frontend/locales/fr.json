@@ -1199,7 +1199,9 @@
     "eventTitlePlaceholder": "Voyage à Paris",
     "eventContextLabel": "Détails",
     "eventContextPlaceholder": "Ajoute le contexte utile",
-    "eventDate": "Date"
+    "eventDate": "Date",
+    "undated": "Sans date",
+    "undatedSection": "SANS DATE"
   },
   "contactIcebreakers": {
     "headerLabel": "BRISE-GLACE",
