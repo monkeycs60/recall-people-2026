@@ -1207,7 +1207,12 @@
     "eventContextPlaceholder": "Aggiungi contesto utile",
     "eventDate": "Data",
     "undated": "Senza data",
-    "undatedSection": "SENZA DATA"
+    "undatedSection": "SENZA DATA",
+    "resolveEventTitle": "Risolvi evento",
+    "resolutionDate": "Data di risoluzione",
+    "resolutionReason": "Cos'è successo? (facoltativo)",
+    "resolutionReasonPlaceholder": "Aggiungi l'esito o un dettaglio utile",
+    "resolveAction": "Segna come risolto"
   },
   "contactIcebreakers": {
     "headerLabel": "ROMPIGHIACCIO",

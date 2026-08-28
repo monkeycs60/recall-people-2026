@@ -1207,7 +1207,12 @@
     "eventContextPlaceholder": "Add useful context",
     "eventDate": "Date",
     "undated": "No date",
-    "undatedSection": "NO DATE"
+    "undatedSection": "NO DATE",
+    "resolveEventTitle": "Resolve event",
+    "resolutionDate": "Resolution date",
+    "resolutionReason": "What happened? (optional)",
+    "resolutionReasonPlaceholder": "Add the outcome or useful details",
+    "resolveAction": "Mark as resolved"
   },
   "contactIcebreakers": {
     "headerLabel": "ICEBREAKERS",

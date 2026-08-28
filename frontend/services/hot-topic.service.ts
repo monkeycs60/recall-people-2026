@@ -6,6 +6,7 @@ import i18n from '@/lib/i18n';
 import { notificationService } from '@/services/notification.service';
 import { syncQueueService } from './sync-queue.service';
 import { analytics, AnalyticsEvent } from '@/lib/analytics';
+import { getResolutionValues } from '@/utils/hotTopicResolution';
 
 type HotTopicSyncRow = {
   id: string;
@@ -220,12 +221,13 @@ export const hotTopicService = {
     await enqueueHotTopic(id, 'upsert');
   },
 
-  resolve: async (id: string, resolution?: string): Promise<void> => {
+  resolve: async (id: string, resolution?: string, resolutionDate?: string): Promise<void> => {
     const db = await getDatabase();
     const now = new Date().toISOString();
+    const resolutionValues = getResolutionValues(resolutionDate);
     await db.runAsync(
-      'UPDATE hot_topics SET status = ?, resolution = ?, resolved_at = ?, updated_at = ? WHERE id = ?',
-      ['resolved', resolution || null, now, now, id]
+      'UPDATE hot_topics SET status = ?, resolution = ?, event_date = COALESCE(event_date, ?), resolved_at = ?, updated_at = ? WHERE id = ?',
+      ['resolved', resolution || null, resolutionValues.eventDate, resolutionValues.resolvedAt, now, id]
     );
     await enqueueHotTopic(id, 'upsert');
     // Optimistic client event. Boolean only — never the resolution text.

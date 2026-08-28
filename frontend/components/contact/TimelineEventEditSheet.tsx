@@ -4,6 +4,7 @@ import { BottomSheetBackdrop, BottomSheetModal, BottomSheetTextInput } from '@go
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { CalendarDays } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { sheetInputStyles } from '@/components/ui/EditSheetShell';
 import { Colors, Fonts } from '@/constants/theme';
 import { formatLocalizedDate } from '@/utils/dateLocale';
@@ -46,6 +47,7 @@ function formatDateForStorage(date: Date): string {
 export const TimelineEventEditSheet = forwardRef<BottomSheetModal, TimelineEventEditSheetProps>(
   ({ event, isSaving = false, onDismiss, onSave }, ref) => {
     const { t } = useTranslation();
+    const insets = useSafeAreaInsets();
     const [title, setTitle] = useState(event?.title ?? '');
     const [context, setContext] = useState(event?.context ?? '');
     const [date, setDate] = useState(() => cloneDate(event?.date));
@@ -111,7 +113,7 @@ export const TimelineEventEditSheet = forwardRef<BottomSheetModal, TimelineEvent
           onDismiss?.();
         }}
       >
-        <View style={styles.container}>
+        <View style={[styles.container, { paddingBottom: Math.max(insets.bottom, 16) + 16 }]}>
           <View style={styles.header}>
             <View style={styles.iconCircle}>
               <CalendarDays size={18} color={Colors.primary} strokeWidth={2.4} />
@@ -226,7 +228,6 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 28,
   },
   header: {
     flexDirection: 'row',

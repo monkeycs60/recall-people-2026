@@ -35,6 +35,7 @@ import { Paywall } from '@/components/Paywall';
 import { shouldApplyExtractedMeetingContext } from '@/utils/meetingContext';
 import { mergeLoves } from '@/utils/loves';
 import { resolveReviewContactId, resolveReviewStringParam } from '@/utils/reviewParams';
+import { buildReviewResolutionTopics } from '@/utils/hotTopicResolution';
 import { computeExtractionFeedback, deriveInitialContactName } from '@/utils/extractionFeedback';
 
 const FLOATING_SAVE_RESERVED_SPACE = 144;
@@ -157,17 +158,12 @@ export default function ReviewScreen() {
     loadHotTopics();
   }, [contactId]);
 
-  const resolvedTopicsWithData = existingHotTopics
-    .filter((topic) => resolvedTopicsState.some((resolved) => resolved.id === topic.id))
-    .map((topic) => ({
-      ...topic,
-      proposedResolution: resolvedTopicsState.find((resolved) => resolved.id === topic.id)?.resolution || '',
-    }));
+  const resolvedTopicsWithData = buildReviewResolutionTopics(existingHotTopics, resolvedTopicsState);
 
   const hasContactInfo = !!(editableContactInfo.phone || editableContactInfo.email || editableContactInfo.birthday);
   const contactInfoCount = [editableContactInfo.phone, editableContactInfo.email, editableContactInfo.birthday].filter(Boolean).length;
   const resolvedTopicsCount = Math.max(resolvedTopicsWithData.length, resolvedTopicsState.length);
-  const hasResolvedTopics = resolvedTopicsCount > 0;
+  const hasResolvedTopics = existingHotTopics.length > 0;
   const selectedDetailCount = contactInfoCount + selectedFacts.length + selectedGroups.length + resolvedTopicsState.length + selectedHotTopics.length + selectedMemories.length + extractedLoves.length;
   const selectedReminderCount = selectedHotTopics.filter((hotTopicIndex) => {
     const dateInfo = hotTopicDates[hotTopicIndex];

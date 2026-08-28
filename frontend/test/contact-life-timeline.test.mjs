@@ -9,6 +9,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const suiteName = 'contact-life-timeline';
 const comingUpScreenPath = resolve(__dirname, '../app/contact/[id]/coming-up.tsx');
 const timelineEventEditSheetPath = resolve(__dirname, '../components/contact/TimelineEventEditSheet.tsx');
+const timelineEventResolveSheetPath = resolve(__dirname, '../components/contact/TimelineEventResolveSheet.tsx');
 const localePaths = ['en', 'fr', 'es', 'de', 'it'].map((locale) =>
   resolve(__dirname, `../locales/${locale}.json`)
 );
@@ -162,6 +163,17 @@ test('contact life screen exposes editing only for active non-birthday timeline 
   assert.match(source, /TimelineEventEditSheet/);
 });
 
+test('contact life screen exposes resolution next to editing for every active non-birthday event', async () => {
+  const source = await readFile(comingUpScreenPath, 'utf8');
+  const resolveSheetSource = await readFile(timelineEventResolveSheetPath, 'utf8');
+
+  assert.match(source, /onResolve=\{handleResolveTimelineEntry\}/);
+  assert.match(source, /TimelineEventResolveSheet/);
+  assert.match(resolveSheetSource, /maximumDate=\{today\}/);
+  assert.match(resolveSheetSource, /resolutionDate/);
+  assert.match(resolveSheetSource, /resolutionReason/);
+});
+
 test('contact life screen saves edited events and refreshes their reminders', async () => {
   const source = await readFile(comingUpScreenPath, 'utf8');
 
@@ -196,6 +208,8 @@ test('timeline event edit sheet opens compact instead of expanding for keyboard 
   assert.doesNotMatch(source, /keyboardBehavior="fillParent"/);
   assert.doesNotMatch(source, /\sautoFocus\b/);
   assert.doesNotMatch(source, /'72%'/);
+  assert.match(source, /useSafeAreaInsets/);
+  assert.match(source, /paddingBottom:\s*Math\.max\(insets\.bottom,\s*16\)\s*\+\s*16/);
 });
 
 test('timeline event edit strings are translated in every supported locale', async () => {
@@ -212,6 +226,11 @@ test('timeline event edit strings are translated in every supported locale', asy
       'eventDate',
       'undated',
       'undatedSection',
+      'resolveEventTitle',
+      'resolutionDate',
+      'resolutionReason',
+      'resolutionReasonPlaceholder',
+      'resolveAction',
     ]) {
       assert.equal(typeof translations.contactComingUp[key], 'string', `${localePath} missing ${key}`);
     }

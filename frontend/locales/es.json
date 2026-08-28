@@ -1207,7 +1207,12 @@
     "eventContextPlaceholder": "Añade contexto útil",
     "eventDate": "Fecha",
     "undated": "Sin fecha",
-    "undatedSection": "SIN FECHA"
+    "undatedSection": "SIN FECHA",
+    "resolveEventTitle": "Resolver evento",
+    "resolutionDate": "Fecha de resolución",
+    "resolutionReason": "¿Qué ocurrió? (opcional)",
+    "resolutionReasonPlaceholder": "Añade el resultado o un detalle útil",
+    "resolveAction": "Marcar como resuelto"
   },
   "contactIcebreakers": {
     "headerLabel": "ROMPEHIELOS",
