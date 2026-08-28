@@ -90,8 +90,13 @@ export function useResolveHotTopic() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, resolution, contactId }: { id: string; resolution?: string; contactId: string }) => {
-      await hotTopicService.resolve(id, resolution);
+    mutationFn: async ({ id, resolution, resolutionDate, contactId }: {
+      id: string;
+      resolution?: string;
+      resolutionDate?: string;
+      contactId: string;
+    }) => {
+      await hotTopicService.resolve(id, resolution, resolutionDate);
       return { contactId };
     },
     onSuccess: (result) => {

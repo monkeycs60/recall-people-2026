@@ -1201,7 +1201,12 @@
     "eventContextPlaceholder": "Ajoute le contexte utile",
     "eventDate": "Date",
     "undated": "Sans date",
-    "undatedSection": "SANS DATE"
+    "undatedSection": "SANS DATE",
+    "resolveEventTitle": "Résoudre l'événement",
+    "resolutionDate": "Date de résolution",
+    "resolutionReason": "Que s'est-il passé ? (facultatif)",
+    "resolutionReasonPlaceholder": "Ajoute le résultat ou un détail utile",
+    "resolveAction": "Marquer comme résolu"
   },
   "contactIcebreakers": {
     "headerLabel": "BRISE-GLACE",

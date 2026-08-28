@@ -35,8 +35,11 @@ export function ResolvedTopicsSection({ state, handlers }: ResolvedTopicsSection
       <Text style={styles.description}>{t('review.topicsToArchiveDescription')}</Text>
 
       {resolvedTopicsWithData.map((topic) => {
-        const isSelected = resolvedTopicsState.some((resolved) => resolved.id === topic.id);
-        const currentResolution = resolvedTopicsState.find((resolved) => resolved.id === topic.id)?.resolution || '';
+        const selectedResolution = resolvedTopicsState.find(
+          (resolved) => resolved.id === topic.id || resolved.existingTopicId === topic.id
+        );
+        const isSelected = Boolean(selectedResolution);
+        const currentResolution = selectedResolution?.resolution || '';
         const isEditing = editingResolutionId === topic.id;
 
         return (

@@ -4,14 +4,18 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
-import { Check, ChevronLeft, Edit3 } from 'lucide-react-native';
-import { useContactQuery, useUpdateHotTopic } from '@/hooks/useContactQuery';
+import { Check, CheckCircle2, ChevronLeft, Edit3 } from 'lucide-react-native';
+import { useContactQuery, useResolveHotTopic, useUpdateHotTopic } from '@/hooks/useContactQuery';
 import { ContactAvatar } from '@/components/contact/ContactAvatar';
 import {
   TimelineEventEditSheet,
   type TimelineEventEditSheetEvent,
   type TimelineEventEditValues,
 } from '@/components/contact/TimelineEventEditSheet';
+import {
+  TimelineEventResolveSheet,
+  type TimelineEventResolutionValues,
+} from '@/components/contact/TimelineEventResolveSheet';
 import { Colors, Fonts, Shadows } from '@/constants/theme';
 import { ContactDetailSkeleton } from '@/components/skeleton/ContactDetailSkeleton';
 import { formatLocalizedDate } from '@/utils/dateLocale';
@@ -19,6 +23,7 @@ import { getContactLifeTimelineSections, type ContactLifeTimelineEntry } from '@
 import { notificationService } from '@/services/notification.service';
 import { showErrorToast } from '@/lib/error-handler';
 import type { HotTopic } from '@/types';
+import { formatResolutionDate } from '@/utils/hotTopicResolution';
 
 type ToneKey = 'amber' | 'primary' | 'accent' | 'mint';
 type TimelineTranslate = (key: string, options?: Record<string, unknown>) => string;
@@ -47,6 +52,7 @@ type TimelineEventRowProps = {
   translate: TimelineTranslate;
   canEdit?: boolean;
   onEdit?: (entry: TimelineEntry) => void;
+  onResolve?: (entry: TimelineEntry) => void;
 };
 
 const tonePalette: Record<ToneKey, { color: string; background: string; shadowTint: string }> = {
@@ -164,7 +170,7 @@ function getTimelineEntryTimeLabel(
     : translate('contactComingUp.inDays', { count: entry.diffDays });
 }
 
-function TimelineEventRow({ entry, translate, canEdit = false, onEdit }: TimelineEventRowProps) {
+function TimelineEventRow({ entry, translate, canEdit = false, onEdit, onResolve }: TimelineEventRowProps) {
   const isResolved = entry.timelineStatus === 'resolved';
   const palette = isResolved
     ? { color: Colors.success, background: Colors.successLight }
@@ -221,15 +227,26 @@ function TimelineEventRow({ entry, translate, canEdit = false, onEdit }: Timelin
               {getTimelineEntryTimeLabel(entry, translate)}
             </Text>
             {canEdit ? (
-              <Pressable
-                style={styles.eventCardEditButton}
-                onPress={() => onEdit?.(entry)}
-                accessibilityRole="button"
-                accessibilityLabel={translate('common.edit')}
-                hitSlop={8}
-              >
-                <Edit3 size={14} color={Colors.primary} strokeWidth={2.5} />
-              </Pressable>
+              <View style={styles.eventCardActions}>
+                <Pressable
+                  style={[styles.eventCardActionButton, styles.eventCardResolveButton]}
+                  onPress={() => onResolve?.(entry)}
+                  accessibilityRole="button"
+                  accessibilityLabel={translate('contactComingUp.resolveAction')}
+                  hitSlop={8}
+                >
+                  <CheckCircle2 size={15} color={Colors.success} strokeWidth={2.5} />
+                </Pressable>
+                <Pressable
+                  style={styles.eventCardActionButton}
+                  onPress={() => onEdit?.(entry)}
+                  accessibilityRole="button"
+                  accessibilityLabel={translate('common.edit')}
+                  hitSlop={8}
+                >
+                  <Edit3 size={14} color={Colors.primary} strokeWidth={2.5} />
+                </Pressable>
+              </View>
             ) : null}
           </View>
         </View>
@@ -251,11 +268,14 @@ export default function ContactComingUpScreen() {
   const contactId = params.id as string;
   const { contact, isLoading } = useContactQuery(contactId);
   const updateHotTopicMutation = useUpdateHotTopic();
+  const resolveHotTopicMutation = useResolveHotTopic();
   const scrollRef = useRef<ScrollView>(null);
   const editSheetRef = useRef<BottomSheetModal>(null);
+  const resolveSheetRef = useRef<BottomSheetModal>(null);
   const hasScrolledToTodayRef = useRef(false);
   const [todayMarkerY, setTodayMarkerY] = useState<number | null>(null);
   const [selectedTimelineEntry, setSelectedTimelineEntry] = useState<TimelineEntry | null>(null);
+  const [timelineEntryToResolve, setTimelineEntryToResolve] = useState<TimelineEntry | null>(null);
   const [isSavingTimelineEntry, setIsSavingTimelineEntry] = useState(false);
 
   const today = useMemo(() => new Date(), []);
@@ -309,6 +329,31 @@ export default function ContactComingUpScreen() {
 
     setSelectedTimelineEntry(entry);
     requestAnimationFrame(() => editSheetRef.current?.present());
+  };
+
+  const handleResolveTimelineEntry = (entry: TimelineEntry) => {
+    if (entry.timelineStatus !== 'active' || entry.isBirthday) return;
+
+    setTimelineEntryToResolve(entry);
+    requestAnimationFrame(() => resolveSheetRef.current?.present());
+  };
+
+  const handleConfirmTimelineResolution = async (values: TimelineEventResolutionValues) => {
+    if (!contact || !timelineEntryToResolve) return;
+
+    try {
+      await resolveHotTopicMutation.mutateAsync({
+        id: timelineEntryToResolve.id,
+        contactId: contact.id,
+        resolution: values.resolutionReason || undefined,
+        resolutionDate: formatResolutionDate(values.resolutionDate),
+      });
+      await notificationService.cancelEventRemindersByEventId(timelineEntryToResolve.id);
+    } catch (error) {
+      console.error('Failed to resolve timeline event:', error);
+      showErrorToast(t('errors.generic'));
+      throw error;
+    }
   };
 
   const handleSaveTimelineEntry = async (
@@ -424,6 +469,7 @@ export default function ContactComingUpScreen() {
                 translate={t}
                 canEdit={entry.timelineStatus === 'active' && !entry.isBirthday}
                 onEdit={handleEditTimelineEntry}
+                onResolve={handleResolveTimelineEntry}
               />
             ))}
 
@@ -445,6 +491,7 @@ export default function ContactComingUpScreen() {
                 translate={t}
                 canEdit={entry.timelineStatus === 'active' && !entry.isBirthday}
                 onEdit={handleEditTimelineEntry}
+                onResolve={handleResolveTimelineEntry}
               />
             ))}
 
@@ -462,6 +509,7 @@ export default function ContactComingUpScreen() {
                     translate={t}
                     canEdit
                     onEdit={handleEditTimelineEntry}
+                    onResolve={handleResolveTimelineEntry}
                   />
                 ))}
               </>
@@ -476,6 +524,14 @@ export default function ContactComingUpScreen() {
         isSaving={isSavingTimelineEntry}
         onSave={handleSaveTimelineEntry}
         onDismiss={() => setSelectedTimelineEntry(null)}
+      />
+      <TimelineEventResolveSheet
+        key={timelineEntryToResolve?.id ?? 'timeline-event-resolve'}
+        ref={resolveSheetRef}
+        eventTitle={timelineEntryToResolve?.title}
+        isSaving={resolveHotTopicMutation.isPending}
+        onResolve={handleConfirmTimelineResolution}
+        onDismiss={() => setTimelineEntryToResolve(null)}
       />
     </View>
   );
@@ -656,13 +712,21 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     gap: 8,
   },
-  eventCardEditButton: {
+  eventCardActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  eventCardActionButton: {
     width: 28,
     height: 28,
     borderRadius: 14,
     backgroundColor: Colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  eventCardResolveButton: {
+    backgroundColor: Colors.successLight,
   },
   eventCardBody: {
     fontFamily: Fonts.sans.medium,

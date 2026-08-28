@@ -1207,7 +1207,12 @@
     "eventContextPlaceholder": "Nützlichen Kontext hinzufügen",
     "eventDate": "Datum",
     "undated": "Ohne Datum",
-    "undatedSection": "OHNE DATUM"
+    "undatedSection": "OHNE DATUM",
+    "resolveEventTitle": "Ereignis abschließen",
+    "resolutionDate": "Abschlussdatum",
+    "resolutionReason": "Was ist passiert? (optional)",
+    "resolutionReasonPlaceholder": "Ergebnis oder hilfreiches Detail hinzufügen",
+    "resolveAction": "Als erledigt markieren"
   },
   "contactIcebreakers": {
     "headerLabel": "EISBRECHER",
