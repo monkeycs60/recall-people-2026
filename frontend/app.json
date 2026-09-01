@@ -29,7 +29,7 @@
       "blockedPermissions": [
         "android.permission.CAMERA"
       ],
-      "versionCode": 15
+      "versionCode": 16
     },
     "web": {
       "output": "static",
