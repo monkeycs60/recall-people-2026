@@ -46,8 +46,6 @@ export const BirthdayEditSheet = forwardRef<BottomSheetModal, BirthdayEditSheetP
         title={t('contact.birthdayModal.title')}
         icon={<Cake size={18} color={Colors.primary} strokeWidth={2.3} />}
         config={{
-          snapPoint: '34%',
-          editSnapPoint: '66%',
           readValue,
           canSave,
           onStart: () => {

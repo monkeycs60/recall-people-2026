@@ -26,7 +26,6 @@ export const NameEditSheet = forwardRef<BottomSheetModal, NameEditSheetProps>(
         title={t('contact.nameModal.title')}
         icon={<User size={18} color={Colors.primary} strokeWidth={2.3} />}
         config={{
-          snapPoint: '34%',
           readValue: fullName || null,
           canSave: firstName.trim().length > 0,
           onStart: () => {

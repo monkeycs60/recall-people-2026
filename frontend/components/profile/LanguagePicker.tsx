@@ -6,10 +6,12 @@ import { useTranslation } from 'react-i18next';
 import { Language, SUPPORTED_LANGUAGES, LANGUAGE_NAMES, LANGUAGE_FLAGS } from '@/types';
 import { useSettingsStore } from '@/stores/settings-store';
 import { changeLanguage } from '@/lib/i18n';
+import { useSheetMaxHeight } from '@/components/ui/sheetConfig';
 import { Colors } from '@/constants/theme';
 
 export const LanguagePicker = forwardRef<BottomSheetModal>((_, ref) => {
   const { t } = useTranslation();
+  const maxHeight = useSheetMaxHeight();
   const currentLanguage = useSettingsStore((state) => state.language);
   const setLanguage = useSettingsStore((state) => state.setLanguage);
 
@@ -32,6 +34,7 @@ export const LanguagePicker = forwardRef<BottomSheetModal>((_, ref) => {
     <BottomSheetModal
       ref={ref}
       enableDynamicSizing
+      maxDynamicContentSize={maxHeight}
       backdropComponent={renderBackdrop}
       backgroundStyle={{ backgroundColor: Colors.surface }}
       handleIndicatorStyle={{ backgroundColor: Colors.hairline }}

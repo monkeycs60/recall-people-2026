@@ -35,8 +35,6 @@ export const LovesEditSheet = forwardRef<BottomSheetModal, LovesEditSheetProps>(
         title={t('contactProfile.tileLoves')}
         icon={<Heart size={18} color={Colors.error} fill={Colors.error} strokeWidth={2.2} />}
         config={{
-          snapPoint: '34%',
-          editSnapPoint: '60%',
           readValue: initialLoves.length > 0 ? initialLoves.join(', ') : null,
           readContent: <ReadChips loves={initialLoves} />,
           canSave: true,

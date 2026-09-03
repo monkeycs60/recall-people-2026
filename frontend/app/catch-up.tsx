@@ -231,7 +231,7 @@ export default function CatchUpScreen() {
       >
         <KeyboardAvoidingView
           style={styles.modalOverlay}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
           <Pressable style={styles.modalBackdrop} onPress={closeResolveSheet}>
             <Pressable style={styles.resolveSheet} onPress={(event) => event.stopPropagation()}>

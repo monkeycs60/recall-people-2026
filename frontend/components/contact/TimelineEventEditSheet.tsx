@@ -1,11 +1,19 @@
 import { View, Text, Pressable, StyleSheet, Platform } from 'react-native';
-import { forwardRef, useCallback, useMemo, useState } from 'react';
-import { BottomSheetBackdrop, BottomSheetModal, BottomSheetTextInput } from '@gorhom/bottom-sheet';
+import { forwardRef, useCallback, useState } from 'react';
+import {
+  BottomSheetBackdrop,
+  BottomSheetFooter,
+  type BottomSheetFooterProps,
+  BottomSheetModal,
+  BottomSheetScrollView,
+  BottomSheetTextInput,
+} from '@gorhom/bottom-sheet';
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { CalendarDays } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { sheetInputStyles } from '@/components/ui/EditSheetShell';
+import { sheetKeyboardProps, useKeyboardHeight, useSheetMaxHeight } from '@/components/ui/sheetConfig';
 import { Colors, Fonts } from '@/constants/theme';
 import { formatLocalizedDate } from '@/utils/dateLocale';
 
@@ -48,12 +56,13 @@ export const TimelineEventEditSheet = forwardRef<BottomSheetModal, TimelineEvent
   ({ event, isSaving = false, onDismiss, onSave }, ref) => {
     const { t } = useTranslation();
     const insets = useSafeAreaInsets();
+    const maxHeight = useSheetMaxHeight();
+    const keyboardHeight = useKeyboardHeight();
     const [title, setTitle] = useState(event?.title ?? '');
     const [context, setContext] = useState(event?.context ?? '');
     const [date, setDate] = useState(() => cloneDate(event?.date));
     const [showAndroidDatePicker, setShowAndroidDatePicker] = useState(false);
 
-    const snapPoints = useMemo(() => [Platform.OS === 'ios' ? '78%' : '58%'], []);
     const canSave = Boolean(event && title.trim().length > 0 && !isSaving);
     const dateLabel = date
       ? formatLocalizedDate(date, {
@@ -97,15 +106,36 @@ export const TimelineEventEditSheet = forwardRef<BottomSheetModal, TimelineEvent
       dismiss();
     };
 
+    const renderFooter = (footerProps: BottomSheetFooterProps) => (
+      <BottomSheetFooter {...footerProps}>
+        <View
+          style={[
+            styles.footer,
+            { paddingBottom: keyboardHeight > 0 ? 12 : Math.max(insets.bottom, 12) },
+          ]}
+        >
+          <Pressable style={styles.cancelButton} onPress={dismiss} disabled={isSaving}>
+            <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
+          </Pressable>
+          <Pressable
+            style={[styles.saveButton, !canSave && styles.saveButtonDisabled]}
+            onPress={handleSave}
+            disabled={!canSave}
+          >
+            <Text style={styles.saveButtonText}>{t('common.save')}</Text>
+          </Pressable>
+        </View>
+      </BottomSheetFooter>
+    );
+
     return (
       <BottomSheetModal
         ref={ref}
-        snapPoints={snapPoints}
-        enableDynamicSizing={false}
-        keyboardBehavior="interactive"
-        keyboardBlurBehavior="restore"
-        android_keyboardInputMode="adjustResize"
+        enableDynamicSizing
+        maxDynamicContentSize={maxHeight}
+        {...sheetKeyboardProps}
         backdropComponent={renderBackdrop}
+        footerComponent={renderFooter}
         backgroundStyle={styles.sheetBackground}
         handleIndicatorStyle={styles.handle}
         onDismiss={() => {
@@ -113,7 +143,12 @@ export const TimelineEventEditSheet = forwardRef<BottomSheetModal, TimelineEvent
           onDismiss?.();
         }}
       >
-        <View style={[styles.container, { paddingBottom: Math.max(insets.bottom, 16) + 16 }]}>
+        <BottomSheetScrollView
+          contentContainerStyle={styles.container}
+          enableFooterMarginAdjustment
+          keyboardShouldPersistTaps="handled"
+          bounces={false}
+        >
           <View style={styles.header}>
             <View style={styles.iconCircle}>
               <CalendarDays size={18} color={Colors.primary} strokeWidth={2.4} />
@@ -188,19 +223,6 @@ export const TimelineEventEditSheet = forwardRef<BottomSheetModal, TimelineEvent
             />
           </View>
 
-          <View style={styles.footer}>
-            <Pressable style={styles.cancelButton} onPress={dismiss} disabled={isSaving}>
-              <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
-            </Pressable>
-            <Pressable
-              style={[styles.saveButton, !canSave && styles.saveButtonDisabled]}
-              onPress={handleSave}
-              disabled={!canSave}
-            >
-              <Text style={styles.saveButtonText}>{t('common.save')}</Text>
-            </Pressable>
-          </View>
-
           {Platform.OS === 'android' && showAndroidDatePicker ? (
             <DateTimePicker
               value={date ?? new Date()}
@@ -210,7 +232,7 @@ export const TimelineEventEditSheet = forwardRef<BottomSheetModal, TimelineEvent
               minimumDate={new Date()}
             />
           ) : null}
-        </View>
+        </BottomSheetScrollView>
       </BottomSheetModal>
     );
   }
@@ -288,7 +310,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-end',
     gap: 12,
-    marginTop: 4,
+    backgroundColor: Colors.surface,
+    paddingHorizontal: 20,
+    paddingTop: 12,
   },
   cancelButton: {
     paddingVertical: 12,

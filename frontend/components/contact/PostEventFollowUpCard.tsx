@@ -20,9 +20,7 @@ export function PostEventFollowUpCard({ topic, onResolve, onTellStory }: PostEve
           <MessageCircle size={16} color={Colors.primary} strokeWidth={2.3} />
         </View>
         <View style={styles.textColumn}>
-          <Text style={styles.title} numberOfLines={2}>
-            {t('postEvent.cardTitle', { title: topic.title })}
-          </Text>
+          <Text style={styles.title}>{t('postEvent.cardTitle', { title: topic.title })}</Text>
           <Text style={styles.subtitle}>
             {t('postEvent.cardDaysAgo', { count: topic.daysPast })}
           </Text>

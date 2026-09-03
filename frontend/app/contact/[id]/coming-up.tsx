@@ -218,42 +218,34 @@ function TimelineEventRow({ entry, translate, canEdit = false, onEdit, onResolve
             ) : (
               <Text style={styles.eventCardEmoji}>{entry.emoji}</Text>
             )}
-            <Text style={styles.eventCardTitle} numberOfLines={2}>
-              {entry.title}
-            </Text>
+            <Text style={styles.eventCardTitle}>{entry.title}</Text>
           </View>
-          <View style={styles.eventCardTrailing}>
-            <Text style={styles.eventCardSoon} numberOfLines={1}>
-              {getTimelineEntryTimeLabel(entry, translate)}
-            </Text>
-            {canEdit ? (
-              <View style={styles.eventCardActions}>
-                <Pressable
-                  style={[styles.eventCardActionButton, styles.eventCardResolveButton]}
-                  onPress={() => onResolve?.(entry)}
-                  accessibilityRole="button"
-                  accessibilityLabel={translate('contactComingUp.resolveAction')}
-                  hitSlop={8}
-                >
-                  <CheckCircle2 size={15} color={Colors.success} strokeWidth={2.5} />
-                </Pressable>
-                <Pressable
-                  style={styles.eventCardActionButton}
-                  onPress={() => onEdit?.(entry)}
-                  accessibilityRole="button"
-                  accessibilityLabel={translate('common.edit')}
-                  hitSlop={8}
-                >
-                  <Edit3 size={14} color={Colors.primary} strokeWidth={2.5} />
-                </Pressable>
-              </View>
-            ) : null}
-          </View>
+          {canEdit ? (
+            <View style={styles.eventCardActions}>
+              <Pressable
+                style={[styles.eventCardActionButton, styles.eventCardResolveButton]}
+                onPress={() => onResolve?.(entry)}
+                accessibilityRole="button"
+                accessibilityLabel={translate('contactComingUp.resolveAction')}
+                hitSlop={8}
+              >
+                <CheckCircle2 size={15} color={Colors.success} strokeWidth={2.5} />
+              </Pressable>
+              <Pressable
+                style={styles.eventCardActionButton}
+                onPress={() => onEdit?.(entry)}
+                accessibilityRole="button"
+                accessibilityLabel={translate('common.edit')}
+                hitSlop={8}
+              >
+                <Edit3 size={14} color={Colors.primary} strokeWidth={2.5} />
+              </Pressable>
+            </View>
+          ) : null}
         </View>
+        <Text style={styles.eventCardSoon}>{getTimelineEntryTimeLabel(entry, translate)}</Text>
         {entry.subtitle ? (
-          <Text style={styles.eventCardBody} numberOfLines={3}>
-            {entry.subtitle}
-          </Text>
+          <Text style={styles.eventCardBody}>{entry.subtitle}</Text>
         ) : null}
       </View>
     </View>
@@ -702,20 +694,16 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   eventCardSoon: {
-    minWidth: 48,
     fontFamily: Fonts.sans.bold,
-    fontSize: 10,
+    fontSize: 11,
     color: Colors.textMuted,
-    textAlign: 'right',
-  },
-  eventCardTrailing: {
-    alignItems: 'flex-end',
-    gap: 8,
+    marginTop: 6,
   },
   eventCardActions: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    paddingTop: 1,
   },
   eventCardActionButton: {
     width: 28,
@@ -733,7 +721,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
     color: Colors.textSecondary,
-    marginTop: 6,
+    marginTop: 4,
   },
   emptyState: {
     alignItems: 'center',

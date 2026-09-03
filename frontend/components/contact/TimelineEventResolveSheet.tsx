@@ -1,11 +1,19 @@
 import { forwardRef, useCallback, useMemo, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import { BottomSheetBackdrop, BottomSheetModal, BottomSheetTextInput } from '@gorhom/bottom-sheet';
+import {
+  BottomSheetBackdrop,
+  BottomSheetFooter,
+  type BottomSheetFooterProps,
+  BottomSheetModal,
+  BottomSheetScrollView,
+  BottomSheetTextInput,
+} from '@gorhom/bottom-sheet';
 import { CalendarCheck } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { sheetInputStyles } from '@/components/ui/EditSheetShell';
+import { sheetKeyboardProps, useKeyboardHeight, useSheetMaxHeight } from '@/components/ui/sheetConfig';
 import { Colors, Fonts } from '@/constants/theme';
 import { formatLocalizedDate } from '@/utils/dateLocale';
 
@@ -29,11 +37,12 @@ export const TimelineEventResolveSheet = forwardRef<BottomSheetModal, TimelineEv
   ({ eventTitle, isSaving = false, onDismiss, onResolve }, ref) => {
     const { t } = useTranslation();
     const insets = useSafeAreaInsets();
+    const maxHeight = useSheetMaxHeight();
+    const keyboardHeight = useKeyboardHeight();
     const today = useMemo(() => cloneDay(new Date()), []);
     const [resolutionDate, setResolutionDate] = useState(today);
     const [resolutionReason, setResolutionReason] = useState('');
     const [showAndroidDatePicker, setShowAndroidDatePicker] = useState(false);
-    const snapPoints = useMemo(() => [Platform.OS === 'ios' ? '68%' : '54%'], []);
 
     const renderBackdrop = useCallback(
       (props: React.ComponentProps<typeof BottomSheetBackdrop>) => (
@@ -57,15 +66,36 @@ export const TimelineEventResolveSheet = forwardRef<BottomSheetModal, TimelineEv
       dismiss();
     };
 
+    const renderFooter = (footerProps: BottomSheetFooterProps) => (
+      <BottomSheetFooter {...footerProps}>
+        <View
+          style={[
+            styles.footer,
+            { paddingBottom: keyboardHeight > 0 ? 12 : Math.max(insets.bottom, 12) },
+          ]}
+        >
+          <Pressable style={styles.cancelButton} onPress={dismiss} disabled={isSaving}>
+            <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
+          </Pressable>
+          <Pressable
+            style={[styles.resolveButton, isSaving && styles.resolveButtonDisabled]}
+            onPress={handleResolve}
+            disabled={isSaving}
+          >
+            <Text style={styles.resolveButtonText}>{t('contactComingUp.resolveAction')}</Text>
+          </Pressable>
+        </View>
+      </BottomSheetFooter>
+    );
+
     return (
       <BottomSheetModal
         ref={ref}
-        snapPoints={snapPoints}
-        enableDynamicSizing={false}
-        keyboardBehavior="interactive"
-        keyboardBlurBehavior="restore"
-        android_keyboardInputMode="adjustResize"
+        enableDynamicSizing
+        maxDynamicContentSize={maxHeight}
+        {...sheetKeyboardProps}
         backdropComponent={renderBackdrop}
+        footerComponent={renderFooter}
         backgroundStyle={styles.sheetBackground}
         handleIndicatorStyle={styles.handle}
         onDismiss={() => {
@@ -75,7 +105,12 @@ export const TimelineEventResolveSheet = forwardRef<BottomSheetModal, TimelineEv
           onDismiss?.();
         }}
       >
-        <View style={[styles.container, { paddingBottom: Math.max(insets.bottom, 16) + 16 }]}>
+        <BottomSheetScrollView
+          contentContainerStyle={styles.container}
+          enableFooterMarginAdjustment
+          keyboardShouldPersistTaps="handled"
+          bounces={false}
+        >
           <View style={styles.header}>
             <View style={styles.iconCircle}>
               <CalendarCheck size={19} color={Colors.success} strokeWidth={2.5} />
@@ -122,19 +157,6 @@ export const TimelineEventResolveSheet = forwardRef<BottomSheetModal, TimelineEv
             />
           </View>
 
-          <View style={styles.footer}>
-            <Pressable style={styles.cancelButton} onPress={dismiss} disabled={isSaving}>
-              <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
-            </Pressable>
-            <Pressable
-              style={[styles.resolveButton, isSaving && styles.resolveButtonDisabled]}
-              onPress={handleResolve}
-              disabled={isSaving}
-            >
-              <Text style={styles.resolveButtonText}>{t('contactComingUp.resolveAction')}</Text>
-            </Pressable>
-          </View>
-
           {Platform.OS === 'android' && showAndroidDatePicker ? (
             <DateTimePicker
               value={resolutionDate}
@@ -144,7 +166,7 @@ export const TimelineEventResolveSheet = forwardRef<BottomSheetModal, TimelineEv
               maximumDate={today}
             />
           ) : null}
-        </View>
+        </BottomSheetScrollView>
       </BottomSheetModal>
     );
   }
@@ -184,7 +206,15 @@ const styles = StyleSheet.create({
   dateButtonText: { fontFamily: Fonts.sans.bold, fontSize: 15, color: Colors.textPrimary },
   iosDatePickerWrap: { borderRadius: 14, borderWidth: 1.5, borderColor: Colors.hairline, overflow: 'hidden' },
   iosDatePicker: { height: 150 },
-  footer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 12, marginTop: 4 },
+  footer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: 12,
+    backgroundColor: Colors.surface,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+  },
   cancelButton: {
     paddingVertical: 12,
     paddingHorizontal: 20,

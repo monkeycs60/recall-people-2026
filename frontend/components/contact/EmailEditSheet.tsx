@@ -27,7 +27,6 @@ export const EmailEditSheet = forwardRef<BottomSheetModal, EmailEditSheetProps>(
         title={t('contact.emailModal.title')}
         icon={<Mail size={18} color={Colors.primary} strokeWidth={2.3} />}
         config={{
-          snapPoint: '38%',
           readValue: initialValue ?? null,
           canSave: !isInvalid,
           onStart: () => setValue(initialValue ?? ''),
