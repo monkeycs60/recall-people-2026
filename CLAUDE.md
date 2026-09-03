@@ -119,9 +119,12 @@ Une notification Android réelle peut être déclenchée depuis l'app debug avec
 ```bash
 adb -s emulator-5554 shell am start \
   -a android.intent.action.VIEW \
-  -d "recall-people://debug/notification?ts=$(date +%s)" \
-  com.monkeycs60.recallpeople2026
+  -d "recall-people-dev://debug/notification?ts=$(date +%s)" \
+  com.monkeycs60.recallpeople2026.dev
 ```
+
+Le build debug porte le suffixe `.dev` (id, nom et scheme de deep link distincts), donc l'app de
+dev et celle du Play Store cohabitent sur le même téléphone.
 
 Le hook est dev-only (`__DEV__`) et passe par `notificationService.scheduleCaptureDemoNotification()`. Il crée un canal Android haute priorité puis planifie la bannière 2 secondes plus tard. Pour capturer la bannière au-dessus du launcher :
 
