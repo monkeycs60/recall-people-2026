@@ -71,7 +71,7 @@ export const TimelineEventResolveSheet = forwardRef<BottomSheetModal, TimelineEv
         <View
           style={[
             styles.footer,
-            { paddingBottom: keyboardHeight > 0 ? 12 : Math.max(insets.bottom, 12) },
+            { paddingBottom: keyboardHeight > 0 ? 16 : Math.max(insets.bottom, 12) + 16 },
           ]}
         >
           <Pressable style={styles.cancelButton} onPress={dismiss} disabled={isSaving}>

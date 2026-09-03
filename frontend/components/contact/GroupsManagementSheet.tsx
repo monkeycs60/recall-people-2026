@@ -126,7 +126,6 @@ export const GroupsManagementSheet = forwardRef<BottomSheetModal, GroupsManageme
     return (
       <BottomSheetModal
         ref={ref}
-        snapPoints={['70%']}
         enableDynamicSizing
         maxDynamicContentSize={maxHeight}
         {...sheetKeyboardProps}

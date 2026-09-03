@@ -584,9 +584,11 @@ export default function ContactDetailScreen() {
                     return (
                       <View key={entry.id} style={styles.heroTimelineRow}>
                         <View style={[styles.heroTimelineDot, { backgroundColor: index === 0 ? Colors.textInverse : 'rgba(255,255,255,0.7)', borderColor: accent }]} />
-                        <Text style={styles.heroTimelineDate}>{entry.dateLabel}</Text>
+                        <View style={styles.heroTimelineDateColumn}>
+                          <Text style={styles.heroTimelineDate}>{entry.dateLabel}</Text>
+                          <Text style={styles.heroTimelineSoon} numberOfLines={1}>{entry.soonLabel}</Text>
+                        </View>
                         <Text style={styles.heroTimelineLabel} numberOfLines={2}>{entry.label}</Text>
-                        <Text style={styles.heroTimelineSoon} numberOfLines={1}>{entry.soonLabel}</Text>
                       </View>
                     );
                   })}
@@ -1098,8 +1100,11 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     borderWidth: 2,
   },
+  heroTimelineDateColumn: {
+    width: 72,
+    gap: 1,
+  },
   heroTimelineDate: {
-    width: 50,
     fontFamily: Fonts.sans.bold,
     fontSize: 11,
     letterSpacing: 0.3,
@@ -1113,12 +1118,9 @@ const styles = StyleSheet.create({
     color: Colors.textInverse,
   },
   heroTimelineSoon: {
-    minWidth: 44,
-    marginLeft: 4,
     fontFamily: Fonts.sans.bold,
     fontSize: 10,
     color: 'rgba(255,255,255,0.72)',
-    textAlign: 'right',
   },
   heroTimelineMore: {
     paddingLeft: 18,
