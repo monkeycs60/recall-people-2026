@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Frontend guard suite: layout and keyboard conventions are enforced by tests
+# that read source files, so they only protect what is committed if they run here.
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+
+if [ -z "$(git diff --cached --name-only --diff-filter=ACMR -- "$repo_root/frontend")" ]; then
+  exit 0
+fi
+
+if ! command -v npm >/dev/null 2>&1 && [ -s "$HOME/.nvm/nvm.sh" ]; then
+  # Hooks run in a non-interactive shell, where nvm has not been sourced.
+  . "$HOME/.nvm/nvm.sh" >/dev/null 2>&1
+fi
+
+cd "$repo_root/frontend"
+npm test --silent

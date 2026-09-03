@@ -1,5 +1,19 @@
 - Le backend de production tourne en Node sur le VPS via Coolify. Tout déploiement Coolify ou toute autre mutation de la production nécessite une demande explicite.
 
+## Hook pre-commit
+
+Les conventions de layout et de clavier sont vérifiées par des tests qui lisent les sources
+(`frontend/test/sheet-keyboard-config.test.mjs` notamment). Ils ne protègent que s'ils tournent
+avant le commit :
+
+```bash
+git config core.hooksPath .githooks
+```
+
+À relancer dans chaque clone : `core.hooksPath` est une config locale, pas une donnée versionnée.
+Le hook ne se déclenche que si des fichiers de `frontend/` sont indexés, et `--no-verify` reste
+disponible pour les commits en cours de route.
+
 # Analytics / PostHog
 
 Recall People est instrumenté avec **PostHog** : analytics produit (events **par utilisateur** : `contact_created`,
