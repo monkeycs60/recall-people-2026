@@ -11,8 +11,9 @@ git config core.hooksPath .githooks
 ```
 
 À relancer dans chaque clone : `core.hooksPath` est une config locale, pas une donnée versionnée.
-Le hook ne se déclenche que si des fichiers de `frontend/` sont indexés, et `--no-verify` reste
-disponible pour les commits en cours de route.
+Le hook lance la suite d'un workspace (`frontend`, `backend`) uniquement si des fichiers de ce
+workspace sont indexés — environ une seconde chacune. `--no-verify` reste disponible pour les
+commits en cours de route.
 
 # Analytics / PostHog
 
