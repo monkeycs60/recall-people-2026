@@ -585,7 +585,7 @@ export default function ContactDetailScreen() {
                       <View key={entry.id} style={styles.heroTimelineRow}>
                         <View style={[styles.heroTimelineDot, { backgroundColor: index === 0 ? Colors.textInverse : 'rgba(255,255,255,0.7)', borderColor: accent }]} />
                         <Text style={styles.heroTimelineDate}>{entry.dateLabel}</Text>
-                        <Text style={styles.heroTimelineLabel} numberOfLines={1}>{entry.label}</Text>
+                        <Text style={styles.heroTimelineLabel} numberOfLines={2}>{entry.label}</Text>
                         <Text style={styles.heroTimelineSoon} numberOfLines={1}>{entry.soonLabel}</Text>
                       </View>
                     );
