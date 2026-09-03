@@ -60,6 +60,34 @@ When implementing features:
 
 # Mobile Debugging
 
+## Brancher le dev-client sur Metro (téléphone physique)
+
+Symptôme : l'app reste sur le splash, `logcat` répète « Make sure you're running Metro » et le log
+Metro ne montre **aucune** requête de bundle.
+
+```bash
+adb connect 192.168.1.5:<port>       # port affiché par le téléphone (débogage sans fil)
+adb reverse tcp:8081 tcp:8081        # indispensable, même en adb wifi
+```
+
+Le dev-client garde en préférence l'hôte du packager de son dernier build ; `adb reverse` mappe
+`localhost:8081` du téléphone vers la machine et court-circuite cette valeur périmée. Sans lui,
+ni le relancement, ni le deep link `expo-development-client`, ni le force-stop ne suffisent.
+
+Le backend doit tourner **avant** de lancer l'app : au démarrage l'app vérifie la session auprès de
+lui, et un backend injoignable renvoie l'utilisateur sur l'écran de connexion.
+
+```bash
+cd backend && PORT=8787 npm run dev  # le défaut est 3000, le frontend attend 8787
+```
+
+En lançant `tsx` à la main, passer les deux fichiers d'env (`--env-file=.env --env-file=.dev.vars`) :
+les clés R2 ne sont que dans `.dev.vars` et le serveur refuse de démarrer sans elles.
+
+L'écran du téléphone se verrouille pendant les attentes longues (chargement du bundle) et coupe la
+passe. Les événements d'entrée réarment le minuteur : envoyer `adb shell input keyevent 143`
+(NUM_LOCK, sans effet visible) toutes les 15-20 s pendant une session de capture.
+
 ## ASO Screenshots Sans Barre Android
 
 Pour les captures App Store / ASO, ne pas masquer la barre Android en post-traitement : le rendu est visible et fait cheap dans un mockup iPhone. Utiliser le mode screenshot natif de l'app.
