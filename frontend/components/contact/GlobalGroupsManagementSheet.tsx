@@ -2,6 +2,7 @@ import { View, Text, Pressable, Alert, StyleSheet } from 'react-native';
 import { forwardRef, useCallback, useState } from 'react';
 import { BottomSheetModal, BottomSheetBackdrop, BottomSheetScrollView, BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import { useTranslation } from 'react-i18next';
+import { sheetKeyboardProps, useSheetMaxHeight } from '@/components/ui/sheetConfig';
 import { Pencil, Trash2, Plus, X, Check, Users } from 'lucide-react-native';
 import { Colors } from '@/constants/theme';
 import {
@@ -15,6 +16,7 @@ import { Group } from '@/types';
 export const GlobalGroupsManagementSheet = forwardRef<BottomSheetModal>(
   (_, ref) => {
     const { t } = useTranslation();
+    const maxHeight = useSheetMaxHeight();
     const { groups: allGroups, refetch: refetchGroups } = useGroupsQuery();
     const createGroupMutation = useCreateGroup();
     const deleteGroupMutation = useDeleteGroup();
@@ -102,22 +104,22 @@ export const GlobalGroupsManagementSheet = forwardRef<BottomSheetModal>(
       <BottomSheetModal
         ref={ref}
         snapPoints={['60%']}
-        enableDynamicSizing={false}
-        keyboardBehavior="interactive"
-        keyboardBlurBehavior="restore"
-        android_keyboardInputMode="adjustResize"
+        enableDynamicSizing
+        maxDynamicContentSize={maxHeight}
+        {...sheetKeyboardProps}
         backdropComponent={renderBackdrop}
         backgroundStyle={{ backgroundColor: Colors.surface }}
         handleIndicatorStyle={{ backgroundColor: Colors.hairline }}
       >
-        <View style={styles.header}>
-          <Text style={styles.title}>{t('contact.groupsSheet.manageGroupsTitle')}</Text>
-        </View>
-
         <BottomSheetScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
         >
+          <View style={styles.header}>
+            <Text style={styles.title}>{t('contact.groupsSheet.manageGroupsTitle')}</Text>
+          </View>
+
           <View style={styles.createSection}>
             <View style={styles.createRow}>
               <BottomSheetTextInput
@@ -210,8 +212,9 @@ GlobalGroupsManagementSheet.displayName = 'GlobalGroupsManagementSheet';
 
 const styles = StyleSheet.create({
   header: {
-    paddingHorizontal: 20,
+    paddingTop: 4,
     paddingBottom: 12,
+    marginBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: Colors.hairline,
   },
@@ -225,8 +228,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 60,
+    paddingBottom: 32,
   },
   createSection: {
     marginBottom: 20,

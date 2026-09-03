@@ -1,7 +1,13 @@
-import { View, Text, Pressable, TextInput, Alert, StyleSheet } from 'react-native';
+import { View, Text, Pressable, Alert, StyleSheet } from 'react-native';
 import { forwardRef, useCallback, useState } from 'react';
-import { BottomSheetModal, BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import {
+  BottomSheetModal,
+  BottomSheetBackdrop,
+  BottomSheetScrollView,
+  BottomSheetTextInput,
+} from '@gorhom/bottom-sheet';
 import { useTranslation } from 'react-i18next';
+import { sheetKeyboardProps, useSheetMaxHeight } from '@/components/ui/sheetConfig';
 import { Check, Pencil, Trash2, Plus, X } from 'lucide-react-native';
 import { Colors } from '@/constants/theme';
 import {
@@ -22,6 +28,7 @@ type GroupsManagementSheetProps = {
 export const GroupsManagementSheet = forwardRef<BottomSheetModal, GroupsManagementSheetProps>(
   ({ contactId, contactFirstName, allGroups, contactGroups }, ref) => {
     const { t } = useTranslation();
+    const maxHeight = useSheetMaxHeight();
     const setContactGroupsMutation = useSetContactGroups();
     const createGroupMutation = useCreateGroup();
     const deleteGroupMutation = useDeleteGroup();
@@ -120,23 +127,26 @@ export const GroupsManagementSheet = forwardRef<BottomSheetModal, GroupsManageme
       <BottomSheetModal
         ref={ref}
         snapPoints={['70%']}
-        enableDynamicSizing={false}
+        enableDynamicSizing
+        maxDynamicContentSize={maxHeight}
+        {...sheetKeyboardProps}
         backdropComponent={renderBackdrop}
         backgroundStyle={{ backgroundColor: Colors.surface }}
         handleIndicatorStyle={{ backgroundColor: Colors.hairline }}
       >
-        <View style={styles.header}>
-          <Text style={styles.title}>{t('contact.groupsSheet.title')}</Text>
-        </View>
-
         <BottomSheetScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
         >
+          <View style={styles.header}>
+            <Text style={styles.title}>{t('contact.groupsSheet.title')}</Text>
+          </View>
+
           {/* Create new group - AT THE TOP */}
           <View style={styles.createSection}>
             <View style={styles.createRow}>
-              <TextInput
+              <BottomSheetTextInput
                 style={styles.createInput}
                 value={newGroupName}
                 onChangeText={setNewGroupName}
@@ -171,7 +181,7 @@ export const GroupsManagementSheet = forwardRef<BottomSheetModal, GroupsManageme
                     if (isEditing) {
                       return (
                         <View key={group.id} style={styles.groupRowEditing}>
-                          <TextInput
+                          <BottomSheetTextInput
                             style={styles.editInput}
                             value={editingGroupName}
                             onChangeText={setEditingGroupName}
@@ -232,8 +242,9 @@ GroupsManagementSheet.displayName = 'GroupsManagementSheet';
 
 const styles = StyleSheet.create({
   header: {
-    paddingHorizontal: 20,
+    paddingTop: 4,
     paddingBottom: 12,
+    marginBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: Colors.hairline,
   },
@@ -247,8 +258,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 60,
+    paddingBottom: 32,
   },
   createSection: {
     marginBottom: 20,

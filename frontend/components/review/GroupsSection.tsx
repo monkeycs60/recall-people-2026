@@ -124,7 +124,7 @@ export function GroupsSection({ state, handlers }: GroupsSectionProps) {
       >
         <KeyboardAvoidingView
           style={styles.modalContainer}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
           <View style={[styles.modalHeader, { paddingTop: Platform.OS === 'ios' ? 16 : insets.top + 8 }]}>
             <View style={styles.modalHandleBar} />
