@@ -3,6 +3,7 @@ import { forwardRef, useCallback } from 'react';
 import { BottomSheetModal, BottomSheetBackdrop, BottomSheetView } from '@gorhom/bottom-sheet';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Check } from 'lucide-react-native';
+import { useSheetMaxHeight } from '@/components/ui/sheetConfig';
 import { Colors, Spacing } from '@/constants/theme';
 
 interface OptionPickerOption {
@@ -21,6 +22,7 @@ interface OptionPickerSheetProps {
 export const OptionPickerSheet = forwardRef<BottomSheetModal, OptionPickerSheetProps>(
   ({ title, description, options, selectedValue, onSelect }, ref) => {
     const insets = useSafeAreaInsets();
+    const maxHeight = useSheetMaxHeight();
     const renderBackdrop = useCallback(
       (props: React.ComponentProps<typeof BottomSheetBackdrop>) => (
         <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} />
@@ -41,6 +43,7 @@ export const OptionPickerSheet = forwardRef<BottomSheetModal, OptionPickerSheetP
       <BottomSheetModal
         ref={ref}
         enableDynamicSizing
+        maxDynamicContentSize={maxHeight}
         backdropComponent={renderBackdrop}
         backgroundStyle={{ backgroundColor: Colors.surface }}
         handleIndicatorStyle={{ backgroundColor: Colors.hairline }}

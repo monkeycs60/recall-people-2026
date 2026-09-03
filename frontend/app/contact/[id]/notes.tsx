@@ -176,9 +176,7 @@ export default function ContactNotesScreen() {
                     <Text style={styles.nodeDate}>{formatRelativeAge(note.createdAt).toUpperCase()}</Text>
                   </View>
                   <View style={styles.noteCard}>
-                    <Text style={styles.noteTitle} numberOfLines={2}>
-                      {titleText}
-                    </Text>
+                    <Text style={styles.noteTitle}>{titleText}</Text>
                     <Text style={styles.noteBody}>
                       {note.transcription}
                     </Text>

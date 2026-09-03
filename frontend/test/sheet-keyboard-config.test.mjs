@@ -80,3 +80,63 @@ test('Android keyboard avoidance is never left to the window resize', async () =
     `KeyboardAvoidingView needs an explicit Android behavior ('height') in ${offenders.join(', ')}`
   );
 });
+
+test('native modals holding an input avoid the keyboard themselves', async () => {
+  const sources = await readScannedSources();
+  const offenders = sources
+    .filter(({ source }) =>
+      [...source.matchAll(/<Modal[\s>]/g)].some((match) => {
+        const modalBlock = source.slice(match.index, source.indexOf('</Modal>', match.index));
+        return /TextInput\b/.test(modalBlock) && !modalBlock.includes('KeyboardAvoidingView');
+      })
+    )
+    .map(({ path }) => path);
+
+  assert.deepEqual(
+    offenders,
+    [],
+    `A native Modal is its own window: without a KeyboardAvoidingView its inputs stay under the keyboard (${offenders.join(', ')})`
+  );
+});
+
+test('every KeyboardAvoidingView declares how it avoids the keyboard', async () => {
+  const sources = await readScannedSources();
+  const offenders = sources
+    .filter(({ source }) =>
+      [...source.matchAll(/<KeyboardAvoidingView\b/g)].some(
+        (match) => !source.slice(match.index, match.index + 300).includes('behavior=')
+      )
+    )
+    .map(({ path }) => path);
+
+  assert.deepEqual(offenders, [], `Missing behavior prop in ${offenders.join(', ')}`);
+});
+
+test('no bottom sheet is locked to a fixed height', async () => {
+  const sources = await readScannedSources();
+  const offenders = sources
+    .filter(({ source }) => source.includes('enableDynamicSizing={false}'))
+    .map(({ path }) => path);
+
+  assert.deepEqual(
+    offenders,
+    [],
+    `Percentage detents clip anything taller than the percentage: keep enableDynamicSizing and add snapPoints if a floor is needed (${offenders.join(', ')})`
+  );
+});
+
+test('every bottom sheet caps its height below the status bar', async () => {
+  const sources = await readScannedSources();
+  const offenders = sources
+    .filter(
+      ({ source }) =>
+        /<BottomSheetModal\s/.test(source) && !source.includes('maxDynamicContentSize')
+    )
+    .map(({ path }) => path);
+
+  assert.deepEqual(
+    offenders,
+    [],
+    `Uncapped dynamic sizing lets the sheet grow under the status bar and ignores the keyboard: pass maxDynamicContentSize={useSheetMaxHeight()} (${offenders.join(', ')})`
+  );
+});

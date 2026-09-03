@@ -8,6 +8,7 @@ import * as Sharing from 'expo-sharing';
 import { contactService } from '@/services/contact.service';
 import { useGroupsStore } from '@/stores/groups-store';
 import { ContactWithDetails, Group, FactType } from '@/types';
+import { useSheetMaxHeight } from '@/components/ui/sheetConfig';
 import { Colors } from '@/constants/theme';
 
 type ExportFormat = 'json' | 'csv';
@@ -66,6 +67,7 @@ const convertToCSV = (contacts: ContactWithDetails[], groups: Group[]): string =
 
 export const ExportDataSheet = forwardRef<BottomSheetModal>((_, ref) => {
   const { t } = useTranslation();
+  const maxHeight = useSheetMaxHeight();
   const groups = useGroupsStore((state) => state.groups);
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>('json');
   const [isExporting, setIsExporting] = useState(false);
@@ -129,6 +131,7 @@ export const ExportDataSheet = forwardRef<BottomSheetModal>((_, ref) => {
     <BottomSheetModal
       ref={ref}
       enableDynamicSizing
+      maxDynamicContentSize={maxHeight}
       backdropComponent={renderBackdrop}
       backgroundStyle={{ backgroundColor: Colors.surface }}
       handleIndicatorStyle={{ backgroundColor: Colors.hairline }}

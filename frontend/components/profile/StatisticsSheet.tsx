@@ -5,10 +5,12 @@ import { Users, FolderOpen } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { useContactsStore } from '@/stores/contacts-store';
 import { useGroupsStore } from '@/stores/groups-store';
+import { useSheetMaxHeight } from '@/components/ui/sheetConfig';
 import { Colors } from '@/constants/theme';
 
 export const StatisticsSheet = forwardRef<BottomSheetModal>((_, ref) => {
   const { t } = useTranslation();
+  const maxHeight = useSheetMaxHeight();
   const contacts = useContactsStore((state) => state.contacts);
   const groups = useGroupsStore((state) => state.groups);
 
@@ -23,6 +25,7 @@ export const StatisticsSheet = forwardRef<BottomSheetModal>((_, ref) => {
     <BottomSheetModal
       ref={ref}
       enableDynamicSizing
+      maxDynamicContentSize={maxHeight}
       backdropComponent={renderBackdrop}
       backgroundStyle={{ backgroundColor: Colors.surface }}
       handleIndicatorStyle={{ backgroundColor: Colors.hairline }}

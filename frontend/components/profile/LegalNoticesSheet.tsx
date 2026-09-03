@@ -3,10 +3,12 @@ import { forwardRef, useCallback } from 'react';
 import { BottomSheetModal, BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { Shield, Database, Lock, Server, Mail, ExternalLink } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
+import { useSheetMaxHeight } from '@/components/ui/sheetConfig';
 import { Colors } from '@/constants/theme';
 
 export const LegalNoticesSheet = forwardRef<BottomSheetModal>((_, ref) => {
   const { t } = useTranslation();
+  const maxHeight = useSheetMaxHeight();
 
   const renderBackdrop = useCallback(
     (props: React.ComponentProps<typeof BottomSheetBackdrop>) => (
@@ -31,6 +33,7 @@ export const LegalNoticesSheet = forwardRef<BottomSheetModal>((_, ref) => {
     <BottomSheetModal
       ref={ref}
       snapPoints={['85%']}
+      maxDynamicContentSize={maxHeight}
       backdropComponent={renderBackdrop}
       backgroundStyle={{ backgroundColor: Colors.surface }}
       handleIndicatorStyle={{ backgroundColor: Colors.hairline }}
