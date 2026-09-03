@@ -1,8 +1,10 @@
-import { View, Text, Pressable, StyleSheet, Platform, Keyboard as RNKeyboard } from 'react-native';
-import { forwardRef, useCallback, useMemo, useState } from 'react';
-import { BottomSheetBackdrop, BottomSheetModal, BottomSheetTextInput } from '@gorhom/bottom-sheet';
+import { View, Text, Pressable, StyleSheet, Keyboard as RNKeyboard } from 'react-native';
+import { forwardRef, useCallback, useState } from 'react';
+import { BottomSheetBackdrop, BottomSheetModal, BottomSheetTextInput, BottomSheetView } from '@gorhom/bottom-sheet';
 import { ArrowRight, Keyboard, Mic, UserPlus } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { sheetKeyboardProps, useSheetMaxHeight } from '@/components/ui/sheetConfig';
 import { Colors, Fonts } from '@/constants/theme';
 import type { Contact } from '@/types';
 
@@ -16,25 +18,14 @@ type CreateContactSheetProps = {
 export const CreateContactSheet = forwardRef<BottomSheetModal, CreateContactSheetProps>(
   ({ onCreate, onRecordVoice, onRecordType, onSkip }, ref) => {
     const { t } = useTranslation();
+    const insets = useSafeAreaInsets();
+    const maxHeight = useSheetMaxHeight();
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [createdContact, setCreatedContact] = useState<Contact | null>(null);
     const [isCreating, setIsCreating] = useState(false);
 
-    const isIOS = Platform.OS === 'ios';
-    // Android resizes the window for the keyboard, so the sheet must be tall to
-    // keep both inputs above it; iOS keeps the full screen and lifts the sheet,
-    // so it stays compact. Snap points must be ascending.
-    const snapPoints = useMemo(() => (isIOS ? ['42%', '56%'] : ['56%', '90%']), [isIOS]);
-    const formSnapIndex = isIOS ? 0 : 1;
-    const nextStepSnapIndex = isIOS ? 1 : 0;
     const isValid = firstName.trim().length > 0 && !isCreating;
-
-    const goToNextStepSnap = () => {
-      if (ref && typeof ref !== 'function') {
-        ref.current?.snapToIndex(nextStepSnapIndex);
-      }
-    };
 
     const renderBackdrop = useCallback(
       (props: React.ComponentProps<typeof BottomSheetBackdrop>) => (
@@ -65,7 +56,6 @@ export const CreateContactSheet = forwardRef<BottomSheetModal, CreateContactShee
         if (contact) {
           setCreatedContact(contact);
           RNKeyboard.dismiss();
-          goToNextStepSnap();
         }
       } finally {
         setIsCreating(false);
@@ -97,18 +87,15 @@ export const CreateContactSheet = forwardRef<BottomSheetModal, CreateContactShee
     return (
       <BottomSheetModal
         ref={ref}
-        index={formSnapIndex}
-        snapPoints={snapPoints}
-        enableDynamicSizing={false}
-        keyboardBehavior="interactive"
-        keyboardBlurBehavior="restore"
-        android_keyboardInputMode="adjustResize"
+        enableDynamicSizing
+        maxDynamicContentSize={maxHeight}
+        {...sheetKeyboardProps}
         backdropComponent={renderBackdrop}
         backgroundStyle={styles.sheetBackground}
         handleIndicatorStyle={styles.handle}
         onDismiss={reset}
       >
-        <View style={styles.container}>
+        <BottomSheetView style={[styles.container, { paddingBottom: insets.bottom + 28 }]}>
           {createdContact ? (
             <View style={styles.nextStepContent}>
               <View style={styles.header}>
@@ -206,7 +193,7 @@ export const CreateContactSheet = forwardRef<BottomSheetModal, CreateContactShee
               </View>
             </>
           )}
-        </View>
+        </BottomSheetView>
       </BottomSheetModal>
     );
   }
@@ -224,7 +211,6 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 28,
   },
   header: {
     flexDirection: 'row',

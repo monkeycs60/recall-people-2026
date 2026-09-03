@@ -1,6 +1,6 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { forwardRef, useCallback, useMemo } from 'react';
-import { BottomSheetBackdrop, BottomSheetModal } from '@gorhom/bottom-sheet';
+import { forwardRef, useCallback } from 'react';
+import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import {
   ArrowDownAZ,
   Bell,
@@ -11,6 +11,8 @@ import {
   ListFilter,
 } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSheetMaxHeight } from '@/components/ui/sheetConfig';
 import { Colors, Fonts } from '@/constants/theme';
 import type { ContactSortMode } from '@/utils/contactSort';
 
@@ -67,7 +69,8 @@ export function getContactSortLabelKey(mode: ContactSortMode): string {
 export const ContactSortSheet = forwardRef<BottomSheetModal, ContactSortSheetProps>(
   ({ selectedMode, isSaving = false, onSelectMode }, ref) => {
     const { t } = useTranslation();
-    const snapPoints = useMemo(() => ['56%'], []);
+    const insets = useSafeAreaInsets();
+    const maxHeight = useSheetMaxHeight();
 
     const renderBackdrop = useCallback(
       (props: React.ComponentProps<typeof BottomSheetBackdrop>) => (
@@ -85,13 +88,13 @@ export const ContactSortSheet = forwardRef<BottomSheetModal, ContactSortSheetPro
     return (
       <BottomSheetModal
         ref={ref}
-        snapPoints={snapPoints}
-        enableDynamicSizing={false}
+        enableDynamicSizing
+        maxDynamicContentSize={maxHeight}
         backdropComponent={renderBackdrop}
         backgroundStyle={styles.sheetBackground}
         handleIndicatorStyle={styles.handle}
       >
-        <View style={styles.container}>
+        <BottomSheetView style={[styles.container, { paddingBottom: insets.bottom + 24 }]}>
           <View style={styles.header}>
             <View style={styles.headerTitleRow}>
               <View style={styles.iconCircle}>
@@ -136,7 +139,7 @@ export const ContactSortSheet = forwardRef<BottomSheetModal, ContactSortSheetPro
               );
             })}
           </View>
-        </View>
+        </BottomSheetView>
       </BottomSheetModal>
     );
   }
@@ -154,7 +157,6 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 28,
   },
   header: {
     flexDirection: 'row',

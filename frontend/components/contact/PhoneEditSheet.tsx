@@ -21,7 +21,6 @@ export const PhoneEditSheet = forwardRef<BottomSheetModal, PhoneEditSheetProps>(
         title={t('contact.phoneModal.title')}
         icon={<Phone size={18} color={Colors.primary} strokeWidth={2.3} />}
         config={{
-          snapPoint: '34%',
           readValue: initialValue ?? null,
           canSave: true,
           onStart: () => setValue(initialValue ?? ''),

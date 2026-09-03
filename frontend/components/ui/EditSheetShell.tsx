@@ -1,14 +1,13 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { forwardRef, useCallback, useMemo, useState, type ReactNode } from 'react';
-import { BottomSheetModal, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
+import { forwardRef, useCallback, useState, type ReactNode } from 'react';
+import { BottomSheetModal, BottomSheetBackdrop, BottomSheetView } from '@gorhom/bottom-sheet';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Edit3, Plus, Trash2 } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
+import { sheetKeyboardProps, useSheetMaxHeight } from '@/components/ui/sheetConfig';
 import { Colors, Fonts } from '@/constants/theme';
 
 type FieldEditConfig = {
-  snapPoint: string;
-  editSnapPoint?: string;
   readValue: string | null;
   readContent?: ReactNode;
   canSave: boolean;
@@ -28,18 +27,8 @@ export const EditSheetShell = forwardRef<BottomSheetModal, EditSheetShellProps>(
   ({ title, icon, config, children }, ref) => {
     const { t } = useTranslation();
     const insets = useSafeAreaInsets();
+    const maxHeight = useSheetMaxHeight();
     const [isEditing, setIsEditing] = useState(false);
-
-    const snapPoints = useMemo(
-      () => (config.editSnapPoint ? [config.snapPoint, config.editSnapPoint] : [config.snapPoint]),
-      [config.snapPoint, config.editSnapPoint]
-    );
-
-    const snapTo = (index: number) => {
-      if (config.editSnapPoint && ref && 'current' in ref && ref.current) {
-        ref.current.snapToIndex(index);
-      }
-    };
 
     const renderBackdrop = useCallback(
       (props: React.ComponentProps<typeof BottomSheetBackdrop>) => (
@@ -57,12 +46,10 @@ export const EditSheetShell = forwardRef<BottomSheetModal, EditSheetShellProps>(
     const handleEditStart = () => {
       config.onStart();
       setIsEditing(true);
-      snapTo(1);
     };
 
     const handleCancel = () => {
       setIsEditing(false);
-      snapTo(0);
     };
 
     const handleSave = () => {
@@ -81,17 +68,15 @@ export const EditSheetShell = forwardRef<BottomSheetModal, EditSheetShellProps>(
     return (
       <BottomSheetModal
         ref={ref}
-        snapPoints={snapPoints}
-        enableDynamicSizing={false}
-        keyboardBehavior="fillParent"
-        keyboardBlurBehavior="restore"
-        android_keyboardInputMode="adjustResize"
+        enableDynamicSizing
+        maxDynamicContentSize={maxHeight}
+        {...sheetKeyboardProps}
         backdropComponent={renderBackdrop}
         backgroundStyle={styles.sheetBackground}
         handleIndicatorStyle={styles.handle}
         onDismiss={() => setIsEditing(false)}
       >
-        <View style={[styles.container, { paddingBottom: insets.bottom + 28 }]}>
+        <BottomSheetView style={[styles.container, { paddingBottom: insets.bottom + 28 }]}>
           <View style={styles.header}>
             <View style={styles.iconCircle}>{icon}</View>
             <Text style={styles.title}>{title}</Text>
@@ -139,7 +124,7 @@ export const EditSheetShell = forwardRef<BottomSheetModal, EditSheetShellProps>(
               </Text>
             </Pressable>
           )}
-        </View>
+        </BottomSheetView>
       </BottomSheetModal>
     );
   }

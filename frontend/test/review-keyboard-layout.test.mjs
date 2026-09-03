@@ -92,9 +92,18 @@ test('contact edit sheets keep inputs above the keyboard via the shared sheet sh
     'utf8'
   );
 
-  assert.match(shellSource, /keyboardBehavior="fillParent"/);
-  assert.match(shellSource, /android_keyboardInputMode="adjustResize"/);
+  assert.match(shellSource, /\{\.\.\.sheetKeyboardProps\}/);
+  assert.match(shellSource, /enableDynamicSizing/);
+  assert.match(shellSource, /maxDynamicContentSize=\{maxHeight\}/);
   assert.match(shellSource, /BottomSheetModal/);
+
+  const sheetConfigSource = await readFile(
+    resolve(__dirname, '../components/ui/sheetConfig.ts'),
+    'utf8'
+  );
+
+  assert.match(sheetConfigSource, /android_keyboardInputMode: 'adjustPan'/);
+  assert.match(sheetConfigSource, /keyboardBehavior: 'interactive'/);
 
   for (const sheetPath of contactEditSheetPaths) {
     const source = await readFile(resolve(__dirname, sheetPath), 'utf8');

@@ -23,7 +23,6 @@ export const MeetingContextEditSheet = forwardRef<BottomSheetModal, MeetingConte
         title={t('contact.meetingContextModal.title')}
         icon={<MapPin size={18} color={Colors.primary} strokeWidth={2.3} />}
         config={{
-          snapPoint: '36%',
           readValue: initialValue || null,
           canSave: trimmed.length > 0,
           onStart: () => setValue(initialValue),

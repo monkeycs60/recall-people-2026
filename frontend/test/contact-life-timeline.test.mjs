@@ -201,15 +201,35 @@ test('timeline event edit sheet preserves an absent date until the user selects 
   assert.match(source, /contactComingUp\.undated/);
 });
 
-test('timeline event edit sheet opens compact instead of expanding for keyboard focus', async () => {
+test('timeline event edit sheet sizes to its content and keeps its actions above the keyboard', async () => {
   const source = await readFile(timelineEventEditSheetPath, 'utf8');
 
-  assert.match(source, /keyboardBehavior="interactive"/);
-  assert.doesNotMatch(source, /keyboardBehavior="fillParent"/);
+  assert.match(source, /\{\.\.\.sheetKeyboardProps\}/);
+  assert.match(source, /enableDynamicSizing/);
+  assert.match(source, /maxDynamicContentSize=\{maxHeight\}/);
+  assert.match(source, /footerComponent=\{renderFooter\}/);
+  assert.match(source, /enableFooterMarginAdjustment/);
+  assert.doesNotMatch(source, /snapPoints/);
   assert.doesNotMatch(source, /\sautoFocus\b/);
-  assert.doesNotMatch(source, /'72%'/);
   assert.match(source, /useSafeAreaInsets/);
-  assert.match(source, /paddingBottom:\s*Math\.max\(insets\.bottom,\s*16\)\s*\+\s*16/);
+});
+
+test('timeline resolve sheet sizes to its content and keeps its actions above the keyboard', async () => {
+  const source = await readFile(timelineEventResolveSheetPath, 'utf8');
+
+  assert.match(source, /\{\.\.\.sheetKeyboardProps\}/);
+  assert.match(source, /enableDynamicSizing/);
+  assert.match(source, /maxDynamicContentSize=\{maxHeight\}/);
+  assert.match(source, /footerComponent=\{renderFooter\}/);
+  assert.match(source, /enableFooterMarginAdjustment/);
+  assert.doesNotMatch(source, /snapPoints/);
+});
+
+test('contact life cards show event titles and details in full', async () => {
+  const source = await readFile(comingUpScreenPath, 'utf8');
+
+  assert.match(source, /<Text style=\{styles\.eventCardTitle\}>\{entry\.title\}<\/Text>/);
+  assert.match(source, /<Text style=\{styles\.eventCardBody\}>\{entry\.subtitle\}<\/Text>/);
 });
 
 test('timeline event edit strings are translated in every supported locale', async () => {
