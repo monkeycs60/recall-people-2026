@@ -76,15 +76,22 @@ test('a prompt that spells out a JSON contract spells out every schema field', a
   }
 });
 
-test('every extraction field appears in the JSON contract of all five languages', async () => {
+test('the single JSON contract skeleton covers every extraction field', async () => {
   const source = await readFile(resolve(routes, 'extract.ts'), 'utf8');
   const { keys } = topLevelKeys(source, 'extractionSchema');
 
-  const blocks = [...source.matchAll(/formatJson: `([\s\S]*?)`,\n/g)].map((m) => m[1]);
-  assert.equal(blocks.length, 5, 'les 5 langues doivent définir formatJson');
+  const skeleton = source.match(/const buildFormatJson = \(labels: FormatJsonLabels\): string => `([\s\S]*?)`;/);
+  assert.ok(skeleton, 'buildFormatJson introuvable');
 
-  for (const [index, block] of blocks.entries()) {
-    const missing = keys.filter((key) => !block.includes(`"${key}"`));
-    assert.deepEqual(missing, [], `formatJson #${index + 1} omet ${missing.join(', ')}`);
-  }
+  const missing = keys.filter((key) => !skeleton[1].includes(`"${key}"`));
+  assert.deepEqual(missing, [], `le squelette omet ${missing.join(', ')}`);
+});
+
+test('all five languages render the contract from that single skeleton', async () => {
+  const source = await readFile(resolve(routes, 'extract.ts'), 'utf8');
+  const callSites = [...source.matchAll(/formatJson: buildFormatJson\(\{/g)];
+  assert.equal(callSites.length, 5, 'chaque langue doit passer par buildFormatJson');
+
+  const inlined = [...source.matchAll(/formatJson: `/g)];
+  assert.equal(inlined.length, 0, 'aucun bloc JSON ne doit être réécrit à la main');
 });

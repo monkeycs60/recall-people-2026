@@ -149,6 +149,53 @@ const buildDateExamples = (reference: Date, language: string): DateExamples => {
   };
 };
 
+/**
+ * Le squelette du contrat JSON est identique dans les cinq langues : seuls les
+ * libelles changent. Le decrire une fois evite la derive ou un champ ajoute a
+ * extractionSchema n'atteint que certaines traductions -- panne silencieuse qui
+ * fait echouer la validation cote gpt-oss, lequel suit le prompt plutot que le
+ * json_schema.
+ */
+type FormatJsonLabels = {
+  header: string;
+  hotTopicTitle: string;
+  hotTopicContext: string;
+  resolution: string;
+  noteTitle: string;
+  meetingContext: string;
+  loveLabel: string;
+};
+
+const buildFormatJson = (labels: FormatJsonLabels): string => `${labels.header}
+{
+  "contactIdentified": {
+    "firstName": string,
+    "lastName": string | null,
+    "confidence": "high" | "medium" | "low"
+  },
+  "contactInfo": {
+    "phone": string | null,
+    "email": string | null,
+    "birthday": { "day": number, "month": number, "year": number | null } | null
+  },
+  "hotTopics": [
+    {
+      "title": "${labels.hotTopicTitle}",
+      "context": "${labels.hotTopicContext}",
+      "eventDate": "YYYY-MM-DD" | null
+    }
+  ],
+  "resolvedTopics": [
+    {
+      "existingTopicId": "id",
+      "resolution": "${labels.resolution}"
+    }
+  ],
+  "noteTitle": "${labels.noteTitle}",
+  "meetingContext": "${labels.meetingContext}" | null,
+  "loves": ["${labels.loveLabel}", "..."]
+}`;
+
 const PROMPT_TEMPLATES: Record<string, {
   intro: string;
   dateReference: (currentDate: string) => string;
@@ -290,35 +337,15 @@ const PROMPT_TEMPLATES: Record<string, {
 2. Utilise des dates ABSOLUES (YYYY-MM-DD), jamais relatives
 3. Si pas assez d'informations, retourne moins de résultats
 4. Ne crée un hot topic QUE si c'est temporaire/actionnable`,
-    formatJson: `FORMAT JSON (les 7 champs sont OBLIGATOIRES : renvoie meetingContext=null et loves=[] si rien à mettre dedans):
-{
-  "contactIdentified": {
-    "firstName": string,
-    "lastName": string | null,
-    "confidence": "high" | "medium" | "low"
-  },
-  "contactInfo": {
-    "phone": string | null,
-    "email": string | null,
-    "birthday": { "day": number, "month": number, "year": number | null } | null
-  },
-  "hotTopics": [
-    {
-      "title": "Titre court (3-5 mots)",
-      "context": "1-2 phrases de contexte avec les détails importants",
-      "eventDate": "YYYY-MM-DD" | null
-    }
-  ],
-  "resolvedTopics": [
-    {
-      "existingTopicId": "id",
-      "resolution": "Description concrète de ce qui s'est passé"
-    }
-  ],
-  "noteTitle": "Titre SPÉCIFIQUE capturant le sujet principal (2-5 mots)",
-  "meetingContext": "Où/comment l'utilisateur a rencontré le contact" | null,
-  "loves": ["Libellé court", "..."]
-}`,
+    formatJson: buildFormatJson({
+      header: `FORMAT JSON (les 7 champs sont OBLIGATOIRES : renvoie meetingContext=null et loves=[] si rien à mettre dedans):`,
+      hotTopicTitle: `Titre court (3-5 mots)`,
+      hotTopicContext: `1-2 phrases de contexte avec les détails importants`,
+      resolution: `Description concrète de ce qui s'est passé`,
+      noteTitle: `Titre SPÉCIFIQUE capturant le sujet principal (2-5 mots)`,
+      meetingContext: `Où/comment l'utilisateur a rencontré le contact`,
+      loveLabel: `Libellé court`,
+    }),
     noteTitleRules: {
       header: 'RÈGLES POUR noteTitle - CRITIQUE:\nLe titre doit permettre à l\'utilisateur de retrouver facilement la note plus tard.',
       goodExamples: `BON titre (spécifique, mémorable):
@@ -485,35 +512,15 @@ Exemple 4 - "On a pris un café, elle m'a raconté ses vacances":
 2. Use ABSOLUTE dates (YYYY-MM-DD), never relative
 3. If not enough information, return fewer results
 4. Only create a hot topic if it's temporary/actionable`,
-    formatJson: `JSON FORMAT (all 7 fields are REQUIRED: return meetingContext=null and loves=[] when there is nothing to put in them):
-{
-  "contactIdentified": {
-    "firstName": string,
-    "lastName": string | null,
-    "confidence": "high" | "medium" | "low"
-  },
-  "contactInfo": {
-    "phone": string | null,
-    "email": string | null,
-    "birthday": { "day": number, "month": number, "year": number | null } | null
-  },
-  "hotTopics": [
-    {
-      "title": "Short title (3-5 words)",
-      "context": "1-2 sentences of context with important details",
-      "eventDate": "YYYY-MM-DD" | null
-    }
-  ],
-  "resolvedTopics": [
-    {
-      "existingTopicId": "id",
-      "resolution": "Concrete description of what happened"
-    }
-  ],
-  "noteTitle": "SPECIFIC title capturing the main topic (2-5 words)",
-  "meetingContext": "Where/how the user met the contact" | null,
-  "loves": ["Short label", "..."]
-}`,
+    formatJson: buildFormatJson({
+      header: `JSON FORMAT (all 7 fields are REQUIRED: return meetingContext=null and loves=[] when there is nothing to put in them):`,
+      hotTopicTitle: `Short title (3-5 words)`,
+      hotTopicContext: `1-2 sentences of context with important details`,
+      resolution: `Concrete description of what happened`,
+      noteTitle: `SPECIFIC title capturing the main topic (2-5 words)`,
+      meetingContext: `Where/how the user met the contact`,
+      loveLabel: `Short label`,
+    }),
     noteTitleRules: {
       header: 'RULES FOR noteTitle - CRITICAL:\nThe title should help the user easily find the note later.',
       goodExamples: `GOOD title (specific, memorable):
@@ -680,35 +687,15 @@ Example 4 - "We had coffee, she told me about her vacation":
 2. Usa fechas ABSOLUTAS (YYYY-MM-DD), nunca relativas
 3. Si no hay suficiente información, devuelve menos resultados
 4. Solo crea un hot topic si es temporal/accionable`,
-    formatJson: `FORMATO JSON (los 7 campos son OBLIGATORIOS: devuelve meetingContext=null y loves=[] si no hay nada):
-{
-  "contactIdentified": {
-    "firstName": string,
-    "lastName": string | null,
-    "confidence": "high" | "medium" | "low"
-  },
-  "contactInfo": {
-    "phone": string | null,
-    "email": string | null,
-    "birthday": { "day": number, "month": number, "year": number | null } | null
-  },
-  "hotTopics": [
-    {
-      "title": "Título corto (3-5 palabras)",
-      "context": "1-2 frases de contexto con los detalles importantes",
-      "eventDate": "YYYY-MM-DD" | null
-    }
-  ],
-  "resolvedTopics": [
-    {
-      "existingTopicId": "id",
-      "resolution": "Descripción concreta de lo que pasó"
-    }
-  ],
-  "noteTitle": "Título ESPECÍFICO capturando el tema principal (2-5 palabras)",
-  "meetingContext": "Dónde/cómo el usuario conoció al contacto" | null,
-  "loves": ["Etiqueta corta", "..."]
-}`,
+    formatJson: buildFormatJson({
+      header: `FORMATO JSON (los 7 campos son OBLIGATORIOS: devuelve meetingContext=null y loves=[] si no hay nada):`,
+      hotTopicTitle: `Título corto (3-5 palabras)`,
+      hotTopicContext: `1-2 frases de contexto con los detalles importantes`,
+      resolution: `Descripción concreta de lo que pasó`,
+      noteTitle: `Título ESPECÍFICO capturando el tema principal (2-5 palabras)`,
+      meetingContext: `Dónde/cómo el usuario conoció al contacto`,
+      loveLabel: `Etiqueta corta`,
+    }),
     noteTitleRules: {
       header: 'REGLAS PARA noteTitle - CRÍTICO:\nEl título debe permitir al usuario encontrar fácilmente la nota después.',
       goodExamples: `BUEN título (específico, memorable):
@@ -875,35 +862,15 @@ Ejemplo 4 - "Tomamos un café, me contó sus vacaciones":
 2. Usa date ASSOLUTE (YYYY-MM-DD), mai relative
 3. Se non ci sono abbastanza informazioni, restituisci meno risultati
 4. Crea un hot topic SOLO se è temporaneo/azionabile`,
-    formatJson: `FORMATO JSON (los 7 campos son OBLIGATORIOS: devuelve meetingContext=null y loves=[] si no hay nada):
-{
-  "contactIdentified": {
-    "firstName": string,
-    "lastName": string | null,
-    "confidence": "high" | "medium" | "low"
-  },
-  "contactInfo": {
-    "phone": string | null,
-    "email": string | null,
-    "birthday": { "day": number, "month": number, "year": number | null } | null
-  },
-  "hotTopics": [
-    {
-      "title": "Titolo breve (3-5 parole)",
-      "context": "1-2 frasi di contesto con i dettagli importanti",
-      "eventDate": "YYYY-MM-DD" | null
-    }
-  ],
-  "resolvedTopics": [
-    {
-      "existingTopicId": "id",
-      "resolution": "Descrizione concreta di cosa è successo"
-    }
-  ],
-  "noteTitle": "Titolo SPECIFICO che cattura l'argomento principale (2-5 parole)",
-  "meetingContext": "Dove/come l'utente ha conosciuto il contatto" | null,
-  "loves": ["Etichetta breve", "..."]
-}`,
+    formatJson: buildFormatJson({
+      header: `FORMATO JSON (i 7 campi sono OBBLIGATORI: restituisci meetingContext=null e loves=[] se non c'è nulla da inserire):`,
+      hotTopicTitle: `Titolo breve (3-5 parole)`,
+      hotTopicContext: `1-2 frasi di contesto con i dettagli importanti`,
+      resolution: `Descrizione concreta di cosa è successo`,
+      noteTitle: `Titolo SPECIFICO che cattura l'argomento principale (2-5 parole)`,
+      meetingContext: `Dove/come l'utente ha conosciuto il contatto`,
+      loveLabel: `Etichetta breve`,
+    }),
     noteTitleRules: {
       header: 'REGOLE PER noteTitle - CRITICO:\nIl titolo deve permettere all\'utente di ritrovare facilmente la nota in seguito.',
       goodExamples: `BUON titolo (specifico, memorabile):
@@ -1071,35 +1038,15 @@ Esempio 4 - "Abbiamo preso un caffè, mi ha raccontato le sue vacanze":
 2. Verwende ABSOLUTE Daten (YYYY-MM-DD), niemals relative
 3. Wenn nicht genug Informationen, gib weniger Ergebnisse zurück
 4. Erstelle ein Hot Topic NUR wenn es temporär/handlungsfähig ist`,
-    formatJson: `JSON-FORMAT (alle 7 Felder sind PFLICHT: gib meetingContext=null und loves=[] zurück, wenn nichts hineingehört):
-{
-  "contactIdentified": {
-    "firstName": string,
-    "lastName": string | null,
-    "confidence": "high" | "medium" | "low"
-  },
-  "contactInfo": {
-    "phone": string | null,
-    "email": string | null,
-    "birthday": { "day": number, "month": number, "year": number | null } | null
-  },
-  "hotTopics": [
-    {
-      "title": "Kurzer Titel (3-5 Wörter)",
-      "context": "1-2 Sätze Kontext mit wichtigen Details",
-      "eventDate": "YYYY-MM-DD" | null
-    }
-  ],
-  "resolvedTopics": [
-    {
-      "existingTopicId": "id",
-      "resolution": "Konkrete Beschreibung was passiert ist"
-    }
-  ],
-  "noteTitle": "SPEZIFISCHER Titel, der das Hauptthema erfasst (2-5 Wörter)",
-  "meetingContext": "Wo/wie der Nutzer den Kontakt kennengelernt hat" | null,
-  "loves": ["Kurzes Label", "..."]
-}`,
+    formatJson: buildFormatJson({
+      header: `JSON-FORMAT (alle 7 Felder sind PFLICHT: gib meetingContext=null und loves=[] zurück, wenn nichts hineingehört):`,
+      hotTopicTitle: `Kurzer Titel (3-5 Wörter)`,
+      hotTopicContext: `1-2 Sätze Kontext mit wichtigen Details`,
+      resolution: `Konkrete Beschreibung was passiert ist`,
+      noteTitle: `SPEZIFISCHER Titel, der das Hauptthema erfasst (2-5 Wörter)`,
+      meetingContext: `Wo/wie der Nutzer den Kontakt kennengelernt hat`,
+      loveLabel: `Kurzes Label`,
+    }),
     noteTitleRules: {
       header: 'REGELN FÜR noteTitle - KRITISCH:\nDer Titel soll dem Benutzer helfen, die Notiz später leicht zu finden.',
       goodExamples: `GUTER Titel (spezifisch, einprägsam):
