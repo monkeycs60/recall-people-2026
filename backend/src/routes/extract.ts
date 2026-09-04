@@ -170,6 +170,7 @@ const PROMPT_TEMPLATES: Record<string, {
     rule5Title: string;
     rule5Content: string;
   };
+  hotTopicExhaustiveness: string;
   absoluteRules: string;
   formatJson: string;
   noteTitleRules: {
@@ -275,6 +276,15 @@ const PROMPT_TEMPLATES: Record<string, {
      Tu DOIS reconstituer l'adresse email correcte avec "@" devant le nom de domaine.
    - birthday: { day, month, year } si anniversaire mentionné (year peut être null)`,
     },
+    hotTopicExhaustiveness: `EXHAUSTIVITÉ DES HOT TOPICS - CRITIQUE:
+- Crée UN hot topic SÉPARÉ par actualité distincte. Ne fusionne JAMAIS deux actualités
+  différentes en une seule, même si elles sont liées: "déménagement" et "visite d'appartement"
+  sont deux hot topics, pas un seul; "grossesse" et "recherche de nourrice" aussi.
+- Avant de répondre, relis la transcription et compte les actualités temporaires mentionnées.
+  Ton tableau hotTopics doit en contenir autant. Si tu en as moins, tu en as oublié: reprends.
+- Une actualité déjà présente dans les ACTUALITÉS EXISTANTES compte aussi: si la note lui
+  ajoute une date ou un détail nouveau sans la résoudre, crée le hot topic correspondant.
+- La concision n'est PAS un objectif ici. Mieux vaut un hot topic de trop qu'un oublié.`,
     absoluteRules: `RÈGLES ABSOLUES:
 1. N'invente JAMAIS d'information non présente dans la transcription
 2. Utilise des dates ABSOLUES (YYYY-MM-DD), jamais relatives
@@ -461,6 +471,15 @@ Exemple 4 - "On a pris un café, elle m'a raconté ses vacances":
      You MUST reconstruct the correct email address with "@" before the domain name.
    - birthday: { day, month, year } if birthday mentioned (year can be null)`,
     },
+    hotTopicExhaustiveness: `HOT TOPIC EXHAUSTIVENESS - CRITICAL:
+- Create ONE SEPARATE hot topic per distinct piece of news. NEVER merge two different
+  items into one, even when related: "moving" and "apartment viewing" are two hot topics,
+  not one; so are "pregnancy" and "looking for a nanny".
+- Before answering, re-read the transcription and count the temporary items mentioned.
+  Your hotTopics array must contain that many. Fewer means you dropped one: go back.
+- An item already listed in EXISTING TOPICS counts too: if the note adds a new date or
+  detail without resolving it, create the corresponding hot topic.
+- Conciseness is NOT a goal here. One hot topic too many beats one missed.`,
     absoluteRules: `ABSOLUTE RULES:
 1. NEVER invent information not present in the transcription
 2. Use ABSOLUTE dates (YYYY-MM-DD), never relative
@@ -647,6 +666,15 @@ Example 4 - "We had coffee, she told me about her vacation":
      DEBES reconstruir la dirección email correcta con "@" antes del nombre de dominio.
    - birthday: { day, month, year } si se menciona cumpleaños (year puede ser null)`,
     },
+    hotTopicExhaustiveness: `EXHAUSTIVIDAD DE LOS HOT TOPICS - CRÍTICO:
+- Crea UN hot topic SEPARADO por cada novedad distinta. NUNCA fusiones dos novedades
+  diferentes en una sola, aunque estén relacionadas: "mudanza" y "visita de piso" son dos
+  hot topics, no uno; lo mismo para "embarazo" y "buscar niñera".
+- Antes de responder, relee la transcripción y cuenta las novedades temporales mencionadas.
+  Tu array hotTopics debe contener esa cantidad. Si tienes menos, olvidaste alguna: vuelve.
+- Una novedad ya presente en las ACTUALIDADES EXISTENTES también cuenta: si la nota le
+  añade una fecha o un detalle nuevo sin resolverla, crea el hot topic correspondiente.
+- La concisión NO es un objetivo aquí. Mejor un hot topic de más que uno olvidado.`,
     absoluteRules: `REGLAS ABSOLUTAS:
 1. NUNCA inventes información que no esté en la transcripción
 2. Usa fechas ABSOLUTAS (YYYY-MM-DD), nunca relativas
@@ -833,6 +861,15 @@ Ejemplo 4 - "Tomamos un café, me contó sus vacaciones":
      DEVI ricostruire l'indirizzo email corretto con "@" prima del nome di dominio.
    - birthday: { day, month, year } se compleanno menzionato (year può essere null)`,
     },
+    hotTopicExhaustiveness: `ESAUSTIVITÀ DEGLI HOT TOPICS - CRITICO:
+- Crea UN hot topic SEPARATO per ogni novità distinta. Non unire MAI due novità diverse
+  in una sola, anche se collegate: "trasloco" e "visita dell'appartamento" sono due hot
+  topics, non uno; lo stesso vale per "gravidanza" e "ricerca di una tata".
+- Prima di rispondere, rileggi la trascrizione e conta le novità temporanee menzionate.
+  Il tuo array hotTopics deve contenerne altrettante. Se ne hai meno, ne hai dimenticata una.
+- Una novità già presente nelle ATTUALITÀ ESISTENTI conta anche: se la nota le aggiunge
+  una data o un dettaglio nuovo senza risolverla, crea il hot topic corrispondente.
+- La concisione NON è un obiettivo qui. Meglio un hot topic in più che uno mancante.`,
     absoluteRules: `REGOLE ASSOLUTE:
 1. NON inventare MAI informazioni non presenti nella trascrizione
 2. Usa date ASSOLUTE (YYYY-MM-DD), mai relative
@@ -1019,6 +1056,16 @@ Esempio 4 - "Abbiamo preso un caffè, mi ha raccontato le sue vacanze":
      Du MUSST die korrekte E-Mail-Adresse mit "@" vor dem Domainnamen rekonstruieren.
    - birthday: { day, month, year } falls Geburtstag erwähnt (year kann null sein)`,
     },
+    hotTopicExhaustiveness: `VOLLSTÄNDIGKEIT DER HOT TOPICS - KRITISCH:
+- Erstelle EINEN EIGENEN hot topic pro eigenständiger Neuigkeit. Führe NIEMALS zwei
+  verschiedene Neuigkeiten zusammen, auch wenn sie zusammenhängen: "Umzug" und
+  "Wohnungsbesichtigung" sind zwei hot topics, nicht einer; ebenso "Schwangerschaft"
+  und "Suche nach einer Tagesmutter".
+- Lies vor dem Antworten die Transkription erneut und zähle die genannten temporären
+  Themen. Dein hotTopics-Array muss genauso viele enthalten. Sind es weniger, fehlt eines.
+- Ein bereits in BESTEHENDE THEMEN gelistetes Thema zählt ebenfalls: Fügt die Notiz ihm
+  ein neues Datum oder Detail hinzu, ohne es abzuschließen, erstelle den hot topic.
+- Kürze ist hier KEIN Ziel. Ein hot topic zu viel ist besser als einer zu wenig.`,
     absoluteRules: `ABSOLUTE REGELN:
 1. Erfinde NIEMALS Informationen, die nicht in der Transkription stehen
 2. Verwende ABSOLUTE Daten (YYYY-MM-DD), niemals relative
@@ -1535,6 +1582,8 @@ ${template.rules.rule5Content}
 ${getMeetingContextInstruction(language, currentDate)}
 
 ${getLovesInstruction(language)}
+
+${template.hotTopicExhaustiveness}
 
 ${template.absoluteRules}
 

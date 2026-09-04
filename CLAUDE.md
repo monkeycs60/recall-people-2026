@@ -24,6 +24,35 @@ error tracking. Le session replay et l'autocapture des interactions sont désact
 ce qui est observé (landing / mobile / backend) + la règle — si tu modifies le produit, mets à jour
 l'instrumentation (events / `$ai_generation`) **ET** `POSTHOG.md`.
 
+# Qualité d'extraction / Banc d'essai
+
+La route `/api/extract` est couverte par un banc de **20 transcriptions annotées** avec assertions
+programmatiques, mesure de rappel, succès de schéma, latence et coût — voir
+[`EXTRACTION-BENCH.md`](./EXTRACTION-BENCH.md) (procédure, les 20 cas, métriques de référence
+datées, historique des décisions de modèle).
+
+**Avant de toucher à `PROMPT_TEMPLATES` ou à `extractionSchema` dans `backend/src/routes/extract.ts`,
+lis-le** : deux régressions silencieuses y sont documentées, et la seconde a coûté 14 % de retries
+en production sans qu'aucun test ne la voie.
+
+Deux pièges que le banc a mis au jour, et qui se reproduiront :
+
+- **Jamais d'année en dur dans un exemple de date.** Un exemple figé à 2026 fait créer des rappels
+  dans le passé dès que le mois est écoulé. Les exemples se calculent depuis la date du jour
+  (`buildDateExamples()`).
+- **Le prompt et le schéma Zod sont deux contrats concurrents.** Si le bloc `FORMAT JSON` du prompt
+  énumère les champs, il doit les énumérer **tous** : gpt-oss suit le prompt plutôt que le
+  `json_schema` et la validation Zod rejette la réponse. `test/prompt-schema-contract.test.mjs`
+  garde cet invariant sur les six routes structurées.
+
+Après toute modification du prompt d'extraction, relancer le banc sur le modèle de production et
+comparer aux métriques de référence :
+
+```bash
+cd backend && MODELS=gpt-oss PROMPTS=prod RUNS=3 \
+  npx tsx --env-file=.env --env-file=.dev.vars scripts/ab-extract-models.ts
+```
+
 # App Name
 
 The app is called **Recall People** (two words, always together). Never shorten to just "Recall" in user-facing copy. In code identifiers, `recall-people` or `recallPeople` is acceptable.
