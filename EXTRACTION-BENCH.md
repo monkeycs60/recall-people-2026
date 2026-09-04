@@ -121,9 +121,15 @@ de la règle d'exhaustivité. **Ligne de référence pour les prochaines compara
 | Latence médiane | **1 085 ms** | 1 160 ms | 1 196 ms | 1 223 ms |
 | Coût / 1 000 extractions | **2,39 $** | 2,42 $ | 6,51 $ | 6,78 $ |
 
-`prod` est le prompt du dépôt ; `v2` ajoutait la règle d'exhaustivité, **désormais intégrée à
-`PROMPT_TEMPLATES`**. La colonne `gpt-oss / v2` est donc la ligne à battre : c'est ce que fait
-la production depuis le 4 septembre 2026.
+`prod` était alors le prompt du dépôt ; `v2` ajoutait la règle d'exhaustivité que le banc
+injectait au moment du test.
+
+**Cette règle est depuis intégrée à `PROMPT_TEMPLATES`.** Mesure de contrôle après intégration,
+60 runs sur `gpt-oss` avec le prompt du dépôt — c'est la ligne à battre :
+
+| Succès schéma | Rappel | Juge | Simples | Complexes | Latence méd. | Coût / 1 000 |
+|---|---|---|---|---|---|---|
+| **100 %** (60/60) | **94 %** | **8,32** | 96 % | 96 % | 1 132 ms | 2,49 $ |
 
 ## Historique des décisions
 
