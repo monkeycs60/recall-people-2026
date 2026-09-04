@@ -175,14 +175,14 @@ searchRoutes.post('/', async (c) => {
 		trace?.update({ output: { success: true, resultsCount: sortedResults.length, processingTimeMs } });
 
 		// Run evaluation in background (non-blocking)
-		if (c.env.XAI_API_KEY && c.executionCtx) {
+		if (c.env.ENABLE_EVALUATION === 'true' && c.env.OPENAI_API_KEY && c.executionCtx) {
 			c.executionCtx.waitUntil(
 				evaluateSearch(
 					query,
 					{ facts, memories, notes },
 					sortedResults,
 					{
-						XAI_API_KEY: c.env.XAI_API_KEY,
+						OPENAI_API_KEY: c.env.OPENAI_API_KEY,
 						enableEvaluation: c.env.ENABLE_EVALUATION === 'true',
 						samplingRate: parseFloat(c.env.EVALUATION_SAMPLING_RATE || '0.25'),
 						distinctId: userId,

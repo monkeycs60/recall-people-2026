@@ -1,19 +1,27 @@
 import { generateText, Output } from 'ai';
 import { z } from 'zod';
-import { createXai } from '@ai-sdk/xai';
+import { createOpenAI } from '@ai-sdk/openai';
 import { withTracing } from '@posthog/ai/vercel';
 import { getPostHog, aiTracingOptions, captureServerException } from './posthog';
 
-const EVALUATOR_MODEL = 'grok-4-1-fast';
+const EVALUATOR_MODEL = 'gpt-5.6-luna';
+const EVALUATOR_PROVIDER = 'openai';
 
 /**
- * Build the Grok evaluator model, wrapped with PostHog tracing when enabled so
+ * Un effort de raisonnement plus eleve ne change pas assez la note pour
+ * justifier les tokens : le juge tranche sur une grille fermee, pas sur un
+ * probleme ouvert.
+ */
+const EVALUATOR_REASONING_EFFORT = 'medium';
+
+/**
+ * Build the evaluator model, wrapped with PostHog tracing when enabled so
  * each LLM-as-judge call emits a $ai_generation event. No-op when PostHog is
  * disabled. Best-effort: tracing failure falls back to the untraced model.
  */
 function createEvaluatorModel(config: EvaluatorConfig, evaluator: string) {
-	const grok = createXai({ apiKey: config.XAI_API_KEY });
-	const baseModel = grok(EVALUATOR_MODEL);
+	const openai = createOpenAI({ apiKey: config.OPENAI_API_KEY });
+	const baseModel = openai(EVALUATOR_MODEL);
 
 	const phClient = getPostHog();
 	if (!phClient) {
@@ -29,7 +37,7 @@ function createEvaluatorModel(config: EvaluatorConfig, evaluator: string) {
 				properties: {
 					feature: 'evaluator',
 					evaluator,
-					$ai_provider: 'xai',
+					$ai_provider: EVALUATOR_PROVIDER,
 				},
 			})
 		);
@@ -42,9 +50,9 @@ function createEvaluatorModel(config: EvaluatorConfig, evaluator: string) {
 /**
  * LLM-as-a-Judge Evaluators for Quality Measurement
  *
- * These evaluators use cheap, fast LLMs (like Grok 4.1 Fast) to automatically
- * evaluate the quality of AI outputs. They're designed to be cost-effective
- * with sampling strategies to reduce evaluation costs.
+ * These evaluators run a second LLM over an output to score it. Each call is a
+ * billed generation on top of the one it judges, so they stay behind
+ * ENABLE_EVALUATION and a sampling rate.
  */
 
 /**
@@ -69,7 +77,7 @@ export type EvaluationResult = z.infer<typeof evaluationSchema>;
  * Configuration for evaluators
  */
 export type EvaluatorConfig = {
-	XAI_API_KEY: string;
+	OPENAI_API_KEY: string;
 	samplingRate?: number; // 0-1, default 0.25 (25%)
 	enableEvaluation?: boolean; // default false
 	distinctId?: string; // user id for PostHog $ai_generation attribution
@@ -157,6 +165,9 @@ Sois strict et objectif.`;
 			model: evaluatorModel,
 			output: Output.object({ schema: evaluationSchema }),
 			prompt,
+			providerOptions: {
+				openai: { reasoningEffort: EVALUATOR_REASONING_EFFORT },
+			},
 		});
 
 		return evaluation!;
@@ -165,7 +176,7 @@ Sois strict et objectif.`;
 		captureServerException(error, config.distinctId, {
 			feature: 'evaluator',
 			evaluator: 'extraction',
-			provider: 'xai',
+			provider: EVALUATOR_PROVIDER,
 			model: EVALUATOR_MODEL,
 		});
 		return null;
@@ -241,6 +252,9 @@ Sois strict et objectif.`;
 			model: evaluatorModel,
 			output: Output.object({ schema: evaluationSchema }),
 			prompt,
+			providerOptions: {
+				openai: { reasoningEffort: EVALUATOR_REASONING_EFFORT },
+			},
 		});
 
 		return evaluation!;
@@ -249,7 +263,7 @@ Sois strict et objectif.`;
 		captureServerException(error, config.distinctId, {
 			feature: 'evaluator',
 			evaluator: 'search',
-			provider: 'xai',
+			provider: EVALUATOR_PROVIDER,
 			model: EVALUATOR_MODEL,
 		});
 		return null;
@@ -340,6 +354,9 @@ Sois strict et objectif.`;
 			model: evaluatorModel,
 			output: Output.object({ schema: evaluationSchema }),
 			prompt,
+			providerOptions: {
+				openai: { reasoningEffort: EVALUATOR_REASONING_EFFORT },
+			},
 		});
 
 		return evaluation!;
@@ -348,7 +365,7 @@ Sois strict et objectif.`;
 		captureServerException(error, config.distinctId, {
 			feature: 'evaluator',
 			evaluator: 'detection',
-			provider: 'xai',
+			provider: EVALUATOR_PROVIDER,
 			model: EVALUATOR_MODEL,
 		});
 		return null;
@@ -430,6 +447,9 @@ Sois TRÈS strict sur les hallucinations et les adjectifs.`;
 			model: evaluatorModel,
 			output: Output.object({ schema: evaluationSchema }),
 			prompt,
+			providerOptions: {
+				openai: { reasoningEffort: EVALUATOR_REASONING_EFFORT },
+			},
 		});
 
 		return evaluation!;
@@ -438,7 +458,7 @@ Sois TRÈS strict sur les hallucinations et les adjectifs.`;
 		captureServerException(error, config.distinctId, {
 			feature: 'evaluator',
 			evaluator: 'summary',
-			provider: 'xai',
+			provider: EVALUATOR_PROVIDER,
 			model: EVALUATOR_MODEL,
 		});
 		return null;

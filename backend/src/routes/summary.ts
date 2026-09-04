@@ -253,10 +253,10 @@ ${template.summaryLabel}`;
 		console.log('[Summary] Success! Generated summary:', { summaryLength: summary.length });
 
 		// Run evaluation in background (non-blocking)
-		if (c.env.XAI_API_KEY && c.executionCtx) {
+		if (c.env.ENABLE_EVALUATION === 'true' && c.env.OPENAI_API_KEY && c.executionCtx) {
 			c.executionCtx.waitUntil(
 				evaluateSummary(contactName, transcriptions, summary, {
-					XAI_API_KEY: c.env.XAI_API_KEY,
+					OPENAI_API_KEY: c.env.OPENAI_API_KEY,
 					enableEvaluation: c.env.ENABLE_EVALUATION === 'true',
 					samplingRate: parseFloat(
 						c.env.EVALUATION_SAMPLING_RATE || '0.25'

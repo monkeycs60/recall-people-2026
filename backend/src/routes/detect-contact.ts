@@ -17,6 +17,7 @@ type Bindings = {
   CEREBRAS_API_KEY: string;
   DETECT_CONTACT_MODEL?: string;
   XAI_API_KEY?: string;
+  OPENAI_API_KEY?: string;
   ENABLE_PERFORMANCE_LOGGING?: string | boolean;
   ENABLE_EVALUATION?: string;
   EVALUATION_SAMPLING_RATE?: string;
@@ -766,14 +767,14 @@ detectContactRoutes.post('/', async (c) => {
     generation?.end({ output: validatedDetection });
 
     // Run evaluation in background (non-blocking)
-    if (c.env.XAI_API_KEY && c.executionCtx) {
+    if (c.env.ENABLE_EVALUATION === 'true' && c.env.OPENAI_API_KEY && c.executionCtx) {
       c.executionCtx.waitUntil(
         evaluateDetection(
           transcription,
           contacts,
           validatedDetection,
           {
-            XAI_API_KEY: c.env.XAI_API_KEY,
+            OPENAI_API_KEY: c.env.OPENAI_API_KEY,
             enableEvaluation: c.env.ENABLE_EVALUATION === 'true',
             samplingRate: parseFloat(c.env.EVALUATION_SAMPLING_RATE || '0.25'),
           }
