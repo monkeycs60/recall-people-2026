@@ -8,6 +8,16 @@ import { format, addDays } from 'date-fns';
  * Volontairement en prose decousue : C4 du banc principal montre que six sujets
  * enumeres ("un... deux... trois...") passent sans peine. Ce qui coute, c'est
  * la dispersion, pas le nombre de mots.
+ *
+ * expectedTopics ne liste QUE ce qui merite un rappel, au sens de la regle 2 du
+ * prompt. En sont exclus :
+ *   - les habitudes regulieres, meme recemment reprises ("le velo tous les
+ *     jours", "la basse une fois par semaine", "le festival tous les ans") ;
+ *   - les evenements deja acheves et sans suite ("le chat a ete opere la
+ *     semaine derniere, tout s'est bien passe").
+ * La premiere version de ce fichier les comptait, et une mesure de rappel a
+ * conclu a tort que le modele oubliait des sujets alors qu'il appliquait la
+ * regle correctement.
  */
 
 const now = new Date();
@@ -24,13 +34,12 @@ export type LongCase = {
 
 export const LONG_CASES: LongCase[] = [
   {
-    id: 'L1-150mots-6sujets',
+    id: 'L1-150mots-5sujets',
     words: 156,
     language: 'fr',
     transcription:
       "Bon, note un peu longue sur Yasmine parce qu'on a parlé deux heures. Alors déjà elle a changé de service, elle est passée au juridique le mois dernier, ça se passe bien. Ensuite elle m'a dit qu'elle avait un souci avec son proprio, il veut vendre l'appart, elle a trois mois pour partir. Du coup elle cherche à acheter, elle a un rendez-vous banque vendredi pour son prêt. Après on a parlé de son père, il se fait opérer du genou le 3 du mois prochain, elle va descendre à Toulouse pour être là. Elle m'a raconté aussi qu'elle s'était remise au piano, elle prend des cours le samedi, ça la détend. Ah et elle part en Grèce deux semaines en octobre avec ses soeurs, c'est réservé. Et le dernier truc, elle passe le TOEIC dans un mois pour son dossier de mutation. Voilà. Elle est en forme mais elle a beaucoup de choses en cours.",
     expectedTopics: [
-      { label: 'changement de service', keywords: ['juridique', 'service'] },
       { label: 'départ de l appartement', keywords: ['proprio', 'appart', 'logement', 'partir'] },
       { label: 'achat / prêt', keywords: ['banque', 'pret', 'prêt', 'achat', 'acheter'] },
       { label: 'opération du père', keywords: ['genou', 'pere', 'père', 'operation', 'opération'] },
@@ -39,7 +48,7 @@ export const LONG_CASES: LongCase[] = [
     ],
   },
   {
-    id: 'L2-230mots-8sujets',
+    id: 'L2-230mots-7sujets',
     words: 233,
     language: 'fr',
     transcription:
@@ -51,12 +60,11 @@ export const LONG_CASES: LongCase[] = [
       { label: 'cours de cuisine', keywords: ['cuisine'] },
       { label: 'IRM du dos', keywords: ['irm', 'dos'] },
       { label: 'retour de la soeur', keywords: ['soeur', 'sœur', 'montreal', 'montréal'] },
-      { label: 'reprise de la basse', keywords: ['basse'] },
       { label: 'tribunal / bailleur', keywords: ['tribunal', 'bailleur', 'audience'] },
     ],
   },
   {
-    id: 'L3-320mots-10sujets',
+    id: 'L3-320mots-8sujets',
     words: 318,
     language: 'fr',
     transcription:
@@ -69,13 +77,11 @@ export const LONG_CASES: LongCase[] = [
       { label: 'rendez-vous thyroïde', keywords: ['thyroide', 'thyroïde', 'specialiste', 'spécialiste'] },
       { label: 'travaux salle de bain', keywords: ['salle de bain', 'travaux', 'chantier'] },
       { label: 'accompagnement de la mère', keywords: ['mere', 'mère', 'assistante sociale', 'domicile'] },
-      { label: 'opération du chat', keywords: ['chat'] },
-      { label: 'festival de Bourges', keywords: ['bourges', 'festival'] },
       { label: 'résidence d écriture', keywords: ['residence', 'résidence', 'ecriture', 'écriture', 'candidat'] },
     ],
   },
   {
-    id: 'L4-430mots-12sujets',
+    id: 'L4-430mots-10sujets',
     words: 428,
     language: 'fr',
     transcription:
@@ -89,10 +95,8 @@ export const LONG_CASES: LongCase[] = [
       { label: 'mariage de la soeur', keywords: ['mariage', 'temoin', 'témoin', 'discours'] },
       { label: 'JLPT japonais', keywords: ['jlpt', 'japonais'] },
       { label: 'boîte de vitesses', keywords: ['voiture', 'vitesses', 'garagiste', 'devis'] },
-      { label: 'psychothérapie', keywords: ['psychotherapie', 'psychothérapie', 'therapie', 'thérapie'] },
       { label: 'traitement du chien', keywords: ['chien', 'articulation'] },
       { label: 'side-project appli', keywords: ['side', 'appli', 'projet', 'clubs'] },
-      { label: 'vélo quotidien', keywords: ['velo', 'vélo'] },
     ],
   },
 ];

@@ -11,6 +11,10 @@ import { LONG_CASES, type LongCase } from './long-note-cases';
  * Mesure principale : le RAPPEL, part des sujets reellement presents qu'on
  * retrouve. Les assertions du banc principal ne le voient pas -- une extraction
  * peut etre juste sur tout ce qu'elle contient et taire la moitie de la note.
+ *
+ * Un reasoning eleve a ete essaye puis retire : 9 runs sur 12 rendaient une
+ * reponse vide, pour 20 s de latence mediane, soit au-dela de l'abort de 15 s
+ * de la route. Inexploitable ici.
  */
 
 const MODEL = process.env.MODEL || 'gpt-oss-120b';
@@ -27,17 +31,12 @@ type Strategy = {
 
 const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
-const extract = async (
-  cerebras: ReturnType<typeof createCerebras>,
-  prompt: string,
-  reasoningEffort?: 'low' | 'medium' | 'high'
-) => {
+const extract = async (cerebras: ReturnType<typeof createCerebras>, prompt: string) => {
   const res = await generateText({
     model: cerebras(MODEL),
     output: Output.object({ schema: extractionSchema }),
     prompt,
     temperature: 0,
-    ...(reasoningEffort ? { providerOptions: { cerebras: { reasoningEffort } } } : {}),
   });
   const u = res.usage || ({} as Record<string, number>);
   return {
@@ -58,14 +57,6 @@ const STRATEGIES: Strategy[] = [
     label: 'Passe unique (production actuelle)',
     run: async (c, cerebras) => {
       const r = await extract(cerebras, buildExtractionPrompt(c.transcription, undefined, c.language));
-      return { out: r.out, calls: 1, inTok: r.inTok, outTok: r.outTok };
-    },
-  },
-  {
-    key: 'reasoning-high',
-    label: 'Passe unique, reasoning high',
-    run: async (c, cerebras) => {
-      const r = await extract(cerebras, buildExtractionPrompt(c.transcription, undefined, c.language), 'high');
       return { out: r.out, calls: 1, inTok: r.inTok, outTok: r.outTok };
     },
   },

@@ -56,3 +56,6 @@ app-example
 # generated native folders
 /ios
 /android
+
+# Secrets MCP Gemini (local)
+.gemini/settings.json

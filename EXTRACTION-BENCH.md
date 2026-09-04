@@ -127,12 +127,13 @@ de la règle d'exhaustivité. **Ligne de référence pour les prochaines compara
 `prod` était alors le prompt du dépôt ; `v2` ajoutait la règle d'exhaustivité que le banc
 injectait au moment du test.
 
-**Cette règle est depuis intégrée à `PROMPT_TEMPLATES`.** Mesure de contrôle après intégration,
-60 runs sur `gpt-oss` avec le prompt du dépôt — c'est la ligne à battre :
+**Cette règle est depuis intégrée à `PROMPT_TEMPLATES`**, ainsi qu'une seconde sur les
+situations à plusieurs échéances (voir plus bas). Mesure de contrôle sur le prompt du dépôt,
+60 runs sur `gpt-oss` — c'est la ligne à battre :
 
 | Succès schéma | Rappel | Juge | Simples | Complexes | Latence méd. | Coût / 1 000 |
 |---|---|---|---|---|---|---|
-| **100 %** (60/60) | **94 %** | **8,32** | 96 % | 96 % | 1 132 ms | 2,49 $ |
+| **100 %** (60/60) | **96 %** | 8,02 | 96 % | 96 % | 1 102 ms | 2,57 $ |
 
 ## Historique des décisions
 
@@ -164,12 +165,11 @@ tranché ici : il reste valable et indépendant de ces résultats, mais n'est pa
 
 ## Disposition du prompt et cache Cerebras — 5 septembre 2026
 
-`buildExtractionPrompt` accepte un `layout`. En `cache-first` (défaut) tout ce qui ne varie pas
-d'une requête à l'autre est groupé en tête, et la transcription passe en fin de prompt : le
-préfixe commun entre deux requêtes atteint **95 % du prompt**. En `legacy`, la transcription
-arrive au onzième centile et casse le préfixe.
+**Essayé puis abandonné.** L'idée était de grouper en tête tout ce qui ne varie pas d'une requête
+à l'autre et de passer la transcription en fin de prompt, pour que le préfixe commun atteigne
+95 % du prompt au lieu du onzième centile.
 
-Mesuré sur 60 runs par disposition :
+Mesuré sur 60 runs par disposition, avant abandon :
 
 | | cache-first | legacy |
 |---|---|---|
@@ -179,13 +179,14 @@ Mesuré sur 60 runs par disposition :
 | Rappel | 93 % | 94 % |
 | Juge | 8,22 | 8,25 |
 
-La qualité est identique à effectif égal. **Le cache n'apporte aucune économie** : la
+La qualité est identique à effectif égal. Mais **le cache n'apporte aucune économie** : la
 documentation Cerebras précise que les tokens d'entrée sont facturés au tarif standard qu'ils
 viennent du cache ou non. Le gain est la latence (~5 %) et le fait que les tokens cachés ne
 comptent pas dans la limite TPM non-cachée. TTL d'au moins 5 minutes, blocs de 128 tokens,
-automatique.
+automatique. Un gain de 5 % de latence ne justifiait pas de réorganiser le prompt : la
+disposition historique a été rétablie.
 
-Une variante testée puis abandonnée : répéter les consignes de sécurité **après** la
+Une variante également abandonnée : répéter les consignes de sécurité **après** la
 transcription, pour retrouver la posture anti-injection de `legacy` où les règles suivaient
 l'entrée utilisateur. Elle coûte 3 points de rappel à effectif égal (90 % contre 93 % sur
 60 runs, 88 % sur un autre échantillon de 40). La protection qui compte reste `wrapUserInput`
@@ -228,3 +229,38 @@ même situation, ce qui donnerait deux rappels doublons à l'utilisateur.
 **Avant toute nouvelle itération sur ce sujet**, corriger `expectedTopics` dans
 `long-note-cases.ts` pour en retirer les habitudes régulières et les événements terminés.
 Sinon toute mesure future répétera le même biais.
+
+## Une situation, plusieurs échéances — 5 septembre 2026
+
+Défaut résiduel après la règle d'exhaustivité : le modèle reconnaissait bien une situation mais
+la rendait en un seul hot topic là où elle porte plusieurs échéances distinctes. « Le proprio
+veut vendre, trois mois pour partir, rendez-vous banque vendredi » donnait un topic au lieu de
+trois — donc un seul rappel pour trois échéances.
+
+Une règle a été ajoutée aux cinq langues, avec son test explicite : *si deux éléments méritent
+des rappels à des moments différents, ce sont deux hot topics*.
+
+| | sans la règle | règle seule | règle + gardes |
+|---|---|---|---|
+| **Rappel des sujets** | 93 % | **96 %** | **96 %** |
+| Assertions simples | 96 % | 95 % | 96 % |
+| Assertions complexes | 97 % | 95 % | 96 % |
+| Échecs d'assertion (sur ~1 500) | 11 | 17 | 14 |
+| Juge | 8,26 | 8,25 | 8,02 |
+| Coût / 1 000 | 2,49 $ | 2,56 $ | 2,57 $ |
+
+La règle seule gagne 3 points de rappel mais **crée des doublons** : elle recréait un hot topic
+déjà listé dans les actualités existantes auquel la note n'ajoutait rien (`C12`, 2 occurrences
+sur 3 runs) et inventait un hot topic sur une note qui n'en contient aucun (`S2`). En
+production, ce sont des rappels en double pour le même événement.
+
+Deux gardes ont donc été ajoutées : la règle **découpe** une situation réellement présente, elle
+n'autorise ni à inventer une échéance non mentionnée, ni à recréer une actualité existante à
+laquelle la note n'ajoute rien de neuf. Les trois régressions ciblées disparaissent.
+
+**Ce que le bilan n'est pas :** un gain net sur tous les tableaux. Le rappel monte de 3 points et
+s'y tient sur deux mesures indépendantes, les assertions reviennent à un écart de 3 échecs sur
+environ 1 500, mais le juge ne corrobore pas — il donne 8,37 / 8,25 / 8,02 sur des prompts très
+proches, ce qui situe plutôt son bruit à n=60 qu'une tendance. L'arbitrage retenu privilégie le
+rappel parce qu'un hot topic manqué est un rappel qui ne se déclenchera jamais, alors qu'une
+assertion isolée qui tombe se dégrade en douceur.

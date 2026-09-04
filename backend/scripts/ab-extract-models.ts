@@ -2,7 +2,7 @@ import { generateText, Output } from 'ai';
 import { createCerebras } from '@ai-sdk/cerebras';
 import { createOpenAI } from '@ai-sdk/openai';
 import { z } from 'zod';
-import { extractionSchema, buildExtractionPrompt, type PromptLayout } from '../src/routes/extract';
+import { extractionSchema, buildExtractionPrompt } from '../src/routes/extract';
 import { CASES, TODAY, type Case, type Extraction } from './ab-cases';
 
 /**
@@ -54,14 +54,43 @@ EXHAUSTIVIDAD DE LOS HOT TOPICS - CRÍTICO:
 - La concisión NO es un objetivo aquí. Mejor un hot topic de más que uno olvidado.`,
 };
 
+
+/**
+ * Le defaut residuel apres la regle d'exhaustivite : le modele reconnait bien
+ * une situation mais la rend en un seul hot topic la ou elle porte plusieurs
+ * echeances distinctes, chacune meritant son rappel.
+ */
+const FACETS_ADDENDUM: Record<string, string> = {
+  fr: `
+UNE SITUATION PEUT PORTER PLUSIEURS ÉCHÉANCES:
+- Si une même situation implique plusieurs échéances ou démarches distinctes, crée UN hot topic
+  PAR ÉCHÉANCE, pas un seul pour la situation entière.
+- Exemple: "le proprio veut vendre, j'ai trois mois pour partir, et j'ai rendez-vous à la banque
+  vendredi pour un prêt" = TROIS hot topics (départ du logement, recherche d'achat, rendez-vous
+  bancaire), parce que chacun a sa propre date et son propre suivi.
+- Le test: si deux éléments méritent des rappels à des moments différents, ce sont deux hot topics.`,
+  en: `
+ONE SITUATION CAN CARRY SEVERAL DEADLINES:
+- When a single situation involves several distinct deadlines or steps, create ONE hot topic
+  PER DEADLINE, not one for the whole situation.
+- Example: "the landlord is selling, I have three months to move out, and I have a bank
+  appointment Friday about a loan" = THREE hot topics (moving out, house hunting, bank
+  appointment), because each has its own date and its own follow-up.
+- The test: if two items deserve reminders at different moments, they are two hot topics.`,
+  es: `
+UNA SITUACIÓN PUEDE TENER VARIOS PLAZOS:
+- Si una misma situación implica varios plazos o gestiones distintas, crea UN hot topic POR
+  PLAZO, no uno solo para toda la situación.
+- La prueba: si dos elementos merecen recordatorios en momentos diferentes, son dos hot topics.`,
+};
+
 type PromptVariant = { key: string; decorate: (prompt: string, language: string) => string };
 
 const ALL_PROMPTS: PromptVariant[] = [
   { key: 'prod', decorate: (p) => p },
   { key: 'recall', decorate: (p, lang) => p + '\n' + (RECALL_ADDENDUM[lang] || RECALL_ADDENDUM.fr) },
+  { key: 'facets', decorate: (p, lang) => p + '\n' + (FACETS_ADDENDUM[lang] || FACETS_ADDENDUM.fr) },
 ];
-
-const ALL_LAYOUTS: PromptLayout[] = ['cache-first', 'legacy'];
 
 const PRICING: Record<string, { in: number; out: number }> = {
   'gpt-oss-120b': { in: 0.35, out: 0.75 },
@@ -114,7 +143,7 @@ Score 0-10 : 9-10 parfait, 7-8 très bon, 4-6 moyen, 1-3 mauvais. Sois strict et
 }
 
 type Run = {
-  caseId: string; tier: string; model: string; prompt: string; layout: string; ok: boolean; error?: string;
+  caseId: string; tier: string; model: string; prompt: string; ok: boolean; error?: string;
   latencyMs: number; inputTokens: number; cachedInputTokens: number; outputTokens: number;
   reasoningTokens: number; costUsd: number;
   checksPassed: number; checksTotal: number; failedChecks: string[];
@@ -128,16 +157,16 @@ const TIMEOUT_MS = Number(process.env.TIMEOUT_MS || 90000);
 const CONCURRENCY = Number(process.env.CONCURRENCY || 4);
 
 async function runOne(
-  c: Case, m: ModelVariant, pv: PromptVariant, layout: PromptLayout,
+  c: Case, m: ModelVariant, pv: PromptVariant,
   cerebras: ReturnType<typeof createCerebras>, openai: ReturnType<typeof createOpenAI>
 ): Promise<Run> {
   const prompt = pv.decorate(
-    buildExtractionPrompt(c.transcription, c.currentContact, c.language, undefined, layout),
+    buildExtractionPrompt(c.transcription, c.currentContact, c.language),
     c.language
   );
   const started = Date.now();
   const base: Run = {
-    caseId: c.id, tier: c.tier, model: m.key, prompt: pv.key, layout, ok: false, latencyMs: 0,
+    caseId: c.id, tier: c.tier, model: m.key, prompt: pv.key, ok: false, latencyMs: 0,
     inputTokens: 0, cachedInputTokens: 0, outputTokens: 0, reasoningTokens: 0, costUsd: 0,
     checksPassed: 0, checksTotal: 0, failedChecks: [],
     topicsExtracted: 0, topicsExpected: c.expectedTopics,
@@ -212,19 +241,14 @@ async function main() {
   const pick = (name: string) => (process.env[name] || '').split(',').map((s) => s.trim()).filter(Boolean);
   const onlyModels = pick('MODELS');
   const onlyPrompts = pick('PROMPTS');
-  const onlyLayouts = pick('LAYOUTS');
   const models = onlyModels.length ? ALL_MODELS.filter((m) => onlyModels.includes(m.key)) : ALL_MODELS;
   const prompts = onlyPrompts.length ? ALL_PROMPTS.filter((p) => onlyPrompts.includes(p.key)) : ALL_PROMPTS;
-  const layouts = onlyLayouts.length
-    ? ALL_LAYOUTS.filter((l) => onlyLayouts.includes(l))
-    : (['cache-first'] as PromptLayout[]);
-
   const jobs: (() => Promise<Run>)[] = [];
-  for (const c of CASES) for (const m of models) for (const p of prompts) for (const l of layouts) {
-    for (let i = 0; i < RUNS; i++) jobs.push(() => runOne(c, m, p, l, cerebras, openai));
+  for (const c of CASES) for (const m of models) for (const p of prompts) {
+    for (let i = 0; i < RUNS; i++) jobs.push(() => runOne(c, m, p, cerebras, openai));
   }
   console.log(
-    `${jobs.length} runs · ${CASES.length} cas × ${models.length} modèles × ${prompts.length} prompts × ${layouts.length} layouts × ${RUNS}\n`
+    `${jobs.length} runs · ${CASES.length} cas × ${models.length} modèles × ${prompts.length} prompts × ${RUNS}\n`
   );
 
   let done = 0;
@@ -235,7 +259,7 @@ async function main() {
       const tag = r.ok
         ? `${r.checksPassed}/${r.checksTotal} · ${r.topicsExtracted}/${r.topicsExpected} topics · juge ${r.judgeScore ?? '—'} · ${r.latencyMs}ms`
         : `ERREUR ${r.error}`;
-      console.log(`(${done}/${jobs.length}) [${r.caseId}] ${r.model}/${r.prompt}/${r.layout}  ${tag}`);
+      console.log(`(${done}/${jobs.length}) [${r.caseId}] ${r.model}/${r.prompt}  ${tag}`);
       return r;
     }),
     CONCURRENCY
@@ -246,10 +270,10 @@ async function main() {
   fs.writeFileSync(outPath, JSON.stringify({ today: TODAY, runs }, null, 2));
 
   console.log(`\nRésultats bruts → ${outPath}`);
-  console.log('\n=== SYNTHÈSE (modèle × prompt × layout) ===');
+  console.log('\n=== SYNTHÈSE (modèle × prompt) ===');
   const pct = (a: number, b: number) => (b ? ((a / b) * 100).toFixed(0) + '%' : '—');
-  for (const m of models) for (const p of prompts) for (const l of layouts) {
-    const rs = runs.filter((r) => r.model === m.key && r.prompt === p.key && r.layout === l);
+  for (const m of models) for (const p of prompts) {
+    const rs = runs.filter((r) => r.model === m.key && r.prompt === p.key);
     const ok = rs.filter((r) => r.ok);
     const lat = ok.map((r) => r.latencyMs).sort((a, b) => a - b);
     const tier = (t: string) => {
@@ -260,7 +284,7 @@ async function main() {
     const judged = ok.filter((r) => r.judgeScore !== null);
     const sum = (f: (r: Run) => number) => ok.reduce((a, r) => a + f(r), 0);
     console.log([
-      `\n${m.key} / prompt=${p.key} / layout=${l}`,
+      `\n${m.key} / prompt=${p.key}`,
       `  succès schéma  : ${ok.length}/${rs.length} (${pct(ok.length, rs.length)})`,
       `  checks simple  : ${tier('simple')}`,
       `  checks complexe: ${tier('complex')}`,
