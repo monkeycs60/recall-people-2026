@@ -280,7 +280,7 @@ const PROMPT_TEMPLATES: Record<string, {
 2. Utilise des dates ABSOLUES (YYYY-MM-DD), jamais relatives
 3. Si pas assez d'informations, retourne moins de résultats
 4. Ne crée un hot topic QUE si c'est temporaire/actionnable`,
-    formatJson: `FORMAT JSON:
+    formatJson: `FORMAT JSON (les 7 champs sont OBLIGATOIRES : renvoie meetingContext=null et loves=[] si rien à mettre dedans):
 {
   "contactIdentified": {
     "firstName": string,
@@ -305,7 +305,9 @@ const PROMPT_TEMPLATES: Record<string, {
       "resolution": "Description concrète de ce qui s'est passé"
     }
   ],
-  "noteTitle": "Titre SPÉCIFIQUE capturant le sujet principal (2-5 mots)"
+  "noteTitle": "Titre SPÉCIFIQUE capturant le sujet principal (2-5 mots)",
+  "meetingContext": "Où/comment l'utilisateur a rencontré le contact" | null,
+  "loves": ["Libellé court", "..."]
 }`,
     noteTitleRules: {
       header: 'RÈGLES POUR noteTitle - CRITIQUE:\nLe titre doit permettre à l\'utilisateur de retrouver facilement la note plus tard.',
@@ -464,7 +466,7 @@ Exemple 4 - "On a pris un café, elle m'a raconté ses vacances":
 2. Use ABSOLUTE dates (YYYY-MM-DD), never relative
 3. If not enough information, return fewer results
 4. Only create a hot topic if it's temporary/actionable`,
-    formatJson: `JSON FORMAT:
+    formatJson: `JSON FORMAT (all 7 fields are REQUIRED: return meetingContext=null and loves=[] when there is nothing to put in them):
 {
   "contactIdentified": {
     "firstName": string,
@@ -489,7 +491,9 @@ Exemple 4 - "On a pris un café, elle m'a raconté ses vacances":
       "resolution": "Concrete description of what happened"
     }
   ],
-  "noteTitle": "SPECIFIC title capturing the main topic (2-5 words)"
+  "noteTitle": "SPECIFIC title capturing the main topic (2-5 words)",
+  "meetingContext": "Where/how the user met the contact" | null,
+  "loves": ["Short label", "..."]
 }`,
     noteTitleRules: {
       header: 'RULES FOR noteTitle - CRITICAL:\nThe title should help the user easily find the note later.',
@@ -648,7 +652,7 @@ Example 4 - "We had coffee, she told me about her vacation":
 2. Usa fechas ABSOLUTAS (YYYY-MM-DD), nunca relativas
 3. Si no hay suficiente información, devuelve menos resultados
 4. Solo crea un hot topic si es temporal/accionable`,
-    formatJson: `FORMATO JSON:
+    formatJson: `FORMATO JSON (los 7 campos son OBLIGATORIOS: devuelve meetingContext=null y loves=[] si no hay nada):
 {
   "contactIdentified": {
     "firstName": string,
@@ -673,7 +677,9 @@ Example 4 - "We had coffee, she told me about her vacation":
       "resolution": "Descripción concreta de lo que pasó"
     }
   ],
-  "noteTitle": "Título ESPECÍFICO capturando el tema principal (2-5 palabras)"
+  "noteTitle": "Título ESPECÍFICO capturando el tema principal (2-5 palabras)",
+  "meetingContext": "Dónde/cómo el usuario conoció al contacto" | null,
+  "loves": ["Etiqueta corta", "..."]
 }`,
     noteTitleRules: {
       header: 'REGLAS PARA noteTitle - CRÍTICO:\nEl título debe permitir al usuario encontrar fácilmente la nota después.',
@@ -832,7 +838,7 @@ Ejemplo 4 - "Tomamos un café, me contó sus vacaciones":
 2. Usa date ASSOLUTE (YYYY-MM-DD), mai relative
 3. Se non ci sono abbastanza informazioni, restituisci meno risultati
 4. Crea un hot topic SOLO se è temporaneo/azionabile`,
-    formatJson: `FORMATO JSON:
+    formatJson: `FORMATO JSON (los 7 campos son OBLIGATORIOS: devuelve meetingContext=null y loves=[] si no hay nada):
 {
   "contactIdentified": {
     "firstName": string,
@@ -857,7 +863,9 @@ Ejemplo 4 - "Tomamos un café, me contó sus vacaciones":
       "resolution": "Descrizione concreta di cosa è successo"
     }
   ],
-  "noteTitle": "Titolo SPECIFICO che cattura l'argomento principale (2-5 parole)"
+  "noteTitle": "Titolo SPECIFICO che cattura l'argomento principale (2-5 parole)",
+  "meetingContext": "Dove/come l'utente ha conosciuto il contatto" | null,
+  "loves": ["Etichetta breve", "..."]
 }`,
     noteTitleRules: {
       header: 'REGOLE PER noteTitle - CRITICO:\nIl titolo deve permettere all\'utente di ritrovare facilmente la nota in seguito.',
@@ -1016,7 +1024,7 @@ Esempio 4 - "Abbiamo preso un caffè, mi ha raccontato le sue vacanze":
 2. Verwende ABSOLUTE Daten (YYYY-MM-DD), niemals relative
 3. Wenn nicht genug Informationen, gib weniger Ergebnisse zurück
 4. Erstelle ein Hot Topic NUR wenn es temporär/handlungsfähig ist`,
-    formatJson: `JSON-FORMAT:
+    formatJson: `JSON-FORMAT (alle 7 Felder sind PFLICHT: gib meetingContext=null und loves=[] zurück, wenn nichts hineingehört):
 {
   "contactIdentified": {
     "firstName": string,
@@ -1041,7 +1049,9 @@ Esempio 4 - "Abbiamo preso un caffè, mi ha raccontato le sue vacanze":
       "resolution": "Konkrete Beschreibung was passiert ist"
     }
   ],
-  "noteTitle": "SPEZIFISCHER Titel, der das Hauptthema erfasst (2-5 Wörter)"
+  "noteTitle": "SPEZIFISCHER Titel, der das Hauptthema erfasst (2-5 Wörter)",
+  "meetingContext": "Wo/wie der Nutzer den Kontakt kennengelernt hat" | null,
+  "loves": ["Kurzes Label", "..."]
 }`,
     noteTitleRules: {
       header: 'REGELN FÜR noteTitle - KRITISCH:\nDer Titel soll dem Benutzer helfen, die Notiz später leicht zu finden.',
