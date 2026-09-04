@@ -11,6 +11,8 @@ Les fichiers vivent dans `backend/scripts/` :
 | `ab-cases.ts` | Les 20 transcriptions et leurs assertions |
 | `ab-extract-models.ts` | Le runner : croise modèles × variantes de prompt, agrège les métriques |
 | `diag-schema-failures.ts` | Rejoue un cas N fois et capture la **réponse brute** quand la validation échoue |
+| `long-note-cases.ts` | 4 notes fleuves de 156 à 428 mots, pour l'étude dédiée |
+| `long-note-strategies.ts` | Compare des stratégies d'extraction sur ces notes |
 
 ## Lancer le banc
 
@@ -31,7 +33,8 @@ CASES=C10-english-recall,C5-double-resolution N=8 \
 ```
 
 Variables : `RUNS`, `CONCURRENCY`, `TIMEOUT_MS`, `MODELS` (`gpt-oss`, `qwen`),
-`PROMPTS` (`prod`, `recall`), `OUT`, et pour le diagnostic `MODEL`, `N`, `CASES`.
+`PROMPTS` (`prod`, `recall`), `LAYOUTS` (`cache-first`, `legacy`), `OUT`, et pour le
+diagnostic `MODEL`, `N`, `CASES`.
 
 > Le banc appelle l'API Cerebras et le juge OpenAI pour de vrai. Une campagne complète
 > (160 runs) coûte environ **1,20 $** et prend une dizaine de minutes.
@@ -158,3 +161,70 @@ Deux défauts de production ont été trouvés et corrigés à cette occasion :
 
 L'argument **vision** de Qwen (images en entrée, donc scan de carte de visite) n'a pas été
 tranché ici : il reste valable et indépendant de ces résultats, mais n'est pas jugé prioritaire.
+
+## Disposition du prompt et cache Cerebras — 5 septembre 2026
+
+`buildExtractionPrompt` accepte un `layout`. En `cache-first` (défaut) tout ce qui ne varie pas
+d'une requête à l'autre est groupé en tête, et la transcription passe en fin de prompt : le
+préfixe commun entre deux requêtes atteint **95 % du prompt**. En `legacy`, la transcription
+arrive au onzième centile et casse le préfixe.
+
+Mesuré sur 60 runs par disposition :
+
+| | cache-first | legacy |
+|---|---|---|
+| Tokens d'entrée en cache | **93 %** | 37 % |
+| Latence médiane / p95 | **1 005 ms** / 1 739 ms | 1 057 ms / 1 896 ms |
+| Assertions complexes | 97 % | 96 % |
+| Rappel | 93 % | 94 % |
+| Juge | 8,22 | 8,25 |
+
+La qualité est identique à effectif égal. **Le cache n'apporte aucune économie** : la
+documentation Cerebras précise que les tokens d'entrée sont facturés au tarif standard qu'ils
+viennent du cache ou non. Le gain est la latence (~5 %) et le fait que les tokens cachés ne
+comptent pas dans la limite TPM non-cachée. TTL d'au moins 5 minutes, blocs de 128 tokens,
+automatique.
+
+Une variante testée puis abandonnée : répéter les consignes de sécurité **après** la
+transcription, pour retrouver la posture anti-injection de `legacy` où les règles suivaient
+l'entrée utilisateur. Elle coûte 3 points de rappel à effectif égal (90 % contre 93 % sur
+60 runs, 88 % sur un autre échantillon de 40). La protection qui compte reste `wrapUserInput`
+et ses délimiteurs aléatoires, inchangée.
+
+## Notes longues — étude du 5 septembre 2026
+
+Quatre notes de 156 à 428 mots, 6 à 12 sujets, en prose décousue. Rappel par stratégie, 3 runs :
+
+| Stratégie | 156 m | 233 m | 318 m | 428 m | Global | Coût / 1 000 | Latence méd. |
+|---|---|---|---|---|---|---|---|
+| baseline (production) | 83 % | 92 % | 93 % | 89 % | 90 % | 3,58 $ | 1 679 ms |
+| reasoning high | — | 94 % | — | 92 % | 93 % | 18,42 $ | 20 088 ms |
+| inventaire puis extraction | 100 % | 100 % | 90 % | 92 % | 94 % | 4,06 $ | 2 125 ms |
+| extraction puis complétion | 83 % | 96 % | 93 % | 86 % | 90 % | 7,24 $ | 3 542 ms |
+
+**Aucune stratégie n'a été retenue**, pour trois raisons.
+
+1. **Le rappel ne décroît pas avec la longueur** (83 / 92 / 93 / 89 %). La note la plus courte
+   est la pire. Il n'y a donc pas de seuil de mots à détecter : un déclencheur « note fleuve »
+   instrumenterait un phénomène qui n'existe pas. Ce qui coûte, c'est la dispersion des sujets
+   dans la prose, pas le nombre de mots — `C4-rappel-5-sujets` du banc principal sort 5 sujets
+   sur 5 avec 85 mots parce qu'ils y sont énumérés.
+
+2. **`reasoning high` est inutilisable** : 9 runs sur 12 échouent en `No output generated`, et
+   20 s de latence médiane, très au-delà de l'abort à 15 s de la route. Son 93 % n'est calculé
+   que sur les survivants.
+
+3. **L'étalon sur-comptait.** Les sujets le plus souvent « manqués » — vélo quotidien,
+   psychothérapie hebdomadaire, reprise de la basse, opération du chat déjà faite, changement
+   de service déjà effectué — sont exactement ce que la règle 2 exclut : habitudes régulières
+   et événements passés terminés. Le modèle a raison, la liste attendue avait tort.
+
+Le seul défaut réel qui subsiste est la **fusion de facettes** : sur `L1`, « le proprio veut
+vendre », « trois mois pour partir » et « cherche à acheter » deviennent un ou deux hot topics
+au lieu de trois. La stratégie d'inventaire gagne en fusionnant moins, mais sur-découpe en
+retour — elle produit « Propriétaire veut vendre » *et* « Délai départ appartement » pour une
+même situation, ce qui donnerait deux rappels doublons à l'utilisateur.
+
+**Avant toute nouvelle itération sur ce sujet**, corriger `expectedTopics` dans
+`long-note-cases.ts` pour en retirer les habitudes régulières et les événements terminés.
+Sinon toute mesure future répétera le même biais.

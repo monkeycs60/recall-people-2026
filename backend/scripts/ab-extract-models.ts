@@ -2,7 +2,7 @@ import { generateText, Output } from 'ai';
 import { createCerebras } from '@ai-sdk/cerebras';
 import { createOpenAI } from '@ai-sdk/openai';
 import { z } from 'zod';
-import { extractionSchema, buildExtractionPrompt } from '../src/routes/extract';
+import { extractionSchema, buildExtractionPrompt, type PromptLayout } from '../src/routes/extract';
 import { CASES, TODAY, type Case, type Extraction } from './ab-cases';
 
 /**
@@ -61,6 +61,8 @@ const ALL_PROMPTS: PromptVariant[] = [
   { key: 'recall', decorate: (p, lang) => p + '\n' + (RECALL_ADDENDUM[lang] || RECALL_ADDENDUM.fr) },
 ];
 
+const ALL_LAYOUTS: PromptLayout[] = ['cache-first', 'legacy'];
+
 const PRICING: Record<string, { in: number; out: number }> = {
   'gpt-oss-120b': { in: 0.35, out: 0.75 },
   'qwen-3.8-27b': { in: 0.99, out: 1.49 },
@@ -112,8 +114,9 @@ Score 0-10 : 9-10 parfait, 7-8 très bon, 4-6 moyen, 1-3 mauvais. Sois strict et
 }
 
 type Run = {
-  caseId: string; tier: string; model: string; prompt: string; ok: boolean; error?: string;
-  latencyMs: number; inputTokens: number; outputTokens: number; reasoningTokens: number; costUsd: number;
+  caseId: string; tier: string; model: string; prompt: string; layout: string; ok: boolean; error?: string;
+  latencyMs: number; inputTokens: number; cachedInputTokens: number; outputTokens: number;
+  reasoningTokens: number; costUsd: number;
   checksPassed: number; checksTotal: number; failedChecks: string[];
   topicsExtracted: number; topicsExpected: number;
   judgeScore: number | null; judgeIssues: string[]; judgeCostUsd: number;
@@ -125,14 +128,17 @@ const TIMEOUT_MS = Number(process.env.TIMEOUT_MS || 90000);
 const CONCURRENCY = Number(process.env.CONCURRENCY || 4);
 
 async function runOne(
-  c: Case, m: ModelVariant, pv: PromptVariant,
+  c: Case, m: ModelVariant, pv: PromptVariant, layout: PromptLayout,
   cerebras: ReturnType<typeof createCerebras>, openai: ReturnType<typeof createOpenAI>
 ): Promise<Run> {
-  const prompt = pv.decorate(buildExtractionPrompt(c.transcription, c.currentContact, c.language), c.language);
+  const prompt = pv.decorate(
+    buildExtractionPrompt(c.transcription, c.currentContact, c.language, undefined, layout),
+    c.language
+  );
   const started = Date.now();
   const base: Run = {
-    caseId: c.id, tier: c.tier, model: m.key, prompt: pv.key, ok: false, latencyMs: 0,
-    inputTokens: 0, outputTokens: 0, reasoningTokens: 0, costUsd: 0,
+    caseId: c.id, tier: c.tier, model: m.key, prompt: pv.key, layout, ok: false, latencyMs: 0,
+    inputTokens: 0, cachedInputTokens: 0, outputTokens: 0, reasoningTokens: 0, costUsd: 0,
     checksPassed: 0, checksTotal: 0, failedChecks: [],
     topicsExtracted: 0, topicsExpected: c.expectedTopics,
     judgeScore: null, judgeIssues: [], judgeCostUsd: 0,
@@ -169,6 +175,7 @@ async function runOne(
 
     return {
       ...base, ok: true, latencyMs, inputTokens, outputTokens,
+      cachedInputTokens: Number((u as Record<string, number>).cachedInputTokens || 0),
       reasoningTokens: Number((u as Record<string, number>).reasoningTokens || 0),
       costUsd: (inputTokens * price.in + outputTokens * price.out) / 1_000_000,
       checksPassed: checks.filter((k) => k.pass).length,
@@ -202,16 +209,23 @@ async function main() {
   const cerebras = createCerebras({ apiKey: cerebrasKey });
   const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-  const onlyModels = (process.env.MODELS || '').split(',').map((s) => s.trim()).filter(Boolean);
-  const onlyPrompts = (process.env.PROMPTS || '').split(',').map((s) => s.trim()).filter(Boolean);
+  const pick = (name: string) => (process.env[name] || '').split(',').map((s) => s.trim()).filter(Boolean);
+  const onlyModels = pick('MODELS');
+  const onlyPrompts = pick('PROMPTS');
+  const onlyLayouts = pick('LAYOUTS');
   const models = onlyModels.length ? ALL_MODELS.filter((m) => onlyModels.includes(m.key)) : ALL_MODELS;
   const prompts = onlyPrompts.length ? ALL_PROMPTS.filter((p) => onlyPrompts.includes(p.key)) : ALL_PROMPTS;
+  const layouts = onlyLayouts.length
+    ? ALL_LAYOUTS.filter((l) => onlyLayouts.includes(l))
+    : (['cache-first'] as PromptLayout[]);
 
   const jobs: (() => Promise<Run>)[] = [];
-  for (const c of CASES) for (const m of models) for (const p of prompts) for (let i = 0; i < RUNS; i++) {
-    jobs.push(() => runOne(c, m, p, cerebras, openai));
+  for (const c of CASES) for (const m of models) for (const p of prompts) for (const l of layouts) {
+    for (let i = 0; i < RUNS; i++) jobs.push(() => runOne(c, m, p, l, cerebras, openai));
   }
-  console.log(`${jobs.length} runs · ${CASES.length} cas × ${models.length} modèles × ${prompts.length} prompts × ${RUNS}\n`);
+  console.log(
+    `${jobs.length} runs · ${CASES.length} cas × ${models.length} modèles × ${prompts.length} prompts × ${layouts.length} layouts × ${RUNS}\n`
+  );
 
   let done = 0;
   const runs = await pool(
@@ -221,7 +235,7 @@ async function main() {
       const tag = r.ok
         ? `${r.checksPassed}/${r.checksTotal} · ${r.topicsExtracted}/${r.topicsExpected} topics · juge ${r.judgeScore ?? '—'} · ${r.latencyMs}ms`
         : `ERREUR ${r.error}`;
-      console.log(`(${done}/${jobs.length}) [${r.caseId}] ${r.model}/${r.prompt}  ${tag}`);
+      console.log(`(${done}/${jobs.length}) [${r.caseId}] ${r.model}/${r.prompt}/${r.layout}  ${tag}`);
       return r;
     }),
     CONCURRENCY
@@ -232,10 +246,10 @@ async function main() {
   fs.writeFileSync(outPath, JSON.stringify({ today: TODAY, runs }, null, 2));
 
   console.log(`\nRésultats bruts → ${outPath}`);
-  console.log('\n=== SYNTHÈSE (modèle × prompt) ===');
+  console.log('\n=== SYNTHÈSE (modèle × prompt × layout) ===');
   const pct = (a: number, b: number) => (b ? ((a / b) * 100).toFixed(0) + '%' : '—');
-  for (const m of models) for (const p of prompts) {
-    const rs = runs.filter((r) => r.model === m.key && r.prompt === p.key);
+  for (const m of models) for (const p of prompts) for (const l of layouts) {
+    const rs = runs.filter((r) => r.model === m.key && r.prompt === p.key && r.layout === l);
     const ok = rs.filter((r) => r.ok);
     const lat = ok.map((r) => r.latencyMs).sort((a, b) => a - b);
     const tier = (t: string) => {
@@ -244,14 +258,16 @@ async function main() {
     };
     const withTopics = ok.filter((r) => r.topicsExpected > 0);
     const judged = ok.filter((r) => r.judgeScore !== null);
+    const sum = (f: (r: Run) => number) => ok.reduce((a, r) => a + f(r), 0);
     console.log([
-      `\n${m.key} / prompt=${p.key}`,
+      `\n${m.key} / prompt=${p.key} / layout=${l}`,
       `  succès schéma  : ${ok.length}/${rs.length} (${pct(ok.length, rs.length)})`,
       `  checks simple  : ${tier('simple')}`,
       `  checks complexe: ${tier('complex')}`,
       `  RAPPEL topics  : ${pct(withTopics.reduce((a, r) => a + Math.min(r.topicsExtracted, r.topicsExpected), 0), withTopics.reduce((a, r) => a + r.topicsExpected, 0))}`,
       `  juge moyen     : ${judged.length ? (judged.reduce((a, r) => a + (r.judgeScore || 0), 0) / judged.length).toFixed(2) : '—'}/10`,
       `  latence méd/p95: ${lat[Math.floor(lat.length / 2)] || 0}ms / ${lat[Math.floor(lat.length * 0.95)] || 0}ms`,
+      `  tokens in moy  : ${ok.length ? Math.round(sum((r) => r.inputTokens) / ok.length) : 0} (dont ${ok.length ? Math.round(sum((r) => r.cachedInputTokens) / ok.length) : 0} en cache, ${pct(sum((r) => r.cachedInputTokens), sum((r) => r.inputTokens))})`,
       `  coût/1000 extr.: $${ok.length ? ((ok.reduce((a, r) => a + r.costUsd, 0) / ok.length) * 1000).toFixed(2) : '0'}`,
     ].join('\n'));
   }
