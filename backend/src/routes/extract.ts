@@ -68,7 +68,7 @@ const normalizeContactName = (value: string): string =>
     .replace(/\s+/g, ' ')
     .trim();
 
-const extractionSchema = z.object({
+export const extractionSchema = z.object({
   contactIdentified: z.object({
     firstName: z.string().describe('Prénom extrait de la transcription'),
     lastName: z.string().nullable().describe('Nom de famille si mentionné'),
@@ -90,7 +90,7 @@ const extractionSchema = z.object({
     z.object({
       title: z.string().describe('Titre court du sujet (ex: "Entretien Google", "Déménagement Lyon")'),
       context: z.string().describe('1-2 phrases de contexte avec les détails importants'),
-      eventDate: z.string().nullable().describe('OBLIGATOIRE si une date est mentionnée (relative ou absolue). Format: YYYY-MM-DD. Exemples: "la semaine prochaine" doit être converti en date ISO, "en juin" devient "2026-06-01". null UNIQUEMENT si aucune date mentionnée.'),
+      eventDate: z.string().nullable().describe('OBLIGATOIRE si une date est mentionnée (relative ou absolue). Format: YYYY-MM-DD. Exemples: "la semaine prochaine" doit être converti en date ISO, "en juin" devient le 1er juin de sa prochaine occurrence a venir. null UNIQUEMENT si aucune date mentionnée.'),
     })
   ).describe('NOUVELLES actualités/sujets à suivre mentionnés dans la note (projets, événements, situations en cours)'),
   resolvedTopics: z.array(
@@ -100,6 +100,54 @@ const extractionSchema = z.object({
     })
   ).describe('Hot topics existants qui sont résolus selon cette note, avec leur résolution détaillée'),
 });
+
+type DateExamples = {
+  jan25: string; feb15: string; mar31: string; apr01: string;
+  june: string; summer: string; fall: string; winter: string; spring: string;
+  nextYearNote: string;
+};
+
+/**
+ * Un mois nommé sans annee ("en juin", "cet ete") designe la prochaine
+ * occurrence a venir, pas celle de l'annee civile courante : en septembre,
+ * "en juin" est dans neuf mois, pas trois mois en arriere.
+ */
+const nextOccurrence = (reference: Date, month: number, day: number): string => {
+  const sameYear = new Date(Date.UTC(reference.getUTCFullYear(), month - 1, day));
+  const rolled =
+    sameYear.getTime() < Date.UTC(reference.getUTCFullYear(), reference.getUTCMonth(), reference.getUTCDate())
+      ? new Date(Date.UTC(reference.getUTCFullYear() + 1, month - 1, day))
+      : sameYear;
+  return format(rolled, 'yyyy-MM-dd');
+};
+
+const lastDayOfNextOccurrence = (reference: Date, month: number): string => {
+  const first = nextOccurrence(reference, month, 1);
+  const year = Number(first.slice(0, 4));
+  return format(new Date(Date.UTC(year, month, 0)), 'yyyy-MM-dd');
+};
+
+const buildDateExamples = (reference: Date, language: string): DateExamples => {
+  const notes: Record<string, string> = {
+    fr: 'Ces exemples sont calcules depuis la date de reference. Un mois nomme sans annee designe TOUJOURS sa prochaine occurrence a venir : si le mois est deja passe cette annee, utilise l\'annee suivante.',
+    en: 'These examples are computed from the reference date. A month named without a year ALWAYS means its next upcoming occurrence: if that month is already past this year, use next year.',
+    es: 'Estos ejemplos se calculan desde la fecha de referencia. Un mes nombrado sin ano SIEMPRE designa su proxima ocurrencia: si ese mes ya paso este ano, usa el ano siguiente.',
+    it: 'Questi esempi sono calcolati dalla data di riferimento. Un mese indicato senza anno indica SEMPRE la sua prossima occorrenza: se quel mese e gia passato quest\'anno, usa l\'anno successivo.',
+    de: 'Diese Beispiele werden aus dem Referenzdatum berechnet. Ein ohne Jahr genannter Monat bezeichnet IMMER sein naechstes Vorkommen: Ist der Monat dieses Jahr bereits vorbei, nimm das Folgejahr.',
+  };
+  return {
+    jan25: nextOccurrence(reference, 1, 25),
+    feb15: nextOccurrence(reference, 2, 15),
+    mar31: lastDayOfNextOccurrence(reference, 3),
+    apr01: nextOccurrence(reference, 4, 1),
+    june: nextOccurrence(reference, 6, 1),
+    summer: nextOccurrence(reference, 7, 1),
+    fall: nextOccurrence(reference, 9, 1),
+    winter: nextOccurrence(reference, 12, 1),
+    spring: nextOccurrence(reference, 3, 1),
+    nextYearNote: notes[language] || notes.fr,
+  };
+};
 
 const PROMPT_TEMPLATES: Record<string, {
   intro: string;
@@ -116,7 +164,7 @@ const PROMPT_TEMPLATES: Record<string, {
     rule2Title: string;
     rule2Content: string;
     rule3Title: string;
-    rule3Content: (currentDate: string) => string;
+    rule3Content: (currentDate: string, ex: DateExamples) => string;
     rule4Title: string;
     rule4Content: string;
     rule5Title: string;
@@ -130,7 +178,7 @@ const PROMPT_TEMPLATES: Record<string, {
     badExamples: string;
     priority: string;
   };
-  concreteExamples: (nextWeekDate: string, twoMonthsDate: string) => string;
+  concreteExamples: (nextWeekDate: string, twoMonthsDate: string, ex: DateExamples) => string;
 }> = {
   fr: {
     intro: 'Tu es un assistant qui extrait les actualités importantes d\'une note vocale.',
@@ -171,7 +219,7 @@ const PROMPT_TEMPLATES: Record<string, {
    - Infos statiques: lieu de vie, formation
    - Activités régulières: "fait du sport", "joue aux échecs"`,
       rule3Title: '3. DATES ABSOLUES (format ISO: YYYY-MM-DD) - CRITIQUE',
-      rule3Content: (currentDate) => `Aujourd'hui c'est ${currentDate}. Tu DOIS calculer et retourner eventDate pour TOUTE mention de date.
+      rule3Content: (currentDate, ex) => `Aujourd'hui c'est ${currentDate}. Tu DOIS calculer et retourner eventDate pour TOUTE mention de date.
 
    Calculs temporels (OBLIGATOIRE - calcule la date exacte):
    - "demain" → ${currentDate} + 1 jour
@@ -182,28 +230,30 @@ const PROMPT_TEMPLATES: Record<string, {
    - "dans 3 mois" → ${currentDate} + 3 mois
 
    Dates fixes:
-   - "le 25 janvier" → 2026-01-25
-   - "le 15/02" → 2026-02-15
-   - "mi-février" → 2026-02-15
-   - "fin mars" → 2026-03-31
-   - "début avril" → 2026-04-01
+   - "le 25 janvier" → ${ex.jan25}
+   - "le 15/02" → ${ex.feb15}
+   - "mi-février" → ${ex.feb15}
+   - "fin mars" → ${ex.mar31}
+   - "début avril" → ${ex.apr01}
 
    Périodes/saisons (utilise le premier jour):
-   - "en juin" → 2026-06-01
-   - "cet été" → 2026-07-01
-   - "l'automne prochain" → 2026-09-01
-   - "cet hiver" → 2026-12-01
-   - "le printemps" → 2026-03-01
+   - "en juin" → ${ex.june}
+   - "cet été" → ${ex.summer}
+   - "l'automne prochain" → ${ex.fall}
+   - "cet hiver" → ${ex.winter}
+   - "le printemps" → ${ex.spring}
 
    RÈGLE CRITIQUE - eventDate:
    - Si une date est EXPLICITEMENT mentionnée (relative ou absolue), tu DOIS retourner eventDate en YYYY-MM-DD
    - Exemples où eventDate est OBLIGATOIRE:
      * "entretien la semaine prochaine" → eventDate = date calculée
      * "déménage dans 2 mois" → eventDate = date calculée
-     * "mariage en juin" → eventDate = "2026-06-01"
-     * "examen le 15" → eventDate = "2026-XX-15" (mois actuel ou suivant)
+     * "mariage en juin" → eventDate = "${ex.june}"
+     * "examen le 15" → eventDate = "${currentDate.slice(0, 4)}-XX-15" (mois actuel ou suivant)
    - eventDate = null si aucune date mentionnée OU date trop vague ("un jour", "bientôt", "peut-être")
-   - IMPORTANT: N'utilise PAS la date du jour comme date par défaut. Si l'événement n'a pas de référence temporelle explicite, eventDate = null`,
+   - IMPORTANT: N'utilise PAS la date du jour comme date par défaut. Si l'événement n'a pas de référence temporelle explicite, eventDate = null
+
+   ${ex.nextYearNote}`,
       rule4Title: '4. RÉSOLUTION D\'ACTUALITÉS EXISTANTES',
       rule4Content: `Si une actualité existante est mentionnée avec une issue, marque-la résolue.
 
@@ -278,7 +328,7 @@ const PROMPT_TEMPLATES: Record<string, {
 2. Le projet/situation EN COURS discuté (recherche emploi, achat maison, etc.)
 3. Le contexte de la rencontre SI spécifique (anniversaire 30 ans, retour de voyage, etc.)`,
     },
-    concreteExamples: (nextWeekDate, twoMonthsDate) => `EXEMPLES CONCRETS DE HOT TOPICS AVEC DATES:
+    concreteExamples: (nextWeekDate, twoMonthsDate, ex) => `EXEMPLES CONCRETS DE HOT TOPICS AVEC DATES:
 
 Exemple 1 - "Marie a un entretien chez Google la semaine prochaine":
 {
@@ -306,7 +356,7 @@ Exemple 3 - "Elle m'a annoncé qu'elle est enceinte, elle se marie en juin":
   "hotTopics": [{
     "title": "Mariage",
     "context": "Elle prépare son mariage prévu pour juin.",
-    "eventDate": "2026-06-01"
+    "eventDate": "${ex.june}"
   }]
 }
 
@@ -355,7 +405,7 @@ Exemple 4 - "On a pris un café, elle m'a raconté ses vacances":
    - Static info: place of residence, education
    - Regular activities: "does sports", "plays chess"`,
       rule3Title: '3. ABSOLUTE DATES (ISO format: YYYY-MM-DD) - CRITICAL',
-      rule3Content: (currentDate) => `Today is ${currentDate}. You MUST calculate and return eventDate for ANY date mention.
+      rule3Content: (currentDate, ex) => `Today is ${currentDate}. You MUST calculate and return eventDate for ANY date mention.
 
    Time calculations (MANDATORY - calculate the exact date):
    - "tomorrow" → ${currentDate} + 1 day
@@ -366,26 +416,26 @@ Exemple 4 - "On a pris un café, elle m'a raconté ses vacances":
    - "in 3 months" → ${currentDate} + 3 months
 
    Fixed dates:
-   - "January 25th" → 2026-01-25
-   - "02/15" → 2026-02-15
-   - "mid-February" → 2026-02-15
-   - "end of March" → 2026-03-31
-   - "early April" → 2026-04-01
+   - "January 25th" → ${ex.jan25}
+   - "02/15" → ${ex.feb15}
+   - "mid-February" → ${ex.feb15}
+   - "end of March" → ${ex.mar31}
+   - "early April" → ${ex.apr01}
 
    Periods/seasons (use the first day):
-   - "in June" → 2026-06-01
-   - "this summer" → 2026-07-01
-   - "next fall" → 2026-09-01
-   - "this winter" → 2026-12-01
-   - "spring" → 2026-03-01
+   - "in June" → ${ex.june}
+   - "this summer" → ${ex.summer}
+   - "next fall" → ${ex.fall}
+   - "this winter" → ${ex.winter}
+   - "spring" → ${ex.spring}
 
    CRITICAL RULE - eventDate:
    - If a date is EXPLICITLY mentioned (relative or absolute), you MUST return eventDate in YYYY-MM-DD
    - Examples where eventDate is MANDATORY:
      * "interview next week" → eventDate = calculated date
      * "moving in 2 months" → eventDate = calculated date
-     * "wedding in June" → eventDate = "2026-06-01"
-     * "exam on the 15th" → eventDate = "2026-XX-15" (current or next month)
+     * "wedding in June" → eventDate = "${ex.june}"
+     * "exam on the 15th" → eventDate = "${currentDate.slice(0, 4)}-XX-15" (current or next month)
    - eventDate = null if no date mentioned OR date too vague ("someday", "soon", "maybe")
    - IMPORTANT: Do NOT use today's date as a default. If the event has no explicit temporal reference, eventDate = null`,
       rule4Title: '4. RESOLUTION OF EXISTING UPDATES',
@@ -462,7 +512,7 @@ Exemple 4 - "On a pris un café, elle m'a raconté ses vacances":
 2. The ONGOING project/situation discussed (job search, house purchase, etc.)
 3. The meeting context IF specific (30th birthday, back from trip, etc.)`,
     },
-    concreteExamples: (nextWeekDate, twoMonthsDate) => `CONCRETE EXAMPLES OF HOT TOPICS WITH DATES:
+    concreteExamples: (nextWeekDate, twoMonthsDate, ex) => `CONCRETE EXAMPLES OF HOT TOPICS WITH DATES:
 
 Example 1 - "Marie has an interview at Google next week":
 {
@@ -490,7 +540,7 @@ Example 3 - "She told me she's pregnant, she's getting married in June":
   "hotTopics": [{
     "title": "Wedding",
     "context": "She's preparing her wedding planned for June.",
-    "eventDate": "2026-06-01"
+    "eventDate": "${ex.june}"
   }]
 }
 
@@ -539,7 +589,7 @@ Example 4 - "We had coffee, she told me about her vacation":
    - Info estática: lugar de residencia, formación
    - Actividades regulares: "hace deporte", "juega al ajedrez"`,
       rule3Title: '3. FECHAS ABSOLUTAS (formato ISO: YYYY-MM-DD) - CRÍTICO',
-      rule3Content: (currentDate) => `Hoy es ${currentDate}. DEBES calcular y devolver eventDate para CUALQUIER mención de fecha.
+      rule3Content: (currentDate, ex) => `Hoy es ${currentDate}. DEBES calcular y devolver eventDate para CUALQUIER mención de fecha.
 
    Cálculos temporales (OBLIGATORIO - calcula la fecha exacta):
    - "mañana" → ${currentDate} + 1 día
@@ -550,26 +600,26 @@ Example 4 - "We had coffee, she told me about her vacation":
    - "en 3 meses" → ${currentDate} + 3 meses
 
    Fechas fijas:
-   - "el 25 de enero" → 2026-01-25
-   - "el 15/02" → 2026-02-15
-   - "a mediados de febrero" → 2026-02-15
-   - "a finales de marzo" → 2026-03-31
-   - "a principios de abril" → 2026-04-01
+   - "el 25 de enero" → ${ex.jan25}
+   - "el 15/02" → ${ex.feb15}
+   - "a mediados de febrero" → ${ex.feb15}
+   - "a finales de marzo" → ${ex.mar31}
+   - "a principios de abril" → ${ex.apr01}
 
    Períodos/estaciones (usa el primer día):
-   - "en junio" → 2026-06-01
-   - "este verano" → 2026-07-01
-   - "el próximo otoño" → 2026-09-01
-   - "este invierno" → 2026-12-01
-   - "la primavera" → 2026-03-01
+   - "en junio" → ${ex.june}
+   - "este verano" → ${ex.summer}
+   - "el próximo otoño" → ${ex.fall}
+   - "este invierno" → ${ex.winter}
+   - "la primavera" → ${ex.spring}
 
    REGLA CRÍTICA - eventDate:
    - Si se menciona EXPLÍCITAMENTE una fecha (relativa o absoluta), DEBES devolver eventDate en YYYY-MM-DD
    - Ejemplos donde eventDate es OBLIGATORIO:
      * "entrevista la semana que viene" → eventDate = fecha calculada
      * "se muda en 2 meses" → eventDate = fecha calculada
-     * "boda en junio" → eventDate = "2026-06-01"
-     * "examen el 15" → eventDate = "2026-XX-15" (mes actual o siguiente)
+     * "boda en junio" → eventDate = "${ex.june}"
+     * "examen el 15" → eventDate = "${currentDate.slice(0, 4)}-XX-15" (mes actual o siguiente)
    - eventDate = null si no se menciona fecha O fecha demasiado vaga ("algún día", "pronto", "quizás")
    - IMPORTANTE: NO uses la fecha de hoy como predeterminada. Si el evento no tiene referencia temporal explícita, eventDate = null`,
       rule4Title: '4. RESOLUCIÓN DE NOVEDADES EXISTENTES',
@@ -646,7 +696,7 @@ Example 4 - "We had coffee, she told me about her vacation":
 2. El proyecto/situación EN CURSO discutido (búsqueda de empleo, compra de casa, etc.)
 3. El contexto del encuentro SI es específico (cumpleaños 30, vuelta de viaje, etc.)`,
     },
-    concreteExamples: (nextWeekDate, twoMonthsDate) => `EJEMPLOS CONCRETOS DE HOT TOPICS CON FECHAS:
+    concreteExamples: (nextWeekDate, twoMonthsDate, ex) => `EJEMPLOS CONCRETOS DE HOT TOPICS CON FECHAS:
 
 Ejemplo 1 - "María tiene una entrevista en Google la semana que viene":
 {
@@ -674,7 +724,7 @@ Ejemplo 3 - "Me anunció que está embarazada, se casa en junio":
   "hotTopics": [{
     "title": "Boda",
     "context": "Prepara su boda prevista para junio.",
-    "eventDate": "2026-06-01"
+    "eventDate": "${ex.june}"
   }]
 }
 
@@ -723,7 +773,7 @@ Ejemplo 4 - "Tomamos un café, me contó sus vacaciones":
    - Info statiche: luogo di residenza, formazione
    - Attività regolari: "fa sport", "gioca a scacchi"`,
       rule3Title: '3. DATE ASSOLUTE (formato ISO: YYYY-MM-DD) - CRITICO',
-      rule3Content: (currentDate) => `Oggi è ${currentDate}. DEVI calcolare e restituire eventDate per QUALSIASI menzione di data.
+      rule3Content: (currentDate, ex) => `Oggi è ${currentDate}. DEVI calcolare e restituire eventDate per QUALSIASI menzione di data.
 
    Calcoli temporali (OBBLIGATORIO - calcola la data esatta):
    - "domani" → ${currentDate} + 1 giorno
@@ -734,26 +784,26 @@ Ejemplo 4 - "Tomamos un café, me contó sus vacaciones":
    - "tra 3 mesi" → ${currentDate} + 3 mesi
 
    Date fisse:
-   - "il 25 gennaio" → 2026-01-25
-   - "il 15/02" → 2026-02-15
-   - "a metà febbraio" → 2026-02-15
-   - "a fine marzo" → 2026-03-31
-   - "a inizio aprile" → 2026-04-01
+   - "il 25 gennaio" → ${ex.jan25}
+   - "il 15/02" → ${ex.feb15}
+   - "a metà febbraio" → ${ex.feb15}
+   - "a fine marzo" → ${ex.mar31}
+   - "a inizio aprile" → ${ex.apr01}
 
    Periodi/stagioni (usa il primo giorno):
-   - "a giugno" → 2026-06-01
-   - "quest'estate" → 2026-07-01
-   - "il prossimo autunno" → 2026-09-01
-   - "quest'inverno" → 2026-12-01
-   - "la primavera" → 2026-03-01
+   - "a giugno" → ${ex.june}
+   - "quest'estate" → ${ex.summer}
+   - "il prossimo autunno" → ${ex.fall}
+   - "quest'inverno" → ${ex.winter}
+   - "la primavera" → ${ex.spring}
 
    REGOLA CRITICA - eventDate:
    - Se una data è ESPLICITAMENTE menzionata (relativa o assoluta), DEVI restituire eventDate in YYYY-MM-DD
    - Esempi dove eventDate è OBBLIGATORIO:
      * "colloquio la settimana prossima" → eventDate = data calcolata
      * "si trasferisce tra 2 mesi" → eventDate = data calcolata
-     * "matrimonio a giugno" → eventDate = "2026-06-01"
-     * "esame il 15" → eventDate = "2026-XX-15" (mese corrente o successivo)
+     * "matrimonio a giugno" → eventDate = "${ex.june}"
+     * "esame il 15" → eventDate = "${currentDate.slice(0, 4)}-XX-15" (mese corrente o successivo)
    - eventDate = null se nessuna data menzionata O data troppo vaga ("un giorno", "presto", "forse")
    - IMPORTANTE: NON usare la data di oggi come predefinita. Se l'evento non ha un riferimento temporale esplicito, eventDate = null`,
       rule4Title: '4. RISOLUZIONE DI NOVITÀ ESISTENTI',
@@ -830,7 +880,7 @@ Ejemplo 4 - "Tomamos un café, me contó sus vacaciones":
 2. Il progetto/situazione IN CORSO discusso (ricerca lavoro, acquisto casa, ecc.)
 3. Il contesto dell'incontro SE specifico (compleanno 30 anni, ritorno da viaggio, ecc.)`,
     },
-    concreteExamples: (nextWeekDate, twoMonthsDate) => `ESEMPI CONCRETI DI HOT TOPICS CON DATE:
+    concreteExamples: (nextWeekDate, twoMonthsDate, ex) => `ESEMPI CONCRETI DI HOT TOPICS CON DATE:
 
 Esempio 1 - "Maria ha un colloquio da Google la settimana prossima":
 {
@@ -858,7 +908,7 @@ Esempio 3 - "Mi ha annunciato che è incinta, si sposa a giugno":
   "hotTopics": [{
     "title": "Matrimonio",
     "context": "Prepara il suo matrimonio previsto per giugno.",
-    "eventDate": "2026-06-01"
+    "eventDate": "${ex.june}"
   }]
 }
 
@@ -907,7 +957,7 @@ Esempio 4 - "Abbiamo preso un caffè, mi ha raccontato le sue vacanze":
    - Statische Infos: Wohnort, Ausbildung
    - Regelmäßige Aktivitäten: "macht Sport", "spielt Schach"`,
       rule3Title: '3. ABSOLUTE DATEN (ISO-Format: YYYY-MM-DD) - KRITISCH',
-      rule3Content: (currentDate) => `Heute ist ${currentDate}. Du MUSST eventDate für JEDE Datumserwähnung berechnen und zurückgeben.
+      rule3Content: (currentDate, ex) => `Heute ist ${currentDate}. Du MUSST eventDate für JEDE Datumserwähnung berechnen und zurückgeben.
 
    Zeitberechnungen (PFLICHT - berechne das genaue Datum):
    - "morgen" → ${currentDate} + 1 Tag
@@ -918,26 +968,26 @@ Esempio 4 - "Abbiamo preso un caffè, mi ha raccontato le sue vacanze":
    - "in 3 Monaten" → ${currentDate} + 3 Monate
 
    Feste Daten:
-   - "am 25. Januar" → 2026-01-25
-   - "am 15.02." → 2026-02-15
-   - "Mitte Februar" → 2026-02-15
-   - "Ende März" → 2026-03-31
-   - "Anfang April" → 2026-04-01
+   - "am 25. Januar" → ${ex.jan25}
+   - "am 15.02." → ${ex.feb15}
+   - "Mitte Februar" → ${ex.feb15}
+   - "Ende März" → ${ex.mar31}
+   - "Anfang April" → ${ex.apr01}
 
    Zeiträume/Jahreszeiten (verwende den ersten Tag):
-   - "im Juni" → 2026-06-01
-   - "diesen Sommer" → 2026-07-01
-   - "nächsten Herbst" → 2026-09-01
-   - "diesen Winter" → 2026-12-01
-   - "im Frühling" → 2026-03-01
+   - "im Juni" → ${ex.june}
+   - "diesen Sommer" → ${ex.summer}
+   - "nächsten Herbst" → ${ex.fall}
+   - "diesen Winter" → ${ex.winter}
+   - "im Frühling" → ${ex.spring}
 
    KRITISCHE REGEL - eventDate:
    - Wenn ein Datum EXPLIZIT erwähnt wird (relativ oder absolut), MUSST du eventDate im Format YYYY-MM-DD zurückgeben
    - Beispiele wo eventDate PFLICHT ist:
      * "Vorstellungsgespräch nächste Woche" → eventDate = berechnetes Datum
      * "zieht in 2 Monaten um" → eventDate = berechnetes Datum
-     * "Hochzeit im Juni" → eventDate = "2026-06-01"
-     * "Prüfung am 15." → eventDate = "2026-XX-15" (aktueller oder nächster Monat)
+     * "Hochzeit im Juni" → eventDate = "${ex.june}"
+     * "Prüfung am 15." → eventDate = "${currentDate.slice(0, 4)}-XX-15" (aktueller oder nächster Monat)
    - eventDate = null wenn kein Datum erwähnt ODER Datum zu vage ("irgendwann", "bald", "vielleicht")
    - WICHTIG: Verwende NICHT das heutige Datum als Standard. Wenn das Ereignis keine explizite Zeitangabe hat, eventDate = null`,
       rule4Title: '4. LÖSUNG BESTEHENDER NEUIGKEITEN',
@@ -1014,7 +1064,7 @@ Esempio 4 - "Abbiamo preso un caffè, mi ha raccontato le sue vacanze":
 2. Das LAUFENDE Projekt/die Situation diskutiert (Jobsuche, Hauskauf, usw.)
 3. Der Kontext des Treffens WENN spezifisch (30. Geburtstag, Rückkehr von Reise, usw.)`,
     },
-    concreteExamples: (nextWeekDate, twoMonthsDate) => `KONKRETE BEISPIELE FÜR HOT TOPICS MIT DATEN:
+    concreteExamples: (nextWeekDate, twoMonthsDate, ex) => `KONKRETE BEISPIELE FÜR HOT TOPICS MIT DATEN:
 
 Beispiel 1 - "Marie hat nächste Woche ein Vorstellungsgespräch bei Google":
 {
@@ -1042,7 +1092,7 @@ Beispiel 3 - "Sie hat mir erzählt, dass sie schwanger ist, sie heiratet im Juni
   "hotTopics": [{
     "title": "Hochzeit",
     "context": "Sie bereitet ihre Hochzeit für Juni vor.",
-    "eventDate": "2026-06-01"
+    "eventDate": "${ex.june}"
   }]
 }
 
@@ -1322,13 +1372,13 @@ extractRoutes.post('/', async (c) => {
     trace?.update({ output: { success: true, extraction: formattedExtraction } });
 
     // Run evaluation in background (non-blocking)
-    if (c.env.XAI_API_KEY && c.executionCtx) {
+    if (c.env.ENABLE_EVALUATION === 'true' && c.env.OPENAI_API_KEY && c.executionCtx) {
       c.executionCtx.waitUntil(
         evaluateExtraction(
           transcription,
           formattedExtraction,
           {
-            XAI_API_KEY: c.env.XAI_API_KEY,
+            OPENAI_API_KEY: c.env.OPENAI_API_KEY,
             enableEvaluation: c.env.ENABLE_EVALUATION === 'true',
             samplingRate: parseFloat(c.env.EVALUATION_SAMPLING_RATE || '0.25'),
             distinctId: userId,
@@ -1398,7 +1448,7 @@ const normalizeTranscriptionEmails = (text: string): string => {
   return text;
 };
 
-const buildExtractionPrompt = (
+export const buildExtractionPrompt = (
   transcription: string,
   currentContact?: ExtractionRequest['currentContact'],
   language: string = 'fr',
@@ -1428,6 +1478,7 @@ ${currentContact.hotTopics.map((topic) => `  - [ID: ${topic.id}] "${topic.title}
   const currentDate = format(now, 'yyyy-MM-dd');
   const nextWeekDate = format(new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd');
   const twoMonthsDate = format(new Date(new Date(now).setMonth(now.getMonth() + 2)), 'yyyy-MM-dd');
+  const dateExamples = buildDateExamples(now, language);
 
   const respondingToTopicPreamble = respondingToTopic
     ? `\n\n${buildRespondingToTopicPreamble(respondingToTopic, language)}`
@@ -1463,7 +1514,7 @@ ${template.rules.rule2Title}:
 ${template.rules.rule2Content}
 
 ${template.rules.rule3Title}:
-${template.rules.rule3Content(currentDate)}
+${template.rules.rule3Content(currentDate, dateExamples)}
 
 ${template.rules.rule4Title}:
 ${template.rules.rule4Content}
@@ -1487,7 +1538,7 @@ ${template.noteTitleRules.badExamples}
 
 ${template.noteTitleRules.priority}
 
-${template.concreteExamples(nextWeekDate, twoMonthsDate)}
+${template.concreteExamples(nextWeekDate, twoMonthsDate, dateExamples)}
 
 ${getLanguageComplianceReminder(language)}`;
 };
