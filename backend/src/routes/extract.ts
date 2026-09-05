@@ -218,7 +218,6 @@ const PROMPT_TEMPLATES: Record<string, {
     rule5Content: string;
   };
   hotTopicExhaustiveness: string;
-  multiDeadlineSituations: string;
   absoluteRules: string;
   formatJson: string;
   noteTitleRules: {
@@ -332,18 +331,7 @@ const PROMPT_TEMPLATES: Record<string, {
   Ton tableau hotTopics doit en contenir autant. Si tu en as moins, tu en as oublié: reprends.
 - Une actualité déjà présente dans les ACTUALITÉS EXISTANTES compte aussi: si la note lui
   ajoute une date ou un détail nouveau sans la résoudre, crée le hot topic correspondant.
-  Si la note n'y ajoute rien ("il attend toujours", "rien de neuf"), ne la recrée PAS.
 - La concision n'est PAS un objectif ici. Mieux vaut un hot topic de trop qu'un oublié.`,
-    multiDeadlineSituations: `UNE SITUATION PEUT PORTER PLUSIEURS ÉCHÉANCES:
-- Si une même situation implique plusieurs échéances ou démarches distinctes, crée UN hot topic
-  PAR ÉCHÉANCE, pas un seul pour la situation entière.
-- Exemple: "le proprio veut vendre, j'ai trois mois pour partir, et j'ai rendez-vous à la banque
-  vendredi pour un prêt" = TROIS hot topics (départ du logement, recherche d'achat, rendez-vous
-  bancaire), parce que chacun a sa propre date et son propre suivi.
-- Le test: si deux éléments méritent des rappels à des moments différents, ce sont deux hot topics.
-- Cette règle DÉCOUPE une situation réellement présente dans la note. Elle n'autorise jamais à
-  inventer une échéance non mentionnée, ni à recréer une actualité déjà listée dans les
-  ACTUALITÉS EXISTANTES à laquelle la note n'ajoute rien de neuf.`,
     absoluteRules: `RÈGLES ABSOLUES:
 1. N'invente JAMAIS d'information non présente dans la transcription
 2. Utilise des dates ABSOLUES (YYYY-MM-DD), jamais relatives
@@ -517,19 +505,8 @@ Exemple 4 - "On a pris un café, elle m'a raconté ses vacances":
 - Before answering, re-read the transcription and count the temporary items mentioned.
   Your hotTopics array must contain that many. Fewer means you dropped one: go back.
 - An item already listed in EXISTING TOPICS counts too: if the note adds a new date or
-  detail without resolving it, create the corresponding hot topic. If the note adds nothing
-  ("still waiting", "no news"), do NOT recreate it.
+  detail without resolving it, create the corresponding hot topic.
 - Conciseness is NOT a goal here. One hot topic too many beats one missed.`,
-    multiDeadlineSituations: `ONE SITUATION CAN CARRY SEVERAL DEADLINES:
-- When a single situation involves several distinct deadlines or steps, create ONE hot topic
-  PER DEADLINE, not one for the whole situation.
-- Example: "the landlord is selling, I have three months to move out, and I have a bank
-  appointment Friday about a loan" = THREE hot topics (moving out, house hunting, bank
-  appointment), because each has its own date and its own follow-up.
-- The test: if two items deserve reminders at different moments, they are two hot topics.
-- This rule SPLITS a situation actually present in the note. It never licenses inventing a
-  deadline that was not mentioned, nor recreating an item already listed in EXISTING TOPICS
-  that the note adds nothing new to.`,
     absoluteRules: `ABSOLUTE RULES:
 1. NEVER invent information not present in the transcription
 2. Use ABSOLUTE dates (YYYY-MM-DD), never relative
@@ -704,18 +681,7 @@ Example 4 - "We had coffee, she told me about her vacation":
   Tu array hotTopics debe contener esa cantidad. Si tienes menos, olvidaste alguna: vuelve.
 - Una novedad ya presente en las ACTUALIDADES EXISTENTES también cuenta: si la nota le
   añade una fecha o un detalle nuevo sin resolverla, crea el hot topic correspondiente.
-  Si la nota no le añade nada ("sigue esperando", "nada nuevo"), NO la recrees.
 - La concisión NO es un objetivo aquí. Mejor un hot topic de más que uno olvidado.`,
-    multiDeadlineSituations: `UNA SITUACIÓN PUEDE TENER VARIOS PLAZOS:
-- Si una misma situación implica varios plazos o gestiones distintas, crea UN hot topic POR
-  PLAZO, no uno solo para toda la situación.
-- Ejemplo: "el casero quiere vender, tengo tres meses para irme, y tengo cita en el banco el
-  viernes para un préstamo" = TRES hot topics (salida de la vivienda, búsqueda de compra, cita
-  bancaria), porque cada uno tiene su propia fecha y su propio seguimiento.
-- La prueba: si dos elementos merecen recordatorios en momentos diferentes, son dos hot topics.
-- Esta regla DIVIDE una situación realmente presente en la nota. Nunca autoriza a inventar un
-  plazo no mencionado, ni a recrear una actualidad ya listada en las ACTUALIDADES EXISTENTES a
-  la que la nota no añade nada nuevo.`,
     absoluteRules: `REGLAS ABSOLUTAS:
 1. NUNCA inventes información que no esté en la transcripción
 2. Usa fechas ABSOLUTAS (YYYY-MM-DD), nunca relativas
@@ -891,16 +857,6 @@ Ejemplo 4 - "Tomamos un café, me contó sus vacaciones":
 - Una novità già presente nelle ATTUALITÀ ESISTENTI conta anche: se la nota le aggiunge
   una data o un dettaglio nuovo senza risolverla, crea il hot topic corrispondente.
 - La concisione NON è un obiettivo qui. Meglio un hot topic in più che uno mancante.`,
-    multiDeadlineSituations: `UNA SITUAZIONE PUÒ AVERE PIÙ SCADENZE:
-- Se una stessa situazione comporta più scadenze o pratiche distinte, crea UN hot topic PER
-  SCADENZA, non uno solo per l'intera situazione.
-- Esempio: "il proprietario vuole vendere, ho tre mesi per andarmene, e venerdì ho appuntamento
-  in banca per un mutuo" = TRE hot topics (uscita dall'alloggio, ricerca di acquisto,
-  appuntamento in banca), perché ciascuno ha la propria data e il proprio seguito.
-- La prova: se due elementi meritano promemoria in momenti diversi, sono due hot topics.
-- Questa regola DIVIDE una situazione realmente presente nella nota. Non autorizza mai a
-  inventare una scadenza non menzionata, né a ricreare un'attualità già elencata nelle
-  ATTUALITÀ ESISTENTI a cui la nota non aggiunge nulla di nuovo.`,
     absoluteRules: `REGOLE ASSOLUTE:
 1. NON inventare MAI informazioni non presenti nella trascrizione
 2. Usa date ASSOLUTE (YYYY-MM-DD), mai relative
@@ -1077,17 +1033,6 @@ Esempio 4 - "Abbiamo preso un caffè, mi ha raccontato le sue vacanze":
 - Ein bereits in BESTEHENDE THEMEN gelistetes Thema zählt ebenfalls: Fügt die Notiz ihm
   ein neues Datum oder Detail hinzu, ohne es abzuschließen, erstelle den hot topic.
 - Kürze ist hier KEIN Ziel. Ein hot topic zu viel ist besser als einer zu wenig.`,
-    multiDeadlineSituations: `EINE SITUATION KANN MEHRERE FRISTEN HABEN:
-- Umfasst eine einzelne Situation mehrere eigenständige Fristen oder Schritte, erstelle EINEN
-  hot topic PRO FRIST, nicht einen für die gesamte Situation.
-- Beispiel: "der Vermieter will verkaufen, ich habe drei Monate zum Ausziehen, und am Freitag
-  habe ich einen Banktermin wegen eines Kredits" = DREI hot topics (Auszug, Kaufsuche,
-  Banktermin), denn jeder hat sein eigenes Datum und seine eigene Nachverfolgung.
-- Der Test: Verdienen zwei Punkte Erinnerungen zu unterschiedlichen Zeitpunkten, sind es zwei
-  hot topics.
-- Diese Regel TEILT eine tatsächlich in der Notiz vorhandene Situation auf. Sie erlaubt nie,
-  eine nicht genannte Frist zu erfinden oder ein bereits unter BESTEHENDE THEMEN gelistetes
-  Thema neu anzulegen, dem die Notiz nichts Neues hinzufügt.`,
     absoluteRules: `ABSOLUTE REGELN:
 1. Erfinde NIEMALS Informationen, die nicht in der Transkription stehen
 2. Verwende ABSOLUTE Daten (YYYY-MM-DD), niemals relative
@@ -1586,8 +1531,6 @@ ${getMeetingContextInstruction(language, currentDate)}
 ${getLovesInstruction(language)}
 
 ${template.hotTopicExhaustiveness}
-
-${template.multiDeadlineSituations}
 
 ${template.absoluteRules}
 

@@ -127,13 +127,12 @@ de la règle d'exhaustivité. **Ligne de référence pour les prochaines compara
 `prod` était alors le prompt du dépôt ; `v2` ajoutait la règle d'exhaustivité que le banc
 injectait au moment du test.
 
-**Cette règle est depuis intégrée à `PROMPT_TEMPLATES`**, ainsi qu'une seconde sur les
-situations à plusieurs échéances (voir plus bas). Mesure de contrôle sur le prompt du dépôt,
-60 runs sur `gpt-oss` — c'est la ligne à battre :
+**Cette règle est depuis intégrée à `PROMPT_TEMPLATES`.** Mesure de contrôle sur le prompt du
+dépôt, 60 runs sur `gpt-oss` — c'est la ligne à battre :
 
 | Succès schéma | Rappel | Juge | Simples | Complexes | Latence méd. | Coût / 1 000 |
 |---|---|---|---|---|---|---|
-| **100 %** (60/60) | **96 %** | 8,02 | 96 % | 96 % | 1 102 ms | 2,57 $ |
+| **100 %** (60/60) | **93 %** | **8,26** | 96 % | 97 % | 1 037 ms | 2,49 $ |
 
 ## Historique des décisions
 
@@ -258,9 +257,18 @@ Deux gardes ont donc été ajoutées : la règle **découpe** une situation rée
 n'autorise ni à inventer une échéance non mentionnée, ni à recréer une actualité existante à
 laquelle la note n'ajoute rien de neuf. Les trois régressions ciblées disparaissent.
 
-**Ce que le bilan n'est pas :** un gain net sur tous les tableaux. Le rappel monte de 3 points et
-s'y tient sur deux mesures indépendantes, les assertions reviennent à un écart de 3 échecs sur
-environ 1 500, mais le juge ne corrobore pas — il donne 8,37 / 8,25 / 8,02 sur des prompts très
-proches, ce qui situe plutôt son bruit à n=60 qu'une tendance. L'arbitrage retenu privilégie le
-rappel parce qu'un hot topic manqué est un rappel qui ne se déclenchera jamais, alors qu'une
-assertion isolée qui tombe se dégrade en douceur.
+**Décision : la règle n'est PAS retenue.** Elle a été intégrée, déployée, puis retirée le même
+jour. Le rappel montait de 3 points et s'y tenait sur deux mesures indépendantes, les assertions
+revenaient à 3 échecs près de la baseline, mais le juge ne corroborait pas : 8,37 / 8,25 / 8,02
+sur des prompts très proches, avec la version finale la plus basse des trois.
+
+Deux lectures restaient possibles et le banc ne permettait pas de trancher entre elles à n=60 :
+soit le juge mesure une dégradation réelle que les assertions ne voient pas, soit ces trois
+valeurs sont son bruit. Face à cette ambiguïté, le choix a été de rester sur la configuration
+dont la qualité est la mieux établie plutôt que d'expédier un gain de rappel dont le prix reste
+inconnu.
+
+**Pour reprendre ce sujet**, il faut d'abord établir le bruit du juge : faire tourner deux fois
+la même configuration à n=60 et regarder l'écart entre les deux. Tant qu'on ignore si 0,24 point
+est significatif, aucune comparaison de prompt qui se joue à cette échelle n'est concluante. La
+règle et ses gardes restent dans l'historique git (`d37b7bb`) pour être reprises telles quelles.
