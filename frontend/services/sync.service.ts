@@ -11,7 +11,9 @@ import {
 import { toNullableSyncIsoDate, toSyncIsoDate } from '@/lib/sync-date';
 import { syncApi } from '@/lib/sync-api';
 import type { SyncChange, SyncMutation } from '@/lib/sync-types';
-import { syncQueueService } from './sync-queue.service';
+import { pushIsolatingRejections } from '@/lib/sync-push';
+import { analytics, AnalyticsEvent } from '@/lib/analytics';
+import { MAX_SYNC_REJECTIONS, syncQueueService } from './sync-queue.service';
 
 let syncPromise: Promise<string> | null = null;
 let syncPromiseUserId: string | null = null;
@@ -426,9 +428,24 @@ export const syncService = {
 
       let pending = await syncQueueService.getPendingMutations();
       while (pending.length > 0) {
-        const response = await syncApi.push(pending);
-        await syncQueueService.deleteAppliedMutations(response.appliedMutationIds);
-        await setSyncState('cursor', response.cursor);
+        await pushIsolatingRejections({
+          mutations: pending,
+          push: syncApi.push,
+          onApplied: async (response) => {
+            await syncQueueService.deleteAppliedMutations(response.appliedMutationIds);
+            await setSyncState('cursor', response.cursor);
+          },
+          onRejected: async (mutation, error) => {
+            const attempts = await syncQueueService.markRejected(mutation.id, error.message);
+            analytics.capture(AnalyticsEvent.SYNC_MUTATION_REJECTED, {
+              entity_type: mutation.entityType,
+              operation: mutation.operation,
+              status: error.status,
+              attempts,
+              parked: attempts >= MAX_SYNC_REJECTIONS,
+            });
+          },
+        });
         if (pending.length < SYNC_BATCH_SIZE) break;
         pending = await syncQueueService.getPendingMutations();
       }

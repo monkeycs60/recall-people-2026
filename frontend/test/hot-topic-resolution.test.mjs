@@ -24,7 +24,8 @@ test('uses the selected local calendar day as the resolution timestamp', async (
   const values = getResolutionValues('2026-08-26');
   const resolvedDate = new Date(values.resolvedAt);
 
-  assert.equal(values.eventDate, '2026-08-26');
+  assert.equal(values.eventDate, values.resolvedAt);
+  assert.match(values.eventDate, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
   assert.equal(resolvedDate.getFullYear(), 2026);
   assert.equal(resolvedDate.getMonth(), 7);
   assert.equal(resolvedDate.getDate(), 26);

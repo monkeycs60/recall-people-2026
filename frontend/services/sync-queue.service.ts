@@ -2,6 +2,8 @@ import * as Crypto from 'expo-crypto';
 import { getDatabase } from '@/lib/db';
 import type { SyncEntityType, SyncMutation, SyncOperation } from '@/lib/sync-types';
 
+export const MAX_SYNC_REJECTIONS = 3;
+
 export const syncQueueService = {
   enqueueMutation: async (input: {
     entityType: SyncEntityType;
@@ -35,7 +37,10 @@ export const syncQueueService = {
       operation: SyncOperation;
       payload_json: string;
       created_at: string;
-    }>('SELECT * FROM sync_queue ORDER BY created_at ASC LIMIT ?', [limit]);
+    }>(
+      'SELECT * FROM sync_queue WHERE attempts < ? ORDER BY created_at ASC LIMIT ?',
+      [MAX_SYNC_REJECTIONS, limit]
+    );
 
     return rows.map((row) => ({
       id: row.id,
@@ -45,6 +50,19 @@ export const syncQueueService = {
       payload: JSON.parse(row.payload_json),
       createdAt: row.created_at,
     }));
+  },
+
+  markRejected: async (mutationId: string, error: string): Promise<number> => {
+    const db = await getDatabase();
+    await db.runAsync(
+      'UPDATE sync_queue SET attempts = attempts + 1, last_error = ?, updated_at = ? WHERE id = ?',
+      [error, new Date().toISOString(), mutationId]
+    );
+    const row = await db.getFirstAsync<{ attempts: number }>(
+      'SELECT attempts FROM sync_queue WHERE id = ?',
+      [mutationId]
+    );
+    return row?.attempts ?? 0;
   },
 
   deleteAppliedMutations: async (mutationIds: string[]): Promise<void> => {

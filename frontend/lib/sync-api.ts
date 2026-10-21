@@ -1,5 +1,6 @@
 import { getToken, refreshAccessToken } from './auth';
 import { API_URL } from './config';
+import { SyncRequestError } from './sync-push';
 import type {
   SyncBootstrapResponse,
   SyncChangesResponse,
@@ -29,10 +30,11 @@ async function syncRequest<T>(
 
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
-    throw new Error(
+    throw new SyncRequestError(
       typeof body.error === 'string'
         ? body.error
-        : `Sync request failed with status ${response.status}`
+        : `Sync request failed with status ${response.status}`,
+      response.status
     );
   }
 

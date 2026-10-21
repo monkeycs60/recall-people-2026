@@ -42,7 +42,8 @@ export function getResolutionValues(value = formatResolutionDate(new Date())): {
 } {
   const date = parseLocalDate(value);
   if (!date) throw new Error('Invalid resolution date');
-  return { eventDate: value, resolvedAt: date.toISOString() };
+  const timestamp = date.toISOString();
+  return { eventDate: timestamp, resolvedAt: timestamp };
 }
 
 export function buildReviewResolutionTopics(

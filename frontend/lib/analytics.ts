@@ -55,6 +55,8 @@ export const AnalyticsEvent = {
   REMINDER_TIME_CHANGED: 'reminder_time_changed',
   // Post-event loop: user taps "Tell the story" on the follow-up card
   POST_EVENT_STORY_STARTED: 'post_event_story_started',
+  // Sync: one queued mutation refused by the server (4xx), isolated from the rest of the queue
+  SYNC_MUTATION_REJECTED: 'sync_mutation_rejected',
 } as const;
 
 export type AnalyticsEventName =
