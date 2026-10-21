@@ -29,6 +29,12 @@ type AuthContext = {
 const syncEntityTypeSchema = z.enum(['contact', 'note', 'group', 'contact_group', 'hot_topic']);
 const syncOperationSchema = z.enum(['upsert', 'delete']);
 
+const calendarDaySchema = z.string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/)
+  .transform((day) => `${day}T12:00:00.000Z`);
+
+const eventDateSchema = z.union([z.string().datetime(), calendarDaySchema]);
+
 const contactPayloadSchema = z.object({
   id: z.string().min(1),
   firstName: z.string().min(1),
@@ -93,7 +99,7 @@ const hotTopicPayloadSchema = z.object({
   resolution: z.string().nullable().optional(),
   status: z.enum(['active', 'resolved']).default('active'),
   sourceNoteId: z.string().nullable().optional(),
-  eventDate: z.string().datetime().nullable().optional(),
+  eventDate: eventDateSchema.nullable().optional(),
   birthdayContactId: z.string().nullable().optional(),
   notifiedAt: z.string().datetime().nullable().optional(),
   resolvedAt: z.string().datetime().nullable().optional(),
@@ -600,8 +606,69 @@ async function getEntityPayload(prisma: any, encryptionKey: string | undefined, 
   }
 }
 
-function errorResponse(c: any, error: unknown, fallbackMessage: string) {
+type SyncWriteRoute = 'push' | 'initialize';
+
+type RejectedSyncIssue = {
+  entity_type: string | null;
+  field: string;
+  code: string;
+};
+
+function describeValidationIssues(body: unknown, issues: z.ZodIssue[]): RejectedSyncIssue[] {
+  const mutations = (body as { mutations?: unknown } | null)?.mutations;
+  const described = issues.slice(0, 20).map((issue) => {
+    const [root, index, ...rest] = issue.path;
+    const mutation = root === 'mutations' && typeof index === 'number' && Array.isArray(mutations)
+      ? mutations[index] as { entityType?: unknown } | undefined
+      : undefined;
+    const entityType = typeof mutation?.entityType === 'string' ? mutation.entityType : null;
+    const field = root === 'mutations' && typeof index === 'number'
+      ? rest.join('.')
+      : issue.path.join('.');
+    return { entity_type: entityType, field: field || '(root)', code: issue.code };
+  });
+
+  const unique = new Map(described.map((issue) => [`${issue.entity_type}|${issue.field}|${issue.code}`, issue]));
+  return [...unique.values()];
+}
+
+function reportRejectedSync(
+  userId: string,
+  route: SyncWriteRoute,
+  status: number,
+  reason: string,
+  details: { mutationCount?: number; issues?: RejectedSyncIssue[] } = {}
+): void {
+  console.warn(`[sync] ${route} rejected (${status})`, JSON.stringify({
+    userId,
+    reason,
+    mutationCount: details.mutationCount ?? null,
+    issues: details.issues ?? [],
+  }));
+  captureServerEvent('sync_push_rejected', userId, {
+    route,
+    status,
+    reason,
+    mutation_count: details.mutationCount ?? null,
+    issues: details.issues ?? [],
+    issue_fields: (details.issues ?? []).map((issue) => `${issue.entity_type ?? '?'}.${issue.field}`),
+  });
+}
+
+function rejectInvalidBody(c: any, userId: string, route: SyncWriteRoute, body: unknown, issues: z.ZodIssue[]) {
+  const mutations = (body as { mutations?: unknown } | null)?.mutations;
+  reportRejectedSync(userId, route, 400, 'invalid_body', {
+    mutationCount: Array.isArray(mutations) ? mutations.length : undefined,
+    issues: describeValidationIssues(body, issues),
+  });
+  return c.json({ error: 'Invalid request body' }, 400);
+}
+
+function errorResponse(c: any, error: unknown, fallbackMessage: string, rejection?: { userId: string; route: SyncWriteRoute }) {
   if (error instanceof SyncRouteError) {
+    if (rejection) {
+      reportRejectedSync(rejection.userId, rejection.route, error.status, error.message);
+    }
     return c.json({ error: error.message }, error.status);
   }
 
@@ -634,7 +701,7 @@ syncRoutes.post('/initialize', async (c) => {
     const body = await c.req.json().catch(() => null);
     const validation = syncBatchSchema.safeParse(body);
     if (!validation.success) {
-      return c.json({ error: 'Invalid request body' }, 400);
+      return rejectInvalidBody(c, user.id, 'initialize', body, validation.error.issues);
     }
 
     const prisma = getPrisma(c.env.DATABASE_URL);
@@ -657,7 +724,7 @@ syncRoutes.post('/initialize', async (c) => {
 
     return c.json(result);
   } catch (error) {
-    return errorResponse(c, error, 'Failed to initialize sync');
+    return errorResponse(c, error, 'Failed to initialize sync', { userId: c.get('user').id, route: 'initialize' });
   }
 });
 
@@ -667,7 +734,7 @@ syncRoutes.post('/push', async (c) => {
     const body = await c.req.json().catch(() => null);
     const validation = syncBatchSchema.safeParse(body);
     if (!validation.success) {
-      return c.json({ error: 'Invalid request body' }, 400);
+      return rejectInvalidBody(c, user.id, 'push', body, validation.error.issues);
     }
 
     const prisma = getPrisma(c.env.DATABASE_URL);
@@ -680,7 +747,7 @@ syncRoutes.post('/push', async (c) => {
 
     return c.json(result);
   } catch (error) {
-    return errorResponse(c, error, 'Failed to push sync mutations');
+    return errorResponse(c, error, 'Failed to push sync mutations', { userId: c.get('user').id, route: 'push' });
   }
 });
 

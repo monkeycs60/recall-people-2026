@@ -73,6 +73,12 @@ Le mobile est **local-first + sync chiffré** : ses events sont *optimistes* et 
   - L'opération `delete` (signal explicite du mobile) prime → `*_deleted` pour contact/note/group.
 - ⚠️ **Contenu chiffré** côté backend : on ne logge **aucune** donnée perso, **uniquement** des ids techniques / flags. Best-effort absolu (no-op sans clé, jamais d'exception qui casse la sync).
 
+#### Synchro refusée (`sync_push_rejected`)
+Le client renvoie toujours le même lot depuis la tête de sa file : **un seul lot refusé bloque toute la synchro du compte**, et tout ce qui est créé ensuite reste uniquement sur le téléphone. Chaque refus 4xx de `POST /api/sync/push` ou `/initialize` émet donc `sync_push_rejected` (`backend/src/routes/sync.ts`, `reportRejectedSync`) et une ligne `[sync] push rejected (400) {...}` dans les logs Coolify.
+- Propriétés : `route` (`push` | `initialize`), `status`, `reason` (`invalid_body` ou le message d'erreur statique : propriété d'une ligne, etc.), `mutation_count`, `issues` (`entity_type`, `field`, `code` zod) et `issue_fields` (ex. `hot_topic.payload.eventDate`). **Jamais de valeur** : ni le message zod (il peut citer la valeur reçue), ni le contenu de la mutation. Test : `backend/test/sync-routes.test.mjs`.
+- Insights : « Synchro refusée : comptes touchés par jour », par `reason` (`6soWauVy`) et en total (`r1y8hssC`).
+- **Alerte** « Recall People : synchro refusée » sur `r1y8hssC` : vérification quotidienne, se déclenche dès qu'un compte est refusé dans la journée (seuil > 0), e-mail à Clément. Chaque refus est un bug et bloque la synchro d'un compte, d'où le seuil à zéro.
+
 #### Observabilité IA
 - **Observabilité IA** : un **`$ai_generation`** par appel LLM (modèle, provider, tokens in/out, **coût**, latence, erreur), avec **privacy mode activé par défaut** : les prompts et outputs sont masqués :
   - via `withTracing` (`@posthog/ai`) : `ask`, `summary`, `extract`, `search`, `similarity`, `suggested-questions`, `detect-contact` + les 4 **évaluateurs** LLM-as-judge (Grok/xAI).

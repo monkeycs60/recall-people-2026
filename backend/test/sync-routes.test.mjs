@@ -49,6 +49,54 @@ function validNoteMutation(overrides = {}) {
   };
 }
 
+function validHotTopicMutation(payloadOverrides = {}) {
+  const now = '2026-10-15T13:04:32.231Z';
+  return {
+    id: 'mutation-topic-1',
+    entityType: 'hot_topic',
+    entityId: 'topic-1',
+    operation: 'upsert',
+    createdAt: now,
+    payload: {
+      id: 'topic-1',
+      contactId: 'contact-1',
+      title: 'Job interview',
+      context: 'Private context',
+      resolution: null,
+      status: 'resolved',
+      sourceNoteId: null,
+      eventDate: null,
+      birthdayContactId: null,
+      notifiedAt: null,
+      resolvedAt: '2026-10-15T10:00:00.000Z',
+      createdAt: now,
+      updatedAt: now,
+      deletedAt: null,
+      ...payloadOverrides,
+    },
+  };
+}
+
+function hotTopicPrisma(calls) {
+  return {
+    $transaction: async (callback) => callback({
+      syncedContact: {
+        findFirst: async () => ({ id: 'contact-1', userId: testUser.id }),
+      },
+      syncedHotTopic: {
+        findFirst: async () => null,
+        upsert: async (args) => {
+          calls.push(args);
+          return args.create;
+        },
+      },
+      syncChange: {
+        create: async () => ({ sequence: 30n }),
+      },
+    }),
+  };
+}
+
 function validInitializeBody() {
   return { mutations: [validContactMutation()] };
 }
@@ -65,6 +113,11 @@ async function loadSyncRoutes() {
           build.onResolve({ filter: /^\.\.\/middleware\/auth$/ }, () => ({ path: 'auth-mock', namespace: 'sync-test' }));
           build.onResolve({ filter: /^\.\.\/lib\/db$/ }, () => ({ path: 'db-mock', namespace: 'sync-test' }));
           build.onResolve({ filter: /^\.\.\/lib\/sync-encryption$/ }, () => ({ path: 'encryption-mock', namespace: 'sync-test' }));
+          build.onResolve({ filter: /^\.\.\/lib\/posthog$/ }, () => ({ path: 'posthog-mock', namespace: 'sync-test' }));
+          build.onLoad({ filter: /^posthog-mock$/, namespace: 'sync-test' }, () => ({
+            loader: 'js',
+            contents: 'export const captureServerEvent = (event, distinctId, properties) => { (globalThis.__syncTestCaptures ??= []).push({ event, distinctId, properties }); };',
+          }));
           build.onLoad({ filter: /^auth-mock$/, namespace: 'sync-test' }, () => ({
             loader: 'js',
             contents: 'export const authMiddleware = async (c, next) => { c.set("user", globalThis.__syncTestUser); await next(); };',
@@ -258,6 +311,71 @@ test('POST /push rejects mutations that reference another user row', async () =>
   assert.deepEqual(await response.json(), { error: 'Referenced contact does not belong to user' });
 });
 
+test('POST /push accepts a hot topic resolved without a prior date (calendar-day eventDate)', async () => {
+  const calls = [];
+  const response = await requestSync('/api/sync/push', hotTopicPrisma(calls), {
+    method: 'POST',
+    body: { mutations: [validHotTopicMutation({ eventDate: '2026-10-15' })] },
+  });
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { cursor: '30', appliedMutationIds: ['mutation-topic-1'] });
+  assert.equal(calls[0].create.eventDate.toISOString(), '2026-10-15T12:00:00.000Z');
+});
+
+test('POST /push still rejects a malformed eventDate', async () => {
+  const response = await requestSync('/api/sync/push', hotTopicPrisma([]), {
+    method: 'POST',
+    body: { mutations: [validHotTopicMutation({ eventDate: '15/10/2026' })] },
+  });
+
+  assert.equal(response.status, 400);
+});
+
+test('POST /push reports the rejected fields to PostHog without any payload value', async () => {
+  globalThis.__syncTestCaptures = [];
+  const mutation = validHotTopicMutation({ eventDate: 'not-a-date', status: 'secret-status' });
+
+  const response = await requestSync('/api/sync/push', hotTopicPrisma([]), {
+    method: 'POST',
+    body: { mutations: [validNoteMutation(), mutation] },
+  });
+
+  assert.equal(response.status, 400);
+  const [capture] = globalThis.__syncTestCaptures;
+  assert.equal(capture.event, 'sync_push_rejected');
+  assert.equal(capture.distinctId, testUser.id);
+  assert.equal(capture.properties.route, 'push');
+  assert.equal(capture.properties.reason, 'invalid_body');
+  assert.equal(capture.properties.mutation_count, 2);
+  assert.deepEqual(
+    [...capture.properties.issue_fields].sort(),
+    ['hot_topic.payload.eventDate', 'hot_topic.payload.status']
+  );
+  const serialized = JSON.stringify(capture.properties);
+  for (const leaked of ['not-a-date', 'secret-status', 'Private context', 'Job interview']) {
+    assert.equal(serialized.includes(leaked), false, `${leaked} leaked to PostHog`);
+  }
+});
+
+test('POST /push reports ownership rejections to PostHog', async () => {
+  globalThis.__syncTestCaptures = [];
+  const prisma = {
+    $transaction: async (callback) => callback({
+      syncedContact: { findFirst: async () => null },
+    }),
+  };
+
+  const response = await requestSync('/api/sync/push', prisma, {
+    method: 'POST',
+    body: { mutations: [validNoteMutation()] },
+  });
+
+  assert.equal(response.status, 403);
+  assert.equal(globalThis.__syncTestCaptures[0].properties.reason, 'Referenced contact does not belong to user');
+  assert.equal(globalThis.__syncTestCaptures[0].properties.status, 403);
+});
+
 test('GET /changes returns decrypted changes after a cursor', async () => {
   const prisma = {
     syncChange: {
@@ -329,5 +447,6 @@ test('GET /changes returns decrypted changes after a cursor', async () => {
 test.after(async () => {
   delete globalThis.__syncTestUser;
   delete globalThis.__syncTestPrisma;
+  delete globalThis.__syncTestCaptures;
   await cleanTsModule(suiteName);
 });
